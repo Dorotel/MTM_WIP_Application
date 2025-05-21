@@ -1,4 +1,5 @@
-﻿using MTM_WIP_Application.Logging;
+﻿using MTM_WIP_Application.Core;
+using MTM_WIP_Application.Logging;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
