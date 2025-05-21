@@ -257,8 +257,8 @@ internal static class ErrorLogDao
                 var mainForm = Application.OpenForms.OfType<MainForm>().First();
                 mainForm.Invoke(() =>
                 {
-                    mainForm.MainForm_StatusStrip_Disconnected.Visible = true;
-                    mainForm.MainForm_StatusStrip_SavedStatus.Visible = false;
+                    //mainForm.MainForm_StatusStrip_Disconnected.Visible = true;
+                    //mainForm.MainForm_StatusStrip_SavedStatus.Visible = false;
                     foreach (Control c in mainForm.Controls) c.Enabled = false;
                 });
             }
@@ -309,7 +309,8 @@ internal static class ErrorLogDao
     }
 
     internal static void LogErrorWithMethod(Exception ex,
-        [System.Runtime.CompilerServices.CallerMemberName] string methodName = "")
+        [System.Runtime.CompilerServices.CallerMemberName]
+        string methodName = "")
     {
         AppLogger.Log($"Error in {methodName}: {ex.Message}");
     }

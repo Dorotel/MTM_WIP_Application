@@ -43,8 +43,8 @@ internal static class ExceptionHandler
                 var mainForm = Application.OpenForms.OfType<MainForm>().First();
                 mainForm.Invoke(new Action(() =>
                 {
-                    mainForm.MainForm_StatusStrip_Disconnected.Visible = true;
-                    mainForm.MainForm_StatusStrip_SavedStatus.Visible = false;
+                    //mainForm.MainForm_StatusStrip_Disconnected.Visible = true;
+                    //mainForm.MainForm_StatusStrip_SavedStatus.Visible = false;
                     mainForm.Enabled = false;
                 }));
             }

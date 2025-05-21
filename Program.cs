@@ -15,4 +15,6 @@ internal static class Program
 
         Application.Run(new MainForm()); // Replace with MainForm when ready
     }
+
+    public static string connectionString { get; }
 }
