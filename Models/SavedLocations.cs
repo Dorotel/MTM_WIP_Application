@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MTM_WIP_Application.Models;
 
-internal class SavedLocationsTable
+internal class SavedLocations
 {
     public int Id { get; set; }
     public string? Location { get; set; }
