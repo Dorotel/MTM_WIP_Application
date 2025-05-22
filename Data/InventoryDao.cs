@@ -13,11 +13,11 @@ namespace MTM_WIP_Application.Data;
 
 internal static class InventoryDao
 {
-    internal static async Task<List<SavedLocations>?> InventoryTab_SaveAsync(bool useAsync = false)
+    internal static async Task<List<CurrentInventory>?> InventoryTab_SaveAsync(bool useAsync = false)
     {
         try
         {
-            List<SavedLocations> returnThese = [];
+            List<CurrentInventory> returnThese = [];
             var type = await InventoryTab_GetItemTypeAsync(useAsync);
 
             var parameters1 = new Dictionary<string, object>
@@ -105,11 +105,11 @@ internal static class InventoryDao
         }
     }
 
-    internal static async Task<List<SavedLocations>?> RemoveTab_DeleteAsync(bool useAsync = false)
+    internal static async Task<List<CurrentInventory>?> RemoveTab_DeleteAsync(bool useAsync = false)
     {
         try
         {
-            List<SavedLocations> returnThese = [];
+            List<CurrentInventory> returnThese = [];
             var parameters1 = new Dictionary<string, object>
             {
                 ["@RemoveID"] = WipAppVariables.removeId
