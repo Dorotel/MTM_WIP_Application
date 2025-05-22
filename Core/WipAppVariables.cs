@@ -1,56 +1,60 @@
 ﻿using MTM_WIP_Application.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using MTM_WIP_Application.Models;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MTM_WIP_Application.Core;
 
+/// <summary>
+/// Centralized static variables for application-wide state and configuration.
+/// </summary>
 internal static class WipAppVariables
 {
-    // Create Bools
-    public static bool mainFormFormReset = false;
-    public static bool userTypeAdmin = false;
-    public static bool userTypeReadOnly = false;
-    // Create Ints
+    // Boolean flags for application state
+    public static bool mainFormFormReset = false; // Indicates if the main form should be reset
+    public static bool userTypeAdmin = false; // True if the current user is an admin
+    public static bool userTypeReadOnly = false; // True if the current user is read-only
 
-    public static int RemoveQuantity;
+    // Integer values for inventory and removal operations
+    public static int RemoveQuantity; // Quantity to remove from inventory
+    public static int InventoryQuantity; // Current inventory quantity
 
-    public static int InventoryQuantity;
+    // String values for various operational and user context
+    public static string? PrintOp; // Operation to print
+    public static string? PrintTitle; // Title for print operations
+    public static string? removeId; // ID for removal operations
+    public static string? RemoveLocation; // Location for removal
+    public static string? RemovePartNumber; // Part number for removal
+    public static string? RemoveUser; // User performing removal
+    public static string? id; // Generic ID
+    public static string? Location; // Current location
+    public static string? OldLocation; // Previous location (for transfers)
+    public static string? NewLocation; // New location (for transfers)
+    public static string? PartType; // Type of part
+    public static string? partId; // Part ID
+    public static string? Operation; // Current operation
+    public static string? Notes; // Notes for operations
+    public static string? TransferType; // Type of transfer
+    public static string? Version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString(); // App version
+    public static string? VisualUserName; // Visual username for UI
+    public static string? VisualPassword; // Visual password for UI
+    public static string? WipServerPort; // WIP server port
+    public static string? WipServerAddress; // WIP server address
+    public static string? WipDataGridTheme; // Theme for data grid
+    public static string? UserShift; // User's shift
+    public static string? UserPin; // User's PIN
 
-    // Create Strings
-    public static string? PrintOp;
-    public static string? PrintTitle;
-    public static string? removeId;
-    public static string? RemoveLocation;
-    public static string? RemovePartNumber;
-    public static string? RemoveUser;
-    public static string? id;
-    public static string? Location;
-    public static string? OldLocation;
-    public static string? NewLocation;
-    public static string? PartType;
-    public static string? partId;
-    public static string? Operation;
-    public static string? Notes;
-    public static string? TransferType;
-    public static string? Version = Assembly.GetEntryAssembly().GetName().Version.ToString();
-    public static string? VisualUserName;
-    public static string? VisualPassword;
-    public static string? WipServerPort;
-    public static string? WipServerAddress;
-    public static string? WipDataGridTheme;
-    public static string? UserShift;
-    public static string? UserPin;
+    // Current user (resolved at startup)
+    public static string User = SystemDao.System_GetUserName();
 
-
-    public static string
-        User = SystemDao.System_GetUserName();
-
+    // Connection string for database access
     public static string connectionString = SqlVariables.GetConnectionString(null, null, null, null);
-    internal static List<Last10> list = [];
 
+    // List of the last 10 items interacted with by the user (for quick access buttons)
+    internal static List<Last10> list = new();
+
+    // Operation used for removal, with internal setter
     public static string? RemoveOperation { get; internal set; }
+
+    // No logging-specific variables are needed here.
+    // Logging is now handled entirely by AppLogger and does not require state in WipAppVariables.
 }

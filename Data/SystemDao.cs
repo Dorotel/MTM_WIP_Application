@@ -6,110 +6,87 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Principal;
-using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using MTM_WIP_Application.Models;
 
 namespace MTM_WIP_Application.Data;
 
 internal static class SystemDao
 {
-    // =====================
-    // SystemDao
-    // =====================
-
-
+    /// <summary>
+    /// Gets the current user name, normalizing and updating WipAppVariables.User.
+    /// </summary>
     internal static string System_GetUserName()
     {
-        if (Program.enteredUser == "Default User")
-        {
-            var userIdWithDomain = WindowsIdentity.GetCurrent().Name;
-            var posSlash = userIdWithDomain.IndexOf('\\');
-            var user = (posSlash == -1 ? userIdWithDomain : userIdWithDomain[(posSlash + 1)..]).ToUpper();
-            WipAppVariables.User = user; // Keep WipAppVariables in sync
-            return user;
-        }
-        else
-        {
-            var userIdWithDomain = Program.enteredUser;
-            if (userIdWithDomain == null) throw new InvalidOperationException("User identity could not be retrieved.");
+        var userIdWithDomain = Program.enteredUser == "Default User"
+            ? WindowsIdentity.GetCurrent().Name
+            : Program.enteredUser ?? throw new InvalidOperationException("User identity could not be retrieved.");
 
-            var posSlash = userIdWithDomain.IndexOf('\\');
-            var user = (posSlash == -1 ? userIdWithDomain : userIdWithDomain[(posSlash + 1)..]).ToUpper();
-            WipAppVariables.User = user; // Keep WipAppVariables in sync
-            return user;
-        }
+        var posSlash = userIdWithDomain.IndexOf('\\');
+        var user = (posSlash == -1 ? userIdWithDomain : userIdWithDomain[(posSlash + 1)..]).ToUpper();
+        WipAppVariables.User = user;
+        return user;
     }
 
-    internal static async Task<List<AdminList>> System_UserAccessTypeAsync(bool useAsync = false)
+    /// <summary>
+    /// Checks and sets the current user's admin and read-only access types.
+    /// </summary>
+    internal static async Task<List<Users>> System_UserAccessTypeAsync(bool useAsync = false)
     {
         var user = WipAppVariables.User;
-        List<AdminList> returnThese = [];
+        var result = new List<Users>();
         try
         {
-            // Reset before checking
             WipAppVariables.userTypeAdmin = false;
             WipAppVariables.userTypeReadOnly = false;
 
-            // Admin check
-            using (var reader = useAsync
-                       ? await SqlHelper.ExecuteReader("SELECT * FROM `leads`", useAsync: true)
-                       : SqlHelper.ExecuteReader("SELECT * FROM `leads`").Result)
+            // Check admin access
+            await foreach (var admin in GetUserAccessListAsync("leads", useAsync))
             {
-                while (reader.Read())
-                {
-                    AdminList a = new()
-                    {
-                        Id = reader.GetInt32(0),
-                        User = reader.GetString(1)
-                    };
-                    if (a.User == user) WipAppVariables.userTypeAdmin = true;
-
-                    returnThese.Add(a);
-                }
+                if (admin.User == user) WipAppVariables.userTypeAdmin = true;
+                result.Add(admin);
             }
 
-            // ReadOnly check
-            using (var reader2 = useAsync
-                       ? await SqlHelper.ExecuteReader("SELECT * FROM `readonly`", useAsync: true)
-                       : SqlHelper.ExecuteReader("SELECT * FROM `readonly`").Result)
+            // Check read-only access
+            await foreach (var readOnly in GetUserAccessListAsync("readonly", useAsync))
             {
-                while (reader2.Read())
-                {
-                    AdminList a = new()
-                    {
-                        Id = reader2.GetInt32(0),
-                        User = reader2.GetString(1)
-                    };
-                    if (a.User == user) WipAppVariables.userTypeReadOnly = true;
-
-                    returnThese.Add(a);
-                }
+                if (readOnly.User == user) WipAppVariables.userTypeReadOnly = true;
+                result.Add(readOnly);
             }
 
-            AppLogger.Log("System_UserAccessType executed successfully for user: " + user);
-            return returnThese;
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            AppLogger.Log("Error in System_UserAccessType: " + ex.Message);
-            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
-            return [];
+            AppLogger.Log($"System_UserAccessType executed successfully for user: {user}");
+            return result;
         }
         catch (Exception ex)
         {
-            AppLogger.LogDatabaseError(ex);
-            AppLogger.Log("Error in System_UserAccessType: " + ex.Message);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
-            return [];
+            AppLogger.LogApplicationError(ex);
+            await HandleSystemDaoExceptionAsync(ex, "System_UserAccessType", useAsync);
+            return new List<Users>();
         }
     }
 
+    private static async IAsyncEnumerable<Users> GetUserAccessListAsync(string table, bool useAsync)
+    {
+        using var reader = useAsync
+            ? await SqlHelper.ExecuteReader($"SELECT * FROM `{table}`", useAsync: true)
+            : SqlHelper.ExecuteReader($"SELECT * FROM `{table}`").Result;
+        while (reader.Read())
+            yield return new Users
+            {
+                Id = reader.GetInt32(0),
+                User = reader.GetString(1)
+                // Other Users properties can be set here if needed and available in the table
+            };
+    }
+
+    /// <summary>
+    /// Sets the user's access type (Admin or ReadOnly) in the database and updates WipAppVariables.
+    /// </summary>
     internal static async Task SetUserAccessTypeAsync(string email, string accessType, bool useAsync = false)
     {
         try
         {
-            // Remove from both tables first
             var parameters = new Dictionary<string, object> { ["@Email"] = email };
             await SqlHelper.ExecuteNonQuery("DELETE FROM `leads` WHERE `User` = @Email", parameters,
                 useAsync: useAsync);
@@ -123,25 +100,22 @@ internal static class SystemDao
                 await SqlHelper.ExecuteNonQuery("INSERT INTO `readonly` (`User`) VALUES (@Email)", parameters,
                     useAsync: useAsync);
 
-            // Update WipAppVariables if the affected user is the current user
             if (WipAppVariables.User == email)
             {
                 WipAppVariables.userTypeAdmin = accessType == "Admin";
                 WipAppVariables.userTypeReadOnly = accessType == "ReadOnly";
             }
         }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
-        }
         catch (Exception ex)
         {
-            AppLogger.LogDatabaseError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+            AppLogger.LogApplicationError(ex);
+            await HandleSystemDaoExceptionAsync(ex, "SetUserAccessType", useAsync);
         }
     }
 
+    /// <summary>
+    /// Updates the last 10 transactions table and updates the main form status.
+    /// </summary>
     internal static async Task System_Last10_Buttons_ChangedAsync(bool useAsync = false)
     {
         try
@@ -158,22 +132,14 @@ internal static class SystemDao
             var com7 = "ALTER TABLE  `mtm database`.`last_10_transactions` MODIFY COLUMN `ID` INT AUTO_INCREMENT;";
             var com8 = "UPDATE `last_10_transactions` SET `ID`= 1 WHERE `ID` = 11;";
 
-            await SqlHelper.ExecuteNonQuery(com1 + com2 + com3 + com4 + com5 + com6 + com7 + com8,
-                useAsync: useAsync);
+            await SqlHelper.ExecuteNonQuery(com1 + com2 + com3 + com4 + com5 + com6 + com7 + com8, useAsync: useAsync);
 
             AppLogger.Log("System_Last10_Buttons_Changed executed successfully.");
         }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            AppLogger.Log("Error in System_Last10_Buttons_Changed: " + ex.Message);
-            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
-        }
         catch (Exception ex)
         {
-            AppLogger.LogDatabaseError(ex);
-            AppLogger.Log("Error in System_Last10_Buttons_Changed: " + ex.Message);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+            AppLogger.LogApplicationError(ex);
+            await HandleSystemDaoExceptionAsync(ex, "System_Last10_Buttons_Changed", useAsync);
         }
         finally
         {
@@ -188,5 +154,15 @@ internal static class SystemDao
                 });
             }
         }
+    }
+
+    // --- Helper for consistent error handling ---
+    private static async Task HandleSystemDaoExceptionAsync(Exception ex, string method, bool useAsync)
+    {
+        AppLogger.LogApplicationError(new Exception($"Error in {method}: {ex.Message}", ex));
+        if (ex is MySqlException)
+            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
+        else
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
     }
 }

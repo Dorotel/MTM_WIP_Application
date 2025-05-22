@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MTM_WIP_Application.Models;
 
+/// <summary>
+/// Represents a user in the MTM WIP Application, mapping to the users table and related user settings.
+/// </summary>
 internal class Users
 {
-    public int Id { get; set; } // Maps to ID Primary, int, NOT NULL, AUTO_INCREMENT
+    public int Id { get; set; } = 0; // Maps to ID Primary, int, NOT NULL, AUTO_INCREMENT
     public string User { get; set; } = string.Empty; // Maps to User, varchar(100), NOT NULL
     public string FullName { get; set; } = string.Empty; // Maps to Full Name, varchar(100), NOT NULL
     public string Shift { get; set; } = string.Empty; // Maps to Shift, varchar(100), NOT NULL

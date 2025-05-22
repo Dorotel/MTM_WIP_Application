@@ -3,27 +3,23 @@ using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MTM_WIP_Application.Data;
 
 internal static class OperationDao
 {
+    // --- Existence Check ---
     internal static async Task<bool> OperationExists(string operationNumber, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object>
-        {
-            ["@operationNumber"] = operationNumber
-        };
+        var parameters = new Dictionary<string, object> { ["@operationNumber"] = operationNumber };
         var result = await SqlHelper.ExecuteScalar(
             "SELECT COUNT(*) FROM `operation_numbers` WHERE `Operation` = @operationNumber",
-            parameters,
-            useAsync: useAsync);
+            parameters, useAsync: useAsync);
         return Convert.ToInt32(result) > 0;
     }
 
+    // --- Insert ---
     internal static async Task InsertOperation(string operationNumber, string user, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
@@ -31,110 +27,89 @@ internal static class OperationDao
             ["@operationNumber"] = operationNumber,
             ["@user"] = user
         };
-        await SqlHelper.ExecuteNonQuery(
+        await ExecuteNonQueryAsync(
             "INSERT INTO `operation_numbers` (`Operation`, `ID`, `Issued By`) VALUES (@operationNumber, NULL, @user);",
-            parameters,
-            useAsync: useAsync);
+            parameters, useAsync);
     }
 
+    // --- Get All ---
     internal static async Task<DataTable> GetAllOperations(bool useAsync = false)
     {
-        try
-        {
-            return await SqlHelper.ExecuteDataTable("SELECT * FROM `operation_numbers`", useAsync: useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_SQLError_CloseApp(ex);
-            return new DataTable();
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_GeneralError_CloseApp(ex);
-            return new DataTable();
-        }
+        return await GetOperationByQueryAsync("SELECT * FROM `operation_numbers`", null, useAsync);
     }
 
+    // --- Get By Number ---
     internal static async Task<DataRow?> GetOperationByNumber(string operationNumber, bool useAsync = false)
     {
-        try
-        {
-            var parameters = new Dictionary<string, object>
-            {
-                ["@operationNumber"] = operationNumber
-            };
-            var table = await SqlHelper.ExecuteDataTable(
-                "SELECT * FROM `operation_numbers` WHERE `Operation` = @operationNumber",
-                parameters,
-                useAsync: useAsync);
-            return table.Rows.Count > 0 ? table.Rows[0] : null;
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_SQLError_CloseApp(ex);
-            return null;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_GeneralError_CloseApp(ex);
-            return null;
-        }
+        var table = await GetOperationByQueryAsync(
+            "SELECT * FROM `operation_numbers` WHERE `Operation` = @operationNumber",
+            new Dictionary<string, object> { ["@operationNumber"] = operationNumber }, useAsync);
+        return table.Rows.Count > 0 ? table.Rows[0] : null;
     }
 
+    // --- Update ---
     internal static async Task UpdateOperation(string operationNumber, string newOperationNumber, string user,
         bool useAsync = false)
     {
-        try
+        var parameters = new Dictionary<string, object>
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["@operationNumber"] = operationNumber,
-                ["@newOperationNumber"] = newOperationNumber,
-                ["@user"] = user
-            };
-            await SqlHelper.ExecuteNonQuery(
-                "UPDATE `operation_numbers` SET `Operation` = @newOperationNumber, `Issued By` = @user WHERE `Operation` = @operationNumber",
-                parameters,
-                useAsync: useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_SQLError_CloseApp(ex);
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_GeneralError_CloseApp(ex);
-        }
+            ["@operationNumber"] = operationNumber,
+            ["@newOperationNumber"] = newOperationNumber,
+            ["@user"] = user
+        };
+        await ExecuteNonQueryAsync(
+            "UPDATE `operation_numbers` SET `Operation` = @newOperationNumber, `Issued By` = @user WHERE `Operation` = @operationNumber",
+            parameters, useAsync);
     }
 
+    // --- Delete ---
     internal static async Task DeleteOperation(string operationNumber, bool useAsync = false)
+    {
+        var parameters = new Dictionary<string, object> { ["@operationNumber"] = operationNumber };
+        await ExecuteNonQueryAsync(
+            "DELETE FROM `operation_numbers` WHERE `Operation` = @operationNumber",
+            parameters, useAsync);
+    }
+
+    // --- Helpers ---
+    private static async Task<DataTable> GetOperationByQueryAsync(string sql, Dictionary<string, object>? parameters,
+        bool useAsync)
     {
         try
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["@operationNumber"] = operationNumber
-            };
-            await SqlHelper.ExecuteNonQuery(
-                "DELETE FROM `operation_numbers` WHERE `Operation` = @operationNumber",
-                parameters,
-                useAsync: useAsync);
+            return parameters == null
+                ? await SqlHelper.ExecuteDataTable(sql, useAsync: useAsync)
+                : await SqlHelper.ExecuteDataTable(sql, parameters, useAsync: useAsync);
         }
         catch (MySqlException ex)
         {
             AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_SQLError_CloseApp(ex);
+            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
+            return new DataTable();
         }
         catch (Exception ex)
         {
+            AppLogger.LogApplicationError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return new DataTable();
+        }
+    }
+
+    private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
+    {
+        try
+        {
+            await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
+        }
+        catch (MySqlException ex)
+        {
             AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_GeneralError_CloseApp(ex);
+            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogApplicationError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
 }

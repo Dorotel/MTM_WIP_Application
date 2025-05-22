@@ -1,4 +1,6 @@
 ﻿using MTM_WIP_Application.Logging;
+using IWshRuntimeLibrary;
+using File = System.IO.File;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

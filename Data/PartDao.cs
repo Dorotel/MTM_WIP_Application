@@ -3,27 +3,23 @@ using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MTM_WIP_Application.Data;
 
 internal static class PartDao
 {
+    // --- Existence Check ---
     internal static async Task<bool> PartExists(string partNumber, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object>
-        {
-            ["@partNumber"] = partNumber
-        };
+        var parameters = new Dictionary<string, object> { ["@partNumber"] = partNumber };
         var result = await SqlHelper.ExecuteScalar(
             "SELECT COUNT(*) FROM `part_ids` WHERE `Item Number` = @partNumber",
-            parameters,
-            useAsync: useAsync);
+            parameters, useAsync: useAsync);
         return Convert.ToInt32(result) > 0;
     }
 
+    // --- Insert ---
     internal static async Task InsertPart(string partNumber, string user, string partType, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
@@ -32,109 +28,88 @@ internal static class PartDao
             ["@user"] = user,
             ["@partType"] = partType
         };
-        await SqlHelper.ExecuteNonQuery(
+        await ExecuteNonQueryAsync(
             "INSERT INTO `part_ids` (`Item Number`, `ID`, `Issued By`, `Type`) VALUES (@partNumber, NULL, @user, @partType);",
-            parameters,
-            useAsync: useAsync);
+            parameters, useAsync);
     }
 
+    // --- Get All ---
     internal static async Task<DataTable> GetAllParts(bool useAsync = false)
     {
-        try
-        {
-            return await SqlHelper.ExecuteDataTable("SELECT * FROM `part_ids`", useAsync: useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_SQLError_CloseApp(ex);
-            return new DataTable();
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_GeneralError_CloseApp(ex);
-            return new DataTable();
-        }
+        return await GetPartByQueryAsync("SELECT * FROM `part_ids`", null, useAsync);
     }
 
+    // --- Get By Number ---
     internal static async Task<DataRow?> GetPartByNumber(string partNumber, bool useAsync = false)
     {
-        try
-        {
-            var parameters = new Dictionary<string, object>
-            {
-                ["@partNumber"] = partNumber
-            };
-            var table = await SqlHelper.ExecuteDataTable(
-                "SELECT * FROM `part_ids` WHERE `Item Number` = @partNumber",
-                parameters,
-                useAsync: useAsync);
-            return table.Rows.Count > 0 ? table.Rows[0] : null;
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_SQLError_CloseApp(ex);
-            return null;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_GeneralError_CloseApp(ex);
-            return null;
-        }
+        var table = await GetPartByQueryAsync(
+            "SELECT * FROM `part_ids` WHERE `Item Number` = @partNumber",
+            new Dictionary<string, object> { ["@partNumber"] = partNumber }, useAsync);
+        return table.Rows.Count > 0 ? table.Rows[0] : null;
     }
 
+    // --- Update ---
     internal static async Task UpdatePart(string partNumber, string partType, string user, bool useAsync = false)
     {
-        try
+        var parameters = new Dictionary<string, object>
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["@partNumber"] = partNumber,
-                ["@partType"] = partType,
-                ["@user"] = user
-            };
-            await SqlHelper.ExecuteNonQuery(
-                "UPDATE `part_ids` SET `Type` = @partType, `Issued By` = @user WHERE `Item Number` = @partNumber",
-                parameters,
-                useAsync: useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_SQLError_CloseApp(ex);
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_GeneralError_CloseApp(ex);
-        }
+            ["@partNumber"] = partNumber,
+            ["@partType"] = partType,
+            ["@user"] = user
+        };
+        await ExecuteNonQueryAsync(
+            "UPDATE `part_ids` SET `Type` = @partType, `Issued By` = @user WHERE `Item Number` = @partNumber",
+            parameters, useAsync);
     }
 
+    // --- Delete ---
     internal static async Task DeletePart(string partNumber, bool useAsync = false)
+    {
+        var parameters = new Dictionary<string, object> { ["@partNumber"] = partNumber };
+        await ExecuteNonQueryAsync(
+            "DELETE FROM `part_ids` WHERE `Item Number` = @partNumber",
+            parameters, useAsync);
+    }
+
+    // --- Helpers ---
+    private static async Task<DataTable> GetPartByQueryAsync(string sql, Dictionary<string, object>? parameters,
+        bool useAsync)
     {
         try
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["@partNumber"] = partNumber
-            };
-            await SqlHelper.ExecuteNonQuery(
-                "DELETE FROM `part_ids` WHERE `Item Number` = @partNumber",
-                parameters,
-                useAsync: useAsync);
+            return parameters == null
+                ? await SqlHelper.ExecuteDataTable(sql, useAsync: useAsync)
+                : await SqlHelper.ExecuteDataTable(sql, parameters, useAsync: useAsync);
         }
         catch (MySqlException ex)
         {
             AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_SQLError_CloseApp(ex);
+            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
+            return new DataTable();
         }
         catch (Exception ex)
         {
+            AppLogger.LogApplicationError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return new DataTable();
+        }
+    }
+
+    private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
+    {
+        try
+        {
+            await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
+        }
+        catch (MySqlException ex)
+        {
             AppLogger.LogDatabaseError(ex);
-            ErrorLogDao.HandleException_GeneralError_CloseApp(ex);
+            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogApplicationError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
 }

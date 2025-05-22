@@ -7,13 +7,18 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MTM_WIP_Application.Data;
 
+/// <summary>
+/// Data access and error handling for the application's error log.
+/// </summary>
 internal static class ErrorLogDao
 {
+    // --- Query Methods ---
+
     internal static async Task<List<(string Method, string Error)>> GetUniqueErrorsAsync(bool useAsync = false)
     {
         var uniqueErrors = new List<(string Method, string Error)>();
@@ -25,25 +30,14 @@ internal static class ErrorLogDao
                 : SqlHelper.ExecuteReader("SELECT DISTINCT `Method`, `Error` FROM `wipapp_errorlog`").Result;
 
             while (reader.Read())
-            {
-                var method = reader.GetString("Method");
-                var error = reader.GetString("Error");
-                uniqueErrors.Add((method, error));
-            }
+                uniqueErrors.Add((reader.GetString("Method"), reader.GetString("Error")));
 
             AppLogger.Log("GetUniqueErrors executed successfully.");
         }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            AppLogger.Log("Error in GetUniqueErrors: " + ex.Message);
-            HandleException_SQLError_CloseApp(ex, useAsync);
-        }
         catch (Exception ex)
         {
-            AppLogger.LogDatabaseError(ex);
-            AppLogger.Log("Error in GetUniqueErrors: " + ex.Message);
-            HandleException_GeneralError_CloseApp(ex, useAsync);
+            AppLogger.LogApplicationError(ex);
+            await HandleException_GeneralError_CloseApp(ex, useAsync);
         }
 
         return uniqueErrors;
@@ -51,120 +45,75 @@ internal static class ErrorLogDao
 
     internal static async Task<DataTable> GetAllErrorsAsync(bool useAsync = false)
     {
-        try
-        {
-            return await SqlHelper.ExecuteDataTable("SELECT * FROM `wipapp_errorlog` ORDER BY `DateTime` DESC",
-                useAsync: useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await HandleException_SQLError_CloseApp(ex, useAsync);
-            return new DataTable();
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await HandleException_GeneralError_CloseApp(ex, useAsync);
-            return new DataTable();
-        }
+        return await GetErrorsByQueryAsync("SELECT * FROM `wipapp_errorlog` ORDER BY `DateTime` DESC", null, useAsync);
     }
 
     internal static async Task<DataTable> GetErrorsByUserAsync(string user, bool useAsync = false)
     {
+        return await GetErrorsByQueryAsync(
+            "SELECT * FROM `wipapp_errorlog` WHERE `User` = @User ORDER BY `DateTime` DESC",
+            new Dictionary<string, object> { ["@User"] = user }, useAsync);
+    }
+
+    internal static async Task<DataTable> GetErrorsByDateRangeAsync(DateTime start, DateTime end, bool useAsync = false)
+    {
+        return await GetErrorsByQueryAsync(
+            "SELECT * FROM `wipapp_errorlog` WHERE `DateTime` BETWEEN @Start AND @End ORDER BY `DateTime` DESC",
+            new Dictionary<string, object> { ["@Start"] = start, ["@End"] = end }, useAsync);
+    }
+
+    private static async Task<DataTable> GetErrorsByQueryAsync(string sql, Dictionary<string, object>? parameters,
+        bool useAsync)
+    {
         try
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["@User"] = user
-            };
-            return await SqlHelper.ExecuteDataTable(
-                "SELECT * FROM `wipapp_errorlog` WHERE `User` = @User ORDER BY `DateTime` DESC",
-                parameters, useAsync: useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await HandleException_SQLError_CloseApp(ex, useAsync);
-            return new DataTable();
+            return parameters == null
+                ? await SqlHelper.ExecuteDataTable(sql, useAsync: useAsync)
+                : await SqlHelper.ExecuteDataTable(sql, parameters, useAsync: useAsync);
         }
         catch (Exception ex)
         {
-            AppLogger.LogDatabaseError(ex);
+            AppLogger.LogApplicationError(ex);
             await HandleException_GeneralError_CloseApp(ex, useAsync);
             return new DataTable();
         }
     }
 
+    // --- Delete Methods ---
+
     internal static async Task DeleteErrorByIdAsync(int id, bool useAsync = false)
     {
-        try
-        {
-            var parameters = new Dictionary<string, object>
-            {
-                ["@Id"] = id
-            };
-            await SqlHelper.ExecuteNonQuery(
-                "DELETE FROM `wipapp_errorlog` WHERE `ID` = @Id",
-                parameters, useAsync: useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await HandleException_SQLError_CloseApp(ex, useAsync);
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await HandleException_GeneralError_CloseApp(ex, useAsync);
-        }
+        await ExecuteNonQueryAsync("DELETE FROM `wipapp_errorlog` WHERE `ID` = @Id",
+            new Dictionary<string, object> { ["@Id"] = id }, useAsync);
     }
 
     internal static async Task DeleteAllErrorsAsync(bool useAsync = false)
     {
+        await ExecuteNonQueryAsync("DELETE FROM `wipapp_errorlog`", null, useAsync);
+    }
+
+    private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object>? parameters, bool useAsync)
+    {
         try
         {
-            await SqlHelper.ExecuteNonQuery("DELETE FROM `wipapp_errorlog`", useAsync: useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await HandleException_SQLError_CloseApp(ex, useAsync);
+            if (parameters == null)
+                await SqlHelper.ExecuteNonQuery(sql, useAsync: useAsync);
+            else
+                await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
         }
         catch (Exception ex)
         {
-            AppLogger.LogDatabaseError(ex);
+            // Use database error log for SQL exceptions, application error log otherwise
+            if (ex is MySqlException)
+                AppLogger.LogDatabaseError(ex);
+            else
+                AppLogger.LogApplicationError(ex);
+
             await HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
 
-    internal static async Task<DataTable> GetErrorsByDateRangeAsync(DateTime start, DateTime end,
-        bool useAsync = false)
-    {
-        try
-        {
-            var parameters = new Dictionary<string, object>
-            {
-                ["@Start"] = start,
-                ["@End"] = end
-            };
-            return await SqlHelper.ExecuteDataTable(
-                "SELECT * FROM `wipapp_errorlog` WHERE `DateTime` BETWEEN @Start AND @End ORDER BY `DateTime` DESC",
-                parameters, useAsync: useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await HandleException_SQLError_CloseApp(ex, useAsync);
-            return new DataTable();
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await HandleException_GeneralError_CloseApp(ex, useAsync);
-            return new DataTable();
-        }
-    }
+    // --- Error Handling Methods ---
 
     internal static async Task HandleException_SQLError_CloseApp(
         Exception ex,
@@ -175,9 +124,8 @@ internal static class ErrorLogDao
     {
         try
         {
+            AppLogger.LogDatabaseError(ex);
             AppLogger.Log($"SQL Error in method: {callerName}, Control: {controlName}");
-            AppLogger.Log($"Exception Message: {ex.Message}");
-            AppLogger.Log($"Stack Trace: {ex.StackTrace}");
 
             if (ex is MySqlException mysqlEx)
             {
@@ -203,25 +151,12 @@ internal static class ErrorLogDao
             }
             else
             {
-                var parameters = new Dictionary<string, object>
-                {
-                    ["@Method"] = callerName,
-                    ["@Error"] = ex.Message,
-                    ["@User"] = WipAppVariables.User,
-                    ["@DateTime"] = DateTime.Now,
-                    ["@Control"] = controlName
-                };
-                var sql = "INSERT INTO `wipapp_errorlog` (`Method`, `Error`, `User`, `DateTime`, `Control`) " +
-                          "VALUES (@Method, @Error, @User, @DateTime, @Control)";
-                if (useAsync)
-                    await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: true);
-                else
-                    SqlHelper.ExecuteNonQuery(sql, parameters).Wait();
+                await LogErrorToDatabaseAsync(ex.Message, callerName, controlName, useAsync);
             }
         }
         catch (Exception innerEx)
         {
-            AppLogger.Log($"Error while handling exception: {innerEx.Message}");
+            AppLogger.LogApplicationError(innerEx);
         }
     }
 
@@ -257,26 +192,13 @@ internal static class ErrorLogDao
                 var mainForm = Application.OpenForms.OfType<MainForm>().First();
                 mainForm.Invoke(() =>
                 {
-                    //mainForm.MainForm_StatusStrip_Disconnected.Visible = true;
-                    //mainForm.MainForm_StatusStrip_SavedStatus.Visible = false;
                     foreach (Control c in mainForm.Controls) c.Enabled = false;
                 });
             }
 
-            var parameters = new Dictionary<string, object>
-            {
-                ["@Method"] = callerName,
-                ["@Error"] = ex.Message,
-                ["@User"] = WipAppVariables.User,
-                ["@DateTime"] = DateTime.Now,
-                ["@Control"] = controlName
-            };
-            var sql = "INSERT INTO `wipapp_errorlog` (`Method`, `Error`, `User`, `DateTime`, `Control`) " +
-                      "VALUES (@Method, @Error, @User, @DateTime, @Control)";
-            if (useAsync)
-                await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: true);
-            else
-                SqlHelper.ExecuteNonQuery(sql, parameters).Wait();
+            AppLogger.LogApplicationError(ex);
+
+            await LogErrorToDatabaseAsync(ex.Message, callerName, controlName, useAsync);
 
             if (isCritical)
             {
@@ -293,8 +215,24 @@ internal static class ErrorLogDao
         }
         catch (Exception innerEx)
         {
+            AppLogger.LogApplicationError(innerEx);
             await HandleException_GeneralError_CloseApp(innerEx, useAsync, controlName: controlName);
         }
+    }
+
+    private static async Task LogErrorToDatabaseAsync(string error, string method, string control, bool useAsync)
+    {
+        var parameters = new Dictionary<string, object>
+        {
+            ["@Method"] = method,
+            ["@Error"] = error,
+            ["@User"] = WipAppVariables.User,
+            ["@DateTime"] = DateTime.Now,
+            ["@Control"] = control
+        };
+        var sql = "INSERT INTO `wipapp_errorlog` (`Method`, `Error`, `User`, `DateTime`, `Control`) " +
+                  "VALUES (@Method, @Error, @User, @DateTime, @Control)";
+        await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
     }
 
     internal static List<(string Method, string Error)> GetUniqueErrors()
@@ -302,16 +240,12 @@ internal static class ErrorLogDao
         return GetUniqueErrorsAsync(false).GetAwaiter().GetResult();
     }
 
-    public static void HandleException_SQLError_CloseApp(MySqlException mySqlException, bool useAsync,
-        string controlName)
-    {
-        throw new NotImplementedException();
-    }
-
     internal static void LogErrorWithMethod(Exception ex,
         [System.Runtime.CompilerServices.CallerMemberName]
         string methodName = "")
     {
+        // Use application error log for general exceptions
+        AppLogger.LogApplicationError(ex);
         AppLogger.Log($"Error in {methodName}: {ex.Message}");
     }
 }
