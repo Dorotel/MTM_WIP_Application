@@ -13,6 +13,8 @@ internal static class WipAppVariables
     public static bool mainFormFormReset = false; // Indicates if the main form should be reset
     public static bool userTypeAdmin = false; // True if the current user is an admin
     public static bool userTypeReadOnly = false; // True if the current user is read-only
+    public static string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+    public static string enteredUser = "Default User";
 
     // Integer values for inventory and removal operations
     public static int RemoveQuantity; // Quantity to remove from inventory

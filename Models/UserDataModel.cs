@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MTM_WIP_Application.Models;
+﻿namespace MTM_WIP_Application.Models;
 
 /// <summary>
 /// Represents a user in the MTM WIP Application, mapping to the users table and related user settings.

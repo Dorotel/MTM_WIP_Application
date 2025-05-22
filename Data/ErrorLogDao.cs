@@ -2,13 +2,8 @@
 using MTM_WIP_Application.Forms.MainForm;
 using MTM_WIP_Application.Logging;
 using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace MTM_WIP_Application.Data;
 

@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace MTM_WIP_Application.Data;
 
-namespace MTM_WIP_Application.Data
+internal class FileDao
 {
-    internal class FileDao
-    {
-    }
 }

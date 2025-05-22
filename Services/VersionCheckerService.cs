@@ -1,11 +1,8 @@
 ﻿using MTM_WIP_Application.Logging;
 using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MTM_WIP_Application.Core;
+using MTM_WIP_Application.Data;
 using MTM_WIP_Application.ErrorHandling;
 
 namespace MTM_WIP_Application.Services;
@@ -44,7 +41,7 @@ internal static class VersionCheckerService
 
         try
         {
-            connection = new MySqlConnection(Program.connectionString);
+            connection = new MySqlConnection(SqlVariables.GetConnectionString(null, null, null, null));
             connection.Open();
 
             command = new MySqlCommand("SELECT * FROM `program_information`", connection);
@@ -54,19 +51,19 @@ internal static class VersionCheckerService
                 {
                     var databaseVersion = reader.GetString(1);
 
-                    if (databaseVersion != Program.version)
+                    if (databaseVersion != WipAppVariables.version)
                     {
                         AppLogger.Log(
-                            $"Version mismatch detected. Current: {Program.version}, Expected: {databaseVersion}");
+                            $"Version mismatch detected. Current: {WipAppVariables.version}, Expected: {databaseVersion}");
                         Debug.WriteLine(
-                            $"Version mismatch detected. Current: {Program.version}, Expected: {databaseVersion}");
+                            $"Version mismatch detected. Current: {WipAppVariables.version}, Expected: {databaseVersion}");
 
                         Task.Run(() =>
                         {
                             var message = "You are using an older version of the WIP Application.\n" +
                                           "This normally means a newer version is just about to be released.\n" +
                                           "The program will close in 30 seconds, or by clicking OK.";
-                            var caption = $"Version Conflict Error ({Program.version}/{databaseVersion})";
+                            var caption = $"Version Conflict Error ({WipAppVariables.version}/{databaseVersion})";
                             MessageBox.Show(message, caption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
                             Application.Exit();

@@ -2,12 +2,7 @@
 using MTM_WIP_Application.Forms.MainForm;
 using MTM_WIP_Application.Logging;
 using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Principal;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using MTM_WIP_Application.Models;
 
 namespace MTM_WIP_Application.Data;
@@ -19,9 +14,10 @@ internal static class SystemDao
     /// </summary>
     internal static string System_GetUserName()
     {
-        var userIdWithDomain = Program.enteredUser == "Default User"
+        var userIdWithDomain = WipAppVariables.enteredUser == "Default User"
             ? WindowsIdentity.GetCurrent().Name
-            : Program.enteredUser ?? throw new InvalidOperationException("User identity could not be retrieved.");
+            : WipAppVariables.enteredUser ??
+              throw new InvalidOperationException("User identity could not be retrieved.");
 
         var posSlash = userIdWithDomain.IndexOf('\\');
         var user = (posSlash == -1 ? userIdWithDomain : userIdWithDomain[(posSlash + 1)..]).ToUpper();
@@ -148,8 +144,8 @@ internal static class SystemDao
                 var mainForm = Application.OpenForms.OfType<MainForm>().First();
                 mainForm.Invoke(() =>
                 {
-                    mainForm.MainForm_StatusStrip_Disconnected.Visible = false;
-                    mainForm.MainForm_StatusStrip_SavedStatus.Visible = true;
+                    //mainForm.MainForm_StatusStrip_Disconnected.Visible = false;
+                    //mainForm.MainForm_StatusStrip_SavedStatus.Visible = true;
                     mainForm.Enabled = true;
                 });
             }

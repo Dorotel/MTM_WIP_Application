@@ -1,9 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Data;
 using MTM_WIP_Application.Services;
@@ -28,7 +24,7 @@ internal static class AppLogger
     public static void InitializeLogging()
     {
         Debug.WriteLine("Initializing logging...");
-        var server = new MySqlConnectionStringBuilder(Program.connectionString).Server;
+        var server = new MySqlConnectionStringBuilder(WipAppVariables.connectionString).Server;
         var userName = WipAppVariables.User;
         var logFilePath = SqlVariables.GetLogFilePath(server, userName);
 

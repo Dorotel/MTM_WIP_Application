@@ -1,10 +1,7 @@
 ﻿using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Logging;
 using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Threading.Tasks;
 
 namespace MTM_WIP_Application.Data;
 
