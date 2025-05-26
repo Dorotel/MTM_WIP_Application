@@ -4,12 +4,12 @@ using MTM_WIP_Application.Logging;
 namespace MTM_WIP_Application.Data;
 
 /// <summary>
-/// Provides connection string and log file path utilities for database and logging operations.
+///     Provides connection string and log file path utilities for database and logging operations.
 /// </summary>
 public static class SqlVariables
 {
     /// <summary>
-    /// Builds a MySQL connection string using provided or default values.
+    ///     Builds a MySQL connection string using provided or default values.
     /// </summary>
     /// <param name="server">The server address. Defaults to 'localhost' if null or empty.</param>
     /// <param name="database">The database name. Defaults to 'mtm database' if null or empty.</param>
@@ -22,7 +22,7 @@ public static class SqlVariables
         {
             server ??= "localhost"; // "172.16.1.104"
             database ??= "mtm database";
-            uid ??= WipAppVariables.User;
+            uid ??= WipAppVariables.User != null ? WipAppVariables.User.ToUpper() : "";
             password ??= "";
 
             return $"SERVER={server};DATABASE={database};UID={uid};PASSWORD={password};Allow User Variables=True";
@@ -35,7 +35,7 @@ public static class SqlVariables
     }
 
     /// <summary>
-    /// Returns the log file path for a given server and user, creating the directory if needed.
+    ///     Returns the log file path for a given server and user, creating the directory if needed.
     /// </summary>
     /// <param name="server">The server address.</param>
     /// <param name="userName">The user name.</param>

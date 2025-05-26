@@ -5,6 +5,7 @@ using MTM_WIP_Application.Logging;
 using MTM_WIP_Application.Services;
 using MySql.Data.MySqlClient;
 using System.Diagnostics;
+using System.Timers;
 
 namespace MTM_WIP_Application;
 
@@ -46,7 +47,7 @@ internal static class Program
 
             Debug.WriteLine("Running VersionChecker...");
             AppLogger.Log("Running VersionChecker...");
-            VersionCheckerService.VersionChecker(null, null);
+            VersionCheckerService.Initialize();
 
 
             Debug.WriteLine("Starting main form...");

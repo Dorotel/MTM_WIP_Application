@@ -3,13 +3,23 @@
 namespace MTM_WIP_Application.Helpers;
 
 /// <summary>
-/// Provides methods to check and handle DPI scaling issues for the application.
+///     Provides methods to check and handle DPI scaling issues for the application.
 /// </summary>
 public static class DpiChecker
 {
     /// <summary>
-    /// Checks the current DPI scaling and prompts the user if it exceeds 125%.
-    /// Also logs the DPI value and any warnings.
+    ///     Adjusts the font size and layout of the specified form and its controls based on the current DPI scaling.
+    ///     Uses FontScaler for consistent scaling logic.
+    /// </summary>
+    /// <param name="form">The form to adjust.</param>
+    public static void AdjustFormForDpi(Form? form)
+    {
+        FontScaler.AdjustFontAndLayout(form);
+    }
+
+    /// <summary>
+    ///     Checks the current DPI scaling and prompts the user if it exceeds 125%.
+    ///     Also logs the DPI value and any warnings.
     /// </summary>
     public static void CheckDpiScaling()
     {
@@ -37,25 +47,15 @@ public static class DpiChecker
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
-
-    /// <summary>
-    /// Adjusts the font size and layout of the specified form and its controls based on the current DPI scaling.
-    /// Uses FontScaler for consistent scaling logic.
-    /// </summary>
-    /// <param name="form">The form to adjust.</param>
-    public static void AdjustFormForDpi(Form? form)
-    {
-        FontScaler.AdjustFontAndLayout(form);
-    }
 }
 
 /// <summary>
-/// Handles adjusting font sizes and layouts for forms and controls based on DPI.
+///     Handles adjusting font sizes and layouts for forms and controls based on DPI.
 /// </summary>
 public static class FontScaler
 {
     /// <summary>
-    /// Adjusts the font size of a form and its controls based on the current DPI scaling.
+    ///     Adjusts the font size of a form and its controls based on the current DPI scaling.
     /// </summary>
     /// <param name="form">The form to adjust.</param>
     public static void AdjustFontAndLayout(Form? form)
@@ -88,7 +88,7 @@ public static class FontScaler
     }
 
     /// <summary>
-    /// Returns the font size for a given DPI scaling factor.
+    ///     Returns the font size for a given DPI scaling factor.
     /// </summary>
     private static float GetFontSizeForDpi(float dpi)
     {
@@ -102,7 +102,7 @@ public static class FontScaler
     }
 
     /// <summary>
-    /// Recursively resets the font size of a control and its child controls to a specified value.
+    ///     Recursively resets the font size of a control and its child controls to a specified value.
     /// </summary>
     private static void ResetControlFont(Control? control, float fontSize)
     {

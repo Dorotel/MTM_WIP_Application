@@ -1,12 +1,35 @@
-﻿using MTM_WIP_Application.Logging;
+﻿using System.Diagnostics;
 using IWshRuntimeLibrary;
+using MTM_WIP_Application.Logging;
 using File = System.IO.File;
-using System.Diagnostics;
 
 namespace MTM_WIP_Application.Services;
 
 internal static class ShortcutManager
 {
+    private static void CreateShortcut(string shortcutPath, string targetPath, string description)
+    {
+        Debug.WriteLine($"Creating shortcut at {shortcutPath}...");
+        AppLogger.Log($"Creating shortcut at {shortcutPath}...");
+
+        try
+        {
+            var shell = new WshShell();
+            var shortcut = (IWshShortcut)shell.CreateShortcut(shortcutPath);
+            shortcut.TargetPath = targetPath;
+            shortcut.Description = description;
+            shortcut.Save();
+
+            Debug.WriteLine($"Shortcut created at {shortcutPath}");
+            AppLogger.Log($"Shortcut created at {shortcutPath}");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error creating shortcut: {ex.Message}");
+            AppLogger.Log($"Error creating shortcut: {ex.Message}");
+        }
+    }
+
     public static void EnsureApplicationShortcut()
     {
         Debug.WriteLine("Ensuring application shortcut...");
@@ -44,29 +67,6 @@ internal static class ShortcutManager
         {
             Debug.WriteLine($"Error ensuring application shortcut: {ex.Message}");
             AppLogger.Log($"Error ensuring application shortcut: {ex.Message}");
-        }
-    }
-
-    private static void CreateShortcut(string shortcutPath, string targetPath, string description)
-    {
-        Debug.WriteLine($"Creating shortcut at {shortcutPath}...");
-        AppLogger.Log($"Creating shortcut at {shortcutPath}...");
-
-        try
-        {
-            var shell = new WshShell();
-            var shortcut = (IWshShortcut)shell.CreateShortcut(shortcutPath);
-            shortcut.TargetPath = targetPath;
-            shortcut.Description = description;
-            shortcut.Save();
-
-            Debug.WriteLine($"Shortcut created at {shortcutPath}");
-            AppLogger.Log($"Shortcut created at {shortcutPath}");
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Error creating shortcut: {ex.Message}");
-            AppLogger.Log($"Error creating shortcut: {ex.Message}");
         }
     }
 

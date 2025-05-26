@@ -185,10 +185,10 @@ internal static class ErrorLogDao
             if (Application.OpenForms.OfType<MainForm>().Any())
             {
                 var mainForm = Application.OpenForms.OfType<MainForm>().First();
-                mainForm.Invoke(() =>
+                mainForm.BeginInvoke(new Action(() =>
                 {
                     foreach (Control c in mainForm.Controls) c.Enabled = false;
-                });
+                }));
             }
 
             AppLogger.LogApplicationError(ex);

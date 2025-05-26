@@ -1,15 +1,19 @@
-﻿using MTM_WIP_Application.Logging;
-using MySql.Data.MySqlClient;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using System.Timers;
 using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Data;
 using MTM_WIP_Application.ErrorHandling;
+using MTM_WIP_Application.Logging;
+using MySql.Data.MySqlClient;
+using Timer = System.Timers.Timer;
+
+// Ensure this is the correct Timer namespace being used
 
 namespace MTM_WIP_Application.Services;
 
 internal static class VersionCheckerService
 {
-    private static readonly System.Timers.Timer VersionTimer = new(30000);
+    private static readonly Timer VersionTimer = new(30000); // Fully qualify the Timer type
 
     public static void Initialize()
     {
@@ -30,14 +34,14 @@ internal static class VersionCheckerService
         }
     }
 
-    public static void VersionChecker(object? sender, System.Timers.ElapsedEventArgs e)
+    public static void VersionChecker(object? sender, ElapsedEventArgs e)
     {
         Debug.WriteLine("Running VersionChecker...");
         AppLogger.Log("Running VersionChecker...");
 
-        MySqlConnection connection = null;
-        MySqlCommand command = null;
-        MySqlDataReader reader = null;
+        MySqlConnection? connection = null;
+        MySqlCommand? command = null;
+        MySqlDataReader? reader = null;
 
         try
         {
@@ -51,19 +55,19 @@ internal static class VersionCheckerService
                 {
                     var databaseVersion = reader.GetString(1);
 
-                    if (databaseVersion != WipAppVariables.version)
+                    if (databaseVersion != WipAppVariables.UserVersion)
                     {
                         AppLogger.Log(
-                            $"Version mismatch detected. Current: {WipAppVariables.version}, Expected: {databaseVersion}");
+                            $"Version mismatch detected. Current: {WipAppVariables.UserVersion}, Expected: {databaseVersion}");
                         Debug.WriteLine(
-                            $"Version mismatch detected. Current: {WipAppVariables.version}, Expected: {databaseVersion}");
+                            $"Version mismatch detected. Current: {WipAppVariables.UserVersion}, Expected: {databaseVersion}");
 
                         Task.Run(() =>
                         {
                             var message = "You are using an older version of the WIP Application.\n" +
                                           "This normally means a newer version is just about to be released.\n" +
                                           "The program will close in 30 seconds, or by clicking OK.";
-                            var caption = $"Version Conflict Error ({WipAppVariables.version}/{databaseVersion})";
+                            var caption = $"Version Conflict Error ({WipAppVariables.UserVersion}/{databaseVersion})";
                             MessageBox.Show(message, caption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
                             Application.Exit();

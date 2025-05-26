@@ -1,32 +1,36 @@
-﻿using MTM_WIP_Application.Logging;
+﻿using System.Data;
+using MTM_WIP_Application.Logging;
 using MySql.Data.MySqlClient;
-using System.Data;
 
 namespace MTM_WIP_Application.Data;
 
 internal static class PartTypeDao
 {
-    // --- Existence Check ---
-    internal static async Task<bool> PartTypeExists(string partType, bool useAsync = false)
+    // --- Delete ---
+    internal static async Task DeletePartType(string partType, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object> { ["@partType"] = partType };
-        var result = await SqlHelper.ExecuteScalar(
-            "SELECT COUNT(*) FROM `item_types` WHERE `Type` = @partType",
-            parameters, useAsync: useAsync);
-        return Convert.ToInt32(result) > 0;
+        await ExecuteNonQueryAsync(
+            "DELETE FROM `item_types` WHERE `Type` = @partType",
+            parameters, useAsync);
     }
 
-    // --- Insert ---
-    internal static async Task InsertPartType(string partType, string user, bool useAsync = false)
+    private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
     {
-        var parameters = new Dictionary<string, object>
+        try
         {
-            ["@partType"] = partType,
-            ["@user"] = user
-        };
-        await ExecuteNonQueryAsync(
-            "INSERT INTO `item_types` (`Type`, `ID`, `Issued By`) VALUES (@partType, NULL, @user);",
-            parameters, useAsync);
+            await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
+        }
+        catch (MySqlException ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogApplicationError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
     }
 
     // --- Get All ---
@@ -42,29 +46,6 @@ internal static class PartTypeDao
             "SELECT * FROM `item_types` WHERE `Type` = @partType",
             new Dictionary<string, object> { ["@partType"] = partType }, useAsync);
         return table.Rows.Count > 0 ? table.Rows[0] : null;
-    }
-
-    // --- Update ---
-    internal static async Task UpdatePartType(string partType, string newType, string user, bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object>
-        {
-            ["@partType"] = partType,
-            ["@newType"] = newType,
-            ["@user"] = user
-        };
-        await ExecuteNonQueryAsync(
-            "UPDATE `item_types` SET `Type` = @newType, `Issued By` = @user WHERE `Type` = @partType",
-            parameters, useAsync);
-    }
-
-    // --- Delete ---
-    internal static async Task DeletePartType(string partType, bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object> { ["@partType"] = partType };
-        await ExecuteNonQueryAsync(
-            "DELETE FROM `item_types` WHERE `Type` = @partType",
-            parameters, useAsync);
     }
 
     // --- Helpers ---
@@ -91,21 +72,40 @@ internal static class PartTypeDao
         }
     }
 
-    private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
+    // --- Insert ---
+    internal static async Task InsertPartType(string partType, string user, bool useAsync = false)
     {
-        try
+        var parameters = new Dictionary<string, object>
         {
-            await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
-        }
-        catch (MySqlException ex)
+            ["@partType"] = partType,
+            ["@user"] = user
+        };
+        await ExecuteNonQueryAsync(
+            "INSERT INTO `item_types` (`Type`, `ID`, `Issued By`) VALUES (@partType, NULL, @user);",
+            parameters, useAsync);
+    }
+
+    // --- Existence Check ---
+    internal static async Task<bool> PartTypeExists(string partType, bool useAsync = false)
+    {
+        var parameters = new Dictionary<string, object> { ["@partType"] = partType };
+        var result = await SqlHelper.ExecuteScalar(
+            "SELECT COUNT(*) FROM `item_types` WHERE `Type` = @partType",
+            parameters, useAsync: useAsync);
+        return Convert.ToInt32(result) > 0;
+    }
+
+    // --- Update ---
+    internal static async Task UpdatePartType(string partType, string newType, string user, bool useAsync = false)
+    {
+        var parameters = new Dictionary<string, object>
         {
-            AppLogger.LogDatabaseError(ex);
-            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
-        }
+            ["@partType"] = partType,
+            ["@newType"] = newType,
+            ["@user"] = user
+        };
+        await ExecuteNonQueryAsync(
+            "UPDATE `item_types` SET `Type` = @newType, `Issued By` = @user WHERE `Type` = @partType",
+            parameters, useAsync);
     }
 }

@@ -1,67 +1,14 @@
-﻿using MTM_WIP_Application.Core;
+﻿using System.Security.Principal;
+using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Forms.MainForm;
 using MTM_WIP_Application.Logging;
-using MySql.Data.MySqlClient;
-using System.Security.Principal;
 using MTM_WIP_Application.Models;
+using MySql.Data.MySqlClient;
 
 namespace MTM_WIP_Application.Data;
 
 internal static class SystemDao
 {
-    /// <summary>
-    /// Gets the current user name, normalizing and updating WipAppVariables.User.
-    /// </summary>
-    internal static string System_GetUserName()
-    {
-        var userIdWithDomain = WipAppVariables.enteredUser == "Default User"
-            ? WindowsIdentity.GetCurrent().Name
-            : WipAppVariables.enteredUser ??
-              throw new InvalidOperationException("User identity could not be retrieved.");
-
-        var posSlash = userIdWithDomain.IndexOf('\\');
-        var user = (posSlash == -1 ? userIdWithDomain : userIdWithDomain[(posSlash + 1)..]).ToUpper();
-        WipAppVariables.User = user;
-        return user;
-    }
-
-    /// <summary>
-    /// Checks and sets the current user's admin and read-only access types.
-    /// </summary>
-    internal static async Task<List<Users>> System_UserAccessTypeAsync(bool useAsync = false)
-    {
-        var user = WipAppVariables.User;
-        var result = new List<Users>();
-        try
-        {
-            WipAppVariables.userTypeAdmin = false;
-            WipAppVariables.userTypeReadOnly = false;
-
-            // Check admin access
-            await foreach (var admin in GetUserAccessListAsync("leads", useAsync))
-            {
-                if (admin.User == user) WipAppVariables.userTypeAdmin = true;
-                result.Add(admin);
-            }
-
-            // Check read-only access
-            await foreach (var readOnly in GetUserAccessListAsync("readonly", useAsync))
-            {
-                if (readOnly.User == user) WipAppVariables.userTypeReadOnly = true;
-                result.Add(readOnly);
-            }
-
-            AppLogger.Log($"System_UserAccessType executed successfully for user: {user}");
-            return result;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await HandleSystemDaoExceptionAsync(ex, "System_UserAccessType", useAsync);
-            return new List<Users>();
-        }
-    }
-
     private static async IAsyncEnumerable<Users> GetUserAccessListAsync(string table, bool useAsync)
     {
         using var reader = useAsync
@@ -76,8 +23,18 @@ internal static class SystemDao
             };
     }
 
+    // --- Helper for consistent error handling ---
+    private static async Task HandleSystemDaoExceptionAsync(Exception ex, string method, bool useAsync)
+    {
+        AppLogger.LogApplicationError(new Exception($"Error in {method}: {ex.Message}", ex));
+        if (ex is MySqlException)
+            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
+        else
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+    }
+
     /// <summary>
-    /// Sets the user's access type (Admin or ReadOnly) in the database and updates WipAppVariables.
+    ///     Sets the user's access type (Admin or ReadOnly) in the database and updates WipAppVariables.
     /// </summary>
     internal static async Task SetUserAccessTypeAsync(string email, string accessType, bool useAsync = false)
     {
@@ -98,8 +55,8 @@ internal static class SystemDao
 
             if (WipAppVariables.User == email)
             {
-                WipAppVariables.userTypeAdmin = accessType == "Admin";
-                WipAppVariables.userTypeReadOnly = accessType == "ReadOnly";
+                WipAppVariables.UserTypeAdmin = accessType == "Admin";
+                WipAppVariables.UserTypeReadOnly = accessType == "ReadOnly";
             }
         }
         catch (Exception ex)
@@ -110,14 +67,30 @@ internal static class SystemDao
     }
 
     /// <summary>
-    /// Updates the last 10 transactions table and updates the main form status.
+    ///     Gets the current user name, normalizing and updating WipAppVariables.User.
+    /// </summary>
+    internal static string System_GetUserName()
+    {
+        var userIdWithDomain = WipAppVariables.EnteredUser == "Default User"
+            ? WindowsIdentity.GetCurrent().Name
+            : WipAppVariables.EnteredUser ??
+              throw new InvalidOperationException("User identity could not be retrieved.");
+
+        var posSlash = userIdWithDomain.IndexOf('\\');
+        var user = (posSlash == -1 ? userIdWithDomain : userIdWithDomain[(posSlash + 1)..]).ToUpper();
+        WipAppVariables.User = user;
+        return user;
+    }
+
+    /// <summary>
+    ///     Updates the last 10 transactions table and updates the main form status.
     /// </summary>
     internal static async Task System_Last10_Buttons_ChangedAsync(bool useAsync = false)
     {
         try
         {
             var com1 = "INSERT INTO `last_10_transactions`(`ID`, `PartID`, `Op`, `Quantity`) VALUES(11, '" +
-                       WipAppVariables.partId + "', '" + WipAppVariables.Operation + "', '" +
+                       WipAppVariables.PartId + "', '" + WipAppVariables.Operation + "', '" +
                        WipAppVariables.InventoryQuantity + "');";
             var com2 = "DELETE FROM `last_10_transactions` WHERE `ID` = 10;";
             var com3 = "ALTER TABLE  `mtm database`.`last_10_transactions` MODIFY COLUMN `ID` INT;";
@@ -152,13 +125,40 @@ internal static class SystemDao
         }
     }
 
-    // --- Helper for consistent error handling ---
-    private static async Task HandleSystemDaoExceptionAsync(Exception ex, string method, bool useAsync)
+    /// <summary>
+    ///     Checks and sets the current user's admin and read-only access types.
+    /// </summary>
+    internal static async Task<List<Users>> System_UserAccessTypeAsync(bool useAsync = false)
     {
-        AppLogger.LogApplicationError(new Exception($"Error in {method}: {ex.Message}", ex));
-        if (ex is MySqlException)
-            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
-        else
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+        var user = WipAppVariables.User;
+        var result = new List<Users>();
+        try
+        {
+            WipAppVariables.UserTypeAdmin = false;
+            WipAppVariables.UserTypeReadOnly = false;
+
+            // Check admin access
+            await foreach (var admin in GetUserAccessListAsync("leads", useAsync))
+            {
+                if (admin.User == user) WipAppVariables.UserTypeAdmin = true;
+                result.Add(admin);
+            }
+
+            // Check read-only access
+            await foreach (var readOnly in GetUserAccessListAsync("readonly", useAsync))
+            {
+                if (readOnly.User == user) WipAppVariables.UserTypeReadOnly = true;
+                result.Add(readOnly);
+            }
+
+            AppLogger.Log($"System_UserAccessType executed successfully for user: {user}");
+            return result;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogApplicationError(ex);
+            await HandleSystemDaoExceptionAsync(ex, "System_UserAccessType", useAsync);
+            return [];
+        }
     }
 }

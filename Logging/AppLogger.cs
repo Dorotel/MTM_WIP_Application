@@ -3,6 +3,7 @@ using System.Diagnostics;
 using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Data;
 using MTM_WIP_Application.Services;
+using System.Threading;
 
 namespace MTM_WIP_Application.Logging;
 
@@ -16,7 +17,7 @@ internal static class AppLogger
     private static string _normalLogFile = string.Empty;
     private static string _dbErrorLogFile = string.Empty;
     private static string _appErrorLogFile = string.Empty;
-    private static readonly Lock LogLock = new();
+    private static readonly object LogLock = new();
 
     /// <summary>
     /// Initializes logging, sets up log file paths, and hooks process exit for log flush.
@@ -24,7 +25,7 @@ internal static class AppLogger
     public static void InitializeLogging()
     {
         Debug.WriteLine("Initializing logging...");
-        var server = new MySqlConnectionStringBuilder(WipAppVariables.connectionString).Server;
+        var server = new MySqlConnectionStringBuilder(WipAppVariables.ConnectionString).Server;
         var userName = WipAppVariables.User;
         var logFilePath = SqlVariables.GetLogFilePath(server, userName);
 

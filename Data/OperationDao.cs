@@ -1,32 +1,36 @@
-﻿using MTM_WIP_Application.Logging;
+﻿using System.Data;
+using MTM_WIP_Application.Logging;
 using MySql.Data.MySqlClient;
-using System.Data;
 
 namespace MTM_WIP_Application.Data;
 
 internal static class OperationDao
 {
-    // --- Existence Check ---
-    internal static async Task<bool> OperationExists(string operationNumber, bool useAsync = false)
+    // --- Delete ---
+    internal static async Task DeleteOperation(string operationNumber, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object> { ["@operationNumber"] = operationNumber };
-        var result = await SqlHelper.ExecuteScalar(
-            "SELECT COUNT(*) FROM `operation_numbers` WHERE `Operation` = @operationNumber",
-            parameters, useAsync: useAsync);
-        return Convert.ToInt32(result) > 0;
+        await ExecuteNonQueryAsync(
+            "DELETE FROM `operation_numbers` WHERE `Operation` = @operationNumber",
+            parameters, useAsync);
     }
 
-    // --- Insert ---
-    internal static async Task InsertOperation(string operationNumber, string user, bool useAsync = false)
+    private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
     {
-        var parameters = new Dictionary<string, object>
+        try
         {
-            ["@operationNumber"] = operationNumber,
-            ["@user"] = user
-        };
-        await ExecuteNonQueryAsync(
-            "INSERT INTO `operation_numbers` (`Operation`, `ID`, `Issued By`) VALUES (@operationNumber, NULL, @user);",
-            parameters, useAsync);
+            await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
+        }
+        catch (MySqlException ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogApplicationError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
     }
 
     // --- Get All ---
@@ -42,30 +46,6 @@ internal static class OperationDao
             "SELECT * FROM `operation_numbers` WHERE `Operation` = @operationNumber",
             new Dictionary<string, object> { ["@operationNumber"] = operationNumber }, useAsync);
         return table.Rows.Count > 0 ? table.Rows[0] : null;
-    }
-
-    // --- Update ---
-    internal static async Task UpdateOperation(string operationNumber, string newOperationNumber, string user,
-        bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object>
-        {
-            ["@operationNumber"] = operationNumber,
-            ["@newOperationNumber"] = newOperationNumber,
-            ["@user"] = user
-        };
-        await ExecuteNonQueryAsync(
-            "UPDATE `operation_numbers` SET `Operation` = @newOperationNumber, `Issued By` = @user WHERE `Operation` = @operationNumber",
-            parameters, useAsync);
-    }
-
-    // --- Delete ---
-    internal static async Task DeleteOperation(string operationNumber, bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object> { ["@operationNumber"] = operationNumber };
-        await ExecuteNonQueryAsync(
-            "DELETE FROM `operation_numbers` WHERE `Operation` = @operationNumber",
-            parameters, useAsync);
     }
 
     // --- Helpers ---
@@ -92,21 +72,41 @@ internal static class OperationDao
         }
     }
 
-    private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
+    // --- Insert ---
+    internal static async Task InsertOperation(string operationNumber, string user, bool useAsync = false)
     {
-        try
+        var parameters = new Dictionary<string, object>
         {
-            await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
-        }
-        catch (MySqlException ex)
+            ["@operationNumber"] = operationNumber,
+            ["@user"] = user
+        };
+        await ExecuteNonQueryAsync(
+            "INSERT INTO `operation_numbers` (`Operation`, `ID`, `Issued By`) VALUES (@operationNumber, NULL, @user);",
+            parameters, useAsync);
+    }
+
+    // --- Existence Check ---
+    internal static async Task<bool> OperationExists(string operationNumber, bool useAsync = false)
+    {
+        var parameters = new Dictionary<string, object> { ["@operationNumber"] = operationNumber };
+        var result = await SqlHelper.ExecuteScalar(
+            "SELECT COUNT(*) FROM `operation_numbers` WHERE `Operation` = @operationNumber",
+            parameters, useAsync: useAsync);
+        return Convert.ToInt32(result) > 0;
+    }
+
+    // --- Update ---
+    internal static async Task UpdateOperation(string operationNumber, string newOperationNumber, string user,
+        bool useAsync = false)
+    {
+        var parameters = new Dictionary<string, object>
         {
-            AppLogger.LogDatabaseError(ex);
-            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
-        }
+            ["@operationNumber"] = operationNumber,
+            ["@newOperationNumber"] = newOperationNumber,
+            ["@user"] = user
+        };
+        await ExecuteNonQueryAsync(
+            "UPDATE `operation_numbers` SET `Operation` = @newOperationNumber, `Issued By` = @user WHERE `Operation` = @operationNumber",
+            parameters, useAsync);
     }
 }
