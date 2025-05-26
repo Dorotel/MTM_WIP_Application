@@ -137,4 +137,102 @@ public static class MainFormControlHelper
         else
             control.Focus();
     }
+
+    public static void AdjustQuantityByKey(
+        object? sender,
+        KeyEventArgs e,
+        string placeholder = "[ Enter Valid Quantity ]",
+        int step5 = 5,
+        int step1 = 1,
+        int step100 = 100,
+        int step1000 = 1000,
+        Color? validColor = null,
+        Color? invalidColor = null)
+    {
+        if (sender is not TextBox textBox)
+            return;
+
+        validColor ??= Color.Black;
+        invalidColor ??= Color.Red;
+
+        var value = 0;
+        var isPlaceholder = textBox.Text.Trim() == placeholder;
+        var isNumber = int.TryParse(textBox.Text.Trim(), out value);
+
+        void SetValueOrPlaceholder(int newValue)
+        {
+            if (newValue <= 0)
+            {
+                textBox.Text = placeholder;
+                textBox.ForeColor = invalidColor.Value;
+            }
+            else
+            {
+                textBox.Text = newValue.ToString();
+                textBox.ForeColor = validColor.Value;
+                textBox.SelectionStart = textBox.Text.Length;
+            }
+        }
+
+        if (isPlaceholder || isNumber)
+        {
+            var current = isNumber ? value : 0;
+            var newValue = current;
+
+            if (e.KeyCode == Keys.Up && !e.Shift)
+            {
+                if (isPlaceholder || (isNumber && current % step5 == 0))
+                {
+                    newValue = current + step5;
+                    SetValueOrPlaceholder(newValue);
+                    e.Handled = true;
+                }
+            }
+            else if (e.KeyCode == Keys.Down && !e.Shift)
+            {
+                if (isPlaceholder || (isNumber && current % step5 == 0))
+                {
+                    newValue = current - step5;
+                    SetValueOrPlaceholder(newValue);
+                    e.Handled = true;
+                }
+            }
+            else if (e.KeyCode == Keys.Up && e.Shift)
+            {
+                newValue = current + step1;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Down && e.Shift)
+            {
+                newValue = current - step1;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Left && !e.Shift)
+            {
+                newValue = current - step100;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Right && !e.Shift)
+            {
+                newValue = current + step100;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Left && e.Shift)
+            {
+                newValue = current - step1000;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Right && e.Shift)
+            {
+                newValue = current + step1000;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+        }
+    }
 }

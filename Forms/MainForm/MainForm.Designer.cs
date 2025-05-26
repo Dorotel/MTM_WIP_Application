@@ -74,6 +74,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Remove_Image_NothingFound = new PictureBox();
             MainForm_Remove_DataGrid = new DataGridView();
             MainForm_Remove_Panel_Buttons = new Panel();
+            MainForm_RemoveTab_Button_AdvancedSearch = new Button();
             MainForm_Remove_Button_Reset = new Button();
             MainForm_Remove_Button_Delete = new Button();
             MainForm_Remove_Button_Search = new Button();
@@ -81,10 +82,11 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Inventory = new TabPage();
             MainForm_Inventory_GroupBox_Main = new GroupBox();
             MainForm_Inventory_Panel_BottomGroup = new Panel();
-            MainForm_Inventory_Label_Version = new Label();
             MainForm_Inventory_Button_Reset = new Button();
             MainForm_Inventory_Button_Save = new Button();
+            MainForm_Inventory_Label_Version = new Label();
             MainForm_Inventory_Panel_Top = new Panel();
+            MainForm_InventoryTab_Button_AdvancedEntry = new Button();
             MainForm_Inventory_Label_Part = new Label();
             MainForm_Inventory_ComboBox_Part = new ComboBox();
             MainForm_Inventory_Label_Op = new Label();
@@ -131,8 +133,6 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Last10_Button_02 = new Button();
             MainForm_Last10_Button_01 = new Button();
             MainForm_Last10_Timer = new System.Windows.Forms.Timer(components);
-            MainForm_InventoryTab_Button_AdvancedEntry = new Button();
-            MainForm_RemoveTab_Button_AdvancedSearch = new Button();
             MainForm_MenuStrip.SuspendLayout();
             MainForm_Remove_GroupBox_Main.SuspendLayout();
             MainForm_Remove_Panel_Header.SuspendLayout();
@@ -343,7 +343,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_Remove_ComboBox_Part
             // 
-            MainForm_Remove_ComboBox_Part.AutoCompleteMode = AutoCompleteMode.Suggest;
+            MainForm_Remove_ComboBox_Part.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             MainForm_Remove_ComboBox_Part.AutoCompleteSource = AutoCompleteSource.ListItems;
             MainForm_Remove_ComboBox_Part.FormattingEnabled = true;
             MainForm_Remove_ComboBox_Part.Location = new Point(86, 7);
@@ -371,7 +371,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_Remove_ComboBox_Op
             // 
-            MainForm_Remove_ComboBox_Op.AutoCompleteMode = AutoCompleteMode.Suggest;
+            MainForm_Remove_ComboBox_Op.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             MainForm_Remove_ComboBox_Op.AutoCompleteSource = AutoCompleteSource.ListItems;
             MainForm_Remove_ComboBox_Op.FormattingEnabled = true;
             MainForm_Remove_ComboBox_Op.Location = new Point(688, 7);
@@ -440,6 +440,17 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Remove_Panel_Buttons.Padding = new Padding(3);
             MainForm_Remove_Panel_Buttons.Size = new Size(811, 41);
             MainForm_Remove_Panel_Buttons.TabIndex = 20;
+            // 
+            // MainForm_RemoveTab_Button_AdvancedSearch
+            // 
+            MainForm_RemoveTab_Button_AdvancedSearch.ForeColor = Color.DarkRed;
+            MainForm_RemoveTab_Button_AdvancedSearch.Location = new Point(148, 6);
+            MainForm_RemoveTab_Button_AdvancedSearch.Name = "MainForm_RemoveTab_Button_AdvancedSearch";
+            MainForm_RemoveTab_Button_AdvancedSearch.Size = new Size(236, 32);
+            MainForm_RemoveTab_Button_AdvancedSearch.TabIndex = 13;
+            MainForm_RemoveTab_Button_AdvancedSearch.Text = "Advanced Search (Ctrl + Alt + S)";
+            MainForm_ToolTip.SetToolTip(MainForm_RemoveTab_Button_AdvancedSearch, "Shortcut: Ctrl+Alt+S");
+            MainForm_RemoveTab_Button_AdvancedSearch.UseVisualStyleBackColor = true;
             // 
             // MainForm_Remove_Button_Reset
             // 
@@ -522,17 +533,6 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Inventory_Panel_BottomGroup.Size = new Size(819, 40);
             MainForm_Inventory_Panel_BottomGroup.TabIndex = 25;
             // 
-            // MainForm_Inventory_Label_Version
-            // 
-            MainForm_Inventory_Label_Version.Dock = DockStyle.Fill;
-            MainForm_Inventory_Label_Version.Font = new System.Drawing.Font("Segoe UI", 7F);
-            MainForm_Inventory_Label_Version.Location = new Point(0, 0);
-            MainForm_Inventory_Label_Version.Name = "MainForm_Inventory_Label_Version";
-            MainForm_Inventory_Label_Version.Size = new Size(819, 40);
-            MainForm_Inventory_Label_Version.TabIndex = 8;
-            MainForm_Inventory_Label_Version.Text = "Version: ";
-            MainForm_Inventory_Label_Version.TextAlign = ContentAlignment.BottomCenter;
-            // 
             // MainForm_Inventory_Button_Reset
             // 
             MainForm_Inventory_Button_Reset.Font = new System.Drawing.Font("Segoe UI", 8F);
@@ -556,6 +556,17 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_ToolTip.SetToolTip(MainForm_Inventory_Button_Save, "Shortcut: Ctrl+S");
             MainForm_Inventory_Button_Save.UseVisualStyleBackColor = true;
             // 
+            // MainForm_Inventory_Label_Version
+            // 
+            MainForm_Inventory_Label_Version.Dock = DockStyle.Fill;
+            MainForm_Inventory_Label_Version.Font = new System.Drawing.Font("Segoe UI", 7F);
+            MainForm_Inventory_Label_Version.Location = new Point(0, 0);
+            MainForm_Inventory_Label_Version.Name = "MainForm_Inventory_Label_Version";
+            MainForm_Inventory_Label_Version.Size = new Size(819, 40);
+            MainForm_Inventory_Label_Version.TabIndex = 8;
+            MainForm_Inventory_Label_Version.Text = "Version: ";
+            MainForm_Inventory_Label_Version.TextAlign = ContentAlignment.BottomCenter;
+            // 
             // MainForm_Inventory_Panel_Top
             // 
             MainForm_Inventory_Panel_Top.Controls.Add(MainForm_InventoryTab_Button_AdvancedEntry);
@@ -576,6 +587,15 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Inventory_Panel_Top.Size = new Size(819, 376);
             MainForm_Inventory_Panel_Top.TabIndex = 26;
             // 
+            // MainForm_InventoryTab_Button_AdvancedEntry
+            // 
+            MainForm_InventoryTab_Button_AdvancedEntry.Location = new Point(101, 126);
+            MainForm_InventoryTab_Button_AdvancedEntry.Name = "MainForm_InventoryTab_Button_AdvancedEntry";
+            MainForm_InventoryTab_Button_AdvancedEntry.Size = new Size(186, 23);
+            MainForm_InventoryTab_Button_AdvancedEntry.TabIndex = 8;
+            MainForm_InventoryTab_Button_AdvancedEntry.Text = "Advanced Entry";
+            MainForm_InventoryTab_Button_AdvancedEntry.UseVisualStyleBackColor = true;
+            // 
             // MainForm_Inventory_Label_Part
             // 
             MainForm_Inventory_Label_Part.AutoSize = true;
@@ -587,7 +607,10 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_Inventory_ComboBox_Part
             // 
+            MainForm_Inventory_ComboBox_Part.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            MainForm_Inventory_ComboBox_Part.AutoCompleteSource = AutoCompleteSource.ListItems;
             MainForm_Inventory_ComboBox_Part.Location = new Point(101, 4);
+            MainForm_Inventory_ComboBox_Part.MaxDropDownItems = 6;
             MainForm_Inventory_ComboBox_Part.Name = "MainForm_Inventory_ComboBox_Part";
             MainForm_Inventory_ComboBox_Part.Size = new Size(708, 23);
             MainForm_Inventory_ComboBox_Part.TabIndex = 1;
@@ -603,10 +626,13 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_Inventory_ComboBox_Op
             // 
+            MainForm_Inventory_ComboBox_Op.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            MainForm_Inventory_ComboBox_Op.AutoCompleteSource = AutoCompleteSource.ListItems;
             MainForm_Inventory_ComboBox_Op.Location = new Point(101, 35);
+            MainForm_Inventory_ComboBox_Op.MaxDropDownItems = 6;
             MainForm_Inventory_ComboBox_Op.Name = "MainForm_Inventory_ComboBox_Op";
             MainForm_Inventory_ComboBox_Op.Size = new Size(708, 23);
-            MainForm_Inventory_ComboBox_Op.TabIndex = 3;
+            MainForm_Inventory_ComboBox_Op.TabIndex = 2;
             // 
             // MainForm_Inventory_Label_Qty
             // 
@@ -622,7 +648,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Inventory_TextBox_Qty.Location = new Point(101, 66);
             MainForm_Inventory_TextBox_Qty.Name = "MainForm_Inventory_TextBox_Qty";
             MainForm_Inventory_TextBox_Qty.Size = new Size(708, 23);
-            MainForm_Inventory_TextBox_Qty.TabIndex = 5;
+            MainForm_Inventory_TextBox_Qty.TabIndex = 3;
             // 
             // MainForm_Inventory_Label_Loc
             // 
@@ -635,10 +661,13 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_Inventory_ComboBox_Loc
             // 
+            MainForm_Inventory_ComboBox_Loc.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            MainForm_Inventory_ComboBox_Loc.AutoCompleteSource = AutoCompleteSource.ListItems;
             MainForm_Inventory_ComboBox_Loc.Location = new Point(101, 97);
+            MainForm_Inventory_ComboBox_Loc.MaxDropDownItems = 6;
             MainForm_Inventory_ComboBox_Loc.Name = "MainForm_Inventory_ComboBox_Loc";
             MainForm_Inventory_ComboBox_Loc.Size = new Size(708, 23);
-            MainForm_Inventory_ComboBox_Loc.TabIndex = 7;
+            MainForm_Inventory_ComboBox_Loc.TabIndex = 4;
             // 
             // MainForm_Inventory_Button_ShowHideLast10
             // 
@@ -646,6 +675,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Inventory_Button_ShowHideLast10.Name = "MainForm_Inventory_Button_ShowHideLast10";
             MainForm_Inventory_Button_ShowHideLast10.Size = new Size(186, 23);
             MainForm_Inventory_Button_ShowHideLast10.TabIndex = 8;
+            MainForm_Inventory_Button_ShowHideLast10.TabStop = false;
             MainForm_Inventory_Button_ShowHideLast10.Text = "Hide Last 10";
             MainForm_Inventory_Button_ShowHideLast10.UseVisualStyleBackColor = true;
             // 
@@ -664,7 +694,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Inventory_RichTextBox_Notes.Location = new Point(6, 155);
             MainForm_Inventory_RichTextBox_Notes.Name = "MainForm_Inventory_RichTextBox_Notes";
             MainForm_Inventory_RichTextBox_Notes.Size = new Size(803, 175);
-            MainForm_Inventory_RichTextBox_Notes.TabIndex = 10;
+            MainForm_Inventory_RichTextBox_Notes.TabIndex = 5;
             MainForm_Inventory_RichTextBox_Notes.Text = "";
             // 
             // MainForm_TabControl_Remove
@@ -731,7 +761,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_Transfer_ComboBox_Part
             // 
-            MainForm_Transfer_ComboBox_Part.AutoCompleteMode = AutoCompleteMode.Suggest;
+            MainForm_Transfer_ComboBox_Part.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             MainForm_Transfer_ComboBox_Part.AutoCompleteSource = AutoCompleteSource.ListItems;
             MainForm_Transfer_ComboBox_Part.FormattingEnabled = true;
             MainForm_Transfer_ComboBox_Part.Location = new Point(86, 7);
@@ -759,7 +789,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_Transfer_ComboBox_Loc
             // 
-            MainForm_Transfer_ComboBox_Loc.AutoCompleteMode = AutoCompleteMode.Suggest;
+            MainForm_Transfer_ComboBox_Loc.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             MainForm_Transfer_ComboBox_Loc.AutoCompleteSource = AutoCompleteSource.ListItems;
             MainForm_Transfer_ComboBox_Loc.FormattingEnabled = true;
             MainForm_Transfer_ComboBox_Loc.Location = new Point(463, 7);
@@ -1040,26 +1070,6 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             MainForm_Last10_Timer.Enabled = true;
             MainForm_Last10_Timer.Interval = 15000;
-            // 
-            // MainForm_InventoryTab_Button_AdvancedEntry
-            // 
-            MainForm_InventoryTab_Button_AdvancedEntry.Location = new Point(101, 126);
-            MainForm_InventoryTab_Button_AdvancedEntry.Name = "MainForm_InventoryTab_Button_AdvancedEntry";
-            MainForm_InventoryTab_Button_AdvancedEntry.Size = new Size(186, 23);
-            MainForm_InventoryTab_Button_AdvancedEntry.TabIndex = 11;
-            MainForm_InventoryTab_Button_AdvancedEntry.Text = "Advanced Entry";
-            MainForm_InventoryTab_Button_AdvancedEntry.UseVisualStyleBackColor = true;
-            // 
-            // MainForm_RemoveTab_Button_AdvancedSearch
-            // 
-            MainForm_RemoveTab_Button_AdvancedSearch.ForeColor = Color.DarkRed;
-            MainForm_RemoveTab_Button_AdvancedSearch.Location = new Point(148, 6);
-            MainForm_RemoveTab_Button_AdvancedSearch.Name = "MainForm_RemoveTab_Button_AdvancedSearch";
-            MainForm_RemoveTab_Button_AdvancedSearch.Size = new Size(236, 32);
-            MainForm_RemoveTab_Button_AdvancedSearch.TabIndex = 13;
-            MainForm_RemoveTab_Button_AdvancedSearch.Text = "Advanced Search (Ctrl + Alt + S)";
-            MainForm_ToolTip.SetToolTip(MainForm_RemoveTab_Button_AdvancedSearch, "Shortcut: Ctrl+Alt+S");
-            MainForm_RemoveTab_Button_AdvancedSearch.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
