@@ -58,13 +58,19 @@ public static class MainFormControlHelper
             comboBox.Invoke(new MethodInvoker(() =>
             {
                 comboBox.ForeColor = color;
-                comboBox.SelectedIndex = selectedIndex;
+                if (comboBox.Items.Count > 0 && selectedIndex >= 0 && selectedIndex < comboBox.Items.Count)
+                    comboBox.SelectedIndex = selectedIndex;
+                else
+                    comboBox.SelectedIndex = -1;
             }));
         }
         else
         {
             comboBox.ForeColor = color;
-            comboBox.SelectedIndex = selectedIndex;
+            if (comboBox.Items.Count > 0 && selectedIndex >= 0 && selectedIndex < comboBox.Items.Count)
+                comboBox.SelectedIndex = selectedIndex;
+            else
+                comboBox.SelectedIndex = -1;
         }
     }
 
@@ -138,14 +144,10 @@ public static class MainFormControlHelper
             control.Focus();
     }
 
-    public static void AdjustQuantityByKey(
+    public static void AdjustQuantityByKey_Transfers(
         object? sender,
         KeyEventArgs e,
         string placeholder = "[ Enter Valid Quantity ]",
-        int step5 = 5,
-        int step1 = 1,
-        int step100 = 100,
-        int step1000 = 1000,
         Color? validColor = null,
         Color? invalidColor = null)
     {
@@ -155,9 +157,8 @@ public static class MainFormControlHelper
         validColor ??= Color.Black;
         invalidColor ??= Color.Red;
 
-        var value = 0;
         var isPlaceholder = textBox.Text.Trim() == placeholder;
-        var isNumber = int.TryParse(textBox.Text.Trim(), out value);
+        var isNumber = int.TryParse(textBox.Text.Trim(), out var value);
 
         void SetValueOrPlaceholder(int newValue)
         {
@@ -177,59 +178,140 @@ public static class MainFormControlHelper
         if (isPlaceholder || isNumber)
         {
             var current = isNumber ? value : 0;
-            var newValue = current;
+            int newValue;
 
-            if (e.KeyCode == Keys.Up && !e.Shift)
+            if (e.KeyCode == Keys.Left && !e.Shift)
             {
-                if (isPlaceholder || (isNumber && current % step5 == 0))
-                {
-                    newValue = current + step5;
-                    SetValueOrPlaceholder(newValue);
-                    e.Handled = true;
-                }
-            }
-            else if (e.KeyCode == Keys.Down && !e.Shift)
-            {
-                if (isPlaceholder || (isNumber && current % step5 == 0))
-                {
-                    newValue = current - step5;
-                    SetValueOrPlaceholder(newValue);
-                    e.Handled = true;
-                }
-            }
-            else if (e.KeyCode == Keys.Up && e.Shift)
-            {
-                newValue = current + step1;
-                SetValueOrPlaceholder(newValue);
-                e.Handled = true;
-            }
-            else if (e.KeyCode == Keys.Down && e.Shift)
-            {
-                newValue = current - step1;
-                SetValueOrPlaceholder(newValue);
-                e.Handled = true;
-            }
-            else if (e.KeyCode == Keys.Left && !e.Shift)
-            {
-                newValue = current - step100;
+                newValue = current - 1;
                 SetValueOrPlaceholder(newValue);
                 e.Handled = true;
             }
             else if (e.KeyCode == Keys.Right && !e.Shift)
             {
-                newValue = current + step100;
+                newValue = current + 1;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Up && !e.Shift)
+            {
+                newValue = current + 5;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Down && !e.Shift)
+            {
+                newValue = current - 5;
                 SetValueOrPlaceholder(newValue);
                 e.Handled = true;
             }
             else if (e.KeyCode == Keys.Left && e.Shift)
             {
-                newValue = current - step1000;
+                newValue = current - 10;
                 SetValueOrPlaceholder(newValue);
                 e.Handled = true;
             }
             else if (e.KeyCode == Keys.Right && e.Shift)
             {
-                newValue = current + step1000;
+                newValue = current + 10;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Up && e.Shift)
+            {
+                newValue = current + 50;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Down && e.Shift)
+            {
+                newValue = current - 50;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+        }
+    }
+
+    public static void AdjustQuantityByKey_Quantity(
+        object? sender,
+        KeyEventArgs e,
+        string placeholder = "[ Enter Valid Quantity ]",
+        Color? validColor = null,
+        Color? invalidColor = null)
+    {
+        if (sender is not TextBox textBox)
+            return;
+
+        validColor ??= Color.Black;
+        invalidColor ??= Color.Red;
+
+        var isPlaceholder = textBox.Text.Trim() == placeholder;
+        var isNumber = int.TryParse(textBox.Text.Trim(), out var value);
+
+        void SetValueOrPlaceholder(int newValue)
+        {
+            if (newValue <= 0)
+            {
+                textBox.Text = placeholder;
+                textBox.ForeColor = invalidColor.Value;
+            }
+            else
+            {
+                textBox.Text = newValue.ToString();
+                textBox.ForeColor = validColor.Value;
+                textBox.SelectionStart = textBox.Text.Length;
+            }
+        }
+
+        if (isPlaceholder || isNumber)
+        {
+            var current = isNumber ? value : 0;
+            int newValue;
+
+            if (e.KeyCode == Keys.Left && !e.Shift)
+            {
+                newValue = current - 10;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Right && !e.Shift)
+            {
+                newValue = current + 10;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Up && !e.Shift)
+            {
+                newValue = current + 1000;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Down && !e.Shift)
+            {
+                newValue = current - 1000;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Left && e.Shift)
+            {
+                newValue = current - 10000;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Right && e.Shift)
+            {
+                newValue = current + 10000;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Up && e.Shift)
+            {
+                newValue = current + 100;
+                SetValueOrPlaceholder(newValue);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Down && e.Shift)
+            {
+                newValue = current - 100;
                 SetValueOrPlaceholder(newValue);
                 e.Handled = true;
             }

@@ -14,6 +14,7 @@ public static class DpiChecker
     /// <param name="form">The form to adjust.</param>
     public static void AdjustFormForDpi(Form? form)
     {
+        if (form == null) return;
         FontScaler.AdjustFontAndLayout(form);
     }
 

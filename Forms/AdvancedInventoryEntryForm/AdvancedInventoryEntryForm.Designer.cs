@@ -1,11 +1,11 @@
 ﻿using System.Windows.Forms;
 using System.Drawing;
+using System.ComponentModel;
 
 namespace MTM_WIP_Application.Forms.AdvancedInventoryEntryForm;
 
 partial class AdvancedInventoryEntryForm
 {
-    private System.ComponentModel.IContainer components = null;
 
     // Tab control and tabs
     private TabControl AdvancedEntry_TabControl;
