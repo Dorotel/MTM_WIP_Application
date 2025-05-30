@@ -1,6 +1,5 @@
 ﻿#pragma warning disable CS0649
 using System.Reflection;
-using System.Windows.Forms; // Add this at the top if not already present
 using MTM_WIP_Application.Data;
 using MTM_WIP_Application.Models;
 
@@ -52,6 +51,7 @@ internal static class WipAppVariables
     public static bool UserTypeAdmin = false; // True if the current user is an admin
     public static bool UserTypeReadOnly = false; // True if the current user is read-only
     public static string UserVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
+    public static string? UserFullName;
 
     // App version (entry assembly)
     public static string? Version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
@@ -67,15 +67,5 @@ internal static class WipAppVariables
     public static string? RemoveOperation { get; internal set; }
 
 // Connection string for database access
-    public static string ConnectionString =
-        ShowConnectionStringAndReturn(SqlVariables.GetConnectionString(null, null, null, null));
-
-    private static string ShowConnectionStringAndReturn(string connectionString)
-    {
-        MessageBox.Show(connectionString, "Connection String", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        return connectionString;
-    }
-
-    // No logging-specific variables are needed here.
-    // Logging is now handled entirely by AppLogger and does not require state in WipAppVariables.
+    public static string ConnectionString = SqlVariables.GetConnectionString(null, null, null, null);
 }

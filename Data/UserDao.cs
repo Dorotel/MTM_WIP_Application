@@ -22,6 +22,12 @@ internal static class UserDao
         }
     }
 
+    internal static async Task<string?> GetUserFullNameAsync(string email, bool useAsync = false)
+    {
+        var row = await GetUserByEmail(email, useAsync);
+        return row?["Full Name"] as string;
+    }
+
     internal static async Task ChangeUserPin(string email, string newPin, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>

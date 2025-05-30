@@ -1,8 +1,5 @@
 ﻿using MTM_WIP_Application.Logging;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
-using MTM_WIP_Application.Forms.MainForm;
+
 
 namespace MTM_WIP_Application.Core;
 

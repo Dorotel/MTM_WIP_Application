@@ -142,23 +142,6 @@ internal static class InventoryDao
             await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
     }
 
-
-    internal static async Task UpdateInventoryNotesAsync(int id, string notes, bool useAsync = false)
-    {
-        await ExecuteNonQueryAsync(
-            "UPDATE `saved_locations` SET `Notes` = @Notes WHERE `ID` = @Id",
-            new Dictionary<string, object> { ["@Id"] = id, ["@Notes"] = notes }, useAsync);
-    }
-
-    // --- Inventory Updates/Deletes ---
-
-    internal static async Task UpdateInventoryQuantityAsync(int id, int newQuantity, bool useAsync = false)
-    {
-        await ExecuteNonQueryAsync(
-            "UPDATE `saved_locations` SET `Quantity` = @Quantity WHERE `ID` = @Id",
-            new Dictionary<string, object> { ["@Id"] = id, ["@Quantity"] = newQuantity }, useAsync);
-    }
-
     internal static async Task<string> InventoryTab_GetItemTypeAsync(bool useAsync = false)
     {
         try
@@ -265,5 +248,22 @@ internal static class InventoryDao
             await HandleInventoryExceptionAsync(ex, "RemoveTab_Delete", useAsync);
             return null;
         }
+    }
+
+
+    internal static async Task UpdateInventoryNotesAsync(int id, string notes, bool useAsync = false)
+    {
+        await ExecuteNonQueryAsync(
+            "UPDATE `saved_locations` SET `Notes` = @Notes WHERE `ID` = @Id",
+            new Dictionary<string, object> { ["@Id"] = id, ["@Notes"] = notes }, useAsync);
+    }
+
+    // --- Inventory Updates/Deletes ---
+
+    internal static async Task UpdateInventoryQuantityAsync(int id, int newQuantity, bool useAsync = false)
+    {
+        await ExecuteNonQueryAsync(
+            "UPDATE `saved_locations` SET `Quantity` = @Quantity WHERE `ID` = @Id",
+            new Dictionary<string, object> { ["@Id"] = id, ["@Quantity"] = newQuantity }, useAsync);
     }
 }

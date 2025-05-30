@@ -1,6 +1,4 @@
-﻿using Org.BouncyCastle.Asn1.Crmf;
-using System;
-using System.Diagnostics.Metrics;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -595,6 +593,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_InventoryTab_Button_AdvancedEntry.TabIndex = 8;
             MainForm_InventoryTab_Button_AdvancedEntry.Text = "Advanced Entry";
             MainForm_InventoryTab_Button_AdvancedEntry.UseVisualStyleBackColor = true;
+            MainForm_InventoryTab_Button_AdvancedEntry.Click += MainForm_InventoryTab_Button_AdvancedEntry_Click;
             // 
             // MainForm_Inventory_Label_Part
             // 

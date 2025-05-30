@@ -29,10 +29,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Folder Include="Forms\AdvancedInventoryEntryForm\Classes\" />
 		<Folder Include="Images\" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="MySql.Data" Version="9.3.0" />
 	</ItemGroup>
 

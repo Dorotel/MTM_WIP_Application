@@ -6,4 +6,9 @@ public partial class AnalyticsForm : Form
     {
         InitializeComponent();
     }
+
+    public void PublicDispose(bool disposing)
+    {
+        throw new NotImplementedException();
+    }
 }
