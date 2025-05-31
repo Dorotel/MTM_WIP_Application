@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("MTM_WIP_Application.Tests")]
+[assembly: InternalsVisibleTo("MTM_WIP_Application_UnitTests")]
 
 namespace MTM_WIP_Application;
 

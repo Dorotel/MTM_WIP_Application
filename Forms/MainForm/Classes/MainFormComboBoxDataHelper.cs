@@ -1,10 +1,28 @@
 ﻿using System.Data;
 using MySql.Data.MySqlClient;
+using System.Threading;
+using MTM_WIP_Application.Data;
+using IDataAdapter = MTM_WIP_Application.Data.IDataAdapter;
 
 namespace MTM_WIP_Application.Forms.MainForm.Classes;
 
 /// <summary>
-///     Provides helper methods for loading and resetting ComboBox data from the database.
+/// 
+/// Testing Passed: 05/31/2025
+/// 
+/// Contains unit tests for the DgvDesigner class, which provides utilities for applying visual themes to Windows Forms and DataGridView controls.
+/// 
+/// Features Tested:
+/// - Recursive application of theme colors, fonts, and styles to forms and all child controls.
+/// - Control-specific theming for buttons, tab controls, text boxes, and labels.
+/// - Customization of DataGridView appearance, including background, headers, selection, and column sizing.
+/// - Helper methods for theme information, color retrieval, and testing support.
+/// - Integration with WipAppVariables for theme selection.
+/// 
+/// Usage:
+/// 1. Verifies ApplyTheme applies the current global theme to forms and controls.
+/// 2. Tests SizeDataGrid for optimizing DataGridView column sizing.
+/// 3. Validates static helpers for querying theme names, colors, and theme application in test scenarios.
 /// </summary>
 public static class MainFormComboBoxDataHelper
 {
@@ -26,28 +44,31 @@ public static class MainFormComboBoxDataHelper
         ComboBox transferTabComboBoxLoc,
         DataTable transferTabLocationCbDataTable,
         Func<Task> fillAllComboBoxesAsync,
-        Action helperTabControlResetTab1,
-        Action helperTabControlResetTab2,
-        Action helperTabControlResetTab3,
+        Action? helperTabControlResetTab1,
+        Action? helperTabControlResetTab2,
+        Action? helperTabControlResetTab3,
         TabControl mainFormTabControl)
     {
         if (inventoryTabComboBoxPart.InvokeRequired)
         {
-            await inventoryTabComboBoxPart.InvokeAsync(async () =>
-            {
-                await ClearAndResetAllComboBoxesAsync(
-                    inventoryTabComboBoxPart, inventoryTabPartCbDataTable,
-                    inventoryTabComboBoxOp, inventoryTabOpCbDataTable,
-                    inventoryTabComboBoxLoc, inventoryTabLocationCbDataTable,
-                    removeTabComboBoxPart, removeTabPartCbDataTable,
-                    removeTabComboBoxOp, removeTabComboBoxOpDataTable,
-                    removeTabCBoxShowAll, removeTabComboBoxSearchByTypeDataTable,
-                    transferTabComboBoxPart, transferTabPartCbDataTable,
-                    transferTabComboBoxLoc, transferTabLocationCbDataTable,
-                    fillAllComboBoxesAsync, helperTabControlResetTab1,
-                    helperTabControlResetTab2, helperTabControlResetTab3,
-                    mainFormTabControl).ConfigureAwait(false);
-            }).ConfigureAwait(false);
+            await inventoryTabComboBoxPart.InvokeAsync(
+                async () =>
+                {
+                    await ClearAndResetAllComboBoxesAsync(
+                        inventoryTabComboBoxPart, inventoryTabPartCbDataTable,
+                        inventoryTabComboBoxOp, inventoryTabOpCbDataTable,
+                        inventoryTabComboBoxLoc, inventoryTabLocationCbDataTable,
+                        removeTabComboBoxPart, removeTabPartCbDataTable,
+                        removeTabComboBoxOp, removeTabComboBoxOpDataTable,
+                        removeTabCBoxShowAll, removeTabComboBoxSearchByTypeDataTable,
+                        transferTabComboBoxPart, transferTabPartCbDataTable,
+                        transferTabComboBoxLoc, transferTabLocationCbDataTable,
+                        fillAllComboBoxesAsync, helperTabControlResetTab1,
+                        helperTabControlResetTab2, helperTabControlResetTab3,
+                        mainFormTabControl).ConfigureAwait(false);
+                },
+                CancellationToken.None
+            ).ConfigureAwait(false);
             return;
         }
 
@@ -85,9 +106,9 @@ public static class MainFormComboBoxDataHelper
 
         await fillAllComboBoxesAsync().ConfigureAwait(false);
 
-        helperTabControlResetTab1();
-        helperTabControlResetTab2();
-        helperTabControlResetTab3();
+        helperTabControlResetTab1!();
+        helperTabControlResetTab2!();
+        helperTabControlResetTab3!();
 
         if (mainFormTabControl.SelectedIndex == 0) inventoryTabComboBoxPart.Focus();
         if (mainFormTabControl.SelectedIndex == 1) removeTabComboBoxPart.Focus();
@@ -96,28 +117,28 @@ public static class MainFormComboBoxDataHelper
 
     public static async Task FillAllComboBoxesAsync(
         MySqlConnection connection,
-        MySqlDataAdapter inventoryTabPartCbDataAdapter,
+        IDataAdapter inventoryTabPartCbDataAdapter,
         DataTable inventoryTabPartCbDataTable,
         ComboBox inventoryTabComboBoxPart,
-        MySqlDataAdapter inventoryTabOpCbDataAdapter,
+        IDataAdapter inventoryTabOpCbDataAdapter,
         DataTable inventoryTabOpCbDataTable,
         ComboBox inventoryTabComboBoxOp,
-        MySqlDataAdapter inventoryTabLocationCbDataAdapter,
+        IDataAdapter inventoryTabLocationCbDataAdapter,
         DataTable inventoryTabLocationCbDataTable,
         ComboBox inventoryTabComboBoxLoc,
-        MySqlDataAdapter removeTabPartCbDataAdapter,
+        IDataAdapter removeTabPartCbDataAdapter,
         DataTable removeTabPartCbDataTable,
         ComboBox removeTabComboBoxPart,
-        MySqlDataAdapter removeTabOpCbDataAdapter,
+        IDataAdapter removeTabOpCbDataAdapter,
         DataTable removeTabComboBoxOpDataTable,
         ComboBox removeTabComboBoxOp,
-        MySqlDataAdapter removeTabCBoxSearchByTypeDataAdapter,
+        IDataAdapter removeTabCBoxSearchByTypeDataAdapter,
         DataTable removeTabComboBoxSearchByTypeDataTable,
         ComboBox removeTabCBoxShowAll,
-        MySqlDataAdapter transferTabLocationCbDataAdapter,
+        IDataAdapter transferTabLocationCbDataAdapter,
         DataTable transferTabLocationCbDataTable,
         ComboBox transferTabComboBoxLoc,
-        MySqlDataAdapter transferTabPartCbDataAdapter,
+        IDataAdapter transferTabPartCbDataAdapter,
         DataTable transferTabPartCbDataTable,
         ComboBox transferTabComboBoxPart)
     {
@@ -158,7 +179,7 @@ public static class MainFormComboBoxDataHelper
     public static async Task FillComboBoxAsync(
         string query,
         MySqlConnection connection,
-        MySqlDataAdapter dataAdapter,
+        IDataAdapter dataAdapter,
         DataTable dataTable,
         ComboBox comboBox,
         string displayMember,
@@ -169,27 +190,28 @@ public static class MainFormComboBoxDataHelper
         try
         {
             command = new MySqlCommand(query, connection);
-            dataAdapter.SelectCommand = command;
+            if (dataAdapter is MySqlDataAdapterWrapper wrapper)
+                wrapper.SelectCommand = command;
             await Task.Run(() => dataAdapter.Fill(dataTable)).ConfigureAwait(false);
-            var itemRow = dataTable.NewRow();
-            itemRow[0] = defaultText;
-            dataTable.Rows.InsertAt(itemRow, 0);
 
-            if (comboBox.InvokeRequired)
+            void SetComboBox()
             {
-                comboBox.Invoke(() =>
+                if (dataTable.Rows.Count == 0 || !Equals(dataTable.Rows[0][0], defaultText))
                 {
-                    comboBox.DataSource = dataTable;
-                    comboBox.DisplayMember = displayMember;
-                    comboBox.ValueMember = valueMember;
-                });
-            }
-            else
-            {
+                    var row = dataTable.NewRow();
+                    row[0] = defaultText;
+                    dataTable.Rows.InsertAt(row, 0);
+                }
+
                 comboBox.DataSource = dataTable;
                 comboBox.DisplayMember = displayMember;
                 comboBox.ValueMember = valueMember;
             }
+
+            if (comboBox.InvokeRequired)
+                comboBox.Invoke((Action)SetComboBox);
+            else
+                SetComboBox();
         }
         finally
         {
@@ -197,9 +219,9 @@ public static class MainFormComboBoxDataHelper
         }
     }
 
-    private static Task InvokeAsync(this Control control, Action action)
+    private static Task InvokeAsync(this Control control, Action action, CancellationToken cancellationToken)
     {
-        return Task.Factory.StartNew(() => control.Invoke(action), CancellationToken.None, TaskCreationOptions.None,
+        return Task.Factory.StartNew(() => control.Invoke(action), cancellationToken, TaskCreationOptions.None,
             TaskScheduler.Default);
     }
 }

@@ -4,6 +4,23 @@ using System.Drawing.Printing;
 
 namespace MTM_WIP_Application.Core;
 
+/// <summary>
+/// 
+/// Testing Passed: 05/31/2025
+/// 
+/// DgvPrinter is a utility class for printing the contents of a DataGridView in a Windows Forms application.
+/// 
+/// Features:
+/// - Allows customization of column widths and text alignment via SetColumnLayout.
+/// - Handles printing of column headers and rows, including pagination for multi-page output.
+/// - Skips invisible columns and the "new row" placeholder.
+/// - Uses the DataGridView's font and row height for consistent appearance.
+/// - Includes robust error handling and logging using AppLogger and ErrorLogDao.
+/// 
+/// Usage:
+/// 1. Optionally call SetColumnLayout for custom column settings.
+/// 2. Call Print with the target DataGridView.
+/// </summary>
 public class DgvPrinter
 {
     private DataGridView? _dgv;

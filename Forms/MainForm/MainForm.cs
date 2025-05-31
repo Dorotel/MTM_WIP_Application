@@ -292,7 +292,8 @@ public partial class MainForm : Form
 
             foreach (var (adapter, table, comboBox, query, display, value, placeholder) in comboBoxSets)
                 await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                    query, connection, adapter, table, comboBox, display, value, placeholder
+                    query, connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()), table, comboBox, display,
+                    value, placeholder
                 );
             AppLogger.Log("Inventory tab ComboBoxes loaded.");
         }

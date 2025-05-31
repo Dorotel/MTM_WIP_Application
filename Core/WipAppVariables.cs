@@ -41,7 +41,7 @@ internal static class WipAppVariables
     public static string? RemoveUser; // User performing removal
 
     // Theme font size (added from solution context)
-    public static int ThemeFontSize = 9;
+    public static float ThemeFontSize = 9f;
     public static string? TransferType; // Type of transfer
 
     // Current user (resolved at startup)
@@ -66,6 +66,6 @@ internal static class WipAppVariables
     // Operation used for removal, with internal setter
     public static string? RemoveOperation { get; internal set; }
 
-// Connection string for database access
+    // Connection string for database access
     public static string ConnectionString = SqlVariables.GetConnectionString(null, null, null, null);
 }

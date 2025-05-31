@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Color = System.Drawing.Color;
 using MySql.Data.MySqlClient;
+using IDataAdapter = MTM_WIP_Application.Data.IDataAdapter;
 
 namespace MTM_WIP_Application.Forms.AdvancedInventoryEntryForm;
 
@@ -121,22 +122,28 @@ public partial class AdvancedInventoryEntryForm : Form
         {
             await using var connection = new MySqlConnection(WipAppVariables.ConnectionString);
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM part_ids", connection, new MySqlDataAdapter(), new DataTable(),
+                "SELECT * FROM part_ids", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                new DataTable(),
                 AdvancedEntry_Single_ComboBox_Part, "Item Number", "ID", "[ Enter Part ID ]");
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM `operation_numbers`", connection, new MySqlDataAdapter(), new DataTable(),
+                "SELECT * FROM `operation_numbers`", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                new DataTable(),
                 AdvancedEntry_Single_ComboBox_Op, "Operation", "Operation", "[ Enter Op # ]");
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM `locations`", connection, new MySqlDataAdapter(), new DataTable(),
+                "SELECT * FROM `locations`", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                new DataTable(),
                 AdvancedEntry_Single_ComboBox_Loc, "Location", "Location", "[ Enter Location ]");
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM part_ids", connection, new MySqlDataAdapter(), new DataTable(),
+                "SELECT * FROM part_ids", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                new DataTable(),
                 AdvancedEntry_MultiLoc_ComboBox_Part, "Item Number", "ID", "[ Enter Part ID ]");
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM `operation_numbers`", connection, new MySqlDataAdapter(), new DataTable(),
+                "SELECT * FROM `operation_numbers`", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                new DataTable(),
                 AdvancedEntry_MultiLoc_ComboBox_Op, "Operation", "Operation", "[ Enter Op # ]");
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM `locations`", connection, new MySqlDataAdapter(), new DataTable(),
+                "SELECT * FROM `locations`", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                new DataTable(),
                 AdvancedEntry_MultiLoc_ComboBox_Loc, "Location", "Location", "[ Enter Location ]");
             AppLogger.Log("AdvancedInventoryEntryForm ComboBoxes loaded.");
         }
