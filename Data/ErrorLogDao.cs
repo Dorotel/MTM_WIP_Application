@@ -14,18 +14,19 @@ internal static class ErrorLogDao
 {
     // --- Query Methods ---
 
-    internal static async Task<List<(string Method, string Error)>> GetUniqueErrorsAsync(bool useAsync = false)
+    internal static async Task<List<(string MethodName, string ErrorMessage)>> GetUniqueErrorsAsync(
+        bool useAsync = false)
     {
-        var uniqueErrors = new List<(string Method, string Error)>();
+        var uniqueErrors = new List<(string MethodName, string ErrorMessage)>();
         try
         {
             using var reader = useAsync
-                ? await SqlHelper.ExecuteReader("SELECT DISTINCT `Method`, `Error` FROM `wipapp_errorlog`",
+                ? await SqlHelper.ExecuteReader("SELECT DISTINCT `MethodName`, `ErrorMessage` FROM `log_error`",
                     useAsync: true)
-                : SqlHelper.ExecuteReader("SELECT DISTINCT `Method`, `Error` FROM `wipapp_errorlog`").Result;
+                : SqlHelper.ExecuteReader("SELECT DISTINCT `MethodName`, `ErrorMessage` FROM `log_error`").Result;
 
             while (reader.Read())
-                uniqueErrors.Add((reader.GetString("Method"), reader.GetString("Error")));
+                uniqueErrors.Add((reader.GetString("MethodName"), reader.GetString("ErrorMessage")));
 
             AppLogger.Log("GetUniqueErrors executed successfully.");
         }
@@ -40,20 +41,20 @@ internal static class ErrorLogDao
 
     internal static async Task<DataTable> GetAllErrorsAsync(bool useAsync = false)
     {
-        return await GetErrorsByQueryAsync("SELECT * FROM `wipapp_errorlog` ORDER BY `DateTime` DESC", null, useAsync);
+        return await GetErrorsByQueryAsync("SELECT * FROM `log_error` ORDER BY `ErrorTime` DESC", null, useAsync);
     }
 
     internal static async Task<DataTable> GetErrorsByUserAsync(string user, bool useAsync = false)
     {
         return await GetErrorsByQueryAsync(
-            "SELECT * FROM `wipapp_errorlog` WHERE `User` = @User ORDER BY `DateTime` DESC",
+            "SELECT * FROM `log_error` WHERE `User` = @User ORDER BY `ErrorTime` DESC",
             new Dictionary<string, object> { ["@User"] = user }, useAsync);
     }
 
     internal static async Task<DataTable> GetErrorsByDateRangeAsync(DateTime start, DateTime end, bool useAsync = false)
     {
         return await GetErrorsByQueryAsync(
-            "SELECT * FROM `wipapp_errorlog` WHERE `DateTime` BETWEEN @Start AND @End ORDER BY `DateTime` DESC",
+            "SELECT * FROM `log_error` WHERE `ErrorTime` BETWEEN @Start AND @End ORDER BY `ErrorTime` DESC",
             new Dictionary<string, object> { ["@Start"] = start, ["@End"] = end }, useAsync);
     }
 
@@ -78,13 +79,13 @@ internal static class ErrorLogDao
 
     internal static async Task DeleteErrorByIdAsync(int id, bool useAsync = false)
     {
-        await ExecuteNonQueryAsync("DELETE FROM `wipapp_errorlog` WHERE `ID` = @Id",
+        await ExecuteNonQueryAsync("DELETE FROM `log_error` WHERE `ID` = @Id",
             new Dictionary<string, object> { ["@Id"] = id }, useAsync);
     }
 
     internal static async Task DeleteAllErrorsAsync(bool useAsync = false)
     {
-        await ExecuteNonQueryAsync("DELETE FROM `wipapp_errorlog`", null, useAsync);
+        await ExecuteNonQueryAsync("DELETE FROM `log_error`", null, useAsync);
     }
 
     private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object>? parameters, bool useAsync)
@@ -146,7 +147,16 @@ internal static class ErrorLogDao
             }
             else
             {
-                await LogErrorToDatabaseAsync(ex.Message, callerName, controlName, useAsync);
+                await LogErrorToDatabaseAsync(
+                    "Critical",
+                    ex.GetType().ToString(),
+                    ex.Message,
+                    ex.StackTrace,
+                    "",
+                    callerName,
+                    controlName,
+                    useAsync
+                );
             }
         }
         catch (Exception innerEx)
@@ -193,7 +203,16 @@ internal static class ErrorLogDao
 
             AppLogger.LogApplicationError(ex);
 
-            await LogErrorToDatabaseAsync(ex.Message, callerName, controlName, useAsync);
+            await LogErrorToDatabaseAsync(
+                isCritical ? "Critical" : "Error",
+                ex.GetType().ToString(),
+                ex.Message,
+                ex.StackTrace,
+                "",
+                callerName,
+                controlName,
+                useAsync
+            );
 
             if (isCritical)
             {
@@ -215,22 +234,41 @@ internal static class ErrorLogDao
         }
     }
 
-    private static async Task LogErrorToDatabaseAsync(string error, string method, string control, bool useAsync)
+    private static async Task LogErrorToDatabaseAsync(
+        string severity,
+        string errorType,
+        string errorMessage,
+        string? stackTrace,
+        string moduleName,
+        string methodName,
+        string? additionalInfo,
+        bool useAsync)
     {
         var parameters = new Dictionary<string, object>
         {
-            ["@Method"] = method,
-            ["@Error"] = error,
             ["@User"] = WipAppVariables.User,
-            ["@DateTime"] = DateTime.Now,
-            ["@Control"] = control
+            ["@Severity"] = severity,
+            ["@ErrorType"] = errorType,
+            ["@ErrorMessage"] = errorMessage,
+            ["@StackTrace"] = stackTrace ?? "",
+            ["@ModuleName"] = moduleName ?? "",
+            ["@MethodName"] = methodName ?? "",
+            ["@AdditionalInfo"] = additionalInfo ?? "",
+            ["@MachineName"] = Environment.MachineName,
+            ["@OSVersion"] = Environment.OSVersion.ToString(),
+            ["@AppVersion"] = Application.ProductVersion,
+            ["@ErrorTime"] = DateTime.Now
         };
-        var sql = "INSERT INTO `wipapp_errorlog` (`Method`, `Error`, `User`, `DateTime`, `Control`) " +
-                  "VALUES (@Method, @Error, @User, @DateTime, @Control)";
+
+        var sql = @"
+            INSERT INTO `log_error` 
+            (`User`, `Severity`, `ErrorType`, `ErrorMessage`, `StackTrace`, `ModuleName`, `MethodName`, `AdditionalInfo`, `MachineName`, `OSVersion`, `AppVersion`, `ErrorTime`) 
+            VALUES 
+            (@User, @Severity, @ErrorType, @ErrorMessage, @StackTrace, @ModuleName, @MethodName, @AdditionalInfo, @MachineName, @OSVersion, @AppVersion, @ErrorTime)";
         await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
     }
 
-    internal static List<(string Method, string Error)> GetUniqueErrors()
+    internal static List<(string MethodName, string ErrorMessage)> GetUniqueErrors()
     {
         return GetUniqueErrorsAsync(false).GetAwaiter().GetResult();
     }
@@ -239,7 +277,6 @@ internal static class ErrorLogDao
         [System.Runtime.CompilerServices.CallerMemberName]
         string methodName = "")
     {
-        // Use application error log for general exceptions
         AppLogger.LogApplicationError(ex);
         AppLogger.Log($"Error in {methodName}: {ex.Message}");
     }

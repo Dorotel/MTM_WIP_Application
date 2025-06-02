@@ -11,7 +11,7 @@ internal static class OperationDao
     {
         var parameters = new Dictionary<string, object> { ["@operationNumber"] = operationNumber };
         await ExecuteNonQueryAsync(
-            "DELETE FROM `operation_numbers` WHERE `Operation` = @operationNumber",
+            "DELETE FROM `md_operation_numbers` WHERE `Operation` = @operationNumber",
             parameters, useAsync);
     }
 
@@ -36,14 +36,14 @@ internal static class OperationDao
     // --- Get All ---
     internal static async Task<DataTable> GetAllOperations(bool useAsync = false)
     {
-        return await GetOperationByQueryAsync("SELECT * FROM `operation_numbers`", null, useAsync);
+        return await GetOperationByQueryAsync("SELECT * FROM `md_operation_numbers`", null, useAsync);
     }
 
     // --- Get By Number ---
     internal static async Task<DataRow?> GetOperationByNumber(string operationNumber, bool useAsync = false)
     {
         var table = await GetOperationByQueryAsync(
-            "SELECT * FROM `operation_numbers` WHERE `Operation` = @operationNumber",
+            "SELECT * FROM `md_operation_numbers` WHERE `Operation` = @operationNumber",
             new Dictionary<string, object> { ["@operationNumber"] = operationNumber }, useAsync);
         return table.Rows.Count > 0 ? table.Rows[0] : null;
     }
@@ -81,7 +81,7 @@ internal static class OperationDao
             ["@user"] = user
         };
         await ExecuteNonQueryAsync(
-            "INSERT INTO `operation_numbers` (`Operation`, `ID`, `Issued By`) VALUES (@operationNumber, NULL, @user);",
+            "INSERT INTO `md_operation_numbers` (`Operation`, `Issued By`) VALUES (@operationNumber, @user);",
             parameters, useAsync);
     }
 
@@ -90,7 +90,7 @@ internal static class OperationDao
     {
         var parameters = new Dictionary<string, object> { ["@operationNumber"] = operationNumber };
         var result = await SqlHelper.ExecuteScalar(
-            "SELECT COUNT(*) FROM `operation_numbers` WHERE `Operation` = @operationNumber",
+            "SELECT COUNT(*) FROM `md_operation_numbers` WHERE `Operation` = @operationNumber",
             parameters, useAsync: useAsync);
         return Convert.ToInt32(result) > 0;
     }
@@ -106,7 +106,7 @@ internal static class OperationDao
             ["@user"] = user
         };
         await ExecuteNonQueryAsync(
-            "UPDATE `operation_numbers` SET `Operation` = @newOperationNumber, `Issued By` = @user WHERE `Operation` = @operationNumber",
+            "UPDATE `md_operation_numbers` SET `Operation` = @newOperationNumber, `Issued By` = @user WHERE `Operation` = @operationNumber",
             parameters, useAsync);
     }
 }

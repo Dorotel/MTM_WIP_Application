@@ -11,7 +11,7 @@ internal static class PartTypeDao
     {
         var parameters = new Dictionary<string, object> { ["@partType"] = partType };
         await ExecuteNonQueryAsync(
-            "DELETE FROM `item_types` WHERE `Type` = @partType",
+            "DELETE FROM `md_item_types` WHERE `Type` = @partType",
             parameters, useAsync);
     }
 
@@ -36,14 +36,14 @@ internal static class PartTypeDao
     // --- Get All ---
     internal static async Task<DataTable> GetAllPartTypes(bool useAsync = false)
     {
-        return await GetPartTypeByQueryAsync("SELECT * FROM `item_types`", null, useAsync);
+        return await GetPartTypeByQueryAsync("SELECT * FROM `md_item_types`", null, useAsync);
     }
 
     // --- Get By Name ---
     internal static async Task<DataRow?> GetPartTypeByName(string partType, bool useAsync = false)
     {
         var table = await GetPartTypeByQueryAsync(
-            "SELECT * FROM `item_types` WHERE `Type` = @partType",
+            "SELECT * FROM `md_item_types` WHERE `Type` = @partType",
             new Dictionary<string, object> { ["@partType"] = partType }, useAsync);
         return table.Rows.Count > 0 ? table.Rows[0] : null;
     }
@@ -81,7 +81,7 @@ internal static class PartTypeDao
             ["@user"] = user
         };
         await ExecuteNonQueryAsync(
-            "INSERT INTO `item_types` (`Type`, `ID`, `Issued By`) VALUES (@partType, NULL, @user);",
+            "INSERT INTO `md_item_types` (`Type`, `Issued By`) VALUES (@partType, @user);",
             parameters, useAsync);
     }
 
@@ -90,7 +90,7 @@ internal static class PartTypeDao
     {
         var parameters = new Dictionary<string, object> { ["@partType"] = partType };
         var result = await SqlHelper.ExecuteScalar(
-            "SELECT COUNT(*) FROM `item_types` WHERE `Type` = @partType",
+            "SELECT COUNT(*) FROM `md_item_types` WHERE `Type` = @partType",
             parameters, useAsync: useAsync);
         return Convert.ToInt32(result) > 0;
     }
@@ -105,7 +105,7 @@ internal static class PartTypeDao
             ["@user"] = user
         };
         await ExecuteNonQueryAsync(
-            "UPDATE `item_types` SET `Type` = @newType, `Issued By` = @user WHERE `Type` = @partType",
+            "UPDATE `md_item_types` SET `Type` = @newType, `Issued By` = @user WHERE `Type` = @partType",
             parameters, useAsync);
     }
 }

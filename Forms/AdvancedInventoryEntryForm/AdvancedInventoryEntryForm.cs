@@ -57,9 +57,8 @@ public partial class AdvancedInventoryEntryForm : Form
 
             ValidateQtyTextBox(AdvancedEntry_Single_TextBox_Qty, "[ Enter Valid Quantity ]");
             ValidateQtyTextBox(AdvancedEntry_Single_TextBox_Count, "[ How Many Transactions ]");
-            ValidateQtyTextBox(AdvancedEntry_MultiLoc_TextBox_Qty, "[ Enter Valid Quantity ]"); // <-- Add this line
+            ValidateQtyTextBox(AdvancedEntry_MultiLoc_TextBox_Qty, "[ Enter Valid Quantity ]");
             AdvancedEntry_TabControl.SelectedIndexChanged += AdvancedEntry_TabControl_SelectedIndexChanged;
-
 
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
@@ -77,7 +76,6 @@ public partial class AdvancedInventoryEntryForm : Form
 
     private void AdvancedEntry_TabControl_SelectedIndexChanged(object? sender, EventArgs e)
     {
-        // Set form size and focus based on selected tab
         switch (AdvancedEntry_TabControl.SelectedIndex)
         {
             case 0: // Tab 1
@@ -122,27 +120,27 @@ public partial class AdvancedInventoryEntryForm : Form
         {
             await using var connection = new MySqlConnection(WipAppVariables.ConnectionString);
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM part_ids", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                "SELECT * FROM md_part_ids", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
                 new DataTable(),
                 AdvancedEntry_Single_ComboBox_Part, "Item Number", "ID", "[ Enter Part ID ]");
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM `operation_numbers`", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                "SELECT * FROM md_operation_numbers", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
                 new DataTable(),
                 AdvancedEntry_Single_ComboBox_Op, "Operation", "Operation", "[ Enter Op # ]");
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM `locations`", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                "SELECT * FROM md_locations", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
                 new DataTable(),
                 AdvancedEntry_Single_ComboBox_Loc, "Location", "Location", "[ Enter Location ]");
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM part_ids", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                "SELECT * FROM md_part_ids", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
                 new DataTable(),
                 AdvancedEntry_MultiLoc_ComboBox_Part, "Item Number", "ID", "[ Enter Part ID ]");
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM `operation_numbers`", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                "SELECT * FROM md_operation_numbers", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
                 new DataTable(),
                 AdvancedEntry_MultiLoc_ComboBox_Op, "Operation", "Operation", "[ Enter Op # ]");
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM `locations`", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                "SELECT * FROM md_locations", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
                 new DataTable(),
                 AdvancedEntry_MultiLoc_ComboBox_Loc, "Location", "Location", "[ Enter Location ]");
             AppLogger.Log("AdvancedInventoryEntryForm ComboBoxes loaded.");

@@ -7,18 +7,18 @@ using IDataAdapter = MTM_WIP_Application.Data.IDataAdapter;
 namespace MTM_WIP_Application.Forms.MainForm.Classes;
 
 /// <summary>
-/// 
+///
 /// Testing Passed: 05/31/2025
-/// 
+///
 /// Contains unit tests for the DgvDesigner class, which provides utilities for applying visual themes to Windows Forms and DataGridView controls.
-/// 
+///
 /// Features Tested:
 /// - Recursive application of theme colors, fonts, and styles to forms and all child controls.
 /// - Control-specific theming for buttons, tab controls, text boxes, and labels.
 /// - Customization of DataGridView appearance, including background, headers, selection, and column sizing.
 /// - Helper methods for theme information, color retrieval, and testing support.
 /// - Integration with WipAppVariables for theme selection.
-/// 
+///
 /// Usage:
 /// 1. Verifies ApplyTheme applies the current global theme to forms and controls.
 /// 2. Tests SizeDataGrid for optimizing DataGridView column sizing.
@@ -142,36 +142,36 @@ public static class MainFormComboBoxDataHelper
         DataTable transferTabPartCbDataTable,
         ComboBox transferTabComboBoxPart)
     {
-        await FillComboBoxAsync("SELECT * FROM part_ids", connection, inventoryTabPartCbDataAdapter,
+        await FillComboBoxAsync("SELECT * FROM md_part_ids", connection, inventoryTabPartCbDataAdapter,
                 inventoryTabPartCbDataTable, inventoryTabComboBoxPart, "Item Number", "ID", "[ Enter Part ID ]")
             .ConfigureAwait(false);
 
-        await FillComboBoxAsync("SELECT * FROM `operation_numbers`", connection, inventoryTabOpCbDataAdapter,
+        await FillComboBoxAsync("SELECT * FROM md_operation_numbers", connection, inventoryTabOpCbDataAdapter,
                 inventoryTabOpCbDataTable, inventoryTabComboBoxOp, "Operation", "Operation", "[ Enter Op # ]")
             .ConfigureAwait(false);
 
-        await FillComboBoxAsync("SELECT * FROM `locations`", connection, inventoryTabLocationCbDataAdapter,
+        await FillComboBoxAsync("SELECT * FROM md_locations", connection, inventoryTabLocationCbDataAdapter,
                 inventoryTabLocationCbDataTable, inventoryTabComboBoxLoc, "Location", "Location", "[ Enter Location ]")
             .ConfigureAwait(false);
 
-        await FillComboBoxAsync("SELECT * FROM part_ids", connection, removeTabPartCbDataAdapter,
+        await FillComboBoxAsync("SELECT * FROM md_part_ids", connection, removeTabPartCbDataAdapter,
                 removeTabPartCbDataTable, removeTabComboBoxPart, "Item Number", "Item Number", "[ Enter Part ID ]")
             .ConfigureAwait(false);
 
-        await FillComboBoxAsync("SELECT * FROM `operation_numbers`", connection, removeTabOpCbDataAdapter,
+        await FillComboBoxAsync("SELECT * FROM md_operation_numbers", connection, removeTabOpCbDataAdapter,
                 removeTabComboBoxOpDataTable, removeTabComboBoxOp, "Operation", "Operation", "[ Enter Op # ]")
             .ConfigureAwait(false);
 
-        await FillComboBoxAsync("SELECT * FROM `item_types`", connection, removeTabCBoxSearchByTypeDataAdapter,
+        await FillComboBoxAsync("SELECT * FROM md_item_types", connection, removeTabCBoxSearchByTypeDataAdapter,
                 removeTabComboBoxSearchByTypeDataTable, removeTabCBoxShowAll, "Type", "Type", "[ Select Type ]")
             .ConfigureAwait(false);
 
-        await FillComboBoxAsync("SELECT * FROM `locations`", connection, transferTabLocationCbDataAdapter,
+        await FillComboBoxAsync("SELECT * FROM md_locations", connection, transferTabLocationCbDataAdapter,
                 transferTabLocationCbDataTable, transferTabComboBoxLoc, "Location", "Location",
                 "[ Enter New Location ]")
             .ConfigureAwait(false);
 
-        await FillComboBoxAsync("SELECT * FROM part_ids", connection, transferTabPartCbDataAdapter,
+        await FillComboBoxAsync("SELECT * FROM md_part_ids", connection, transferTabPartCbDataAdapter,
                 transferTabPartCbDataTable, transferTabComboBoxPart, "Item Number", "Item Number", "[ Enter Part ID ]")
             .ConfigureAwait(false);
     }
@@ -199,7 +199,7 @@ public static class MainFormComboBoxDataHelper
                 if (dataTable.Rows.Count == 0 || !Equals(dataTable.Rows[0][0], defaultText))
                 {
                     var row = dataTable.NewRow();
-                    row[0] = defaultText;
+                    row[1] = defaultText;
                     dataTable.Rows.InsertAt(row, 0);
                 }
 

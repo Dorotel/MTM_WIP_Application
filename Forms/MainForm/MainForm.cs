@@ -283,11 +283,11 @@ public partial class MainForm : Form
                     Value, string Placeholder)[]
                     {
                         (new MySqlDataAdapter(), new DataTable(), MainForm_Inventory_ComboBox_Part,
-                            "SELECT * FROM part_ids", "Item Number", "ID", "[ Enter Part ID ]"),
+                            "SELECT * FROM md_part_ids", "Item Number", "ID", "[ Enter Part ID ]"),
                         (new MySqlDataAdapter(), new DataTable(), MainForm_Inventory_ComboBox_Op,
-                            "SELECT * FROM `operation_numbers`", "Operation", "Operation", "[ Enter Op # ]"),
+                            "SELECT * FROM md_operation_numbers", "Operation", "Operation", "[ Enter Op # ]"),
                         (new MySqlDataAdapter(), new DataTable(), MainForm_Inventory_ComboBox_Loc,
-                            "SELECT * FROM `locations`", "Location", "Location", "[ Enter Location ]")
+                            "SELECT * FROM md_locations", "Location", "Location", "[ Enter Location ]")
                     };
 
             foreach (var (adapter, table, comboBox, query, display, value, placeholder) in comboBoxSets)

@@ -68,4 +68,5 @@ internal static class WipAppVariables
 
     // Connection string for database access
     public static string ConnectionString = SqlVariables.GetConnectionString(null, null, null, null);
+    public static string? BatchNumber { get; set; }
 }

@@ -21,7 +21,7 @@ public static class SqlVariables
         try
         {
             server ??= "localhost"; // "172.16.1.104"
-            database ??= "mtm database";
+            database ??= "mtm_wip_application";
             uid ??= WipAppVariables.User != null ? WipAppVariables.User.ToUpper() : "";
             password ??= "";
 

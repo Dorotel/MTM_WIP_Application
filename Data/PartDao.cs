@@ -11,7 +11,7 @@ internal static class PartDao
     {
         var parameters = new Dictionary<string, object> { ["@partNumber"] = partNumber };
         await ExecuteNonQueryAsync(
-            "DELETE FROM `part_ids` WHERE `Item Number` = @partNumber",
+            "DELETE FROM `md_part_ids` WHERE `Item Number` = @partNumber",
             parameters, useAsync);
     }
 
@@ -36,14 +36,14 @@ internal static class PartDao
     // --- Get All ---
     internal static async Task<DataTable> GetAllParts(bool useAsync = false)
     {
-        return await GetPartByQueryAsync("SELECT * FROM `part_ids`", null, useAsync);
+        return await GetPartByQueryAsync("SELECT * FROM `md_part_ids`", null, useAsync);
     }
 
     // --- Get By Number ---
     internal static async Task<DataRow?> GetPartByNumber(string partNumber, bool useAsync = false)
     {
         var table = await GetPartByQueryAsync(
-            "SELECT * FROM `part_ids` WHERE `Item Number` = @partNumber",
+            "SELECT * FROM `md_part_ids` WHERE `Item Number` = @partNumber",
             new Dictionary<string, object> { ["@partNumber"] = partNumber }, useAsync);
         return table.Rows.Count > 0 ? table.Rows[0] : null;
     }
@@ -82,7 +82,7 @@ internal static class PartDao
             ["@partType"] = partType
         };
         await ExecuteNonQueryAsync(
-            "INSERT INTO `part_ids` (`Item Number`, `ID`, `Issued By`, `Type`) VALUES (@partNumber, NULL, @user, @partType);",
+            "INSERT INTO `md_part_ids` (`Item Number`, `Issued By`, `Type`) VALUES (@partNumber, @user, @partType);",
             parameters, useAsync);
     }
 
@@ -91,7 +91,7 @@ internal static class PartDao
     {
         var parameters = new Dictionary<string, object> { ["@partNumber"] = partNumber };
         var result = await SqlHelper.ExecuteScalar(
-            "SELECT COUNT(*) FROM `part_ids` WHERE `Item Number` = @partNumber",
+            "SELECT COUNT(*) FROM `md_part_ids` WHERE `Item Number` = @partNumber",
             parameters, useAsync: useAsync);
         return Convert.ToInt32(result) > 0;
     }
@@ -106,7 +106,7 @@ internal static class PartDao
             ["@user"] = user
         };
         await ExecuteNonQueryAsync(
-            "UPDATE `part_ids` SET `Type` = @partType, `Issued By` = @user WHERE `Item Number` = @partNumber",
+            "UPDATE `md_part_ids` SET `Type` = @partType, `Issued By` = @user WHERE `Item Number` = @partNumber",
             parameters, useAsync);
     }
 }

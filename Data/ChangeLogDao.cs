@@ -6,6 +6,8 @@ namespace MTM_WIP_Application.Data;
 
 internal static class ChangeLogDao
 {
+    // --- ChangeLog Table Operations (now log_changelog) ---
+
     internal static async Task DeleteChangeLogEntryAsync(string version, bool useAsync = false)
     {
         try
@@ -15,7 +17,7 @@ internal static class ChangeLogDao
                 ["@Version"] = version
             };
             await SqlHelper.ExecuteNonQuery(
-                "DELETE FROM `changelog` WHERE `Version` = @Version",
+                "DELETE FROM `log_changelog` WHERE `Version` = @Version",
                 parameters, useAsync: useAsync);
         }
         catch (Exception ex)
@@ -29,7 +31,7 @@ internal static class ChangeLogDao
     {
         try
         {
-            return await SqlHelper.ExecuteDataTable("SELECT * FROM `changelog` ORDER BY `Version` DESC",
+            return await SqlHelper.ExecuteDataTable("SELECT * FROM `log_changelog` ORDER BY `Version` DESC",
                 useAsync: useAsync);
         }
         catch (Exception ex)
@@ -49,7 +51,7 @@ internal static class ChangeLogDao
                 ["@Version"] = version
             };
             var table = await SqlHelper.ExecuteDataTable(
-                "SELECT * FROM `changelog` WHERE `Version` = @Version",
+                "SELECT * FROM `log_changelog` WHERE `Version` = @Version",
                 parameters, useAsync: useAsync);
             return table.Rows.Count > 0 ? table.Rows[0] : null;
         }
@@ -60,6 +62,83 @@ internal static class ChangeLogDao
             return null;
         }
     }
+
+    internal static async Task InsertChangeLogEntryAsync(string version, string notes, bool useAsync = false)
+    {
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["@Version"] = version,
+                ["@Notes"] = notes
+            };
+            await SqlHelper.ExecuteNonQuery(
+                "INSERT INTO `log_changelog` (`Version`, `Notes`) VALUES (@Version, @Notes)",
+                parameters, useAsync: useAsync);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    internal static async Task<List<string>> Primary_ChangeLog_Get_AllVersionsAsync(bool useAsync = false)
+    {
+        var versions = new List<string>();
+        try
+        {
+            using var reader = useAsync
+                ? await SqlHelper.ExecuteReader("SELECT `Version` FROM `log_changelog` ORDER BY `Version` DESC",
+                    useAsync: true)
+                : SqlHelper.ExecuteReader("SELECT `Version` FROM `log_changelog` ORDER BY `Version` DESC").Result;
+            while (reader.Read()) versions.Add(reader.GetString("Version"));
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+
+        return versions;
+    }
+
+    internal static async Task<string> Primary_ChangeLog_Get_VersionNotesAsync(string? version = null,
+        bool useAsync = false)
+    {
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["@Version"] = version ?? string.Empty
+            };
+            var result = await SqlHelper.ExecuteScalar(
+                "SELECT `Notes` FROM `log_changelog` WHERE `Version` = @Version",
+                parameters, useAsync: useAsync);
+            return result?.ToString() ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return string.Empty;
+        }
+    }
+
+    internal static async Task Primary_ChangeLog_Set_VersionNotesAsync(string rtfNotes, string version,
+        bool useAsync = false)
+    {
+        var parameters = new Dictionary<string, object>
+        {
+            ["@Notes"] = rtfNotes,
+            ["@Version"] = version
+        };
+        await SqlHelper.ExecuteNonQuery(
+            "UPDATE `log_changelog` SET `Notes` = @Notes WHERE `Version` = @Version",
+            parameters, useAsync: useAsync);
+    }
+
+    // --- User Table Operations (unchanged) ---
 
     internal static async Task<string> GetWipServerAddressAsync(string user, bool useAsync = false)
     {
@@ -101,46 +180,6 @@ internal static class ChangeLogDao
             await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
             return string.Empty;
         }
-    }
-
-    internal static async Task InsertChangeLogEntryAsync(string version, string notes, bool useAsync = false)
-    {
-        try
-        {
-            var parameters = new Dictionary<string, object>
-            {
-                ["@Version"] = version,
-                ["@Notes"] = notes
-            };
-            await SqlHelper.ExecuteNonQuery(
-                "INSERT INTO `changelog` (`Version`, `Notes`) VALUES (@Version, @Notes)",
-                parameters, useAsync: useAsync);
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
-        }
-    }
-
-    internal static async Task<List<string>> Primary_ChangeLog_Get_AllVersionsAsync(bool useAsync = false)
-    {
-        var versions = new List<string>();
-        try
-        {
-            using var reader = useAsync
-                ? await SqlHelper.ExecuteReader("SELECT `Version` FROM `changelog` ORDER BY `Version` DESC",
-                    useAsync: true)
-                : SqlHelper.ExecuteReader("SELECT `Version` FROM `changelog` ORDER BY `Version` DESC").Result;
-            while (reader.Read()) versions.Add(reader.GetString("Version"));
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
-        }
-
-        return versions;
     }
 
     internal static async Task<string> Primary_ChangeLog_Get_LastShownAsync(bool useAsync = false)
@@ -205,29 +244,6 @@ internal static class ChangeLogDao
             return string.Empty;
         }
     }
-
-    internal static async Task<string> Primary_ChangeLog_Get_VersionNotesAsync(string? version = null,
-        bool useAsync = false)
-    {
-        try
-        {
-            var parameters = new Dictionary<string, object>
-            {
-                ["@Version"] = version ?? string.Empty
-            };
-            var result = await SqlHelper.ExecuteScalar(
-                "SELECT `Notes` FROM `changelog` WHERE `Version` = @Version",
-                parameters, useAsync: useAsync);
-            return result?.ToString() ?? string.Empty;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
-            return string.Empty;
-        }
-    }
-
 
     internal static async Task<string> Primary_ChangeLog_Get_Visual_PasswordAsync(bool useAsync = false)
     {
@@ -342,20 +358,6 @@ internal static class ChangeLogDao
             "UPDATE `users` SET `Theme_Name` = @Theme_Name WHERE `User` = @User",
             parameters, useAsync: useAsync);
     }
-
-    internal static async Task Primary_ChangeLog_Set_VersionNotesAsync(string rtfNotes, string version,
-        bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object>
-        {
-            ["@Notes"] = rtfNotes,
-            ["@Version"] = version
-        };
-        await SqlHelper.ExecuteNonQuery(
-            "UPDATE `changelog` SET `Notes` = @Notes WHERE `Version` = @Version",
-            parameters, useAsync: useAsync);
-    }
-
 
     internal static async Task Primary_ChangeLog_Set_Visual_PasswordAsync(string value, string user,
         bool useAsync = false)

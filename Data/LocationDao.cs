@@ -11,7 +11,7 @@ internal static class LocationDao
     {
         var parameters = new Dictionary<string, object> { ["@location"] = location };
         await ExecuteNonQueryAsync(
-            "DELETE FROM `locations` WHERE `Location` = @location",
+            "DELETE FROM `md_locations` WHERE `Location` = @location",
             parameters, useAsync);
     }
 
@@ -36,14 +36,14 @@ internal static class LocationDao
     // --- Get All ---
     internal static async Task<DataTable> GetAllLocations(bool useAsync = false)
     {
-        return await GetLocationByQueryAsync("SELECT * FROM `locations`", null, useAsync);
+        return await GetLocationByQueryAsync("SELECT * FROM `md_locations`", null, useAsync);
     }
 
     // --- Get By Name ---
     internal static async Task<DataRow?> GetLocationByName(string location, bool useAsync = false)
     {
         var table = await GetLocationByQueryAsync(
-            "SELECT * FROM `locations` WHERE `Location` = @location",
+            "SELECT * FROM `md_locations` WHERE `Location` = @location",
             new Dictionary<string, object> { ["@location"] = location }, useAsync);
         return table.Rows.Count > 0 ? table.Rows[0] : null;
     }
@@ -81,7 +81,7 @@ internal static class LocationDao
             ["@user"] = user
         };
         await ExecuteNonQueryAsync(
-            "INSERT INTO `locations` (`Location`, `ID`, `Issued By`) VALUES (@location, NULL, @user);",
+            "INSERT INTO `md_locations` (`Location`, `Issued By`) VALUES (@location, @user);",
             parameters, useAsync);
     }
 
@@ -90,7 +90,7 @@ internal static class LocationDao
     {
         var parameters = new Dictionary<string, object> { ["@location"] = location };
         var result = await SqlHelper.ExecuteScalar(
-            "SELECT COUNT(*) FROM `locations` WHERE `Location` = @location",
+            "SELECT COUNT(*) FROM `md_locations` WHERE `Location` = @location",
             parameters, useAsync: useAsync);
         return Convert.ToInt32(result) > 0;
     }
@@ -105,7 +105,7 @@ internal static class LocationDao
             ["@user"] = user
         };
         await ExecuteNonQueryAsync(
-            "UPDATE `locations` SET `Location` = @newLocation, `Issued By` = @user WHERE `Location` = @location",
+            "UPDATE `md_locations` SET `Location` = @newLocation, `Issued By` = @user WHERE `Location` = @location",
             parameters, useAsync);
     }
 }

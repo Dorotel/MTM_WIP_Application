@@ -4,25 +4,12 @@ using MTM_WIP_Application.Forms.MainForm;
 using MTM_WIP_Application.Logging;
 using MTM_WIP_Application.Models;
 using MySql.Data.MySqlClient;
+using System.Data;
 
 namespace MTM_WIP_Application.Data;
 
 internal static class SystemDao
 {
-    private static async IAsyncEnumerable<Users> GetUserAccessListAsync(string table, bool useAsync)
-    {
-        using var reader = useAsync
-            ? await SqlHelper.ExecuteReader($"SELECT * FROM `{table}`", useAsync: true)
-            : SqlHelper.ExecuteReader($"SELECT * FROM `{table}`").Result;
-        while (reader.Read())
-            yield return new Users
-            {
-                Id = reader.GetInt32(0),
-                User = reader.GetString(1)
-                // Other Users properties can be set here if needed and available in the table
-            };
-    }
-
     // --- Helper for consistent error handling ---
     private static async Task HandleSystemDaoExceptionAsync(Exception ex, string method, bool useAsync)
     {
@@ -33,27 +20,52 @@ internal static class SystemDao
             await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
     }
 
+    // --- User Roles / Access (based on new sys_user_roles and sys_roles) ---
+
     /// <summary>
-    ///     Sets the user's access type (Admin or ReadOnly) in the database and updates WipAppVariables.
+    ///     Assigns a role to a user (Admin or ReadOnly) in sys_user_roles.
+    ///     Removes all existing roles for the user first.
     /// </summary>
-    internal static async Task SetUserAccessTypeAsync(string email, string accessType, bool useAsync = false)
+    internal static async Task SetUserAccessTypeAsync(string userName, string accessType, bool useAsync = false)
     {
         try
         {
-            var parameters = new Dictionary<string, object> { ["@Email"] = email };
-            await SqlHelper.ExecuteNonQuery("DELETE FROM `leads` WHERE `User` = @Email", parameters,
-                useAsync: useAsync);
-            await SqlHelper.ExecuteNonQuery("DELETE FROM `readonly` WHERE `User` = @Email", parameters,
+            // Get UserID from usr_users
+            var userIdObj = await SqlHelper.ExecuteScalar(
+                "SELECT `ID` FROM `usr_users` WHERE `User` = @userName",
+                new Dictionary<string, object> { ["@userName"] = userName }, useAsync: useAsync);
+
+            if (userIdObj == null) throw new Exception("User not found.");
+
+            var userId = Convert.ToInt32(userIdObj);
+
+            // Get RoleID for the intended role
+            var roleName = accessType == "Admin" ? "Admin" : "ReadOnly";
+            var roleIdObj = await SqlHelper.ExecuteScalar(
+                "SELECT `ID` FROM `sys_roles` WHERE `RoleName` = @roleName",
+                new Dictionary<string, object> { ["@roleName"] = roleName }, useAsync: useAsync);
+
+            if (roleIdObj == null) throw new Exception("Role not found.");
+
+            var roleId = Convert.ToInt32(roleIdObj);
+
+            // Remove all existing roles for this user
+            await SqlHelper.ExecuteNonQuery(
+                "DELETE FROM `sys_user_roles` WHERE `UserID` = @userId",
+                new Dictionary<string, object> { ["@userId"] = userId }, useAsync: useAsync);
+
+            // Assign the new role
+            await SqlHelper.ExecuteNonQuery(
+                "INSERT INTO `sys_user_roles` (`UserID`, `RoleID`, `AssignedBy`) VALUES (@userId, @roleId, @assignedBy)",
+                new Dictionary<string, object>
+                {
+                    ["@userId"] = userId,
+                    ["@roleId"] = roleId,
+                    ["@assignedBy"] = WipAppVariables.User
+                },
                 useAsync: useAsync);
 
-            if (accessType == "Admin")
-                await SqlHelper.ExecuteNonQuery("INSERT INTO `leads` (`User`) VALUES (@Email)", parameters,
-                    useAsync: useAsync);
-            else if (accessType == "ReadOnly")
-                await SqlHelper.ExecuteNonQuery("INSERT INTO `readonly` (`User`) VALUES (@Email)", parameters,
-                    useAsync: useAsync);
-
-            if (WipAppVariables.User == email)
+            if (WipAppVariables.User == userName)
             {
                 WipAppVariables.UserTypeAdmin = accessType == "Admin";
                 WipAppVariables.UserTypeReadOnly = accessType == "ReadOnly";
@@ -83,26 +95,42 @@ internal static class SystemDao
     }
 
     /// <summary>
-    ///     Updates the last 10 transactions table and updates the main form status.
+    ///     Updates the sys_last_10_transacitons table and updates the main form status.
+    ///     (This version uses only standard DML; schema-altering queries are removed)
     /// </summary>
     internal static async Task System_Last10_Buttons_ChangedAsync(bool useAsync = false)
     {
         try
         {
-            var com1 = "INSERT INTO `last_10_transactions`(`ID`, `PartID`, `Op`, `Quantity`) VALUES(11, '" +
-                       WipAppVariables.PartId + "', '" + WipAppVariables.Operation + "', '" +
-                       WipAppVariables.InventoryQuantity + "');";
-            var com2 = "DELETE FROM `last_10_transactions` WHERE `ID` = 10;";
-            var com3 = "ALTER TABLE  `mtm_wip_application`.`last_10_transactions` MODIFY COLUMN `ID` INT;";
-            var com4 = "ALTER TABLE  `mtm_wip_application`.`last_10_transactions` DROP PRIMARY KEY;";
-            var com5 =
-                "UPDATE `mtm_wip_application`.`last_10_transactions` SET `mtm_wip_application`.`last_10_transactions`.`ID` = `ID` +1 LIMIT 9;";
-            var com6 = "ALTER TABLE  `mtm_wip_application`.`last_10_transactions` ADD PRIMARY KEY(id);";
-            var com7 =
-                "ALTER TABLE  `mtm_wip_application`.`last_10_transactions` MODIFY COLUMN `ID` INT AUTO_INCREMENT;";
-            var com8 = "UPDATE `last_10_transactions` SET `ID`= 1 WHERE `ID` = 11;";
+            // Insert the new transaction
+            await SqlHelper.ExecuteNonQuery(
+                @"INSERT INTO `sys_last_10_transacitons` (`User`, `PartID`, `Operation`, `Quantity`, `DateTime`)
+                  VALUES (@user, @partId, @operation, @quantity, NOW());",
+                new Dictionary<string, object>
+                {
+                    ["@user"] = WipAppVariables.User,
+                    ["@partId"] = WipAppVariables.PartId,
+                    ["@operation"] = WipAppVariables.Operation,
+                    ["@quantity"] = WipAppVariables.InventoryQuantity
+                },
+                useAsync: useAsync);
 
-            await SqlHelper.ExecuteNonQuery(com1 + com2 + com3 + com4 + com5 + com6 + com7 + com8, useAsync: useAsync);
+            // Remove oldest if there are more than 10 records for this user
+            await SqlHelper.ExecuteNonQuery(
+                @"DELETE FROM `sys_last_10_transacitons`
+                  WHERE `ID` NOT IN (
+                      SELECT ID FROM (
+                          SELECT ID FROM `sys_last_10_transacitons`
+                          WHERE `User` = @user
+                          ORDER BY `DateTime` DESC
+                          LIMIT 10
+                      ) AS t
+                  ) AND `User` = @user;",
+                new Dictionary<string, object>
+                {
+                    ["@user"] = WipAppVariables.User
+                },
+                useAsync: useAsync);
 
             AppLogger.Log("System_Last10_Buttons_Changed executed successfully.");
         }
@@ -116,18 +144,13 @@ internal static class SystemDao
             if (Application.OpenForms.OfType<MainForm>().Any())
             {
                 var mainForm = Application.OpenForms.OfType<MainForm>().First();
-                mainForm.Invoke(() =>
-                {
-                    //mainForm.MainForm_StatusStrip_Disconnected.Visible = false;
-                    //mainForm.MainForm_StatusStrip_SavedStatus.Visible = true;
-                    mainForm.Enabled = true;
-                });
+                mainForm.Invoke(() => { mainForm.Enabled = true; });
             }
         }
     }
 
     /// <summary>
-    ///     Checks and sets the current user's admin and read-only access types.
+    ///     Gets all users and their roles, and sets current user's admin/read-only flags.
     /// </summary>
     internal static async Task<List<Users>> System_UserAccessTypeAsync(bool useAsync = false)
     {
@@ -138,18 +161,34 @@ internal static class SystemDao
             WipAppVariables.UserTypeAdmin = false;
             WipAppVariables.UserTypeReadOnly = false;
 
-            // Check admin access
-            await foreach (var admin in GetUserAccessListAsync("leads", useAsync))
-            {
-                if (admin.User == user) WipAppVariables.UserTypeAdmin = true;
-                result.Add(admin);
-            }
+            var sql =
+                @"SELECT u.ID, u.User, r.RoleName FROM usr_users u
+                  JOIN sys_user_roles ur ON u.ID = ur.UserID
+                  JOIN sys_roles r ON ur.RoleID = r.ID";
 
-            // Check read-only access
-            await foreach (var readOnly in GetUserAccessListAsync("readonly", useAsync))
+            using var reader = useAsync
+                ? await SqlHelper.ExecuteReader(sql, useAsync: true)
+                : SqlHelper.ExecuteReader(sql).Result;
+
+            while (reader.Read())
             {
-                if (readOnly.User == user) WipAppVariables.UserTypeReadOnly = true;
-                result.Add(readOnly);
+                var u = new Users
+                {
+                    Id = reader.GetInt32(0),
+                    User = reader.GetString(1)
+                    // Add more fields as necessary
+                };
+
+                var roleName = reader.GetString(2);
+                if (u.User == user)
+                {
+                    if (roleName == "Admin")
+                        WipAppVariables.UserTypeAdmin = true;
+                    if (roleName == "ReadOnly")
+                        WipAppVariables.UserTypeReadOnly = true;
+                }
+
+                result.Add(u);
             }
 
             AppLogger.Log($"System_UserAccessType executed successfully for user: {user}");

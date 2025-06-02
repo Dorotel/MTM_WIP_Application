@@ -45,7 +45,7 @@ internal static class VersionCheckerService
 
         try
         {
-            connection = new MySqlConnection(SqlVariables.GetConnectionString(null, null, null, null));
+            connection = new MySqlConnection(SqlVariables.GetConnectionString(null, "mtm database", null, null));
             connection.Open();
 
             command = new MySqlCommand("SELECT * FROM `program_information`", connection);
