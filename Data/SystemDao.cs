@@ -93,12 +93,13 @@ internal static class SystemDao
                        WipAppVariables.PartId + "', '" + WipAppVariables.Operation + "', '" +
                        WipAppVariables.InventoryQuantity + "');";
             var com2 = "DELETE FROM `last_10_transactions` WHERE `ID` = 10;";
-            var com3 = "ALTER TABLE  `mtm database`.`last_10_transactions` MODIFY COLUMN `ID` INT;";
-            var com4 = "ALTER TABLE  `mtm database`.`last_10_transactions` DROP PRIMARY KEY;";
+            var com3 = "ALTER TABLE  `mtm_wip_application`.`last_10_transactions` MODIFY COLUMN `ID` INT;";
+            var com4 = "ALTER TABLE  `mtm_wip_application`.`last_10_transactions` DROP PRIMARY KEY;";
             var com5 =
-                "UPDATE `mtm database`.`last_10_transactions` SET `mtm database`.`last_10_transactions`.`ID` = `ID` +1 LIMIT 9;";
-            var com6 = "ALTER TABLE  `mtm database`.`last_10_transactions` ADD PRIMARY KEY(id);";
-            var com7 = "ALTER TABLE  `mtm database`.`last_10_transactions` MODIFY COLUMN `ID` INT AUTO_INCREMENT;";
+                "UPDATE `mtm_wip_application`.`last_10_transactions` SET `mtm_wip_application`.`last_10_transactions`.`ID` = `ID` +1 LIMIT 9;";
+            var com6 = "ALTER TABLE  `mtm_wip_application`.`last_10_transactions` ADD PRIMARY KEY(id);";
+            var com7 =
+                "ALTER TABLE  `mtm_wip_application`.`last_10_transactions` MODIFY COLUMN `ID` INT AUTO_INCREMENT;";
             var com8 = "UPDATE `last_10_transactions` SET `ID`= 1 WHERE `ID` = 11;";
 
             await SqlHelper.ExecuteNonQuery(com1 + com2 + com3 + com4 + com5 + com6 + com7 + com8, useAsync: useAsync);

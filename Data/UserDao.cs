@@ -156,30 +156,35 @@ internal static class UserDao
 
     internal static async Task<DataTable> GetVitsUsers(bool useAsync = false)
     {
-        return await ExecuteDataTableSafe("SELECT `User` FROM `users` WHERE `VitsUser` = TRUE ORDER BY `User` ASC",
-            null, useAsync);
+        // Use a parameterized query for consistency
+        var parameters = new Dictionary<string, object>
+        {
+            ["@IsVitsUser"] = true
+        };
+        return await ExecuteDataTableSafe(
+            "SELECT `User` FROM `users` WHERE `VitsUser` = @IsVitsUser ORDER BY `User` ASC",
+            parameters, useAsync);
     }
 
     internal static async Task InsertUser(string email, string fullName, string shift, string isVitsUser, string? pin,
         bool useAsync = false)
     {
+        // Convert isVitsUser string to boolean first
+        var vitsUserBool = isVitsUser.ToUpper() == "TRUE";
+
         var parameters = new Dictionary<string, object>
         {
             ["@Email"] = email,
             ["@FullName"] = fullName,
             ["@Shift"] = shift,
-            ["@IsVitsUser"] = isVitsUser,
+            ["@IsVitsUser"] = vitsUserBool, // Now passing a boolean value
             ["@Pin"] = pin ?? (object)DBNull.Value
         };
         await ExecuteNonQuerySafe(
             "INSERT INTO `users` (`User`, `Full Name`, `Shift`, `VitsUser`, `Pin`) VALUES (@Email, @FullName, @Shift, @IsVitsUser, @Pin)",
             parameters, useAsync);
 
-        if (WipAppVariables.User == email)
-        {
-            WipAppVariables.PartType = null;
-            WipAppVariables.UserShift = shift;
-        }
+        if (WipAppVariables.User == email) WipAppVariables.UserShift = shift;
     }
 
     internal static async Task SetUserAdminStatus(string email, bool isAdmin, bool useAsync = false)
@@ -236,12 +241,15 @@ internal static class UserDao
     internal static async Task UpdateUser(string email, string fullName, string shift, string isVitsUser, string? pin,
         bool useAsync = false)
     {
+        // Convert isVitsUser string to boolean first
+        var vitsUserBool = isVitsUser.ToUpper() == "TRUE";
+
         var parameters = new Dictionary<string, object>
         {
             ["@Email"] = email,
             ["@FullName"] = fullName,
             ["@Shift"] = shift,
-            ["@IsVitsUser"] = isVitsUser,
+            ["@IsVitsUser"] = vitsUserBool, // Now passing a boolean value
             ["@Pin"] = pin ?? (object)DBNull.Value
         };
         await ExecuteNonQuerySafe(

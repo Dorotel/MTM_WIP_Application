@@ -37,6 +37,9 @@ public class DgvPrinter
         _printDocument.PrintPage += PrintPage;
     }
 
+    // Add this property to expose the PrintDocument for testing
+    public PrintDocument? PrintDocument => _printDocument;
+
     // Call this before Print() to customize columns
     public void SetColumnLayout(string columnName, float? width = null, StringAlignment? alignment = null)
     {

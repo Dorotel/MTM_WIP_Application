@@ -7,6 +7,9 @@ namespace MTM_WIP_Application.Data;
 
 internal static class SqlHelper
 {
+    // Add this static property to support testing
+    public static string? DefaultConnectionString { get; set; }
+
     private static void AddParameters(MySqlCommand command, Dictionary<string, object>? parameters)
     {
         if (parameters == null) return;
@@ -193,6 +196,11 @@ internal static class SqlHelper
 
     private static string GetConnectionString()
     {
+        // If DefaultConnectionString is set (e.g., during testing), use it
+        if (!string.IsNullOrEmpty(DefaultConnectionString))
+            return DefaultConnectionString;
+
+        // Otherwise fall back to the application's connection string
         return WipAppVariables.ConnectionString ?? throw new InvalidOperationException("Connection string is not set.");
     }
 }
