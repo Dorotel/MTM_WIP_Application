@@ -1,6 +1,8 @@
 ﻿using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Data;
 using MTM_WIP_Application.Forms.Changelog;
+using System.Data;
+using System.Windows.Forms;
 
 namespace MTM_WIP_Application.Forms.MainForm.Classes;
 
@@ -15,23 +17,23 @@ public static class MainFormUserSettingsHelper
     public static async Task LoadUserSettingsAsync()
     {
         // Load last shown changelog version
-        var lastShownVersion = await ChangeLogDao.Primary_ChangeLog_Get_LastShownAsync();
+        var lastShownVersion = await UserDao.GetLastShownVersionAsync(WipAppVariables.User);
         if (lastShownVersion != WipAppVariables.Version)
         {
-            await ChangeLogDao.Primary_ChangeLog_Set_SwitchAsync("false", WipAppVariables.User);
+            await UserDao.SetHideChangeLogAsync(WipAppVariables.User, "false");
             if (WipAppVariables.Version != null)
-                await ChangeLogDao.Primary_ChangeLog_Set_LastShownAsync(WipAppVariables.Version, WipAppVariables.User);
+                await UserDao.SetLastShownVersionAsync(WipAppVariables.User, WipAppVariables.Version);
         }
 
         // Load user settings from DB and assign to WipAppVariables
-        WipAppVariables.WipServerAddress = await ChangeLogDao.GetWipServerAddressAsync(WipAppVariables.User);
-        WipAppVariables.WipServerPort = await ChangeLogDao.GetWipServerPortAsync(WipAppVariables.User);
-        WipAppVariables.VisualUserName = await ChangeLogDao.Primary_ChangeLog_Get_Visual_UserAsync();
-        WipAppVariables.VisualPassword = await ChangeLogDao.Primary_ChangeLog_Get_Visual_PasswordAsync();
-        WipAppVariables.WipDataGridTheme = await ChangeLogDao.Primary_ChangeLog_Get_Theme_NameAsync();
+        WipAppVariables.WipServerAddress = await UserDao.GetWipServerAddressAsync(WipAppVariables.User);
+        WipAppVariables.WipServerPort = await UserDao.GetWipServerPortAsync(WipAppVariables.User);
+        WipAppVariables.VisualUserName = await UserDao.GetVisualUserNameAsync(WipAppVariables.User);
+        WipAppVariables.VisualPassword = await UserDao.GetVisualPasswordAsync(WipAppVariables.User);
+        WipAppVariables.WipDataGridTheme = await UserDao.GetThemeNameAsync(WipAppVariables.User);
         WipAppVariables.UserShift = null; // Set elsewhere if needed
 
-        var fontSize = await ChangeLogDao.Primary_ChangeLog_Get_Visual_Theme_FontSizeAsync();
+        var fontSize = await UserDao.GetThemeFontSizeAsync(WipAppVariables.User);
         WipAppVariables.ThemeFontSize = fontSize ?? 9;
     }
 
@@ -40,17 +42,13 @@ public static class MainFormUserSettingsHelper
     /// </summary>
     public static async Task SaveUserSettingsAsync()
     {
-        // Save user settings from WipAppVariables to DB
-        await ChangeLogDao.SetWipServerAddressAsync(WipAppVariables.User, WipAppVariables.WipServerAddress ?? "");
-        await ChangeLogDao.SetWipServerPortAsync(WipAppVariables.User, WipAppVariables.WipServerPort ?? "");
-        await ChangeLogDao.Primary_ChangeLog_Set_Theme_NameAsync(WipAppVariables.WipDataGridTheme ?? "",
-            WipAppVariables.User);
-        await ChangeLogDao.Primary_ChangeLog_Set_Theme_FontSizeAsync(WipAppVariables.ThemeFontSize.ToString(),
-            WipAppVariables.User);
-        await ChangeLogDao.Primary_ChangeLog_Set_Visual_UserAsync(WipAppVariables.VisualUserName ?? "",
-            WipAppVariables.User);
-        await ChangeLogDao.Primary_ChangeLog_Set_Visual_PasswordAsync(WipAppVariables.VisualPassword ?? "",
-            WipAppVariables.User);
+        // Save user settings from WipAppVariables to DB using stored procedures
+        await UserDao.SetWipServerAddressAsync(WipAppVariables.User, WipAppVariables.WipServerAddress ?? "");
+        await UserDao.SetWipServerPortAsync(WipAppVariables.User, WipAppVariables.WipServerPort ?? "");
+        await UserDao.SetThemeNameAsync(WipAppVariables.User, WipAppVariables.WipDataGridTheme ?? "");
+        await UserDao.SetThemeFontSizeAsync(WipAppVariables.User, (int)WipAppVariables.ThemeFontSize);
+        await UserDao.SetVisualUserNameAsync(WipAppVariables.User, WipAppVariables.VisualUserName ?? "");
+        await UserDao.SetVisualPasswordAsync(WipAppVariables.User, WipAppVariables.VisualPassword ?? "");
     }
 
     /// <summary>
@@ -58,7 +56,7 @@ public static class MainFormUserSettingsHelper
     /// </summary>
     public static async Task ShowChangeLogIfNeededAsync(Form mainForm)
     {
-        var show = await ChangeLogDao.Primary_ChangeLog_Get_ToggleAsync();
+        var show = await UserDao.GetHideChangeLogAsync(WipAppVariables.User);
         if (show == "false")
         {
             var change = new ChangeLogForm();

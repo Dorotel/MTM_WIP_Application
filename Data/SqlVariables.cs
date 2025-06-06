@@ -23,7 +23,7 @@ public static class SqlVariables
             server ??= "localhost"; // "172.16.1.104"
             database ??= "mtm_wip_application";
             uid ??= WipAppVariables.User != null ? WipAppVariables.User.ToUpper() : "";
-            password ??= "";
+            password ??= "0000";
 
             return $"SERVER={server};DATABASE={database};UID={uid};PASSWORD=0000;Allow User Variables=True";
         }

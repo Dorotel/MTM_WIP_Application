@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Logging;
 using MySql.Data.MySqlClient;
 
@@ -6,6 +7,14 @@ namespace MTM_WIP_Application.Data;
 
 internal static class PartTypeDao
 {
+    public static SqlHelper SqlHelper =
+        new(SqlVariables.GetConnectionString(
+            WipAppVariables.WipServerAddress,
+            "mtm_wip_application",
+            WipAppVariables.User,
+            WipAppVariables.UserPin
+        ));
+
     // --- Delete ---
     internal static async Task DeletePartType(string partType, bool useAsync = false)
     {
@@ -19,7 +28,7 @@ internal static class PartTypeDao
     {
         try
         {
-            await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
+            await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync);
         }
         catch (MySqlException ex)
         {
@@ -56,7 +65,7 @@ internal static class PartTypeDao
         {
             return parameters == null
                 ? await SqlHelper.ExecuteDataTable(sql, useAsync: useAsync)
-                : await SqlHelper.ExecuteDataTable(sql, parameters, useAsync: useAsync);
+                : await SqlHelper.ExecuteDataTable(sql, parameters, useAsync);
         }
         catch (MySqlException ex)
         {
@@ -91,7 +100,7 @@ internal static class PartTypeDao
         var parameters = new Dictionary<string, object> { ["@partType"] = partType };
         var result = await SqlHelper.ExecuteScalar(
             "SELECT COUNT(*) FROM `md_item_types` WHERE `Type` = @partType",
-            parameters, useAsync: useAsync);
+            parameters, useAsync);
         return Convert.ToInt32(result) > 0;
     }
 

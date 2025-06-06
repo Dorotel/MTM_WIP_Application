@@ -10,6 +10,14 @@ namespace MTM_WIP_Application.Data;
 
 internal static class SystemDao
 {
+    public static SqlHelper SqlHelper =
+        new(SqlVariables.GetConnectionString(
+            WipAppVariables.WipServerAddress,
+            "mtm_wip_application",
+            WipAppVariables.User,
+            WipAppVariables.UserPin
+        ));
+
     // --- Helper for consistent error handling ---
     private static async Task HandleSystemDaoExceptionAsync(Exception ex, string method, bool useAsync)
     {
@@ -33,7 +41,7 @@ internal static class SystemDao
             // Get UserID from usr_users
             var userIdObj = await SqlHelper.ExecuteScalar(
                 "SELECT `ID` FROM `usr_users` WHERE `User` = @userName",
-                new Dictionary<string, object> { ["@userName"] = userName }, useAsync: useAsync);
+                new Dictionary<string, object> { ["@userName"] = userName }, useAsync);
 
             if (userIdObj == null) throw new Exception("User not found.");
 
@@ -43,7 +51,7 @@ internal static class SystemDao
             var roleName = accessType == "Admin" ? "Admin" : "ReadOnly";
             var roleIdObj = await SqlHelper.ExecuteScalar(
                 "SELECT `ID` FROM `sys_roles` WHERE `RoleName` = @roleName",
-                new Dictionary<string, object> { ["@roleName"] = roleName }, useAsync: useAsync);
+                new Dictionary<string, object> { ["@roleName"] = roleName }, useAsync);
 
             if (roleIdObj == null) throw new Exception("Role not found.");
 
@@ -52,7 +60,7 @@ internal static class SystemDao
             // Remove all existing roles for this user
             await SqlHelper.ExecuteNonQuery(
                 "DELETE FROM `sys_user_roles` WHERE `UserID` = @userId",
-                new Dictionary<string, object> { ["@userId"] = userId }, useAsync: useAsync);
+                new Dictionary<string, object> { ["@userId"] = userId }, useAsync);
 
             // Assign the new role
             await SqlHelper.ExecuteNonQuery(
@@ -63,7 +71,7 @@ internal static class SystemDao
                     ["@roleId"] = roleId,
                     ["@assignedBy"] = WipAppVariables.User
                 },
-                useAsync: useAsync);
+                useAsync);
 
             if (WipAppVariables.User == userName)
             {
@@ -113,7 +121,7 @@ internal static class SystemDao
                     ["@operation"] = WipAppVariables.Operation,
                     ["@quantity"] = WipAppVariables.InventoryQuantity
                 },
-                useAsync: useAsync);
+                useAsync);
 
             // Remove oldest if there are more than 10 records for this user
             await SqlHelper.ExecuteNonQuery(
@@ -130,7 +138,7 @@ internal static class SystemDao
                 {
                     ["@user"] = WipAppVariables.User
                 },
-                useAsync: useAsync);
+                useAsync);
 
             AppLogger.Log("System_Last10_Buttons_Changed executed successfully.");
         }

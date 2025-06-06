@@ -131,7 +131,17 @@ public partial class MainForm : Form
             WipAppVariables.User ??= Environment.UserName;
             WipAppVariables.PartType ??= "";
 
-            await InventoryDao.InventoryTab_SaveAsync(true);
+            // FIXED: Use AddInventoryItemAsync instead of InventoryTab_SaveAsync
+            await InventoryDao.AddInventoryItemAsync(
+                partId,
+                loc,
+                op,
+                qty,
+                WipAppVariables.PartType ?? "",
+                WipAppVariables.User,
+                "", // batchNumber
+                notes,
+                true);
 
             MessageBox.Show(@"Inventory transaction saved successfully.", @"Success", MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
