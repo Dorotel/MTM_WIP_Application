@@ -196,10 +196,19 @@ public static class MainFormComboBoxDataHelper
 
             void SetComboBox()
             {
-                if (dataTable.Rows.Count == 0 || !Equals(dataTable.Rows[0][0], defaultText))
+                if (dataTable.Rows.Count == 0 || !Equals(dataTable.Rows[0][displayMember], defaultText))
                 {
                     var row = dataTable.NewRow();
-                    row[1] = defaultText;
+                    // Set display column to default text
+                    row[displayMember] = defaultText;
+
+                    // For ID/integer columns, use a placeholder value like -1
+                    if (dataTable.Columns[valueMember].DataType == typeof(int))
+                        row[valueMember] = -1;
+                    else
+                        // For non-integer columns, use the default text
+                        row[valueMember] = defaultText;
+
                     dataTable.Rows.InsertAt(row, 0);
                 }
 
