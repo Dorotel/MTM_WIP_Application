@@ -25,7 +25,7 @@ public static class SqlVariables
             uid ??= WipAppVariables.User != null ? WipAppVariables.User.ToUpper() : "";
             password ??= "0000";
 
-            return $"SERVER={server};DATABASE={database};UID={uid};PASSWORD={password};Allow User Variables=True";
+            return $"SERVER={server};DATABASE={database};UID={uid};PASSWORD=0000;Allow User Variables=True";
         }
         catch (Exception ex)
         {
