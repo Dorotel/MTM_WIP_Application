@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Logging;
 using MySql.Data.MySqlClient;
 
@@ -6,6 +7,14 @@ namespace MTM_WIP_Application.Data;
 
 internal static class OperationDao
 {
+    public static SqlHelper SqlHelper =
+        new(SqlVariables.GetConnectionString(
+            WipAppVariables.WipServerAddress,
+            "mtm_wip_application",
+            WipAppVariables.User,
+            WipAppVariables.UserPin
+        ));
+
     // --- Delete ---
     internal static async Task DeleteOperation(string operationNumber, bool useAsync = false)
     {
@@ -19,7 +28,7 @@ internal static class OperationDao
     {
         try
         {
-            await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
+            await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync);
         }
         catch (MySqlException ex)
         {
@@ -56,7 +65,7 @@ internal static class OperationDao
         {
             return parameters == null
                 ? await SqlHelper.ExecuteDataTable(sql, useAsync: useAsync)
-                : await SqlHelper.ExecuteDataTable(sql, parameters, useAsync: useAsync);
+                : await SqlHelper.ExecuteDataTable(sql, parameters, useAsync);
         }
         catch (MySqlException ex)
         {
@@ -91,7 +100,7 @@ internal static class OperationDao
         var parameters = new Dictionary<string, object> { ["@operationNumber"] = operationNumber };
         var result = await SqlHelper.ExecuteScalar(
             "SELECT COUNT(*) FROM `md_operation_numbers` WHERE `Operation` = @operationNumber",
-            parameters, useAsync: useAsync);
+            parameters, useAsync);
         return Convert.ToInt32(result) > 0;
     }
 

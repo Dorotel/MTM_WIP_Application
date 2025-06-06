@@ -14,6 +14,14 @@ internal static class ErrorLogDao
 {
     // --- Query Methods ---
 
+    public static SqlHelper SqlHelper =
+        new(SqlVariables.GetConnectionString(
+            WipAppVariables.WipServerAddress,
+            "mtm_wip_application",
+            WipAppVariables.User,
+            WipAppVariables.UserPin
+        ));
+
     internal static async Task<List<(string MethodName, string ErrorMessage)>> GetUniqueErrorsAsync(
         bool useAsync = false)
     {
@@ -65,7 +73,7 @@ internal static class ErrorLogDao
         {
             return parameters == null
                 ? await SqlHelper.ExecuteDataTable(sql, useAsync: useAsync)
-                : await SqlHelper.ExecuteDataTable(sql, parameters, useAsync: useAsync);
+                : await SqlHelper.ExecuteDataTable(sql, parameters, useAsync);
         }
         catch (Exception ex)
         {
@@ -95,7 +103,7 @@ internal static class ErrorLogDao
             if (parameters == null)
                 await SqlHelper.ExecuteNonQuery(sql, useAsync: useAsync);
             else
-                await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
+                await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync);
         }
         catch (Exception ex)
         {
@@ -265,7 +273,7 @@ internal static class ErrorLogDao
             (`User`, `Severity`, `ErrorType`, `ErrorMessage`, `StackTrace`, `ModuleName`, `MethodName`, `AdditionalInfo`, `MachineName`, `OSVersion`, `AppVersion`, `ErrorTime`) 
             VALUES 
             (@User, @Severity, @ErrorType, @ErrorMessage, @StackTrace, @ModuleName, @MethodName, @AdditionalInfo, @MachineName, @OSVersion, @AppVersion, @ErrorTime)";
-        await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
+        await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync);
     }
 
     internal static List<(string MethodName, string ErrorMessage)> GetUniqueErrors()

@@ -1,326 +1,355 @@
 ﻿using System.Data;
 using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Logging;
-using MySql.Data.MySqlClient;
 
 namespace MTM_WIP_Application.Data;
 
+#region UserDao
+
 internal static class UserDao
 {
-    internal static async Task AddUserToMySqlServer(string email, bool useAsync = false)
+    public static SqlHelper SqlHelper =
+        new(SqlVariables.GetConnectionString(
+            WipAppVariables.WipServerAddress,
+            "mtm_wip_application",
+            WipAppVariables.User,
+            WipAppVariables.UserPin
+        ));
+
+    #region User Settings Getters/Setters
+
+    internal static async Task<string> GetLastShownVersionAsync(string user, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object> { ["@Email"] = email };
-        var count = await ExecuteScalarIntSafe("SELECT COUNT(*) FROM mysql.user WHERE User = @Email AND Host = '%'",
-            parameters, useAsync);
-        if (count == 0)
+        return await GetUserSettingAsync("LastShownVersion", user, useAsync);
+    }
+
+    internal static async Task SetLastShownVersionAsync(string user, string value, bool useAsync = false)
+    {
+        await SetUserSettingAsync("LastShownVersion", user, value, useAsync);
+    }
+
+    internal static async Task<string> GetHideChangeLogAsync(string user, bool useAsync = false)
+    {
+        return await GetUserSettingAsync("HideChangeLog", user, useAsync);
+    }
+
+    internal static async Task SetHideChangeLogAsync(string user, string value, bool useAsync = false)
+    {
+        await SetUserSettingAsync("HideChangeLog", user, value, useAsync);
+    }
+
+    internal static async Task<string> GetThemeNameAsync(string user, bool useAsync = false)
+    {
+        return await GetUserSettingAsync("Theme_Name", user, useAsync);
+    }
+
+    internal static async Task SetThemeNameAsync(string user, string value, bool useAsync = false)
+    {
+        await SetUserSettingAsync("Theme_Name", user, value, useAsync);
+    }
+
+    internal static async Task<int?> GetThemeFontSizeAsync(string user, bool useAsync = false)
+    {
+        try
         {
-            var createUserSql =
-                $"CREATE USER '{email}'@'%' IDENTIFIED WITH mysql_native_password AS ''; " +
-                $"GRANT ALL PRIVILEGES ON *.* TO '{email}'@'%' REQUIRE NONE WITH GRANT OPTION " +
-                $"MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;";
-            await ExecuteNonQuerySafe(createUserSql, null, useAsync);
+            var str = await GetUserSettingAsync("Theme_FontSize", user, useAsync);
+            return int.TryParse(str, out var val) ? val : null;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return null;
         }
     }
 
-    internal static async Task<string?> GetUserFullNameAsync(string email, bool useAsync = false)
+    internal static async Task SetThemeFontSizeAsync(string user, int value, bool useAsync = false)
     {
-        var row = await GetUserByEmail(email, useAsync);
-        return row?["Full Name"] as string;
+        await SetUserSettingAsync("Theme_FontSize", user, value.ToString(), useAsync);
     }
 
-    internal static async Task ChangeUserPin(string email, string newPin, bool useAsync = false)
+    internal static async Task<string> GetVisualUserNameAsync(string user, bool useAsync = false)
+    {
+        return await GetUserSettingAsync("VisualUserName", user, useAsync);
+    }
+
+    internal static async Task SetVisualUserNameAsync(string user, string value, bool useAsync = false)
+    {
+        await SetUserSettingAsync("VisualUserName", user, value, useAsync);
+    }
+
+    internal static async Task<string> GetVisualPasswordAsync(string user, bool useAsync = false)
+    {
+        return await GetUserSettingAsync("VisualPassword", user, useAsync);
+    }
+
+    internal static async Task SetVisualPasswordAsync(string user, string value, bool useAsync = false)
+    {
+        await SetUserSettingAsync("VisualPassword", user, value, useAsync);
+    }
+
+    internal static async Task<string> GetWipServerAddressAsync(string user, bool useAsync = false)
+    {
+        return await GetUserSettingAsync("WipServerAddress", user, useAsync);
+    }
+
+    internal static async Task SetWipServerAddressAsync(string user, string value, bool useAsync = false)
+    {
+        await SetUserSettingAsync("WipServerAddress", user, value, useAsync);
+    }
+
+    internal static async Task<string> GetWipServerPortAsync(string user, bool useAsync = false)
+    {
+        return await GetUserSettingAsync("WipServerPort", user, useAsync);
+    }
+
+    internal static async Task SetWipServerPortAsync(string user, string value, bool useAsync = false)
+    {
+        await SetUserSettingAsync("WipServerPort", user, value, useAsync);
+    }
+
+    internal static async Task<string?> GetUserFullNameAsync(string user, bool useAsync = false)
+    {
+        try
+        {
+            var parameters = new Dictionary<string, object> { ["@User"] = user };
+            var result = await SqlHelper.ExecuteScalar(
+                "SELECT `Full Name` FROM `usr_users` WHERE `User` = @User",
+                parameters, useAsync, CommandType.Text);
+            return result?.ToString();
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return null;
+        }
+    }
+
+    private static async Task<string> GetUserSettingAsync(string field, string user, bool useAsync)
+    {
+        try
+        {
+            var parameters = new Dictionary<string, object> { ["@User"] = user };
+            var result = await SqlHelper.ExecuteScalar(
+                $"SELECT `{field}` FROM `usr_users` WHERE `User` = @User",
+                parameters, useAsync, CommandType.Text);
+            return result?.ToString() ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return string.Empty;
+        }
+    }
+
+    private static async Task SetUserSettingAsync(string field, string user, string value, bool useAsync)
     {
         var parameters = new Dictionary<string, object>
         {
-            ["@Email"] = email,
-            ["@Pin"] = newPin
+            ["@User"] = user,
+            [$"@{field}"] = value
         };
-        await ExecuteNonQuerySafe("UPDATE `usr_users` SET `Pin` = @Pin WHERE `User` = @Email", parameters, useAsync);
-
-        if (WipAppVariables.User == email)
-            WipAppVariables.UserPin = newPin;
+        await SqlHelper.ExecuteNonQuery(
+            $"UPDATE `usr_users` SET `{field}` = @{field} WHERE `User` = @User",
+            parameters, useAsync, CommandType.Text);
     }
 
-    internal static async Task DeleteUser(string email, bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object> { ["@Email"] = email };
-        await ExecuteNonQuerySafe("DELETE FROM `usr_users` WHERE `User` = @Email", parameters, useAsync);
-    }
+    #endregion
 
-    // --- Private helpers for error handling and DRY ---
+    #region Add / Update / Delete
 
-    private static async Task<DataTable> ExecuteDataTableSafe(string sql, Dictionary<string, object>? parameters,
-        bool useAsync)
-    {
-        try
-        {
-            return await SqlHelper.ExecuteDataTable(sql, parameters, useAsync: useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
-            return new DataTable();
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
-            return new DataTable();
-        }
-    }
-
-    private static async Task ExecuteNonQuerySafe(string sql, Dictionary<string, object>? parameters, bool useAsync)
-    {
-        try
-        {
-            await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync: useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
-        }
-    }
-
-    private static async Task<bool> ExecuteScalarBoolSafe(string sql, Dictionary<string, object>? parameters,
-        bool useAsync)
-    {
-        try
-        {
-            var result = await SqlHelper.ExecuteScalar(sql, parameters, useAsync: useAsync);
-            return Convert.ToInt32(result) > 0;
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
-            return false;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
-            return false;
-        }
-    }
-
-    private static async Task<int> ExecuteScalarIntSafe(string sql, Dictionary<string, object>? parameters,
-        bool useAsync)
-    {
-        try
-        {
-            var result = await SqlHelper.ExecuteScalar(sql, parameters, useAsync: useAsync);
-            return Convert.ToInt32(result);
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            await ErrorLogDao.HandleException_SQLError_CloseApp(ex, useAsync);
-            return 0;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
-            return 0;
-        }
-    }
-
-    internal static async Task<DataTable> GetAdmins(bool useAsync = false)
-    {
-        // "Admin" users are those in sys_user_roles with sys_roles.RoleName = 'Admin'
-        var sql = @"
-            SELECT u.User FROM usr_users u
-            JOIN sys_user_roles ur ON u.ID = ur.UserID
-            JOIN sys_roles r ON ur.RoleID = r.ID
-            WHERE r.RoleName = 'Admin'";
-        return await ExecuteDataTableSafe(sql, null, useAsync);
-    }
-
-    internal static async Task<DataTable> GetAllUsers(bool useAsync = false)
-    {
-        return await ExecuteDataTableSafe("SELECT * FROM `usr_users`", null, useAsync);
-    }
-
-    internal static async Task<DataTable> GetReadOnlyUsers(bool useAsync = false)
-    {
-        // "ReadOnly" users are those in sys_user_roles with sys_roles.RoleName = 'ReadOnly'
-        var sql = @"
-            SELECT u.User FROM usr_users u
-            JOIN sys_user_roles ur ON u.ID = ur.UserID
-            JOIN sys_roles r ON ur.RoleID = r.ID
-            WHERE r.RoleName = 'ReadOnly'";
-        return await ExecuteDataTableSafe(sql, null, useAsync);
-    }
-
-    internal static async Task<DataRow?> GetUserByEmail(string email, bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object> { ["@Email"] = email };
-        var table = await ExecuteDataTableSafe("SELECT * FROM `usr_users` WHERE `User` = @Email", parameters, useAsync);
-        return table.Rows.Count > 0 ? table.Rows[0] : null;
-    }
-
-    internal static async Task<DataTable> GetVitsUsers(bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object>
-        {
-            ["@IsVitsUser"] = true
-        };
-        return await ExecuteDataTableSafe(
-            "SELECT `User` FROM `usr_users` WHERE `VitsUser` = @IsVitsUser ORDER BY `User` ASC",
-            parameters, useAsync);
-    }
-
-    internal static async Task InsertUser(string email, string fullName, string shift, string isVitsUser, string? pin,
+    internal static async Task InsertUserAsync(
+        string user, string fullName, string shift, bool vitsUser, string pin,
+        string lastShownVersion, string hideChangeLog, string themeName, int themeFontSize,
+        string visualUserName, string visualPassword, string wipServerAddress, string wipServerPort,
         bool useAsync = false)
     {
-        var vitsUserBool = isVitsUser.ToUpper() == "TRUE";
-
-        var parameters = new Dictionary<string, object>
+        try
         {
-            ["@Email"] = email,
-            ["@FullName"] = fullName,
-            ["@Shift"] = shift,
-            ["@IsVitsUser"] = vitsUserBool,
-            ["@Pin"] = pin ?? (object)DBNull.Value
-        };
-        await ExecuteNonQuerySafe(
-            "INSERT INTO `usr_users` (`User`, `Full Name`, `Shift`, `VitsUser`, `Pin`) VALUES (@Email, @FullName, @Shift, @IsVitsUser, @Pin)",
-            parameters, useAsync);
-
-        if (WipAppVariables.User == email) WipAppVariables.UserShift = shift;
+            var parameters = new Dictionary<string, object>
+            {
+                ["p_User"] = user,
+                ["p_FullName"] = fullName,
+                ["p_Shift"] = shift,
+                ["p_VitsUser"] = vitsUser,
+                ["p_Pin"] = pin,
+                ["p_LastShownVersion"] = lastShownVersion,
+                ["p_HideChangeLog"] = hideChangeLog,
+                ["p_Theme_Name"] = themeName,
+                ["p_Theme_FontSize"] = themeFontSize,
+                ["p_VisualUserName"] = visualUserName,
+                ["p_VisualPassword"] = visualPassword,
+                ["p_WipServerAddress"] = wipServerAddress,
+                ["p_WipServerPort"] = wipServerPort
+            };
+            await SqlHelper.ExecuteNonQuery(
+                "usr_users_Add_User",
+                parameters, useAsync, CommandType.StoredProcedure);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
     }
 
-    internal static async Task SetUserAdminStatus(string email, bool isAdmin, bool useAsync = false)
-    {
-        // Get UserID
-        var userIdObj = await ExecuteScalarIntSafe(
-            "SELECT ID FROM usr_users WHERE User = @Email",
-            new Dictionary<string, object> { ["@Email"] = email }, useAsync);
-        if (userIdObj == 0) return;
-
-        // Get RoleID for Admin
-        var roleIdObj = await ExecuteScalarIntSafe(
-            "SELECT ID FROM sys_roles WHERE RoleName = 'Admin'", null, useAsync);
-        if (roleIdObj == 0) return;
-
-        var parameters = new Dictionary<string, object> { ["@UserID"] = userIdObj, ["@RoleID"] = roleIdObj };
-
-        if (isAdmin)
-        {
-            var count = await ExecuteScalarIntSafe(
-                "SELECT COUNT(*) FROM sys_user_roles WHERE UserID = @UserID AND RoleID = @RoleID",
-                parameters, useAsync);
-            if (count == 0)
-                await ExecuteNonQuerySafe(
-                    "INSERT INTO sys_user_roles (UserID, RoleID, AssignedBy) VALUES (@UserID, @RoleID, @UserID)",
-                    parameters, useAsync);
-        }
-        else
-        {
-            await ExecuteNonQuerySafe(
-                "DELETE FROM sys_user_roles WHERE UserID = @UserID AND RoleID = @RoleID",
-                parameters, useAsync);
-        }
-
-        if (WipAppVariables.User == email)
-            WipAppVariables.UserTypeAdmin = isAdmin;
-    }
-
-    internal static async Task SetUserReadOnlyStatus(string email, bool isReadOnly, bool useAsync = false)
-    {
-        // Get UserID
-        var userIdObj = await ExecuteScalarIntSafe(
-            "SELECT ID FROM usr_users WHERE User = @Email",
-            new Dictionary<string, object> { ["@Email"] = email }, useAsync);
-        if (userIdObj == 0) return;
-
-        // Get RoleID for ReadOnly
-        var roleIdObj = await ExecuteScalarIntSafe(
-            "SELECT ID FROM sys_roles WHERE RoleName = 'ReadOnly'", null, useAsync);
-        if (roleIdObj == 0) return;
-
-        var parameters = new Dictionary<string, object> { ["@UserID"] = userIdObj, ["@RoleID"] = roleIdObj };
-
-        if (isReadOnly)
-        {
-            var count = await ExecuteScalarIntSafe(
-                "SELECT COUNT(*) FROM sys_user_roles WHERE UserID = @UserID AND RoleID = @RoleID",
-                parameters, useAsync);
-            if (count == 0)
-                await ExecuteNonQuerySafe(
-                    "INSERT INTO sys_user_roles (UserID, RoleID, AssignedBy) VALUES (@UserID, @RoleID, @UserID)",
-                    parameters, useAsync);
-        }
-        else
-        {
-            await ExecuteNonQuerySafe(
-                "DELETE FROM sys_user_roles WHERE UserID = @UserID AND RoleID = @RoleID",
-                parameters, useAsync);
-        }
-
-        if (WipAppVariables.User == email)
-            WipAppVariables.UserTypeReadOnly = isReadOnly;
-    }
-
-    internal static async Task SetUserShift(string email, string shift, bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object>
-        {
-            ["@Email"] = email,
-            ["@Shift"] = shift
-        };
-        await ExecuteNonQuerySafe("UPDATE `usr_users` SET `Shift` = @Shift WHERE `User` = @Email", parameters,
-            useAsync);
-
-        if (WipAppVariables.User == email)
-            WipAppVariables.UserShift = shift;
-    }
-
-    internal static async Task UpdateUser(string email, string fullName, string shift, string isVitsUser, string? pin,
+    internal static async Task UpdateUserAsync(
+        string user, string fullName, string shift, bool vitsUser, string pin,
+        string lastShownVersion, string hideChangeLog, string themeName, int themeFontSize,
+        string visualUserName, string visualPassword, string wipServerAddress, string wipServerPort,
         bool useAsync = false)
     {
-        var vitsUserBool = isVitsUser.ToUpper() == "TRUE";
-
-        var parameters = new Dictionary<string, object>
+        try
         {
-            ["@Email"] = email,
-            ["@FullName"] = fullName,
-            ["@Shift"] = shift,
-            ["@IsVitsUser"] = vitsUserBool,
-            ["@Pin"] = pin ?? (object)DBNull.Value
-        };
-        await ExecuteNonQuerySafe(
-            "UPDATE `usr_users` SET `Full Name` = @FullName, `Shift` = @Shift, `VitsUser` = @IsVitsUser, `Pin` = @Pin WHERE `User` = @Email",
-            parameters, useAsync);
-
-        if (WipAppVariables.User == email)
-            WipAppVariables.UserShift = shift;
-    }
-
-    internal static async Task<bool> UserExists(string email, bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object> { ["@Email"] = email };
-        return await ExecuteScalarBoolSafe(
-            "SELECT COUNT(*) FROM `usr_users` WHERE `User` = @Email",
-            parameters, useAsync);
-    }
-
-    internal static async Task<bool> ValidateUserPin(string username, string pin, bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object>
+            var parameters = new Dictionary<string, object>
+            {
+                ["p_User"] = user,
+                ["p_FullName"] = fullName,
+                ["p_Shift"] = shift,
+                ["p_VitsUser"] = vitsUser,
+                ["p_Pin"] = pin,
+                ["p_LastShownVersion"] = lastShownVersion,
+                ["p_HideChangeLog"] = hideChangeLog,
+                ["p_Theme_Name"] = themeName,
+                ["p_Theme_FontSize"] = themeFontSize,
+                ["p_VisualUserName"] = visualUserName,
+                ["p_VisualPassword"] = visualPassword,
+                ["p_WipServerAddress"] = wipServerAddress,
+                ["p_WipServerPort"] = wipServerPort
+            };
+            await SqlHelper.ExecuteNonQuery(
+                "usr_users_Update_User",
+                parameters, useAsync, CommandType.StoredProcedure);
+        }
+        catch (Exception ex)
         {
-            ["@username"] = username,
-            ["@pin"] = pin
-        };
-        return await ExecuteScalarBoolSafe(
-            "SELECT COUNT(*) FROM `usr_users` WHERE `User` = @username AND `Pin` = @pin",
-            parameters, useAsync);
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
     }
+
+    internal static async Task DeleteUserAsync(string user, bool useAsync = false)
+    {
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["p_User"] = user
+            };
+            await SqlHelper.ExecuteNonQuery(
+                "usr_users_Delete_User",
+                parameters, useAsync, CommandType.StoredProcedure);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    #endregion
+
+    #region Queries
+
+    internal static async Task<DataTable> GetAllUsersAsync(bool useAsync = false)
+    {
+        try
+        {
+            return await SqlHelper.ExecuteDataTable(
+                "usr_users_Get_All",
+                null, useAsync, CommandType.StoredProcedure);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return new DataTable();
+        }
+    }
+
+    internal static async Task<DataRow?> GetUserByUsernameAsync(string user, bool useAsync = false)
+    {
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["p_User"] = user
+            };
+            var table = await SqlHelper.ExecuteDataTable(
+                "usr_users_Get_ByUser",
+                parameters, useAsync, CommandType.StoredProcedure);
+            return table.Rows.Count > 0 ? table.Rows[0] : null;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return null;
+        }
+    }
+
+    internal static async Task<bool> UserExistsAsync(string user, bool useAsync = false)
+    {
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["p_User"] = user
+            };
+            var result = await SqlHelper.ExecuteDataTable(
+                "usr_users_Exists",
+                parameters, useAsync, CommandType.StoredProcedure);
+            return result.Rows.Count > 0 && Convert.ToInt32(result.Rows[0]["UserExists"]) > 0;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return false;
+        }
+    }
+
+    #endregion
+
+    #region Privileges
+
+    internal static async Task GrantFullPrivilegesAsync(string user, bool useAsync = false)
+    {
+        await GrantPrivilegeAsync("usr_users_Grant_Full", user, useAsync);
+    }
+
+    internal static async Task GrantReadOnlyPrivilegesAsync(string user, bool useAsync = false)
+    {
+        await GrantPrivilegeAsync("usr_users_Grant_ReadOnly", user, useAsync);
+    }
+
+    internal static async Task GrantReadWritePrivilegesAsync(string user, bool useAsync = false)
+    {
+        await GrantPrivilegeAsync("usr_users_Grant_ReadWrite", user, useAsync);
+    }
+
+    private static async Task GrantPrivilegeAsync(string procName, string user, bool useAsync)
+    {
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["p_User"] = user
+            };
+            await SqlHelper.ExecuteNonQuery(
+                procName,
+                parameters, useAsync, CommandType.StoredProcedure);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogDatabaseError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    #endregion
 }
+
+#endregion

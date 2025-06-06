@@ -3,7 +3,9 @@ using System.Data;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
-using MTM_WIP_Application.Core; // Adjust this namespace if your ISqlHelper is elsewhere
+using MTM_WIP_Application.Core;
+
+namespace MTM_WIP_Application.Data;
 
 public class SqlHelper : ISqlHelper
 {
@@ -14,101 +16,114 @@ public class SqlHelper : ISqlHelper
         _connectionString = connectionString;
     }
 
+    private static string NormalizeParameterName(string key, CommandType commandType)
+    {
+        // For stored procedures, parameter names should not start with '@'.
+        return commandType == CommandType.StoredProcedure && key.StartsWith("@")
+            ? key.Substring(1)
+            : key;
+    }
+
     public async Task<int> ExecuteNonQuery(
-        string procedureName,
+        string procedureOrSql,
         Dictionary<string, object>? parameters = null,
         bool useAsync = false,
         CommandType commandType = CommandType.StoredProcedure)
     {
-        using (var conn = new MySqlConnection(_connectionString))
-        using (var cmd = new MySqlCommand(procedureName, conn))
+        using var conn = new MySqlConnection(_connectionString);
+        using var cmd = new MySqlCommand(procedureOrSql, conn)
         {
-            cmd.CommandType = commandType;
-            if (parameters != null)
-                foreach (var param in parameters)
-                    cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
-            await conn.OpenAsync();
-            if (useAsync)
-                return await cmd.ExecuteNonQueryAsync();
-            else
-                return cmd.ExecuteNonQuery();
-        }
+            CommandType = commandType
+        };
+
+        if (parameters != null)
+            foreach (var param in parameters)
+                cmd.Parameters.AddWithValue(NormalizeParameterName(param.Key, commandType),
+                    param.Value ?? DBNull.Value);
+
+        await conn.OpenAsync();
+        return useAsync
+            ? await cmd.ExecuteNonQueryAsync()
+            : cmd.ExecuteNonQuery();
     }
 
     public async Task<DataTable> ExecuteDataTable(
-        string procedureName,
+        string procedureOrSql,
         Dictionary<string, object>? parameters = null,
         bool useAsync = false,
         CommandType commandType = CommandType.StoredProcedure)
     {
-        using (var conn = new MySqlConnection(_connectionString))
-        using (var cmd = new MySqlCommand(procedureName, conn))
+        using var conn = new MySqlConnection(_connectionString);
+        using var cmd = new MySqlCommand(procedureOrSql, conn)
         {
-            cmd.CommandType = commandType;
-            if (parameters != null)
-                foreach (var param in parameters)
-                    cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+            CommandType = commandType
+        };
 
-            using (var adapter = new MySqlDataAdapter(cmd))
-            {
-                var table = new DataTable();
-                if (useAsync)
-                {
-                    await conn.OpenAsync();
-                    await Task.Run(() => adapter.Fill(table));
-                }
-                else
-                {
-                    conn.Open();
-                    adapter.Fill(table);
-                }
+        if (parameters != null)
+            foreach (var param in parameters)
+                cmd.Parameters.AddWithValue(NormalizeParameterName(param.Key, commandType),
+                    param.Value ?? DBNull.Value);
 
-                return table;
-            }
+        using var adapter = new MySqlDataAdapter(cmd);
+        var table = new DataTable();
+
+        if (useAsync)
+        {
+            await conn.OpenAsync();
+            await Task.Run(() => adapter.Fill(table));
         }
+        else
+        {
+            conn.Open();
+            adapter.Fill(table);
+        }
+
+        return table;
     }
 
     public async Task<object?> ExecuteScalar(
-        string procedureName,
+        string procedureOrSql,
         Dictionary<string, object>? parameters = null,
         bool useAsync = false,
         CommandType commandType = CommandType.StoredProcedure)
     {
-        using (var conn = new MySqlConnection(_connectionString))
-        using (var cmd = new MySqlCommand(procedureName, conn))
+        using var conn = new MySqlConnection(_connectionString);
+        using var cmd = new MySqlCommand(procedureOrSql, conn)
         {
-            cmd.CommandType = commandType;
-            if (parameters != null)
-                foreach (var param in parameters)
-                    cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+            CommandType = commandType
+        };
 
-            await conn.OpenAsync();
-            if (useAsync)
-                return await cmd.ExecuteScalarAsync();
-            else
-                return cmd.ExecuteScalar();
-        }
+        if (parameters != null)
+            foreach (var param in parameters)
+                cmd.Parameters.AddWithValue(NormalizeParameterName(param.Key, commandType),
+                    param.Value ?? DBNull.Value);
+
+        await conn.OpenAsync();
+        return useAsync
+            ? await cmd.ExecuteScalarAsync()
+            : cmd.ExecuteScalar();
     }
 
     public async Task<MySqlDataReader> ExecuteReader(
-        string procedureName,
+        string procedureOrSql,
         Dictionary<string, object>? parameters = null,
         bool useAsync = false,
         CommandType commandType = CommandType.StoredProcedure)
     {
         var conn = new MySqlConnection(_connectionString);
-        var cmd = new MySqlCommand(procedureName, conn)
+        var cmd = new MySqlCommand(procedureOrSql, conn)
         {
             CommandType = commandType
         };
+
         if (parameters != null)
             foreach (var param in parameters)
-                cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+                cmd.Parameters.AddWithValue(NormalizeParameterName(param.Key, commandType),
+                    param.Value ?? DBNull.Value);
 
         await conn.OpenAsync();
-        if (useAsync)
-            return (MySqlDataReader)await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection);
-        else
-            return cmd.ExecuteReader(CommandBehavior.CloseConnection);
+        return useAsync
+            ? (MySqlDataReader)await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection)
+            : cmd.ExecuteReader(CommandBehavior.CloseConnection);
     }
 }
