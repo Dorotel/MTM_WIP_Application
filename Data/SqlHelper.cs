@@ -1,206 +1,114 @@
-﻿using System.Data;
-using MTM_WIP_Application.Core;
-using MTM_WIP_Application.Logging;
+﻿using System;
+using System.Data;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using MySql.Data.MySqlClient;
+using MTM_WIP_Application.Core; // Adjust this namespace if your ISqlHelper is elsewhere
 
-namespace MTM_WIP_Application.Data;
-
-internal static class SqlHelper
+public class SqlHelper : ISqlHelper
 {
-    // Add this static property to support testing
-    public static string? DefaultConnectionString { get; set; }
+    private readonly string _connectionString;
 
-    private static void AddParameters(MySqlCommand command, Dictionary<string, object>? parameters)
+    public SqlHelper(string connectionString)
     {
-        if (parameters == null) return;
-        foreach (var param in parameters)
-            command.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+        _connectionString = connectionString;
     }
 
-    public static async Task<DataTable> ExecuteDataTable(
-        string commandText,
+    public async Task<int> ExecuteNonQuery(
+        string procedureName,
         Dictionary<string, object>? parameters = null,
-        int commandTimeout = 30,
-        bool useAsync = false)
+        bool useAsync = false,
+        CommandType commandType = CommandType.StoredProcedure)
     {
-        try
+        using (var conn = new MySqlConnection(_connectionString))
+        using (var cmd = new MySqlCommand(procedureName, conn))
         {
+            cmd.CommandType = commandType;
+            if (parameters != null)
+                foreach (var param in parameters)
+                    cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+            await conn.OpenAsync();
             if (useAsync)
+                return await cmd.ExecuteNonQueryAsync();
+            else
+                return cmd.ExecuteNonQuery();
+        }
+    }
+
+    public async Task<DataTable> ExecuteDataTable(
+        string procedureName,
+        Dictionary<string, object>? parameters = null,
+        bool useAsync = false,
+        CommandType commandType = CommandType.StoredProcedure)
+    {
+        using (var conn = new MySqlConnection(_connectionString))
+        using (var cmd = new MySqlCommand(procedureName, conn))
+        {
+            cmd.CommandType = commandType;
+            if (parameters != null)
+                foreach (var param in parameters)
+                    cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+
+            using (var adapter = new MySqlDataAdapter(cmd))
             {
-                await using var connection = new MySqlConnection(GetConnectionString());
-                await using var command = new MySqlCommand(commandText, connection)
-                {
-                    CommandTimeout = commandTimeout
-                };
-                AddParameters(command, parameters);
-                await connection.OpenAsync();
-                using var reader = await command.ExecuteReaderAsync();
                 var table = new DataTable();
-                table.Load(reader);
+                if (useAsync)
+                {
+                    await conn.OpenAsync();
+                    await Task.Run(() => adapter.Fill(table));
+                }
+                else
+                {
+                    conn.Open();
+                    adapter.Fill(table);
+                }
+
                 return table;
             }
-            else
-            {
-                using var connection = new MySqlConnection(GetConnectionString());
-                using var command = new MySqlCommand(commandText, connection)
-                {
-                    CommandTimeout = commandTimeout
-                };
-                AddParameters(command, parameters);
-                using var adapter = new MySqlDataAdapter(command);
-                var table = new DataTable();
-                adapter.Fill(table);
-                return table;
-            }
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            throw;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            throw;
         }
     }
 
-    public static async Task<int> ExecuteNonQuery(
-        string commandText,
+    public async Task<object?> ExecuteScalar(
+        string procedureName,
         Dictionary<string, object>? parameters = null,
-        int commandTimeout = 30,
-        bool useAsync = false)
+        bool useAsync = false,
+        CommandType commandType = CommandType.StoredProcedure)
     {
-        try
+        using (var conn = new MySqlConnection(_connectionString))
+        using (var cmd = new MySqlCommand(procedureName, conn))
         {
+            cmd.CommandType = commandType;
+            if (parameters != null)
+                foreach (var param in parameters)
+                    cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+
+            await conn.OpenAsync();
             if (useAsync)
-            {
-                await using var connection = new MySqlConnection(GetConnectionString());
-                await using var command = new MySqlCommand(commandText, connection)
-                {
-                    CommandTimeout = commandTimeout
-                };
-                AddParameters(command, parameters);
-                await connection.OpenAsync();
-                return await command.ExecuteNonQueryAsync();
-            }
+                return await cmd.ExecuteScalarAsync();
             else
-            {
-                using var connection = new MySqlConnection(GetConnectionString());
-                using var command = new MySqlCommand(commandText, connection)
-                {
-                    CommandTimeout = commandTimeout
-                };
-                AddParameters(command, parameters);
-                connection.Open();
-                return command.ExecuteNonQuery();
-            }
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            throw;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            throw;
+                return cmd.ExecuteScalar();
         }
     }
 
-    public static async Task<MySqlDataReader> ExecuteReader(
-        string commandText,
+    public async Task<MySqlDataReader> ExecuteReader(
+        string procedureName,
         Dictionary<string, object>? parameters = null,
-        int commandTimeout = 30,
-        bool useAsync = false)
+        bool useAsync = false,
+        CommandType commandType = CommandType.StoredProcedure)
     {
-        try
+        var conn = new MySqlConnection(_connectionString);
+        var cmd = new MySqlCommand(procedureName, conn)
         {
-            if (useAsync)
-            {
-                var connection = new MySqlConnection(GetConnectionString());
-                var command = new MySqlCommand(commandText, connection)
-                {
-                    CommandTimeout = commandTimeout
-                };
-                AddParameters(command, parameters);
-                await connection.OpenAsync();
-                return await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
-            }
-            else
-            {
-                var connection = new MySqlConnection(GetConnectionString());
-                var command = new MySqlCommand(commandText, connection)
-                {
-                    CommandTimeout = commandTimeout
-                };
-                AddParameters(command, parameters);
-                connection.Open();
-                return command.ExecuteReader(CommandBehavior.CloseConnection);
-            }
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            throw;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            throw;
-        }
-    }
+            CommandType = commandType
+        };
+        if (parameters != null)
+            foreach (var param in parameters)
+                cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
 
-    public static async Task<object?> ExecuteScalar(
-        string commandText,
-        Dictionary<string, object>? parameters = null,
-        int commandTimeout = 30,
-        bool useAsync = false)
-    {
-        try
-        {
-            if (useAsync)
-            {
-                await using var connection = new MySqlConnection(GetConnectionString());
-                await using var command = new MySqlCommand(commandText, connection)
-                {
-                    CommandTimeout = commandTimeout
-                };
-                AddParameters(command, parameters);
-                await connection.OpenAsync();
-                return await command.ExecuteScalarAsync();
-            }
-            else
-            {
-                using var connection = new MySqlConnection(GetConnectionString());
-                using var command = new MySqlCommand(commandText, connection)
-                {
-                    CommandTimeout = commandTimeout
-                };
-                AddParameters(command, parameters);
-                connection.Open();
-                return command.ExecuteScalar();
-            }
-        }
-        catch (MySqlException ex)
-        {
-            AppLogger.LogDatabaseError(ex);
-            throw;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            throw;
-        }
-    }
-
-    private static string GetConnectionString()
-    {
-        // If DefaultConnectionString is set (e.g., during testing), use it
-        if (!string.IsNullOrEmpty(DefaultConnectionString))
-            return DefaultConnectionString;
-
-        // Otherwise fall back to the application's connection string
-        return WipAppVariables.ConnectionString ?? throw new InvalidOperationException("Connection string is not set.");
+        await conn.OpenAsync();
+        if (useAsync)
+            return (MySqlDataReader)await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+        else
+            return cmd.ExecuteReader(CommandBehavior.CloseConnection);
     }
 }
