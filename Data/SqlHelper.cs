@@ -1,7 +1,9 @@
-﻿using System;
+
+using System;
 using System.Data;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+
 using MySql.Data.MySqlClient;
 using MTM_WIP_Application.Core;
 
@@ -9,7 +11,9 @@ namespace MTM_WIP_Application.Data;
 
 public class SqlHelper : ISqlHelper
 {
+
     private readonly string _connectionString;
+
 
     public SqlHelper(string connectionString)
     {
@@ -22,6 +26,7 @@ public class SqlHelper : ISqlHelper
         return commandType == CommandType.StoredProcedure && key.StartsWith("@")
             ? key.Substring(1)
             : key;
+
     }
 
     public async Task<int> ExecuteNonQuery(
@@ -47,14 +52,18 @@ public class SqlHelper : ISqlHelper
             : cmd.ExecuteNonQuery();
     }
 
+
     public async Task<DataTable> ExecuteDataTable(
+
         string procedureOrSql,
         Dictionary<string, object>? parameters = null,
         bool useAsync = false,
         CommandType commandType = CommandType.StoredProcedure)
     {
+
         using var conn = new MySqlConnection(_connectionString);
         using var cmd = new MySqlCommand(procedureOrSql, conn)
+
         {
             CommandType = commandType
         };
@@ -79,6 +88,7 @@ public class SqlHelper : ISqlHelper
         }
 
         return table;
+
     }
 
     public async Task<object?> ExecuteScalar(
@@ -104,6 +114,7 @@ public class SqlHelper : ISqlHelper
             : cmd.ExecuteScalar();
     }
 
+
     public async Task<MySqlDataReader> ExecuteReader(
         string procedureOrSql,
         Dictionary<string, object>? parameters = null,
@@ -125,5 +136,6 @@ public class SqlHelper : ISqlHelper
         return useAsync
             ? (MySqlDataReader)await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection)
             : cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+
+using System;
 using System.Data;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -159,3 +160,4 @@ public static class InventoryDao
 }
 
 #endregion
+
