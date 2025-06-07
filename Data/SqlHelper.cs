@@ -1,51 +1,17 @@
-using System;
 using System.Data;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using MySql.Data.MySqlClient;
 using MTM_WIP_Application.Core;
+using MySql.Data.MySqlClient;
 
 namespace MTM_WIP_Application.Data;
 
 public class SqlHelper : ISqlHelper
 {
-    private readonly string _connectionString;
-
     public SqlHelper(string connectionString)
     {
         _connectionString = connectionString;
     }
 
-    private static string NormalizeParameterName(string key, CommandType commandType)
-    {
-        // For stored procedures, parameter names should not start with '@'.
-        return commandType == CommandType.StoredProcedure && key.StartsWith("@")
-            ? key.Substring(1)
-            : key;
-    }
-
-    public async Task<int> ExecuteNonQuery(
-        string procedureOrSql,
-        Dictionary<string, object>? parameters = null,
-        bool useAsync = false,
-        CommandType commandType = CommandType.StoredProcedure)
-    {
-        using var conn = new MySqlConnection(_connectionString);
-        using var cmd = new MySqlCommand(procedureOrSql, conn)
-        {
-            CommandType = commandType
-        };
-
-        if (parameters != null)
-            foreach (var param in parameters)
-                cmd.Parameters.AddWithValue(NormalizeParameterName(param.Key, commandType),
-                    param.Value ?? DBNull.Value);
-
-        await conn.OpenAsync();
-        return useAsync
-            ? await cmd.ExecuteNonQueryAsync()
-            : cmd.ExecuteNonQuery();
-    }
+    private readonly string _connectionString;
 
     public async Task<DataTable> ExecuteDataTable(
         string procedureOrSql,
@@ -81,7 +47,7 @@ public class SqlHelper : ISqlHelper
         return table;
     }
 
-    public async Task<object?> ExecuteScalar(
+    public async Task<int> ExecuteNonQuery(
         string procedureOrSql,
         Dictionary<string, object>? parameters = null,
         bool useAsync = false,
@@ -100,8 +66,8 @@ public class SqlHelper : ISqlHelper
 
         await conn.OpenAsync();
         return useAsync
-            ? await cmd.ExecuteScalarAsync()
-            : cmd.ExecuteScalar();
+            ? await cmd.ExecuteNonQueryAsync()
+            : cmd.ExecuteNonQuery();
     }
 
     public async Task<MySqlDataReader> ExecuteReader(
@@ -125,5 +91,36 @@ public class SqlHelper : ISqlHelper
         return useAsync
             ? (MySqlDataReader)await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection)
             : cmd.ExecuteReader(CommandBehavior.CloseConnection);
+    }
+
+    public async Task<object?> ExecuteScalar(
+        string procedureOrSql,
+        Dictionary<string, object>? parameters = null,
+        bool useAsync = false,
+        CommandType commandType = CommandType.StoredProcedure)
+    {
+        using var conn = new MySqlConnection(_connectionString);
+        using var cmd = new MySqlCommand(procedureOrSql, conn)
+        {
+            CommandType = commandType
+        };
+
+        if (parameters != null)
+            foreach (var param in parameters)
+                cmd.Parameters.AddWithValue(NormalizeParameterName(param.Key, commandType),
+                    param.Value ?? DBNull.Value);
+
+        await conn.OpenAsync();
+        return useAsync
+            ? await cmd.ExecuteScalarAsync()
+            : cmd.ExecuteScalar();
+    }
+
+    private static string NormalizeParameterName(string key, CommandType commandType)
+    {
+        // For stored procedures, parameter names should not start with '@'.
+        return commandType == CommandType.StoredProcedure && key.StartsWith("@")
+            ? key.Substring(1)
+            : key;
     }
 }
