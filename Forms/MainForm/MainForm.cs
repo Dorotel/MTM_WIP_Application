@@ -46,7 +46,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void InventoryButtonReset_Click()
+    private async void InventoryButtonReset_Click()
     {
         try
         {
@@ -54,6 +54,40 @@ public partial class MainForm : Form
             MainForm_Inventory_ComboBox_Loc.Visible = false;
             MainForm_Inventory_ComboBox_Op.Visible = false;
             MainForm_Inventory_ComboBox_Part.Visible = false;
+
+            // Reinitialize ComboBox DataTables
+            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+                "md_part_ids_Get_All",
+                new MySqlConnection(WipAppVariables.ConnectionString),
+                new MySqlDataAdapter(),
+                new DataTable(),
+                MainForm_Inventory_ComboBox_Part,
+                "Item Number",
+                "ID",
+                "[ Enter Part ID ]",
+                CommandType.StoredProcedure);
+
+            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+                "md_operation_numbers_Get_All",
+                new MySqlConnection(WipAppVariables.ConnectionString),
+                new MySqlDataAdapter(),
+                new DataTable(),
+                MainForm_Inventory_ComboBox_Op,
+                "Operation",
+                "Operation",
+                "[ Enter Op # ]",
+                CommandType.StoredProcedure);
+
+            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+                "md_locations_Get_All",
+                new MySqlConnection(WipAppVariables.ConnectionString),
+                new MySqlDataAdapter(),
+                new DataTable(),
+                MainForm_Inventory_ComboBox_Loc,
+                "Location",
+                "Location",
+                "[ Enter Location ]",
+                CommandType.StoredProcedure);
 
             MainFormTabResetHelper.ResetInventoryTab(
                 MainForm_Inventory_ComboBox_Loc,
@@ -289,21 +323,31 @@ public partial class MainForm : Form
             await using var connection = new MySqlConnection(WipAppVariables.ConnectionString);
 
             var comboBoxSets =
-                new (MySqlDataAdapter Adapter, DataTable Table, ComboBox ComboBox, string Query, string Display, string
-                    Value, string Placeholder)[]
+                new (MySqlDataAdapter Adapter, DataTable Table, ComboBox ComboBox, string ProcName, string Display,
+                    string Value, string Placeholder, CommandType CommandType)[]
                     {
                         (new MySqlDataAdapter(), new DataTable(), MainForm_Inventory_ComboBox_Part,
-                            "SELECT * FROM md_part_ids", "Item Number", "ID", "[ Enter Part ID ]"),
+                            "md_part_ids_Get_All", "Item Number", "ID", "[ Enter Part ID ]",
+                            CommandType.StoredProcedure),
                         (new MySqlDataAdapter(), new DataTable(), MainForm_Inventory_ComboBox_Op,
-                            "SELECT * FROM md_operation_numbers", "Operation", "Operation", "[ Enter Op # ]"),
+                            "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
+                            CommandType.StoredProcedure),
                         (new MySqlDataAdapter(), new DataTable(), MainForm_Inventory_ComboBox_Loc,
-                            "SELECT * FROM md_locations", "Location", "Location", "[ Enter Location ]")
+                            "md_locations_Get_All", "Location", "Location", "[ Enter Location ]",
+                            CommandType.StoredProcedure)
                     };
 
-            foreach (var (adapter, table, comboBox, query, display, value, placeholder) in comboBoxSets)
+            foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
                 await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                    query, connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()), table, comboBox, display,
-                    value, placeholder
+                    procName,
+                    connection,
+                    adapter,
+                    table,
+                    comboBox,
+                    display,
+                    value,
+                    placeholder,
+                    cmdType
                 );
             AppLogger.Log("Inventory tab ComboBoxes loaded.");
         }
@@ -456,6 +500,16 @@ public partial class MainForm : Form
                 MainFormControlHelper.AdjustQuantityByKey_Quantity(sender, e, "[ Enter Valid Quantity ]", Color.Black,
                     Color.Red);
 
+            // Highlight notes RichTextBox on Enter/Leave
+            MainForm_Inventory_RichTextBox_Notes.Enter += (s, e) =>
+            {
+                MainForm_Inventory_RichTextBox_Notes.BackColor = Color.LightBlue;
+            };
+            MainForm_Inventory_RichTextBox_Notes.Leave += (s, e) =>
+            {
+                MainForm_Inventory_RichTextBox_Notes.BackColor = SystemColors.Window;
+            };
+
             AppLogger.Log("Inventory tab events wired up.");
         }
         catch (Exception ex)
@@ -465,40 +519,17 @@ public partial class MainForm : Form
         }
     }
 
-    public static void VersionChecker(object? sender, ElapsedEventArgs e)
+    // Add this method to your MainForm class
+    public void SetVersionLabel(string currentVersion, string serverVersion)
     {
-        Debug.WriteLine("Running VersionChecker...");
-        AppLogger.Log("Running VersionChecker...");
-
-        using var connection = new MySqlConnection(SqlVariables.GetConnectionString(null, null, null, null));
-        connection.Open();
-
-        using var command = new MySqlCommand("SELECT * FROM `program_information`", connection);
-        using var reader = command.ExecuteReader();
-        while (reader.Read())
+        if (MainForm_Inventory_Label_Version.InvokeRequired)
         {
-            var databaseVersion = reader.GetString(1);
-
-            if (databaseVersion != WipAppVariables.UserVersion)
-            {
-                AppLogger.Log(
-                    $"Version mismatch detected. Current: {WipAppVariables.UserVersion}, Expected: {databaseVersion}");
-                Debug.WriteLine(
-                    $"Version mismatch detected. Current: {WipAppVariables.UserVersion}, Expected: {databaseVersion}");
-
-                Task.Run(() =>
-                {
-                    var message = "You are using an older version of the WIP Application.\n" +
-                                  "This normally means a newer version is just about to be released.\n" +
-                                  "The program will close in 30 seconds, or by clicking OK.";
-                    var caption = $"Version Conflict Error ({WipAppVariables.UserVersion}/{databaseVersion})";
-                    MessageBox.Show(message, caption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-
-                    Application.Exit();
-                });
-
-                break;
-            }
+            MainForm_Inventory_Label_Version.Invoke(new Action(() => SetVersionLabel(currentVersion, serverVersion)));
+            return;
         }
+
+        var isOutOfDate = currentVersion != serverVersion;
+        MainForm_Inventory_Label_Version.Text = $@"Client Version: {currentVersion} | Server Version: {serverVersion})";
+        MainForm_Inventory_Label_Version.ForeColor = isOutOfDate ? Color.Red : SystemColors.ControlText;
     }
 }

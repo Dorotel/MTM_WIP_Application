@@ -1,4 +1,8 @@
-﻿namespace MTM_WIP_Application.Forms.MainForm.Classes;
+﻿using System.Data;
+using MTM_WIP_Application.Data;
+using MySql.Data.MySqlClient;
+
+namespace MTM_WIP_Application.Forms.MainForm.Classes;
 
 /// <summary>
 ///     Provides helper methods for resetting the controls on each MainForm tab.
@@ -17,6 +21,55 @@ public static class MainFormTabResetHelper
         Button buttonSave,
         ToolStripMenuItem menuStripFileSave)
     {
+        MainFormControlHelper.ResetComboBox(comboBoxLoc, Color.Red, 0);
+        MainFormControlHelper.ResetComboBox(comboBoxOp, Color.Red, 0);
+        MainFormControlHelper.ResetComboBox(comboBoxPart, Color.Red, 0);
+
+        checkBoxMulti.Checked = false;
+        checkBoxMultiDifferent.Checked = false;
+        if (textBoxHowMany != null)
+        {
+            textBoxHowMany.Clear();
+            textBoxHowMany.Enabled = false;
+        }
+
+        checkBoxMultiDifferent.Enabled = false;
+
+        MainFormControlHelper.ResetTextBox(textBoxQty, Color.Red, "[ Enter Valid Quantity ]");
+        richTextBoxNotes.Text = string.Empty;
+
+        if (comboBoxPart.FindForm() is { } form)
+            MainFormControlHelper.SetActiveControl(form, comboBoxPart);
+        buttonSave.Enabled = false;
+        menuStripFileSave.Enabled = false;
+    }
+
+    public static async Task FullResetInventoryTabAsync(
+        ComboBox comboBoxLoc,
+        ComboBox comboBoxOp,
+        ComboBox comboBoxPart,
+        CheckBox checkBoxMulti,
+        CheckBox checkBoxMultiDifferent,
+        TextBox? textBoxHowMany,
+        TextBox textBoxQty,
+        RichTextBox richTextBoxNotes,
+        Button buttonSave,
+        ToolStripMenuItem menuStripFileSave
+    )
+    {
+        var connection = new MySqlConnection(SqlVariables.GetConnectionString(null, null, null, null));
+        // Reinitialize ComboBox DataTables
+        await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            "md_part_ids_Get_All", connection, null, new DataTable(), comboBoxPart, "Item Number", "ID",
+            "[ Enter Part ID ]", CommandType.StoredProcedure);
+        await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            "md_operation_numbers_Get_All", connection, null, new DataTable(), comboBoxOp, "Operation", "Operation",
+            "[ Enter Op # ]", CommandType.StoredProcedure);
+        await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            "md_locations_Get_All", connection, null, new DataTable(), comboBoxLoc, "Location", "Location",
+            "[ Enter Location ]", CommandType.StoredProcedure);
+
+        // Existing reset logic
         MainFormControlHelper.ResetComboBox(comboBoxLoc, Color.Red, 0);
         MainFormControlHelper.ResetComboBox(comboBoxOp, Color.Red, 0);
         MainFormControlHelper.ResetComboBox(comboBoxPart, Color.Red, 0);

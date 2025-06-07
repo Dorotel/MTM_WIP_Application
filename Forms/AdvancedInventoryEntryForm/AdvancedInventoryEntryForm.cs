@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Color = System.Drawing.Color;
 using MySql.Data.MySqlClient;
-using IDataAdapter = MTM_WIP_Application.Data.IDataAdapter;
 
 namespace MTM_WIP_Application.Forms.AdvancedInventoryEntryForm;
 
@@ -81,10 +80,12 @@ public partial class AdvancedInventoryEntryForm : Form
             case 0: // Tab 1
                 ClientSize = new Size(431, 309);
                 AdvancedEntry_Single_ComboBox_Part.Focus();
+                AdvancedEntry_Single_ComboBox_Part.SelectAll();
                 break;
             case 1: // Tab 2
                 ClientSize = new Size(835, 309);
                 AdvancedEntry_MultiLoc_ComboBox_Part.Focus();
+                AdvancedEntry_MultiLoc_ComboBox_Part.SelectAll();
                 break;
             case 2: // Tab 3
                 ClientSize = new Size(835, 348);
@@ -119,30 +120,73 @@ public partial class AdvancedInventoryEntryForm : Form
         try
         {
             await using var connection = new MySqlConnection(WipAppVariables.ConnectionString);
+
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM md_part_ids", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                "md_part_ids_Get_All",
+                connection,
+                new MySqlDataAdapter(),
                 new DataTable(),
-                AdvancedEntry_Single_ComboBox_Part, "Item Number", "ID", "[ Enter Part ID ]");
+                AdvancedEntry_Single_ComboBox_Part,
+                "Item Number",
+                "ID",
+                "[ Enter Part ID ]",
+                CommandType.StoredProcedure);
+
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM md_operation_numbers", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                "md_operation_numbers_Get_All",
+                connection,
+                new MySqlDataAdapter(),
                 new DataTable(),
-                AdvancedEntry_Single_ComboBox_Op, "Operation", "Operation", "[ Enter Op # ]");
+                AdvancedEntry_Single_ComboBox_Op,
+                "Operation",
+                "Operation",
+                "[ Enter Op # ]",
+                CommandType.StoredProcedure);
+
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM md_locations", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                "md_locations_Get_All",
+                connection,
+                new MySqlDataAdapter(),
                 new DataTable(),
-                AdvancedEntry_Single_ComboBox_Loc, "Location", "Location", "[ Enter Location ]");
+                AdvancedEntry_Single_ComboBox_Loc,
+                "Location",
+                "Location",
+                "[ Enter Location ]",
+                CommandType.StoredProcedure);
+
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM md_part_ids", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                "md_part_ids_Get_All",
+                connection,
+                new MySqlDataAdapter(),
                 new DataTable(),
-                AdvancedEntry_MultiLoc_ComboBox_Part, "Item Number", "ID", "[ Enter Part ID ]");
+                AdvancedEntry_MultiLoc_ComboBox_Part,
+                "Item Number",
+                "ID",
+                "[ Enter Part ID ]",
+                CommandType.StoredProcedure);
+
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM md_operation_numbers", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                "md_operation_numbers_Get_All",
+                connection,
+                new MySqlDataAdapter(),
                 new DataTable(),
-                AdvancedEntry_MultiLoc_ComboBox_Op, "Operation", "Operation", "[ Enter Op # ]");
+                AdvancedEntry_MultiLoc_ComboBox_Op,
+                "Operation",
+                "Operation",
+                "[ Enter Op # ]",
+                CommandType.StoredProcedure);
+
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "SELECT * FROM md_locations", connection, new MySqlDataAdapterWrapper(new MySqlDataAdapter()),
+                "md_locations_Get_All",
+                connection,
+                new MySqlDataAdapter(),
                 new DataTable(),
-                AdvancedEntry_MultiLoc_ComboBox_Loc, "Location", "Location", "[ Enter Location ]");
+                AdvancedEntry_MultiLoc_ComboBox_Loc,
+                "Location",
+                "Location",
+                "[ Enter Location ]",
+                CommandType.StoredProcedure);
+
             AppLogger.Log("AdvancedInventoryEntryForm ComboBoxes loaded.");
         }
         catch (Exception ex)
@@ -184,6 +228,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 AppLogger.Log("Single Qty TextBox changed.");
             };
             AdvancedEntry_Single_TextBox_Qty.Enter += (s, e) => AdvancedEntry_Single_TextBox_Qty.SelectAll();
+            AdvancedEntry_Single_TextBox_Qty.Click += (s, e) => AdvancedEntry_Single_TextBox_Qty.SelectAll();
             AdvancedEntry_Single_TextBox_Qty.KeyDown += (sender, e) =>
             {
                 MainFormControlHelper.AdjustQuantityByKey_Quantity(sender, e, "[ Enter Valid Quantity ]",
@@ -198,6 +243,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 AppLogger.Log("Single Count TextBox changed.");
             };
             AdvancedEntry_Single_TextBox_Count.Enter += (s, e) => AdvancedEntry_Single_TextBox_Count.SelectAll();
+            AdvancedEntry_Single_TextBox_Count.Click += (s, e) => AdvancedEntry_Single_TextBox_Count.SelectAll();
             AdvancedEntry_Single_TextBox_Count.KeyDown += (sender, e) =>
             {
                 MainFormControlHelper.AdjustQuantityByKey_Transfers(sender, e, "[ How Many Transactions ]",
@@ -232,6 +278,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 AppLogger.Log("Multi Qty TextBox changed.");
             };
             AdvancedEntry_MultiLoc_TextBox_Qty.Enter += (s, e) => AdvancedEntry_MultiLoc_TextBox_Qty.SelectAll();
+            AdvancedEntry_MultiLoc_TextBox_Qty.Click += (s, e) => AdvancedEntry_MultiLoc_TextBox_Qty.SelectAll();
             AdvancedEntry_MultiLoc_TextBox_Qty.KeyDown += (sender, e) =>
             {
                 MainFormControlHelper.AdjustQuantityByKey_Quantity(sender, e, "[ Enter Valid Quantity ]",
@@ -250,6 +297,25 @@ public partial class AdvancedInventoryEntryForm : Form
             AdvancedEntry_Single_TextBox_Qty.Click += (s, e) =>
                 AdvancedEntry_Single_TextBox_Qty.SelectAll();
             AdvancedEntry_MultiLoc_TextBox_Qty.Enter += (s, e) => AdvancedEntry_MultiLoc_TextBox_Qty.SelectAll();
+
+            // Highlight notes RichTextBox on Enter
+            AdvancedEntry_Single_RichTextBox_Notes.Enter += (s, e) =>
+            {
+                AdvancedEntry_Single_RichTextBox_Notes.BackColor = Color.LightBlue;
+            };
+            AdvancedEntry_Single_RichTextBox_Notes.Leave += (s, e) =>
+            {
+                AdvancedEntry_Single_RichTextBox_Notes.BackColor = SystemColors.Window;
+            };
+            AdvancedEntry_MultiLoc_RichTextBox_Notes.Enter += (s, e) =>
+            {
+                AdvancedEntry_MultiLoc_RichTextBox_Notes.BackColor = Color.LightBlue;
+            };
+            AdvancedEntry_MultiLoc_RichTextBox_Notes.Leave += (s, e) =>
+            {
+                AdvancedEntry_MultiLoc_RichTextBox_Notes.BackColor = SystemColors.Window;
+            };
+
             AppLogger.Log("AdvancedInventoryEntryForm events wired up.");
         }
         catch (Exception ex)
@@ -331,14 +397,50 @@ public partial class AdvancedInventoryEntryForm : Form
             AdvancedEntry_MultiLoc_ListView_Preview.Items.Count > 0 && partValid && opValid;
     }
 
-    private void AdvancedEntry_Single_Button_Reset_Click(object? sender, EventArgs e)
+    private async void AdvancedEntry_Single_Button_Reset_Click(object? sender, EventArgs e)
     {
         try
         {
             AppLogger.Log("Single Reset button clicked.");
+
             AdvancedEntry_Single_ComboBox_Part.Visible = false;
             AdvancedEntry_Single_ComboBox_Op.Visible = false;
             AdvancedEntry_Single_ComboBox_Loc.Visible = false;
+
+            // Reinitialize ComboBox DataTables
+            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+                "md_part_ids_Get_All",
+                new MySqlConnection(WipAppVariables.ConnectionString),
+                new MySqlDataAdapter(),
+                new DataTable(),
+                AdvancedEntry_Single_ComboBox_Part,
+                "Item Number",
+                "ID",
+                "[ Enter Part ID ]",
+                CommandType.StoredProcedure);
+
+            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+                "md_operation_numbers_Get_All",
+                new MySqlConnection(WipAppVariables.ConnectionString),
+                new MySqlDataAdapter(),
+                new DataTable(),
+                AdvancedEntry_Single_ComboBox_Op,
+                "Operation",
+                "Operation",
+                "[ Enter Op # ]",
+                CommandType.StoredProcedure);
+
+            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+                "md_locations_Get_All",
+                new MySqlConnection(WipAppVariables.ConnectionString),
+                new MySqlDataAdapter(),
+                new DataTable(),
+                AdvancedEntry_Single_ComboBox_Loc,
+                "Location",
+                "Location",
+                "[ Enter Location ]",
+                CommandType.StoredProcedure);
+
             MainFormControlHelper.ResetComboBox(AdvancedEntry_Single_ComboBox_Part, Color.Red, 0);
             MainFormControlHelper.ResetComboBox(AdvancedEntry_Single_ComboBox_Op, Color.Red, 0);
             MainFormControlHelper.ResetComboBox(AdvancedEntry_Single_ComboBox_Loc, Color.Red, 0);
@@ -346,6 +448,7 @@ public partial class AdvancedInventoryEntryForm : Form
             MainFormControlHelper.ResetTextBox(AdvancedEntry_Single_TextBox_Count, Color.Red,
                 "[ Enter How Many Times ]");
             AdvancedEntry_Single_RichTextBox_Notes.Text = string.Empty;
+
             AdvancedEntry_Single_ComboBox_Part.Visible = true;
             AdvancedEntry_Single_ComboBox_Op.Visible = true;
             AdvancedEntry_Single_ComboBox_Loc.Visible = true;
@@ -359,14 +462,50 @@ public partial class AdvancedInventoryEntryForm : Form
         }
     }
 
-    private void AdvancedEntry_MultiLoc_Button_Reset_Click(object? sender, EventArgs e)
+    private async void AdvancedEntry_MultiLoc_Button_Reset_Click(object? sender, EventArgs e)
     {
         try
         {
             AppLogger.Log("Multi Reset button clicked.");
+
             AdvancedEntry_MultiLoc_ComboBox_Part.Visible = false;
             AdvancedEntry_MultiLoc_ComboBox_Op.Visible = false;
             AdvancedEntry_MultiLoc_ComboBox_Loc.Visible = false;
+
+            // Reinitialize ComboBox DataTables
+            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+                "md_part_ids_Get_All",
+                new MySqlConnection(WipAppVariables.ConnectionString),
+                new MySqlDataAdapter(),
+                new DataTable(),
+                AdvancedEntry_MultiLoc_ComboBox_Part,
+                "Item Number",
+                "ID",
+                "[ Enter Part ID ]",
+                CommandType.StoredProcedure);
+
+            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+                "md_operation_numbers_Get_All",
+                new MySqlConnection(WipAppVariables.ConnectionString),
+                new MySqlDataAdapter(),
+                new DataTable(),
+                AdvancedEntry_MultiLoc_ComboBox_Op,
+                "Operation",
+                "Operation",
+                "[ Enter Op # ]",
+                CommandType.StoredProcedure);
+
+            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+                "md_locations_Get_All",
+                new MySqlConnection(WipAppVariables.ConnectionString),
+                new MySqlDataAdapter(),
+                new DataTable(),
+                AdvancedEntry_MultiLoc_ComboBox_Loc,
+                "Location",
+                "Location",
+                "[ Enter Location ]",
+                CommandType.StoredProcedure);
+
             MainFormControlHelper.ResetComboBox(AdvancedEntry_MultiLoc_ComboBox_Part, Color.Red, 0);
             MainFormControlHelper.ResetComboBox(AdvancedEntry_MultiLoc_ComboBox_Op, Color.Red, 0);
             MainFormControlHelper.ResetComboBox(AdvancedEntry_MultiLoc_ComboBox_Loc, Color.Red, 0);
@@ -433,6 +572,268 @@ public partial class AdvancedInventoryEntryForm : Form
             _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false,
                 "AdvancedInventoryEntryForm_ProcessCmdKey");
             return false;
+        }
+    }
+
+    private async void AdvancedEntry_Single_Button_Save_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            AppLogger.Log("AdvancedEntry_Single_Button_Save_Click entered.");
+
+            // Get values from controls
+            var partId = AdvancedEntry_Single_ComboBox_Part.Text;
+            var op = AdvancedEntry_Single_ComboBox_Op.Text;
+            var loc = AdvancedEntry_Single_ComboBox_Loc.Text;
+            var qtyText = AdvancedEntry_Single_TextBox_Qty.Text.Trim();
+            var countText = AdvancedEntry_Single_TextBox_Count.Text.Trim();
+            var notes = AdvancedEntry_Single_RichTextBox_Notes.Text.Trim();
+
+            // Validate input
+            if (string.IsNullOrWhiteSpace(partId) || AdvancedEntry_Single_ComboBox_Part.SelectedIndex <= 0)
+            {
+                MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                AdvancedEntry_Single_ComboBox_Part.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(op) || AdvancedEntry_Single_ComboBox_Op.SelectedIndex <= 0)
+            {
+                MessageBox.Show(@"Please select a valid Operation.", @"Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                AdvancedEntry_Single_ComboBox_Op.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(loc) || AdvancedEntry_Single_ComboBox_Loc.SelectedIndex <= 0)
+            {
+                MessageBox.Show(@"Please select a valid Location.", @"Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                AdvancedEntry_Single_ComboBox_Loc.Focus();
+                return;
+            }
+
+            if (!int.TryParse(qtyText, out var qty) || qty <= 0)
+            {
+                MessageBox.Show(@"Please enter a valid quantity.", @"Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                AdvancedEntry_Single_TextBox_Qty.Focus();
+                return;
+            }
+
+            if (!int.TryParse(countText, out var count) || count <= 0)
+            {
+                MessageBox.Show(@"Please enter a valid transaction count.", @"Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                AdvancedEntry_Single_TextBox_Count.Focus();
+                return;
+            }
+
+            // Set WipAppVariables (if needed)
+            WipAppVariables.PartId = partId;
+            WipAppVariables.Operation = op;
+            WipAppVariables.Location = loc;
+            WipAppVariables.Notes = notes;
+            WipAppVariables.InventoryQuantity = qty;
+            WipAppVariables.User ??= Environment.UserName;
+            WipAppVariables.PartType ??= "";
+
+            // Save the specified number of transactions
+            for (var i = 0; i < count; i++)
+                await InventoryDao.AddInventoryItemAsync(
+                    partId,
+                    loc,
+                    op,
+                    qty,
+                    WipAppVariables.PartType ?? "",
+                    WipAppVariables.User,
+                    "", // batchNumber
+                    notes,
+                    true);
+
+            MessageBox.Show(
+                $@"{count} inventory transaction(s) saved successfully.",
+                @"Success",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+
+            AppLogger.Log(
+                $"Saved {count} inventory transaction(s) for Part: {partId}, Op: {op}, Loc: {loc}, Qty: {qty}");
+
+            // Optionally reset the form after save
+            AdvancedEntry_Single_Button_Reset_Click(null, EventArgs.Empty);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogApplicationError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "AdvancedEntry_Single_Button_Save_Click");
+        }
+    }
+
+    private void AdvancedEntry_MultiLoc_Button_AddLoc_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            AppLogger.Log("AdvancedEntry_MultiLoc_Button_AddLoc_Click entered.");
+
+            // Get values from controls
+            var partId = AdvancedEntry_MultiLoc_ComboBox_Part.Text;
+            var op = AdvancedEntry_MultiLoc_ComboBox_Op.Text;
+            var loc = AdvancedEntry_MultiLoc_ComboBox_Loc.Text;
+            var qtyText = AdvancedEntry_MultiLoc_TextBox_Qty.Text.Trim();
+            var notes = AdvancedEntry_MultiLoc_RichTextBox_Notes.Text.Trim();
+
+            // Validate input
+            if (string.IsNullOrWhiteSpace(partId) || AdvancedEntry_MultiLoc_ComboBox_Part.SelectedIndex <= 0)
+            {
+                MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                AdvancedEntry_MultiLoc_ComboBox_Part.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(op) || AdvancedEntry_MultiLoc_ComboBox_Op.SelectedIndex <= 0)
+            {
+                MessageBox.Show(@"Please select a valid Operation.", @"Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                AdvancedEntry_MultiLoc_ComboBox_Op.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(loc) || AdvancedEntry_MultiLoc_ComboBox_Loc.SelectedIndex <= 0)
+            {
+                MessageBox.Show(@"Please select a valid Location.", @"Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                AdvancedEntry_MultiLoc_ComboBox_Loc.Focus();
+                return;
+            }
+
+            if (!int.TryParse(qtyText, out var qty) || qty <= 0)
+            {
+                MessageBox.Show(@"Please enter a valid quantity.", @"Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                AdvancedEntry_MultiLoc_TextBox_Qty.Focus();
+                return;
+            }
+
+            // Prevent duplicate location entries
+            foreach (ListViewItem item in AdvancedEntry_MultiLoc_ListView_Preview.Items)
+                if (string.Equals(item.SubItems[0].Text, loc, StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show(@"This location has already been added.", @"Duplicate Entry", MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    AdvancedEntry_MultiLoc_ComboBox_Loc.Focus();
+                    return;
+                }
+
+            // Add to ListView
+            var listViewItem = new ListViewItem(new[] { loc, qty.ToString(), notes });
+            AdvancedEntry_MultiLoc_ListView_Preview.Items.Add(listViewItem);
+
+            AppLogger.Log($"Added MultiLoc entry: Loc={loc}, Qty={qty}, Notes={notes}");
+
+            // Reset only the location, quantity, and notes fields for next entry
+            MainFormControlHelper.ResetComboBox(AdvancedEntry_MultiLoc_ComboBox_Loc, Color.Red, 0);
+            AdvancedEntry_MultiLoc_ComboBox_Loc.Focus();
+
+            UpdateMultiSaveButtonState();
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogApplicationError(ex);
+            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false,
+                "AdvancedEntry_MultiLoc_Button_AddLoc_Click");
+        }
+    }
+
+    private async void AdvancedEntry_MultiLoc_Button_SaveAll_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            AppLogger.Log("AdvancedEntry_MultiLoc_Button_SaveAll_Click entered.");
+
+            // Validate that there is at least one entry to save
+            if (AdvancedEntry_MultiLoc_ListView_Preview.Items.Count == 0)
+            {
+                MessageBox.Show(@"Please add at least one location entry before saving.", @"No Entries",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Get shared values from controls
+            var partId = AdvancedEntry_MultiLoc_ComboBox_Part.Text;
+            var op = AdvancedEntry_MultiLoc_ComboBox_Op.Text;
+
+            if (string.IsNullOrWhiteSpace(partId) || AdvancedEntry_MultiLoc_ComboBox_Part.SelectedIndex <= 0)
+            {
+                MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                AdvancedEntry_MultiLoc_ComboBox_Part.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(op) || AdvancedEntry_MultiLoc_ComboBox_Op.SelectedIndex <= 0)
+            {
+                MessageBox.Show(@"Please select a valid Operation.", @"Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                AdvancedEntry_MultiLoc_ComboBox_Op.Focus();
+                return;
+            }
+
+            // Save each entry in the ListView
+            var savedCount = 0;
+            foreach (ListViewItem item in AdvancedEntry_MultiLoc_ListView_Preview.Items)
+            {
+                var loc = item.SubItems[0].Text;
+                var qtyText = item.SubItems[1].Text;
+                var notes = item.SubItems[2].Text;
+
+                if (!int.TryParse(qtyText, out var qty) || qty <= 0)
+                {
+                    AppLogger.LogApplicationError(new Exception($"Invalid quantity for location '{loc}': '{qtyText}'"));
+                    continue;
+                }
+
+                // Set WipAppVariables (if needed)
+                WipAppVariables.PartId = partId;
+                WipAppVariables.Operation = op;
+                WipAppVariables.Location = loc;
+                WipAppVariables.Notes = notes;
+                WipAppVariables.InventoryQuantity = qty;
+                WipAppVariables.User ??= Environment.UserName;
+                WipAppVariables.PartType ??= "";
+
+                await InventoryDao.AddInventoryItemAsync(
+                    partId,
+                    loc,
+                    op,
+                    qty,
+                    WipAppVariables.PartType ?? "",
+                    WipAppVariables.User,
+                    "", // batchNumber
+                    notes,
+                    true);
+
+                savedCount++;
+            }
+
+            MessageBox.Show(
+                $@"{savedCount} inventory transaction(s) saved successfully.",
+                @"Success",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+
+            AppLogger.Log($"Saved {savedCount} multi-location inventory transaction(s) for Part: {partId}, Op: {op}");
+
+            // Optionally reset the form after save
+            AdvancedEntry_MultiLoc_Button_Reset_Click(null, EventArgs.Empty);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogApplicationError(ex);
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true,
+                "AdvancedEntry_MultiLoc_Button_SaveAll_Click");
         }
     }
 }

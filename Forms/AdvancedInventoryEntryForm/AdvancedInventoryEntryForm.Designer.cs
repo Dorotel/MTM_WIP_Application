@@ -111,7 +111,7 @@ partial class AdvancedInventoryEntryForm
         AdvancedEntry_MultiLoc_GroupBox_Preview.SuspendLayout();
         AdvancedEntry_TabControl_Import.SuspendLayout();
         AdvancedEntry_Import_Panel_Buttons.SuspendLayout();
-        ((System.ComponentModel.ISupportInitialize)AdvancedEntry_Import_DataGridView).BeginInit();
+        ((ISupportInitialize)AdvancedEntry_Import_DataGridView).BeginInit();
         SuspendLayout();
         // 
         // AdvancedEntry_TabControl
@@ -197,7 +197,7 @@ partial class AdvancedInventoryEntryForm
         // 
         // AdvancedEntry_Single_Label_Loc
         // 
-        AdvancedEntry_Single_Label_Loc.Location = new Point(6, 79);
+        AdvancedEntry_Single_Label_Loc.Location = new Point(6, 108);
         AdvancedEntry_Single_Label_Loc.Name = "AdvancedEntry_Single_Label_Loc";
         AdvancedEntry_Single_Label_Loc.Size = new Size(100, 24);
         AdvancedEntry_Single_Label_Loc.TabIndex = 4;
@@ -208,14 +208,14 @@ partial class AdvancedInventoryEntryForm
         // 
         AdvancedEntry_Single_ComboBox_Loc.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
         AdvancedEntry_Single_ComboBox_Loc.AutoCompleteSource = AutoCompleteSource.ListItems;
-        AdvancedEntry_Single_ComboBox_Loc.Location = new Point(112, 80);
+        AdvancedEntry_Single_ComboBox_Loc.Location = new Point(112, 109);
         AdvancedEntry_Single_ComboBox_Loc.Name = "AdvancedEntry_Single_ComboBox_Loc";
         AdvancedEntry_Single_ComboBox_Loc.Size = new Size(284, 23);
-        AdvancedEntry_Single_ComboBox_Loc.TabIndex = 3;
+        AdvancedEntry_Single_ComboBox_Loc.TabIndex = 4;
         // 
         // AdvancedEntry_Single_Label_Qty
         // 
-        AdvancedEntry_Single_Label_Qty.Location = new Point(6, 108);
+        AdvancedEntry_Single_Label_Qty.Location = new Point(6, 79);
         AdvancedEntry_Single_Label_Qty.Name = "AdvancedEntry_Single_Label_Qty";
         AdvancedEntry_Single_Label_Qty.Size = new Size(100, 24);
         AdvancedEntry_Single_Label_Qty.TabIndex = 6;
@@ -224,10 +224,10 @@ partial class AdvancedInventoryEntryForm
         // 
         // AdvancedEntry_Single_TextBox_Qty
         // 
-        AdvancedEntry_Single_TextBox_Qty.Location = new Point(112, 109);
+        AdvancedEntry_Single_TextBox_Qty.Location = new Point(112, 80);
         AdvancedEntry_Single_TextBox_Qty.Name = "AdvancedEntry_Single_TextBox_Qty";
         AdvancedEntry_Single_TextBox_Qty.Size = new Size(284, 23);
-        AdvancedEntry_Single_TextBox_Qty.TabIndex = 4;
+        AdvancedEntry_Single_TextBox_Qty.TabIndex = 3;
         // 
         // AdvancedEntry_Single_Label_Count
         // 
@@ -269,6 +269,7 @@ partial class AdvancedInventoryEntryForm
         AdvancedEntry_Single_Button_Save.Size = new Size(80, 30);
         AdvancedEntry_Single_Button_Save.TabIndex = 7;
         AdvancedEntry_Single_Button_Save.Text = "Save";
+        AdvancedEntry_Single_Button_Save.Click += AdvancedEntry_Single_Button_Save_Click;
         // 
         // AdvancedEntry_Single_Button_Reset
         // 
@@ -375,7 +376,7 @@ partial class AdvancedInventoryEntryForm
         AdvancedEntry_MultiLoc_RichTextBox_Notes.Location = new Point(112, 138);
         AdvancedEntry_MultiLoc_RichTextBox_Notes.Name = "AdvancedEntry_MultiLoc_RichTextBox_Notes";
         AdvancedEntry_MultiLoc_RichTextBox_Notes.Size = new Size(284, 60);
-        AdvancedEntry_MultiLoc_RichTextBox_Notes.TabIndex = 4;
+        AdvancedEntry_MultiLoc_RichTextBox_Notes.TabIndex = 5;
         AdvancedEntry_MultiLoc_RichTextBox_Notes.Text = "";
         // 
         // AdvancedEntry_MultiLoc_Label_Loc
@@ -394,15 +395,16 @@ partial class AdvancedInventoryEntryForm
         AdvancedEntry_MultiLoc_ComboBox_Loc.Location = new Point(112, 109);
         AdvancedEntry_MultiLoc_ComboBox_Loc.Name = "AdvancedEntry_MultiLoc_ComboBox_Loc";
         AdvancedEntry_MultiLoc_ComboBox_Loc.Size = new Size(284, 23);
-        AdvancedEntry_MultiLoc_ComboBox_Loc.TabIndex = 9;
+        AdvancedEntry_MultiLoc_ComboBox_Loc.TabIndex = 4;
         // 
         // AdvancedEntry_MultiLoc_Button_AddLoc
         // 
         AdvancedEntry_MultiLoc_Button_AddLoc.Location = new Point(112, 204);
         AdvancedEntry_MultiLoc_Button_AddLoc.Name = "AdvancedEntry_MultiLoc_Button_AddLoc";
         AdvancedEntry_MultiLoc_Button_AddLoc.Size = new Size(284, 30);
-        AdvancedEntry_MultiLoc_Button_AddLoc.TabIndex = 10;
+        AdvancedEntry_MultiLoc_Button_AddLoc.TabIndex = 6;
         AdvancedEntry_MultiLoc_Button_AddLoc.Text = "Add Location";
+        AdvancedEntry_MultiLoc_Button_AddLoc.Click += AdvancedEntry_MultiLoc_Button_AddLoc_Click;
         // 
         // AdvancedEntry_MultiLoc_GroupBox_Preview
         // 
@@ -433,7 +435,9 @@ partial class AdvancedInventoryEntryForm
         AdvancedEntry_MultiLoc_Button_SaveAll.Name = "AdvancedEntry_MultiLoc_Button_SaveAll";
         AdvancedEntry_MultiLoc_Button_SaveAll.Size = new Size(100, 30);
         AdvancedEntry_MultiLoc_Button_SaveAll.TabIndex = 1;
+        AdvancedEntry_MultiLoc_Button_SaveAll.TabStop = false;
         AdvancedEntry_MultiLoc_Button_SaveAll.Text = "Save All";
+        AdvancedEntry_MultiLoc_Button_SaveAll.Click += AdvancedEntry_MultiLoc_Button_SaveAll_Click;
         // 
         // AdvancedEntry_MultiLoc_Button_Reset
         // 
@@ -441,6 +445,7 @@ partial class AdvancedInventoryEntryForm
         AdvancedEntry_MultiLoc_Button_Reset.Name = "AdvancedEntry_MultiLoc_Button_Reset";
         AdvancedEntry_MultiLoc_Button_Reset.Size = new Size(100, 30);
         AdvancedEntry_MultiLoc_Button_Reset.TabIndex = 2;
+        AdvancedEntry_MultiLoc_Button_Reset.TabStop = false;
         AdvancedEntry_MultiLoc_Button_Reset.Text = "Reset";
         // 
         // AdvancedEntry_TabControl_Import
@@ -546,7 +551,7 @@ partial class AdvancedInventoryEntryForm
         AdvancedEntry_MultiLoc_GroupBox_Preview.ResumeLayout(false);
         AdvancedEntry_TabControl_Import.ResumeLayout(false);
         AdvancedEntry_Import_Panel_Buttons.ResumeLayout(false);
-        ((System.ComponentModel.ISupportInitialize)AdvancedEntry_Import_DataGridView).EndInit();
+        ((ISupportInitialize)AdvancedEntry_Import_DataGridView).EndInit();
         ResumeLayout(false);
     }
 }

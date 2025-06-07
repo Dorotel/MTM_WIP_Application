@@ -2,7 +2,6 @@
 using MySql.Data.MySqlClient;
 using System.Threading;
 using MTM_WIP_Application.Data;
-using IDataAdapter = MTM_WIP_Application.Data.IDataAdapter;
 
 namespace MTM_WIP_Application.Forms.MainForm.Classes;
 
@@ -117,28 +116,28 @@ public static class MainFormComboBoxDataHelper
 
     public static async Task FillAllComboBoxesAsync(
         MySqlConnection connection,
-        IDataAdapter inventoryTabPartCbDataAdapter,
+        MySqlDataAdapter inventoryTabPartCbDataAdapter,
         DataTable inventoryTabPartCbDataTable,
         ComboBox inventoryTabComboBoxPart,
-        IDataAdapter inventoryTabOpCbDataAdapter,
+        MySqlDataAdapter inventoryTabOpCbDataAdapter,
         DataTable inventoryTabOpCbDataTable,
         ComboBox inventoryTabComboBoxOp,
-        IDataAdapter inventoryTabLocationCbDataAdapter,
+        MySqlDataAdapter inventoryTabLocationCbDataAdapter,
         DataTable inventoryTabLocationCbDataTable,
         ComboBox inventoryTabComboBoxLoc,
-        IDataAdapter removeTabPartCbDataAdapter,
+        MySqlDataAdapter removeTabPartCbDataAdapter,
         DataTable removeTabPartCbDataTable,
         ComboBox removeTabComboBoxPart,
-        IDataAdapter removeTabOpCbDataAdapter,
+        MySqlDataAdapter removeTabOpCbDataAdapter,
         DataTable removeTabComboBoxOpDataTable,
         ComboBox removeTabComboBoxOp,
-        IDataAdapter removeTabCBoxSearchByTypeDataAdapter,
+        MySqlDataAdapter removeTabCBoxSearchByTypeDataAdapter,
         DataTable removeTabComboBoxSearchByTypeDataTable,
         ComboBox removeTabCBoxShowAll,
-        IDataAdapter transferTabLocationCbDataAdapter,
+        MySqlDataAdapter transferTabLocationCbDataAdapter,
         DataTable transferTabLocationCbDataTable,
         ComboBox transferTabComboBoxLoc,
-        IDataAdapter transferTabPartCbDataAdapter,
+        MySqlDataAdapter transferTabPartCbDataAdapter,
         DataTable transferTabPartCbDataTable,
         ComboBox transferTabComboBoxPart)
     {
@@ -176,45 +175,58 @@ public static class MainFormComboBoxDataHelper
             .ConfigureAwait(false);
     }
 
+    // Use System.Data.MySqlDataAdapter for the adapter parameter
     public static async Task FillComboBoxAsync(
-        string query,
+        string procedureName,
         MySqlConnection connection,
-        IDataAdapter dataAdapter,
+        MySqlDataAdapter adapter,
         DataTable dataTable,
         ComboBox comboBox,
         string displayMember,
         string valueMember,
-        string defaultText)
+        string placeholder,
+        CommandType commandType = CommandType.Text)
     {
         MySqlCommand? command = null;
         try
         {
-            command = new MySqlCommand(query, connection);
-            if (dataAdapter is MySqlDataAdapterWrapper wrapper)
-                wrapper.SelectCommand = command;
-            await Task.Run(() => dataAdapter.Fill(dataTable)).ConfigureAwait(false);
+            if (connection.State != ConnectionState.Open)
+                await connection.OpenAsync();
+
+            command = new MySqlCommand(procedureName, connection)
+            {
+                CommandType = commandType
+            };
+
+            // Assign the command if the adapter is a MySqlDataAdapter
+            var mySqlAdapter = adapter as MySqlDataAdapter;
+            if (mySqlAdapter != null)
+                mySqlAdapter.SelectCommand = command;
+            // else: handle your custom wrapper here if you need
+
+            dataTable.Clear();
+            await Task.Run(() => adapter.Fill(dataTable)).ConfigureAwait(false);
 
             void SetComboBox()
             {
-                if (dataTable.Rows.Count == 0 || !Equals(dataTable.Rows[0][displayMember], defaultText))
+                var needsPlaceholder = dataTable.Rows.Count == 0 ||
+                                       !Equals(dataTable.Rows[0][displayMember]?.ToString(), placeholder);
+
+                if (needsPlaceholder)
                 {
                     var row = dataTable.NewRow();
-                    // Set display column to default text
-                    row[displayMember] = defaultText;
-
-                    // For ID/integer columns, use a placeholder value like -1
+                    row[displayMember] = placeholder;
                     if (dataTable.Columns[valueMember].DataType == typeof(int))
                         row[valueMember] = -1;
                     else
-                        // For non-integer columns, use the default text
-                        row[valueMember] = defaultText;
-
+                        row[valueMember] = placeholder;
                     dataTable.Rows.InsertAt(row, 0);
                 }
 
                 comboBox.DataSource = dataTable;
                 comboBox.DisplayMember = displayMember;
                 comboBox.ValueMember = valueMember;
+                comboBox.SelectedIndex = 0;
             }
 
             if (comboBox.InvokeRequired)

@@ -1,3 +1,4 @@
+using MTM_WIP_Application.Core;
 using MTM_WIP_Application.ErrorHandling;
 using MTM_WIP_Application.Forms.MainForm;
 using MTM_WIP_Application.Helpers;
@@ -87,6 +88,16 @@ internal static class Program
     internal static void RunApplication()
     {
         var mainForm = new MainForm();
+
+        // Get current and server version
+        var currentVersion = WipAppVariables.UserVersion;
+        var serverVersion = VersionCheckerService.LastCheckedDatabaseVersion ?? "unknown";
+
+        // Set version label on startup (always show both for debugging)
+        mainForm.SetVersionLabel(currentVersion, serverVersion);
+
+        // Register the MainForm instance for live updates (if desired)
+        VersionCheckerService.MainFormInstance = mainForm;
 
         Debug.WriteLine("Starting main form...");
         AppLogger.Log("Starting main form...");

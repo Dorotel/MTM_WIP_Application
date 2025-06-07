@@ -1,4 +1,3 @@
-
 using System;
 using System.Data;
 using System.Threading.Tasks;
@@ -11,12 +10,6 @@ namespace MTM_WIP_Application.Data;
 
 public static class InventoryDao
 {
-    #region For Testing
-
-    public static ISqlHelper SqlHelper { get; set; } = new SqlHelper("...");
-
-    #endregion
-
     #region Search Methods
 
     public static async Task<DataTable> GetAllInventoryAsync(bool useAsync = false)
@@ -96,12 +89,14 @@ public static class InventoryDao
 
     #region Modification Methods
 
+    private static readonly SqlHelper SqlHelper = new(SqlVariables.GetConnectionString(null, null, null, null));
+
     public static async Task<int> AddInventoryItemAsync(
         string partId, string location, string operation, int quantity, string itemType,
         string user, string batchNumber, string notes, bool useAsync = false)
     {
         return await SqlHelper.ExecuteNonQuery(
-            "mtm_wip_application.inv_inventory_Add_Item",
+            "inv_inventory_Add_Item",
             new Dictionary<string, object>
             {
                 { "p_PartID", partId },
@@ -160,4 +155,3 @@ public static class InventoryDao
 }
 
 #endregion
-
