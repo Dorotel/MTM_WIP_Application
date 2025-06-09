@@ -22,7 +22,7 @@ internal static class VersionCheckerService
 
     // Allow MainForm instance to be set so we can update UI from here if desired
     public static MainForm? MainFormInstance { get; set; }
-    public static Control_InventoryTab? ControlInventoryInstance { get; set; }
+    public static ControlInventoryTab? ControlInventoryInstance { get; set; }
 
     public static void Initialize()
     {

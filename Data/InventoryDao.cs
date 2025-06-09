@@ -74,6 +74,27 @@ public static class InventoryDao
             useAsync, CommandType.StoredProcedure);
     }
 
+    public static async Task<DataTable> GetInventoryByPartIdAsync(string partId, bool useAsync = false)
+    {
+        return await SqlHelper.ExecuteDataTable(
+            "mtm_wip_application.inv_inventory_Get_ByPartID",
+            new Dictionary<string, object> { { "p_PartID", partId } },
+            useAsync, CommandType.StoredProcedure);
+    }
+
+    public static async Task<DataTable> GetInventoryByPartIdAndOperationAsync(string partId, string operation,
+        bool useAsync = false)
+    {
+        return await SqlHelper.ExecuteDataTable(
+            "mtm_wip_application.inv_inventory_Get_ByPartIDAndOperation",
+            new Dictionary<string, object>
+            {
+                { "p_PartID", partId },
+                { "o_Operation", operation }
+            },
+            useAsync, CommandType.StoredProcedure);
+    }
+
     public static async Task<int> GetTotalQuantityByPartIdAsync(string partId, bool useAsync = false)
     {
         var table = await SqlHelper.ExecuteDataTable(

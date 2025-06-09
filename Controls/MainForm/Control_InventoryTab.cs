@@ -11,12 +11,12 @@ using MySql.Data.MySqlClient;
 
 namespace MTM_WIP_Application.Controls.MainForm;
 
-public partial class Control_InventoryTab : UserControl
+public partial class ControlInventoryTab : UserControl
 {
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
 
-    public Control_InventoryTab()
+    public ControlInventoryTab()
     {
         InitializeComponent();
         Control_InventoryTab_Initialize();
@@ -564,15 +564,15 @@ public partial class Control_InventoryTab : UserControl
 
     private void Control_InventoryTab_Button_Toggle_RightPanel_Click(object sender, EventArgs e)
     {
-        if (MainFormInstance != null && !MainFormInstance.MainForm_InventoryTab_SplitContainer_Middle.Panel2Collapsed)
+        if (MainFormInstance != null && !MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed)
         {
-            MainFormInstance.MainForm_InventoryTab_SplitContainer_Middle.Panel2Collapsed = true;
+            MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = true;
             Control_InventoryTab_Button_Toggle_RightPanel.Text = @"Toggle Panel (Off)";
         }
         else
         {
             if (MainFormInstance != null)
-                MainFormInstance.MainForm_InventoryTab_SplitContainer_Middle.Panel2Collapsed = false;
+                MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = false;
             Control_InventoryTab_Button_Toggle_RightPanel.Text = @"Toggle Panel (On)";
         }
     }

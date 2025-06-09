@@ -46,4 +46,16 @@
 		<PackageReference Include="xunit" Version="2.9.3" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Compile Update="Controls\MainForm\Control_RemoveTab.cs">
+	    <SubType>UserControl</SubType>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Controls\MainForm\Control_RemoveTab.resx">
+	    <SubType>Designer</SubType>
+	  </EmbeddedResource>
+	</ItemGroup>
+
 </Project>

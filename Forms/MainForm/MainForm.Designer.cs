@@ -66,47 +66,16 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_MenuStrip_View_ViewOutsideService = new ToolStripMenuItem();
             MainForm_MenuStrip_View_Separator3 = new ToolStripSeparator();
             MainForm_MenuStrip_View_ViewChangelog = new ToolStripMenuItem();
-            MainForm_Remove_GroupBox_Main = new GroupBox();
-            MainForm_Remove_Panel_Header = new Panel();
-            MainForm_Remove_ComboBox_Part = new ComboBox();
-            MainForm_Remove_Label_Part = new Label();
-            MainForm_Remove_Label_Op = new Label();
-            MainForm_Remove_ComboBox_Op = new ComboBox();
-            MainForm_Remove_Panel_DataGrid = new Panel();
-            MainForm_Remove_Image_NothingFound = new PictureBox();
-            MainForm_Remove_DataGrid = new DataGridView();
-            MainForm_Remove_Panel_Buttons = new Panel();
-            MainForm_RemoveTab_Button_AdvancedSearch = new Button();
-            MainForm_Remove_Button_Reset = new Button();
-            MainForm_Remove_Button_Delete = new Button();
-            MainForm_Remove_Button_Search = new Button();
-            MainForm_TabControl = new TabControl();
-            MainForm_TabControl_Inventory = new TabPage();
-            MainForm_InventoryTab_SplitContainer_Middle = new SplitContainer();
-            MainForm_InventoryTab = new Control_InventoryTab();
-            MainForm_TabControl_Remove = new TabPage();
-            MainForm_TabControl_Transfer = new TabPage();
-            MainForm_Transfer_GroupBox_Main = new GroupBox();
-            MainForm_Transfer_Panel_Header = new Panel();
-            MainForm_Transfer_Button_Search = new Button();
-            MainForm_Transfer_ComboBox_Part = new ComboBox();
-            MainForm_Transfer_Label_Part = new Label();
-            MainForm_Transfer_Label_Loc = new Label();
-            MainForm_Transfer_ComboBox_Loc = new ComboBox();
-            MainForm_Transfer_Panel_DataGrid = new Panel();
-            MainForm_Transfer_Image_Nothing = new PictureBox();
-            MainForm_Transfer_DataGrid = new DataGridView();
-            MainForm_Transfer_Panel_Bottom = new Panel();
-            MainForm_Transfer_TextBox_Qty = new TextBox();
-            MainForm_Transfer_Button_Save = new Button();
-            MainForm_Transfer_Label_Qty = new Label();
-            MainForm_Transfer_Button_Reset = new Button();
             MainForm_StatusStrip = new StatusStrip();
             MainForm_StatusStrip_SavedStatus = new ToolStripStatusLabel();
             MainForm_StatusStrip_Disconnected = new ToolStripStatusLabel();
             MainForm_Inventory_PrintDocument = new System.Drawing.Printing.PrintDocument();
             MainForm_Inventory_PrintDialog = new PrintPreviewDialog();
             MainForm_ToolTip = new ToolTip(components);
+            MainForm_Transfer_Button_Search = new Button();
+            MainForm_Transfer_Button_Save = new Button();
+            MainForm_Transfer_Label_Qty = new Label();
+            MainForm_Transfer_Button_Reset = new Button();
             MainForm_Last10_Timer = new System.Windows.Forms.Timer(components);
             MainForm_SplitContainer_Lower = new SplitContainer();
             MainForm_Control_SignalStrength = new ConnectionStrengthControl();
@@ -116,18 +85,36 @@ namespace MTM_WIP_Application.Forms.MainForm
             LeftToolStripPanel = new ToolStripPanel();
             ContentPanel = new ToolStripContentPanel();
             MainForm_TableLayout = new TableLayoutPanel();
+            MainForm_SplitContainer_Middle = new SplitContainer();
+            MainForm_TabControl = new TabControl();
+            MainForm_TabControl_Inventory = new TabPage();
+            controlInventoryTab1 = new ControlInventoryTab();
+            MainForm_TabControl_Remove = new TabPage();
+            MainForm_RemoveTab = new ControlRemoveTab();
+            MainForm_TabControl_Transfer = new TabPage();
+            MainForm_Transfer_GroupBox_Main = new GroupBox();
+            MainForm_Transfer_Panel_Header = new Panel();
+            MainForm_Transfer_ComboBox_Part = new ComboBox();
+            MainForm_Transfer_Label_Part = new Label();
+            MainForm_Transfer_Label_Loc = new Label();
+            MainForm_Transfer_ComboBox_Loc = new ComboBox();
+            MainForm_Transfer_Panel_DataGrid = new Panel();
+            MainForm_Transfer_Image_Nothing = new PictureBox();
+            MainForm_Transfer_DataGrid = new DataGridView();
+            MainForm_Transfer_Panel_Bottom = new Panel();
+            MainForm_Transfer_TextBox_Qty = new TextBox();
             MainForm_MenuStrip.SuspendLayout();
-            MainForm_Remove_GroupBox_Main.SuspendLayout();
-            MainForm_Remove_Panel_Header.SuspendLayout();
-            MainForm_Remove_Panel_DataGrid.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)MainForm_Remove_Image_NothingFound).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)MainForm_Remove_DataGrid).BeginInit();
-            MainForm_Remove_Panel_Buttons.SuspendLayout();
+            MainForm_StatusStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Lower).BeginInit();
+            MainForm_SplitContainer_Lower.Panel1.SuspendLayout();
+            MainForm_SplitContainer_Lower.Panel2.SuspendLayout();
+            MainForm_SplitContainer_Lower.SuspendLayout();
+            MainForm_TableLayout.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Middle).BeginInit();
+            MainForm_SplitContainer_Middle.Panel1.SuspendLayout();
+            MainForm_SplitContainer_Middle.SuspendLayout();
             MainForm_TabControl.SuspendLayout();
             MainForm_TabControl_Inventory.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)MainForm_InventoryTab_SplitContainer_Middle).BeginInit();
-            MainForm_InventoryTab_SplitContainer_Middle.Panel1.SuspendLayout();
-            MainForm_InventoryTab_SplitContainer_Middle.SuspendLayout();
             MainForm_TabControl_Remove.SuspendLayout();
             MainForm_TabControl_Transfer.SuspendLayout();
             MainForm_Transfer_GroupBox_Main.SuspendLayout();
@@ -136,12 +123,6 @@ namespace MTM_WIP_Application.Forms.MainForm
             ((System.ComponentModel.ISupportInitialize)MainForm_Transfer_Image_Nothing).BeginInit();
             ((System.ComponentModel.ISupportInitialize)MainForm_Transfer_DataGrid).BeginInit();
             MainForm_Transfer_Panel_Bottom.SuspendLayout();
-            MainForm_StatusStrip.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Lower).BeginInit();
-            MainForm_SplitContainer_Lower.Panel1.SuspendLayout();
-            MainForm_SplitContainer_Lower.Panel2.SuspendLayout();
-            MainForm_SplitContainer_Lower.SuspendLayout();
-            MainForm_TableLayout.SuspendLayout();
             SuspendLayout();
             // 
             // MainForm_MenuStrip
@@ -151,7 +132,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_MenuStrip.Items.AddRange(new ToolStripItem[] { MainForm_MenuStrip_File, MainForm_MenuStrip_Edit, MainForm_MenuStrip_View });
             MainForm_MenuStrip.Location = new Point(0, 0);
             MainForm_MenuStrip.Name = "MainForm_MenuStrip";
-            MainForm_MenuStrip.Size = new Size(935, 26);
+            MainForm_MenuStrip.Size = new Size(959, 26);
             MainForm_MenuStrip.TabIndex = 1;
             // 
             // MainForm_MenuStrip_File
@@ -301,174 +282,190 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_MenuStrip_View_ViewChangelog.Size = new Size(234, 22);
             MainForm_MenuStrip_View_ViewChangelog.Text = "View Changelog";
             // 
-            // MainForm_Remove_GroupBox_Main
+            // MainForm_StatusStrip
             // 
-            MainForm_Remove_GroupBox_Main.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            MainForm_Remove_GroupBox_Main.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            MainForm_Remove_GroupBox_Main.Controls.Add(MainForm_Remove_Panel_Header);
-            MainForm_Remove_GroupBox_Main.Controls.Add(MainForm_Remove_Panel_DataGrid);
-            MainForm_Remove_GroupBox_Main.Controls.Add(MainForm_Remove_Panel_Buttons);
-            MainForm_Remove_GroupBox_Main.FlatStyle = FlatStyle.Flat;
-            MainForm_Remove_GroupBox_Main.Location = new Point(8, 6);
-            MainForm_Remove_GroupBox_Main.Name = "MainForm_Remove_GroupBox_Main";
-            MainForm_Remove_GroupBox_Main.Size = new Size(910, 378);
-            MainForm_Remove_GroupBox_Main.TabIndex = 16;
-            MainForm_Remove_GroupBox_Main.TabStop = false;
-            MainForm_Remove_GroupBox_Main.Text = "Part Lookup and Remove";
+            MainForm_StatusStrip.Dock = DockStyle.Fill;
+            MainForm_StatusStrip.ImageScalingSize = new Size(24, 24);
+            MainForm_StatusStrip.Items.AddRange(new ToolStripItem[] { MainForm_StatusStrip_SavedStatus, MainForm_StatusStrip_Disconnected });
+            MainForm_StatusStrip.Location = new Point(0, 0);
+            MainForm_StatusStrip.Name = "MainForm_StatusStrip";
+            MainForm_StatusStrip.RenderMode = ToolStripRenderMode.Professional;
+            MainForm_StatusStrip.Size = new Size(884, 25);
+            MainForm_StatusStrip.SizingGrip = false;
+            MainForm_StatusStrip.TabIndex = 18;
             // 
-            // MainForm_Remove_Panel_Header
+            // MainForm_StatusStrip_SavedStatus
             // 
-            MainForm_Remove_Panel_Header.Controls.Add(MainForm_Remove_ComboBox_Part);
-            MainForm_Remove_Panel_Header.Controls.Add(MainForm_Remove_Label_Part);
-            MainForm_Remove_Panel_Header.Controls.Add(MainForm_Remove_Label_Op);
-            MainForm_Remove_Panel_Header.Controls.Add(MainForm_Remove_ComboBox_Op);
-            MainForm_Remove_Panel_Header.Dock = DockStyle.Top;
-            MainForm_Remove_Panel_Header.Location = new Point(3, 19);
-            MainForm_Remove_Panel_Header.Name = "MainForm_Remove_Panel_Header";
-            MainForm_Remove_Panel_Header.Size = new Size(904, 36);
-            MainForm_Remove_Panel_Header.TabIndex = 22;
+            MainForm_StatusStrip_SavedStatus.Name = "MainForm_StatusStrip_SavedStatus";
+            MainForm_StatusStrip_SavedStatus.Size = new Size(0, 20);
             // 
-            // MainForm_Remove_ComboBox_Part
+            // MainForm_StatusStrip_Disconnected
             // 
-            MainForm_Remove_ComboBox_Part.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            MainForm_Remove_ComboBox_Part.AutoCompleteSource = AutoCompleteSource.ListItems;
-            MainForm_Remove_ComboBox_Part.FormattingEnabled = true;
-            MainForm_Remove_ComboBox_Part.Location = new Point(86, 7);
-            MainForm_Remove_ComboBox_Part.Name = "MainForm_Remove_ComboBox_Part";
-            MainForm_Remove_ComboBox_Part.Size = new Size(564, 23);
-            MainForm_Remove_ComboBox_Part.TabIndex = 1;
+            MainForm_StatusStrip_Disconnected.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, FontStyle.Bold | FontStyle.Italic);
+            MainForm_StatusStrip_Disconnected.ForeColor = Color.Red;
+            MainForm_StatusStrip_Disconnected.Name = "MainForm_StatusStrip_Disconnected";
+            MainForm_StatusStrip_Disconnected.Size = new Size(240, 20);
+            MainForm_StatusStrip_Disconnected.Text = "Disconnected from Server, please standby...";
+            MainForm_StatusStrip_Disconnected.Visible = false;
             // 
-            // MainForm_Remove_Label_Part
+            // MainForm_Inventory_PrintDialog
             // 
-            MainForm_Remove_Label_Part.AutoSize = true;
-            MainForm_Remove_Label_Part.Location = new Point(3, 11);
-            MainForm_Remove_Label_Part.Name = "MainForm_Remove_Label_Part";
-            MainForm_Remove_Label_Part.Size = new Size(78, 15);
-            MainForm_Remove_Label_Part.TabIndex = 4;
-            MainForm_Remove_Label_Part.Text = "Part Number:";
+            MainForm_Inventory_PrintDialog.AutoScrollMargin = new Size(0, 0);
+            MainForm_Inventory_PrintDialog.AutoScrollMinSize = new Size(0, 0);
+            MainForm_Inventory_PrintDialog.ClientSize = new Size(400, 300);
+            MainForm_Inventory_PrintDialog.Enabled = true;
+            MainForm_Inventory_PrintDialog.Icon = (Icon)resources.GetObject("MainForm_Inventory_PrintDialog.Icon");
+            MainForm_Inventory_PrintDialog.Name = "MainForm_Inventory_PrintDialog";
+            MainForm_Inventory_PrintDialog.Visible = false;
             // 
-            // MainForm_Remove_Label_Op
+            // MainForm_Transfer_Button_Search
             // 
-            MainForm_Remove_Label_Op.AutoSize = true;
-            MainForm_Remove_Label_Op.Location = new Point(656, 11);
-            MainForm_Remove_Label_Op.Name = "MainForm_Remove_Label_Op";
-            MainForm_Remove_Label_Op.Size = new Size(26, 15);
-            MainForm_Remove_Label_Op.TabIndex = 5;
-            MainForm_Remove_Label_Op.Text = "Op:";
+            MainForm_Transfer_Button_Search.Dock = DockStyle.Right;
+            MainForm_Transfer_Button_Search.FlatStyle = FlatStyle.System;
+            MainForm_Transfer_Button_Search.Location = new Point(1428, 0);
+            MainForm_Transfer_Button_Search.Name = "MainForm_Transfer_Button_Search";
+            MainForm_Transfer_Button_Search.Size = new Size(87, 36);
+            MainForm_Transfer_Button_Search.TabIndex = 2;
+            MainForm_Transfer_Button_Search.Text = "Search";
+            MainForm_ToolTip.SetToolTip(MainForm_Transfer_Button_Search, "Shortcut: None");
+            MainForm_Transfer_Button_Search.UseVisualStyleBackColor = true;
             // 
-            // MainForm_Remove_ComboBox_Op
+            // MainForm_Transfer_Button_Save
             // 
-            MainForm_Remove_ComboBox_Op.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            MainForm_Remove_ComboBox_Op.AutoCompleteSource = AutoCompleteSource.ListItems;
-            MainForm_Remove_ComboBox_Op.FormattingEnabled = true;
-            MainForm_Remove_ComboBox_Op.Location = new Point(688, 7);
-            MainForm_Remove_ComboBox_Op.Name = "MainForm_Remove_ComboBox_Op";
-            MainForm_Remove_ComboBox_Op.Size = new Size(117, 23);
-            MainForm_Remove_ComboBox_Op.TabIndex = 2;
+            MainForm_Transfer_Button_Save.Dock = DockStyle.Right;
+            MainForm_Transfer_Button_Save.FlatStyle = FlatStyle.System;
+            MainForm_Transfer_Button_Save.Location = new Point(1343, 0);
+            MainForm_Transfer_Button_Save.Name = "MainForm_Transfer_Button_Save";
+            MainForm_Transfer_Button_Save.Size = new Size(86, 35);
+            MainForm_Transfer_Button_Save.TabIndex = 6;
+            MainForm_Transfer_Button_Save.Text = "Save";
+            MainForm_ToolTip.SetToolTip(MainForm_Transfer_Button_Save, "Shortcut: Ctrl+S");
+            MainForm_Transfer_Button_Save.UseVisualStyleBackColor = true;
             // 
-            // MainForm_Remove_Panel_DataGrid
+            // MainForm_Transfer_Label_Qty
             // 
-            MainForm_Remove_Panel_DataGrid.Controls.Add(MainForm_Remove_Image_NothingFound);
-            MainForm_Remove_Panel_DataGrid.Controls.Add(MainForm_Remove_DataGrid);
-            MainForm_Remove_Panel_DataGrid.Location = new Point(3, 61);
-            MainForm_Remove_Panel_DataGrid.Name = "MainForm_Remove_Panel_DataGrid";
-            MainForm_Remove_Panel_DataGrid.Size = new Size(811, 281);
-            MainForm_Remove_Panel_DataGrid.TabIndex = 21;
+            MainForm_Transfer_Label_Qty.AutoSize = true;
+            MainForm_Transfer_Label_Qty.Location = new Point(3, 10);
+            MainForm_Transfer_Label_Qty.Name = "MainForm_Transfer_Label_Qty";
+            MainForm_Transfer_Label_Qty.Size = new Size(0, 15);
+            MainForm_Transfer_Label_Qty.TabIndex = 7;
+            MainForm_ToolTip.SetToolTip(MainForm_Transfer_Label_Qty, "Enter an amount to have the application subtract\r\nthat amount from your selected location.\r\n\r\nLeave this blank to transfer the entire amount.");
             // 
-            // MainForm_Remove_Image_NothingFound
+            // MainForm_Transfer_Button_Reset
             // 
-            MainForm_Remove_Image_NothingFound.Dock = DockStyle.Fill;
-            MainForm_Remove_Image_NothingFound.ErrorImage = null;
-            MainForm_Remove_Image_NothingFound.InitialImage = null;
-            MainForm_Remove_Image_NothingFound.Location = new Point(0, 0);
-            MainForm_Remove_Image_NothingFound.Name = "MainForm_Remove_Image_NothingFound";
-            MainForm_Remove_Image_NothingFound.Size = new Size(811, 281);
-            MainForm_Remove_Image_NothingFound.SizeMode = PictureBoxSizeMode.CenterImage;
-            MainForm_Remove_Image_NothingFound.TabIndex = 6;
-            MainForm_Remove_Image_NothingFound.TabStop = false;
+            MainForm_Transfer_Button_Reset.Dock = DockStyle.Right;
+            MainForm_Transfer_Button_Reset.FlatStyle = FlatStyle.System;
+            MainForm_Transfer_Button_Reset.Location = new Point(1429, 0);
+            MainForm_Transfer_Button_Reset.Name = "MainForm_Transfer_Button_Reset";
+            MainForm_Transfer_Button_Reset.Size = new Size(86, 35);
+            MainForm_Transfer_Button_Reset.TabIndex = 19;
+            MainForm_Transfer_Button_Reset.Text = "Reset";
+            MainForm_ToolTip.SetToolTip(MainForm_Transfer_Button_Reset, "Shortcut: Ctrl+R");
+            MainForm_Transfer_Button_Reset.UseVisualStyleBackColor = true;
             // 
-            // MainForm_Remove_DataGrid
+            // MainForm_Last10_Timer
             // 
-            MainForm_Remove_DataGrid.AllowUserToAddRows = false;
-            MainForm_Remove_DataGrid.AllowUserToDeleteRows = false;
-            MainForm_Remove_DataGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            MainForm_Remove_DataGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-            MainForm_Remove_DataGrid.BorderStyle = BorderStyle.Fixed3D;
-            MainForm_Remove_DataGrid.CellBorderStyle = DataGridViewCellBorderStyle.Sunken;
-            MainForm_Remove_DataGrid.ClipboardCopyMode = DataGridViewClipboardCopyMode.Disable;
-            MainForm_Remove_DataGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Sunken;
-            MainForm_Remove_DataGrid.ColumnHeadersHeight = 34;
-            MainForm_Remove_DataGrid.Dock = DockStyle.Fill;
-            MainForm_Remove_DataGrid.EditMode = DataGridViewEditMode.EditProgrammatically;
-            MainForm_Remove_DataGrid.Location = new Point(0, 0);
-            MainForm_Remove_DataGrid.Name = "MainForm_Remove_DataGrid";
-            MainForm_Remove_DataGrid.ReadOnly = true;
-            MainForm_Remove_DataGrid.RowHeadersWidth = 62;
-            MainForm_Remove_DataGrid.RowTemplate.ReadOnly = true;
-            MainForm_Remove_DataGrid.RowTemplate.Resizable = DataGridViewTriState.True;
-            MainForm_Remove_DataGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            MainForm_Remove_DataGrid.ShowCellErrors = false;
-            MainForm_Remove_DataGrid.ShowCellToolTips = false;
-            MainForm_Remove_DataGrid.ShowEditingIcon = false;
-            MainForm_Remove_DataGrid.ShowRowErrors = false;
-            MainForm_Remove_DataGrid.Size = new Size(811, 281);
-            MainForm_Remove_DataGrid.StandardTab = true;
-            MainForm_Remove_DataGrid.TabIndex = 4;
+            MainForm_Last10_Timer.Enabled = true;
+            MainForm_Last10_Timer.Interval = 15000;
             // 
-            // MainForm_Remove_Panel_Buttons
+            // MainForm_SplitContainer_Lower
             // 
-            MainForm_Remove_Panel_Buttons.Controls.Add(MainForm_RemoveTab_Button_AdvancedSearch);
-            MainForm_Remove_Panel_Buttons.Controls.Add(MainForm_Remove_Button_Reset);
-            MainForm_Remove_Panel_Buttons.Controls.Add(MainForm_Remove_Button_Delete);
-            MainForm_Remove_Panel_Buttons.Controls.Add(MainForm_Remove_Button_Search);
-            MainForm_Remove_Panel_Buttons.Dock = DockStyle.Bottom;
-            MainForm_Remove_Panel_Buttons.Location = new Point(3, 334);
-            MainForm_Remove_Panel_Buttons.Name = "MainForm_Remove_Panel_Buttons";
-            MainForm_Remove_Panel_Buttons.Padding = new Padding(3);
-            MainForm_Remove_Panel_Buttons.Size = new Size(904, 41);
-            MainForm_Remove_Panel_Buttons.TabIndex = 20;
+            MainForm_SplitContainer_Lower.Dock = DockStyle.Fill;
+            MainForm_SplitContainer_Lower.IsSplitterFixed = true;
+            MainForm_SplitContainer_Lower.Location = new Point(3, 453);
+            MainForm_SplitContainer_Lower.Name = "MainForm_SplitContainer_Lower";
             // 
-            // MainForm_RemoveTab_Button_AdvancedSearch
+            // MainForm_SplitContainer_Lower.Panel1
             // 
-            MainForm_RemoveTab_Button_AdvancedSearch.ForeColor = Color.DarkRed;
-            MainForm_RemoveTab_Button_AdvancedSearch.Location = new Point(148, 6);
-            MainForm_RemoveTab_Button_AdvancedSearch.Name = "MainForm_RemoveTab_Button_AdvancedSearch";
-            MainForm_RemoveTab_Button_AdvancedSearch.Size = new Size(236, 32);
-            MainForm_RemoveTab_Button_AdvancedSearch.TabIndex = 13;
-            MainForm_RemoveTab_Button_AdvancedSearch.Text = "Advanced Search (Ctrl + Alt + S)";
-            MainForm_ToolTip.SetToolTip(MainForm_RemoveTab_Button_AdvancedSearch, "Shortcut: Ctrl+Alt+S");
-            MainForm_RemoveTab_Button_AdvancedSearch.UseVisualStyleBackColor = true;
+            MainForm_SplitContainer_Lower.Panel1.Controls.Add(MainForm_StatusStrip);
             // 
-            // MainForm_Remove_Button_Reset
+            // MainForm_SplitContainer_Lower.Panel2
             // 
-            MainForm_Remove_Button_Reset.Location = new Point(581, 6);
-            MainForm_Remove_Button_Reset.Name = "MainForm_Remove_Button_Reset";
-            MainForm_Remove_Button_Reset.Size = new Size(131, 32);
-            MainForm_Remove_Button_Reset.TabIndex = 5;
-            MainForm_Remove_Button_Reset.TabStop = false;
-            MainForm_Remove_Button_Reset.Text = "Reset ( Ctrl + R )";
-            MainForm_ToolTip.SetToolTip(MainForm_Remove_Button_Reset, "Shortcut: Ctrl+R");
-            MainForm_Remove_Button_Reset.UseVisualStyleBackColor = true;
+            MainForm_SplitContainer_Lower.Panel2.Controls.Add(MainForm_Control_SignalStrength);
+            MainForm_SplitContainer_Lower.Panel2.Padding = new Padding(4);
+            MainForm_SplitContainer_Lower.Size = new Size(953, 25);
+            MainForm_SplitContainer_Lower.SplitterDistance = 884;
+            MainForm_SplitContainer_Lower.SplitterWidth = 1;
+            MainForm_SplitContainer_Lower.TabIndex = 92;
             // 
-            // MainForm_Remove_Button_Delete
+            // MainForm_Control_SignalStrength
             // 
-            MainForm_Remove_Button_Delete.Location = new Point(718, 6);
-            MainForm_Remove_Button_Delete.Name = "MainForm_Remove_Button_Delete";
-            MainForm_Remove_Button_Delete.Size = new Size(87, 32);
-            MainForm_Remove_Button_Delete.TabIndex = 8;
-            MainForm_Remove_Button_Delete.Text = "Delete ( Del )";
-            MainForm_ToolTip.SetToolTip(MainForm_Remove_Button_Delete, "Shortcut: Del");
-            MainForm_Remove_Button_Delete.UseVisualStyleBackColor = true;
+            MainForm_Control_SignalStrength.BackColor = SystemColors.Control;
+            MainForm_Control_SignalStrength.Dock = DockStyle.Bottom;
+            MainForm_Control_SignalStrength.Location = new Point(4, 6);
+            MainForm_Control_SignalStrength.Margin = new Padding(0);
+            MainForm_Control_SignalStrength.Name = "MainForm_Control_SignalStrength";
+            MainForm_Control_SignalStrength.Ping = -1;
+            MainForm_Control_SignalStrength.Size = new Size(60, 15);
+            MainForm_Control_SignalStrength.Strength = 0;
+            MainForm_Control_SignalStrength.TabIndex = 0;
             // 
-            // MainForm_Remove_Button_Search
+            // BottomToolStripPanel
             // 
-            MainForm_Remove_Button_Search.Location = new Point(6, 6);
-            MainForm_Remove_Button_Search.Name = "MainForm_Remove_Button_Search";
-            MainForm_Remove_Button_Search.Size = new Size(136, 32);
-            MainForm_Remove_Button_Search.TabIndex = 3;
-            MainForm_Remove_Button_Search.Text = "Search ( Ctrl + S )";
-            MainForm_ToolTip.SetToolTip(MainForm_Remove_Button_Search, "Shortcut: Ctrl+S");
-            MainForm_Remove_Button_Search.UseVisualStyleBackColor = true;
+            BottomToolStripPanel.Location = new Point(0, 0);
+            BottomToolStripPanel.Name = "BottomToolStripPanel";
+            BottomToolStripPanel.Orientation = Orientation.Horizontal;
+            BottomToolStripPanel.RowMargin = new Padding(3, 0, 0, 0);
+            BottomToolStripPanel.Size = new Size(0, 0);
+            // 
+            // TopToolStripPanel
+            // 
+            TopToolStripPanel.Location = new Point(0, 0);
+            TopToolStripPanel.Name = "TopToolStripPanel";
+            TopToolStripPanel.Orientation = Orientation.Horizontal;
+            TopToolStripPanel.RowMargin = new Padding(3, 0, 0, 0);
+            TopToolStripPanel.Size = new Size(0, 0);
+            // 
+            // RightToolStripPanel
+            // 
+            RightToolStripPanel.Location = new Point(0, 0);
+            RightToolStripPanel.Name = "RightToolStripPanel";
+            RightToolStripPanel.Orientation = Orientation.Horizontal;
+            RightToolStripPanel.RowMargin = new Padding(3, 0, 0, 0);
+            RightToolStripPanel.Size = new Size(0, 0);
+            // 
+            // LeftToolStripPanel
+            // 
+            LeftToolStripPanel.Location = new Point(0, 0);
+            LeftToolStripPanel.Name = "LeftToolStripPanel";
+            LeftToolStripPanel.Orientation = Orientation.Horizontal;
+            LeftToolStripPanel.RowMargin = new Padding(3, 0, 0, 0);
+            LeftToolStripPanel.Size = new Size(0, 0);
+            // 
+            // ContentPanel
+            // 
+            ContentPanel.Size = new Size(125, 175);
+            // 
+            // MainForm_TableLayout
+            // 
+            MainForm_TableLayout.ColumnCount = 1;
+            MainForm_TableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            MainForm_TableLayout.Controls.Add(MainForm_MenuStrip, 0, 0);
+            MainForm_TableLayout.Controls.Add(MainForm_SplitContainer_Lower, 0, 2);
+            MainForm_TableLayout.Controls.Add(MainForm_SplitContainer_Middle, 0, 1);
+            MainForm_TableLayout.Dock = DockStyle.Fill;
+            MainForm_TableLayout.Location = new Point(0, 0);
+            MainForm_TableLayout.Name = "MainForm_TableLayout";
+            MainForm_TableLayout.RowCount = 3;
+            MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+            MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 31F));
+            MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            MainForm_TableLayout.Size = new Size(959, 481);
+            MainForm_TableLayout.TabIndex = 94;
+            // 
+            // MainForm_SplitContainer_Middle
+            // 
+            MainForm_SplitContainer_Middle.Dock = DockStyle.Fill;
+            MainForm_SplitContainer_Middle.Location = new Point(3, 29);
+            MainForm_SplitContainer_Middle.Name = "MainForm_SplitContainer_Middle";
+            // 
+            // MainForm_SplitContainer_Middle.Panel1
+            // 
+            MainForm_SplitContainer_Middle.Panel1.Controls.Add(MainForm_TabControl);
+            MainForm_SplitContainer_Middle.Size = new Size(953, 418);
+            MainForm_SplitContainer_Middle.SplitterDistance = 823;
+            MainForm_SplitContainer_Middle.TabIndex = 93;
             // 
             // MainForm_TabControl
             // 
@@ -476,63 +473,57 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl.Controls.Add(MainForm_TabControl_Remove);
             MainForm_TabControl.Controls.Add(MainForm_TabControl_Transfer);
             MainForm_TabControl.Dock = DockStyle.Fill;
-            MainForm_TabControl.Location = new Point(3, 29);
+            MainForm_TabControl.Location = new Point(0, 0);
             MainForm_TabControl.Multiline = true;
             MainForm_TabControl.Name = "MainForm_TabControl";
             MainForm_TabControl.SelectedIndex = 0;
             MainForm_TabControl.ShowToolTips = true;
-            MainForm_TabControl.Size = new Size(929, 418);
+            MainForm_TabControl.Size = new Size(823, 418);
             MainForm_TabControl.SizeMode = TabSizeMode.FillToRight;
-            MainForm_TabControl.TabIndex = 90;
+            MainForm_TabControl.TabIndex = 91;
             MainForm_TabControl.TabStop = false;
             // 
             // MainForm_TabControl_Inventory
             // 
-            MainForm_TabControl_Inventory.Controls.Add(MainForm_InventoryTab_SplitContainer_Middle);
+            MainForm_TabControl_Inventory.Controls.Add(controlInventoryTab1);
             MainForm_TabControl_Inventory.Location = new Point(4, 24);
             MainForm_TabControl_Inventory.Name = "MainForm_TabControl_Inventory";
             MainForm_TabControl_Inventory.Padding = new Padding(3);
-            MainForm_TabControl_Inventory.Size = new Size(921, 390);
+            MainForm_TabControl_Inventory.Size = new Size(815, 390);
             MainForm_TabControl_Inventory.TabIndex = 0;
             MainForm_TabControl_Inventory.Text = "New Transaction (Ctrl+1)";
             MainForm_TabControl_Inventory.ToolTipText = "Shortcut: Ctrl+1";
             MainForm_TabControl_Inventory.UseVisualStyleBackColor = true;
             // 
-            // MainForm_InventoryTab_SplitContainer_Middle
+            // controlInventoryTab1
             // 
-            MainForm_InventoryTab_SplitContainer_Middle.Dock = DockStyle.Fill;
-            MainForm_InventoryTab_SplitContainer_Middle.Location = new Point(3, 3);
-            MainForm_InventoryTab_SplitContainer_Middle.Name = "MainForm_InventoryTab_SplitContainer_Middle";
-            // 
-            // MainForm_InventoryTab_SplitContainer_Middle.Panel1
-            // 
-            MainForm_InventoryTab_SplitContainer_Middle.Panel1.Controls.Add(MainForm_InventoryTab);
-            MainForm_InventoryTab_SplitContainer_Middle.Panel1MinSize = 815;
-            MainForm_InventoryTab_SplitContainer_Middle.Panel2MinSize = 0;
-            MainForm_InventoryTab_SplitContainer_Middle.Size = new Size(915, 384);
-            MainForm_InventoryTab_SplitContainer_Middle.SplitterDistance = 815;
-            MainForm_InventoryTab_SplitContainer_Middle.TabIndex = 0;
-            // 
-            // MainForm_InventoryTab
-            // 
-            MainForm_InventoryTab.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            MainForm_InventoryTab.Dock = DockStyle.Fill;
-            MainForm_InventoryTab.Location = new Point(0, 0);
-            MainForm_InventoryTab.Name = "MainForm_InventoryTab";
-            MainForm_InventoryTab.Size = new Size(815, 384);
-            MainForm_InventoryTab.TabIndex = 0;
+            controlInventoryTab1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            controlInventoryTab1.Dock = DockStyle.Fill;
+            controlInventoryTab1.Location = new Point(3, 3);
+            controlInventoryTab1.Name = "controlInventoryTab1";
+            controlInventoryTab1.Size = new Size(809, 384);
+            controlInventoryTab1.TabIndex = 0;
             // 
             // MainForm_TabControl_Remove
             // 
-            MainForm_TabControl_Remove.Controls.Add(MainForm_Remove_GroupBox_Main);
+            MainForm_TabControl_Remove.Controls.Add(MainForm_RemoveTab);
             MainForm_TabControl_Remove.Location = new Point(4, 24);
             MainForm_TabControl_Remove.Name = "MainForm_TabControl_Remove";
             MainForm_TabControl_Remove.Padding = new Padding(3);
-            MainForm_TabControl_Remove.Size = new Size(921, 390);
+            MainForm_TabControl_Remove.Size = new Size(817, 390);
             MainForm_TabControl_Remove.TabIndex = 1;
             MainForm_TabControl_Remove.Text = "Remove (Ctrl + 2)";
             MainForm_TabControl_Remove.ToolTipText = "Shortcut: Ctrl+2";
             MainForm_TabControl_Remove.UseVisualStyleBackColor = true;
+            // 
+            // MainForm_RemoveTab
+            // 
+            MainForm_RemoveTab.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            MainForm_RemoveTab.Dock = DockStyle.Fill;
+            MainForm_RemoveTab.Location = new Point(3, 3);
+            MainForm_RemoveTab.Name = "MainForm_RemoveTab";
+            MainForm_RemoveTab.Size = new Size(811, 384);
+            MainForm_RemoveTab.TabIndex = 0;
             // 
             // MainForm_TabControl_Transfer
             // 
@@ -540,7 +531,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Transfer.Location = new Point(4, 24);
             MainForm_TabControl_Transfer.Name = "MainForm_TabControl_Transfer";
             MainForm_TabControl_Transfer.Padding = new Padding(3);
-            MainForm_TabControl_Transfer.Size = new Size(921, 390);
+            MainForm_TabControl_Transfer.Size = new Size(817, 390);
             MainForm_TabControl_Transfer.TabIndex = 2;
             MainForm_TabControl_Transfer.Text = "Transfer (Ctrl+3)";
             MainForm_TabControl_Transfer.ToolTipText = "Shortcut: Ctrl+3";
@@ -552,9 +543,9 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_GroupBox_Main.Controls.Add(MainForm_Transfer_Panel_Header);
             MainForm_Transfer_GroupBox_Main.Controls.Add(MainForm_Transfer_Panel_DataGrid);
             MainForm_Transfer_GroupBox_Main.Controls.Add(MainForm_Transfer_Panel_Bottom);
-            MainForm_Transfer_GroupBox_Main.Location = new Point(8, 6);
+            MainForm_Transfer_GroupBox_Main.Location = new Point(11, 9);
             MainForm_Transfer_GroupBox_Main.Name = "MainForm_Transfer_GroupBox_Main";
-            MainForm_Transfer_GroupBox_Main.Size = new Size(910, 377);
+            MainForm_Transfer_GroupBox_Main.Size = new Size(1521, 661);
             MainForm_Transfer_GroupBox_Main.TabIndex = 0;
             MainForm_Transfer_GroupBox_Main.TabStop = false;
             MainForm_Transfer_GroupBox_Main.Text = "Location Change";
@@ -569,20 +560,8 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_Panel_Header.Dock = DockStyle.Top;
             MainForm_Transfer_Panel_Header.Location = new Point(3, 19);
             MainForm_Transfer_Panel_Header.Name = "MainForm_Transfer_Panel_Header";
-            MainForm_Transfer_Panel_Header.Size = new Size(904, 36);
+            MainForm_Transfer_Panel_Header.Size = new Size(1515, 36);
             MainForm_Transfer_Panel_Header.TabIndex = 23;
-            // 
-            // MainForm_Transfer_Button_Search
-            // 
-            MainForm_Transfer_Button_Search.Dock = DockStyle.Right;
-            MainForm_Transfer_Button_Search.FlatStyle = FlatStyle.System;
-            MainForm_Transfer_Button_Search.Location = new Point(817, 0);
-            MainForm_Transfer_Button_Search.Name = "MainForm_Transfer_Button_Search";
-            MainForm_Transfer_Button_Search.Size = new Size(87, 36);
-            MainForm_Transfer_Button_Search.TabIndex = 2;
-            MainForm_Transfer_Button_Search.Text = "Search";
-            MainForm_ToolTip.SetToolTip(MainForm_Transfer_Button_Search, "Shortcut: None");
-            MainForm_Transfer_Button_Search.UseVisualStyleBackColor = true;
             // 
             // MainForm_Transfer_ComboBox_Part
             // 
@@ -629,7 +608,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_Panel_DataGrid.Controls.Add(MainForm_Transfer_DataGrid);
             MainForm_Transfer_Panel_DataGrid.Location = new Point(3, 61);
             MainForm_Transfer_Panel_DataGrid.Name = "MainForm_Transfer_Panel_DataGrid";
-            MainForm_Transfer_Panel_DataGrid.Size = new Size(901, 272);
+            MainForm_Transfer_Panel_DataGrid.Size = new Size(2222, 833);
             MainForm_Transfer_Panel_DataGrid.TabIndex = 25;
             // 
             // MainForm_Transfer_Image_Nothing
@@ -639,7 +618,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_Image_Nothing.InitialImage = null;
             MainForm_Transfer_Image_Nothing.Location = new Point(0, 0);
             MainForm_Transfer_Image_Nothing.Name = "MainForm_Transfer_Image_Nothing";
-            MainForm_Transfer_Image_Nothing.Size = new Size(901, 272);
+            MainForm_Transfer_Image_Nothing.Size = new Size(2222, 833);
             MainForm_Transfer_Image_Nothing.SizeMode = PictureBoxSizeMode.CenterImage;
             MainForm_Transfer_Image_Nothing.TabIndex = 19;
             MainForm_Transfer_Image_Nothing.TabStop = false;
@@ -670,7 +649,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_DataGrid.ShowCellToolTips = false;
             MainForm_Transfer_DataGrid.ShowEditingIcon = false;
             MainForm_Transfer_DataGrid.ShowRowErrors = false;
-            MainForm_Transfer_DataGrid.Size = new Size(901, 272);
+            MainForm_Transfer_DataGrid.Size = new Size(2222, 833);
             MainForm_Transfer_DataGrid.StandardTab = true;
             MainForm_Transfer_DataGrid.TabIndex = 5;
             MainForm_Transfer_DataGrid.TabStop = false;
@@ -682,9 +661,9 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_Panel_Bottom.Controls.Add(MainForm_Transfer_Label_Qty);
             MainForm_Transfer_Panel_Bottom.Controls.Add(MainForm_Transfer_Button_Reset);
             MainForm_Transfer_Panel_Bottom.Dock = DockStyle.Bottom;
-            MainForm_Transfer_Panel_Bottom.Location = new Point(3, 339);
+            MainForm_Transfer_Panel_Bottom.Location = new Point(3, 623);
             MainForm_Transfer_Panel_Bottom.Name = "MainForm_Transfer_Panel_Bottom";
-            MainForm_Transfer_Panel_Bottom.Size = new Size(904, 35);
+            MainForm_Transfer_Panel_Bottom.Size = new Size(1515, 35);
             MainForm_Transfer_Panel_Bottom.TabIndex = 24;
             // 
             // MainForm_Transfer_TextBox_Qty
@@ -694,169 +673,10 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_TextBox_Qty.Size = new Size(187, 23);
             MainForm_Transfer_TextBox_Qty.TabIndex = 3;
             // 
-            // MainForm_Transfer_Button_Save
-            // 
-            MainForm_Transfer_Button_Save.Dock = DockStyle.Right;
-            MainForm_Transfer_Button_Save.FlatStyle = FlatStyle.System;
-            MainForm_Transfer_Button_Save.Location = new Point(732, 0);
-            MainForm_Transfer_Button_Save.Name = "MainForm_Transfer_Button_Save";
-            MainForm_Transfer_Button_Save.Size = new Size(86, 35);
-            MainForm_Transfer_Button_Save.TabIndex = 6;
-            MainForm_Transfer_Button_Save.Text = "Save";
-            MainForm_ToolTip.SetToolTip(MainForm_Transfer_Button_Save, "Shortcut: Ctrl+S");
-            MainForm_Transfer_Button_Save.UseVisualStyleBackColor = true;
-            // 
-            // MainForm_Transfer_Label_Qty
-            // 
-            MainForm_Transfer_Label_Qty.AutoSize = true;
-            MainForm_Transfer_Label_Qty.Location = new Point(3, 10);
-            MainForm_Transfer_Label_Qty.Name = "MainForm_Transfer_Label_Qty";
-            MainForm_Transfer_Label_Qty.Size = new Size(0, 15);
-            MainForm_Transfer_Label_Qty.TabIndex = 7;
-            MainForm_ToolTip.SetToolTip(MainForm_Transfer_Label_Qty, "Enter an amount to have the application subtract\r\nthat amount from your selected location.\r\n\r\nLeave this blank to transfer the entire amount.");
-            // 
-            // MainForm_Transfer_Button_Reset
-            // 
-            MainForm_Transfer_Button_Reset.Dock = DockStyle.Right;
-            MainForm_Transfer_Button_Reset.FlatStyle = FlatStyle.System;
-            MainForm_Transfer_Button_Reset.Location = new Point(818, 0);
-            MainForm_Transfer_Button_Reset.Name = "MainForm_Transfer_Button_Reset";
-            MainForm_Transfer_Button_Reset.Size = new Size(86, 35);
-            MainForm_Transfer_Button_Reset.TabIndex = 19;
-            MainForm_Transfer_Button_Reset.Text = "Reset";
-            MainForm_ToolTip.SetToolTip(MainForm_Transfer_Button_Reset, "Shortcut: Ctrl+R");
-            MainForm_Transfer_Button_Reset.UseVisualStyleBackColor = true;
-            // 
-            // MainForm_StatusStrip
-            // 
-            MainForm_StatusStrip.Dock = DockStyle.Fill;
-            MainForm_StatusStrip.ImageScalingSize = new Size(24, 24);
-            MainForm_StatusStrip.Items.AddRange(new ToolStripItem[] { MainForm_StatusStrip_SavedStatus, MainForm_StatusStrip_Disconnected });
-            MainForm_StatusStrip.Location = new Point(0, 0);
-            MainForm_StatusStrip.Name = "MainForm_StatusStrip";
-            MainForm_StatusStrip.RenderMode = ToolStripRenderMode.Professional;
-            MainForm_StatusStrip.Size = new Size(862, 25);
-            MainForm_StatusStrip.SizingGrip = false;
-            MainForm_StatusStrip.TabIndex = 18;
-            // 
-            // MainForm_StatusStrip_SavedStatus
-            // 
-            MainForm_StatusStrip_SavedStatus.Name = "MainForm_StatusStrip_SavedStatus";
-            MainForm_StatusStrip_SavedStatus.Size = new Size(0, 20);
-            // 
-            // MainForm_StatusStrip_Disconnected
-            // 
-            MainForm_StatusStrip_Disconnected.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, FontStyle.Bold | FontStyle.Italic);
-            MainForm_StatusStrip_Disconnected.ForeColor = Color.Red;
-            MainForm_StatusStrip_Disconnected.Name = "MainForm_StatusStrip_Disconnected";
-            MainForm_StatusStrip_Disconnected.Size = new Size(240, 20);
-            MainForm_StatusStrip_Disconnected.Text = "Disconnected from Server, please standby...";
-            MainForm_StatusStrip_Disconnected.Visible = false;
-            // 
-            // MainForm_Inventory_PrintDialog
-            // 
-            MainForm_Inventory_PrintDialog.AutoScrollMargin = new Size(0, 0);
-            MainForm_Inventory_PrintDialog.AutoScrollMinSize = new Size(0, 0);
-            MainForm_Inventory_PrintDialog.ClientSize = new Size(400, 300);
-            MainForm_Inventory_PrintDialog.Enabled = true;
-            MainForm_Inventory_PrintDialog.Icon = (Icon)resources.GetObject("MainForm_Inventory_PrintDialog.Icon");
-            MainForm_Inventory_PrintDialog.Name = "MainForm_Inventory_PrintDialog";
-            MainForm_Inventory_PrintDialog.Visible = false;
-            // 
-            // MainForm_Last10_Timer
-            // 
-            MainForm_Last10_Timer.Enabled = true;
-            MainForm_Last10_Timer.Interval = 15000;
-            // 
-            // MainForm_SplitContainer_Lower
-            // 
-            MainForm_SplitContainer_Lower.Dock = DockStyle.Fill;
-            MainForm_SplitContainer_Lower.IsSplitterFixed = true;
-            MainForm_SplitContainer_Lower.Location = new Point(3, 453);
-            MainForm_SplitContainer_Lower.Name = "MainForm_SplitContainer_Lower";
-            // 
-            // MainForm_SplitContainer_Lower.Panel1
-            // 
-            MainForm_SplitContainer_Lower.Panel1.Controls.Add(MainForm_StatusStrip);
-            // 
-            // MainForm_SplitContainer_Lower.Panel2
-            // 
-            MainForm_SplitContainer_Lower.Panel2.Controls.Add(MainForm_Control_SignalStrength);
-            MainForm_SplitContainer_Lower.Panel2.Padding = new Padding(4);
-            MainForm_SplitContainer_Lower.Size = new Size(929, 25);
-            MainForm_SplitContainer_Lower.SplitterDistance = 862;
-            MainForm_SplitContainer_Lower.SplitterWidth = 1;
-            MainForm_SplitContainer_Lower.TabIndex = 92;
-            // 
-            // MainForm_Control_SignalStrength
-            // 
-            MainForm_Control_SignalStrength.BackColor = SystemColors.Control;
-            MainForm_Control_SignalStrength.Dock = DockStyle.Bottom;
-            MainForm_Control_SignalStrength.Location = new Point(4, 6);
-            MainForm_Control_SignalStrength.Margin = new Padding(0);
-            MainForm_Control_SignalStrength.Name = "MainForm_Control_SignalStrength";
-            MainForm_Control_SignalStrength.Ping = -1;
-            MainForm_Control_SignalStrength.Size = new Size(58, 15);
-            MainForm_Control_SignalStrength.Strength = 0;
-            MainForm_Control_SignalStrength.TabIndex = 0;
-            // 
-            // BottomToolStripPanel
-            // 
-            BottomToolStripPanel.Location = new Point(0, 0);
-            BottomToolStripPanel.Name = "BottomToolStripPanel";
-            BottomToolStripPanel.Orientation = Orientation.Horizontal;
-            BottomToolStripPanel.RowMargin = new Padding(3, 0, 0, 0);
-            BottomToolStripPanel.Size = new Size(0, 0);
-            // 
-            // TopToolStripPanel
-            // 
-            TopToolStripPanel.Location = new Point(0, 0);
-            TopToolStripPanel.Name = "TopToolStripPanel";
-            TopToolStripPanel.Orientation = Orientation.Horizontal;
-            TopToolStripPanel.RowMargin = new Padding(3, 0, 0, 0);
-            TopToolStripPanel.Size = new Size(0, 0);
-            // 
-            // RightToolStripPanel
-            // 
-            RightToolStripPanel.Location = new Point(0, 0);
-            RightToolStripPanel.Name = "RightToolStripPanel";
-            RightToolStripPanel.Orientation = Orientation.Horizontal;
-            RightToolStripPanel.RowMargin = new Padding(3, 0, 0, 0);
-            RightToolStripPanel.Size = new Size(0, 0);
-            // 
-            // LeftToolStripPanel
-            // 
-            LeftToolStripPanel.Location = new Point(0, 0);
-            LeftToolStripPanel.Name = "LeftToolStripPanel";
-            LeftToolStripPanel.Orientation = Orientation.Horizontal;
-            LeftToolStripPanel.RowMargin = new Padding(3, 0, 0, 0);
-            LeftToolStripPanel.Size = new Size(0, 0);
-            // 
-            // ContentPanel
-            // 
-            ContentPanel.Size = new Size(125, 175);
-            // 
-            // MainForm_TableLayout
-            // 
-            MainForm_TableLayout.ColumnCount = 1;
-            MainForm_TableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            MainForm_TableLayout.Controls.Add(MainForm_MenuStrip, 0, 0);
-            MainForm_TableLayout.Controls.Add(MainForm_TabControl, 0, 1);
-            MainForm_TableLayout.Controls.Add(MainForm_SplitContainer_Lower, 0, 2);
-            MainForm_TableLayout.Dock = DockStyle.Fill;
-            MainForm_TableLayout.Location = new Point(0, 0);
-            MainForm_TableLayout.Name = "MainForm_TableLayout";
-            MainForm_TableLayout.RowCount = 3;
-            MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
-            MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 31F));
-            MainForm_TableLayout.Size = new Size(935, 481);
-            MainForm_TableLayout.TabIndex = 94;
-            // 
             // MainForm
             // 
             AutoScaleMode = AutoScaleMode.None;
-            ClientSize = new Size(935, 481);
+            ClientSize = new Size(959, 481);
             Controls.Add(MainForm_TableLayout);
             DoubleBuffered = true;
             HelpButton = true;
@@ -865,25 +685,27 @@ namespace MTM_WIP_Application.Forms.MainForm
             KeyPreview = true;
             MainMenuStrip = MainForm_MenuStrip;
             MaximizeBox = false;
-            MaximumSize = new Size(951, 520);
-            MinimumSize = new Size(951, 520);
+            MaximumSize = new Size(975, 520);
+            MinimumSize = new Size(975, 520);
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Manitowoc Tool and Manufacturing | WIP Inventory System |";
             MainForm_MenuStrip.ResumeLayout(false);
             MainForm_MenuStrip.PerformLayout();
-            MainForm_Remove_GroupBox_Main.ResumeLayout(false);
-            MainForm_Remove_Panel_Header.ResumeLayout(false);
-            MainForm_Remove_Panel_Header.PerformLayout();
-            MainForm_Remove_Panel_DataGrid.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)MainForm_Remove_Image_NothingFound).EndInit();
-            ((System.ComponentModel.ISupportInitialize)MainForm_Remove_DataGrid).EndInit();
-            MainForm_Remove_Panel_Buttons.ResumeLayout(false);
+            MainForm_StatusStrip.ResumeLayout(false);
+            MainForm_StatusStrip.PerformLayout();
+            MainForm_SplitContainer_Lower.Panel1.ResumeLayout(false);
+            MainForm_SplitContainer_Lower.Panel1.PerformLayout();
+            MainForm_SplitContainer_Lower.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Lower).EndInit();
+            MainForm_SplitContainer_Lower.ResumeLayout(false);
+            MainForm_TableLayout.ResumeLayout(false);
+            MainForm_TableLayout.PerformLayout();
+            MainForm_SplitContainer_Middle.Panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Middle).EndInit();
+            MainForm_SplitContainer_Middle.ResumeLayout(false);
             MainForm_TabControl.ResumeLayout(false);
             MainForm_TabControl_Inventory.ResumeLayout(false);
-            MainForm_InventoryTab_SplitContainer_Middle.Panel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)MainForm_InventoryTab_SplitContainer_Middle).EndInit();
-            MainForm_InventoryTab_SplitContainer_Middle.ResumeLayout(false);
             MainForm_TabControl_Remove.ResumeLayout(false);
             MainForm_TabControl_Transfer.ResumeLayout(false);
             MainForm_Transfer_GroupBox_Main.ResumeLayout(false);
@@ -894,15 +716,6 @@ namespace MTM_WIP_Application.Forms.MainForm
             ((System.ComponentModel.ISupportInitialize)MainForm_Transfer_DataGrid).EndInit();
             MainForm_Transfer_Panel_Bottom.ResumeLayout(false);
             MainForm_Transfer_Panel_Bottom.PerformLayout();
-            MainForm_StatusStrip.ResumeLayout(false);
-            MainForm_StatusStrip.PerformLayout();
-            MainForm_SplitContainer_Lower.Panel1.ResumeLayout(false);
-            MainForm_SplitContainer_Lower.Panel1.PerformLayout();
-            MainForm_SplitContainer_Lower.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Lower).EndInit();
-            MainForm_SplitContainer_Lower.ResumeLayout(false);
-            MainForm_TableLayout.ResumeLayout(false);
-            MainForm_TableLayout.PerformLayout();
             ResumeLayout(false);
 
 
@@ -938,25 +751,28 @@ namespace MTM_WIP_Application.Forms.MainForm
         private ToolStripSeparator MainForm_MenuStrip_View_Separator3;
         private ToolStripMenuItem MainForm_MenuStrip_View_ViewChangelog;
 
-        private GroupBox MainForm_Remove_GroupBox_Main;
-        private Panel MainForm_Remove_Panel_Header;
-        private ComboBox MainForm_Remove_ComboBox_Part;
-        private Label MainForm_Remove_Label_Part;
-        private Label MainForm_Remove_Label_Op;
-        private ComboBox MainForm_Remove_ComboBox_Op;
-        private Panel MainForm_Remove_Panel_DataGrid;
-        private PictureBox MainForm_Remove_Image_NothingFound;
-        private DataGridView MainForm_Remove_DataGrid;
-        private Panel MainForm_Remove_Panel_Buttons;
-        private Button MainForm_Remove_Button_Reset;
-        private Button MainForm_Remove_Button_Delete;
-        private Button MainForm_Remove_Button_Search;
+        private StatusStrip MainForm_StatusStrip;
+        public ToolStripStatusLabel MainForm_StatusStrip_SavedStatus;
+        public ToolStripStatusLabel MainForm_StatusStrip_Disconnected;
 
+        private System.Drawing.Printing.PrintDocument MainForm_Inventory_PrintDocument;
+        private PrintPreviewDialog MainForm_Inventory_PrintDialog;
+        private ToolTip MainForm_ToolTip;
+
+        private System.Windows.Forms.Timer MainForm_Last10_Timer;
+        public SplitContainer MainForm_SplitContainer_Lower;
+        public ConnectionStrengthControl MainForm_Control_SignalStrength;
+        private ToolStripPanel BottomToolStripPanel;
+        private ToolStripPanel TopToolStripPanel;
+        private ToolStripPanel LeftToolStripPanel;
+        private ToolStripContentPanel ContentPanel;
+        private ToolStripPanel RightToolStripPanel;
+        private TableLayoutPanel MainForm_TableLayout;
+        public SplitContainer MainForm_SplitContainer_Middle;
         public TabControl MainForm_TabControl;
         private TabPage MainForm_TabControl_Inventory;
         private TabPage MainForm_TabControl_Remove;
         private TabPage MainForm_TabControl_Transfer;
-
         private GroupBox MainForm_Transfer_GroupBox_Main;
         private Panel MainForm_Transfer_Panel_Header;
         private Button MainForm_Transfer_Button_Search;
@@ -972,26 +788,7 @@ namespace MTM_WIP_Application.Forms.MainForm
         private Button MainForm_Transfer_Button_Save;
         private Label MainForm_Transfer_Label_Qty;
         private Button MainForm_Transfer_Button_Reset;
-
-        private StatusStrip MainForm_StatusStrip;
-        public ToolStripStatusLabel MainForm_StatusStrip_SavedStatus;
-        public ToolStripStatusLabel MainForm_StatusStrip_Disconnected;
-
-        private System.Drawing.Printing.PrintDocument MainForm_Inventory_PrintDocument;
-        private PrintPreviewDialog MainForm_Inventory_PrintDialog;
-        private ToolTip MainForm_ToolTip;
-
-        private System.Windows.Forms.Timer MainForm_Last10_Timer;
-        private Button MainForm_RemoveTab_Button_AdvancedSearch;
-        public SplitContainer MainForm_SplitContainer_Lower;
-        public ConnectionStrengthControl MainForm_Control_SignalStrength;
-        private ToolStripPanel BottomToolStripPanel;
-        private ToolStripPanel TopToolStripPanel;
-        private ToolStripPanel LeftToolStripPanel;
-        private ToolStripContentPanel ContentPanel;
-        private ToolStripPanel RightToolStripPanel;
-        private TableLayoutPanel MainForm_TableLayout;
-        private Control_InventoryTab MainForm_InventoryTab;
-        public SplitContainer MainForm_InventoryTab_SplitContainer_Middle;
+        private ControlInventoryTab controlInventoryTab1;
+        private ControlRemoveTab MainForm_RemoveTab;
     }
 }

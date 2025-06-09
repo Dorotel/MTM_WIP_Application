@@ -1,6 +1,6 @@
 ﻿namespace MTM_WIP_Application.Controls.MainForm
 {
-    partial class Control_InventoryTab
+    partial class ControlInventoryTab
     {
         /// <summary> 
         /// Required designer variable.
@@ -275,7 +275,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             Controls.Add(Control_InventoryTab_GroupBox_Main);
-            Name = "Control_InventoryTab";
+            Name = "ControlRemoveTab";
             Size = new Size(815, 384);
             Control_InventoryTab_GroupBox_Main.ResumeLayout(false);
             Control_InventoryTab_TableLayout_Main.ResumeLayout(false);
