@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Timers;
 using System.Windows.Forms;
 using MTM_WIP_Application.Controls;
+using MTM_WIP_Application.Controls.MainForm;
 using Timer = System.Timers.Timer;
 
 namespace MTM_WIP_Application.Services;

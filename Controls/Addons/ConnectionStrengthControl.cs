@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel;
-using System.Drawing;
-using System.Windows.Forms;
 
-namespace MTM_WIP_Application.Controls;
+namespace MTM_WIP_Application.Controls.Addons;
 
 public partial class ConnectionStrengthControl : UserControl
 {
@@ -19,7 +17,12 @@ public partial class ConnectionStrengthControl : UserControl
         {
             if (InvokeRequired)
             {
-                Invoke(new MethodInvoker(() => Strength = value));
+                Invoke(new MethodInvoker(() =>
+                {
+                    _strength = Math.Max(0, Math.Min(5, value));
+                    UpdateToolTip();
+                    Invalidate();
+                }));
                 return;
             }
 
@@ -38,7 +41,11 @@ public partial class ConnectionStrengthControl : UserControl
         {
             if (InvokeRequired)
             {
-                Invoke(new MethodInvoker(() => Ping = value));
+                Invoke(new MethodInvoker(() =>
+                {
+                    _ping = value;
+                    UpdateToolTip();
+                }));
                 return;
             }
 
@@ -96,7 +103,7 @@ public partial class ConnectionStrengthControl : UserControl
     }
 
 
-    private Color GetBarColor(int barIndex, int barCount)
+    private static Color GetBarColor(int barIndex, int barCount)
     {
         // Interpolate from red (low) to green (high)
         var t = barCount == 1 ? 1f : (float)barIndex / (barCount - 1);
@@ -106,7 +113,7 @@ public partial class ConnectionStrengthControl : UserControl
         return Color.FromArgb(r, g, b);
     }
 
-    private void ConnectionStrengthControl_Paint(object sender, PaintEventArgs e)
+    private void ConnectionStrengthControl_Paint(object? sender, PaintEventArgs e)
     {
         var g = e.Graphics;
         var barCount = 5;

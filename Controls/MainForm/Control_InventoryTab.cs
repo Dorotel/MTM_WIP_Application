@@ -1,21 +1,20 @@
-﻿using MTM_WIP_Application.Core;
+﻿using System.ComponentModel;
+using System.Data;
+using System.Text;
+using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Data;
 using MTM_WIP_Application.Forms.AdvancedInventoryEntryForm;
-using MTM_WIP_Application.Forms.MainForm;
 using MTM_WIP_Application.Forms.MainForm.Classes;
 using MTM_WIP_Application.Logging;
 using MTM_WIP_Application.Services;
 using MySql.Data.MySqlClient;
-using System.ComponentModel;
-using System.Data;
-using System.Text;
 
-namespace MTM_WIP_Application.Controls;
+namespace MTM_WIP_Application.Controls.MainForm;
 
 public partial class Control_InventoryTab : UserControl
 {
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public static MainForm? MainFormInstance { get; set; }
+    public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
 
     public Control_InventoryTab()
     {

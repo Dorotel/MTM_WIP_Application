@@ -1,4 +1,4 @@
-﻿namespace MTM_WIP_Application.Controls
+﻿namespace MTM_WIP_Application.Controls.Addons
 {
     partial class ConnectionStrengthControl
     {

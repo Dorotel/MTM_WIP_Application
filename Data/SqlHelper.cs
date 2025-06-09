@@ -1,32 +1,20 @@
-
 using System;
 using System.Data;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-
 using MySql.Data.MySqlClient;
 using MTM_WIP_Application.Core;
 
 namespace MTM_WIP_Application.Data;
 
-public class SqlHelper : ISqlHelper
+public class SqlHelper(string connectionString) : ISqlHelper
 {
-
-    private readonly string _connectionString;
-
-
-    public SqlHelper(string connectionString)
-    {
-        _connectionString = connectionString;
-    }
-
     private static string NormalizeParameterName(string key, CommandType commandType)
     {
         // For stored procedures, parameter names should not start with '@'.
-        return commandType == CommandType.StoredProcedure && key.StartsWith("@")
-            ? key.Substring(1)
+        return commandType == CommandType.StoredProcedure && "@".StartsWith(key)
+            ? key[1..]
             : key;
-
     }
 
     public async Task<int> ExecuteNonQuery(
@@ -35,7 +23,7 @@ public class SqlHelper : ISqlHelper
         bool useAsync = false,
         CommandType commandType = CommandType.StoredProcedure)
     {
-        using var conn = new MySqlConnection(_connectionString);
+        using var conn = new MySqlConnection(connectionString);
         using var cmd = new MySqlCommand(procedureOrSql, conn)
         {
             CommandType = commandType
@@ -54,14 +42,12 @@ public class SqlHelper : ISqlHelper
 
 
     public async Task<DataTable> ExecuteDataTable(
-
         string procedureOrSql,
         Dictionary<string, object>? parameters = null,
         bool useAsync = false,
         CommandType commandType = CommandType.StoredProcedure)
     {
-
-        using var conn = new MySqlConnection(_connectionString);
+        using var conn = new MySqlConnection(connectionString);
         using var cmd = new MySqlCommand(procedureOrSql, conn)
 
         {
@@ -88,7 +74,6 @@ public class SqlHelper : ISqlHelper
         }
 
         return table;
-
     }
 
     public async Task<object?> ExecuteScalar(
@@ -97,7 +82,7 @@ public class SqlHelper : ISqlHelper
         bool useAsync = false,
         CommandType commandType = CommandType.StoredProcedure)
     {
-        using var conn = new MySqlConnection(_connectionString);
+        using var conn = new MySqlConnection(connectionString);
         using var cmd = new MySqlCommand(procedureOrSql, conn)
         {
             CommandType = commandType
@@ -121,7 +106,7 @@ public class SqlHelper : ISqlHelper
         bool useAsync = false,
         CommandType commandType = CommandType.StoredProcedure)
     {
-        var conn = new MySqlConnection(_connectionString);
+        var conn = new MySqlConnection(connectionString);
         var cmd = new MySqlCommand(procedureOrSql, conn)
         {
             CommandType = commandType
@@ -136,6 +121,5 @@ public class SqlHelper : ISqlHelper
         return useAsync
             ? (MySqlDataReader)await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection)
             : cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
     }
 }

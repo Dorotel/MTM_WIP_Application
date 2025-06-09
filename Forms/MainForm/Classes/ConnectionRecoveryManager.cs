@@ -72,4 +72,32 @@ public class ConnectionRecoveryManager
             // Still disconnected, do nothing
         }
     }
+
+    public async Task UpdateConnectionStrengthAsync()
+    {
+        // Use the MainForm's control references via _mainForm
+        var signalStrength = _mainForm.MainForm_Control_SignalStrength;
+        var statusStripDisconnected = _mainForm.MainForm_StatusStrip_Disconnected;
+
+        if (signalStrength.InvokeRequired)
+        {
+            await Task.Run(async () => await UpdateConnectionStrengthAsync());
+            return;
+        }
+
+        // Access the connection checker via _mainForm (make it internal or provide a getter)
+        var (strength, pingMs) = await MySqlConnectionStrengthChecker.GetStrengthAsync();
+
+        // Use the instance's IsDisconnectTimerActive property
+        if (IsDisconnectTimerActive) strength = 0;
+
+        signalStrength.Strength = strength;
+        signalStrength.Ping = pingMs;
+
+        statusStripDisconnected.Visible = strength == 0;
+
+        // Use the instance method for connection lost
+        if (strength == 0 && !IsDisconnectTimerActive)
+            HandleConnectionLost();
+    }
 }

@@ -16,18 +16,25 @@ namespace MTM_WIP_Application.Forms.MainForm;
 public partial class MainForm : Form
 {
     private Timer? _connectionStrengthTimer;
-    private MySqlConnectionStrengthChecker _connectionStrengthChecker;
+
+    public MySqlConnectionStrengthChecker ConnectionStrengthChecker = null!;
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public ConnectionRecoveryManager ConnectionRecoveryManager { get; private set; }
+    public ConnectionRecoveryManager ConnectionRecoveryManager { get; private set; } = null!;
 
     public MainForm()
     {
         try
         {
             InitializeComponent();
-            SetupConnectionStrengthControl();
+
+            AppLogger.Log("MainForm constructor called.");
+
+            ConnectionStrengthChecker = new MySqlConnectionStrengthChecker();
+
             ConnectionRecoveryManager = new ConnectionRecoveryManager(this);
+
+            SetupConnectionStrengthControl();
 
             _ = OnStartup();
             AppLogger.Log("MainForm initialized.");
@@ -39,48 +46,10 @@ public partial class MainForm : Form
         }
     }
 
-    private void SetupConnectionStrengthControl()
-    {
-        // Initialize the checker and timer
-        _connectionStrengthChecker = new MySqlConnectionStrengthChecker();
-        _connectionStrengthTimer = new Timer();
-        _connectionStrengthTimer.Interval = 5000; // Check every 5 seconds
-        _connectionStrengthTimer.Tick += async (s, e) => await UpdateConnectionStrengthAsync();
-        _connectionStrengthTimer.Start();
-    }
-
-    private async Task UpdateConnectionStrengthAsync()
-    {
-        if (MainForm_Control_SignalStrength.InvokeRequired)
-        {
-            MainForm_Control_SignalStrength.Invoke(new Func<Task>(async () => await UpdateConnectionStrengthAsync()));
-            return;
-        }
-
-        var (strength, pingMs) = await _connectionStrengthChecker.GetStrengthAsync();
-
-        // If the disconnect timer is active, force strength to 0
-        if (ConnectionRecoveryManager.IsDisconnectTimerActive) strength = 0;
-
-        MainForm_Control_SignalStrength.Strength = strength;
-        MainForm_Control_SignalStrength.Ping = pingMs;
-
-        // Show disconnected status if strength is 0 (no connection)
-        MainForm_StatusStrip_Disconnected.Visible = strength == 0;
-
-        // Handle connection lost
-        if (strength == 0 && !ConnectionRecoveryManager.IsDisconnectTimerActive)
-            ConnectionRecoveryManager.HandleConnectionLost();
-    }
-
-
-    private async Task OnStartup()
+    private static async Task OnStartup()
     {
         try
         {
-            WireUpInventoryTabEvents();
-
-
             try
             {
                 WipAppVariables.UserFullName = await UserDao.GetUserFullNameAsync(WipAppVariables.User, true);
@@ -89,13 +58,33 @@ public partial class MainForm : Form
             catch (Exception ex)
             {
                 AppLogger.LogApplicationError(ex);
-                await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "MainForm_OnStartup_GetUserFullName");
+                await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true,
+                    "MainForm / " + "OnStartup / " + "GetUserFullNameAsync");
             }
         }
         catch (Exception ex)
         {
             AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "MainForm_OnStartup");
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "MainForm / " + "OnStartup");
+        }
+    }
+
+    private void SetupConnectionStrengthControl()
+    {
+        try
+        {
+            _connectionStrengthTimer = new Timer
+            {
+                Interval = 5000 // Check every 5 seconds
+            };
+            _connectionStrengthTimer.Tick +=
+                async (s, e) => await ConnectionRecoveryManager.UpdateConnectionStrengthAsync();
+            _connectionStrengthTimer.Start();
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogApplicationError(ex);
+            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, nameof(SetupConnectionStrengthControl));
         }
     }
 
@@ -120,22 +109,8 @@ public partial class MainForm : Form
         catch (Exception ex)
         {
             AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_ProcessCmdKey");
+            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm / " + "ProcessCmdKey");
             return false;
-        }
-    }
-
-
-    private void WireUpInventoryTabEvents()
-    {
-        try
-        {
-            AppLogger.Log("Inventory tab events wired up.");
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_WireUpInventoryTabEvents");
         }
     }
 }

@@ -5,7 +5,7 @@ using MySql.Data.MySqlClient;
 using MTM_WIP_Application.Data;
 using MTM_WIP_Application.Core;
 
-namespace MTM_WIP_Application.Forms.MainForm;
+namespace MTM_WIP_Application.Forms.MainForm.Classes;
 
 /// <summary>
 /// Checks the connection "strength" to a MySQL server by pinging its host.
@@ -15,7 +15,7 @@ public class MySqlConnectionStrengthChecker
     /// <summary>
     /// Asynchronously gets the connection strength (0-5) and ping time (ms).
     /// </summary>
-    public async Task<(int strength, int pingMs)> GetStrengthAsync()
+    public static async Task<(int strength, int pingMs)> GetStrengthAsync()
     {
         string host;
         try

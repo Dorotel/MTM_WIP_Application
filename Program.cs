@@ -9,6 +9,7 @@ using MTM_WIP_Application.Services;
 using MySql.Data.MySqlClient;
 using System.Diagnostics;
 using System.Timers;
+using MTM_WIP_Application.Controls.MainForm;
 using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_WIP_Application;
@@ -95,10 +96,6 @@ internal static class Program
 
 
         Control_InventoryTab.MainFormInstance = mainForm;
-
-        // Get current and server version
-        var currentVersion = WipAppVariables.UserVersion;
-        var serverVersion = VersionCheckerService.LastCheckedDatabaseVersion ?? "unknown";
 
         // Register the MainForm instance for live updates (if desired)
         VersionCheckerService.MainFormInstance = mainForm;

@@ -43,40 +43,50 @@ internal static class SystemDao
                 "SELECT `ID` FROM `usr_users` WHERE `User` = @userName",
                 new Dictionary<string, object> { ["@userName"] = userName }, useAsync);
 
-            if (userIdObj == null) throw new Exception("User not found.");
-
-            var userId = Convert.ToInt32(userIdObj);
-
-            // Get RoleID for the intended role
-            var roleName = accessType == "Admin" ? "Admin" : "ReadOnly";
-            var roleIdObj = await SqlHelper.ExecuteScalar(
-                "SELECT `ID` FROM `sys_roles` WHERE `RoleName` = @roleName",
-                new Dictionary<string, object> { ["@roleName"] = roleName }, useAsync);
-
-            if (roleIdObj == null) throw new Exception("Role not found.");
-
-            var roleId = Convert.ToInt32(roleIdObj);
-
-            // Remove all existing roles for this user
-            await SqlHelper.ExecuteNonQuery(
-                "DELETE FROM `sys_user_roles` WHERE `UserID` = @userId",
-                new Dictionary<string, object> { ["@userId"] = userId }, useAsync);
-
-            // Assign the new role
-            await SqlHelper.ExecuteNonQuery(
-                "INSERT INTO `sys_user_roles` (`UserID`, `RoleID`, `AssignedBy`) VALUES (@userId, @roleId, @assignedBy)",
-                new Dictionary<string, object>
-                {
-                    ["@userId"] = userId,
-                    ["@roleId"] = roleId,
-                    ["@assignedBy"] = WipAppVariables.User
-                },
-                useAsync);
-
-            if (WipAppVariables.User == userName)
+            if (userIdObj != null)
             {
-                WipAppVariables.UserTypeAdmin = accessType == "Admin";
-                WipAppVariables.UserTypeReadOnly = accessType == "ReadOnly";
+                var userId = Convert.ToInt32(userIdObj);
+
+                // Get RoleID for the intended role
+                var roleName = accessType == "Admin" ? "Admin" : "ReadOnly";
+                var roleIdObj = await SqlHelper.ExecuteScalar(
+                    "SELECT `ID` FROM `sys_roles` WHERE `RoleName` = @roleName",
+                    new Dictionary<string, object> { ["@roleName"] = roleName }, useAsync);
+
+                if (roleIdObj != null)
+                {
+                    var roleId = Convert.ToInt32(roleIdObj);
+
+                    // Remove all existing roles for this user
+                    await SqlHelper.ExecuteNonQuery(
+                        "DELETE FROM `sys_user_roles` WHERE `UserID` = @userId",
+                        new Dictionary<string, object> { ["@userId"] = userId }, useAsync);
+
+                    // Assign the new role
+                    await SqlHelper.ExecuteNonQuery(
+                        "INSERT INTO `sys_user_roles` (`UserID`, `RoleID`, `AssignedBy`) VALUES (@userId, @roleId, @assignedBy)",
+                        new Dictionary<string, object>
+                        {
+                            ["@userId"] = userId,
+                            ["@roleId"] = roleId,
+                            ["@assignedBy"] = WipAppVariables.User
+                        },
+                        useAsync);
+
+                    if (WipAppVariables.User == userName)
+                    {
+                        WipAppVariables.UserTypeAdmin = accessType == "Admin";
+                        WipAppVariables.UserTypeReadOnly = accessType == "ReadOnly";
+                    }
+                }
+                else
+                {
+                    throw new Exception("Role not found.");
+                }
+            }
+            else
+            {
+                throw new Exception("User not found.");
             }
         }
         catch (Exception ex)
@@ -100,61 +110,6 @@ internal static class SystemDao
         var user = (posSlash == -1 ? userIdWithDomain : userIdWithDomain[(posSlash + 1)..]).ToUpper();
         WipAppVariables.User = user;
         return user;
-    }
-
-    /// <summary>
-    ///     Updates the sys_last_10_transacitons table and updates the main form status.
-    ///     (This version uses only standard DML; schema-altering queries are removed)
-    /// </summary>
-    internal static async Task System_Last10_Buttons_ChangedAsync(bool useAsync = false)
-    {
-        try
-        {
-            // Insert the new transaction
-            await SqlHelper.ExecuteNonQuery(
-                @"INSERT INTO `sys_last_10_transacitons` (`User`, `PartID`, `Operation`, `Quantity`, `DateTime`)
-                  VALUES (@user, @partId, @operation, @quantity, NOW());",
-                new Dictionary<string, object>
-                {
-                    ["@user"] = WipAppVariables.User,
-                    ["@partId"] = WipAppVariables.PartId,
-                    ["@operation"] = WipAppVariables.Operation,
-                    ["@quantity"] = WipAppVariables.InventoryQuantity
-                },
-                useAsync);
-
-            // Remove oldest if there are more than 10 records for this user
-            await SqlHelper.ExecuteNonQuery(
-                @"DELETE FROM `sys_last_10_transacitons`
-                  WHERE `ID` NOT IN (
-                      SELECT ID FROM (
-                          SELECT ID FROM `sys_last_10_transacitons`
-                          WHERE `User` = @user
-                          ORDER BY `DateTime` DESC
-                          LIMIT 10
-                      ) AS t
-                  ) AND `User` = @user;",
-                new Dictionary<string, object>
-                {
-                    ["@user"] = WipAppVariables.User
-                },
-                useAsync);
-
-            AppLogger.Log("System_Last10_Buttons_Changed executed successfully.");
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await HandleSystemDaoExceptionAsync(ex, "System_Last10_Buttons_Changed", useAsync);
-        }
-        finally
-        {
-            if (Application.OpenForms.OfType<MainForm>().Any())
-            {
-                var mainForm = Application.OpenForms.OfType<MainForm>().First();
-                mainForm.Invoke(() => { mainForm.Enabled = true; });
-            }
-        }
     }
 
     /// <summary>

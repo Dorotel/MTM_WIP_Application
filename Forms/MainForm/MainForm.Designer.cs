@@ -2,6 +2,8 @@
 using System.Drawing;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using MTM_WIP_Application.Controls.Addons;
+using MTM_WIP_Application.Controls.MainForm;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
@@ -81,7 +83,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl = new TabControl();
             MainForm_TabControl_Inventory = new TabPage();
             MainForm_InventoryTab_SplitContainer_Middle = new SplitContainer();
-            MainForm_InventoryTab = new MTM_WIP_Application.Controls.Control_InventoryTab();
+            MainForm_InventoryTab = new Control_InventoryTab();
             MainForm_TabControl_Remove = new TabPage();
             MainForm_TabControl_Transfer = new TabPage();
             MainForm_Transfer_GroupBox_Main = new GroupBox();
@@ -107,7 +109,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_ToolTip = new ToolTip(components);
             MainForm_Last10_Timer = new System.Windows.Forms.Timer(components);
             MainForm_SplitContainer_Lower = new SplitContainer();
-            MainForm_Control_SignalStrength = new MTM_WIP_Application.Controls.ConnectionStrengthControl();
+            MainForm_Control_SignalStrength = new ConnectionStrengthControl();
             BottomToolStripPanel = new ToolStripPanel();
             TopToolStripPanel = new ToolStripPanel();
             RightToolStripPanel = new ToolStripPanel();
@@ -982,17 +984,14 @@ namespace MTM_WIP_Application.Forms.MainForm
         private System.Windows.Forms.Timer MainForm_Last10_Timer;
         private Button MainForm_RemoveTab_Button_AdvancedSearch;
         public SplitContainer MainForm_SplitContainer_Lower;
-        private Controls.ConnectionStrengthControl MainForm_Control_SignalStrength;
-        private ToolStripContainer MainForm_InventoryTab_Container;
+        public ConnectionStrengthControl MainForm_Control_SignalStrength;
         private ToolStripPanel BottomToolStripPanel;
         private ToolStripPanel TopToolStripPanel;
-        private ToolStripPanel MainForm_InventoryTab_RightToolStrip;
         private ToolStripPanel LeftToolStripPanel;
         private ToolStripContentPanel ContentPanel;
-        private ToolStripPanel MainFrom_InventoryTab_RightToolStrip;
         private ToolStripPanel RightToolStripPanel;
         private TableLayoutPanel MainForm_TableLayout;
-        private Controls.Control_InventoryTab MainForm_InventoryTab;
+        private Control_InventoryTab MainForm_InventoryTab;
         public SplitContainer MainForm_InventoryTab_SplitContainer_Middle;
     }
 }

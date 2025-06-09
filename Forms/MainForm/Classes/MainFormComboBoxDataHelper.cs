@@ -50,7 +50,7 @@ public static class MainFormComboBoxDataHelper
     {
         if (inventoryTabComboBoxPart.InvokeRequired)
         {
-            await inventoryTabComboBoxPart.InvokeAsync(
+            await inventoryTabComboBoxPart.InvokeAsyncTask(
                 async () =>
                 {
                     await ClearAndResetAllComboBoxesAsync(
@@ -199,8 +199,7 @@ public static class MainFormComboBoxDataHelper
             };
 
             // Assign the command if the adapter is a MySqlDataAdapter
-            var mySqlAdapter = adapter as MySqlDataAdapter;
-            if (mySqlAdapter != null)
+            if (adapter is { } mySqlAdapter)
                 mySqlAdapter.SelectCommand = command;
             // else: handle your custom wrapper here if you need
 
@@ -216,7 +215,8 @@ public static class MainFormComboBoxDataHelper
                 {
                     var row = dataTable.NewRow();
                     row[displayMember] = placeholder;
-                    if (dataTable.Columns[valueMember].DataType == typeof(int))
+                    if (dataTable.Columns[valueMember] != null &&
+                        dataTable.Columns[valueMember]!.DataType == typeof(int))
                         row[valueMember] = -1;
                     else
                         row[valueMember] = placeholder;
@@ -240,7 +240,7 @@ public static class MainFormComboBoxDataHelper
         }
     }
 
-    private static Task InvokeAsync(this Control control, Action action, CancellationToken cancellationToken)
+    private static Task InvokeAsyncTask(this Control control, Action action, CancellationToken cancellationToken)
     {
         return Task.Factory.StartNew(() => control.Invoke(action), cancellationToken, TaskCreationOptions.None,
             TaskScheduler.Default);

@@ -16,7 +16,7 @@ internal static class AppLogger
     private static string _dbErrorLogFile = string.Empty;
     private static string _logDirectory = string.Empty;
     private static string _normalLogFile = string.Empty;
-    private static readonly object LogLock = new();
+    private static readonly Lock LogLock = new();
 
     /// <summary>
     ///     Deletes old log files and cleans up application data folders.
