@@ -108,16 +108,14 @@ public static class MainFormControlHelper
             {
                 form.ActiveControl = control;
                 if (control is TextBoxBase textBoxBase)
-                    textBoxBase.SelectAll();
-                control.Focus();
+                    control.Focus();
             }));
         }
         else
         {
             form.ActiveControl = control;
             if (control is TextBoxBase textBoxBase)
-                textBoxBase.SelectAll();
-            control.Focus();
+                control.Focus();
         }
     }
 

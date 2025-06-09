@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
 using System.Timers;
 using MTM_WIP_Application.Core;
@@ -6,400 +7,79 @@ using MTM_WIP_Application.Data;
 using MTM_WIP_Application.Forms.MainForm.Classes;
 using MTM_WIP_Application.Logging;
 using MySql.Data.MySqlClient;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_WIP_Application.Forms.MainForm;
 
 public partial class MainForm : Form
 {
+    private Timer? _connectionStrengthTimer;
+    private MySqlConnectionStrengthChecker _connectionStrengthChecker;
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public ConnectionRecoveryManager ConnectionRecoveryManager { get; private set; }
+
     public MainForm()
     {
         try
         {
             InitializeComponent();
-            MainForm_Inventory_ComboBox_Loc.Visible = false;
-            MainForm_Inventory_ComboBox_Op.Visible = false;
-            MainForm_Inventory_ComboBox_Part.Visible = false;
-            MainForm_Inventory_Button_Reset.TabStop = false;
-            MainForm_Transfer_Button_Reset.TabStop = false;
-            MainForm_Remove_Button_Reset.TabStop = false;
+            SetupConnectionStrengthControl();
+            ConnectionRecoveryManager = new ConnectionRecoveryManager(this);
+
             _ = OnStartup();
             AppLogger.Log("MainForm initialized.");
         }
         catch (Exception ex)
         {
             AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Ctor");
+            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm));
         }
     }
 
-    private static void InventoryButtonAdvancedEntry_Click()
+    private void SetupConnectionStrengthControl()
     {
-        try
-        {
-            AppLogger.Log("Inventory Advanced Entry button clicked.");
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false,
-                "MainForm_InventoryTab_Button_AdvancedEntry");
-        }
+        // Initialize the checker and timer
+        _connectionStrengthChecker = new MySqlConnectionStrengthChecker();
+        _connectionStrengthTimer = new Timer();
+        _connectionStrengthTimer.Interval = 5000; // Check every 5 seconds
+        _connectionStrengthTimer.Tick += async (s, e) => await UpdateConnectionStrengthAsync();
+        _connectionStrengthTimer.Start();
     }
 
-    private async void InventoryButtonReset_Click()
+    private async Task UpdateConnectionStrengthAsync()
     {
-        try
+        if (MainForm_Control_SignalStrength.InvokeRequired)
         {
-            AppLogger.Log("Inventory Reset button clicked.");
-            MainForm_Inventory_ComboBox_Loc.Visible = false;
-            MainForm_Inventory_ComboBox_Op.Visible = false;
-            MainForm_Inventory_ComboBox_Part.Visible = false;
-
-            // Reinitialize ComboBox DataTables
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "md_part_ids_Get_All",
-                new MySqlConnection(WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                MainForm_Inventory_ComboBox_Part,
-                "Item Number",
-                "ID",
-                "[ Enter Part ID ]",
-                CommandType.StoredProcedure);
-
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "md_operation_numbers_Get_All",
-                new MySqlConnection(WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                MainForm_Inventory_ComboBox_Op,
-                "Operation",
-                "Operation",
-                "[ Enter Op # ]",
-                CommandType.StoredProcedure);
-
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                "md_locations_Get_All",
-                new MySqlConnection(WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                MainForm_Inventory_ComboBox_Loc,
-                "Location",
-                "Location",
-                "[ Enter Location ]",
-                CommandType.StoredProcedure);
-
-            MainFormTabResetHelper.ResetInventoryTab(
-                MainForm_Inventory_ComboBox_Loc,
-                MainForm_Inventory_ComboBox_Op,
-                MainForm_Inventory_ComboBox_Part,
-                new CheckBox(),
-                new CheckBox(),
-                null,
-                MainForm_Inventory_TextBox_Qty,
-                MainForm_Inventory_RichTextBox_Notes,
-                MainForm_Inventory_Button_Save,
-                MainForm_MenuStrip_File_Save
-            );
-
-            MainForm_Inventory_ComboBox_Loc.Visible = true;
-            MainForm_Inventory_ComboBox_Op.Visible = true;
-            MainForm_Inventory_ComboBox_Part.Visible = true;
+            MainForm_Control_SignalStrength.Invoke(new Func<Task>(async () => await UpdateConnectionStrengthAsync()));
+            return;
         }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_Button_Reset");
-        }
+
+        var (strength, pingMs) = await _connectionStrengthChecker.GetStrengthAsync();
+
+        // If the disconnect timer is active, force strength to 0
+        if (ConnectionRecoveryManager.IsDisconnectTimerActive) strength = 0;
+
+        MainForm_Control_SignalStrength.Strength = strength;
+        MainForm_Control_SignalStrength.Ping = pingMs;
+
+        // Show disconnected status if strength is 0 (no connection)
+        MainForm_StatusStrip_Disconnected.Visible = strength == 0;
+
+        // Handle connection lost
+        if (strength == 0 && !ConnectionRecoveryManager.IsDisconnectTimerActive)
+            ConnectionRecoveryManager.HandleConnectionLost();
     }
 
-    private async Task InventoryButtonSave_ClickAsync()
-    {
-        try
-        {
-            AppLogger.Log("Inventory Save button clicked.");
-
-            var partId = MainForm_Inventory_ComboBox_Part.Text;
-            var op = MainForm_Inventory_ComboBox_Op.Text;
-            var loc = MainForm_Inventory_ComboBox_Loc.Text;
-            var qtyText = MainForm_Inventory_TextBox_Qty.Text.Trim();
-            var notes = MainForm_Inventory_RichTextBox_Notes.Text.Trim();
-
-            if (string.IsNullOrWhiteSpace(partId) || MainForm_Inventory_ComboBox_Part.SelectedIndex <= 0)
-            {
-                MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                MainForm_Inventory_ComboBox_Part.Focus();
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(op) || MainForm_Inventory_ComboBox_Op.SelectedIndex <= 0)
-            {
-                MessageBox.Show(@"Please select a valid Operation.", @"Validation Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                MainForm_Inventory_ComboBox_Op.Focus();
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(loc) || MainForm_Inventory_ComboBox_Loc.SelectedIndex <= 0)
-            {
-                MessageBox.Show(@"Please select a valid Location.", @"Validation Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                MainForm_Inventory_ComboBox_Loc.Focus();
-                return;
-            }
-
-            if (!int.TryParse(qtyText, out var qty) || qty <= 0)
-            {
-                MessageBox.Show(@"Please enter a valid quantity.", @"Validation Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                MainForm_Inventory_TextBox_Qty.Focus();
-                return;
-            }
-
-            WipAppVariables.PartId = partId;
-            WipAppVariables.Operation = op;
-            WipAppVariables.Location = loc;
-            WipAppVariables.Notes = notes;
-            WipAppVariables.InventoryQuantity = qty;
-            WipAppVariables.User ??= Environment.UserName;
-            WipAppVariables.PartType ??= "";
-
-            // FIXED: Use AddInventoryItemAsync instead of InventoryTab_SaveAsync
-            await InventoryDao.AddInventoryItemAsync(
-                partId,
-                loc,
-                op,
-                qty,
-                WipAppVariables.PartType ?? "",
-                WipAppVariables.User,
-                "", // batchNumber
-                notes,
-                true);
-
-            MessageBox.Show(@"Inventory transaction saved successfully.", @"Success", MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-
-            MainForm_StatusStrip_SavedStatus.Text =
-                $@"Last Inventoried Part: {partId} (Op: {op}), Location: {loc}, Quantity: {qty} @ {DateTime.Now:hh:mm tt}";
-
-            InventoryButtonReset_Click();
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "MainForm_Inventory_Button_Save");
-        }
-    }
-
-    private static void InventoryButtonShowHideLast10_Click()
-    {
-        try
-        {
-            AppLogger.Log("Inventory Show/Hide Last 10 button clicked.");
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false,
-                "MainForm_Inventory_Button_ShowHideLast10");
-        }
-    }
-
-    private void InventoryComboBoxLoc_SelectedIndexChanged()
-    {
-        try
-        {
-            AppLogger.Log("Inventory Location ComboBox selection changed.");
-
-            if (MainForm_Inventory_ComboBox_Loc.SelectedIndex > 0)
-            {
-                MainForm_Inventory_ComboBox_Loc.ForeColor = Color.Black;
-                WipAppVariables.Location = MainForm_Inventory_ComboBox_Loc.Text;
-            }
-            else
-            {
-                MainForm_Inventory_ComboBox_Loc.ForeColor = Color.Red;
-                if (MainForm_Inventory_ComboBox_Loc.SelectedIndex != 0 &&
-                    MainForm_Inventory_ComboBox_Loc.Items.Count > 0) MainForm_Inventory_ComboBox_Loc.SelectedIndex = 0;
-                WipAppVariables.Location = null;
-            }
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Loc");
-        }
-    }
-
-    private void InventoryComboBoxOp_SelectedIndexChanged()
-    {
-        try
-        {
-            AppLogger.Log("Inventory Op ComboBox selection changed.");
-
-            if (MainForm_Inventory_ComboBox_Op.SelectedIndex > 0)
-            {
-                MainForm_Inventory_ComboBox_Op.ForeColor = Color.Black;
-                WipAppVariables.Operation = MainForm_Inventory_ComboBox_Op.Text;
-            }
-            else
-            {
-                MainForm_Inventory_ComboBox_Op.ForeColor = Color.Red;
-                if (MainForm_Inventory_ComboBox_Op.SelectedIndex != 0 && MainForm_Inventory_ComboBox_Op.Items.Count > 0)
-                    MainForm_Inventory_ComboBox_Op.SelectedIndex = 0;
-                WipAppVariables.Operation = null;
-            }
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Op");
-        }
-    }
-
-    private void InventoryComboBoxPart_SelectedIndexChanged()
-    {
-        try
-        {
-            AppLogger.Log("Inventory Part ComboBox selection changed.");
-
-            if (MainForm_Inventory_ComboBox_Part.SelectedIndex > 0)
-            {
-                MainForm_Inventory_ComboBox_Part.ForeColor = Color.Black;
-                WipAppVariables.PartId = MainForm_Inventory_ComboBox_Part.Text;
-            }
-            else
-            {
-                MainForm_Inventory_ComboBox_Part.ForeColor = Color.Red;
-                if (MainForm_Inventory_ComboBox_Part.SelectedIndex != 0 &&
-                    MainForm_Inventory_ComboBox_Part.Items.Count > 0)
-                    MainForm_Inventory_ComboBox_Part.SelectedIndex = 0;
-                WipAppVariables.PartId = null;
-            }
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Part");
-        }
-    }
-
-    private void InventoryTextBoxQty_TextChanged()
-    {
-        try
-        {
-            AppLogger.Log("Inventory Quantity TextBox changed.");
-
-            var text = MainForm_Inventory_TextBox_Qty.Text.Trim();
-            const string placeholder = "[ Enter Valid Quantity ]";
-            var isValid = int.TryParse(text, out var qty) && qty > 0;
-
-            if (isValid)
-            {
-                MainForm_Inventory_TextBox_Qty.ForeColor = Color.Black;
-            }
-            else
-            {
-                MainForm_Inventory_TextBox_Qty.ForeColor = Color.Red;
-                if (text != placeholder)
-                {
-                    MainForm_Inventory_TextBox_Qty.Text = placeholder;
-                    MainForm_Inventory_TextBox_Qty.SelectionStart = MainForm_Inventory_TextBox_Qty.Text.Length;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_TextBox_Qty");
-        }
-    }
-
-    private async Task LoadInventoryTabComboBoxesAsync()
-    {
-        try
-        {
-            await using var connection = new MySqlConnection(WipAppVariables.ConnectionString);
-
-            var comboBoxSets =
-                new (MySqlDataAdapter Adapter, DataTable Table, ComboBox ComboBox, string ProcName, string Display,
-                    string Value, string Placeholder, CommandType CommandType)[]
-                    {
-                        (new MySqlDataAdapter(), new DataTable(), MainForm_Inventory_ComboBox_Part,
-                            "md_part_ids_Get_All", "Item Number", "ID", "[ Enter Part ID ]",
-                            CommandType.StoredProcedure),
-                        (new MySqlDataAdapter(), new DataTable(), MainForm_Inventory_ComboBox_Op,
-                            "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
-                            CommandType.StoredProcedure),
-                        (new MySqlDataAdapter(), new DataTable(), MainForm_Inventory_ComboBox_Loc,
-                            "md_locations_Get_All", "Location", "Location", "[ Enter Location ]",
-                            CommandType.StoredProcedure)
-                    };
-
-            foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await MainFormComboBoxDataHelper.FillComboBoxAsync(
-                    procName,
-                    connection,
-                    adapter,
-                    table,
-                    comboBox,
-                    display,
-                    value,
-                    placeholder,
-                    cmdType
-                );
-            AppLogger.Log("Inventory tab ComboBoxes loaded.");
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true,
-                "MainForm_LoadInventoryTabComboBoxesAsync");
-        }
-    }
-
-    private void MainForm_InventoryTab_Button_AdvancedEntry_Click(object sender, EventArgs e)
-    {
-        try
-        {
-            using (var advancedForm =
-                   new AdvancedInventoryEntryForm.AdvancedInventoryEntryForm())
-            {
-                advancedForm.ShowDialog(this);
-            }
-
-            InventoryButtonReset_Click();
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex);
-        }
-    }
 
     private async Task OnStartup()
     {
         try
         {
-            await LoadInventoryTabComboBoxesAsync();
             WireUpInventoryTabEvents();
-            AppLogger.Log("Initial setup of ComboBoxes in the Inventory Tab.");
-            MainFormTabResetHelper.ResetInventoryTab(
-                MainForm_Inventory_ComboBox_Loc,
-                MainForm_Inventory_ComboBox_Op,
-                MainForm_Inventory_ComboBox_Part,
-                new CheckBox(),
-                new CheckBox(),
-                null,
-                MainForm_Inventory_TextBox_Qty,
-                MainForm_Inventory_RichTextBox_Notes,
-                MainForm_Inventory_Button_Save,
-                MainForm_MenuStrip_File_Save
-            );
-            MainForm_Inventory_ComboBox_Loc.Visible = true;
-            MainForm_Inventory_ComboBox_Op.Visible = true;
-            MainForm_Inventory_ComboBox_Part.Visible = true;
+
 
             try
             {
@@ -445,71 +125,11 @@ public partial class MainForm : Form
         }
     }
 
-    private void UpdateInventorySaveButtonState()
-    {
-        try
-        {
-            var partValid = MainForm_Inventory_ComboBox_Part.SelectedIndex > 0 &&
-                            !string.IsNullOrWhiteSpace(MainForm_Inventory_ComboBox_Part.Text);
-            var opValid = MainForm_Inventory_ComboBox_Op.SelectedIndex > 0 &&
-                          !string.IsNullOrWhiteSpace(MainForm_Inventory_ComboBox_Op.Text);
-            var locValid = MainForm_Inventory_ComboBox_Loc.SelectedIndex > 0 &&
-                           !string.IsNullOrWhiteSpace(MainForm_Inventory_ComboBox_Loc.Text);
-            var qtyValid = int.TryParse(MainForm_Inventory_TextBox_Qty.Text.Trim(), out var qty) && qty > 0;
-            MainForm_Inventory_Button_Save.Enabled = partValid && opValid && locValid && qtyValid;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_UpdateInventorySaveButtonState");
-        }
-    }
 
     private void WireUpInventoryTabEvents()
     {
         try
         {
-            MainForm_Inventory_Button_Save.Click += async (s, e) => await InventoryButtonSave_ClickAsync();
-            MainForm_Inventory_Button_Reset.Click += (s, e) => InventoryButtonReset_Click();
-            MainForm_Inventory_ComboBox_Part.SelectedIndexChanged += (s, e) =>
-            {
-                InventoryComboBoxPart_SelectedIndexChanged();
-                UpdateInventorySaveButtonState();
-            };
-            MainForm_Inventory_ComboBox_Op.SelectedIndexChanged += (s, e) =>
-            {
-                InventoryComboBoxOp_SelectedIndexChanged();
-                UpdateInventorySaveButtonState();
-            };
-            MainForm_Inventory_ComboBox_Loc.SelectedIndexChanged += (s, e) =>
-            {
-                InventoryComboBoxLoc_SelectedIndexChanged();
-                UpdateInventorySaveButtonState();
-            };
-            MainForm_Inventory_TextBox_Qty.TextChanged += (s, e) =>
-            {
-                InventoryTextBoxQty_TextChanged();
-                UpdateInventorySaveButtonState();
-            };
-            MainForm_Inventory_TextBox_Qty.Enter += (s, e) => MainForm_Inventory_TextBox_Qty.SelectAll();
-            MainForm_Inventory_TextBox_Qty.Click += (s, e) => MainForm_Inventory_TextBox_Qty.SelectAll();
-            MainForm_Inventory_Button_ShowHideLast10.Click += (s, e) => InventoryButtonShowHideLast10_Click();
-            MainForm_InventoryTab_Button_AdvancedEntry.Click += (s, e) => InventoryButtonAdvancedEntry_Click();
-            MainForm_Inventory_TextBox_Qty.Enter += (s, e) => MainForm_Inventory_TextBox_Qty.SelectAll();
-            MainForm_Inventory_TextBox_Qty.KeyDown += (sender, e) =>
-                MainFormControlHelper.AdjustQuantityByKey_Quantity(sender, e, "[ Enter Valid Quantity ]", Color.Black,
-                    Color.Red);
-
-            // Highlight notes RichTextBox on Enter/Leave
-            MainForm_Inventory_RichTextBox_Notes.Enter += (s, e) =>
-            {
-                MainForm_Inventory_RichTextBox_Notes.BackColor = Color.LightBlue;
-            };
-            MainForm_Inventory_RichTextBox_Notes.Leave += (s, e) =>
-            {
-                MainForm_Inventory_RichTextBox_Notes.BackColor = SystemColors.Window;
-            };
-
             AppLogger.Log("Inventory tab events wired up.");
         }
         catch (Exception ex)
@@ -517,19 +137,5 @@ public partial class MainForm : Form
             AppLogger.LogApplicationError(ex);
             _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_WireUpInventoryTabEvents");
         }
-    }
-
-    // Add this method to your MainForm class
-    public void SetVersionLabel(string currentVersion, string serverVersion)
-    {
-        if (MainForm_Inventory_Label_Version.InvokeRequired)
-        {
-            MainForm_Inventory_Label_Version.Invoke(new Action(() => SetVersionLabel(currentVersion, serverVersion)));
-            return;
-        }
-
-        var isOutOfDate = currentVersion != serverVersion;
-        MainForm_Inventory_Label_Version.Text = $@"Client Version: {currentVersion} | Server Version: {serverVersion})";
-        MainForm_Inventory_Label_Version.ForeColor = isOutOfDate ? Color.Red : SystemColors.ControlText;
     }
 }

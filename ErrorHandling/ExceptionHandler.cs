@@ -1,6 +1,7 @@
-﻿using System.Diagnostics;
-using MTM_WIP_Application.Forms.MainForm;
+﻿using MTM_WIP_Application.Forms.MainForm;
+using MTM_WIP_Application.Forms.MainForm.Classes;
 using MTM_WIP_Application.Logging;
+using System.Diagnostics;
 
 namespace MTM_WIP_Application.ErrorHandling;
 
@@ -22,11 +23,8 @@ internal static class ExceptionHandler
             if (Application.OpenForms.OfType<MainForm>().Any())
             {
                 var mainForm = Application.OpenForms.OfType<MainForm>().First();
-                mainForm.Invoke(() =>
-                {
-                    // Optionally show status strip indicators here
-                    mainForm.Enabled = false;
-                });
+
+                mainForm.ConnectionRecoveryManager.HandleConnectionLost();
             }
         }
         catch (Exception ex)

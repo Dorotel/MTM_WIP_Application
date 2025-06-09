@@ -1,12 +1,15 @@
+using MTM_WIP_Application.Controls;
 using MTM_WIP_Application.Core;
 using MTM_WIP_Application.ErrorHandling;
 using MTM_WIP_Application.Forms.MainForm;
+using MTM_WIP_Application.Forms.MainForm.Classes;
 using MTM_WIP_Application.Helpers;
 using MTM_WIP_Application.Logging;
 using MTM_WIP_Application.Services;
 using MySql.Data.MySqlClient;
 using System.Diagnostics;
 using System.Timers;
+using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_WIP_Application;
 
@@ -84,17 +87,18 @@ internal static class Program
         VersionCheckerService.Initialize();
     }
 
+
     // Extracted for testability
     internal static void RunApplication()
     {
         var mainForm = new MainForm();
 
+
+        Control_InventoryTab.MainFormInstance = mainForm;
+
         // Get current and server version
         var currentVersion = WipAppVariables.UserVersion;
         var serverVersion = VersionCheckerService.LastCheckedDatabaseVersion ?? "unknown";
-
-        // Set version label on startup (always show both for debugging)
-        mainForm.SetVersionLabel(currentVersion, serverVersion);
 
         // Register the MainForm instance for live updates (if desired)
         VersionCheckerService.MainFormInstance = mainForm;

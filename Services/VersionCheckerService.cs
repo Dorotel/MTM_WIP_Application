@@ -7,6 +7,7 @@ using MySql.Data.MySqlClient;
 using System.Diagnostics;
 using System.Timers;
 using System.Windows.Forms;
+using MTM_WIP_Application.Controls;
 using Timer = System.Timers.Timer;
 
 namespace MTM_WIP_Application.Services;
@@ -20,6 +21,7 @@ internal static class VersionCheckerService
 
     // Allow MainForm instance to be set so we can update UI from here if desired
     public static MainForm? MainFormInstance { get; set; }
+    public static Control_InventoryTab? ControlInventoryInstance { get; set; }
 
     public static void Initialize()
     {
@@ -71,8 +73,7 @@ internal static class VersionCheckerService
                     LastCheckedDatabaseVersion = databaseVersion;
 
                     // Always show both app and server version for debugging
-                    if (MainFormInstance != null)
-                        MainFormInstance.SetVersionLabel(WipAppVariables.UserVersion, databaseVersion);
+                    ControlInventoryInstance?.SetVersionLabel(WipAppVariables.UserVersion, databaseVersion);
 
                     if (WipAppVariables.UserVersion != databaseVersion)
                     {

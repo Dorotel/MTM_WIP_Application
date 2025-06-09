@@ -200,14 +200,9 @@ internal static class ErrorLogDao
             var isCritical = ex is OutOfMemoryException || ex is StackOverflowException ||
                              ex is AccessViolationException;
 
-            if (Application.OpenForms.OfType<MainForm>().Any())
-            {
-                var mainForm = Application.OpenForms.OfType<MainForm>().First();
-                mainForm.BeginInvoke(() =>
-                {
-                    foreach (Control c in mainForm.Controls) c.Enabled = false;
-                });
-            }
+            var mainForm = Application.OpenForms.OfType<MainForm>().First();
+
+            mainForm.ConnectionRecoveryManager.HandleConnectionLost();
 
             AppLogger.LogApplicationError(ex);
 

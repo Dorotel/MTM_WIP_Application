@@ -299,22 +299,64 @@ public partial class AdvancedInventoryEntryForm : Form
             AdvancedEntry_MultiLoc_TextBox_Qty.Enter += (s, e) => AdvancedEntry_MultiLoc_TextBox_Qty.SelectAll();
 
             // Highlight notes RichTextBox on Enter
+
             AdvancedEntry_Single_RichTextBox_Notes.Enter += (s, e) =>
-            {
                 AdvancedEntry_Single_RichTextBox_Notes.BackColor = Color.LightBlue;
-            };
             AdvancedEntry_Single_RichTextBox_Notes.Leave += (s, e) =>
-            {
                 AdvancedEntry_Single_RichTextBox_Notes.BackColor = SystemColors.Window;
-            };
+
             AdvancedEntry_MultiLoc_RichTextBox_Notes.Enter += (s, e) =>
-            {
                 AdvancedEntry_MultiLoc_RichTextBox_Notes.BackColor = Color.LightBlue;
-            };
             AdvancedEntry_MultiLoc_RichTextBox_Notes.Leave += (s, e) =>
-            {
                 AdvancedEntry_MultiLoc_RichTextBox_Notes.BackColor = SystemColors.Window;
-            };
+
+            // TextBoxes: Highlight on Enter/Leave
+            AdvancedEntry_Single_TextBox_Qty.Enter +=
+                (s, e) => AdvancedEntry_Single_TextBox_Qty.BackColor = Color.LightBlue;
+            AdvancedEntry_Single_TextBox_Qty.Leave +=
+                (s, e) => AdvancedEntry_Single_TextBox_Qty.BackColor = SystemColors.Window;
+
+            AdvancedEntry_Single_TextBox_Count.Enter +=
+                (s, e) => AdvancedEntry_Single_TextBox_Count.BackColor = Color.LightBlue;
+            AdvancedEntry_Single_TextBox_Count.Leave +=
+                (s, e) => AdvancedEntry_Single_TextBox_Count.BackColor = SystemColors.Window;
+
+            AdvancedEntry_MultiLoc_TextBox_Qty.Enter +=
+                (s, e) => AdvancedEntry_MultiLoc_TextBox_Qty.BackColor = Color.LightBlue;
+            AdvancedEntry_MultiLoc_TextBox_Qty.Leave +=
+                (s, e) => AdvancedEntry_MultiLoc_TextBox_Qty.BackColor = SystemColors.Window;
+
+            // ComboBoxes: Highlight on Enter/Leave
+            AdvancedEntry_Single_ComboBox_Part.Enter +=
+                (s, e) => AdvancedEntry_Single_ComboBox_Part.BackColor = Color.LightBlue;
+            AdvancedEntry_Single_ComboBox_Part.Leave +=
+                (s, e) => AdvancedEntry_Single_ComboBox_Part.BackColor = SystemColors.Window;
+
+            AdvancedEntry_Single_ComboBox_Op.Enter +=
+                (s, e) => AdvancedEntry_Single_ComboBox_Op.BackColor = Color.LightBlue;
+            AdvancedEntry_Single_ComboBox_Op.Leave +=
+                (s, e) => AdvancedEntry_Single_ComboBox_Op.BackColor = SystemColors.Window;
+
+            AdvancedEntry_Single_ComboBox_Loc.Enter +=
+                (s, e) => AdvancedEntry_Single_ComboBox_Loc.BackColor = Color.LightBlue;
+            AdvancedEntry_Single_ComboBox_Loc.Leave +=
+                (s, e) => AdvancedEntry_Single_ComboBox_Loc.BackColor = SystemColors.Window;
+
+            AdvancedEntry_MultiLoc_ComboBox_Part.Enter +=
+                (s, e) => AdvancedEntry_MultiLoc_ComboBox_Part.BackColor = Color.LightBlue;
+            AdvancedEntry_MultiLoc_ComboBox_Part.Leave += (s, e) =>
+                AdvancedEntry_MultiLoc_ComboBox_Part.BackColor = SystemColors.Window;
+
+            AdvancedEntry_MultiLoc_ComboBox_Op.Enter +=
+                (s, e) => AdvancedEntry_MultiLoc_ComboBox_Op.BackColor = Color.LightBlue;
+            AdvancedEntry_MultiLoc_ComboBox_Op.Leave +=
+                (s, e) => AdvancedEntry_MultiLoc_ComboBox_Op.BackColor = SystemColors.Window;
+
+            AdvancedEntry_MultiLoc_ComboBox_Loc.Enter +=
+                (s, e) => AdvancedEntry_MultiLoc_ComboBox_Loc.BackColor = Color.LightBlue;
+            AdvancedEntry_MultiLoc_ComboBox_Loc.Leave += (s, e) =>
+                AdvancedEntry_MultiLoc_ComboBox_Loc.BackColor = SystemColors.Window;
+
 
             AppLogger.Log("AdvancedInventoryEntryForm events wired up.");
         }
