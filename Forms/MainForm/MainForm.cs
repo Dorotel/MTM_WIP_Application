@@ -113,4 +113,8 @@ public partial class MainForm : Form
             return false;
         }
     }
+
+    private void controlInventoryTab1_Load(object sender, EventArgs e)
+    {
+    }
 }

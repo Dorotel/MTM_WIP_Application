@@ -322,7 +322,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             MainForm_Transfer_Button_Search.Dock = DockStyle.Right;
             MainForm_Transfer_Button_Search.FlatStyle = FlatStyle.System;
-            MainForm_Transfer_Button_Search.Location = new Point(1428, 0);
+            MainForm_Transfer_Button_Search.Location = new Point(1426, 0);
             MainForm_Transfer_Button_Search.Name = "MainForm_Transfer_Button_Search";
             MainForm_Transfer_Button_Search.Size = new Size(87, 36);
             MainForm_Transfer_Button_Search.TabIndex = 2;
@@ -334,7 +334,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             MainForm_Transfer_Button_Save.Dock = DockStyle.Right;
             MainForm_Transfer_Button_Save.FlatStyle = FlatStyle.System;
-            MainForm_Transfer_Button_Save.Location = new Point(1343, 0);
+            MainForm_Transfer_Button_Save.Location = new Point(1341, 0);
             MainForm_Transfer_Button_Save.Name = "MainForm_Transfer_Button_Save";
             MainForm_Transfer_Button_Save.Size = new Size(86, 35);
             MainForm_Transfer_Button_Save.TabIndex = 6;
@@ -355,7 +355,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             MainForm_Transfer_Button_Reset.Dock = DockStyle.Right;
             MainForm_Transfer_Button_Reset.FlatStyle = FlatStyle.System;
-            MainForm_Transfer_Button_Reset.Location = new Point(1429, 0);
+            MainForm_Transfer_Button_Reset.Location = new Point(1427, 0);
             MainForm_Transfer_Button_Reset.Name = "MainForm_Transfer_Button_Reset";
             MainForm_Transfer_Button_Reset.Size = new Size(86, 35);
             MainForm_Transfer_Button_Reset.TabIndex = 19;
@@ -510,7 +510,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Remove.Location = new Point(4, 24);
             MainForm_TabControl_Remove.Name = "MainForm_TabControl_Remove";
             MainForm_TabControl_Remove.Padding = new Padding(3);
-            MainForm_TabControl_Remove.Size = new Size(817, 390);
+            MainForm_TabControl_Remove.Size = new Size(815, 390);
             MainForm_TabControl_Remove.TabIndex = 1;
             MainForm_TabControl_Remove.Text = "Remove (Ctrl + 2)";
             MainForm_TabControl_Remove.ToolTipText = "Shortcut: Ctrl+2";
@@ -522,7 +522,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_RemoveTab.Dock = DockStyle.Fill;
             MainForm_RemoveTab.Location = new Point(3, 3);
             MainForm_RemoveTab.Name = "MainForm_RemoveTab";
-            MainForm_RemoveTab.Size = new Size(811, 384);
+            MainForm_RemoveTab.Size = new Size(809, 384);
             MainForm_RemoveTab.TabIndex = 0;
             // 
             // MainForm_TabControl_Transfer
@@ -531,7 +531,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Transfer.Location = new Point(4, 24);
             MainForm_TabControl_Transfer.Name = "MainForm_TabControl_Transfer";
             MainForm_TabControl_Transfer.Padding = new Padding(3);
-            MainForm_TabControl_Transfer.Size = new Size(817, 390);
+            MainForm_TabControl_Transfer.Size = new Size(815, 390);
             MainForm_TabControl_Transfer.TabIndex = 2;
             MainForm_TabControl_Transfer.Text = "Transfer (Ctrl+3)";
             MainForm_TabControl_Transfer.ToolTipText = "Shortcut: Ctrl+3";
@@ -545,7 +545,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_GroupBox_Main.Controls.Add(MainForm_Transfer_Panel_Bottom);
             MainForm_Transfer_GroupBox_Main.Location = new Point(11, 9);
             MainForm_Transfer_GroupBox_Main.Name = "MainForm_Transfer_GroupBox_Main";
-            MainForm_Transfer_GroupBox_Main.Size = new Size(1521, 661);
+            MainForm_Transfer_GroupBox_Main.Size = new Size(1519, 661);
             MainForm_Transfer_GroupBox_Main.TabIndex = 0;
             MainForm_Transfer_GroupBox_Main.TabStop = false;
             MainForm_Transfer_GroupBox_Main.Text = "Location Change";
@@ -560,7 +560,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_Panel_Header.Dock = DockStyle.Top;
             MainForm_Transfer_Panel_Header.Location = new Point(3, 19);
             MainForm_Transfer_Panel_Header.Name = "MainForm_Transfer_Panel_Header";
-            MainForm_Transfer_Panel_Header.Size = new Size(1515, 36);
+            MainForm_Transfer_Panel_Header.Size = new Size(1513, 36);
             MainForm_Transfer_Panel_Header.TabIndex = 23;
             // 
             // MainForm_Transfer_ComboBox_Part
@@ -608,7 +608,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_Panel_DataGrid.Controls.Add(MainForm_Transfer_DataGrid);
             MainForm_Transfer_Panel_DataGrid.Location = new Point(3, 61);
             MainForm_Transfer_Panel_DataGrid.Name = "MainForm_Transfer_Panel_DataGrid";
-            MainForm_Transfer_Panel_DataGrid.Size = new Size(2222, 833);
+            MainForm_Transfer_Panel_DataGrid.Size = new Size(2220, 833);
             MainForm_Transfer_Panel_DataGrid.TabIndex = 25;
             // 
             // MainForm_Transfer_Image_Nothing
@@ -618,7 +618,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_Image_Nothing.InitialImage = null;
             MainForm_Transfer_Image_Nothing.Location = new Point(0, 0);
             MainForm_Transfer_Image_Nothing.Name = "MainForm_Transfer_Image_Nothing";
-            MainForm_Transfer_Image_Nothing.Size = new Size(2222, 833);
+            MainForm_Transfer_Image_Nothing.Size = new Size(2220, 833);
             MainForm_Transfer_Image_Nothing.SizeMode = PictureBoxSizeMode.CenterImage;
             MainForm_Transfer_Image_Nothing.TabIndex = 19;
             MainForm_Transfer_Image_Nothing.TabStop = false;
@@ -649,7 +649,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_DataGrid.ShowCellToolTips = false;
             MainForm_Transfer_DataGrid.ShowEditingIcon = false;
             MainForm_Transfer_DataGrid.ShowRowErrors = false;
-            MainForm_Transfer_DataGrid.Size = new Size(2222, 833);
+            MainForm_Transfer_DataGrid.Size = new Size(2220, 833);
             MainForm_Transfer_DataGrid.StandardTab = true;
             MainForm_Transfer_DataGrid.TabIndex = 5;
             MainForm_Transfer_DataGrid.TabStop = false;
@@ -663,7 +663,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Transfer_Panel_Bottom.Dock = DockStyle.Bottom;
             MainForm_Transfer_Panel_Bottom.Location = new Point(3, 623);
             MainForm_Transfer_Panel_Bottom.Name = "MainForm_Transfer_Panel_Bottom";
-            MainForm_Transfer_Panel_Bottom.Size = new Size(1515, 35);
+            MainForm_Transfer_Panel_Bottom.Size = new Size(1513, 35);
             MainForm_Transfer_Panel_Bottom.TabIndex = 24;
             // 
             // MainForm_Transfer_TextBox_Qty

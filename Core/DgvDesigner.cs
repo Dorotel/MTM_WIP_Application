@@ -104,8 +104,10 @@ public class DgvDesigner
         }
     }
 
-    private static void ApplyThemeToDataGridView(DataGridView dataGridView, AppThemes.AppTheme theme)
+    public static void ApplyThemeToDataGridView(DataGridView dataGridView, AppThemes.AppTheme theme)
     {
+        dataGridView.Dock = DockStyle.Fill; // Ensure the DataGridView fills its parent
+
         dataGridView.BackgroundColor = theme.DataGridBackColor;
         dataGridView.BorderStyle = theme.DataGridBorderStyle;
         dataGridView.DefaultCellStyle.SelectionBackColor = theme.DataGridSelectionBackColor;

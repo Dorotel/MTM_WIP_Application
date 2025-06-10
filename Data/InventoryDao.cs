@@ -164,6 +164,25 @@ public static class InventoryDao
             useAsync, CommandType.StoredProcedure);
     }
 
+    public static async Task<int> DeleteInventoryByPartIdLocationOperationQuantityAsync(
+        string partId,
+        string location,
+        string operation,
+        int quantity,
+        bool useAsync = false)
+    {
+        return await SqlHelper.ExecuteNonQuery(
+            "mtm_wip_application.inv_inventory_Remove_Item",
+            new Dictionary<string, object>
+            {
+                { "p_PartID", partId },
+                { "p_Location", location },
+                { "p_Operation", operation },
+                { "p_Quantity", quantity }
+            },
+            useAsync, CommandType.StoredProcedure);
+    }
+
     public static async Task<int> BulkDeleteInventoryByLocationAsync(string location, bool useAsync = false)
     {
         return await SqlHelper.ExecuteNonQuery(

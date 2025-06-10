@@ -54,6 +54,95 @@ public partial class ControlRemoveTab : UserControl
         }
     }
 
+    private async void Control_RemoveTab_Button_Delete_Click(object? sender, EventArgs? e)
+    {
+        try
+        {
+            var selectedCount = Control_RemoveTab_DataGridView_Main.SelectedRows.Count;
+            AppLogger.Log($"Delete clicked. Selected rows: {selectedCount}");
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] Delete clicked. Selected rows: {selectedCount}");
+
+            if (selectedCount == 0)
+            {
+                AppLogger.Log("No rows selected for deletion.");
+                System.Diagnostics.Debug.WriteLine("[DEBUG] No rows selected for deletion.");
+                return;
+            }
+
+            // Build a summary of items to delete
+            var sb = new StringBuilder();
+            var itemsToDelete = new List<(string PartID, string Location, int Quantity)>();
+            foreach (DataGridViewRow row in Control_RemoveTab_DataGridView_Main.SelectedRows)
+                if (row.DataBoundItem is DataRowView drv)
+                {
+                    var partId = drv["PartID"]?.ToString() ?? "";
+                    var location = drv["Location"]?.ToString() ?? "";
+                    var quantity = 0;
+                    int.TryParse(drv["Quantity"]?.ToString(), out quantity);
+
+                    sb.AppendLine($"PartID: {partId}, Location: {location}, Quantity: {quantity}");
+                    AppLogger.Log($"Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[DEBUG] Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
+
+                    itemsToDelete.Add((partId, location, quantity));
+                }
+
+            var confirmResult = MessageBox.Show(
+                $"The following items will be deleted:\n\n{sb}\nAre you sure?",
+                "Confirm Deletion",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (confirmResult != DialogResult.Yes)
+            {
+                AppLogger.Log("User cancelled deletion.");
+                System.Diagnostics.Debug.WriteLine("[DEBUG] User cancelled deletion.");
+                return;
+            }
+
+            // Delete each selected item using InventoryDao
+            foreach (DataGridViewRow row in Control_RemoveTab_DataGridView_Main.SelectedRows)
+                if (row.DataBoundItem is DataRowView drv)
+                {
+                    var partId = drv["PartID"]?.ToString() ?? "";
+                    var location = drv["Location"]?.ToString() ?? "";
+                    var operation = drv["Operation"]?.ToString() ?? "";
+                    var quantity = 0;
+                    int.TryParse(drv["Quantity"]?.ToString(), out quantity);
+
+                    AppLogger.Log(
+                        $"Deleting: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[DEBUG] Deleting: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
+
+                    await InventoryDao.DeleteInventoryByPartIdLocationOperationQuantityAsync(
+                        partId,
+                        location,
+                        operation,
+                        quantity
+                    );
+
+                    AppLogger.Log(
+                        $"Deleted: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[DEBUG] Deleted: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
+                }
+
+            AppLogger.Log("Selected inventory items deleted.");
+            System.Diagnostics.Debug.WriteLine("[DEBUG] Selected inventory items deleted.");
+
+            // Refresh the DataGridView after deletion
+            Control_RemoveTab_Button_Search_Click(null, null);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogApplicationError(ex);
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] Exception: {ex}");
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "Control_RemoveTab_Button_Delete_Click");
+        }
+    }
+
     private async void Control_RemoveTab_Button_Reset_Click()
     {
         try
@@ -61,7 +150,7 @@ public partial class ControlRemoveTab : UserControl
             AppLogger.Log("Inventory Reset button clicked.");
             Control_RemoveTab_ComboBox_Operation.Visible = false;
             Control_RemoveTab_ComboBox_Part.Visible = false;
-
+            Control_RemoveTab_Image_NothingFound.Visible = false;
 
             // Reinitialize ComboBox DataTables
             await MainFormComboBoxDataHelper.FillComboBoxAsync(
@@ -267,9 +356,10 @@ public partial class ControlRemoveTab : UserControl
             // Enable Search if Part ComboBox has a valid selection
             Control_RemoveTab_Button_Search.Enabled = Control_RemoveTab_ComboBox_Part.SelectedIndex > 0;
 
-            // Enable Delete if a row is selected in the DataGridView
-            Control_RemoveTab_Button_Delete.Enabled =
-                Control_RemoveTab_DataGridView_Main.SelectedRows.Count > 0;
+            // Enable Delete if there is data and a row is selected
+            var hasData = Control_RemoveTab_DataGridView_Main.Rows.Count > 0;
+            var hasSelection = Control_RemoveTab_DataGridView_Main.SelectedRows.Count > 0;
+            Control_RemoveTab_Button_Delete.Enabled = hasData && hasSelection;
         }
         catch (Exception ex)
         {
@@ -295,10 +385,8 @@ public partial class ControlRemoveTab : UserControl
                 Control_RemoveTab_Update_ButtonStates();
             };
 
-
             Control_RemoveTab_Button_AdvancedItemRemoval.Click +=
                 (s, e) => Control_RemoveTab_Button_AdvancedItemRemoval_Click();
-
 
             Control_RemoveTab_ComboBox_Part.Enter += (s, e) =>
             {
@@ -309,7 +397,6 @@ public partial class ControlRemoveTab : UserControl
                 Control_RemoveTab_ComboBox_Part.BackColor = SystemColors.Window;
             };
 
-
             Control_RemoveTab_ComboBox_Operation.Enter += (s, e) =>
             {
                 Control_RemoveTab_ComboBox_Operation.BackColor = Color.LightBlue;
@@ -319,6 +406,10 @@ public partial class ControlRemoveTab : UserControl
                 Control_RemoveTab_ComboBox_Operation.BackColor = SystemColors.Window;
             };
 
+            // Wire up DataGridView selection change to update button states
+            Control_RemoveTab_DataGridView_Main.SelectionChanged += (s, e) => Control_RemoveTab_Update_ButtonStates();
+
+            Control_RemoveTab_Button_Delete.Click += Control_RemoveTab_Button_Delete_Click;
 
             AppLogger.Log("Removal tab events wired up.");
         }
@@ -379,6 +470,13 @@ public partial class ControlRemoveTab : UserControl
                                  column.Name == "Operation" ||
                                  column.Name == "Quantity" ||
                                  column.Name == "Location";
+
+            // Apply theme and size columns
+            DgvDesigner.ApplyThemeToDataGridView(
+                Control_RemoveTab_DataGridView_Main,
+                AppThemes.GetTheme(WipAppVariables.WipDataGridTheme ?? "Default (Black and White)")
+            );
+            DgvDesigner.SizeDataGrid(Control_RemoveTab_DataGridView_Main);
 
             if (results.Rows.Count == 0)
                 Control_RemoveTab_Image_NothingFound.Visible = true;

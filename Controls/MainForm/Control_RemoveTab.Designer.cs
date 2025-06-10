@@ -31,8 +31,8 @@
             Control_RemoveTab_GroupBox_MainControl = new GroupBox();
             Control_RemoveTab_Panel_Main = new TableLayoutPanel();
             Control_RemoveTab_Panel_DataGridView = new Panel();
-            Control_RemoveTab_Image_NothingFound = new PictureBox();
             Control_RemoveTab_DataGridView_Main = new DataGridView();
+            Control_RemoveTab_Image_NothingFound = new PictureBox();
             Control_RemoveTab_Panel_Footer = new Panel();
             Control_RemoveTab_Button_Toggle_RightPanel = new Button();
             Control_RemoveTab_Button_AdvancedItemRemoval = new Button();
@@ -47,8 +47,8 @@
             Control_RemoveTab_GroupBox_MainControl.SuspendLayout();
             Control_RemoveTab_Panel_Main.SuspendLayout();
             Control_RemoveTab_Panel_DataGridView.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_Image_NothingFound).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_DataGridView_Main).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_Image_NothingFound).BeginInit();
             Control_RemoveTab_Panel_Footer.SuspendLayout();
             Control_RemoveTab_Panel_Header.SuspendLayout();
             SuspendLayout();
@@ -85,25 +85,13 @@
             // 
             // Control_RemoveTab_Panel_DataGridView
             // 
-            Control_RemoveTab_Panel_DataGridView.Controls.Add(Control_RemoveTab_DataGridView_Main);
             Control_RemoveTab_Panel_DataGridView.Controls.Add(Control_RemoveTab_Image_NothingFound);
+            Control_RemoveTab_Panel_DataGridView.Controls.Add(Control_RemoveTab_DataGridView_Main);
             Control_RemoveTab_Panel_DataGridView.Dock = DockStyle.Fill;
             Control_RemoveTab_Panel_DataGridView.Location = new Point(3, 45);
             Control_RemoveTab_Panel_DataGridView.Name = "Control_RemoveTab_Panel_DataGridView";
             Control_RemoveTab_Panel_DataGridView.Size = new Size(803, 272);
             Control_RemoveTab_Panel_DataGridView.TabIndex = 21;
-            // 
-            // Control_RemoveTab_Image_NothingFound
-            // 
-            Control_RemoveTab_Image_NothingFound.Dock = DockStyle.Fill;
-            Control_RemoveTab_Image_NothingFound.ErrorImage = null;
-            Control_RemoveTab_Image_NothingFound.InitialImage = null;
-            Control_RemoveTab_Image_NothingFound.Location = new Point(0, 0);
-            Control_RemoveTab_Image_NothingFound.Name = "Control_RemoveTab_Image_NothingFound";
-            Control_RemoveTab_Image_NothingFound.Size = new Size(803, 272);
-            Control_RemoveTab_Image_NothingFound.SizeMode = PictureBoxSizeMode.CenterImage;
-            Control_RemoveTab_Image_NothingFound.TabIndex = 6;
-            Control_RemoveTab_Image_NothingFound.TabStop = false;
             // 
             // Control_RemoveTab_DataGridView_Main
             // 
@@ -132,6 +120,20 @@
             Control_RemoveTab_DataGridView_Main.Size = new Size(803, 272);
             Control_RemoveTab_DataGridView_Main.StandardTab = true;
             Control_RemoveTab_DataGridView_Main.TabIndex = 4;
+            // 
+            // Control_RemoveTab_Image_NothingFound
+            // 
+            Control_RemoveTab_Image_NothingFound.Dock = DockStyle.Fill;
+            Control_RemoveTab_Image_NothingFound.ErrorImage = null;
+            Control_RemoveTab_Image_NothingFound.Image = Properties.Resources._404;
+            Control_RemoveTab_Image_NothingFound.InitialImage = null;
+            Control_RemoveTab_Image_NothingFound.Location = new Point(0, 0);
+            Control_RemoveTab_Image_NothingFound.Name = "Control_RemoveTab_Image_NothingFound";
+            Control_RemoveTab_Image_NothingFound.Size = new Size(803, 272);
+            Control_RemoveTab_Image_NothingFound.SizeMode = PictureBoxSizeMode.CenterImage;
+            Control_RemoveTab_Image_NothingFound.TabIndex = 6;
+            Control_RemoveTab_Image_NothingFound.TabStop = false;
+            Control_RemoveTab_Image_NothingFound.Visible = false;
             // 
             // Control_RemoveTab_Panel_Footer
             // 
@@ -261,8 +263,8 @@
             Control_RemoveTab_GroupBox_MainControl.ResumeLayout(false);
             Control_RemoveTab_Panel_Main.ResumeLayout(false);
             Control_RemoveTab_Panel_DataGridView.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_Image_NothingFound).EndInit();
             ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_DataGridView_Main).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_Image_NothingFound).EndInit();
             Control_RemoveTab_Panel_Footer.ResumeLayout(false);
             Control_RemoveTab_Panel_Header.ResumeLayout(false);
             Control_RemoveTab_Panel_Header.PerformLayout();

@@ -18,6 +18,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Images\404.jpg" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <COMReference Include="IWshRuntimeLibrary">
 	    <WrapperTool>tlbimp</WrapperTool>
 	    <VersionMinor>0</VersionMinor>
@@ -36,10 +40,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Images\" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Microsoft.TestPlatform" Version="17.14.1" />
 		<PackageReference Include="MySql.Data" Version="9.3.0" />
 		<PackageReference Include="pose" Version="1.2.1" />
@@ -47,14 +47,29 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Resource Include="Images\404.jpg">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Resource>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Compile Update="Controls\MainForm\Control_RemoveTab.cs">
 	    <SubType>UserControl</SubType>
+	  </Compile>
+	  <Compile Update="Properties\Resources.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Resources.resx</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
 	  <EmbeddedResource Update="Controls\MainForm\Control_RemoveTab.resx">
 	    <SubType>Designer</SubType>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Properties\Resources.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
 	  </EmbeddedResource>
 	</ItemGroup>
 
