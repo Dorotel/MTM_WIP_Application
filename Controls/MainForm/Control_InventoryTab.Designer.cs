@@ -79,8 +79,8 @@
             Control_InventoryTab_TableLayout_Main.RowCount = 4;
             Control_InventoryTab_TableLayout_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 133F));
             Control_InventoryTab_TableLayout_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 18F));
-            Control_InventoryTab_TableLayout_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 164F));
-            Control_InventoryTab_TableLayout_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 29F));
+            Control_InventoryTab_TableLayout_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            Control_InventoryTab_TableLayout_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
             Control_InventoryTab_TableLayout_Main.Size = new Size(809, 362);
             Control_InventoryTab_TableLayout_Main.TabIndex = 0;
             // 
@@ -93,52 +93,54 @@
             Control_InventoryTab_Panel_BottomGroup.Controls.Add(Control_InventoryTab_Button_AdvancedEntry);
             Control_InventoryTab_Panel_BottomGroup.Controls.Add(Control_InventoryTab_Label_Version);
             Control_InventoryTab_Panel_BottomGroup.Dock = DockStyle.Fill;
-            Control_InventoryTab_Panel_BottomGroup.Location = new Point(3, 318);
+            Control_InventoryTab_Panel_BottomGroup.Location = new Point(3, 323);
             Control_InventoryTab_Panel_BottomGroup.Name = "Control_InventoryTab_Panel_BottomGroup";
-            Control_InventoryTab_Panel_BottomGroup.Size = new Size(803, 41);
+            Control_InventoryTab_Panel_BottomGroup.Size = new Size(803, 36);
             Control_InventoryTab_Panel_BottomGroup.TabIndex = 25;
             // 
             // Control_InventoryTab_Button_Toggle_RightPanel
             // 
             Control_InventoryTab_Button_Toggle_RightPanel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            Control_InventoryTab_Button_Toggle_RightPanel.Font = new Font("Segoe UI", 8F);
-            Control_InventoryTab_Button_Toggle_RightPanel.Location = new Point(678, 3);
+            Control_InventoryTab_Button_Toggle_RightPanel.Font = new Font("Segoe UI", 10F);
+            Control_InventoryTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
+            Control_InventoryTab_Button_Toggle_RightPanel.Location = new Point(769, 4);
             Control_InventoryTab_Button_Toggle_RightPanel.Name = "Control_InventoryTab_Button_Toggle_RightPanel";
-            Control_InventoryTab_Button_Toggle_RightPanel.Size = new Size(122, 34);
+            Control_InventoryTab_Button_Toggle_RightPanel.Size = new Size(28, 28);
             Control_InventoryTab_Button_Toggle_RightPanel.TabIndex = 9;
-            Control_InventoryTab_Button_Toggle_RightPanel.Text = "Toggle Panel (On)";
+            Control_InventoryTab_Button_Toggle_RightPanel.Text = "←";
             Control_InventoryTab_Button_Toggle_RightPanel.UseVisualStyleBackColor = true;
             Control_InventoryTab_Button_Toggle_RightPanel.Click += Control_InventoryTab_Button_Toggle_RightPanel_Click;
             // 
             // Control_InventoryTab_Button_Reset
             // 
             Control_InventoryTab_Button_Reset.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            Control_InventoryTab_Button_Reset.Font = new Font("Segoe UI", 8F);
-            Control_InventoryTab_Button_Reset.Location = new Point(564, 3);
+            Control_InventoryTab_Button_Reset.Font = new Font("Segoe UI", 9F);
+            Control_InventoryTab_Button_Reset.Location = new Point(703, 4);
             Control_InventoryTab_Button_Reset.Name = "Control_InventoryTab_Button_Reset";
-            Control_InventoryTab_Button_Reset.Size = new Size(108, 34);
+            Control_InventoryTab_Button_Reset.Size = new Size(60, 28);
             Control_InventoryTab_Button_Reset.TabIndex = 7;
             Control_InventoryTab_Button_Reset.TabStop = false;
-            Control_InventoryTab_Button_Reset.Text = "Reset (Ctrl + R)";
+            Control_InventoryTab_Button_Reset.Text = "Reset";
             Control_InventoryTab_Button_Reset.UseVisualStyleBackColor = true;
             // 
             // Control_InventoryTab_Button_Save
             // 
             Control_InventoryTab_Button_Save.Font = new Font("Segoe UI", 8F);
-            Control_InventoryTab_Button_Save.Location = new Point(0, 3);
+            Control_InventoryTab_Button_Save.Location = new Point(4, 4);
             Control_InventoryTab_Button_Save.Name = "Control_InventoryTab_Button_Save";
-            Control_InventoryTab_Button_Save.Size = new Size(102, 34);
+            Control_InventoryTab_Button_Save.Size = new Size(60, 28);
             Control_InventoryTab_Button_Save.TabIndex = 6;
-            Control_InventoryTab_Button_Save.Text = "Save (Ctrl + S)";
+            Control_InventoryTab_Button_Save.Text = "Save";
             Control_InventoryTab_Button_Save.UseVisualStyleBackColor = true;
             // 
             // Control_InventoryTab_Button_AdvancedEntry
             // 
-            Control_InventoryTab_Button_AdvancedEntry.Location = new Point(108, 3);
+            Control_InventoryTab_Button_AdvancedEntry.ForeColor = Color.DarkRed;
+            Control_InventoryTab_Button_AdvancedEntry.Location = new Point(70, 4);
             Control_InventoryTab_Button_AdvancedEntry.Name = "Control_InventoryTab_Button_AdvancedEntry";
-            Control_InventoryTab_Button_AdvancedEntry.Size = new Size(115, 34);
+            Control_InventoryTab_Button_AdvancedEntry.Size = new Size(80, 28);
             Control_InventoryTab_Button_AdvancedEntry.TabIndex = 8;
-            Control_InventoryTab_Button_AdvancedEntry.Text = "Advanced Entry";
+            Control_InventoryTab_Button_AdvancedEntry.Text = "Advanced";
             Control_InventoryTab_Button_AdvancedEntry.UseVisualStyleBackColor = true;
             // 
             // Control_InventoryTab_Label_Version
@@ -147,7 +149,7 @@
             Control_InventoryTab_Label_Version.Font = new Font("Segoe UI", 7F);
             Control_InventoryTab_Label_Version.Location = new Point(0, 0);
             Control_InventoryTab_Label_Version.Name = "Control_InventoryTab_Label_Version";
-            Control_InventoryTab_Label_Version.Size = new Size(800, 37);
+            Control_InventoryTab_Label_Version.Size = new Size(800, 32);
             Control_InventoryTab_Label_Version.TabIndex = 8;
             Control_InventoryTab_Label_Version.Text = "Version: ";
             Control_InventoryTab_Label_Version.TextAlign = ContentAlignment.BottomCenter;
@@ -157,7 +159,7 @@
             Control_InventoryTab_RichTextBox_Notes.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             Control_InventoryTab_RichTextBox_Notes.Location = new Point(3, 154);
             Control_InventoryTab_RichTextBox_Notes.Name = "Control_InventoryTab_RichTextBox_Notes";
-            Control_InventoryTab_RichTextBox_Notes.Size = new Size(803, 158);
+            Control_InventoryTab_RichTextBox_Notes.Size = new Size(803, 163);
             Control_InventoryTab_RichTextBox_Notes.TabIndex = 5;
             Control_InventoryTab_RichTextBox_Notes.Text = "";
             // 
@@ -202,11 +204,11 @@
             // 
             Control_InventoryTab_Label_Op.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             Control_InventoryTab_Label_Op.AutoSize = true;
-            Control_InventoryTab_Label_Op.Location = new Point(4, 41);
+            Control_InventoryTab_Label_Op.Location = new Point(31, 41);
             Control_InventoryTab_Label_Op.Name = "Control_InventoryTab_Label_Op";
-            Control_InventoryTab_Label_Op.Size = new Size(90, 15);
+            Control_InventoryTab_Label_Op.Size = new Size(63, 15);
             Control_InventoryTab_Label_Op.TabIndex = 2;
-            Control_InventoryTab_Label_Op.Text = "Next Operation:";
+            Control_InventoryTab_Label_Op.Text = "Operation:";
             // 
             // Control_InventoryTab_ComboBox_Location
             // 
@@ -269,13 +271,13 @@
             Control_InventoryTab_Label_Notes.TabIndex = 9;
             Control_InventoryTab_Label_Notes.Text = "Notes";
             // 
-            // Control_InventoryTab
+            // ControlInventoryTab
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             Controls.Add(Control_InventoryTab_GroupBox_Main);
-            Name = "ControlRemoveTab";
+            Name = "ControlInventoryTab";
             Size = new Size(815, 384);
             Control_InventoryTab_GroupBox_Main.ResumeLayout(false);
             Control_InventoryTab_TableLayout_Main.ResumeLayout(false);

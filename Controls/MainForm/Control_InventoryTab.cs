@@ -5,6 +5,7 @@ using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Data;
 using MTM_WIP_Application.Forms.AdvancedInventoryEntryForm;
 using MTM_WIP_Application.Forms.MainForm.Classes;
+using MTM_WIP_Application.Helpers;
 using MTM_WIP_Application.Logging;
 using MTM_WIP_Application.Services;
 using MySql.Data.MySqlClient;
@@ -70,7 +71,7 @@ public partial class ControlInventoryTab : UserControl
 
 
             // Reinitialize ComboBox DataTables
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_part_ids_Get_All",
                 new MySqlConnection(WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
@@ -81,7 +82,7 @@ public partial class ControlInventoryTab : UserControl
                 "[ Enter Part ID ]",
                 CommandType.StoredProcedure);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
                 new MySqlConnection(WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
@@ -92,7 +93,7 @@ public partial class ControlInventoryTab : UserControl
                 "[ Enter Op # ]",
                 CommandType.StoredProcedure);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_locations_Get_All",
                 new MySqlConnection(WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
@@ -343,7 +344,7 @@ public partial class ControlInventoryTab : UserControl
                     };
 
             foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await MainFormComboBoxDataHelper.FillComboBoxAsync(
+                await ComboBoxHelpers.FillComboBoxAsync(
                     procName,
                     connection,
                     adapter,
@@ -422,6 +423,21 @@ public partial class ControlInventoryTab : UserControl
                 );
                 return true;
             }
+
+            if (MainFormInstance != null && !MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed &&
+                keyData == (Keys.Alt | Keys.Right))
+            {
+                Control_InventoryTab_Button_Toggle_RightPanel.PerformClick(); // Triggers the button's Click event
+                return true;
+            }
+
+            if (MainFormInstance != null && MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed &&
+                keyData == (Keys.Alt | Keys.Left))
+            {
+                Control_InventoryTab_Button_Toggle_RightPanel.PerformClick(); // Triggers the button's Click event
+                return true;
+            }
+
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
@@ -509,6 +525,7 @@ public partial class ControlInventoryTab : UserControl
             Control_InventoryTab_ComboBox_Part.Leave += (s, e) =>
             {
                 Control_InventoryTab_ComboBox_Part.BackColor = SystemColors.Window;
+                ComboBoxHelpers.ValidateComboBoxItem(Control_InventoryTab_ComboBox_Part, "[ Enter Part ID ]");
             };
 
             Control_InventoryTab_ComboBox_Location.Enter += (s, e) =>
@@ -518,6 +535,7 @@ public partial class ControlInventoryTab : UserControl
             Control_InventoryTab_ComboBox_Location.Leave += (s, e) =>
             {
                 Control_InventoryTab_ComboBox_Location.BackColor = SystemColors.Window;
+                ComboBoxHelpers.ValidateComboBoxItem(Control_InventoryTab_ComboBox_Location, "[ Enter Location ]");
             };
 
             Control_InventoryTab_ComboBox_Operation.Enter += (s, e) =>
@@ -527,6 +545,7 @@ public partial class ControlInventoryTab : UserControl
             Control_InventoryTab_ComboBox_Operation.Leave += (s, e) =>
             {
                 Control_InventoryTab_ComboBox_Operation.BackColor = SystemColors.Window;
+                ComboBoxHelpers.ValidateComboBoxItem(Control_InventoryTab_ComboBox_Operation, "[ Enter Op # ]");
             };
 
             Control_InventoryTab_TextBox_Quantity.Enter += (s, e) =>
@@ -567,13 +586,33 @@ public partial class ControlInventoryTab : UserControl
         if (MainFormInstance != null && !MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed)
         {
             MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = true;
-            Control_InventoryTab_Button_Toggle_RightPanel.Text = @"Toggle Panel (Off)";
+
+            Control_InventoryTab_Button_Toggle_RightPanel.Text = "←";
+            Control_InventoryTab_Button_Toggle_RightPanel.ForeColor = Color.Red;
         }
         else
         {
             if (MainFormInstance != null)
+            {
                 MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = false;
-            Control_InventoryTab_Button_Toggle_RightPanel.Text = @"Toggle Panel (On)";
+                Control_InventoryTab_Button_Toggle_RightPanel.Text = "→";
+                Control_InventoryTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
+            }
+        }
+    }
+
+
+    public void UpdateToggleRightPanelButton()
+    {
+        if (MainFormInstance != null && !MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed)
+        {
+            Control_InventoryTab_Button_Toggle_RightPanel.Text = "→";
+            Control_InventoryTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
+        }
+        else
+        {
+            Control_InventoryTab_Button_Toggle_RightPanel.Text = "←";
+            Control_InventoryTab_Button_Toggle_RightPanel.ForeColor = Color.Red;
         }
     }
 }

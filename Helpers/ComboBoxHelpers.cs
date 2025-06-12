@@ -3,7 +3,7 @@ using MySql.Data.MySqlClient;
 using System.Threading;
 using MTM_WIP_Application.Data;
 
-namespace MTM_WIP_Application.Forms.MainForm.Classes;
+namespace MTM_WIP_Application.Helpers;
 
 /// <summary>
 ///
@@ -23,7 +23,7 @@ namespace MTM_WIP_Application.Forms.MainForm.Classes;
 /// 2. Tests SizeDataGrid for optimizing DataGridView column sizing.
 /// 3. Validates static helpers for querying theme names, colors, and theme application in test scenarios.
 /// </summary>
-public static class MainFormComboBoxDataHelper
+public static class ComboBoxHelpers
 {
     public static async Task ClearAndResetAllComboBoxesAsync(
         ComboBox inventoryTabComboBoxPart,
@@ -230,7 +230,7 @@ public static class MainFormComboBoxDataHelper
             }
 
             if (comboBox.InvokeRequired)
-                comboBox.Invoke((Action)SetComboBox);
+                comboBox.Invoke(SetComboBox);
             else
                 SetComboBox();
         }
@@ -244,5 +244,71 @@ public static class MainFormComboBoxDataHelper
     {
         return Task.Factory.StartNew(() => control.Invoke(action), cancellationToken, TaskCreationOptions.None,
             TaskScheduler.Default);
+    }
+
+    // --- ComboBox Utility Methods ---
+
+    /// <summary>
+    /// Validates that the ComboBox's text matches either the placeholder or a valid item in the ComboBox.
+    /// Sets ForeColor accordingly. Returns true if valid, false otherwise.
+    /// </summary>
+    public static bool ValidateComboBoxItem(ComboBox comboBox, string placeholder)
+    {
+        if (string.IsNullOrWhiteSpace(comboBox.Text))
+            return false;
+
+        // Accept placeholder as valid
+        if (comboBox.Text.Equals(placeholder, StringComparison.OrdinalIgnoreCase))
+        {
+            comboBox.ForeColor = Color.Red;
+            return true;
+        }
+
+        var found = false;
+        var displayMember = comboBox.DisplayMember;
+
+        foreach (var item in comboBox.Items)
+        {
+            string? itemText = null;
+            if (!string.IsNullOrEmpty(displayMember) && item is DataRowView drv)
+                itemText = drv[displayMember]?.ToString();
+            else
+                itemText = item?.ToString();
+
+            if (!string.IsNullOrEmpty(itemText) &&
+                itemText.Equals(comboBox.Text, StringComparison.OrdinalIgnoreCase))
+            {
+                found = true;
+                break;
+            }
+        }
+
+        comboBox.ForeColor = found ? Color.Black : Color.Red;
+        return found;
+    }
+
+    /// <summary>
+    /// Sets the ComboBox's text and color to the placeholder.
+    /// </summary>
+    public static void SetComboBoxPlaceholder(ComboBox comboBox, string placeholder)
+    {
+        comboBox.Text = placeholder;
+        comboBox.ForeColor = Color.Red;
+    }
+
+    /// <summary>
+    /// Sets the ComboBox's ForeColor to indicate a valid selection.
+    /// </summary>
+    public static void SetComboBoxValid(ComboBox comboBox)
+    {
+        comboBox.ForeColor = Color.Black;
+    }
+
+    /// <summary>
+    /// Sets the ComboBox's ForeColor to indicate an invalid selection.
+    /// </summary>
+    public static void SetComboBoxInvalid(ComboBox comboBox)
+    {
+        comboBox.ForeColor = Color.Red;
     }
 }

@@ -31,8 +31,8 @@
             Control_RemoveTab_GroupBox_MainControl = new GroupBox();
             Control_RemoveTab_Panel_Main = new TableLayoutPanel();
             Control_RemoveTab_Panel_DataGridView = new Panel();
-            Control_RemoveTab_DataGridView_Main = new DataGridView();
             Control_RemoveTab_Image_NothingFound = new PictureBox();
+            Control_RemoveTab_DataGridView_Main = new DataGridView();
             Control_RemoveTab_Panel_Footer = new Panel();
             Control_RemoveTab_Button_Toggle_RightPanel = new Button();
             Control_RemoveTab_Button_AdvancedItemRemoval = new Button();
@@ -47,8 +47,8 @@
             Control_RemoveTab_GroupBox_MainControl.SuspendLayout();
             Control_RemoveTab_Panel_Main.SuspendLayout();
             Control_RemoveTab_Panel_DataGridView.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_DataGridView_Main).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_Image_NothingFound).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_DataGridView_Main).BeginInit();
             Control_RemoveTab_Panel_Footer.SuspendLayout();
             Control_RemoveTab_Panel_Header.SuspendLayout();
             SuspendLayout();
@@ -93,6 +93,20 @@
             Control_RemoveTab_Panel_DataGridView.Size = new Size(803, 272);
             Control_RemoveTab_Panel_DataGridView.TabIndex = 21;
             // 
+            // Control_RemoveTab_Image_NothingFound
+            // 
+            Control_RemoveTab_Image_NothingFound.Dock = DockStyle.Fill;
+            Control_RemoveTab_Image_NothingFound.ErrorImage = null;
+            Control_RemoveTab_Image_NothingFound.Image = Properties.Resources._404;
+            Control_RemoveTab_Image_NothingFound.InitialImage = null;
+            Control_RemoveTab_Image_NothingFound.Location = new Point(0, 0);
+            Control_RemoveTab_Image_NothingFound.Name = "Control_RemoveTab_Image_NothingFound";
+            Control_RemoveTab_Image_NothingFound.Size = new Size(803, 272);
+            Control_RemoveTab_Image_NothingFound.SizeMode = PictureBoxSizeMode.CenterImage;
+            Control_RemoveTab_Image_NothingFound.TabIndex = 6;
+            Control_RemoveTab_Image_NothingFound.TabStop = false;
+            Control_RemoveTab_Image_NothingFound.Visible = false;
+            // 
             // Control_RemoveTab_DataGridView_Main
             // 
             Control_RemoveTab_DataGridView_Main.AllowUserToAddRows = false;
@@ -121,20 +135,6 @@
             Control_RemoveTab_DataGridView_Main.StandardTab = true;
             Control_RemoveTab_DataGridView_Main.TabIndex = 4;
             // 
-            // Control_RemoveTab_Image_NothingFound
-            // 
-            Control_RemoveTab_Image_NothingFound.Dock = DockStyle.Fill;
-            Control_RemoveTab_Image_NothingFound.ErrorImage = null;
-            Control_RemoveTab_Image_NothingFound.Image = Properties.Resources._404;
-            Control_RemoveTab_Image_NothingFound.InitialImage = null;
-            Control_RemoveTab_Image_NothingFound.Location = new Point(0, 0);
-            Control_RemoveTab_Image_NothingFound.Name = "Control_RemoveTab_Image_NothingFound";
-            Control_RemoveTab_Image_NothingFound.Size = new Size(803, 272);
-            Control_RemoveTab_Image_NothingFound.SizeMode = PictureBoxSizeMode.CenterImage;
-            Control_RemoveTab_Image_NothingFound.TabIndex = 6;
-            Control_RemoveTab_Image_NothingFound.TabStop = false;
-            Control_RemoveTab_Image_NothingFound.Visible = false;
-            // 
             // Control_RemoveTab_Panel_Footer
             // 
             Control_RemoveTab_Panel_Footer.Controls.Add(Control_RemoveTab_Button_Toggle_RightPanel);
@@ -152,52 +152,53 @@
             // Control_RemoveTab_Button_Toggle_RightPanel
             // 
             Control_RemoveTab_Button_Toggle_RightPanel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            Control_RemoveTab_Button_Toggle_RightPanel.Font = new Font("Segoe UI", 8F);
-            Control_RemoveTab_Button_Toggle_RightPanel.Location = new Point(675, 5);
+            Control_RemoveTab_Button_Toggle_RightPanel.Font = new Font("Segoe UI", 10F);
+            Control_RemoveTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
+            Control_RemoveTab_Button_Toggle_RightPanel.Location = new Point(769, 4);
             Control_RemoveTab_Button_Toggle_RightPanel.Name = "Control_RemoveTab_Button_Toggle_RightPanel";
-            Control_RemoveTab_Button_Toggle_RightPanel.Size = new Size(122, 28);
+            Control_RemoveTab_Button_Toggle_RightPanel.Size = new Size(28, 28);
             Control_RemoveTab_Button_Toggle_RightPanel.TabIndex = 14;
-            Control_RemoveTab_Button_Toggle_RightPanel.Text = "Toggle Panel (On)";
+            Control_RemoveTab_Button_Toggle_RightPanel.Text = "←";
             Control_RemoveTab_Button_Toggle_RightPanel.UseVisualStyleBackColor = true;
             Control_RemoveTab_Button_Toggle_RightPanel.Click += Control_RemoveTab_Button_Toggle_RightPanel_Click;
             // 
             // Control_RemoveTab_Button_AdvancedItemRemoval
             // 
             Control_RemoveTab_Button_AdvancedItemRemoval.ForeColor = Color.DarkRed;
-            Control_RemoveTab_Button_AdvancedItemRemoval.Location = new Point(241, 5);
+            Control_RemoveTab_Button_AdvancedItemRemoval.Location = new Point(136, 4);
             Control_RemoveTab_Button_AdvancedItemRemoval.Name = "Control_RemoveTab_Button_AdvancedItemRemoval";
-            Control_RemoveTab_Button_AdvancedItemRemoval.Size = new Size(236, 28);
+            Control_RemoveTab_Button_AdvancedItemRemoval.Size = new Size(90, 28);
             Control_RemoveTab_Button_AdvancedItemRemoval.TabIndex = 13;
-            Control_RemoveTab_Button_AdvancedItemRemoval.Text = "Advanced Search (Ctrl + Alt + S)";
+            Control_RemoveTab_Button_AdvancedItemRemoval.Text = "Advanced";
             Control_RemoveTab_Button_AdvancedItemRemoval.UseVisualStyleBackColor = true;
             // 
             // Control_RemoveTab_Button_Reset
             // 
             Control_RemoveTab_Button_Reset.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            Control_RemoveTab_Button_Reset.Location = new Point(538, 5);
+            Control_RemoveTab_Button_Reset.Location = new Point(703, 4);
             Control_RemoveTab_Button_Reset.Name = "Control_RemoveTab_Button_Reset";
-            Control_RemoveTab_Button_Reset.Size = new Size(131, 28);
+            Control_RemoveTab_Button_Reset.Size = new Size(60, 28);
             Control_RemoveTab_Button_Reset.TabIndex = 5;
             Control_RemoveTab_Button_Reset.TabStop = false;
-            Control_RemoveTab_Button_Reset.Text = "Reset ( Ctrl + R )";
+            Control_RemoveTab_Button_Reset.Text = "Reset";
             Control_RemoveTab_Button_Reset.UseVisualStyleBackColor = true;
             // 
             // Control_RemoveTab_Button_Delete
             // 
-            Control_RemoveTab_Button_Delete.Location = new Point(148, 5);
+            Control_RemoveTab_Button_Delete.Location = new Point(72, 4);
             Control_RemoveTab_Button_Delete.Name = "Control_RemoveTab_Button_Delete";
-            Control_RemoveTab_Button_Delete.Size = new Size(87, 28);
+            Control_RemoveTab_Button_Delete.Size = new Size(60, 28);
             Control_RemoveTab_Button_Delete.TabIndex = 8;
-            Control_RemoveTab_Button_Delete.Text = "Delete ( Del )";
+            Control_RemoveTab_Button_Delete.Text = "Delete";
             Control_RemoveTab_Button_Delete.UseVisualStyleBackColor = true;
             // 
             // Control_RemoveTab_Button_Search
             // 
-            Control_RemoveTab_Button_Search.Location = new Point(6, 5);
+            Control_RemoveTab_Button_Search.Location = new Point(6, 4);
             Control_RemoveTab_Button_Search.Name = "Control_RemoveTab_Button_Search";
-            Control_RemoveTab_Button_Search.Size = new Size(136, 28);
+            Control_RemoveTab_Button_Search.Size = new Size(60, 28);
             Control_RemoveTab_Button_Search.TabIndex = 3;
-            Control_RemoveTab_Button_Search.Text = "Search ( Ctrl + S )";
+            Control_RemoveTab_Button_Search.Text = "Search";
             Control_RemoveTab_Button_Search.UseVisualStyleBackColor = true;
             Control_RemoveTab_Button_Search.Click += Control_RemoveTab_Button_Search_Click;
             // 
@@ -235,11 +236,11 @@
             // Control_RemoveTab_Label_Operation
             // 
             Control_RemoveTab_Label_Operation.AutoSize = true;
-            Control_RemoveTab_Label_Operation.Location = new Point(483, 11);
+            Control_RemoveTab_Label_Operation.Location = new Point(510, 11);
             Control_RemoveTab_Label_Operation.Name = "Control_RemoveTab_Label_Operation";
-            Control_RemoveTab_Label_Operation.Size = new Size(90, 15);
+            Control_RemoveTab_Label_Operation.Size = new Size(63, 15);
             Control_RemoveTab_Label_Operation.TabIndex = 5;
-            Control_RemoveTab_Label_Operation.Text = "Next Operation:";
+            Control_RemoveTab_Label_Operation.Text = "Operation:";
             // 
             // Control_RemoveTab_ComboBox_Operation
             // 
@@ -263,8 +264,8 @@
             Control_RemoveTab_GroupBox_MainControl.ResumeLayout(false);
             Control_RemoveTab_Panel_Main.ResumeLayout(false);
             Control_RemoveTab_Panel_DataGridView.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_DataGridView_Main).EndInit();
             ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_Image_NothingFound).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_DataGridView_Main).EndInit();
             Control_RemoveTab_Panel_Footer.ResumeLayout(false);
             Control_RemoveTab_Panel_Header.ResumeLayout(false);
             Control_RemoveTab_Panel_Header.PerformLayout();

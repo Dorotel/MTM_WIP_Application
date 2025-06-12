@@ -36,7 +36,11 @@ public partial class MainForm : Form
 
             SetupConnectionStrengthControl();
 
+            MainForm_OnStartup_WireUpEvents();
+
             _ = OnStartup();
+
+
             AppLogger.Log("MainForm initialized.");
         }
         catch (Exception ex)
@@ -46,6 +50,75 @@ public partial class MainForm : Form
         }
     }
 
+    private void MainForm_OnStartup_WireUpEvents()
+    {
+        // Wire up tab selection event to focus part ComboBox
+        MainForm_TabControl.SelectedIndexChanged += (s, e) =>
+        {
+            // Inventory Tab (index 0)
+            if (MainForm_TabControl.SelectedIndex == 0 && controlInventoryTab1 != null)
+            {
+                controlInventoryTab1.UpdateToggleRightPanelButton();
+
+                var partCombo = controlInventoryTab1.GetType()
+                    .GetField("Control_InventoryTab_ComboBox_Part",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(controlInventoryTab1) as ComboBox;
+                if (partCombo != null && partCombo.Visible && partCombo.Enabled)
+                {
+                    partCombo.Focus();
+                    partCombo.SelectAll();
+                }
+            }
+            // Remove Tab (index 1)
+            else if (MainForm_TabControl.SelectedIndex == 1 && MainForm_RemoveTab != null)
+            {
+                MainForm_RemoveTab.UpdateToggleRightPanelButton();
+
+                var partCombo = MainForm_RemoveTab.GetType()
+                    .GetField("Control_RemoveTab_ComboBox_Part",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(MainForm_RemoveTab) as ComboBox;
+                if (partCombo != null && partCombo.Visible && partCombo.Enabled)
+                {
+                    partCombo.Focus();
+                    partCombo.SelectAll();
+                }
+            }
+            // Transfer Tab (index 2)
+            else if (MainForm_TabControl.SelectedIndex == 2 && controlTransferTab1 != null)
+            {
+                controlTransferTab1.UpdateToggleRightPanelButton();
+
+                var partCombo = controlTransferTab1.GetType()
+                    .GetField("Control_TransferTab_ComboBox_Part",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(controlTransferTab1) as ComboBox;
+                if (partCombo != null && partCombo.Visible && partCombo.Enabled)
+                {
+                    partCombo.Focus();
+                    partCombo.SelectAll();
+                }
+            }
+        };
+
+        // Move focus logic to OnShown for after everything is loaded
+        Shown += async (s, e) =>
+        {
+            // Wait for InventoryTab controls to be loaded and visible
+            await Task.Delay(100); // Small delay to ensure controls are ready
+            var partCombo = controlInventoryTab1.GetType()
+                .GetField("Control_InventoryTab_ComboBox_Part",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.GetValue(controlInventoryTab1) as ComboBox;
+            if (partCombo is { Visible: true, Enabled: true })
+            {
+                partCombo.Focus();
+                partCombo.SelectAll();
+            }
+        };
+    }
+
     private static async Task OnStartup()
     {
         try
@@ -53,6 +126,10 @@ public partial class MainForm : Form
             try
             {
                 WipAppVariables.UserFullName = await UserDao.GetUserFullNameAsync(WipAppVariables.User, true);
+
+                if (string.IsNullOrEmpty(WipAppVariables.UserFullName))
+                    WipAppVariables.UserFullName = WipAppVariables.User; // Fallback to username if full name not found
+
                 AppLogger.Log($"User full name loaded: {WipAppVariables.UserFullName}");
             }
             catch (Exception ex)
@@ -114,7 +191,20 @@ public partial class MainForm : Form
         }
     }
 
-    private void controlInventoryTab1_Load(object sender, EventArgs e)
+    protected override void OnFormClosing(FormClosingEventArgs e)
     {
+        try
+        {
+            _connectionStrengthTimer?.Stop();
+            _connectionStrengthTimer?.Dispose();
+            AppLogger.Log("MainForm is closing. Connection strength timer stopped.");
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogApplicationError(ex);
+            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm / " + "OnFormClosing");
+        }
+
+        base.OnFormClosing(e);
     }
 }

@@ -5,6 +5,7 @@ using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Data;
 using MTM_WIP_Application.Forms.AdvancedInventoryEntryForm;
 using MTM_WIP_Application.Forms.MainForm.Classes;
+using MTM_WIP_Application.Helpers;
 using MTM_WIP_Application.Logging;
 using MTM_WIP_Application.Services;
 using MySql.Data.MySqlClient;
@@ -22,6 +23,7 @@ public partial class ControlRemoveTab : UserControl
         Control_RemoveTab_Initialize();
         Control_RemoveTab_ComboBox_Part.ForeColor = Color.Red;
         Control_RemoveTab_ComboBox_Operation.ForeColor = Color.Red;
+        Control_RemoveTab_Image_NothingFound.Visible = false;
         _ = Control_RemoveTab_OnStartup_LoadComboBoxes();
     }
 
@@ -89,8 +91,11 @@ public partial class ControlRemoveTab : UserControl
                 }
 
             var confirmResult = MessageBox.Show(
-                $"The following items will be deleted:\n\n{sb}\nAre you sure?",
-                "Confirm Deletion",
+                $@"The following items will be deleted:
+
+{sb}
+Are you sure?",
+                @"Confirm Deletion",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning);
 
@@ -153,7 +158,7 @@ public partial class ControlRemoveTab : UserControl
             Control_RemoveTab_Image_NothingFound.Visible = false;
 
             // Reinitialize ComboBox DataTables
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_part_ids_Get_All",
                 new MySqlConnection(WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
@@ -164,7 +169,7 @@ public partial class ControlRemoveTab : UserControl
                 "[ Enter Part ID ]",
                 CommandType.StoredProcedure);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
                 new MySqlConnection(WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
@@ -266,7 +271,7 @@ public partial class ControlRemoveTab : UserControl
                     };
 
             foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await MainFormComboBoxDataHelper.FillComboBoxAsync(
+                await ComboBoxHelpers.FillComboBoxAsync(
                     procName,
                     connection,
                     adapter,
@@ -339,6 +344,20 @@ public partial class ControlRemoveTab : UserControl
                 return true;
             }
 
+            if (MainFormInstance != null && !MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed &&
+                keyData == (Keys.Alt | Keys.Right))
+            {
+                Control_RemoveTab_Button_Toggle_RightPanel.PerformClick(); // Triggers the button's Click event
+                return true;
+            }
+
+            if (MainFormInstance != null && MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed &&
+                keyData == (Keys.Alt | Keys.Left))
+            {
+                Control_RemoveTab_Button_Toggle_RightPanel.PerformClick(); // Triggers the button's Click event
+                return true;
+            }
+
             return base.ProcessCmdKey(ref msg, keyData);
         }
         catch (Exception ex)
@@ -390,20 +409,22 @@ public partial class ControlRemoveTab : UserControl
 
             Control_RemoveTab_ComboBox_Part.Enter += (s, e) =>
             {
-                Control_RemoveTab_ComboBox_Part.BackColor = Color.LightBlue;
+                Control_RemoveTab_ComboBox_Part.BackColor = SystemColors.Window;
             };
             Control_RemoveTab_ComboBox_Part.Leave += (s, e) =>
             {
                 Control_RemoveTab_ComboBox_Part.BackColor = SystemColors.Window;
+                ComboBoxHelpers.ValidateComboBoxItem(Control_RemoveTab_ComboBox_Part, "[ Enter Part ID ]");
             };
 
             Control_RemoveTab_ComboBox_Operation.Enter += (s, e) =>
             {
-                Control_RemoveTab_ComboBox_Operation.BackColor = Color.LightBlue;
+                Control_RemoveTab_ComboBox_Operation.BackColor = SystemColors.Window;
             };
             Control_RemoveTab_ComboBox_Operation.Leave += (s, e) =>
             {
                 Control_RemoveTab_ComboBox_Operation.BackColor = SystemColors.Window;
+                ComboBoxHelpers.ValidateComboBoxItem(Control_RemoveTab_ComboBox_Operation, "[ Enter Op # ]");
             };
 
             // Wire up DataGridView selection change to update button states
@@ -425,13 +446,32 @@ public partial class ControlRemoveTab : UserControl
         if (MainFormInstance != null && !MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed)
         {
             MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = true;
-            Control_RemoveTab_Button_Toggle_RightPanel.Text = @"Toggle Panel (Off)";
+
+            Control_RemoveTab_Button_Toggle_RightPanel.Text = "←";
+            Control_RemoveTab_Button_Toggle_RightPanel.ForeColor = Color.Red;
         }
         else
         {
             if (MainFormInstance != null)
+            {
                 MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = false;
-            Control_RemoveTab_Button_Toggle_RightPanel.Text = @"Toggle Panel (On)";
+                Control_RemoveTab_Button_Toggle_RightPanel.Text = "→";
+                Control_RemoveTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
+            }
+        }
+    }
+
+    public void UpdateToggleRightPanelButton()
+    {
+        if (MainFormInstance != null && !MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed)
+        {
+            Control_RemoveTab_Button_Toggle_RightPanel.Text = "→";
+            Control_RemoveTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
+        }
+        else
+        {
+            Control_RemoveTab_Button_Toggle_RightPanel.Text = "←";
+            Control_RemoveTab_Button_Toggle_RightPanel.ForeColor = Color.Red;
         }
     }
 
@@ -470,6 +510,9 @@ public partial class ControlRemoveTab : UserControl
                                  column.Name == "Operation" ||
                                  column.Name == "Quantity" ||
                                  column.Name == "Location";
+
+            if (Control_RemoveTab_DataGridView_Main.Columns.Contains("Batch Number"))
+                Control_RemoveTab_DataGridView_Main.Columns["Batch Number"].Visible = false;
 
             // Apply theme and size columns
             DgvDesigner.ApplyThemeToDataGridView(

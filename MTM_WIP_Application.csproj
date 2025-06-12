@@ -53,6 +53,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Controls\MainForm\Control_TransferTab.cs">
+	    <SubType>UserControl</SubType>
+	  </Compile>
 	  <Compile Update="Controls\MainForm\Control_RemoveTab.cs">
 	    <SubType>UserControl</SubType>
 	  </Compile>
@@ -64,6 +67,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <EmbeddedResource Update="Controls\MainForm\Control_TransferTab.resx">
+	    <SubType>Designer</SubType>
+	  </EmbeddedResource>
 	  <EmbeddedResource Update="Controls\MainForm\Control_RemoveTab.resx">
 	    <SubType>Designer</SubType>
 	  </EmbeddedResource>

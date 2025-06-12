@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Color = System.Drawing.Color;
 using MySql.Data.MySqlClient;
+using MTM_WIP_Application.Helpers;
 
 namespace MTM_WIP_Application.Forms.AdvancedInventoryEntryForm;
 
@@ -29,6 +30,14 @@ public partial class AdvancedInventoryEntryForm : Form
             AdvancedEntry_MultiLoc_ComboBox_Loc.Visible = false;
             AdvancedEntry_Single_Button_Reset.TabStop = false;
             AdvancedEntry_MultiLoc_Button_Reset.TabStop = false;
+
+            // Set ComboBox ForeColor to Red initially
+            AdvancedEntry_Single_ComboBox_Part.ForeColor = Color.Red;
+            AdvancedEntry_Single_ComboBox_Op.ForeColor = Color.Red;
+            AdvancedEntry_Single_ComboBox_Loc.ForeColor = Color.Red;
+            AdvancedEntry_MultiLoc_ComboBox_Part.ForeColor = Color.Red;
+            AdvancedEntry_MultiLoc_ComboBox_Op.ForeColor = Color.Red;
+            AdvancedEntry_MultiLoc_ComboBox_Loc.ForeColor = Color.Red;
 
             WireUpEvents();
 
@@ -64,6 +73,23 @@ public partial class AdvancedInventoryEntryForm : Form
             MinimizeBox = true;
             SizeGripStyle = SizeGripStyle.Hide;
 
+            // Focus part ComboBox when form is entered
+            Enter += (s, e) =>
+            {
+                if (AdvancedEntry_TabControl.SelectedIndex == 0 && AdvancedEntry_Single_ComboBox_Part.Visible &&
+                    AdvancedEntry_Single_ComboBox_Part.Enabled)
+                {
+                    AdvancedEntry_Single_ComboBox_Part.Focus();
+                    AdvancedEntry_Single_ComboBox_Part.SelectAll();
+                }
+                else if (AdvancedEntry_TabControl.SelectedIndex == 1 && AdvancedEntry_MultiLoc_ComboBox_Part.Visible &&
+                         AdvancedEntry_MultiLoc_ComboBox_Part.Enabled)
+                {
+                    AdvancedEntry_MultiLoc_ComboBox_Part.Focus();
+                    AdvancedEntry_MultiLoc_ComboBox_Part.SelectAll();
+                }
+            };
+
             AppLogger.Log("AdvancedInventoryEntryForm constructor exited.");
         }
         catch (Exception ex)
@@ -79,12 +105,14 @@ public partial class AdvancedInventoryEntryForm : Form
         {
             case 0: // Tab 1
                 ClientSize = new Size(431, 309);
-                AdvancedEntry_Single_ComboBox_Part.Focus();
+                if (AdvancedEntry_Single_ComboBox_Part.Visible && AdvancedEntry_Single_ComboBox_Part.Enabled)
+                    AdvancedEntry_Single_ComboBox_Part.Focus();
                 AdvancedEntry_Single_ComboBox_Part.SelectAll();
                 break;
             case 1: // Tab 2
                 ClientSize = new Size(835, 309);
-                AdvancedEntry_MultiLoc_ComboBox_Part.Focus();
+                if (AdvancedEntry_MultiLoc_ComboBox_Part.Visible && AdvancedEntry_MultiLoc_ComboBox_Part.Enabled)
+                    AdvancedEntry_MultiLoc_ComboBox_Part.Focus();
                 AdvancedEntry_MultiLoc_ComboBox_Part.SelectAll();
                 break;
             case 2: // Tab 3
@@ -106,6 +134,13 @@ public partial class AdvancedInventoryEntryForm : Form
             AdvancedEntry_MultiLoc_ComboBox_Part.Visible = true;
             AdvancedEntry_MultiLoc_ComboBox_Op.Visible = true;
             AdvancedEntry_MultiLoc_ComboBox_Loc.Visible = true;
+            // Ensure ForeColor is red after async load
+            AdvancedEntry_Single_ComboBox_Part.ForeColor = Color.Red;
+            AdvancedEntry_Single_ComboBox_Op.ForeColor = Color.Red;
+            AdvancedEntry_Single_ComboBox_Loc.ForeColor = Color.Red;
+            AdvancedEntry_MultiLoc_ComboBox_Part.ForeColor = Color.Red;
+            AdvancedEntry_MultiLoc_ComboBox_Op.ForeColor = Color.Red;
+            AdvancedEntry_MultiLoc_ComboBox_Loc.ForeColor = Color.Red;
             AdvancedEntry_Single_ComboBox_Part.Focus();
         }
         catch (Exception ex)
@@ -121,7 +156,7 @@ public partial class AdvancedInventoryEntryForm : Form
         {
             await using var connection = new MySqlConnection(WipAppVariables.ConnectionString);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_part_ids_Get_All",
                 connection,
                 new MySqlDataAdapter(),
@@ -132,7 +167,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 "[ Enter Part ID ]",
                 CommandType.StoredProcedure);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
                 connection,
                 new MySqlDataAdapter(),
@@ -143,7 +178,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 "[ Enter Op # ]",
                 CommandType.StoredProcedure);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_locations_Get_All",
                 connection,
                 new MySqlDataAdapter(),
@@ -154,7 +189,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 "[ Enter Location ]",
                 CommandType.StoredProcedure);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_part_ids_Get_All",
                 connection,
                 new MySqlDataAdapter(),
@@ -165,7 +200,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 "[ Enter Part ID ]",
                 CommandType.StoredProcedure);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
                 connection,
                 new MySqlDataAdapter(),
@@ -176,7 +211,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 "[ Enter Op # ]",
                 CommandType.StoredProcedure);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_locations_Get_All",
                 connection,
                 new MySqlDataAdapter(),
@@ -204,19 +239,19 @@ public partial class AdvancedInventoryEntryForm : Form
             AdvancedEntry_Single_Button_Reset.Click += AdvancedEntry_Single_Button_Reset_Click;
             AdvancedEntry_Single_ComboBox_Part.SelectedIndexChanged += (s, e) =>
             {
-                SetComboBoxColor(AdvancedEntry_Single_ComboBox_Part);
+                ComboBoxHelpers.ValidateComboBoxItem(AdvancedEntry_Single_ComboBox_Part, "[ Enter Part ID ]");
                 UpdateSingleSaveButtonState();
                 AppLogger.Log("Single Part ComboBox selection changed.");
             };
             AdvancedEntry_Single_ComboBox_Op.SelectedIndexChanged += (s, e) =>
             {
-                SetComboBoxColor(AdvancedEntry_Single_ComboBox_Op);
+                ComboBoxHelpers.ValidateComboBoxItem(AdvancedEntry_Single_ComboBox_Op, "[ Enter Op # ]");
                 UpdateSingleSaveButtonState();
                 AppLogger.Log("Single Op ComboBox selection changed.");
             };
             AdvancedEntry_Single_ComboBox_Loc.SelectedIndexChanged += (s, e) =>
             {
-                SetComboBoxColor(AdvancedEntry_Single_ComboBox_Loc);
+                ComboBoxHelpers.ValidateComboBoxItem(AdvancedEntry_Single_ComboBox_Loc, "[ Enter Location ]");
                 UpdateSingleSaveButtonState();
                 AppLogger.Log("Single Loc ComboBox selection changed.");
             };
@@ -253,19 +288,19 @@ public partial class AdvancedInventoryEntryForm : Form
             AdvancedEntry_MultiLoc_Button_Reset.Click += AdvancedEntry_MultiLoc_Button_Reset_Click;
             AdvancedEntry_MultiLoc_ComboBox_Part.SelectedIndexChanged += (s, e) =>
             {
-                SetComboBoxColor(AdvancedEntry_MultiLoc_ComboBox_Part);
+                ComboBoxHelpers.ValidateComboBoxItem(AdvancedEntry_MultiLoc_ComboBox_Part, "[ Enter Part ID ]");
                 UpdateMultiSaveButtonState();
                 AppLogger.Log("Multi Part ComboBox selection changed.");
             };
             AdvancedEntry_MultiLoc_ComboBox_Op.SelectedIndexChanged += (s, e) =>
             {
-                SetComboBoxColor(AdvancedEntry_MultiLoc_ComboBox_Op);
+                ComboBoxHelpers.ValidateComboBoxItem(AdvancedEntry_MultiLoc_ComboBox_Op, "[ Enter Op # ]");
                 UpdateMultiSaveButtonState();
                 AppLogger.Log("Multi Op ComboBox selection changed.");
             };
             AdvancedEntry_MultiLoc_ComboBox_Loc.SelectedIndexChanged += (s, e) =>
             {
-                SetComboBoxColor(AdvancedEntry_MultiLoc_ComboBox_Loc);
+                ComboBoxHelpers.ValidateComboBoxItem(AdvancedEntry_MultiLoc_ComboBox_Loc, "[ Enter Location ]");
                 UpdateMultiSaveButtonState();
                 AppLogger.Log("Multi Loc ComboBox selection changed.");
             };
@@ -326,37 +361,49 @@ public partial class AdvancedInventoryEntryForm : Form
             AdvancedEntry_MultiLoc_TextBox_Qty.Leave +=
                 (s, e) => AdvancedEntry_MultiLoc_TextBox_Qty.BackColor = SystemColors.Window;
 
-            // ComboBoxes: Highlight on Enter/Leave
+            // ComboBoxes: Highlight and validate on Enter/Leave
             AdvancedEntry_Single_ComboBox_Part.Enter +=
                 (s, e) => AdvancedEntry_Single_ComboBox_Part.BackColor = Color.LightBlue;
-            AdvancedEntry_Single_ComboBox_Part.Leave +=
-                (s, e) => AdvancedEntry_Single_ComboBox_Part.BackColor = SystemColors.Window;
-
+            AdvancedEntry_Single_ComboBox_Part.Leave += (s, e) =>
+            {
+                AdvancedEntry_Single_ComboBox_Part.BackColor = SystemColors.Window;
+                ComboBoxHelpers.ValidateComboBoxItem(AdvancedEntry_Single_ComboBox_Part, "[ Enter Part ID ]");
+            };
             AdvancedEntry_Single_ComboBox_Op.Enter +=
                 (s, e) => AdvancedEntry_Single_ComboBox_Op.BackColor = Color.LightBlue;
-            AdvancedEntry_Single_ComboBox_Op.Leave +=
-                (s, e) => AdvancedEntry_Single_ComboBox_Op.BackColor = SystemColors.Window;
-
+            AdvancedEntry_Single_ComboBox_Op.Leave += (s, e) =>
+            {
+                AdvancedEntry_Single_ComboBox_Op.BackColor = SystemColors.Window;
+                ComboBoxHelpers.ValidateComboBoxItem(AdvancedEntry_Single_ComboBox_Op, "[ Enter Op # ]");
+            };
             AdvancedEntry_Single_ComboBox_Loc.Enter +=
                 (s, e) => AdvancedEntry_Single_ComboBox_Loc.BackColor = Color.LightBlue;
-            AdvancedEntry_Single_ComboBox_Loc.Leave +=
-                (s, e) => AdvancedEntry_Single_ComboBox_Loc.BackColor = SystemColors.Window;
-
+            AdvancedEntry_Single_ComboBox_Loc.Leave += (s, e) =>
+            {
+                AdvancedEntry_Single_ComboBox_Loc.BackColor = SystemColors.Window;
+                ComboBoxHelpers.ValidateComboBoxItem(AdvancedEntry_Single_ComboBox_Loc, "[ Enter Location ]");
+            };
             AdvancedEntry_MultiLoc_ComboBox_Part.Enter +=
                 (s, e) => AdvancedEntry_MultiLoc_ComboBox_Part.BackColor = Color.LightBlue;
             AdvancedEntry_MultiLoc_ComboBox_Part.Leave += (s, e) =>
+            {
                 AdvancedEntry_MultiLoc_ComboBox_Part.BackColor = SystemColors.Window;
-
+                ComboBoxHelpers.ValidateComboBoxItem(AdvancedEntry_MultiLoc_ComboBox_Part, "[ Enter Part ID ]");
+            };
             AdvancedEntry_MultiLoc_ComboBox_Op.Enter +=
                 (s, e) => AdvancedEntry_MultiLoc_ComboBox_Op.BackColor = Color.LightBlue;
-            AdvancedEntry_MultiLoc_ComboBox_Op.Leave +=
-                (s, e) => AdvancedEntry_MultiLoc_ComboBox_Op.BackColor = SystemColors.Window;
-
+            AdvancedEntry_MultiLoc_ComboBox_Op.Leave += (s, e) =>
+            {
+                AdvancedEntry_MultiLoc_ComboBox_Op.BackColor = SystemColors.Window;
+                ComboBoxHelpers.ValidateComboBoxItem(AdvancedEntry_MultiLoc_ComboBox_Op, "[ Enter Op # ]");
+            };
             AdvancedEntry_MultiLoc_ComboBox_Loc.Enter +=
                 (s, e) => AdvancedEntry_MultiLoc_ComboBox_Loc.BackColor = Color.LightBlue;
             AdvancedEntry_MultiLoc_ComboBox_Loc.Leave += (s, e) =>
+            {
                 AdvancedEntry_MultiLoc_ComboBox_Loc.BackColor = SystemColors.Window;
-
+                ComboBoxHelpers.ValidateComboBoxItem(AdvancedEntry_MultiLoc_ComboBox_Loc, "[ Enter Location ]");
+            };
 
             AppLogger.Log("AdvancedInventoryEntryForm events wired up.");
         }
@@ -365,11 +412,6 @@ public partial class AdvancedInventoryEntryForm : Form
             AppLogger.LogApplicationError(ex);
             _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "AdvancedInventoryEntryForm_WireUpEvents");
         }
-    }
-
-    private void AdvancedEntry_MultiLoc_TextBox_Qty_Click(object? sender, EventArgs e)
-    {
-        throw new NotImplementedException();
     }
 
     private static void InventoryTextBoxQty_TextChanged(TextBox textBox, string placeholder)
@@ -395,20 +437,6 @@ public partial class AdvancedInventoryEntryForm : Form
         catch (Exception ex)
         {
             AppLogger.LogApplicationError(ex);
-        }
-    }
-
-    private static void SetComboBoxColor(ComboBox cb)
-    {
-        if (cb.SelectedIndex > 0 && !string.IsNullOrWhiteSpace(cb.Text))
-        {
-            cb.ForeColor = Color.Black;
-        }
-        else
-        {
-            cb.ForeColor = Color.Red;
-            if (cb.Items.Count > 0 && cb.SelectedIndex != 0)
-                cb.SelectedIndex = 0;
         }
     }
 
@@ -450,7 +478,7 @@ public partial class AdvancedInventoryEntryForm : Form
             AdvancedEntry_Single_ComboBox_Loc.Visible = false;
 
             // Reinitialize ComboBox DataTables
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_part_ids_Get_All",
                 new MySqlConnection(WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
@@ -461,7 +489,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 "[ Enter Part ID ]",
                 CommandType.StoredProcedure);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
                 new MySqlConnection(WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
@@ -472,7 +500,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 "[ Enter Op # ]",
                 CommandType.StoredProcedure);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_locations_Get_All",
                 new MySqlConnection(WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
@@ -515,7 +543,7 @@ public partial class AdvancedInventoryEntryForm : Form
             AdvancedEntry_MultiLoc_ComboBox_Loc.Visible = false;
 
             // Reinitialize ComboBox DataTables
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_part_ids_Get_All",
                 new MySqlConnection(WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
@@ -526,7 +554,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 "[ Enter Part ID ]",
                 CommandType.StoredProcedure);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
                 new MySqlConnection(WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
@@ -537,7 +565,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 "[ Enter Op # ]",
                 CommandType.StoredProcedure);
 
-            await MainFormComboBoxDataHelper.FillComboBoxAsync(
+            await ComboBoxHelpers.FillComboBoxAsync(
                 "md_locations_Get_All",
                 new MySqlConnection(WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),

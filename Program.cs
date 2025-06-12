@@ -97,6 +97,7 @@ internal static class Program
 
         ControlRemoveTab.MainFormInstance = mainForm;
         ControlInventoryTab.MainFormInstance = mainForm;
+        ControlTransferTab.MainFormInstance = mainForm;
 
         // Register the MainForm instance for live updates (if desired)
         VersionCheckerService.MainFormInstance = mainForm;

@@ -72,10 +72,6 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Inventory_PrintDocument = new System.Drawing.Printing.PrintDocument();
             MainForm_Inventory_PrintDialog = new PrintPreviewDialog();
             MainForm_ToolTip = new ToolTip(components);
-            MainForm_Transfer_Button_Search = new Button();
-            MainForm_Transfer_Button_Save = new Button();
-            MainForm_Transfer_Label_Qty = new Label();
-            MainForm_Transfer_Button_Reset = new Button();
             MainForm_Last10_Timer = new System.Windows.Forms.Timer(components);
             MainForm_SplitContainer_Lower = new SplitContainer();
             MainForm_Control_SignalStrength = new ConnectionStrengthControl();
@@ -92,17 +88,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Remove = new TabPage();
             MainForm_RemoveTab = new ControlRemoveTab();
             MainForm_TabControl_Transfer = new TabPage();
-            MainForm_Transfer_GroupBox_Main = new GroupBox();
-            MainForm_Transfer_Panel_Header = new Panel();
-            MainForm_Transfer_ComboBox_Part = new ComboBox();
-            MainForm_Transfer_Label_Part = new Label();
-            MainForm_Transfer_Label_Loc = new Label();
-            MainForm_Transfer_ComboBox_Loc = new ComboBox();
-            MainForm_Transfer_Panel_DataGrid = new Panel();
-            MainForm_Transfer_Image_Nothing = new PictureBox();
-            MainForm_Transfer_DataGrid = new DataGridView();
-            MainForm_Transfer_Panel_Bottom = new Panel();
-            MainForm_Transfer_TextBox_Qty = new TextBox();
+            controlTransferTab1 = new ControlTransferTab();
             MainForm_MenuStrip.SuspendLayout();
             MainForm_StatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Lower).BeginInit();
@@ -117,12 +103,6 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Inventory.SuspendLayout();
             MainForm_TabControl_Remove.SuspendLayout();
             MainForm_TabControl_Transfer.SuspendLayout();
-            MainForm_Transfer_GroupBox_Main.SuspendLayout();
-            MainForm_Transfer_Panel_Header.SuspendLayout();
-            MainForm_Transfer_Panel_DataGrid.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)MainForm_Transfer_Image_Nothing).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)MainForm_Transfer_DataGrid).BeginInit();
-            MainForm_Transfer_Panel_Bottom.SuspendLayout();
             SuspendLayout();
             // 
             // MainForm_MenuStrip
@@ -318,51 +298,6 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Inventory_PrintDialog.Name = "MainForm_Inventory_PrintDialog";
             MainForm_Inventory_PrintDialog.Visible = false;
             // 
-            // MainForm_Transfer_Button_Search
-            // 
-            MainForm_Transfer_Button_Search.Dock = DockStyle.Right;
-            MainForm_Transfer_Button_Search.FlatStyle = FlatStyle.System;
-            MainForm_Transfer_Button_Search.Location = new Point(1426, 0);
-            MainForm_Transfer_Button_Search.Name = "MainForm_Transfer_Button_Search";
-            MainForm_Transfer_Button_Search.Size = new Size(87, 36);
-            MainForm_Transfer_Button_Search.TabIndex = 2;
-            MainForm_Transfer_Button_Search.Text = "Search";
-            MainForm_ToolTip.SetToolTip(MainForm_Transfer_Button_Search, "Shortcut: None");
-            MainForm_Transfer_Button_Search.UseVisualStyleBackColor = true;
-            // 
-            // MainForm_Transfer_Button_Save
-            // 
-            MainForm_Transfer_Button_Save.Dock = DockStyle.Right;
-            MainForm_Transfer_Button_Save.FlatStyle = FlatStyle.System;
-            MainForm_Transfer_Button_Save.Location = new Point(1341, 0);
-            MainForm_Transfer_Button_Save.Name = "MainForm_Transfer_Button_Save";
-            MainForm_Transfer_Button_Save.Size = new Size(86, 35);
-            MainForm_Transfer_Button_Save.TabIndex = 6;
-            MainForm_Transfer_Button_Save.Text = "Save";
-            MainForm_ToolTip.SetToolTip(MainForm_Transfer_Button_Save, "Shortcut: Ctrl+S");
-            MainForm_Transfer_Button_Save.UseVisualStyleBackColor = true;
-            // 
-            // MainForm_Transfer_Label_Qty
-            // 
-            MainForm_Transfer_Label_Qty.AutoSize = true;
-            MainForm_Transfer_Label_Qty.Location = new Point(3, 10);
-            MainForm_Transfer_Label_Qty.Name = "MainForm_Transfer_Label_Qty";
-            MainForm_Transfer_Label_Qty.Size = new Size(0, 15);
-            MainForm_Transfer_Label_Qty.TabIndex = 7;
-            MainForm_ToolTip.SetToolTip(MainForm_Transfer_Label_Qty, "Enter an amount to have the application subtract\r\nthat amount from your selected location.\r\n\r\nLeave this blank to transfer the entire amount.");
-            // 
-            // MainForm_Transfer_Button_Reset
-            // 
-            MainForm_Transfer_Button_Reset.Dock = DockStyle.Right;
-            MainForm_Transfer_Button_Reset.FlatStyle = FlatStyle.System;
-            MainForm_Transfer_Button_Reset.Location = new Point(1427, 0);
-            MainForm_Transfer_Button_Reset.Name = "MainForm_Transfer_Button_Reset";
-            MainForm_Transfer_Button_Reset.Size = new Size(86, 35);
-            MainForm_Transfer_Button_Reset.TabIndex = 19;
-            MainForm_Transfer_Button_Reset.Text = "Reset";
-            MainForm_ToolTip.SetToolTip(MainForm_Transfer_Button_Reset, "Shortcut: Ctrl+R");
-            MainForm_Transfer_Button_Reset.UseVisualStyleBackColor = true;
-            // 
             // MainForm_Last10_Timer
             // 
             MainForm_Last10_Timer.Enabled = true;
@@ -527,7 +462,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_TabControl_Transfer
             // 
-            MainForm_TabControl_Transfer.Controls.Add(MainForm_Transfer_GroupBox_Main);
+            MainForm_TabControl_Transfer.Controls.Add(controlTransferTab1);
             MainForm_TabControl_Transfer.Location = new Point(4, 24);
             MainForm_TabControl_Transfer.Name = "MainForm_TabControl_Transfer";
             MainForm_TabControl_Transfer.Padding = new Padding(3);
@@ -537,141 +472,14 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Transfer.ToolTipText = "Shortcut: Ctrl+3";
             MainForm_TabControl_Transfer.UseVisualStyleBackColor = true;
             // 
-            // MainForm_Transfer_GroupBox_Main
+            // controlTransferTab1
             // 
-            MainForm_Transfer_GroupBox_Main.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            MainForm_Transfer_GroupBox_Main.Controls.Add(MainForm_Transfer_Panel_Header);
-            MainForm_Transfer_GroupBox_Main.Controls.Add(MainForm_Transfer_Panel_DataGrid);
-            MainForm_Transfer_GroupBox_Main.Controls.Add(MainForm_Transfer_Panel_Bottom);
-            MainForm_Transfer_GroupBox_Main.Location = new Point(11, 9);
-            MainForm_Transfer_GroupBox_Main.Name = "MainForm_Transfer_GroupBox_Main";
-            MainForm_Transfer_GroupBox_Main.Size = new Size(1519, 661);
-            MainForm_Transfer_GroupBox_Main.TabIndex = 0;
-            MainForm_Transfer_GroupBox_Main.TabStop = false;
-            MainForm_Transfer_GroupBox_Main.Text = "Location Change";
-            // 
-            // MainForm_Transfer_Panel_Header
-            // 
-            MainForm_Transfer_Panel_Header.Controls.Add(MainForm_Transfer_Button_Search);
-            MainForm_Transfer_Panel_Header.Controls.Add(MainForm_Transfer_ComboBox_Part);
-            MainForm_Transfer_Panel_Header.Controls.Add(MainForm_Transfer_Label_Part);
-            MainForm_Transfer_Panel_Header.Controls.Add(MainForm_Transfer_Label_Loc);
-            MainForm_Transfer_Panel_Header.Controls.Add(MainForm_Transfer_ComboBox_Loc);
-            MainForm_Transfer_Panel_Header.Dock = DockStyle.Top;
-            MainForm_Transfer_Panel_Header.Location = new Point(3, 19);
-            MainForm_Transfer_Panel_Header.Name = "MainForm_Transfer_Panel_Header";
-            MainForm_Transfer_Panel_Header.Size = new Size(1513, 36);
-            MainForm_Transfer_Panel_Header.TabIndex = 23;
-            // 
-            // MainForm_Transfer_ComboBox_Part
-            // 
-            MainForm_Transfer_ComboBox_Part.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            MainForm_Transfer_ComboBox_Part.AutoCompleteSource = AutoCompleteSource.ListItems;
-            MainForm_Transfer_ComboBox_Part.FormattingEnabled = true;
-            MainForm_Transfer_ComboBox_Part.Location = new Point(86, 7);
-            MainForm_Transfer_ComboBox_Part.Name = "MainForm_Transfer_ComboBox_Part";
-            MainForm_Transfer_ComboBox_Part.Size = new Size(282, 23);
-            MainForm_Transfer_ComboBox_Part.TabIndex = 1;
-            // 
-            // MainForm_Transfer_Label_Part
-            // 
-            MainForm_Transfer_Label_Part.AutoSize = true;
-            MainForm_Transfer_Label_Part.Location = new Point(3, 11);
-            MainForm_Transfer_Label_Part.Name = "MainForm_Transfer_Label_Part";
-            MainForm_Transfer_Label_Part.Size = new Size(78, 15);
-            MainForm_Transfer_Label_Part.TabIndex = 4;
-            MainForm_Transfer_Label_Part.Text = "Part Number:";
-            // 
-            // MainForm_Transfer_Label_Loc
-            // 
-            MainForm_Transfer_Label_Loc.AutoSize = true;
-            MainForm_Transfer_Label_Loc.Location = new Point(374, 10);
-            MainForm_Transfer_Label_Loc.Name = "MainForm_Transfer_Label_Loc";
-            MainForm_Transfer_Label_Loc.Size = new Size(83, 15);
-            MainForm_Transfer_Label_Loc.TabIndex = 18;
-            MainForm_Transfer_Label_Loc.Text = "New Location:";
-            // 
-            // MainForm_Transfer_ComboBox_Loc
-            // 
-            MainForm_Transfer_ComboBox_Loc.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            MainForm_Transfer_ComboBox_Loc.AutoCompleteSource = AutoCompleteSource.ListItems;
-            MainForm_Transfer_ComboBox_Loc.FormattingEnabled = true;
-            MainForm_Transfer_ComboBox_Loc.Location = new Point(463, 7);
-            MainForm_Transfer_ComboBox_Loc.Name = "MainForm_Transfer_ComboBox_Loc";
-            MainForm_Transfer_ComboBox_Loc.Size = new Size(255, 23);
-            MainForm_Transfer_ComboBox_Loc.TabIndex = 4;
-            // 
-            // MainForm_Transfer_Panel_DataGrid
-            // 
-            MainForm_Transfer_Panel_DataGrid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            MainForm_Transfer_Panel_DataGrid.Controls.Add(MainForm_Transfer_Image_Nothing);
-            MainForm_Transfer_Panel_DataGrid.Controls.Add(MainForm_Transfer_DataGrid);
-            MainForm_Transfer_Panel_DataGrid.Location = new Point(3, 61);
-            MainForm_Transfer_Panel_DataGrid.Name = "MainForm_Transfer_Panel_DataGrid";
-            MainForm_Transfer_Panel_DataGrid.Size = new Size(2220, 833);
-            MainForm_Transfer_Panel_DataGrid.TabIndex = 25;
-            // 
-            // MainForm_Transfer_Image_Nothing
-            // 
-            MainForm_Transfer_Image_Nothing.Dock = DockStyle.Fill;
-            MainForm_Transfer_Image_Nothing.ErrorImage = null;
-            MainForm_Transfer_Image_Nothing.InitialImage = null;
-            MainForm_Transfer_Image_Nothing.Location = new Point(0, 0);
-            MainForm_Transfer_Image_Nothing.Name = "MainForm_Transfer_Image_Nothing";
-            MainForm_Transfer_Image_Nothing.Size = new Size(2220, 833);
-            MainForm_Transfer_Image_Nothing.SizeMode = PictureBoxSizeMode.CenterImage;
-            MainForm_Transfer_Image_Nothing.TabIndex = 19;
-            MainForm_Transfer_Image_Nothing.TabStop = false;
-            MainForm_Transfer_Image_Nothing.Visible = false;
-            // 
-            // MainForm_Transfer_DataGrid
-            // 
-            MainForm_Transfer_DataGrid.AllowUserToAddRows = false;
-            MainForm_Transfer_DataGrid.AllowUserToDeleteRows = false;
-            MainForm_Transfer_DataGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            MainForm_Transfer_DataGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-            MainForm_Transfer_DataGrid.BorderStyle = BorderStyle.Fixed3D;
-            MainForm_Transfer_DataGrid.CellBorderStyle = DataGridViewCellBorderStyle.Sunken;
-            MainForm_Transfer_DataGrid.ClipboardCopyMode = DataGridViewClipboardCopyMode.Disable;
-            MainForm_Transfer_DataGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Sunken;
-            MainForm_Transfer_DataGrid.ColumnHeadersHeight = 34;
-            MainForm_Transfer_DataGrid.Dock = DockStyle.Fill;
-            MainForm_Transfer_DataGrid.EditMode = DataGridViewEditMode.EditProgrammatically;
-            MainForm_Transfer_DataGrid.Location = new Point(0, 0);
-            MainForm_Transfer_DataGrid.MultiSelect = false;
-            MainForm_Transfer_DataGrid.Name = "MainForm_Transfer_DataGrid";
-            MainForm_Transfer_DataGrid.ReadOnly = true;
-            MainForm_Transfer_DataGrid.RowHeadersWidth = 62;
-            MainForm_Transfer_DataGrid.RowTemplate.ReadOnly = true;
-            MainForm_Transfer_DataGrid.RowTemplate.Resizable = DataGridViewTriState.True;
-            MainForm_Transfer_DataGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            MainForm_Transfer_DataGrid.ShowCellErrors = false;
-            MainForm_Transfer_DataGrid.ShowCellToolTips = false;
-            MainForm_Transfer_DataGrid.ShowEditingIcon = false;
-            MainForm_Transfer_DataGrid.ShowRowErrors = false;
-            MainForm_Transfer_DataGrid.Size = new Size(2220, 833);
-            MainForm_Transfer_DataGrid.StandardTab = true;
-            MainForm_Transfer_DataGrid.TabIndex = 5;
-            MainForm_Transfer_DataGrid.TabStop = false;
-            // 
-            // MainForm_Transfer_Panel_Bottom
-            // 
-            MainForm_Transfer_Panel_Bottom.Controls.Add(MainForm_Transfer_TextBox_Qty);
-            MainForm_Transfer_Panel_Bottom.Controls.Add(MainForm_Transfer_Button_Save);
-            MainForm_Transfer_Panel_Bottom.Controls.Add(MainForm_Transfer_Label_Qty);
-            MainForm_Transfer_Panel_Bottom.Controls.Add(MainForm_Transfer_Button_Reset);
-            MainForm_Transfer_Panel_Bottom.Dock = DockStyle.Bottom;
-            MainForm_Transfer_Panel_Bottom.Location = new Point(3, 623);
-            MainForm_Transfer_Panel_Bottom.Name = "MainForm_Transfer_Panel_Bottom";
-            MainForm_Transfer_Panel_Bottom.Size = new Size(1513, 35);
-            MainForm_Transfer_Panel_Bottom.TabIndex = 24;
-            // 
-            // MainForm_Transfer_TextBox_Qty
-            // 
-            MainForm_Transfer_TextBox_Qty.Location = new Point(65, 6);
-            MainForm_Transfer_TextBox_Qty.Name = "MainForm_Transfer_TextBox_Qty";
-            MainForm_Transfer_TextBox_Qty.Size = new Size(187, 23);
-            MainForm_Transfer_TextBox_Qty.TabIndex = 3;
+            controlTransferTab1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            controlTransferTab1.Dock = DockStyle.Fill;
+            controlTransferTab1.Location = new Point(3, 3);
+            controlTransferTab1.Name = "controlTransferTab1";
+            controlTransferTab1.Size = new Size(809, 384);
+            controlTransferTab1.TabIndex = 0;
             // 
             // MainForm
             // 
@@ -708,14 +516,6 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Inventory.ResumeLayout(false);
             MainForm_TabControl_Remove.ResumeLayout(false);
             MainForm_TabControl_Transfer.ResumeLayout(false);
-            MainForm_Transfer_GroupBox_Main.ResumeLayout(false);
-            MainForm_Transfer_Panel_Header.ResumeLayout(false);
-            MainForm_Transfer_Panel_Header.PerformLayout();
-            MainForm_Transfer_Panel_DataGrid.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)MainForm_Transfer_Image_Nothing).EndInit();
-            ((System.ComponentModel.ISupportInitialize)MainForm_Transfer_DataGrid).EndInit();
-            MainForm_Transfer_Panel_Bottom.ResumeLayout(false);
-            MainForm_Transfer_Panel_Bottom.PerformLayout();
             ResumeLayout(false);
 
 
@@ -773,22 +573,8 @@ namespace MTM_WIP_Application.Forms.MainForm
         private TabPage MainForm_TabControl_Inventory;
         private TabPage MainForm_TabControl_Remove;
         private TabPage MainForm_TabControl_Transfer;
-        private GroupBox MainForm_Transfer_GroupBox_Main;
-        private Panel MainForm_Transfer_Panel_Header;
-        private Button MainForm_Transfer_Button_Search;
-        private ComboBox MainForm_Transfer_ComboBox_Part;
-        private Label MainForm_Transfer_Label_Part;
-        private Label MainForm_Transfer_Label_Loc;
-        private ComboBox MainForm_Transfer_ComboBox_Loc;
-        private Panel MainForm_Transfer_Panel_DataGrid;
-        private PictureBox MainForm_Transfer_Image_Nothing;
-        private DataGridView MainForm_Transfer_DataGrid;
-        private Panel MainForm_Transfer_Panel_Bottom;
-        private TextBox MainForm_Transfer_TextBox_Qty;
-        private Button MainForm_Transfer_Button_Save;
-        private Label MainForm_Transfer_Label_Qty;
-        private Button MainForm_Transfer_Button_Reset;
         private ControlInventoryTab controlInventoryTab1;
         private ControlRemoveTab MainForm_RemoveTab;
+        private ControlTransferTab controlTransferTab1;
     }
 }
