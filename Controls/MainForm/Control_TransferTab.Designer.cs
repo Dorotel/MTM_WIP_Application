@@ -79,7 +79,8 @@
             Control_TransferTab_Panel_DataGridView.Location = new Point(3, 78);
             Control_TransferTab_Panel_DataGridView.Name = "Control_TransferTab_Panel_DataGridView";
             Control_TransferTab_Panel_DataGridView.Size = new Size(803, 281);
-            Control_TransferTab_Panel_DataGridView.TabIndex = 21;
+            Control_TransferTab_Panel_DataGridView.TabIndex = 8;
+            Control_TransferTab_Panel_DataGridView.TabStop = true;
             // 
             // Control_TransferTab_Image_NothingFound
             // 
@@ -151,7 +152,8 @@
             Control_TransferTab_Button_Toggle_RightPanel.Location = new Point(768, 35);
             Control_TransferTab_Button_Toggle_RightPanel.Name = "Control_TransferTab_Button_Toggle_RightPanel";
             Control_TransferTab_Button_Toggle_RightPanel.Size = new Size(28, 28);
-            Control_TransferTab_Button_Toggle_RightPanel.TabIndex = 14;
+            Control_TransferTab_Button_Toggle_RightPanel.TabIndex = 999;
+            Control_TransferTab_Button_Toggle_RightPanel.TabStop = false;
             Control_TransferTab_Button_Toggle_RightPanel.Text = "←";
             Control_TransferTab_Button_Toggle_RightPanel.UseVisualStyleBackColor = true;
             Control_TransferTab_Button_Toggle_RightPanel.Click += Control_TransferTab_Button_Toggle_RightPanel_Click;
@@ -182,7 +184,7 @@
             Control_TransferTab_Button_Reset.Location = new Point(678, 5);
             Control_TransferTab_Button_Reset.Name = "Control_TransferTab_Button_Reset";
             Control_TransferTab_Button_Reset.Size = new Size(118, 28);
-            Control_TransferTab_Button_Reset.TabIndex = 5;
+            Control_TransferTab_Button_Reset.TabIndex = 7;
             Control_TransferTab_Button_Reset.TabStop = false;
             Control_TransferTab_Button_Reset.Text = "&Reset";
             Control_TransferTab_Button_Reset.UseVisualStyleBackColor = true;
@@ -202,7 +204,7 @@
             Control_TransferTab_Button_Delete.Location = new Point(547, 34);
             Control_TransferTab_Button_Delete.Name = "Control_TransferTab_Button_Delete";
             Control_TransferTab_Button_Delete.Size = new Size(213, 28);
-            Control_TransferTab_Button_Delete.TabIndex = 8;
+            Control_TransferTab_Button_Delete.TabIndex = 6;
             Control_TransferTab_Button_Delete.Text = "&Save";
             Control_TransferTab_Button_Delete.UseVisualStyleBackColor = true;
             // 
@@ -221,7 +223,7 @@
             Control_TransferTab_Button_Search.Location = new Point(547, 5);
             Control_TransferTab_Button_Search.Name = "Control_TransferTab_Button_Search";
             Control_TransferTab_Button_Search.Size = new Size(118, 28);
-            Control_TransferTab_Button_Search.TabIndex = 3;
+            Control_TransferTab_Button_Search.TabIndex = 5;
             Control_TransferTab_Button_Search.Text = "Search";
             Control_TransferTab_Button_Search.UseVisualStyleBackColor = true;
             Control_TransferTab_Button_Search.Click += Control_TransferTab_Button_Search_Click;
@@ -245,7 +247,7 @@
             Control_TransferTab_ComboBox_ToLocation.Location = new Point(363, 7);
             Control_TransferTab_ComboBox_ToLocation.Name = "Control_TransferTab_ComboBox_ToLocation";
             Control_TransferTab_ComboBox_ToLocation.Size = new Size(171, 24);
-            Control_TransferTab_ComboBox_ToLocation.TabIndex = 9;
+            Control_TransferTab_ComboBox_ToLocation.TabIndex = 3;
             // 
             // Control_TransferTab_Label_Quantity
             // 
@@ -264,7 +266,7 @@
             Control_TransferTab_NumericUpDown_Quantity.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             Control_TransferTab_NumericUpDown_Quantity.Name = "Control_TransferTab_NumericUpDown_Quantity";
             Control_TransferTab_NumericUpDown_Quantity.Size = new Size(171, 23);
-            Control_TransferTab_NumericUpDown_Quantity.TabIndex = 11;
+            Control_TransferTab_NumericUpDown_Quantity.TabIndex = 4;
             Control_TransferTab_NumericUpDown_Quantity.Value = new decimal(new int[] { 1, 0, 0, 0 });
             // 
             // Control_TransferTab_GroupBox_MainControl

@@ -21,6 +21,10 @@ public partial class ControlRemoveTab : UserControl
     {
         InitializeComponent();
         Control_RemoveTab_Initialize();
+
+        ComboBoxHelpers.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Part);
+        ComboBoxHelpers.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Operation);
+
         Control_RemoveTab_ComboBox_Part.ForeColor = Color.Red;
         Control_RemoveTab_ComboBox_Operation.ForeColor = Color.Red;
         Control_RemoveTab_Image_NothingFound.Visible = false;
@@ -56,6 +60,30 @@ public partial class ControlRemoveTab : UserControl
         }
     }
 
+    private List<(string PartID, string Location, int Quantity)> GetSelectedItemsToDelete(out string summary)
+    {
+        var sb = new StringBuilder();
+        var itemsToDelete = new List<(string PartID, string Location, int Quantity)>();
+        foreach (DataGridViewRow row in Control_RemoveTab_DataGridView_Main.SelectedRows)
+            if (row.DataBoundItem is DataRowView drv)
+            {
+                var partId = drv["PartID"]?.ToString() ?? "";
+                var location = drv["Location"]?.ToString() ?? "";
+                var quantity = 0;
+                int.TryParse(drv["Quantity"]?.ToString(), out quantity);
+
+                sb.AppendLine($"PartID: {partId}, Location: {location}, Quantity: {quantity}");
+                AppLogger.Log($"Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
+                System.Diagnostics.Debug.WriteLine(
+                    $"[DEBUG] Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
+
+                itemsToDelete.Add((partId, location, quantity));
+            }
+
+        summary = sb.ToString();
+        return itemsToDelete;
+    }
+
     private async void Control_RemoveTab_Button_Delete_Click(object? sender, EventArgs? e)
     {
         try
@@ -72,28 +100,13 @@ public partial class ControlRemoveTab : UserControl
             }
 
             // Build a summary of items to delete
-            var sb = new StringBuilder();
-            var itemsToDelete = new List<(string PartID, string Location, int Quantity)>();
-            foreach (DataGridViewRow row in Control_RemoveTab_DataGridView_Main.SelectedRows)
-                if (row.DataBoundItem is DataRowView drv)
-                {
-                    var partId = drv["PartID"]?.ToString() ?? "";
-                    var location = drv["Location"]?.ToString() ?? "";
-                    var quantity = 0;
-                    int.TryParse(drv["Quantity"]?.ToString(), out quantity);
-
-                    sb.AppendLine($"PartID: {partId}, Location: {location}, Quantity: {quantity}");
-                    AppLogger.Log($"Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
-                    System.Diagnostics.Debug.WriteLine(
-                        $"[DEBUG] Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
-
-                    itemsToDelete.Add((partId, location, quantity));
-                }
+            string summary;
+            var itemsToDelete = GetSelectedItemsToDelete(out summary);
 
             var confirmResult = MessageBox.Show(
                 $@"The following items will be deleted:
 
-{sb}
+{summary}
 Are you sure?",
                 @"Confirm Deletion",
                 MessageBoxButtons.YesNo,
@@ -459,6 +472,8 @@ Are you sure?",
                 Control_RemoveTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
             }
         }
+
+        ComboBoxHelpers.DeselectAllComboBoxText(this);
     }
 
     public void UpdateToggleRightPanelButton()

@@ -119,6 +119,41 @@ internal static class ErrorLogDao
 
     // --- Error Handling Methods ---
 
+    // Prevents error message spam by tracking the last shown error and time
+    private static string? _lastErrorMessage;
+    private static DateTime _lastErrorTime = DateTime.MinValue;
+    private static readonly TimeSpan ErrorMessageCooldown = TimeSpan.FromSeconds(5);
+
+    private static string? _lastSqlErrorMessage;
+    private static DateTime _lastSqlErrorTime = DateTime.MinValue;
+    private static readonly TimeSpan SqlErrorMessageCooldown = TimeSpan.FromSeconds(5);
+
+    // --- Helper: ShouldShowErrorMessage ---
+    private static bool ShouldShowErrorMessage(string message)
+    {
+        var now = DateTime.Now;
+        lock (typeof(ErrorLogDao))
+        {
+            if (_lastErrorMessage == message && now - _lastErrorTime < ErrorMessageCooldown) return false;
+            _lastErrorMessage = message;
+            _lastErrorTime = now;
+            return true;
+        }
+    }
+
+    private static bool ShouldShowSqlErrorMessage(string message)
+    {
+        var now = DateTime.Now;
+        lock (typeof(ErrorLogDao))
+        {
+            if (_lastSqlErrorMessage == message && now - _lastSqlErrorTime < SqlErrorMessageCooldown)
+                return false;
+            _lastSqlErrorMessage = message;
+            _lastSqlErrorTime = now;
+            return true;
+        }
+    }
+
     internal static async Task HandleException_SQLError_CloseApp(
         Exception ex,
         bool useAsync = false,
@@ -144,13 +179,16 @@ internal static class ErrorLogDao
                                     || ex.Message.Contains("Lost connection to MySQL server")
                                     || ex.Message.Contains("MySQL server has gone away");
 
+            var message = $"SQL Error in method: {callerName}, Control: {controlName}\n{ex.Message}";
+
             if (isConnectionError)
             {
-                MessageBox.Show(
-                    @"Database connection error. The application will now close.",
-                    @"Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                if (ShouldShowSqlErrorMessage(message))
+                    MessageBox.Show(
+                        @"Database connection error. The application will now close.",
+                        @"Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
                 Process.GetCurrentProcess().Kill();
             }
             else
@@ -165,6 +203,9 @@ internal static class ErrorLogDao
                     controlName,
                     useAsync
                 );
+
+                if (ShouldShowSqlErrorMessage(message))
+                    MessageBox.Show(message, @"SQL Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         catch (Exception innerEx)
@@ -200,9 +241,8 @@ internal static class ErrorLogDao
             var isCritical = ex is OutOfMemoryException || ex is StackOverflowException ||
                              ex is AccessViolationException;
 
-            var mainForm = Application.OpenForms.OfType<MainForm>().First();
-
-            mainForm.ConnectionRecoveryManager.HandleConnectionLost();
+            var mainForm = Application.OpenForms.OfType<MainForm>().FirstOrDefault();
+            if (mainForm != null) mainForm.ConnectionRecoveryManager.HandleConnectionLost();
 
             AppLogger.LogApplicationError(ex);
 
@@ -217,15 +257,18 @@ internal static class ErrorLogDao
                 useAsync
             );
 
-            if (isCritical)
+            if (ShouldShowErrorMessage(message))
             {
-                MessageBox.Show(message + "\n\nThe application will now close due to a critical error.",
-                    @"Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Process.GetCurrentProcess().Kill();
-            }
-            else
-            {
-                MessageBox.Show(message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (isCritical)
+                {
+                    MessageBox.Show(message + "\n\nThe application will now close due to a critical error.",
+                        @"Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Process.GetCurrentProcess().Kill();
+                }
+                else
+                {
+                    MessageBox.Show(message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
 
             AppLogger.Log("HandleException_GeneralError_CloseApp executed successfully.");

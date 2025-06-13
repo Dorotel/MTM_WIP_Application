@@ -21,6 +21,12 @@ public partial class ControlInventoryTab : UserControl
     {
         InitializeComponent();
         Control_InventoryTab_Initialize();
+
+        ComboBoxHelpers.ApplyStandardComboBoxProperties(Control_InventoryTab_ComboBox_Part);
+        ComboBoxHelpers.ApplyStandardComboBoxProperties(Control_InventoryTab_ComboBox_Operation);
+        ComboBoxHelpers.ApplyStandardComboBoxProperties(Control_InventoryTab_ComboBox_Location);
+
+
         Control_InventoryTab_ComboBox_Part.ForeColor = Color.Red;
         Control_InventoryTab_ComboBox_Operation.ForeColor = Color.Red;
         Control_InventoryTab_ComboBox_Location.ForeColor = Color.Red;
@@ -497,8 +503,6 @@ public partial class ControlInventoryTab : UserControl
                 Control_InventoryTab_TextBox_Quantity_TextChanged();
                 Control_InventoryTab_Update_SaveButtonState();
             };
-            Control_InventoryTab_TextBox_Quantity.Enter += (s, e) => Control_InventoryTab_TextBox_Quantity.SelectAll();
-            Control_InventoryTab_TextBox_Quantity.Click += (s, e) => Control_InventoryTab_TextBox_Quantity.SelectAll();
 
 
             Control_InventoryTab_Button_AdvancedEntry.Click +=
@@ -599,6 +603,8 @@ public partial class ControlInventoryTab : UserControl
                 Control_InventoryTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
             }
         }
+
+        ComboBoxHelpers.DeselectAllComboBoxText(this);
     }
 
 

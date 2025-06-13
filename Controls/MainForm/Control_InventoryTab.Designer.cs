@@ -298,7 +298,6 @@
         private Label Control_InventoryTab_Label_Version;
         private Button Control_InventoryTab_Button_AdvancedEntry;
         private Label Control_InventoryTab_Label_Part;
-        private ComboBox Control_InventoryTab_ComboBox_Part;
         private Label Control_InventoryTab_Label_Op;
         private ComboBox Control_InventoryTab_ComboBox_Operation;
         private Label Control_InventoryTab_Label_Qty;
@@ -310,5 +309,6 @@
         private TableLayoutPanel Control_InventoryTab_TableLayout_Main;
         private Panel Control_InventoryTab_Panel_Top;
         private Button Control_InventoryTab_Button_Toggle_RightPanel;
+        public ComboBox Control_InventoryTab_ComboBox_Part;
     }
 }

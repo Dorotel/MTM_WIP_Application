@@ -1,13 +1,14 @@
-﻿using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Timers;
-using MTM_WIP_Application.Core;
+﻿using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Data;
 using MTM_WIP_Application.Forms.MainForm.Classes;
+using MTM_WIP_Application.Helpers;
 using MTM_WIP_Application.Logging;
 using MySql.Data.MySqlClient;
+using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
 using Timer = System.Windows.Forms.Timer;
 
@@ -38,7 +39,7 @@ public partial class MainForm : Form
 
             MainForm_OnStartup_WireUpEvents();
 
-            _ = OnStartup();
+            _ = OnStartupAsync();
 
 
             AppLogger.Log("MainForm initialized.");
@@ -64,11 +65,9 @@ public partial class MainForm : Form
                     .GetField("Control_InventoryTab_ComboBox_Part",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     ?.GetValue(controlInventoryTab1) as ComboBox;
-                if (partCombo != null && partCombo.Visible && partCombo.Enabled)
-                {
-                    partCombo.Focus();
-                    partCombo.SelectAll();
-                }
+
+                ComboBoxHelpers.DeselectAllComboBoxText(this);
+                partCombo?.SelectAll();
             }
             // Remove Tab (index 1)
             else if (MainForm_TabControl.SelectedIndex == 1 && MainForm_RemoveTab != null)
@@ -79,11 +78,8 @@ public partial class MainForm : Form
                     .GetField("Control_RemoveTab_ComboBox_Part",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     ?.GetValue(MainForm_RemoveTab) as ComboBox;
-                if (partCombo != null && partCombo.Visible && partCombo.Enabled)
-                {
-                    partCombo.Focus();
-                    partCombo.SelectAll();
-                }
+                ComboBoxHelpers.DeselectAllComboBoxText(this);
+                partCombo?.SelectAll();
             }
             // Transfer Tab (index 2)
             else if (MainForm_TabControl.SelectedIndex == 2 && controlTransferTab1 != null)
@@ -94,11 +90,8 @@ public partial class MainForm : Form
                     .GetField("Control_TransferTab_ComboBox_Part",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     ?.GetValue(controlTransferTab1) as ComboBox;
-                if (partCombo != null && partCombo.Visible && partCombo.Enabled)
-                {
-                    partCombo.Focus();
-                    partCombo.SelectAll();
-                }
+                ComboBoxHelpers.DeselectAllComboBoxText(this);
+                partCombo?.SelectAll();
             }
         };
 
@@ -111,15 +104,11 @@ public partial class MainForm : Form
                 .GetField("Control_InventoryTab_ComboBox_Part",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 ?.GetValue(controlInventoryTab1) as ComboBox;
-            if (partCombo is { Visible: true, Enabled: true })
-            {
-                partCombo.Focus();
-                partCombo.SelectAll();
-            }
         };
     }
 
-    private static async Task OnStartup()
+
+    private async Task OnStartupAsync()
     {
         try
         {
@@ -127,22 +116,25 @@ public partial class MainForm : Form
             {
                 WipAppVariables.UserFullName = await UserDao.GetUserFullNameAsync(WipAppVariables.User, true);
 
+
                 if (string.IsNullOrEmpty(WipAppVariables.UserFullName))
                     WipAppVariables.UserFullName = WipAppVariables.User; // Fallback to username if full name not found
 
                 AppLogger.Log($"User full name loaded: {WipAppVariables.UserFullName}");
+                await Task.Run(() => { controlInventoryTab1.Control_InventoryTab_ComboBox_Part.Focus(); });
+                controlInventoryTab1.Control_InventoryTab_ComboBox_Part.SelectAll();
             }
             catch (Exception ex)
             {
                 AppLogger.LogApplicationError(ex);
                 await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true,
-                    "MainForm / " + "OnStartup / " + "GetUserFullNameAsync");
+                    "MainForm / " + "OnStartupAsync / " + "GetUserFullNameAsync");
             }
         }
         catch (Exception ex)
         {
             AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "MainForm / " + "OnStartup");
+            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "MainForm / " + "OnStartupAsync");
         }
     }
 

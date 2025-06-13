@@ -22,6 +22,14 @@ public partial class AdvancedInventoryEntryForm : Form
             AppLogger.Log("AdvancedInventoryEntryForm constructor entered.");
             InitializeComponent();
 
+            ComboBoxHelpers.ApplyStandardComboBoxProperties(AdvancedEntry_Single_ComboBox_Part);
+            ComboBoxHelpers.ApplyStandardComboBoxProperties(AdvancedEntry_Single_ComboBox_Op);
+            ComboBoxHelpers.ApplyStandardComboBoxProperties(AdvancedEntry_Single_ComboBox_Loc);
+            ComboBoxHelpers.ApplyStandardComboBoxProperties(AdvancedEntry_MultiLoc_ComboBox_Part);
+            ComboBoxHelpers.ApplyStandardComboBoxProperties(AdvancedEntry_MultiLoc_ComboBox_Op);
+            ComboBoxHelpers.ApplyStandardComboBoxProperties(AdvancedEntry_MultiLoc_ComboBox_Loc);
+
+
             AdvancedEntry_Single_ComboBox_Part.Visible = false;
             AdvancedEntry_Single_ComboBox_Op.Visible = false;
             AdvancedEntry_Single_ComboBox_Loc.Visible = false;
@@ -107,13 +115,11 @@ public partial class AdvancedInventoryEntryForm : Form
                 ClientSize = new Size(431, 309);
                 if (AdvancedEntry_Single_ComboBox_Part.Visible && AdvancedEntry_Single_ComboBox_Part.Enabled)
                     AdvancedEntry_Single_ComboBox_Part.Focus();
-                AdvancedEntry_Single_ComboBox_Part.SelectAll();
                 break;
             case 1: // Tab 2
                 ClientSize = new Size(835, 309);
                 if (AdvancedEntry_MultiLoc_ComboBox_Part.Visible && AdvancedEntry_MultiLoc_ComboBox_Part.Enabled)
                     AdvancedEntry_MultiLoc_ComboBox_Part.Focus();
-                AdvancedEntry_MultiLoc_ComboBox_Part.SelectAll();
                 break;
             case 2: // Tab 3
                 ClientSize = new Size(835, 348);

@@ -311,4 +311,45 @@ public static class ComboBoxHelpers
     {
         comboBox.ForeColor = Color.Red;
     }
+
+    /// <summary>
+    /// Applies the standard ComboBox properties used in ControlTransferTab to the given ComboBox.
+    /// </summary>
+    /// <param name="comboBox">The ComboBox to standardize.</param>
+    /// <param name="ownerDraw">Set true for OwnerDrawVariable (e.g., ToLocation), false otherwise.</param>
+    public static void ApplyStandardComboBoxProperties(ComboBox comboBox, bool ownerDraw = false)
+    {
+        if (comboBox == null) return;
+        comboBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        comboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
+        comboBox.FormattingEnabled = true;
+        comboBox.DropDownStyle = ComboBoxStyle.DropDown; // Default unless you want DropDownList
+        comboBox.DrawMode = ownerDraw ? DrawMode.OwnerDrawVariable : DrawMode.Normal;
+    }
+
+    /// <summary>
+    /// Deselects all text in all ComboBox controls within the specified parent control (recursively).
+    /// </summary>
+    /// <param name="parent">The parent control (UserControl or Form) to search for ComboBoxes.</param>
+    public static void DeselectAllComboBoxText(Control parent)
+    {
+        if (parent == null) return;
+
+        foreach (Control control in parent.Controls)
+        {
+            if (control is ComboBox comboBox)
+                // Only applicable if the ComboBox is editable (DropDown or Simple)
+                if (comboBox.DropDownStyle != ComboBoxStyle.DropDownList)
+                {
+                    if (comboBox.InvokeRequired)
+                        comboBox.Invoke(new MethodInvoker(() => comboBox.SelectionLength = 0));
+                    else
+                        comboBox.SelectionLength = 0;
+                }
+
+            // Recursively process child controls
+            if (control.HasChildren)
+                DeselectAllComboBoxText(control);
+        }
+    }
 }

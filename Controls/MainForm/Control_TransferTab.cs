@@ -406,6 +406,8 @@ public partial class ControlTransferTab : UserControl
                 Control_TransferTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
             }
         }
+
+        ComboBoxHelpers.DeselectAllComboBoxText(this);
     }
 
     public void UpdateToggleRightPanelButton()

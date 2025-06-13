@@ -22,9 +22,8 @@ internal static class ExceptionHandler
         {
             if (Application.OpenForms.OfType<MainForm>().Any())
             {
-                var mainForm = Application.OpenForms.OfType<MainForm>().First();
-
-                mainForm.ConnectionRecoveryManager.HandleConnectionLost();
+                var mainForm = Application.OpenForms.OfType<MainForm>().FirstOrDefault();
+                if (mainForm != null) mainForm.ConnectionRecoveryManager.HandleConnectionLost();
             }
         }
         catch (Exception ex)

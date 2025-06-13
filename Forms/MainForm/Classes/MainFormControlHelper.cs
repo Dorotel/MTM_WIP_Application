@@ -97,26 +97,19 @@ public static class MainFormControlHelper
 
     /// <summary>
     ///     Sets the specified control as the active control and focuses on it.
-    ///     If the control is a TextBoxBase, it selects all text within the control.
     /// </summary>
     public static void SetActiveControl(Form form, Control control)
     {
         if (form == null || control == null) return;
         if (form.InvokeRequired)
-        {
             form.Invoke(new MethodInvoker(() =>
             {
                 form.ActiveControl = control;
-                if (control is TextBoxBase textBoxBase)
-                    control.Focus();
+                // Removed SelectAll/DeselectAll logic
             }));
-        }
         else
-        {
             form.ActiveControl = control;
-            if (control is TextBoxBase textBoxBase)
-                control.Focus();
-        }
+        // Removed SelectAll/DeselectAll logic
     }
 
     /// <summary>
