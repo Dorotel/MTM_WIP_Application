@@ -86,7 +86,7 @@
             // 
             Control_TransferTab_Image_NothingFound.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             Control_TransferTab_Image_NothingFound.ErrorImage = null;
-            Control_TransferTab_Image_NothingFound.Image = Properties.Resources._404;
+            Control_TransferTab_Image_NothingFound.Image = Properties.Resources.NothingFound;
             Control_TransferTab_Image_NothingFound.InitialImage = null;
             Control_TransferTab_Image_NothingFound.Location = new Point(0, 0);
             Control_TransferTab_Image_NothingFound.Name = "Control_TransferTab_Image_NothingFound";

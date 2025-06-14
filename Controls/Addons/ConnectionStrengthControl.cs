@@ -2,11 +2,15 @@
 
 namespace MTM_WIP_Application.Controls.Addons;
 
+#region ConnectionStrengthControl
+
 public partial class ConnectionStrengthControl : UserControl
 {
-    private int _strength = 0; // 0-5
+    private int _strength; // 0-5
     private int _ping = -1; // Ping in ms, -1 means unknown
     private readonly ToolTip _toolTip = new();
+
+    #region Properties
 
     [Browsable(true)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
@@ -54,6 +58,10 @@ public partial class ConnectionStrengthControl : UserControl
         }
     }
 
+    #endregion
+
+    #region Initialization
+
     public ConnectionStrengthControl()
     {
         InitializeComponent();
@@ -65,35 +73,13 @@ public partial class ConnectionStrengthControl : UserControl
         MouseHover += ConnectionStrengthControl_MouseHover;
     }
 
+    #endregion
+
+    #region UI Events
+
     private void ConnectionStrengthControl_MouseHover(object? sender, EventArgs e)
     {
         UpdateToolTip();
-    }
-
-    private void UpdateToolTip()
-    {
-        var quality = _strength switch
-        {
-            5 => "Excellent",
-            4 => "Very Good",
-            3 => "Good",
-            2 => "Fair",
-            1 => "Poor",
-            _ => "No Signal"
-        };
-        var pingText = _ping >= 0 ? $"{_ping} ms" : "N/A";
-        _toolTip.SetToolTip(this, $"Ping: {pingText} ({quality})");
-    }
-
-    // Call this method from MainForm after adding to the SplitContainer.Panel2
-    public void SyncBackgroundWithParent()
-    {
-        // Try to match the immediate parent, or fallback to SystemColors.Control
-        if (Parent != null)
-            BackColor = Parent.BackColor;
-        else
-            BackColor = SystemColors.Control;
-        Invalidate();
     }
 
     protected override void OnParentChanged(EventArgs e)
@@ -102,16 +88,9 @@ public partial class ConnectionStrengthControl : UserControl
         SyncBackgroundWithParent();
     }
 
+    #endregion
 
-    private static Color GetBarColor(int barIndex, int barCount)
-    {
-        // Interpolate from red (low) to green (high)
-        var t = barCount == 1 ? 1f : (float)barIndex / (barCount - 1);
-        var r = (int)(255 * (1 - t));
-        var g = (int)(200 * t); // 200 for a more pleasant green
-        var b = 0;
-        return Color.FromArgb(r, g, b);
-    }
+    #region Drawing
 
     private void ConnectionStrengthControl_Paint(object? sender, PaintEventArgs e)
     {
@@ -140,4 +119,47 @@ public partial class ConnectionStrengthControl : UserControl
             g.DrawRectangle(Pens.DarkGray, x, y, barWidth, height);
         }
     }
+
+    private static Color GetBarColor(int barIndex, int barCount)
+    {
+        // Interpolate from red (low) to green (high)
+        var t = barCount == 1 ? 1f : (float)barIndex / (barCount - 1);
+        var r = (int)(255 * (1 - t));
+        var g = (int)(200 * t); // 200 for a more pleasant green
+        var b = 0;
+        return Color.FromArgb(r, g, b);
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private void UpdateToolTip()
+    {
+        var quality = _strength switch
+        {
+            5 => "Excellent",
+            4 => "Very Good",
+            3 => "Good",
+            2 => "Fair",
+            1 => "Poor",
+            _ => "No Signal"
+        };
+        var pingText = _ping >= 0 ? $"{_ping} ms" : "N/A";
+        _toolTip.SetToolTip(this, $"Ping: {pingText} ({quality})");
+    }
+
+    // Call this method from MainForm after adding to the SplitContainer.Panel2
+    public void SyncBackgroundWithParent()
+    {
+        if (Parent != null)
+            BackColor = Parent.BackColor;
+        else
+            BackColor = SystemColors.Control;
+        Invalidate();
+    }
+
+    #endregion
 }
+
+#endregion

@@ -1,7 +1,4 @@
-﻿using System.ComponentModel;
-using System.Data;
-using System.Text;
-using MTM_WIP_Application.Core;
+﻿using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Data;
 using MTM_WIP_Application.Forms.AdvancedInventoryEntryForm;
 using MTM_WIP_Application.Forms.MainForm.Classes;
@@ -10,13 +7,20 @@ using MTM_WIP_Application.Logging;
 using MTM_WIP_Application.Models;
 using MTM_WIP_Application.Services;
 using MySql.Data.MySqlClient;
+using System.ComponentModel;
+using System.Data;
+using System.Text;
 
 namespace MTM_WIP_Application.Controls.MainForm;
+
+#region ControlTransferTab
 
 public partial class ControlTransferTab : UserControl
 {
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
+
+    #region Initialization
 
     public ControlTransferTab()
     {
@@ -26,7 +30,7 @@ public partial class ControlTransferTab : UserControl
         Control_TransferTab_ComboBox_Operation.ForeColor = Color.Red;
         Control_TransferTab_ComboBox_ToLocation.ForeColor = Color.Red;
         Control_TransferTab_Image_NothingFound.Visible = false;
-        _ = Control_TransferTab_OnStartup_LoadComboBoxes();
+        _ = Control_TransferTab_OnStartup_LoadComboBoxesAsync();
     }
 
     public void Control_TransferTab_Initialize()
@@ -42,6 +46,10 @@ public partial class ControlTransferTab : UserControl
         Control_TransferTab_Button_Toggle_RightPanel.Text = panelCollapsed ? "←" : "→";
         Control_TransferTab_Button_Toggle_RightPanel.ForeColor = panelCollapsed ? Color.Red : Color.Green;
     }
+
+    #endregion
+
+    #region Key Processing
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
@@ -68,17 +76,87 @@ public partial class ControlTransferTab : UserControl
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_ProcessCmdKey");
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_ProcessCmdKey");
             return false;
         }
     }
+
+    #endregion
+
+    #region Startup / ComboBox Loading
+
+    private async Task Control_TransferTab_OnStartup_LoadComboBoxesAsync()
+    {
+        try
+        {
+            await Control_TransferTab_OnStartup_LoadDataComboBoxesAsync();
+            Control_TransferTab_OnStartup_WireUpEvents();
+            ApplicationLog.Log("Initial setup of ComboBoxes in the Inventory Tab.");
+            MainFormTabResetHelper.ResetTransferTab(
+                Control_TransferTab_ComboBox_Part,
+                Control_TransferTab_ComboBox_Operation,
+                Control_TransferTab_Button_Search,
+                Control_TransferTab_Button_Transfer);
+            Control_TransferTab_ComboBox_Operation.Visible = true;
+            Control_TransferTab_ComboBox_Part.Visible = true;
+            try
+            {
+                Core_WipAppVariables.UserFullName =
+                    await Dao_User.GetUserFullNameAsync(Core_WipAppVariables.User, true);
+                ApplicationLog.Log($"User full name loaded: {Core_WipAppVariables.UserFullName}");
+            }
+            catch (Exception ex)
+            {
+                ApplicationLog.LogApplicationError(ex);
+                await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
+                    "Control_TransferTab_OnStartup_GetUserFullName");
+            }
+        }
+        catch (Exception ex)
+        {
+            ApplicationLog.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "Control_TransferTab_OnStartup");
+        }
+    }
+
+    private async Task Control_TransferTab_OnStartup_LoadDataComboBoxesAsync()
+    {
+        try
+        {
+            await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
+            var comboBoxSets = new[]
+            {
+                (new MySqlDataAdapter(), new DataTable(), Control_TransferTab_ComboBox_Part, "md_part_ids_Get_All",
+                    "Item Number", "ID", "[ Enter Part ID ]", CommandType.StoredProcedure),
+                (new MySqlDataAdapter(), new DataTable(), Control_TransferTab_ComboBox_Operation,
+                    "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
+                    CommandType.StoredProcedure),
+                (new MySqlDataAdapter(), new DataTable(), Control_TransferTab_ComboBox_ToLocation,
+                    "md_locations_Get_All", "Location", "Location", "[ Enter Location ]", CommandType.StoredProcedure)
+            };
+            foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
+                await Helper_ComboBoxes.FillComboBoxAsync(
+                    procName, connection, adapter, table, comboBox, display, value, placeholder, cmdType);
+            ApplicationLog.Log("Transfer tab ComboBoxes loaded.");
+        }
+        catch (Exception ex)
+        {
+            ApplicationLog.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
+                "MainForm_LoadTransferTabComboBoxesAsync");
+        }
+    }
+
+    #endregion
+
+    #region Button Clicks
 
     private async void Control_TransferTab_Button_Reset_Click()
     {
         try
         {
-            AppLogger.Log("Inventory Reset button clicked.");
+            ApplicationLog.Log("Inventory Reset button clicked.");
             Control_TransferTab_ComboBox_Operation.Visible = false;
             Control_TransferTab_ComboBox_Part.Visible = false;
             Control_TransferTab_ComboBox_ToLocation.Visible = false;
@@ -86,9 +164,9 @@ public partial class ControlTransferTab : UserControl
             Control_TransferTab_DataGridView_Main.DataSource = null;
             Control_TransferTab_DataGridView_Main.Rows.Clear();
             Control_TransferTab_DataGridView_Main.Refresh();
-            await ComboBoxHelpers.FillComboBoxAsync(
+            await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_part_ids_Get_All",
-                new MySqlConnection(WipAppVariables.ConnectionString),
+                new MySqlConnection(Core_WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
                 new DataTable(),
                 Control_TransferTab_ComboBox_Part,
@@ -96,9 +174,9 @@ public partial class ControlTransferTab : UserControl
                 "ID",
                 "[ Enter Part ID ]",
                 CommandType.StoredProcedure);
-            await ComboBoxHelpers.FillComboBoxAsync(
+            await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
-                new MySqlConnection(WipAppVariables.ConnectionString),
+                new MySqlConnection(Core_WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
                 new DataTable(),
                 Control_TransferTab_ComboBox_Operation,
@@ -106,9 +184,9 @@ public partial class ControlTransferTab : UserControl
                 "Operation",
                 "[ Enter Op # ]",
                 CommandType.StoredProcedure);
-            await ComboBoxHelpers.FillComboBoxAsync(
+            await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_locations_Get_All",
-                new MySqlConnection(WipAppVariables.ConnectionString),
+                new MySqlConnection(Core_WipAppVariables.ConnectionString),
                 new MySqlDataAdapter(),
                 new DataTable(),
                 Control_TransferTab_ComboBox_ToLocation,
@@ -131,69 +209,8 @@ public partial class ControlTransferTab : UserControl
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_Button_Reset");
-        }
-    }
-
-    private async Task Control_TransferTab_LoadData_ComboBoxes_Async()
-    {
-        try
-        {
-            await using var connection = new MySqlConnection(WipAppVariables.ConnectionString);
-            var comboBoxSets = new[]
-            {
-                (new MySqlDataAdapter(), new DataTable(), Control_TransferTab_ComboBox_Part, "md_part_ids_Get_All",
-                    "Item Number", "ID", "[ Enter Part ID ]", CommandType.StoredProcedure),
-                (new MySqlDataAdapter(), new DataTable(), Control_TransferTab_ComboBox_Operation,
-                    "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
-                    CommandType.StoredProcedure),
-                (new MySqlDataAdapter(), new DataTable(), Control_TransferTab_ComboBox_ToLocation,
-                    "md_locations_Get_All", "Location", "Location", "[ Enter Location ]", CommandType.StoredProcedure)
-            };
-            foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await ComboBoxHelpers.FillComboBoxAsync(
-                    procName, connection, adapter, table, comboBox, display, value, placeholder, cmdType);
-            AppLogger.Log("Transfer tab ComboBoxes loaded.");
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true,
-                "MainForm_LoadTransferTabComboBoxesAsync");
-        }
-    }
-
-    private async Task Control_TransferTab_OnStartup_LoadComboBoxes()
-    {
-        try
-        {
-            await Control_TransferTab_LoadData_ComboBoxes_Async();
-            Control_TransferTab_OnStartup_WireUpEvents();
-            AppLogger.Log("Initial setup of ComboBoxes in the Inventory Tab.");
-            MainFormTabResetHelper.ResetTransferTab(
-                Control_TransferTab_ComboBox_Part,
-                Control_TransferTab_ComboBox_Operation,
-                Control_TransferTab_Button_Search,
-                Control_TransferTab_Button_Transfer);
-            Control_TransferTab_ComboBox_Operation.Visible = true;
-            Control_TransferTab_ComboBox_Part.Visible = true;
-            try
-            {
-                WipAppVariables.UserFullName = await UserDao.GetUserFullNameAsync(WipAppVariables.User, true);
-                AppLogger.Log($"User full name loaded: {WipAppVariables.UserFullName}");
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogApplicationError(ex);
-                await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true,
-                    "Control_TransferTab_OnStartup_GetUserFullName");
-            }
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "Control_TransferTab_OnStartup");
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_Button_Reset");
         }
     }
 
@@ -201,7 +218,7 @@ public partial class ControlTransferTab : UserControl
     {
         try
         {
-            AppLogger.Log("TransferTab Search button clicked.");
+            ApplicationLog.Log("TransferTab Search button clicked.");
             var partId = Control_TransferTab_ComboBox_Part.Text;
             var op = Control_TransferTab_ComboBox_Operation.Text;
             if (string.IsNullOrWhiteSpace(partId) || Control_TransferTab_ComboBox_Part.SelectedIndex <= 0)
@@ -216,24 +233,24 @@ public partial class ControlTransferTab : UserControl
             if (Control_TransferTab_ComboBox_Operation.SelectedIndex > 0 &&
                 Control_TransferTab_ComboBox_Operation.Text != @"[ Enter Op # ]")
             {
-                AppLogger.Log($"Searching inventory for Part ID: {partId} and Operation: {op}");
-                results = await InventoryDao.GetInventoryByPartIdAndOperationAsync(partId, op, true);
+                ApplicationLog.Log($"Searching inventory for Part ID: {partId} and Operation: {op}");
+                results = await Dao_Inventory.GetInventoryByPartIdAndOperationAsync(partId, op, true);
             }
             else
             {
-                AppLogger.Log($"Searching inventory for Part ID: {partId} without specific operation.");
-                results = await InventoryDao.GetInventoryByPartIdAsync(partId, true);
+                ApplicationLog.Log($"Searching inventory for Part ID: {partId} without specific operation.");
+                results = await Dao_Inventory.GetInventoryByPartIdAsync(partId, true);
             }
 
             Control_TransferTab_DataGridView_Main.DataSource = results;
             Control_TransferTab_DataGridView_Main.ClearSelection();
             foreach (DataGridViewColumn column in Control_TransferTab_DataGridView_Main.Columns)
                 column.Visible = true;
-            DgvDesigner.ApplyThemeToDataGridView(
+            Core_DgvDesigner.ApplyThemeToDataGridView(
                 Control_TransferTab_DataGridView_Main,
-                AppThemes.GetTheme(WipAppVariables.WipDataGridTheme ?? "Default (Black and White)")
+                Core_AppThemes.GetTheme(Core_WipAppVariables.WipDataGridTheme ?? "Default (Black and White)")
             );
-            DgvDesigner.SizeDataGrid(Control_TransferTab_DataGridView_Main);
+            Core_DgvDesigner.SizeDataGrid(Control_TransferTab_DataGridView_Main);
             Control_TransferTab_Image_NothingFound.Visible = results.Rows.Count == 0;
             if (Control_TransferTab_DataGridView_Main.Rows.Count > 0)
             {
@@ -243,8 +260,8 @@ public partial class ControlTransferTab : UserControl
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true,
+            ApplicationLog.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                 "Control_TransferTab_Button_Search_Click");
         }
     }
@@ -269,82 +286,110 @@ public partial class ControlTransferTab : UserControl
                 return;
             }
 
-            var sb = new StringBuilder();
-            foreach (DataGridViewRow row in selectedRows)
-                if (row.DataBoundItem is DataRowView drv)
-                {
-                    var batchNumber = drv["Batch Number"]?.ToString() ?? "";
-                    var partId = drv["PartID"]?.ToString() ?? "";
-                    var operation = drv["Operation"]?.ToString() ?? "";
-                    var quantityStr = drv["Quantity"]?.ToString() ?? "";
-                    sb.AppendLine($"Batch: {batchNumber}, PartID: {partId}, Op: {operation}, Qty: {quantityStr}");
-                }
-
-            var confirmResult = MessageBox.Show(
-                $@"The following items will be transferred to '{Control_TransferTab_ComboBox_ToLocation.Text}':{Environment.NewLine}{Environment.NewLine}{sb}
-Are you sure?",
-                @"Confirm Transfer",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-            if (confirmResult != DialogResult.Yes)
-                return;
-            var newLocation = Control_TransferTab_ComboBox_ToLocation.Text;
-            var user = WipAppVariables.User ?? Environment.UserName;
-            foreach (DataGridViewRow row in selectedRows)
-            {
-                if (row.DataBoundItem is not DataRowView drv)
-                    continue;
-                var batchNumber = drv["Batch Number"]?.ToString() ?? "";
-                var partId = drv["PartID"]?.ToString() ?? "";
-                var operation = drv["Operation"]?.ToString() ?? "";
-                var quantityStr = drv["Quantity"]?.ToString() ?? "";
-                int.TryParse(quantityStr, out var originalQuantity);
-                var transferQuantity = selectedRows.Count == 1
-                    ? Math.Min((int)Control_TransferTab_NumericUpDown_Quantity.Value, originalQuantity)
-                    : originalQuantity;
-                // If more than one row is selected, set batchNumber to empty string
-                var batchNumberForTransfer = selectedRows.Count > 1 ? "" : batchNumber;
-                if (transferQuantity < originalQuantity && selectedRows.Count == 1)
-                    await InventoryDao.TransferInventoryQuantityAsync(
-                        batchNumber, partId, operation, transferQuantity, originalQuantity, newLocation, user);
-                else
-                    await InventoryDao.TransferPartSimpleAsync(
-                        batchNumberForTransfer, partId, operation, quantityStr, newLocation);
-                await HistoryDao.AddTransactionHistoryAsync(new TransactionHistory
-                {
-                    TransactionType = "TRANSFER",
-                    PartId = partId,
-                    FromLocation = drv["Location"]?.ToString() ?? "",
-                    ToLocation = newLocation,
-                    Operation = operation,
-                    Quantity = transferQuantity,
-                    Notes = "",
-                    User = user,
-                    ItemType = drv.Row.Table.Columns.Contains("ItemType") ? drv["ItemType"]?.ToString() ?? "" : "",
-                    BatchNumber = batchNumberForTransfer,
-                    DateTime = DateTime.Now
-                });
-            }
+            if (selectedRows.Count == 1)
+                await TransferSingleRowAsync(selectedRows[0]);
+            else
+                await TransferMultipleRowsAsync(selectedRows);
 
             Control_TransferTab_Button_Search_Click(null, null);
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true,
+            ApplicationLog.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                 "Control_TransferTab_Button_Transfer_Click");
         }
     }
+
+    #endregion
+
+    #region Transfer Logic
+
+    private async Task TransferSingleRowAsync(DataGridViewRow row)
+    {
+        if (row.DataBoundItem is not DataRowView drv)
+            return;
+        var batchNumber = drv["Batch Number"]?.ToString() ?? "";
+        var partId = drv["PartID"]?.ToString() ?? "";
+        var fromLocation = drv["Location"]?.ToString() ?? "";
+        var itemType = drv.Row.Table.Columns.Contains("ItemType") ? drv["ItemType"]?.ToString() ?? "" : "";
+        var notes = drv["Notes"]?.ToString() ?? "";
+        var operation = drv["Operation"]?.ToString() ?? "";
+        var quantityStr = drv["Quantity"]?.ToString() ?? "";
+        int.TryParse(quantityStr, out var originalQuantity);
+        var transferQuantity = Math.Min((int)Control_TransferTab_NumericUpDown_Quantity.Value, originalQuantity);
+        var newLocation = Control_TransferTab_ComboBox_ToLocation.Text;
+        var user = Core_WipAppVariables.User ?? Environment.UserName;
+        if (transferQuantity < originalQuantity)
+            await Dao_Inventory.TransferInventoryQuantityAsync(
+                batchNumber, partId, operation, transferQuantity, originalQuantity, newLocation, user);
+        else
+            await Dao_Inventory.TransferPartSimpleAsync(
+                batchNumber, partId, operation, quantityStr, newLocation);
+        await Dao_History.AddTransactionHistoryAsync(new Model_TransactionHistory
+        {
+            TransactionType = "TRANSFER",
+            PartId = partId,
+            FromLocation = fromLocation,
+            ToLocation = newLocation,
+            Operation = operation,
+            Quantity = transferQuantity,
+            Notes = notes,
+            User = user,
+            ItemType = itemType,
+            BatchNumber = batchNumber,
+            DateTime = DateTime.Now
+        });
+    }
+
+    private async Task TransferMultipleRowsAsync(DataGridViewSelectedRowCollection selectedRows)
+    {
+        var newLocation = Control_TransferTab_ComboBox_ToLocation.Text;
+        var user = Core_WipAppVariables.User ?? Environment.UserName;
+        foreach (DataGridViewRow row in selectedRows)
+        {
+            if (row.DataBoundItem is not DataRowView drv) continue;
+            var batchNumber = drv["Batch Number"]?.ToString() ?? "";
+            var partId = drv["PartID"]?.ToString() ?? "";
+            var fromLocation = drv["Location"]?.ToString() ?? "";
+            var itemType = drv.Row.Table.Columns.Contains("ItemType") ? drv["ItemType"]?.ToString() ?? "" : "";
+            var operation = drv["Operation"]?.ToString() ?? "";
+            var quantityStr = drv["Quantity"]?.ToString() ?? "";
+            var notes = drv["Notes"]?.ToString() ?? "";
+            int.TryParse(quantityStr, out var originalQuantity);
+            var transferQuantity = Math.Min((int)Control_TransferTab_NumericUpDown_Quantity.Value, originalQuantity);
+            await Dao_Inventory.TransferPartSimpleAsync(
+                batchNumber, partId, operation, quantityStr, newLocation);
+            await Dao_History.AddTransactionHistoryAsync(new Model_TransactionHistory
+            {
+                TransactionType = "TRANSFER",
+                PartId = partId,
+                FromLocation = fromLocation,
+                ToLocation = newLocation,
+                Operation = operation,
+                Quantity = transferQuantity,
+                Notes = notes,
+                User = user,
+                ItemType = itemType,
+                BatchNumber = batchNumber,
+                DateTime = DateTime.Now
+            });
+        }
+    }
+
+    #endregion
+
+    #region ComboBox & UI Events
 
     private void Control_TransferTab_ComboBox_Operation_SelectedIndexChanged()
     {
         try
         {
-            AppLogger.Log("Inventory Op ComboBox selection changed.");
+            ApplicationLog.Log("Inventory Op ComboBox selection changed.");
             if (Control_TransferTab_ComboBox_Operation.SelectedIndex > 0)
             {
                 Control_TransferTab_ComboBox_Operation.ForeColor = Color.Black;
-                WipAppVariables.Operation = Control_TransferTab_ComboBox_Operation.Text;
+                Core_WipAppVariables.Operation = Control_TransferTab_ComboBox_Operation.Text;
             }
             else
             {
@@ -352,13 +397,13 @@ Are you sure?",
                 if (Control_TransferTab_ComboBox_Operation.SelectedIndex != 0 &&
                     Control_TransferTab_ComboBox_Operation.Items.Count > 0)
                     Control_TransferTab_ComboBox_Operation.SelectedIndex = 0;
-                WipAppVariables.Operation = null;
+                Core_WipAppVariables.Operation = null;
             }
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Op");
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Op");
         }
     }
 
@@ -366,11 +411,11 @@ Are you sure?",
     {
         try
         {
-            AppLogger.Log("Inventory Part ComboBox selection changed.");
+            ApplicationLog.Log("Inventory Part ComboBox selection changed.");
             if (Control_TransferTab_ComboBox_Part.SelectedIndex > 0)
             {
                 Control_TransferTab_ComboBox_Part.ForeColor = Color.Black;
-                WipAppVariables.PartId = Control_TransferTab_ComboBox_Part.Text;
+                Core_WipAppVariables.PartId = Control_TransferTab_ComboBox_Part.Text;
             }
             else
             {
@@ -378,13 +423,13 @@ Are you sure?",
                 if (Control_TransferTab_ComboBox_Part.SelectedIndex != 0 &&
                     Control_TransferTab_ComboBox_Part.Items.Count > 0)
                     Control_TransferTab_ComboBox_Part.SelectedIndex = 0;
-                WipAppVariables.PartId = null;
+                Core_WipAppVariables.PartId = null;
             }
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Part");
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Part");
         }
     }
 
@@ -425,8 +470,9 @@ Are you sure?",
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "Control_TransferTab_Update_ButtonStates");
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
+                "Control_TransferTab_Update_ButtonStates");
         }
     }
 
@@ -456,7 +502,7 @@ Are you sure?",
             Control_TransferTab_ComboBox_Part.Leave += (s, e) =>
             {
                 Control_TransferTab_ComboBox_Part.BackColor = SystemColors.Window;
-                ComboBoxHelpers.ValidateComboBoxItem(Control_TransferTab_ComboBox_Part, "[ Enter Part ID ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_Part, "[ Enter Part ID ]");
             };
             Control_TransferTab_ComboBox_Operation.Enter += (s, e) =>
             {
@@ -465,7 +511,7 @@ Are you sure?",
             Control_TransferTab_ComboBox_Operation.Leave += (s, e) =>
             {
                 Control_TransferTab_ComboBox_Operation.BackColor = SystemColors.Window;
-                ComboBoxHelpers.ValidateComboBoxItem(Control_TransferTab_ComboBox_Operation, "[ Enter Op # ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_Operation, "[ Enter Op # ]");
             };
             Control_TransferTab_ComboBox_ToLocation.Enter += (s, e) =>
             {
@@ -474,7 +520,7 @@ Are you sure?",
             Control_TransferTab_ComboBox_ToLocation.Leave += (s, e) =>
             {
                 Control_TransferTab_ComboBox_ToLocation.BackColor = SystemColors.Window;
-                ComboBoxHelpers.ValidateComboBoxItem(Control_TransferTab_ComboBox_ToLocation, "[ Enter Location ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_ToLocation, "[ Enter Location ]");
             };
             Control_TransferTab_DataGridView_Main.SelectionChanged +=
                 (s, e) => Control_TransferTab_Update_ButtonStates();
@@ -482,12 +528,12 @@ Are you sure?",
                 Control_TransferTab_DataGridView_Main_SelectionChanged;
             Control_TransferTab_Button_Transfer.Click +=
                 async (s, e) => await Control_TransferTab_Button_Save_ClickAsync(s, e);
-            AppLogger.Log("Transfer tab events wired up.");
+            ApplicationLog.Log("Transfer tab events wired up.");
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_WireUpTransferTabEvents");
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_WireUpTransferTabEvents");
         }
     }
 
@@ -516,7 +562,7 @@ Are you sure?",
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
+            ApplicationLog.LogApplicationError(ex);
         }
     }
 
@@ -530,6 +576,10 @@ Are you sure?",
             Control_TransferTab_Button_Toggle_RightPanel.ForeColor = panelCollapsed ? Color.Green : Color.Red;
         }
 
-        ComboBoxHelpers.DeselectAllComboBoxText(this);
+        Helper_ComboBoxes.DeselectAllComboBoxText(this);
     }
+
+    #endregion
 }
+
+#endregion

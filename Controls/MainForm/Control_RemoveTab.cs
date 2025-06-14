@@ -7,32 +7,34 @@ using MTM_WIP_Application.Forms.AdvancedInventoryEntryForm;
 using MTM_WIP_Application.Forms.MainForm.Classes;
 using MTM_WIP_Application.Helpers;
 using MTM_WIP_Application.Logging;
-using MTM_WIP_Application.Models;
 using MTM_WIP_Application.Services;
+using MTM_WIP_Application.Models;
 using MySql.Data.MySqlClient;
+using static System.Int32;
 
 namespace MTM_WIP_Application.Controls.MainForm;
+
+#region RemoveTab
 
 public partial class ControlRemoveTab : UserControl
 {
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
 
-    private List<HistoryRemove> _lastRemovedItems = new();
+    private readonly List<Model_HistoryRemove> _lastRemovedItems = [];
+
+    #region Initialization
 
     public ControlRemoveTab()
     {
         InitializeComponent();
         Control_RemoveTab_Initialize();
-
-        ComboBoxHelpers.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Part);
-        ComboBoxHelpers.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Operation);
-
+        Helper_ComboBoxes.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Part);
+        Helper_ComboBoxes.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Operation);
         Control_RemoveTab_ComboBox_Part.ForeColor = Color.Red;
         Control_RemoveTab_ComboBox_Operation.ForeColor = Color.Red;
         Control_RemoveTab_Image_NothingFound.Visible = false;
-        _ = Control_RemoveTab_OnStartup_LoadComboBoxes();
-
+        _ = Control_RemoveTab_OnStartup_LoadComboBoxesAsync();
         if (Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] == null)
         {
             var undoButton = new Button
@@ -55,244 +57,17 @@ public partial class ControlRemoveTab : UserControl
         Control_RemoveTab_Button_Reset.TabStop = false;
     }
 
-    private static void Control_RemoveTab_Button_AdvancedItemRemoval_Click()
+    #endregion
+
+    #region Startup / ComboBox Loading
+
+    private async Task Control_RemoveTab_OnStartup_LoadComboBoxesAsync()
     {
         try
         {
-            if (VersionCheckerService.MainFormInstance == null)
-            {
-                AppLogger.Log("MainForm instance is null, cannot open Advanced Inventory Removal.");
-                return;
-            }
-
-            // var advancedEntryForm = new AdvancedInventoryEntryForm();
-            // advancedEntryForm.ShowDialog(VersionCheckerService.MainFormInstance);
-            // AppLogger.Log("Inventory Advanced Removal button clicked.");
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false,
-                "Control_RemoveTab_Button_AdvancedItemRemoval_Click");
-        }
-    }
-
-    private List<(string PartID, string Location, int Quantity)> GetSelectedItemsToDelete(out string summary)
-    {
-        var sb = new StringBuilder();
-        var itemsToDelete = new List<(string PartID, string Location, int Quantity)>();
-        foreach (DataGridViewRow row in Control_RemoveTab_DataGridView_Main.SelectedRows)
-            if (row.DataBoundItem is DataRowView drv)
-            {
-                var partId = drv["PartID"]?.ToString() ?? "";
-                var location = drv["Location"]?.ToString() ?? "";
-                var quantity = 0;
-                int.TryParse(drv["Quantity"]?.ToString(), out quantity);
-
-                sb.AppendLine($"PartID: {partId}, Location: {location}, Quantity: {quantity}");
-                AppLogger.Log($"Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
-                System.Diagnostics.Debug.WriteLine(
-                    $"[DEBUG] Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
-
-                itemsToDelete.Add((partId, location, quantity));
-            }
-
-        summary = sb.ToString();
-        return itemsToDelete;
-    }
-
-    private async void Control_RemoveTab_Button_Delete_Click(object? sender, EventArgs? e)
-    {
-        try
-        {
-            var selectedCount = Control_RemoveTab_DataGridView_Main.SelectedRows.Count;
-            AppLogger.Log($"Delete clicked. Selected rows: {selectedCount}");
-            System.Diagnostics.Debug.WriteLine($"[DEBUG] Delete clicked. Selected rows: {selectedCount}");
-
-            if (selectedCount == 0)
-            {
-                AppLogger.Log("No rows selected for deletion.");
-                System.Diagnostics.Debug.WriteLine("[DEBUG] No rows selected for deletion.");
-                return;
-            }
-
-            string summary;
-            var itemsToDelete = GetSelectedItemsToDelete(out summary);
-
-            var confirmResult = MessageBox.Show(
-                $@"The following items will be deleted:
-
-{summary}
-Are you sure?",
-                @"Confirm Deletion",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning);
-
-            if (confirmResult != DialogResult.Yes)
-            {
-                AppLogger.Log("User cancelled deletion.");
-                System.Diagnostics.Debug.WriteLine("[DEBUG] User cancelled deletion.");
-                return;
-            }
-
-            _lastRemovedItems.Clear();
-
-            foreach (DataGridViewRow row in Control_RemoveTab_DataGridView_Main.SelectedRows)
-                if (row.DataBoundItem is DataRowView drv)
-                {
-                    var partId = drv.DataView.Table.Columns.Contains("PartID") ? drv["PartID"]?.ToString() ?? "" : "";
-                    var location = drv.DataView.Table.Columns.Contains("Location")
-                        ? drv["Location"]?.ToString() ?? ""
-                        : "";
-                    var quantity = drv.DataView.Table.Columns.Contains("Quantity")
-                        ? Convert.ToInt32(drv["Quantity"])
-                        : 0;
-                    var operation = drv.DataView.Table.Columns.Contains("Operation")
-                        ? drv["Operation"]?.ToString() ?? ""
-                        : "";
-                    var batchNumber = drv.DataView.Table.Columns.Contains("Batch Number")
-                        ? drv["Batch Number"]?.ToString() ?? ""
-                        : "";
-                    var itemType = drv.DataView.Table.Columns.Contains("Item Type")
-                        ? drv["Item Type"]?.ToString() ?? ""
-                        : "";
-                    var receivedDate = drv.DataView.Table.Columns.Contains("Received Date")
-                        ? Convert.ToDateTime(drv["Received Date"])
-                        : DateTime.MinValue;
-                    var lastUpdate = drv.DataView.Table.Columns.Contains("Update Date")
-                        ? Convert.ToDateTime(drv["Update Date"])
-                        : DateTime.MinValue;
-                    var user = drv.DataView.Table.Columns.Contains("User")
-                        ? drv["User"]?.ToString() ?? " [ Nothing Entered ] "
-                        : " [ Nothing Entered ] ";
-                    var notes = drv.DataView.Table.Columns.Contains("Notes") ? drv["Notes"]?.ToString() ?? "" : "";
-
-                    _lastRemovedItems.Add(new HistoryRemove
-                    {
-                        PartId = partId,
-                        Location = location,
-                        Operation = operation,
-                        Quantity = quantity,
-                        ItemType = itemType,
-                        ReceiveDate = receivedDate,
-                        LastUpdated = lastUpdate,
-                        User = user,
-                        BatchNumber = batchNumber,
-                        Notes = notes
-                    });
-
-                    AppLogger.Log(
-                        $"Deleting: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
-                    System.Diagnostics.Debug.WriteLine(
-                        $"[DEBUG] Deleting: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
-
-                    await InventoryDao.DeleteInventoryByPartIdLocationOperationQuantityAsync(
-                        partId,
-                        location,
-                        operation,
-                        quantity: quantity,
-                        batchNumber: batchNumber
-                    );
-
-                    AppLogger.Log(
-                        $"Deleted: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
-                    System.Diagnostics.Debug.WriteLine(
-                        $"[DEBUG] Deleted: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
-                }
-
-            var undoBtn = Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] as Button;
-            if (_lastRemovedItems.Count > 0 && undoBtn != null)
-                undoBtn.Enabled = true;
-
-            AppLogger.Log("Selected inventory items deleted.");
-            System.Diagnostics.Debug.WriteLine("[DEBUG] Selected inventory items deleted.");
-
-            Control_RemoveTab_Button_Search_Click(null, null);
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            System.Diagnostics.Debug.WriteLine($"[DEBUG] Exception: {ex}");
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "Control_RemoveTab_Button_Delete_Click");
-        }
-    }
-
-    private async void Control_RemoveTab_Button_Undo_Click(object? sender, EventArgs? e)
-    {
-        if (_lastRemovedItems.Count == 0)
-            return;
-
-        try
-        {
-            foreach (var item in _lastRemovedItems)
-                await InventoryDao.AddInventoryItemAsync(
-                    item.PartId,
-                    item.Location,
-                    item.Operation,
-                    item.Quantity,
-                    item.ItemType,
-                    item.User,
-                    item.BatchNumber,
-                    "Removal reversed via Undo Button.",
-                    true
-                );
-
-            MessageBox.Show("Undo successful. Removed items have been restored.", "Undo", MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-            AppLogger.Log("Undo: Removed items restored.");
-
-            _lastRemovedItems.Clear();
-            var undoBtn = Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] as Button;
-            if (undoBtn != null)
-                undoBtn.Enabled = false;
-
-            Control_RemoveTab_Button_Search_Click(null, null);
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            MessageBox.Show("Undo failed: " + ex.Message, "Undo Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-
-    private async void Control_RemoveTab_Button_Reset_Click()
-    {
-        try
-        {
-            AppLogger.Log("Inventory Reset button clicked.");
-            Control_RemoveTab_ComboBox_Operation.Visible = false;
-            Control_RemoveTab_ComboBox_Part.Visible = false;
-            Control_RemoveTab_Image_NothingFound.Visible = false;
-
-            // Clear the DataGridView
-            Control_RemoveTab_DataGridView_Main.DataSource = null;
-            Control_RemoveTab_DataGridView_Main.Rows.Clear();
-
-            await ComboBoxHelpers.FillComboBoxAsync(
-                "md_part_ids_Get_All",
-                new MySqlConnection(WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                Control_RemoveTab_ComboBox_Part,
-                "Item Number",
-                "ID",
-                "[ Enter Part ID ]",
-                CommandType.StoredProcedure);
-
-            await ComboBoxHelpers.FillComboBoxAsync(
-                "md_operation_numbers_Get_All",
-                new MySqlConnection(WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                Control_RemoveTab_ComboBox_Operation,
-                "Operation",
-                "Operation",
-                "[ Enter Op # ]",
-                CommandType.StoredProcedure);
-
-            MainFormControlHelper.ResetComboBox(Control_RemoveTab_ComboBox_Part, Color.Red, 0);
-            MainFormControlHelper.ResetComboBox(Control_RemoveTab_ComboBox_Operation, Color.Red, 0);
-
+            await Control_RemoveTab_OnStartup_LoadDataComboBoxesAsync();
+            Control_RemoveTab_OnStartup_WireUpEvents();
+            ApplicationLog.Log("Initial setup of ComboBoxes in the Remove Tab.");
             if (MainFormInstance != null)
                 MainFormTabResetHelper.ResetRemoveTab(
                     Control_RemoveTab_ComboBox_Part,
@@ -300,77 +75,33 @@ Are you sure?",
                     Control_RemoveTab_Button_Search,
                     Control_RemoveTab_Button_Delete
                 );
-
             Control_RemoveTab_ComboBox_Operation.Visible = true;
             Control_RemoveTab_ComboBox_Part.Visible = true;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_Button_Reset");
-        }
-    }
-
-    private void Control_RemoveTab_ComboBox_Operation_SelectedIndexChanged()
-    {
-        try
-        {
-            AppLogger.Log("Inventory Op ComboBox selection changed.");
-
-            if (Control_RemoveTab_ComboBox_Operation.SelectedIndex > 0)
+            try
             {
-                Control_RemoveTab_ComboBox_Operation.ForeColor = Color.Black;
-                WipAppVariables.Operation = Control_RemoveTab_ComboBox_Operation.Text;
+                Core_WipAppVariables.UserFullName =
+                    await Dao_User.GetUserFullNameAsync(Core_WipAppVariables.User, true);
+                ApplicationLog.Log($"User full name loaded: {Core_WipAppVariables.UserFullName}");
             }
-            else
+            catch (Exception ex)
             {
-                Control_RemoveTab_ComboBox_Operation.ForeColor = Color.Red;
-                if (Control_RemoveTab_ComboBox_Operation.SelectedIndex != 0 &&
-                    Control_RemoveTab_ComboBox_Operation.Items.Count > 0)
-                    Control_RemoveTab_ComboBox_Operation.SelectedIndex = 0;
-                WipAppVariables.Operation = null;
+                ApplicationLog.LogApplicationError(ex);
+                await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
+                    new StringBuilder().Append("Control_RemoveTab_OnStartup_GetUserFullName").ToString());
             }
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Op");
+            ApplicationLog.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "Control_RemoveTab_OnStartup");
         }
     }
 
-    private void Control_RemoveTab_ComboBox_Part_SelectedIndexChanged()
+    private async Task Control_RemoveTab_OnStartup_LoadDataComboBoxesAsync()
     {
         try
         {
-            AppLogger.Log("Inventory Part ComboBox selection changed.");
-
-            if (Control_RemoveTab_ComboBox_Part.SelectedIndex > 0)
-            {
-                Control_RemoveTab_ComboBox_Part.ForeColor = Color.Black;
-                WipAppVariables.PartId = Control_RemoveTab_ComboBox_Part.Text;
-            }
-            else
-            {
-                Control_RemoveTab_ComboBox_Part.ForeColor = Color.Red;
-                if (Control_RemoveTab_ComboBox_Part.SelectedIndex != 0 &&
-                    Control_RemoveTab_ComboBox_Part.Items.Count > 0)
-                    Control_RemoveTab_ComboBox_Part.SelectedIndex = 0;
-                WipAppVariables.PartId = null;
-            }
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Part");
-        }
-    }
-
-    private async Task Control_RemoveTab_LoadData_ComboBoxes_Async()
-    {
-        try
-        {
-            await using var connection = new MySqlConnection(WipAppVariables.ConnectionString);
-
+            await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
             var comboBoxSets =
                 new (MySqlDataAdapter Adapter, DataTable Table, ComboBox ComboBox, string ProcName, string Display,
                     string Value, string Placeholder, CommandType CommandType)[]
@@ -382,9 +113,8 @@ Are you sure?",
                             "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
                             CommandType.StoredProcedure)
                     };
-
             foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await ComboBoxHelpers.FillComboBoxAsync(
+                await Helper_ComboBoxes.FillComboBoxAsync(
                     procName,
                     connection,
                     adapter,
@@ -395,51 +125,19 @@ Are you sure?",
                     placeholder,
                     cmdType
                 );
-            AppLogger.Log("Remove tab ComboBoxes loaded.");
+            ApplicationLog.Log("Remove tab ComboBoxes loaded.");
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true,
+            ApplicationLog.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                 "MainForm_LoadRemoveTabComboBoxesAsync");
         }
     }
 
-    private async Task Control_RemoveTab_OnStartup_LoadComboBoxes()
-    {
-        try
-        {
-            await Control_RemoveTab_LoadData_ComboBoxes_Async();
-            Control_RemoveTab_OnStartup_WireUpEvents();
-            AppLogger.Log("Initial setup of ComboBoxes in the Remove Tab.");
-            if (MainFormInstance != null)
-                MainFormTabResetHelper.ResetRemoveTab(
-                    Control_RemoveTab_ComboBox_Part,
-                    Control_RemoveTab_ComboBox_Operation,
-                    Control_RemoveTab_Button_Search,
-                    Control_RemoveTab_Button_Delete
-                );
-            Control_RemoveTab_ComboBox_Operation.Visible = true;
-            Control_RemoveTab_ComboBox_Part.Visible = true;
+    #endregion
 
-            try
-            {
-                WipAppVariables.UserFullName = await UserDao.GetUserFullNameAsync(WipAppVariables.User, true);
-                AppLogger.Log($"User full name loaded: {WipAppVariables.UserFullName}");
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogApplicationError(ex);
-                await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true,
-                    new StringBuilder().Append("Control_RemoveTab_OnStartup_GetUserFullName").ToString());
-            }
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "Control_RemoveTab_OnStartup");
-        }
-    }
+    #region Key Processing
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
@@ -475,9 +173,353 @@ Are you sure?",
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_ProcessCmdKey");
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_ProcessCmdKey");
             return false;
+        }
+    }
+
+    #endregion
+
+    #region Button Clicks
+
+    private async void Control_RemoveTab_Button_Delete_Click(object? sender, EventArgs? e)
+    {
+        try
+        {
+            var selectedCount = Control_RemoveTab_DataGridView_Main.SelectedRows.Count;
+            ApplicationLog.Log($"Delete clicked. Selected rows: {selectedCount}");
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] Delete clicked. Selected rows: {selectedCount}");
+
+            if (selectedCount == 0)
+            {
+                ApplicationLog.Log("No rows selected for deletion.");
+                System.Diagnostics.Debug.WriteLine("[DEBUG] No rows selected for deletion.");
+                return;
+            }
+
+            string summary;
+            var itemsToDelete = GetSelectedItemsToDelete(out summary);
+
+            var confirmResult = MessageBox.Show(
+                $@"The following items will be deleted:
+
+{summary}
+Are you sure?",
+                @"Confirm Deletion",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (confirmResult != DialogResult.Yes)
+            {
+                ApplicationLog.Log("User cancelled deletion.");
+                System.Diagnostics.Debug.WriteLine("[DEBUG] User cancelled deletion.");
+                return;
+            }
+
+            _lastRemovedItems.Clear();
+
+            foreach (DataGridViewRow row in Control_RemoveTab_DataGridView_Main.SelectedRows)
+                if (row.DataBoundItem is DataRowView drv)
+                {
+                    var partId = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("PartID")
+                        ? drv["PartID"]?.ToString() ?? ""
+                        : "";
+                    var location = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Location")
+                        ? drv["Location"]?.ToString() ?? ""
+                        : "";
+                    var quantity = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Quantity")
+                        ? Convert.ToInt32(drv["Quantity"])
+                        : 0;
+                    var operation = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Operation")
+                        ? drv["Operation"]?.ToString() ?? ""
+                        : "";
+                    var batchNumber = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Batch Number")
+                        ? drv["Batch Number"]?.ToString() ?? ""
+                        : "";
+                    var itemType = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Item Type")
+                        ? drv["Item Type"]?.ToString() ?? ""
+                        : "";
+                    var receivedDate =
+                        drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Received Date")
+                            ? Convert.ToDateTime(drv["Received Date"])
+                            : DateTime.MinValue;
+                    var lastUpdate = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Update Date")
+                        ? Convert.ToDateTime(drv["Update Date"])
+                        : DateTime.MinValue;
+                    var user = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("User")
+                        ? drv["User"]?.ToString() ?? " [ Nothing Entered ] "
+                        : " [ Nothing Entered ] ";
+                    var notes = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Notes")
+                        ? drv["Notes"]?.ToString() ?? ""
+                        : "";
+
+                    _lastRemovedItems.Add(new Model_HistoryRemove
+                    {
+                        PartId = partId,
+                        Location = location,
+                        Operation = operation,
+                        Quantity = quantity,
+                        ItemType = itemType,
+                        ReceiveDate = receivedDate,
+                        LastUpdated = lastUpdate,
+                        User = user,
+                        BatchNumber = batchNumber,
+                        Notes = notes
+                    });
+
+                    ApplicationLog.Log(
+                        $"Deleting: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[DEBUG] Deleting: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
+
+                    await Dao_Inventory.DeleteInventoryByPartIdLocationOperationQuantityAsync(
+                        partId,
+                        location,
+                        operation,
+                        quantity: quantity,
+                        batchNumber: batchNumber
+                    );
+
+                    ApplicationLog.Log(
+                        $"Deleted: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[DEBUG] Deleted: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
+                }
+
+            var undoBtn = Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] as Button;
+            if (_lastRemovedItems.Count > 0 && undoBtn != null)
+                undoBtn.Enabled = true;
+
+            ApplicationLog.Log("Selected inventory items deleted.");
+            System.Diagnostics.Debug.WriteLine("[DEBUG] Selected inventory items deleted.");
+
+            Control_RemoveTab_Button_Search_Click(null, null);
+        }
+        catch (Exception ex)
+        {
+            ApplicationLog.LogApplicationError(ex);
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] Exception: {ex}");
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "Control_RemoveTab_Button_Delete_Click");
+        }
+    }
+
+    private async void Control_RemoveTab_Button_Undo_Click(object? sender, EventArgs? e)
+    {
+        if (_lastRemovedItems.Count == 0)
+            return;
+
+        try
+        {
+            foreach (var item in _lastRemovedItems)
+                await Dao_Inventory.AddInventoryItemAsync(
+                    item.PartId,
+                    item.Location,
+                    item.Operation,
+                    item.Quantity,
+                    item.ItemType,
+                    item.User,
+                    item.BatchNumber,
+                    "Removal reversed via Undo Button.",
+                    true
+                );
+
+            MessageBox.Show("Undo successful. Removed items have been restored.", "Undo", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            ApplicationLog.Log("Undo: Removed items restored.");
+
+            _lastRemovedItems.Clear();
+            var undoBtn = Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] as Button;
+            if (undoBtn != null)
+                undoBtn.Enabled = false;
+
+            Control_RemoveTab_Button_Search_Click(null, null);
+        }
+        catch (Exception ex)
+        {
+            ApplicationLog.LogApplicationError(ex);
+            MessageBox.Show(@"Undo failed: " + ex.Message, @"Undo Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private async void Control_RemoveTab_Button_Reset_Click()
+    {
+        try
+        {
+            ApplicationLog.Log("Inventory Reset button clicked.");
+            Control_RemoveTab_ComboBox_Operation.Visible = false;
+            Control_RemoveTab_ComboBox_Part.Visible = false;
+            Control_RemoveTab_Image_NothingFound.Visible = false;
+
+            // Clear the DataGridView
+            Control_RemoveTab_DataGridView_Main.DataSource = null;
+            Control_RemoveTab_DataGridView_Main.Rows.Clear();
+
+            await Helper_ComboBoxes.FillComboBoxAsync(
+                "md_part_ids_Get_All",
+                new MySqlConnection(Core_WipAppVariables.ConnectionString),
+                new MySqlDataAdapter(),
+                new DataTable(),
+                Control_RemoveTab_ComboBox_Part,
+                "Item Number",
+                "ID",
+                "[ Enter Part ID ]",
+                CommandType.StoredProcedure);
+
+            await Helper_ComboBoxes.FillComboBoxAsync(
+                "md_operation_numbers_Get_All",
+                new MySqlConnection(Core_WipAppVariables.ConnectionString),
+                new MySqlDataAdapter(),
+                new DataTable(),
+                Control_RemoveTab_ComboBox_Operation,
+                "Operation",
+                "Operation",
+                "[ Enter Op # ]",
+                CommandType.StoredProcedure);
+
+            MainFormControlHelper.ResetComboBox(Control_RemoveTab_ComboBox_Part, Color.Red, 0);
+            MainFormControlHelper.ResetComboBox(Control_RemoveTab_ComboBox_Operation, Color.Red, 0);
+
+            if (MainFormInstance != null)
+                MainFormTabResetHelper.ResetRemoveTab(
+                    Control_RemoveTab_ComboBox_Part,
+                    Control_RemoveTab_ComboBox_Operation,
+                    Control_RemoveTab_Button_Search,
+                    Control_RemoveTab_Button_Delete
+                );
+
+            Control_RemoveTab_ComboBox_Operation.Visible = true;
+            Control_RemoveTab_ComboBox_Part.Visible = true;
+        }
+        catch (Exception ex)
+        {
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_Button_Reset");
+        }
+    }
+
+    private static void Control_RemoveTab_Button_AdvancedItemRemoval_Click()
+    {
+        try
+        {
+            if (Service_Timer_VersionChecker.MainFormInstance == null)
+            {
+                ApplicationLog.Log("MainForm instance is null, cannot open Advanced Inventory Removal.");
+                return;
+            }
+
+            // var advancedEntryForm = new AdvancedInventoryEntryForm();
+            // advancedEntryForm.ShowDialog(VersionCheckerService.MainFormInstance);
+            // AppLogger.Log("Inventory Advanced Removal button clicked.");
+        }
+        catch (Exception ex)
+        {
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
+                "Control_RemoveTab_Button_AdvancedItemRemoval_Click");
+        }
+    }
+
+    private async void Control_RemoveTab_Button_Search_Click(object? sender, EventArgs? e)
+    {
+        try
+        {
+            ApplicationLog.Log("RemoveTab Search button clicked.");
+
+            var partId = Control_RemoveTab_ComboBox_Part.Text;
+            var op = Control_RemoveTab_ComboBox_Operation.Text;
+
+            if (string.IsNullOrWhiteSpace(partId) || Control_RemoveTab_ComboBox_Part.SelectedIndex <= 0)
+            {
+                MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                Control_RemoveTab_ComboBox_Part.Focus();
+                return;
+            }
+
+            DataTable results;
+
+            if (!string.IsNullOrWhiteSpace(op) && Control_RemoveTab_ComboBox_Operation.SelectedIndex > 0)
+                results = await Dao_Inventory.GetInventoryByPartIdAndOperationAsync(partId, op, true);
+            else
+                results = await Dao_Inventory.GetInventoryByPartIdAsync(partId, true);
+
+            Control_RemoveTab_DataGridView_Main.DataSource = results;
+            Control_RemoveTab_DataGridView_Main.ClearSelection();
+
+            foreach (DataGridViewColumn column in Control_RemoveTab_DataGridView_Main.Columns)
+                column.Visible = true;
+
+            Core_DgvDesigner.ApplyThemeToDataGridView(
+                Control_RemoveTab_DataGridView_Main,
+                Core_AppThemes.GetTheme(Core_WipAppVariables.WipDataGridTheme ?? "Default (Black and White)")
+            );
+            Core_DgvDesigner.SizeDataGrid(Control_RemoveTab_DataGridView_Main);
+
+            Control_RemoveTab_Image_NothingFound.Visible = results.Rows.Count == 0;
+        }
+        catch (Exception ex)
+        {
+            ApplicationLog.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "Control_RemoveTab_Button_Search_Click");
+        }
+    }
+
+    #endregion
+
+    #region ComboBox & UI Events
+
+    private void Control_RemoveTab_ComboBox_Operation_SelectedIndexChanged()
+    {
+        try
+        {
+            ApplicationLog.Log("Inventory Op ComboBox selection changed.");
+
+            if (Control_RemoveTab_ComboBox_Operation.SelectedIndex > 0)
+            {
+                Control_RemoveTab_ComboBox_Operation.ForeColor = Color.Black;
+                Core_WipAppVariables.Operation = Control_RemoveTab_ComboBox_Operation.Text;
+            }
+            else
+            {
+                Control_RemoveTab_ComboBox_Operation.ForeColor = Color.Red;
+                if (Control_RemoveTab_ComboBox_Operation.SelectedIndex != 0 &&
+                    Control_RemoveTab_ComboBox_Operation.Items.Count > 0)
+                    Control_RemoveTab_ComboBox_Operation.SelectedIndex = 0;
+                Core_WipAppVariables.Operation = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Op");
+        }
+    }
+
+    private void Control_RemoveTab_ComboBox_Part_SelectedIndexChanged()
+    {
+        try
+        {
+            ApplicationLog.Log("Inventory Part ComboBox selection changed.");
+
+            if (Control_RemoveTab_ComboBox_Part.SelectedIndex > 0)
+            {
+                Control_RemoveTab_ComboBox_Part.ForeColor = Color.Black;
+                Core_WipAppVariables.PartId = Control_RemoveTab_ComboBox_Part.Text;
+            }
+            else
+            {
+                Control_RemoveTab_ComboBox_Part.ForeColor = Color.Red;
+                if (Control_RemoveTab_ComboBox_Part.SelectedIndex != 0 &&
+                    Control_RemoveTab_ComboBox_Part.Items.Count > 0)
+                    Control_RemoveTab_ComboBox_Part.SelectedIndex = 0;
+                Core_WipAppVariables.PartId = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Part");
         }
     }
 
@@ -492,8 +534,8 @@ Are you sure?",
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false,
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 "Control_RemoveTab_Update_ButtonStates");
         }
     }
@@ -524,7 +566,7 @@ Are you sure?",
             Control_RemoveTab_ComboBox_Part.Leave += (s, e) =>
             {
                 Control_RemoveTab_ComboBox_Part.BackColor = SystemColors.Window;
-                ComboBoxHelpers.ValidateComboBoxItem(Control_RemoveTab_ComboBox_Part, "[ Enter Part ID ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(Control_RemoveTab_ComboBox_Part, "[ Enter Part ID ]");
             };
 
             Control_RemoveTab_ComboBox_Operation.Enter += (s, e) =>
@@ -534,19 +576,19 @@ Are you sure?",
             Control_RemoveTab_ComboBox_Operation.Leave += (s, e) =>
             {
                 Control_RemoveTab_ComboBox_Operation.BackColor = SystemColors.Window;
-                ComboBoxHelpers.ValidateComboBoxItem(Control_RemoveTab_ComboBox_Operation, "[ Enter Op # ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(Control_RemoveTab_ComboBox_Operation, "[ Enter Op # ]");
             };
 
             Control_RemoveTab_DataGridView_Main.SelectionChanged += (s, e) => Control_RemoveTab_Update_ButtonStates();
 
             Control_RemoveTab_Button_Delete.Click += Control_RemoveTab_Button_Delete_Click;
 
-            AppLogger.Log("Removal tab events wired up.");
+            ApplicationLog.Log("Removal tab events wired up.");
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm_WireUpRemoveTabEvents");
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_WireUpRemoveTabEvents");
         }
     }
 
@@ -569,7 +611,7 @@ Are you sure?",
             }
         }
 
-        ComboBoxHelpers.DeselectAllComboBoxText(this);
+        Helper_ComboBoxes.DeselectAllComboBoxText(this);
     }
 
     public void UpdateToggleRightPanelButton()
@@ -586,48 +628,34 @@ Are you sure?",
         }
     }
 
-    private async void Control_RemoveTab_Button_Search_Click(object sender, EventArgs e)
+    #endregion
+
+    #region Helpers
+
+    private List<(string PartID, string Location, int Quantity)> GetSelectedItemsToDelete(out string summary)
     {
-        try
-        {
-            AppLogger.Log("RemoveTab Search button clicked.");
-
-            var partId = Control_RemoveTab_ComboBox_Part.Text;
-            var op = Control_RemoveTab_ComboBox_Operation.Text;
-
-            if (string.IsNullOrWhiteSpace(partId) || Control_RemoveTab_ComboBox_Part.SelectedIndex <= 0)
+        var sb = new StringBuilder();
+        var itemsToDelete = new List<(string PartID, string Location, int Quantity)>();
+        foreach (DataGridViewRow row in Control_RemoveTab_DataGridView_Main.SelectedRows)
+            if (row.DataBoundItem is DataRowView drv)
             {
-                MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                Control_RemoveTab_ComboBox_Part.Focus();
-                return;
+                var partId = drv["PartID"]?.ToString() ?? "";
+                var location = drv["Location"]?.ToString() ?? "";
+                TryParse(drv["Quantity"]?.ToString(), out var quantity);
+
+                sb.AppendLine($"PartID: {partId}, Location: {location}, Quantity: {quantity}");
+                ApplicationLog.Log($"Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
+                System.Diagnostics.Debug.WriteLine(
+                    $"[DEBUG] Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
+
+                itemsToDelete.Add((partId, location, quantity));
             }
 
-            DataTable results;
-
-            if (!string.IsNullOrWhiteSpace(op) && Control_RemoveTab_ComboBox_Operation.SelectedIndex > 0)
-                results = await InventoryDao.GetInventoryByPartIdAndOperationAsync(partId, op, true);
-            else
-                results = await InventoryDao.GetInventoryByPartIdAsync(partId, true);
-
-            Control_RemoveTab_DataGridView_Main.DataSource = results;
-            Control_RemoveTab_DataGridView_Main.ClearSelection();
-
-            foreach (DataGridViewColumn column in Control_RemoveTab_DataGridView_Main.Columns)
-                column.Visible = true;
-
-            DgvDesigner.ApplyThemeToDataGridView(
-                Control_RemoveTab_DataGridView_Main,
-                AppThemes.GetTheme(WipAppVariables.WipDataGridTheme ?? "Default (Black and White)")
-            );
-            DgvDesigner.SizeDataGrid(Control_RemoveTab_DataGridView_Main);
-
-            Control_RemoveTab_Image_NothingFound.Visible = results.Rows.Count == 0;
-        }
-        catch (Exception ex)
-        {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "Control_RemoveTab_Button_Search_Click");
-        }
+        summary = sb.ToString();
+        return itemsToDelete;
     }
+
+    #endregion
 }
+
+#endregion

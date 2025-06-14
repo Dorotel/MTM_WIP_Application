@@ -2,8 +2,8 @@ using System;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
-using MTM_WIP_Application.Data;
 using MTM_WIP_Application.Core;
+using MTM_WIP_Application.Helpers;
 
 namespace MTM_WIP_Application.Forms.MainForm.Classes;
 
@@ -60,5 +60,6 @@ public class MySqlConnectionStrengthChecker
 
 public static class DatabaseConfig
 {
-    public static string ConnectionString { get; set; } = SqlVariables.GetConnectionString(null, null, null, null);
+    public static string ConnectionString { get; set; } =
+        Helper_SqlVariables.GetConnectionString(null, null, null, null);
 }

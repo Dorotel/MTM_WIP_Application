@@ -63,9 +63,9 @@ namespace MTM_WIP_Application.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap _404 {
+        internal static System.Drawing.Bitmap NothingFound {
             get {
-                object obj = ResourceManager.GetObject("404", resourceCulture);
+                object obj = ResourceManager.GetObject("NothingFound", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

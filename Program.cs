@@ -1,44 +1,20 @@
-using MTM_WIP_Application.Controls;
-using MTM_WIP_Application.Core;
-using MTM_WIP_Application.ErrorHandling;
+using MTM_WIP_Application.Controls.MainForm;
 using MTM_WIP_Application.Forms.MainForm;
-using MTM_WIP_Application.Forms.MainForm.Classes;
 using MTM_WIP_Application.Helpers;
 using MTM_WIP_Application.Logging;
 using MTM_WIP_Application.Services;
 using MySql.Data.MySqlClient;
 using System.Diagnostics;
-using System.Timers;
-using MTM_WIP_Application.Controls.MainForm;
-using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_WIP_Application;
 
-/// <summary>
-///
-/// Testing Passed: 05/31/2025
-/// 
-/// Main entry point for the MTM WIP Application.
-/// This WinForms application manages Work-In-Process (WIP) inventory for manufacturing or warehouse environments.
-/// Features include:
-/// - Inventory management (add, update, reset, transfer, remove)
-/// - Advanced entry forms for batch and multi-location transactions
-/// - MySQL database integration for inventory, part, operation, and location data
-/// - Theming and UI customization (multiple color themes, font size)
-/// - Logging and robust error handling
-/// - Version checking and update enforcement
-/// - Printing support for inventory data
-/// - User settings and changelog display
-/// - AppData and shortcut management on startup
-/// The application is modular, testable, and uses modern C# and .NET 9 features.
-/// </summary>
 internal static class Program
 {
     [STAThread]
     private static void Main()
     {
         Debug.WriteLine("Main method started.");
-        AppLogger.Log("Main method started.");
+        ApplicationLog.Log("Main method started.");
 
         try
         {
@@ -47,12 +23,12 @@ internal static class Program
         }
         catch (MySqlException ex)
         {
-            AppLogger.LogDatabaseError(ex);
-            ExceptionHandler.HandleDatabaseError();
+            ApplicationLog.LogDatabaseError(ex);
+            Service_OnEvent_ExceptionHandler.HandleDatabaseError();
         }
         catch (Exception ex)
         {
-            AppLogger.LogDatabaseError(ex);
+            ApplicationLog.LogDatabaseError(ex);
             MessageBox.Show(@"An error occurred on Main in Program.cs:
 " + ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
@@ -61,31 +37,31 @@ internal static class Program
     // Extracted for testability
     internal static void RunStartupSequence()
     {
-        AppDataCleaner.WipeAppDataFolders();
-        ShortcutManager.EnsureApplicationShortcut();
+        Service_OnStartup_AppDataCleaner.WipeAppDataFolders();
+        Service_OnStartup_ShortcutManager.EnsureApplicationShortcut();
 
         Debug.WriteLine("Setting High DPI mode...");
-        AppLogger.Log("Setting High DPI mode...");
+        ApplicationLog.Log("Setting High DPI mode...");
         Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
 
         Debug.WriteLine("Checking DPI scaling...");
-        AppLogger.Log("Checking DPI scaling...");
-        DpiChecker.CheckDpiScaling();
+        ApplicationLog.Log("Checking DPI scaling...");
+        Helper_DpiChecker.CheckDpiScaling();
 
         ApplicationConfiguration.Initialize();
 
         Debug.WriteLine("Initializing application...");
-        AppLogger.Log("Initializing application...");
+        ApplicationLog.Log("Initializing application...");
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
 
-        AppLogger.InitializeLogging();
-        AppLogger.Log("Application starting...");
-        AppLogger.CleanUpOldLogsIfNeeded();
+        ApplicationLog.InitializeLogging();
+        ApplicationLog.Log("Application starting...");
+        ApplicationLog.CleanUpOldLogsIfNeeded();
 
         Debug.WriteLine("Running VersionChecker...");
-        AppLogger.Log("Running VersionChecker...");
-        VersionCheckerService.Initialize();
+        ApplicationLog.Log("Running VersionChecker...");
+        Service_Timer_VersionChecker.Initialize();
     }
 
 
@@ -100,13 +76,13 @@ internal static class Program
         ControlTransferTab.MainFormInstance = mainForm;
 
         // Register the MainForm instance for live updates (if desired)
-        VersionCheckerService.MainFormInstance = mainForm;
+        Service_Timer_VersionChecker.MainFormInstance = mainForm;
 
         Debug.WriteLine("Starting main form...");
-        AppLogger.Log("Starting main form...");
+        ApplicationLog.Log("Starting main form...");
         Application.Run(mainForm);
 
         Debug.WriteLine("Application started.");
-        AppLogger.Log("Application started.");
+        ApplicationLog.Log("Application started.");
     }
 }

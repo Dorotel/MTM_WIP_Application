@@ -98,7 +98,7 @@
             // 
             Control_RemoveTab_Image_NothingFound.Dock = DockStyle.Fill;
             Control_RemoveTab_Image_NothingFound.ErrorImage = null;
-            Control_RemoveTab_Image_NothingFound.Image = Properties.Resources._404;
+            Control_RemoveTab_Image_NothingFound.Image = Properties.Resources.NothingFound;
             Control_RemoveTab_Image_NothingFound.InitialImage = null;
             Control_RemoveTab_Image_NothingFound.Location = new Point(0, 0);
             Control_RemoveTab_Image_NothingFound.Name = "Control_RemoveTab_Image_NothingFound";

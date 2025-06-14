@@ -170,7 +170,7 @@
             MainForm_Last10_Button_01.Text = "[ Nothing Yet ]";
             MainForm_Last10_Button_01.UseVisualStyleBackColor = true;
             // 
-            // Last10
+            // Model_UserBasedShortcutBar
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;

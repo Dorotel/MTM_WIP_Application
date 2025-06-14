@@ -14,52 +14,53 @@ using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_WIP_Application.Forms.MainForm;
 
+#region MainForm
+
 public partial class MainForm : Form
 {
     private Timer? _connectionStrengthTimer;
-
     public MySqlConnectionStrengthChecker ConnectionStrengthChecker = null!;
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public ConnectionRecoveryManager ConnectionRecoveryManager { get; private set; } = null!;
+
+    #region Initialization
 
     public MainForm()
     {
         try
         {
             InitializeComponent();
-
             Debug.WriteLine(
                 $"[DEBUG] MainForm_InventoryTab after InitializeComponent: {(MainForm_InventoryTab == null ? "null" : "not null")}");
-
-
-            AppLogger.Log("MainForm constructor called.");
-
+            ApplicationLog.Log("MainForm constructor called.");
             ConnectionStrengthChecker = new MySqlConnectionStrengthChecker();
-
             ConnectionRecoveryManager = new ConnectionRecoveryManager(this);
-
-            SetupConnectionStrengthControl();
-
+            MainForm_OnStartup_SetupConnectionStrengthControl();
             MainForm_OnStartup_WireUpEvents();
-
             Shown += async (s, e) =>
             {
-                await OnStartupAsync();
+                await MainForm_OnStartup_GetUserFullNameAsync();
                 await Task.Delay(100); // Ensure controls are visible
-                MainForm_InventoryTab.Control_InventoryTab_ComboBox_Part.Focus();
-                MainForm_InventoryTab.Control_InventoryTab_ComboBox_Part.SelectAll();
-                MainForm_InventoryTab.Control_InventoryTab_ComboBox_Part.BackColor = Color.LightBlue;
+                if (MainForm_InventoryTab != null)
+                {
+                    MainForm_InventoryTab.Control_InventoryTab_ComboBox_Part.Focus();
+                    MainForm_InventoryTab.Control_InventoryTab_ComboBox_Part.SelectAll();
+                    MainForm_InventoryTab.Control_InventoryTab_ComboBox_Part.BackColor = Color.LightBlue;
+                }
             };
-
-            AppLogger.Log("MainForm initialized.");
+            ApplicationLog.Log("MainForm initialized.");
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm));
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm));
         }
     }
+
+    #endregion
+
+    #region Startup / Events
 
     private void MainForm_OnStartup_WireUpEvents()
     {
@@ -99,7 +100,7 @@ public partial class MainForm : Form
                     ?.GetValue(controlTransferTab1) as ComboBox;
             }
 
-            ComboBoxHelpers.DeselectAllComboBoxText(this);
+            Helper_ComboBoxes.DeselectAllComboBoxText(this);
 #if DEBUG
             Debug.WriteLine(
                 $"[DEBUG] TabIndex: {MainForm_TabControl.SelectedIndex}, partCombo: {(partCombo != null ? partCombo.Name : "null")}");
@@ -127,36 +128,38 @@ public partial class MainForm : Form
         };
     }
 
-
-    private async Task OnStartupAsync()
+    private static async Task MainForm_OnStartup_GetUserFullNameAsync()
     {
         try
         {
             try
             {
-                WipAppVariables.UserFullName = await UserDao.GetUserFullNameAsync(WipAppVariables.User, true);
+                Core_WipAppVariables.UserFullName =
+                    await Dao_User.GetUserFullNameAsync(Core_WipAppVariables.User, true);
 
 
-                if (string.IsNullOrEmpty(WipAppVariables.UserFullName))
-                    WipAppVariables.UserFullName = WipAppVariables.User; // Fallback to username if full name not found
+                if (string.IsNullOrEmpty(Core_WipAppVariables.UserFullName))
+                    Core_WipAppVariables.UserFullName =
+                        Core_WipAppVariables.User; // Fallback to username if full name not found
 
-                AppLogger.Log($"User full name loaded: {WipAppVariables.UserFullName}");
+                ApplicationLog.Log($"User full name loaded: {Core_WipAppVariables.UserFullName}");
             }
             catch (Exception ex)
             {
-                AppLogger.LogApplicationError(ex);
-                await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true,
-                    "MainForm / " + "OnStartupAsync / " + "GetUserFullNameAsync");
+                ApplicationLog.LogApplicationError(ex);
+                await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
+                    "MainForm / " + "MainForm_OnStartup_GetUserFullNameAsync / " + "GetUserFullNameAsync");
             }
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            await ErrorLogDao.HandleException_GeneralError_CloseApp(ex, true, "MainForm / " + "OnStartupAsync");
+            ApplicationLog.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
+                "MainForm / " + "MainForm_OnStartup_GetUserFullNameAsync");
         }
     }
 
-    private void SetupConnectionStrengthControl()
+    private void MainForm_OnStartup_SetupConnectionStrengthControl()
     {
         try
         {
@@ -170,10 +173,15 @@ public partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, nameof(SetupConnectionStrengthControl));
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
+                nameof(MainForm_OnStartup_SetupConnectionStrengthControl));
         }
     }
+
+    #endregion
+
+    #region Key Processing
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
@@ -195,11 +203,15 @@ public partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm / " + "ProcessCmdKey");
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm / " + "ProcessCmdKey");
             return false;
         }
     }
+
+    #endregion
+
+    #region Form Closing
 
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
@@ -207,14 +219,18 @@ public partial class MainForm : Form
         {
             _connectionStrengthTimer?.Stop();
             _connectionStrengthTimer?.Dispose();
-            AppLogger.Log("MainForm is closing. Connection strength timer stopped.");
+            ApplicationLog.Log("MainForm is closing. Connection strength timer stopped.");
         }
         catch (Exception ex)
         {
-            AppLogger.LogApplicationError(ex);
-            _ = ErrorLogDao.HandleException_GeneralError_CloseApp(ex, false, "MainForm / " + "OnFormClosing");
+            ApplicationLog.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm / " + "OnFormClosing");
         }
 
         base.OnFormClosing(e);
     }
+
+    #endregion
 }
+
+#endregion

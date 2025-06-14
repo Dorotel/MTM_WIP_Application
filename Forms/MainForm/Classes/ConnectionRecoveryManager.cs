@@ -63,7 +63,7 @@ public class ConnectionRecoveryManager
     {
         try
         {
-            using var conn = new MySqlConnection(WipAppVariables.ConnectionString);
+            using var conn = new MySqlConnection(Core_WipAppVariables.ConnectionString);
             await conn.OpenAsync();
             HandleConnectionRestored();
         }
