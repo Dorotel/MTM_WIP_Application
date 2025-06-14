@@ -6,8 +6,12 @@ using MySql.Data.MySqlClient;
 
 namespace MTM_WIP_Application.Data;
 
+#region Dao_Location
+
 internal static class Dao_Location
 {
+    #region Fields
+
     public static Helper_MySql HelperMySql =
         new(Helper_SqlVariables.GetConnectionString(
             Core_WipAppVariables.WipServerAddress,
@@ -16,7 +20,10 @@ internal static class Dao_Location
             Core_WipAppVariables.UserPin
         ));
 
-    // --- Delete ---
+    #endregion
+
+    #region Delete
+
     internal static async Task DeleteLocation(string location, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object> { ["@location"] = location };
@@ -25,64 +32,10 @@ internal static class Dao_Location
             parameters, useAsync);
     }
 
-    private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
-    {
-        try
-        {
-            await HelperMySql.ExecuteNonQuery(sql, parameters, useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            ApplicationLog.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-        }
-        catch (Exception ex)
-        {
-            ApplicationLog.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
-        }
-    }
+    #endregion
 
-    // --- Get All ---
-    internal static async Task<DataTable> GetAllLocations(bool useAsync = false)
-    {
-        return await GetLocationByQueryAsync("SELECT * FROM `md_locations`", null, useAsync);
-    }
+    #region Insert
 
-    // --- Get By Name ---
-    internal static async Task<DataRow?> GetLocationByName(string location, bool useAsync = false)
-    {
-        var table = await GetLocationByQueryAsync(
-            "SELECT * FROM `md_locations` WHERE `Location` = @location",
-            new Dictionary<string, object> { ["@location"] = location }, useAsync);
-        return table.Rows.Count > 0 ? table.Rows[0] : null;
-    }
-
-    // --- Helpers ---
-    private static async Task<DataTable> GetLocationByQueryAsync(string sql, Dictionary<string, object>? parameters,
-        bool useAsync)
-    {
-        try
-        {
-            return parameters == null
-                ? await HelperMySql.ExecuteDataTable(sql, useAsync: useAsync)
-                : await HelperMySql.ExecuteDataTable(sql, parameters, useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            ApplicationLog.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return new DataTable();
-        }
-        catch (Exception ex)
-        {
-            ApplicationLog.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
-            return new DataTable();
-        }
-    }
-
-    // --- Insert ---
     internal static async Task InsertLocation(string location, string user, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
@@ -95,17 +48,10 @@ internal static class Dao_Location
             parameters, useAsync);
     }
 
-    // --- Existence Check ---
-    internal static async Task<bool> LocationExists(string location, bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object> { ["@location"] = location };
-        var result = await HelperMySql.ExecuteScalar(
-            "SELECT COUNT(*) FROM `md_locations` WHERE `Location` = @location",
-            parameters, useAsync);
-        return Convert.ToInt32(result) > 0;
-    }
+    #endregion
 
-    // --- Update ---
+    #region Update
+
     internal static async Task UpdateLocation(string location, string newLocation, string user, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
@@ -118,4 +64,83 @@ internal static class Dao_Location
             "UPDATE `md_locations` SET `Location` = @newLocation, `Issued By` = @user WHERE `Location` = @location",
             parameters, useAsync);
     }
+
+    #endregion
+
+    #region Read
+
+    internal static async Task<DataTable> GetAllLocations(bool useAsync = false)
+    {
+        return await GetLocationByQueryAsync("SELECT * FROM `md_locations`", null, useAsync);
+    }
+
+    internal static async Task<DataRow?> GetLocationByName(string location, bool useAsync = false)
+    {
+        var table = await GetLocationByQueryAsync(
+            "SELECT * FROM `md_locations` WHERE `Location` = @location",
+            new Dictionary<string, object> { ["@location"] = location }, useAsync);
+        return table.Rows.Count > 0 ? table.Rows[0] : null;
+    }
+
+    #endregion
+
+    #region Existence Check
+
+    internal static async Task<bool> LocationExists(string location, bool useAsync = false)
+    {
+        var parameters = new Dictionary<string, object> { ["@location"] = location };
+        var result = await HelperMySql.ExecuteScalar(
+            "SELECT COUNT(*) FROM `md_locations` WHERE `Location` = @location",
+            parameters, useAsync);
+        return Convert.ToInt32(result) > 0;
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
+    {
+        try
+        {
+            await HelperMySql.ExecuteNonQuery(sql, parameters, useAsync);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    private static async Task<DataTable> GetLocationByQueryAsync(string sql, Dictionary<string, object>? parameters,
+        bool useAsync)
+    {
+        try
+        {
+            return parameters == null
+                ? await HelperMySql.ExecuteDataTable(sql, useAsync: useAsync)
+                : await HelperMySql.ExecuteDataTable(sql, parameters, useAsync);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+            return new DataTable();
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return new DataTable();
+        }
+    }
+
+    #endregion
 }
+
+#endregion

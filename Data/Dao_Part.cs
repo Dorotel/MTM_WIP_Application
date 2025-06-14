@@ -6,8 +6,12 @@ using MySql.Data.MySqlClient;
 
 namespace MTM_WIP_Application.Data;
 
+#region Dao_Part
+
 internal static class Dao_Part
 {
+    #region Fields
+
     public static Helper_MySql HelperMySql =
         new(Helper_SqlVariables.GetConnectionString(
             Core_WipAppVariables.WipServerAddress,
@@ -16,7 +20,10 @@ internal static class Dao_Part
             Core_WipAppVariables.UserPin
         ));
 
-    // --- Delete ---
+    #endregion
+
+    #region Delete
+
     internal static async Task DeletePart(string partNumber, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object> { ["@partNumber"] = partNumber };
@@ -25,64 +32,10 @@ internal static class Dao_Part
             parameters, useAsync);
     }
 
-    private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
-    {
-        try
-        {
-            await HelperMySql.ExecuteNonQuery(sql, parameters, useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            ApplicationLog.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-        }
-        catch (Exception ex)
-        {
-            ApplicationLog.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
-        }
-    }
+    #endregion
 
-    // --- Get All ---
-    internal static async Task<DataTable> GetAllParts(bool useAsync = false)
-    {
-        return await GetPartByQueryAsync("SELECT * FROM `md_part_ids`", null, useAsync);
-    }
+    #region Insert
 
-    // --- Get By Number ---
-    internal static async Task<DataRow?> GetPartByNumber(string partNumber, bool useAsync = false)
-    {
-        var table = await GetPartByQueryAsync(
-            "SELECT * FROM `md_part_ids` WHERE `Item Number` = @partNumber",
-            new Dictionary<string, object> { ["@partNumber"] = partNumber }, useAsync);
-        return table.Rows.Count > 0 ? table.Rows[0] : null;
-    }
-
-    // --- Helpers ---
-    private static async Task<DataTable> GetPartByQueryAsync(string sql, Dictionary<string, object>? parameters,
-        bool useAsync)
-    {
-        try
-        {
-            return parameters == null
-                ? await HelperMySql.ExecuteDataTable(sql, useAsync: useAsync)
-                : await HelperMySql.ExecuteDataTable(sql, parameters, useAsync);
-        }
-        catch (MySqlException ex)
-        {
-            ApplicationLog.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return new DataTable();
-        }
-        catch (Exception ex)
-        {
-            ApplicationLog.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
-            return new DataTable();
-        }
-    }
-
-    // --- Insert ---
     internal static async Task InsertPart(string partNumber, string user, string partType, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
@@ -96,17 +49,10 @@ internal static class Dao_Part
             parameters, useAsync);
     }
 
-    // --- Existence Check ---
-    internal static async Task<bool> PartExists(string partNumber, bool useAsync = false)
-    {
-        var parameters = new Dictionary<string, object> { ["@partNumber"] = partNumber };
-        var result = await HelperMySql.ExecuteScalar(
-            "SELECT COUNT(*) FROM `md_part_ids` WHERE `Item Number` = @partNumber",
-            parameters, useAsync);
-        return Convert.ToInt32(result) > 0;
-    }
+    #endregion
 
-    // --- Update ---
+    #region Update
+
     internal static async Task UpdatePart(string partNumber, string partType, string user, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
@@ -119,4 +65,83 @@ internal static class Dao_Part
             "UPDATE `md_part_ids` SET `Type` = @partType, `Issued By` = @user WHERE `Item Number` = @partNumber",
             parameters, useAsync);
     }
+
+    #endregion
+
+    #region Read
+
+    internal static async Task<DataTable> GetAllParts(bool useAsync = false)
+    {
+        return await GetPartByQueryAsync("SELECT * FROM `md_part_ids`", null, useAsync);
+    }
+
+    internal static async Task<DataRow?> GetPartByNumber(string partNumber, bool useAsync = false)
+    {
+        var table = await GetPartByQueryAsync(
+            "SELECT * FROM `md_part_ids` WHERE `Item Number` = @partNumber",
+            new Dictionary<string, object> { ["@partNumber"] = partNumber }, useAsync);
+        return table.Rows.Count > 0 ? table.Rows[0] : null;
+    }
+
+    #endregion
+
+    #region Existence Check
+
+    internal static async Task<bool> PartExists(string partNumber, bool useAsync = false)
+    {
+        var parameters = new Dictionary<string, object> { ["@partNumber"] = partNumber };
+        var result = await HelperMySql.ExecuteScalar(
+            "SELECT COUNT(*) FROM `md_part_ids` WHERE `Item Number` = @partNumber",
+            parameters, useAsync);
+        return Convert.ToInt32(result) > 0;
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
+    {
+        try
+        {
+            await HelperMySql.ExecuteNonQuery(sql, parameters, useAsync);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    private static async Task<DataTable> GetPartByQueryAsync(string sql, Dictionary<string, object>? parameters,
+        bool useAsync)
+    {
+        try
+        {
+            return parameters == null
+                ? await HelperMySql.ExecuteDataTable(sql, useAsync: useAsync)
+                : await HelperMySql.ExecuteDataTable(sql, parameters, useAsync);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+            return new DataTable();
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return new DataTable();
+        }
+    }
+
+    #endregion
 }
+
+#endregion

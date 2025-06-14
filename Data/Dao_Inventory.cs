@@ -8,10 +8,17 @@ using System.Threading.Tasks;
 
 namespace MTM_WIP_Application.Data;
 
-#region Data Access Object for inv_inventory operations.
+#region Dao_Inventory
 
 public static class Dao_Inventory
 {
+    #region Fields
+
+    private static readonly Helper_MySql HelperMySql =
+        new(Helper_SqlVariables.GetConnectionString(null, null, null, null));
+
+    #endregion
+
     #region Search Methods
 
     public static async Task<DataTable> GetInventoryByPartIdAsync(string partId, bool useAsync = false)
@@ -41,9 +48,6 @@ public static class Dao_Inventory
 
     #region Modification Methods
 
-    private static readonly Helper_MySql HelperMySql =
-        new(Helper_SqlVariables.GetConnectionString(null, null, null, null));
-
     public static async Task<int> AddInventoryItemAsync(
         string partId, string location, string operation, int quantity, string itemType,
         string user, string batchNumber, string notes, bool useAsync = false)
@@ -63,7 +67,6 @@ public static class Dao_Inventory
             },
             useAsync, CommandType.StoredProcedure);
     }
-
 
     public static async Task<int> DeleteInventoryByPartIdLocationOperationQuantityAsync(
         string partId,
@@ -125,7 +128,6 @@ public static class Dao_Inventory
         await FixBatchNumbersAsync();
     }
 
-    // Runs the inv_inventory_Fix_BatchNumbers stored procedure with no parameters.
     public static async Task FixBatchNumbersAsync()
     {
         var connectionString = Helper_SqlVariables.GetConnectionString(null, null, null, null);

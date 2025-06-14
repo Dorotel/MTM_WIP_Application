@@ -7,15 +7,22 @@ using MTM_WIP_Application.Core;
 
 namespace MTM_WIP_Application.Helpers;
 
+#region Helper_MySql
+
 public class Helper_MySql(string connectionString)
 {
+    #region Parameter Normalization
+
     private static string NormalizeParameterName(string key, CommandType commandType)
     {
-        // For stored procedures, parameter names should not start with '@'.
         return commandType == CommandType.StoredProcedure && "@".StartsWith(key)
             ? key[1..]
             : key;
     }
+
+    #endregion
+
+    #region Execute NonQuery
 
     public async Task<int> ExecuteNonQuery(
         string procedureOrSql,
@@ -28,18 +35,19 @@ public class Helper_MySql(string connectionString)
         {
             CommandType = commandType
         };
-
         if (parameters != null)
             foreach (var param in parameters)
                 cmd.Parameters.AddWithValue(NormalizeParameterName(param.Key, commandType),
                     param.Value ?? DBNull.Value);
-
         await conn.OpenAsync();
         return useAsync
             ? await cmd.ExecuteNonQueryAsync()
             : cmd.ExecuteNonQuery();
     }
 
+    #endregion
+
+    #region Execute DataTable
 
     public async Task<DataTable> ExecuteDataTable(
         string procedureOrSql,
@@ -49,19 +57,15 @@ public class Helper_MySql(string connectionString)
     {
         using var conn = new MySqlConnection(connectionString);
         using var cmd = new MySqlCommand(procedureOrSql, conn)
-
         {
             CommandType = commandType
         };
-
         if (parameters != null)
             foreach (var param in parameters)
                 cmd.Parameters.AddWithValue(NormalizeParameterName(param.Key, commandType),
                     param.Value ?? DBNull.Value);
-
         using var adapter = new MySqlDataAdapter(cmd);
         var table = new DataTable();
-
         if (useAsync)
         {
             await conn.OpenAsync();
@@ -76,6 +80,10 @@ public class Helper_MySql(string connectionString)
         return table;
     }
 
+    #endregion
+
+    #region Execute Scalar
+
     public async Task<object?> ExecuteScalar(
         string procedureOrSql,
         Dictionary<string, object>? parameters = null,
@@ -87,18 +95,19 @@ public class Helper_MySql(string connectionString)
         {
             CommandType = commandType
         };
-
         if (parameters != null)
             foreach (var param in parameters)
                 cmd.Parameters.AddWithValue(NormalizeParameterName(param.Key, commandType),
                     param.Value ?? DBNull.Value);
-
         await conn.OpenAsync();
         return useAsync
             ? await cmd.ExecuteScalarAsync()
             : cmd.ExecuteScalar();
     }
 
+    #endregion
+
+    #region Execute Reader
 
     public async Task<MySqlDataReader> ExecuteReader(
         string procedureOrSql,
@@ -111,15 +120,17 @@ public class Helper_MySql(string connectionString)
         {
             CommandType = commandType
         };
-
         if (parameters != null)
             foreach (var param in parameters)
                 cmd.Parameters.AddWithValue(NormalizeParameterName(param.Key, commandType),
                     param.Value ?? DBNull.Value);
-
         await conn.OpenAsync();
         return useAsync
             ? await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection)
             : cmd.ExecuteReader(CommandBehavior.CloseConnection);
     }
+
+    #endregion
 }
+
+#endregion

@@ -2,8 +2,10 @@ namespace MTM_WIP_Application.Models;
 
 internal class Model_TransactionHistory
 {
+    #region Properties
+
     public int Id { get; set; }
-    public string TransactionType { get; set; } = string.Empty; // "IN", "OUT", "TRANSFER"
+    public string TransactionType { get; set; } = string.Empty;
     public string PartId { get; set; } = string.Empty;
     public string? FromLocation { get; set; }
     public string? ToLocation { get; set; }
@@ -12,6 +14,8 @@ internal class Model_TransactionHistory
     public string? Notes { get; set; }
     public string User { get; set; } = string.Empty;
     public string? ItemType { get; set; }
-    public string? BatchNumber { get; set; } // Added for new inv_transaction structure
+    public string? BatchNumber { get; set; }
     public DateTime DateTime { get; set; } = DateTime.Now;
+
+    #endregion
 }

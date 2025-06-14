@@ -55,7 +55,7 @@ public partial class ControlInventoryTab : UserControl
         {
             await Control_InventoryTab_OnStartup_LoadDataComboBoxesAsync();
             Control_InventoryTab_OnStartup_WireUpEvents();
-            ApplicationLog.Log("Initial setup of ComboBoxes in the Inventory Tab.");
+            LoggingUtility.Log("Initial setup of ComboBoxes in the Inventory Tab.");
             if (MainFormInstance != null)
                 MainFormTabResetHelper.ResetInventoryTab(
                     Control_InventoryTab_ComboBox_Location,
@@ -76,18 +76,18 @@ public partial class ControlInventoryTab : UserControl
             {
                 Core_WipAppVariables.UserFullName =
                     await Dao_User.GetUserFullNameAsync(Core_WipAppVariables.User, true);
-                ApplicationLog.Log($"User full name loaded: {Core_WipAppVariables.UserFullName}");
+                LoggingUtility.Log($"User full name loaded: {Core_WipAppVariables.UserFullName}");
             }
             catch (Exception ex)
             {
-                ApplicationLog.LogApplicationError(ex);
+                LoggingUtility.LogApplicationError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                     new StringBuilder().Append("Control_InventoryTab_OnStartup_GetUserFullName").ToString());
             }
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "Control_InventoryTab_OnStartup");
         }
     }
@@ -123,11 +123,11 @@ public partial class ControlInventoryTab : UserControl
                     placeholder,
                     cmdType
                 );
-            ApplicationLog.Log("Inventory tab ComboBoxes loaded.");
+            LoggingUtility.Log("Inventory tab ComboBoxes loaded.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                 "MainForm_LoadInventoryTabComboBoxesAsync");
         }
@@ -171,7 +171,7 @@ public partial class ControlInventoryTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_ProcessCmdKey");
             return false;
         }
@@ -187,17 +187,17 @@ public partial class ControlInventoryTab : UserControl
         {
             if (Service_Timer_VersionChecker.MainFormInstance == null)
             {
-                ApplicationLog.Log("MainForm instance is null, cannot open Advanced Inventory Entry.");
+                LoggingUtility.Log("MainForm instance is null, cannot open Advanced Inventory Entry.");
                 return;
             }
 
             var advancedEntryForm = new AdvancedInventoryEntryForm();
             advancedEntryForm.ShowDialog(Service_Timer_VersionChecker.MainFormInstance);
-            ApplicationLog.Log("Inventory Advanced Entry button clicked.");
+            LoggingUtility.Log("Inventory Advanced Entry button clicked.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 "Control_InventoryTab_Button_AdvancedEntry_Click");
         }
@@ -207,7 +207,7 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
-            ApplicationLog.Log("Inventory Reset button clicked.");
+            LoggingUtility.Log("Inventory Reset button clicked.");
             Control_InventoryTab_ComboBox_Location.Visible = false;
             Control_InventoryTab_ComboBox_Operation.Visible = false;
             Control_InventoryTab_ComboBox_Part.Visible = false;
@@ -267,7 +267,7 @@ public partial class ControlInventoryTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_Button_Reset");
         }
     }
@@ -276,7 +276,7 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
-            ApplicationLog.Log("Inventory Save button clicked.");
+            LoggingUtility.Log("Inventory Save button clicked.");
 
             var partId = Control_InventoryTab_ComboBox_Part.Text;
             var op = Control_InventoryTab_ComboBox_Operation.Text;
@@ -345,7 +345,7 @@ public partial class ControlInventoryTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "MainForm_Inventory_Button_Save");
         }
     }
@@ -380,7 +380,7 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
-            ApplicationLog.Log("Inventory Location ComboBox selection changed.");
+            LoggingUtility.Log("Inventory Location ComboBox selection changed.");
 
             if (Control_InventoryTab_ComboBox_Location.SelectedIndex > 0)
             {
@@ -398,7 +398,7 @@ public partial class ControlInventoryTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Loc");
         }
     }
@@ -407,7 +407,7 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
-            ApplicationLog.Log("Inventory Op ComboBox selection changed.");
+            LoggingUtility.Log("Inventory Op ComboBox selection changed.");
 
             if (Control_InventoryTab_ComboBox_Operation.SelectedIndex > 0)
             {
@@ -425,7 +425,7 @@ public partial class ControlInventoryTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Op");
         }
     }
@@ -434,7 +434,7 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
-            ApplicationLog.Log("Inventory Part ComboBox selection changed.");
+            LoggingUtility.Log("Inventory Part ComboBox selection changed.");
 
             if (Control_InventoryTab_ComboBox_Part.SelectedIndex > 0)
             {
@@ -452,7 +452,7 @@ public partial class ControlInventoryTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Part");
         }
     }
@@ -461,7 +461,7 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
-            ApplicationLog.Log("Inventory Quantity TextBox changed.");
+            LoggingUtility.Log("Inventory Quantity TextBox changed.");
 
             var text = Control_InventoryTab_TextBox_Quantity.Text.Trim();
             const string placeholder = "[ Enter Valid Quantity ]";
@@ -484,7 +484,7 @@ public partial class ControlInventoryTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_TextBox_Qty");
         }
     }
@@ -504,7 +504,7 @@ public partial class ControlInventoryTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 "Control_InventoryTab_Update_SaveButtonState");
         }
@@ -596,11 +596,11 @@ public partial class ControlInventoryTab : UserControl
             };
 
 
-            ApplicationLog.Log("Inventory tab events wired up.");
+            LoggingUtility.Log("Inventory tab events wired up.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_WireUpInventoryTabEvents");
         }
     }

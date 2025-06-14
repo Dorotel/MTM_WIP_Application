@@ -19,7 +19,7 @@ public partial class AdvancedInventoryEntryForm : Form
     {
         try
         {
-            ApplicationLog.Log("AdvancedInventoryEntryForm constructor entered.");
+            LoggingUtility.Log("AdvancedInventoryEntryForm constructor entered.");
             InitializeComponent();
 
             Helper_ComboBoxes.ApplyStandardComboBoxProperties(AdvancedEntry_Single_ComboBox_Part);
@@ -59,14 +59,14 @@ public partial class AdvancedInventoryEntryForm : Form
 
             if (AdvancedEntry_TabControl == null)
             {
-                ApplicationLog.LogApplicationError(
+                LoggingUtility.LogApplicationError(
                     new InvalidOperationException("TabControl 'AdvancedEntry_TabControl' not found."));
                 throw new InvalidOperationException("TabControl 'AdvancedEntry_TabControl' not found.");
             }
 
             if (AdvancedEntry_TabControl_Import == null)
             {
-                ApplicationLog.LogApplicationError(
+                LoggingUtility.LogApplicationError(
                     new InvalidOperationException("Tab 'AdvancedEntry_TabControl_Import' not found."));
                 throw new InvalidOperationException("Tab 'AdvancedEntry_TabControl_Import' not found.");
             }
@@ -98,11 +98,11 @@ public partial class AdvancedInventoryEntryForm : Form
                 }
             };
 
-            ApplicationLog.Log("AdvancedInventoryEntryForm constructor exited.");
+            LoggingUtility.Log("AdvancedInventoryEntryForm constructor exited.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "AdvancedInventoryEntryForm_Ctor");
         }
     }
@@ -151,7 +151,7 @@ public partial class AdvancedInventoryEntryForm : Form
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "AdvancedInventoryEntryForm.OnLoad");
         }
     }
@@ -228,11 +228,11 @@ public partial class AdvancedInventoryEntryForm : Form
                 "[ Enter Location ]",
                 CommandType.StoredProcedure);
 
-            ApplicationLog.Log("AdvancedInventoryEntryForm ComboBoxes loaded.");
+            LoggingUtility.Log("AdvancedInventoryEntryForm ComboBoxes loaded.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                 "AdvancedInventoryEntryForm_LoadAllComboBoxesAsync");
         }
@@ -247,26 +247,26 @@ public partial class AdvancedInventoryEntryForm : Form
             {
                 Helper_ComboBoxes.ValidateComboBoxItem(AdvancedEntry_Single_ComboBox_Part, "[ Enter Part ID ]");
                 UpdateSingleSaveButtonState();
-                ApplicationLog.Log("Single Part ComboBox selection changed.");
+                LoggingUtility.Log("Single Part ComboBox selection changed.");
             };
             AdvancedEntry_Single_ComboBox_Op.SelectedIndexChanged += (s, e) =>
             {
                 Helper_ComboBoxes.ValidateComboBoxItem(AdvancedEntry_Single_ComboBox_Op, "[ Enter Op # ]");
                 UpdateSingleSaveButtonState();
-                ApplicationLog.Log("Single Op ComboBox selection changed.");
+                LoggingUtility.Log("Single Op ComboBox selection changed.");
             };
             AdvancedEntry_Single_ComboBox_Loc.SelectedIndexChanged += (s, e) =>
             {
                 Helper_ComboBoxes.ValidateComboBoxItem(AdvancedEntry_Single_ComboBox_Loc, "[ Enter Location ]");
                 UpdateSingleSaveButtonState();
-                ApplicationLog.Log("Single Loc ComboBox selection changed.");
+                LoggingUtility.Log("Single Loc ComboBox selection changed.");
             };
             AdvancedEntry_Single_TextBox_Qty.Text = "[ Enter Valid Quantity ]";
             AdvancedEntry_Single_TextBox_Qty.TextChanged += (s, e) =>
             {
                 InventoryTextBoxQty_TextChanged(AdvancedEntry_Single_TextBox_Qty, "[ Enter Valid Quantity ]");
                 UpdateSingleSaveButtonState();
-                ApplicationLog.Log("Single Qty TextBox changed.");
+                LoggingUtility.Log("Single Qty TextBox changed.");
             };
             AdvancedEntry_Single_TextBox_Qty.Enter += (s, e) => AdvancedEntry_Single_TextBox_Qty.SelectAll();
             AdvancedEntry_Single_TextBox_Qty.Click += (s, e) => AdvancedEntry_Single_TextBox_Qty.SelectAll();
@@ -281,7 +281,7 @@ public partial class AdvancedInventoryEntryForm : Form
             {
                 ValidateQtyTextBox(AdvancedEntry_Single_TextBox_Count, "[ How Many Transactions ]");
                 UpdateSingleSaveButtonState();
-                ApplicationLog.Log("Single Count TextBox changed.");
+                LoggingUtility.Log("Single Count TextBox changed.");
             };
             AdvancedEntry_Single_TextBox_Count.Enter += (s, e) => AdvancedEntry_Single_TextBox_Count.SelectAll();
             AdvancedEntry_Single_TextBox_Count.Click += (s, e) => AdvancedEntry_Single_TextBox_Count.SelectAll();
@@ -296,19 +296,19 @@ public partial class AdvancedInventoryEntryForm : Form
             {
                 Helper_ComboBoxes.ValidateComboBoxItem(AdvancedEntry_MultiLoc_ComboBox_Part, "[ Enter Part ID ]");
                 UpdateMultiSaveButtonState();
-                ApplicationLog.Log("Multi Part ComboBox selection changed.");
+                LoggingUtility.Log("Multi Part ComboBox selection changed.");
             };
             AdvancedEntry_MultiLoc_ComboBox_Op.SelectedIndexChanged += (s, e) =>
             {
                 Helper_ComboBoxes.ValidateComboBoxItem(AdvancedEntry_MultiLoc_ComboBox_Op, "[ Enter Op # ]");
                 UpdateMultiSaveButtonState();
-                ApplicationLog.Log("Multi Op ComboBox selection changed.");
+                LoggingUtility.Log("Multi Op ComboBox selection changed.");
             };
             AdvancedEntry_MultiLoc_ComboBox_Loc.SelectedIndexChanged += (s, e) =>
             {
                 Helper_ComboBoxes.ValidateComboBoxItem(AdvancedEntry_MultiLoc_ComboBox_Loc, "[ Enter Location ]");
                 UpdateMultiSaveButtonState();
-                ApplicationLog.Log("Multi Loc ComboBox selection changed.");
+                LoggingUtility.Log("Multi Loc ComboBox selection changed.");
             };
 
             AdvancedEntry_MultiLoc_TextBox_Qty.Text = "[ Enter Valid Quantity ]";
@@ -316,7 +316,7 @@ public partial class AdvancedInventoryEntryForm : Form
             {
                 InventoryTextBoxQty_TextChanged(AdvancedEntry_MultiLoc_TextBox_Qty, "[ Enter Valid Quantity ]");
                 UpdateMultiSaveButtonState();
-                ApplicationLog.Log("Multi Qty TextBox changed.");
+                LoggingUtility.Log("Multi Qty TextBox changed.");
             };
             AdvancedEntry_MultiLoc_TextBox_Qty.Enter += (s, e) => AdvancedEntry_MultiLoc_TextBox_Qty.SelectAll();
             AdvancedEntry_MultiLoc_TextBox_Qty.Click += (s, e) => AdvancedEntry_MultiLoc_TextBox_Qty.SelectAll();
@@ -411,11 +411,11 @@ public partial class AdvancedInventoryEntryForm : Form
                 Helper_ComboBoxes.ValidateComboBoxItem(AdvancedEntry_MultiLoc_ComboBox_Loc, "[ Enter Location ]");
             };
 
-            ApplicationLog.Log("AdvancedInventoryEntryForm events wired up.");
+            LoggingUtility.Log("AdvancedInventoryEntryForm events wired up.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 "AdvancedInventoryEntryForm_WireUpEvents");
         }
@@ -443,7 +443,7 @@ public partial class AdvancedInventoryEntryForm : Form
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
         }
     }
 
@@ -478,7 +478,7 @@ public partial class AdvancedInventoryEntryForm : Form
     {
         try
         {
-            ApplicationLog.Log("Single Reset button clicked.");
+            LoggingUtility.Log("Single Reset button clicked.");
 
             AdvancedEntry_Single_ComboBox_Part.Visible = false;
             AdvancedEntry_Single_ComboBox_Op.Visible = false;
@@ -534,7 +534,7 @@ public partial class AdvancedInventoryEntryForm : Form
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 "AdvancedEntry_Single_Button_Reset_Click");
         }
@@ -544,7 +544,7 @@ public partial class AdvancedInventoryEntryForm : Form
     {
         try
         {
-            ApplicationLog.Log("Multi Reset button clicked.");
+            LoggingUtility.Log("Multi Reset button clicked.");
 
             AdvancedEntry_MultiLoc_ComboBox_Part.Visible = false;
             AdvancedEntry_MultiLoc_ComboBox_Op.Visible = false;
@@ -601,7 +601,7 @@ public partial class AdvancedInventoryEntryForm : Form
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 "AdvancedEntry_MultiLoc_Button_Reset_Click");
         }
@@ -646,7 +646,7 @@ public partial class AdvancedInventoryEntryForm : Form
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 "AdvancedInventoryEntryForm_ProcessCmdKey");
             return false;
@@ -657,7 +657,7 @@ public partial class AdvancedInventoryEntryForm : Form
     {
         try
         {
-            ApplicationLog.Log("AdvancedEntry_Single_Button_Save_Click entered.");
+            LoggingUtility.Log("AdvancedEntry_Single_Button_Save_Click entered.");
 
             // Get values from controls
             var partId = AdvancedEntry_Single_ComboBox_Part.Text;
@@ -736,7 +736,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
 
-            ApplicationLog.Log(
+            LoggingUtility.Log(
                 $"Saved {count} inventory transaction(s) for Part: {partId}, Op: {op}, Loc: {loc}, Qty: {qty}");
 
             // Optionally reset the form after save
@@ -744,7 +744,7 @@ public partial class AdvancedInventoryEntryForm : Form
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                 "AdvancedEntry_Single_Button_Save_Click");
         }
@@ -754,7 +754,7 @@ public partial class AdvancedInventoryEntryForm : Form
     {
         try
         {
-            ApplicationLog.Log("AdvancedEntry_MultiLoc_Button_AddLoc_Click entered.");
+            LoggingUtility.Log("AdvancedEntry_MultiLoc_Button_AddLoc_Click entered.");
 
             // Get values from controls
             var partId = AdvancedEntry_MultiLoc_ComboBox_Part.Text;
@@ -810,7 +810,7 @@ public partial class AdvancedInventoryEntryForm : Form
             var listViewItem = new ListViewItem(new[] { loc, qty.ToString(), notes });
             AdvancedEntry_MultiLoc_ListView_Preview.Items.Add(listViewItem);
 
-            ApplicationLog.Log($"Added MultiLoc entry: Loc={loc}, Qty={qty}, Notes={notes}");
+            LoggingUtility.Log($"Added MultiLoc entry: Loc={loc}, Qty={qty}, Notes={notes}");
 
             // Reset only the location, quantity, and notes fields for next entry
             MainFormControlHelper.ResetComboBox(AdvancedEntry_MultiLoc_ComboBox_Loc, Color.Red, 0);
@@ -820,7 +820,7 @@ public partial class AdvancedInventoryEntryForm : Form
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 "AdvancedEntry_MultiLoc_Button_AddLoc_Click");
         }
@@ -830,7 +830,7 @@ public partial class AdvancedInventoryEntryForm : Form
     {
         try
         {
-            ApplicationLog.Log("AdvancedEntry_MultiLoc_Button_SaveAll_Click entered.");
+            LoggingUtility.Log("AdvancedEntry_MultiLoc_Button_SaveAll_Click entered.");
 
             // Validate that there is at least one entry to save
             if (AdvancedEntry_MultiLoc_ListView_Preview.Items.Count == 0)
@@ -870,7 +870,7 @@ public partial class AdvancedInventoryEntryForm : Form
 
                 if (!int.TryParse(qtyText, out var qty) || qty <= 0)
                 {
-                    ApplicationLog.LogApplicationError(
+                    LoggingUtility.LogApplicationError(
                         new Exception($"Invalid quantity for location '{loc}': '{qtyText}'"));
                     continue;
                 }
@@ -904,7 +904,7 @@ public partial class AdvancedInventoryEntryForm : Form
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
 
-            ApplicationLog.Log(
+            LoggingUtility.Log(
                 $"Saved {savedCount} multi-location inventory transaction(s) for Part: {partId}, Op: {op}");
 
             // Optionally reset the form after save
@@ -912,7 +912,7 @@ public partial class AdvancedInventoryEntryForm : Form
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                 "AdvancedEntry_MultiLoc_Button_SaveAll_Click");
         }

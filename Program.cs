@@ -14,7 +14,7 @@ internal static class Program
     private static void Main()
     {
         Debug.WriteLine("Main method started.");
-        ApplicationLog.Log("Main method started.");
+        LoggingUtility.Log("Main method started.");
 
         try
         {
@@ -23,12 +23,12 @@ internal static class Program
         }
         catch (MySqlException ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             Service_OnEvent_ExceptionHandler.HandleDatabaseError();
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             MessageBox.Show(@"An error occurred on Main in Program.cs:
 " + ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
@@ -41,26 +41,26 @@ internal static class Program
         Service_OnStartup_ShortcutManager.EnsureApplicationShortcut();
 
         Debug.WriteLine("Setting High DPI mode...");
-        ApplicationLog.Log("Setting High DPI mode...");
+        LoggingUtility.Log("Setting High DPI mode...");
         Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
 
         Debug.WriteLine("Checking DPI scaling...");
-        ApplicationLog.Log("Checking DPI scaling...");
+        LoggingUtility.Log("Checking DPI scaling...");
         Helper_DpiChecker.CheckDpiScaling();
 
         ApplicationConfiguration.Initialize();
 
         Debug.WriteLine("Initializing application...");
-        ApplicationLog.Log("Initializing application...");
+        LoggingUtility.Log("Initializing application...");
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
 
-        ApplicationLog.InitializeLogging();
-        ApplicationLog.Log("Application starting...");
-        ApplicationLog.CleanUpOldLogsIfNeeded();
+        LoggingUtility.InitializeLogging();
+        LoggingUtility.Log("Application starting...");
+        LoggingUtility.CleanUpOldLogsIfNeeded();
 
         Debug.WriteLine("Running VersionChecker...");
-        ApplicationLog.Log("Running VersionChecker...");
+        LoggingUtility.Log("Running VersionChecker...");
         Service_Timer_VersionChecker.Initialize();
     }
 
@@ -79,10 +79,10 @@ internal static class Program
         Service_Timer_VersionChecker.MainFormInstance = mainForm;
 
         Debug.WriteLine("Starting main form...");
-        ApplicationLog.Log("Starting main form...");
+        LoggingUtility.Log("Starting main form...");
         Application.Run(mainForm);
 
         Debug.WriteLine("Application started.");
-        ApplicationLog.Log("Application started.");
+        LoggingUtility.Log("Application started.");
     }
 }

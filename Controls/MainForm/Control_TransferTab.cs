@@ -76,7 +76,7 @@ public partial class ControlTransferTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_ProcessCmdKey");
             return false;
         }
@@ -92,7 +92,7 @@ public partial class ControlTransferTab : UserControl
         {
             await Control_TransferTab_OnStartup_LoadDataComboBoxesAsync();
             Control_TransferTab_OnStartup_WireUpEvents();
-            ApplicationLog.Log("Initial setup of ComboBoxes in the Inventory Tab.");
+            LoggingUtility.Log("Initial setup of ComboBoxes in the Inventory Tab.");
             MainFormTabResetHelper.ResetTransferTab(
                 Control_TransferTab_ComboBox_Part,
                 Control_TransferTab_ComboBox_Operation,
@@ -104,18 +104,18 @@ public partial class ControlTransferTab : UserControl
             {
                 Core_WipAppVariables.UserFullName =
                     await Dao_User.GetUserFullNameAsync(Core_WipAppVariables.User, true);
-                ApplicationLog.Log($"User full name loaded: {Core_WipAppVariables.UserFullName}");
+                LoggingUtility.Log($"User full name loaded: {Core_WipAppVariables.UserFullName}");
             }
             catch (Exception ex)
             {
-                ApplicationLog.LogApplicationError(ex);
+                LoggingUtility.LogApplicationError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                     "Control_TransferTab_OnStartup_GetUserFullName");
             }
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "Control_TransferTab_OnStartup");
         }
     }
@@ -138,11 +138,11 @@ public partial class ControlTransferTab : UserControl
             foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
                 await Helper_ComboBoxes.FillComboBoxAsync(
                     procName, connection, adapter, table, comboBox, display, value, placeholder, cmdType);
-            ApplicationLog.Log("Transfer tab ComboBoxes loaded.");
+            LoggingUtility.Log("Transfer tab ComboBoxes loaded.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                 "MainForm_LoadTransferTabComboBoxesAsync");
         }
@@ -156,7 +156,7 @@ public partial class ControlTransferTab : UserControl
     {
         try
         {
-            ApplicationLog.Log("Inventory Reset button clicked.");
+            LoggingUtility.Log("Inventory Reset button clicked.");
             Control_TransferTab_ComboBox_Operation.Visible = false;
             Control_TransferTab_ComboBox_Part.Visible = false;
             Control_TransferTab_ComboBox_ToLocation.Visible = false;
@@ -209,7 +209,7 @@ public partial class ControlTransferTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_Button_Reset");
         }
     }
@@ -218,7 +218,7 @@ public partial class ControlTransferTab : UserControl
     {
         try
         {
-            ApplicationLog.Log("TransferTab Search button clicked.");
+            LoggingUtility.Log("TransferTab Search button clicked.");
             var partId = Control_TransferTab_ComboBox_Part.Text;
             var op = Control_TransferTab_ComboBox_Operation.Text;
             if (string.IsNullOrWhiteSpace(partId) || Control_TransferTab_ComboBox_Part.SelectedIndex <= 0)
@@ -233,12 +233,12 @@ public partial class ControlTransferTab : UserControl
             if (Control_TransferTab_ComboBox_Operation.SelectedIndex > 0 &&
                 Control_TransferTab_ComboBox_Operation.Text != @"[ Enter Op # ]")
             {
-                ApplicationLog.Log($"Searching inventory for Part ID: {partId} and Operation: {op}");
+                LoggingUtility.Log($"Searching inventory for Part ID: {partId} and Operation: {op}");
                 results = await Dao_Inventory.GetInventoryByPartIdAndOperationAsync(partId, op, true);
             }
             else
             {
-                ApplicationLog.Log($"Searching inventory for Part ID: {partId} without specific operation.");
+                LoggingUtility.Log($"Searching inventory for Part ID: {partId} without specific operation.");
                 results = await Dao_Inventory.GetInventoryByPartIdAsync(partId, true);
             }
 
@@ -260,7 +260,7 @@ public partial class ControlTransferTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                 "Control_TransferTab_Button_Search_Click");
         }
@@ -295,7 +295,7 @@ public partial class ControlTransferTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                 "Control_TransferTab_Button_Transfer_Click");
         }
@@ -385,7 +385,7 @@ public partial class ControlTransferTab : UserControl
     {
         try
         {
-            ApplicationLog.Log("Inventory Op ComboBox selection changed.");
+            LoggingUtility.Log("Inventory Op ComboBox selection changed.");
             if (Control_TransferTab_ComboBox_Operation.SelectedIndex > 0)
             {
                 Control_TransferTab_ComboBox_Operation.ForeColor = Color.Black;
@@ -402,7 +402,7 @@ public partial class ControlTransferTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Op");
         }
     }
@@ -411,7 +411,7 @@ public partial class ControlTransferTab : UserControl
     {
         try
         {
-            ApplicationLog.Log("Inventory Part ComboBox selection changed.");
+            LoggingUtility.Log("Inventory Part ComboBox selection changed.");
             if (Control_TransferTab_ComboBox_Part.SelectedIndex > 0)
             {
                 Control_TransferTab_ComboBox_Part.ForeColor = Color.Black;
@@ -428,7 +428,7 @@ public partial class ControlTransferTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Part");
         }
     }
@@ -470,7 +470,7 @@ public partial class ControlTransferTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 "Control_TransferTab_Update_ButtonStates");
         }
@@ -528,11 +528,11 @@ public partial class ControlTransferTab : UserControl
                 Control_TransferTab_DataGridView_Main_SelectionChanged;
             Control_TransferTab_Button_Transfer.Click +=
                 async (s, e) => await Control_TransferTab_Button_Save_ClickAsync(s, e);
-            ApplicationLog.Log("Transfer tab events wired up.");
+            LoggingUtility.Log("Transfer tab events wired up.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_WireUpTransferTabEvents");
         }
     }
@@ -562,7 +562,7 @@ public partial class ControlTransferTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
         }
     }
 

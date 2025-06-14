@@ -67,7 +67,7 @@ public partial class ControlRemoveTab : UserControl
         {
             await Control_RemoveTab_OnStartup_LoadDataComboBoxesAsync();
             Control_RemoveTab_OnStartup_WireUpEvents();
-            ApplicationLog.Log("Initial setup of ComboBoxes in the Remove Tab.");
+            LoggingUtility.Log("Initial setup of ComboBoxes in the Remove Tab.");
             if (MainFormInstance != null)
                 MainFormTabResetHelper.ResetRemoveTab(
                     Control_RemoveTab_ComboBox_Part,
@@ -81,18 +81,18 @@ public partial class ControlRemoveTab : UserControl
             {
                 Core_WipAppVariables.UserFullName =
                     await Dao_User.GetUserFullNameAsync(Core_WipAppVariables.User, true);
-                ApplicationLog.Log($"User full name loaded: {Core_WipAppVariables.UserFullName}");
+                LoggingUtility.Log($"User full name loaded: {Core_WipAppVariables.UserFullName}");
             }
             catch (Exception ex)
             {
-                ApplicationLog.LogApplicationError(ex);
+                LoggingUtility.LogApplicationError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                     new StringBuilder().Append("Control_RemoveTab_OnStartup_GetUserFullName").ToString());
             }
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "Control_RemoveTab_OnStartup");
         }
     }
@@ -125,11 +125,11 @@ public partial class ControlRemoveTab : UserControl
                     placeholder,
                     cmdType
                 );
-            ApplicationLog.Log("Remove tab ComboBoxes loaded.");
+            LoggingUtility.Log("Remove tab ComboBoxes loaded.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                 "MainForm_LoadRemoveTabComboBoxesAsync");
         }
@@ -173,7 +173,7 @@ public partial class ControlRemoveTab : UserControl
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_ProcessCmdKey");
             return false;
         }
@@ -188,12 +188,12 @@ public partial class ControlRemoveTab : UserControl
         try
         {
             var selectedCount = Control_RemoveTab_DataGridView_Main.SelectedRows.Count;
-            ApplicationLog.Log($"Delete clicked. Selected rows: {selectedCount}");
+            LoggingUtility.Log($"Delete clicked. Selected rows: {selectedCount}");
             System.Diagnostics.Debug.WriteLine($"[DEBUG] Delete clicked. Selected rows: {selectedCount}");
 
             if (selectedCount == 0)
             {
-                ApplicationLog.Log("No rows selected for deletion.");
+                LoggingUtility.Log("No rows selected for deletion.");
                 System.Diagnostics.Debug.WriteLine("[DEBUG] No rows selected for deletion.");
                 return;
             }
@@ -212,7 +212,7 @@ Are you sure?",
 
             if (confirmResult != DialogResult.Yes)
             {
-                ApplicationLog.Log("User cancelled deletion.");
+                LoggingUtility.Log("User cancelled deletion.");
                 System.Diagnostics.Debug.WriteLine("[DEBUG] User cancelled deletion.");
                 return;
             }
@@ -268,7 +268,7 @@ Are you sure?",
                         Notes = notes
                     });
 
-                    ApplicationLog.Log(
+                    LoggingUtility.Log(
                         $"Deleting: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
                     System.Diagnostics.Debug.WriteLine(
                         $"[DEBUG] Deleting: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
@@ -281,7 +281,7 @@ Are you sure?",
                         batchNumber: batchNumber
                     );
 
-                    ApplicationLog.Log(
+                    LoggingUtility.Log(
                         $"Deleted: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
                     System.Diagnostics.Debug.WriteLine(
                         $"[DEBUG] Deleted: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
@@ -291,14 +291,14 @@ Are you sure?",
             if (_lastRemovedItems.Count > 0 && undoBtn != null)
                 undoBtn.Enabled = true;
 
-            ApplicationLog.Log("Selected inventory items deleted.");
+            LoggingUtility.Log("Selected inventory items deleted.");
             System.Diagnostics.Debug.WriteLine("[DEBUG] Selected inventory items deleted.");
 
             Control_RemoveTab_Button_Search_Click(null, null);
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             System.Diagnostics.Debug.WriteLine($"[DEBUG] Exception: {ex}");
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "Control_RemoveTab_Button_Delete_Click");
         }
@@ -326,7 +326,7 @@ Are you sure?",
 
             MessageBox.Show("Undo successful. Removed items have been restored.", "Undo", MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
-            ApplicationLog.Log("Undo: Removed items restored.");
+            LoggingUtility.Log("Undo: Removed items restored.");
 
             _lastRemovedItems.Clear();
             var undoBtn = Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] as Button;
@@ -337,7 +337,7 @@ Are you sure?",
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             MessageBox.Show(@"Undo failed: " + ex.Message, @"Undo Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -346,7 +346,7 @@ Are you sure?",
     {
         try
         {
-            ApplicationLog.Log("Inventory Reset button clicked.");
+            LoggingUtility.Log("Inventory Reset button clicked.");
             Control_RemoveTab_ComboBox_Operation.Visible = false;
             Control_RemoveTab_ComboBox_Part.Visible = false;
             Control_RemoveTab_Image_NothingFound.Visible = false;
@@ -393,7 +393,7 @@ Are you sure?",
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_Button_Reset");
         }
     }
@@ -404,7 +404,7 @@ Are you sure?",
         {
             if (Service_Timer_VersionChecker.MainFormInstance == null)
             {
-                ApplicationLog.Log("MainForm instance is null, cannot open Advanced Inventory Removal.");
+                LoggingUtility.Log("MainForm instance is null, cannot open Advanced Inventory Removal.");
                 return;
             }
 
@@ -414,7 +414,7 @@ Are you sure?",
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 "Control_RemoveTab_Button_AdvancedItemRemoval_Click");
         }
@@ -424,7 +424,7 @@ Are you sure?",
     {
         try
         {
-            ApplicationLog.Log("RemoveTab Search button clicked.");
+            LoggingUtility.Log("RemoveTab Search button clicked.");
 
             var partId = Control_RemoveTab_ComboBox_Part.Text;
             var op = Control_RemoveTab_ComboBox_Operation.Text;
@@ -460,7 +460,7 @@ Are you sure?",
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "Control_RemoveTab_Button_Search_Click");
         }
     }
@@ -473,7 +473,7 @@ Are you sure?",
     {
         try
         {
-            ApplicationLog.Log("Inventory Op ComboBox selection changed.");
+            LoggingUtility.Log("Inventory Op ComboBox selection changed.");
 
             if (Control_RemoveTab_ComboBox_Operation.SelectedIndex > 0)
             {
@@ -491,7 +491,7 @@ Are you sure?",
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Op");
         }
     }
@@ -500,7 +500,7 @@ Are you sure?",
     {
         try
         {
-            ApplicationLog.Log("Inventory Part ComboBox selection changed.");
+            LoggingUtility.Log("Inventory Part ComboBox selection changed.");
 
             if (Control_RemoveTab_ComboBox_Part.SelectedIndex > 0)
             {
@@ -518,7 +518,7 @@ Are you sure?",
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Part");
         }
     }
@@ -534,7 +534,7 @@ Are you sure?",
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 "Control_RemoveTab_Update_ButtonStates");
         }
@@ -583,11 +583,11 @@ Are you sure?",
 
             Control_RemoveTab_Button_Delete.Click += Control_RemoveTab_Button_Delete_Click;
 
-            ApplicationLog.Log("Removal tab events wired up.");
+            LoggingUtility.Log("Removal tab events wired up.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_WireUpRemoveTabEvents");
         }
     }
@@ -644,7 +644,7 @@ Are you sure?",
                 TryParse(drv["Quantity"]?.ToString(), out var quantity);
 
                 sb.AppendLine($"PartID: {partId}, Location: {location}, Quantity: {quantity}");
-                ApplicationLog.Log($"Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
+                LoggingUtility.Log($"Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
                 System.Diagnostics.Debug.WriteLine(
                     $"[DEBUG] Selected for deletion: PartID={partId}, Location={location}, Quantity={quantity}");
 

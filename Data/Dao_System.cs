@@ -9,8 +9,12 @@ using MTM_WIP_Application.Helpers;
 
 namespace MTM_WIP_Application.Data;
 
+#region Dao_System
+
 internal static class Dao_System
 {
+    #region Fields
+
     public static Helper_MySql HelperMySql =
         new(Helper_SqlVariables.GetConnectionString(
             Core_WipAppVariables.WipServerAddress,
@@ -19,22 +23,10 @@ internal static class Dao_System
             Core_WipAppVariables.UserPin
         ));
 
-    // --- Helper for consistent error handling ---
-    private static async Task HandleSystemDaoExceptionAsync(Exception ex, string method, bool useAsync)
-    {
-        ApplicationLog.LogApplicationError(new Exception($"Error in {method}: {ex.Message}", ex));
-        if (ex is MySqlException)
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-        else
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
-    }
+    #endregion
 
-    // --- User Roles / Access (based on new sys_user_roles and sys_roles) ---
+    #region User Roles / Access
 
-    /// <summary>
-    ///     Assigns a role to a user (Admin or ReadOnly) in sys_user_roles.
-    ///     Removes all existing roles for the user first.
-    /// </summary>
     internal static async Task SetUserAccessTypeAsync(string userName, string accessType, bool useAsync = false)
     {
         try
@@ -92,14 +84,11 @@ internal static class Dao_System
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await HandleSystemDaoExceptionAsync(ex, "SetUserAccessType", useAsync);
         }
     }
 
-    /// <summary>
-    ///     Gets the current user name, normalizing and updating Core_WipAppVariables.User.
-    /// </summary>
     internal static string System_GetUserName()
     {
         var userIdWithDomain = Core_WipAppVariables.EnteredUser == "Default User"
@@ -113,9 +102,6 @@ internal static class Dao_System
         return user;
     }
 
-    /// <summary>
-    ///     Gets all users and their roles, and sets current user's admin/read-only flags.
-    /// </summary>
     internal static async Task<List<Model_Users>> System_UserAccessTypeAsync(bool useAsync = false)
     {
         var user = Core_WipAppVariables.User;
@@ -155,14 +141,31 @@ internal static class Dao_System
                 result.Add(u);
             }
 
-            ApplicationLog.Log($"System_UserAccessType executed successfully for user: {user}");
+            LoggingUtility.Log($"System_UserAccessType executed successfully for user: {user}");
             return result;
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await HandleSystemDaoExceptionAsync(ex, "System_UserAccessType", useAsync);
             return [];
         }
     }
+
+    #endregion
+
+    #region Helpers
+
+    private static async Task HandleSystemDaoExceptionAsync(Exception ex, string method, bool useAsync)
+    {
+        LoggingUtility.LogApplicationError(new Exception($"Error in {method}: {ex.Message}", ex));
+        if (ex is MySqlException)
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+        else
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+    }
+
+    #endregion
 }
+
+#endregion

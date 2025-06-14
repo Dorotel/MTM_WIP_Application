@@ -33,7 +33,7 @@ public partial class MainForm : Form
             InitializeComponent();
             Debug.WriteLine(
                 $"[DEBUG] MainForm_InventoryTab after InitializeComponent: {(MainForm_InventoryTab == null ? "null" : "not null")}");
-            ApplicationLog.Log("MainForm constructor called.");
+            LoggingUtility.Log("MainForm constructor called.");
             ConnectionStrengthChecker = new MySqlConnectionStrengthChecker();
             ConnectionRecoveryManager = new ConnectionRecoveryManager(this);
             MainForm_OnStartup_SetupConnectionStrengthControl();
@@ -49,11 +49,11 @@ public partial class MainForm : Form
                     MainForm_InventoryTab.Control_InventoryTab_ComboBox_Part.BackColor = Color.LightBlue;
                 }
             };
-            ApplicationLog.Log("MainForm initialized.");
+            LoggingUtility.Log("MainForm initialized.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm));
         }
     }
@@ -142,18 +142,18 @@ public partial class MainForm : Form
                     Core_WipAppVariables.UserFullName =
                         Core_WipAppVariables.User; // Fallback to username if full name not found
 
-                ApplicationLog.Log($"User full name loaded: {Core_WipAppVariables.UserFullName}");
+                LoggingUtility.Log($"User full name loaded: {Core_WipAppVariables.UserFullName}");
             }
             catch (Exception ex)
             {
-                ApplicationLog.LogApplicationError(ex);
+                LoggingUtility.LogApplicationError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                     "MainForm / " + "MainForm_OnStartup_GetUserFullNameAsync / " + "GetUserFullNameAsync");
             }
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                 "MainForm / " + "MainForm_OnStartup_GetUserFullNameAsync");
         }
@@ -173,7 +173,7 @@ public partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 nameof(MainForm_OnStartup_SetupConnectionStrengthControl));
         }
@@ -203,7 +203,7 @@ public partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm / " + "ProcessCmdKey");
             return false;
         }
@@ -219,11 +219,11 @@ public partial class MainForm : Form
         {
             _connectionStrengthTimer?.Stop();
             _connectionStrengthTimer?.Dispose();
-            ApplicationLog.Log("MainForm is closing. Connection strength timer stopped.");
+            LoggingUtility.Log("MainForm is closing. Connection strength timer stopped.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm / " + "OnFormClosing");
         }
 

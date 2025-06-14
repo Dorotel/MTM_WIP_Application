@@ -8,12 +8,11 @@ using System.Diagnostics;
 
 namespace MTM_WIP_Application.Data;
 
-/// <summary>
-/// Data access and error handling for the application's error log.
-/// </summary>
+#region Dao_ErrorLog
+
 internal static class Dao_ErrorLog
 {
-    // --- Query Methods ---
+    #region Fields
 
     public static Helper_MySql HelperMySql =
         new(Helper_SqlVariables.GetConnectionString(
@@ -22,6 +21,10 @@ internal static class Dao_ErrorLog
             Core_WipAppVariables.User,
             Core_WipAppVariables.UserPin
         ));
+
+    #endregion
+
+    #region Query Methods
 
     internal static async Task<List<(string MethodName, string ErrorMessage)>> GetUniqueErrorsAsync(
         bool useAsync = false)
@@ -37,11 +40,11 @@ internal static class Dao_ErrorLog
             while (reader.Read())
                 uniqueErrors.Add((reader.GetString("MethodName"), reader.GetString("ErrorMessage")));
 
-            ApplicationLog.Log("GetUniqueErrors executed successfully.");
+            LoggingUtility.Log("GetUniqueErrors executed successfully.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await HandleException_GeneralError_CloseApp(ex, useAsync);
         }
 
@@ -78,13 +81,15 @@ internal static class Dao_ErrorLog
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             await HandleException_GeneralError_CloseApp(ex, useAsync);
             return new DataTable();
         }
     }
 
-    // --- Delete Methods ---
+    #endregion
+
+    #region Delete Methods
 
     internal static async Task DeleteErrorByIdAsync(int id, bool useAsync = false)
     {
@@ -110,15 +115,17 @@ internal static class Dao_ErrorLog
         {
             // Use database error log for SQL exceptions, application error log otherwise
             if (ex is MySqlException)
-                ApplicationLog.LogDatabaseError(ex);
+                LoggingUtility.LogDatabaseError(ex);
             else
-                ApplicationLog.LogApplicationError(ex);
+                LoggingUtility.LogApplicationError(ex);
 
             await HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
 
-    // --- Error Handling Methods ---
+    #endregion
+
+    #region Error Handling Methods
 
     // Prevents error message spam by tracking the last shown error and time
     private static string? _lastErrorMessage;
@@ -129,7 +136,8 @@ internal static class Dao_ErrorLog
     private static DateTime _lastSqlErrorTime = DateTime.MinValue;
     private static readonly TimeSpan SqlErrorMessageCooldown = TimeSpan.FromSeconds(5);
 
-    // --- Helper: ShouldShowErrorMessage ---
+    #region Error Message Helpers
+
     private static bool ShouldShowErrorMessage(string message)
     {
         var now = DateTime.Now;
@@ -155,6 +163,8 @@ internal static class Dao_ErrorLog
         }
     }
 
+    #endregion
+
     internal static async Task HandleException_SQLError_CloseApp(
         Exception ex,
         bool useAsync = false,
@@ -164,13 +174,13 @@ internal static class Dao_ErrorLog
     {
         try
         {
-            ApplicationLog.LogDatabaseError(ex);
-            ApplicationLog.Log($"SQL Error in method: {callerName}, Control: {controlName}");
+            LoggingUtility.LogDatabaseError(ex);
+            LoggingUtility.Log($"SQL Error in method: {callerName}, Control: {controlName}");
 
             if (ex is MySqlException mysqlEx)
             {
-                ApplicationLog.Log($"MySQL Error Code: {mysqlEx.Number}");
-                ApplicationLog.Log($"MySQL Error Details: {mysqlEx.Message}");
+                LoggingUtility.Log($"MySQL Error Code: {mysqlEx.Number}");
+                LoggingUtility.Log($"MySQL Error Details: {mysqlEx.Message}");
             }
 
             var isConnectionError = ex.Message.Contains("Unable to connect to any of the specified MySQL hosts.")
@@ -211,7 +221,7 @@ internal static class Dao_ErrorLog
         }
         catch (Exception innerEx)
         {
-            ApplicationLog.LogApplicationError(innerEx);
+            LoggingUtility.LogApplicationError(innerEx);
         }
     }
 
@@ -245,7 +255,7 @@ internal static class Dao_ErrorLog
             var mainForm = Application.OpenForms.OfType<MainForm>().FirstOrDefault();
             if (mainForm != null) mainForm.ConnectionRecoveryManager.HandleConnectionLost();
 
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
 
             await LogErrorToDatabaseAsync(
                 isCritical ? "Critical" : "Error",
@@ -272,11 +282,11 @@ internal static class Dao_ErrorLog
                 }
             }
 
-            ApplicationLog.Log("HandleException_GeneralError_CloseApp executed successfully.");
+            LoggingUtility.Log("HandleException_GeneralError_CloseApp executed successfully.");
         }
         catch (Exception innerEx)
         {
-            ApplicationLog.LogApplicationError(innerEx);
+            LoggingUtility.LogApplicationError(innerEx);
             await HandleException_GeneralError_CloseApp(innerEx, useAsync, controlName: controlName);
         }
     }
@@ -315,6 +325,10 @@ internal static class Dao_ErrorLog
         await HelperMySql.ExecuteNonQuery(sql, parameters, useAsync, CommandType.Text);
     }
 
+    #endregion
+
+    #region Synchronous Helpers
+
     internal static List<(string MethodName, string ErrorMessage)> GetUniqueErrors()
     {
         return GetUniqueErrorsAsync(false).GetAwaiter().GetResult();
@@ -324,7 +338,11 @@ internal static class Dao_ErrorLog
         [System.Runtime.CompilerServices.CallerMemberName]
         string methodName = "")
     {
-        ApplicationLog.LogApplicationError(ex);
-        ApplicationLog.Log($"Error in {methodName}: {ex.Message}");
+        LoggingUtility.LogApplicationError(ex);
+        LoggingUtility.Log($"Error in {methodName}: {ex.Message}");
     }
+
+    #endregion
 }
+
+#endregion

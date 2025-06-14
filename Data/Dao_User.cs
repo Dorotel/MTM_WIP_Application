@@ -9,6 +9,8 @@ namespace MTM_WIP_Application.Data;
 
 internal static class Dao_User
 {
+    #region Fields
+
     public static Helper_MySql HelperMySql =
         new(Helper_SqlVariables.GetConnectionString(
             Core_WipAppVariables.WipServerAddress,
@@ -16,6 +18,8 @@ internal static class Dao_User
             Core_WipAppVariables.User,
             Core_WipAppVariables.UserPin
         ));
+
+    #endregion
 
     #region User Settings Getters/Setters
 
@@ -58,7 +62,7 @@ internal static class Dao_User
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return null;
         }
@@ -121,7 +125,7 @@ internal static class Dao_User
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return null;
         }
@@ -139,7 +143,7 @@ internal static class Dao_User
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return string.Empty;
         }
@@ -191,7 +195,7 @@ internal static class Dao_User
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
@@ -226,7 +230,7 @@ internal static class Dao_User
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
@@ -245,7 +249,7 @@ internal static class Dao_User
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
@@ -264,7 +268,7 @@ internal static class Dao_User
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return new DataTable();
         }
@@ -285,7 +289,7 @@ internal static class Dao_User
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return null;
         }
@@ -306,7 +310,7 @@ internal static class Dao_User
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return false;
         }
@@ -345,7 +349,7 @@ internal static class Dao_User
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }

@@ -14,14 +14,21 @@ namespace MTM_WIP_Application.Services;
 
 internal static class Service_Timer_VersionChecker
 {
-    private static readonly Timer VersionTimer = new(30000); // 30 seconds
+    #region Fields
 
-    // Store the latest database version for Program.cs to access
+    private static readonly Timer VersionTimer = new(30000);
+
+    #endregion
+
+    #region Properties
+
     public static string? LastCheckedDatabaseVersion { get; private set; }
-
-    // Allow MainForm instance to be set so we can update UI from here if desired
     public static MainForm? MainFormInstance { get; set; }
     public static ControlInventoryTab? ControlInventoryInstance { get; set; }
+
+    #endregion
+
+    #region Public Methods
 
     public static void Initialize()
     {
@@ -31,57 +38,46 @@ internal static class Service_Timer_VersionChecker
             VersionTimer.Enabled = true;
             VersionTimer.AutoReset = true;
             VersionTimer.Start();
-
             Debug.WriteLine("VersionTimer initialized and started.");
-            ApplicationLog.Log("VersionTimer initialized and started.");
+            LoggingUtility.Log("VersionTimer initialized and started.");
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Error initializing VersionTimer: {ex.Message}");
-            ApplicationLog.Log($"Error initializing VersionTimer: {ex.Message}");
+            LoggingUtility.Log($"Error initializing VersionTimer: {ex.Message}");
         }
 
-        // Also do an immediate version check at startup
         VersionChecker(null, null);
     }
 
     public static void VersionChecker(object? sender, ElapsedEventArgs? e)
     {
         Debug.WriteLine("Running VersionChecker...");
-        ApplicationLog.Log("Running VersionChecker...");
-
+        LoggingUtility.Log("Running VersionChecker...");
         MySqlConnection? connection = null;
         MySqlCommand? command = null;
         MySqlDataReader? reader = null;
-
         try
         {
             connection = new MySqlConnection(Helper_SqlVariables.GetConnectionString(null, null, null, null));
             connection.Open();
-
             command = new MySqlCommand("log_changelog_Get_Current", connection)
             {
                 CommandType = System.Data.CommandType.StoredProcedure
             };
-
             using (reader = command.ExecuteReader())
             {
                 if (reader.Read())
                 {
-                    // Use column name for clarity and safety
                     var databaseVersion = reader.GetString(reader.GetOrdinal("Version"));
                     LastCheckedDatabaseVersion = databaseVersion;
-
-                    // Always show both app and server version for debugging
                     ControlInventoryInstance?.SetVersionLabel(Core_WipAppVariables.UserVersion, databaseVersion);
-
                     if (Core_WipAppVariables.UserVersion != databaseVersion)
                     {
-                        ApplicationLog.Log(
+                        LoggingUtility.Log(
                             $"Version mismatch detected. Current: {Core_WipAppVariables.UserVersion}, Expected: {databaseVersion}");
                         Debug.WriteLine(
                             $"Version mismatch detected. Current: {Core_WipAppVariables.UserVersion}, Expected: {databaseVersion}");
-
                         Task.Run(() =>
                         {
                             var message = "You are using an older version of the WIP Application.\n" +
@@ -90,7 +86,6 @@ internal static class Service_Timer_VersionChecker
                             var caption =
                                 $"Version Conflict Error ({Core_WipAppVariables.UserVersion}/{databaseVersion})";
                             MessageBox.Show(message, caption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-
                             Application.Exit();
                         });
                     }
@@ -99,12 +94,12 @@ internal static class Service_Timer_VersionChecker
         }
         catch (MySqlException ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             Service_OnEvent_ExceptionHandler.HandleDatabaseError();
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             MessageBox.Show(@"An error occurred in VersionChecker:
 " + ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
@@ -115,4 +110,6 @@ internal static class Service_Timer_VersionChecker
             connection?.Close();
         }
     }
+
+    #endregion
 }

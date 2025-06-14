@@ -6,32 +6,31 @@ using MySql.Data.MySqlClient;
 
 namespace MTM_WIP_Application.Logging;
 
-/// <summary>
-///     Centralized application logging utility for thread-safe log collection and file output.
-///     Now supports separate files for normal, database error, and application error logs.
-/// </summary>
-internal static class ApplicationLog
+#region LoggingUtility
+
+internal static class LoggingUtility
 {
+    #region Fields
+
     private static string _appErrorLogFile = string.Empty;
     private static string _dbErrorLogFile = string.Empty;
     private static string _logDirectory = string.Empty;
     private static string _normalLogFile = string.Empty;
     private static readonly Lock LogLock = new();
 
-    /// <summary>
-    ///     Deletes old log files and cleans up application data folders.
-    /// </summary>
+    #endregion
+
+    #region LogCleanup
+
     private static void CleanUpOldLogs(string logDirectory, int maxLogs)
     {
         Debug.WriteLine($"Cleaning up old logs in directory: {logDirectory}");
         Log($"Cleaning up old logs in directory: {logDirectory}");
-
         try
         {
             var logFiles = Directory.GetFiles(logDirectory, "*.log")
                 .OrderByDescending(File.GetCreationTime)
                 .ToList();
-
             if (logFiles.Count > maxLogs)
             {
                 var filesToDelete = logFiles.Skip(maxLogs).ToList();
@@ -54,10 +53,8 @@ internal static class ApplicationLog
                 "MTM_WIP_APP");
             var localAppDataPath =
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MTM_WIP_APP");
-
             Service_OnStartup_AppDataCleaner.DeleteDirectoryContents(appDataPath);
             Service_OnStartup_AppDataCleaner.DeleteDirectoryContents(localAppDataPath);
-
             Log("Cleaned up application data folders in %AppData% and %LocalAppData%.");
         }
         catch (Exception ex)
@@ -67,21 +64,18 @@ internal static class ApplicationLog
         }
     }
 
-    /// <summary>
-    ///     Cleans up old log files and application data folders if needed.
-    /// </summary>
     public static void CleanUpOldLogsIfNeeded()
     {
         Debug.WriteLine("Cleaning up old logs if needed...");
         Log("Cleaning up old logs if needed...");
-
         if (!string.IsNullOrEmpty(_logDirectory))
             CleanUpOldLogs(_logDirectory, 20);
     }
 
-    /// <summary>
-    ///     Writes a single log entry to the specified log file immediately.
-    /// </summary>
+    #endregion
+
+    #region LogFileWriting
+
     private static void FlushLogEntryToDisk(string filePath, string logEntry)
     {
         try
@@ -95,34 +89,32 @@ internal static class ApplicationLog
         catch (Exception ex)
         {
             Debug.WriteLine($"Failed to write log entry to file: {ex.Message}");
-            // Do not log this error to avoid recursion
         }
     }
 
-    /// <summary>
-    ///     Initializes logging, sets up log file paths, and hooks process exit for log flush.
-    /// </summary>
+    #endregion
+
+    #region Initialization
+
     public static void InitializeLogging()
     {
         Debug.WriteLine("Initializing logging...");
         var server = new MySqlConnectionStringBuilder(Core_WipAppVariables.ConnectionString).Server;
         var userName = Core_WipAppVariables.User;
         var logFilePath = Helper_SqlVariables.GetLogFilePath(server, userName);
-
         _logDirectory = Path.GetDirectoryName(logFilePath) ?? "";
         var baseFileName = Path.GetFileNameWithoutExtension(logFilePath);
-
         _normalLogFile = Path.Combine(_logDirectory, $"{baseFileName}_normal.log");
         _dbErrorLogFile = Path.Combine(_logDirectory, $"{baseFileName}_db_error.log");
         _appErrorLogFile = Path.Combine(_logDirectory, $"{baseFileName}_app_error.log");
-
         Log("Initializing logging...");
         AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
     }
 
-    /// <summary>
-    ///     Adds a log message to the normal log file with a timestamp and immediately writes it to disk.
-    /// </summary>
+    #endregion
+
+    #region LoggingMethods
+
     public static void Log(string message)
     {
         var logEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}";
@@ -132,9 +124,6 @@ internal static class ApplicationLog
         }
     }
 
-    /// <summary>
-    ///     Logs an application error and its stack trace, and immediately writes them to the application error log file.
-    /// </summary>
     public static void LogApplicationError(Exception ex)
     {
         var errorEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - Application Error - {ex.Message}";
@@ -146,9 +135,6 @@ internal static class ApplicationLog
         }
     }
 
-    /// <summary>
-    ///     Logs a database error and its stack trace, and immediately writes them to the database error log file.
-    /// </summary>
     public static void LogDatabaseError(Exception ex)
     {
         var errorEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - Database Error - {ex.Message}";
@@ -160,9 +146,10 @@ internal static class ApplicationLog
         }
     }
 
-    /// <summary>
-    ///     Writes a shutdown message to all log files on process exit.
-    /// </summary>
+    #endregion
+
+    #region Shutdown
+
     private static void OnProcessExit(object? sender, EventArgs e)
     {
         Debug.WriteLine("OnProcessExit triggered. Writing shutdown message to all log files...");
@@ -174,4 +161,8 @@ internal static class ApplicationLog
             FlushLogEntryToDisk(_appErrorLogFile, shutdownMsg);
         }
     }
+
+    #endregion
 }
+
+#endregion

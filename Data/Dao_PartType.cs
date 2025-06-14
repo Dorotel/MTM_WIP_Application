@@ -9,6 +9,8 @@ namespace MTM_WIP_Application.Data;
 
 internal static class Dao_PartType
 {
+    #region Fields
+
     public static Helper_MySql HelperMySql =
         new(Helper_SqlVariables.GetConnectionString(
             Core_WipAppVariables.WipServerAddress,
@@ -17,7 +19,9 @@ internal static class Dao_PartType
             Core_WipAppVariables.UserPin
         ));
 
-    #region Add / Update / Delete
+    #endregion
+
+    #region Insert
 
     internal static async Task InsertPartTypeAsync(string partType, string user, bool useAsync = false)
     {
@@ -34,10 +38,14 @@ internal static class Dao_PartType
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
+
+    #endregion
+
+    #region Update
 
     internal static async Task UpdatePartTypeAsync(string partType, string newType, string user, bool useAsync = false)
     {
@@ -55,10 +63,14 @@ internal static class Dao_PartType
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
+
+    #endregion
+
+    #region Delete
 
     internal static async Task DeletePartTypeAsync(string partType, bool useAsync = false)
     {
@@ -71,14 +83,14 @@ internal static class Dao_PartType
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
 
     #endregion
 
-    #region Queries
+    #region Read
 
     internal static async Task<DataTable> GetAllPartTypesAsync(bool useAsync = false)
     {
@@ -90,7 +102,7 @@ internal static class Dao_PartType
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return new DataTable();
         }
@@ -108,7 +120,7 @@ internal static class Dao_PartType
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return null;
         }
@@ -126,7 +138,7 @@ internal static class Dao_PartType
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return false;
         }

@@ -54,7 +54,7 @@ public class Core_DgvDesigner
         ApplyThemeToControls(form.Controls, theme);
 
         form.ResumeLayout();
-        ApplicationLog.Log($"Global theme '{themeName}' applied to form '{form.Name}'.");
+        LoggingUtility.Log($"Global theme '{themeName}' applied to form '{form.Name}'.");
     }
 
     private static void ApplyThemeToControls(Control.ControlCollection controls, Core_AppThemes.AppTheme theme)
@@ -143,7 +143,7 @@ public class Core_DgvDesigner
         {
             if (dataGridView.Columns.Count == 0)
             {
-                ApplicationLog.Log("SizeDataGrid: No columns to size.");
+                LoggingUtility.Log("SizeDataGrid: No columns to size.");
                 return;
             }
 
@@ -158,12 +158,12 @@ public class Core_DgvDesigner
             dataGridView.Font =
                 new Font(dataGridView.Font.Name, Core_WipAppVariables.ThemeFontSize, dataGridView.Font.Style);
 
-            ApplicationLog.Log("SizeDataGrid: DataGridView sized successfully.");
+            LoggingUtility.Log("SizeDataGrid: DataGridView sized successfully.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
-            ApplicationLog.Log("Error in SizeDataGrid: " + ex.Message);
+            LoggingUtility.LogDatabaseError(ex);
+            LoggingUtility.Log("Error in SizeDataGrid: " + ex.Message);
         }
     }
 

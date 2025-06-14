@@ -5,26 +5,12 @@ using MTM_WIP_Application.Data;
 
 namespace MTM_WIP_Application.Helpers;
 
-/// <summary>
-///
-/// Testing Passed: 05/31/2025
-///
-/// Contains unit tests for the Core_DgvDesigner class, which provides utilities for applying visual themes to Windows Forms and DataGridView controls.
-///
-/// Features Tested:
-/// - Recursive application of theme colors, fonts, and styles to forms and all child controls.
-/// - Control-specific theming for buttons, tab controls, text boxes, and labels.
-/// - Customization of DataGridView appearance, including background, headers, selection, and column sizing.
-/// - Helper methods for theme information, color retrieval, and testing support.
-/// - Integration with Core_WipAppVariables for theme selection.
-///
-/// Usage:
-/// 1. Verifies ApplyTheme applies the current global theme to forms and controls.
-/// 2. Tests SizeDataGrid for optimizing DataGridView column sizing.
-/// 3. Validates static helpers for querying theme names, colors, and theme application in test scenarios.
-/// </summary>
+#region Helper_ComboBoxes
+
 public static class Helper_ComboBoxes
 {
+    #region ComboBox Reset & Clear
+
     public static async Task ClearAndResetAllComboBoxesAsync(
         ComboBox inventoryTabComboBoxPart,
         DataTable inventoryTabPartCbDataTable,
@@ -114,6 +100,10 @@ public static class Helper_ComboBoxes
         if (mainFormTabControl.SelectedIndex == 2) transferTabComboBoxPart.Focus();
     }
 
+    #endregion
+
+    #region ComboBox Data Fill
+
     public static async Task FillAllComboBoxesAsync(
         MySqlConnection connection,
         MySqlDataAdapter inventoryTabPartCbDataAdapter,
@@ -175,7 +165,6 @@ public static class Helper_ComboBoxes
             .ConfigureAwait(false);
     }
 
-    // Use System.Data.MySqlDataAdapter for the adapter parameter
     public static async Task FillComboBoxAsync(
         string procedureName,
         MySqlConnection connection,
@@ -198,10 +187,8 @@ public static class Helper_ComboBoxes
                 CommandType = commandType
             };
 
-            // Assign the command if the adapter is a MySqlDataAdapter
             if (adapter is { } mySqlAdapter)
                 mySqlAdapter.SelectCommand = command;
-            // else: handle your custom wrapper here if you need
 
             dataTable.Clear();
             await Task.Run(() => adapter.Fill(dataTable)).ConfigureAwait(false);
@@ -240,24 +227,14 @@ public static class Helper_ComboBoxes
         }
     }
 
-    private static Task InvokeAsyncTask(this Control control, Action action, CancellationToken cancellationToken)
-    {
-        return Task.Factory.StartNew(() => control.Invoke(action), cancellationToken, TaskCreationOptions.None,
-            TaskScheduler.Default);
-    }
+    #endregion
 
-    // --- ComboBox Utility Methods ---
+    #region ComboBox Validation & State
 
-    /// <summary>
-    /// Validates that the ComboBox's text matches either the placeholder or a valid item in the ComboBox.
-    /// Sets ForeColor accordingly. Returns true if valid, false otherwise.
-    /// </summary>
     public static bool ValidateComboBoxItem(ComboBox comboBox, string placeholder)
     {
         if (string.IsNullOrWhiteSpace(comboBox.Text))
             return false;
-
-        // Accept placeholder as valid
         if (comboBox.Text.Equals(placeholder, StringComparison.OrdinalIgnoreCase))
         {
             comboBox.ForeColor = Color.Red;
@@ -266,7 +243,6 @@ public static class Helper_ComboBoxes
 
         var found = false;
         var displayMember = comboBox.DisplayMember;
-
         foreach (var item in comboBox.Items)
         {
             string? itemText = null;
@@ -274,7 +250,6 @@ public static class Helper_ComboBoxes
                 itemText = drv[displayMember]?.ToString();
             else
                 itemText = item?.ToString();
-
             if (!string.IsNullOrEmpty(itemText) &&
                 itemText.Equals(comboBox.Text, StringComparison.OrdinalIgnoreCase))
             {
@@ -287,58 +262,42 @@ public static class Helper_ComboBoxes
         return found;
     }
 
-    /// <summary>
-    /// Sets the ComboBox's text and color to the placeholder.
-    /// </summary>
     public static void SetComboBoxPlaceholder(ComboBox comboBox, string placeholder)
     {
         comboBox.Text = placeholder;
         comboBox.ForeColor = Color.Red;
     }
 
-    /// <summary>
-    /// Sets the ComboBox's ForeColor to indicate a valid selection.
-    /// </summary>
     public static void SetComboBoxValid(ComboBox comboBox)
     {
         comboBox.ForeColor = Color.Black;
     }
 
-    /// <summary>
-    /// Sets the ComboBox's ForeColor to indicate an invalid selection.
-    /// </summary>
     public static void SetComboBoxInvalid(ComboBox comboBox)
     {
         comboBox.ForeColor = Color.Red;
     }
 
-    /// <summary>
-    /// Applies the standard ComboBox properties used in ControlTransferTab to the given ComboBox.
-    /// </summary>
-    /// <param name="comboBox">The ComboBox to standardize.</param>
-    /// <param name="ownerDraw">Set true for OwnerDrawVariable (e.g., ToLocation), false otherwise.</param>
+    #endregion
+
+    #region ComboBox UI Helpers
+
     public static void ApplyStandardComboBoxProperties(ComboBox comboBox, bool ownerDraw = false)
     {
         if (comboBox == null) return;
         comboBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
         comboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
         comboBox.FormattingEnabled = true;
-        comboBox.DropDownStyle = ComboBoxStyle.DropDown; // Default unless you want DropDownList
+        comboBox.DropDownStyle = ComboBoxStyle.DropDown;
         comboBox.DrawMode = ownerDraw ? DrawMode.OwnerDrawVariable : DrawMode.Normal;
     }
 
-    /// <summary>
-    /// Deselects all text in all ComboBox controls within the specified parent control (recursively).
-    /// </summary>
-    /// <param name="parent">The parent control (UserControl or Form) to search for ComboBoxes.</param>
     public static void DeselectAllComboBoxText(Control parent)
     {
         if (parent == null) return;
-
         foreach (Control control in parent.Controls)
         {
             if (control is ComboBox comboBox)
-                // Only applicable if the ComboBox is editable (DropDown or Simple)
                 if (comboBox.DropDownStyle != ComboBoxStyle.DropDownList)
                 {
                     if (comboBox.InvokeRequired)
@@ -347,9 +306,22 @@ public static class Helper_ComboBoxes
                         comboBox.SelectionLength = 0;
                 }
 
-            // Recursively process child controls
             if (control.HasChildren)
                 DeselectAllComboBoxText(control);
         }
     }
+
+    #endregion
+
+    #region Internal Helpers
+
+    private static Task InvokeAsyncTask(this Control control, Action action, CancellationToken cancellationToken)
+    {
+        return Task.Factory.StartNew(() => control.Invoke(action), cancellationToken, TaskCreationOptions.None,
+            TaskScheduler.Default);
+    }
+
+    #endregion
 }
+
+#endregion

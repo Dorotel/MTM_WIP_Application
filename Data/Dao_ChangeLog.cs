@@ -9,7 +9,7 @@ namespace MTM_WIP_Application.Data;
 
 internal static class Dao_ChangeLog
 {
-    #region SQL Helper
+    #region Fields
 
     public static Helper_MySql HelperMySql =
         new(Helper_SqlVariables.GetConnectionString(
@@ -21,7 +21,7 @@ internal static class Dao_ChangeLog
 
     #endregion
 
-    #region ChangeLog Table Operations (log_changelog)
+    #region Delete
 
     internal static async Task DeleteChangeLogEntryAsync(string version, bool useAsync = false)
     {
@@ -37,10 +37,14 @@ internal static class Dao_ChangeLog
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
+
+    #endregion
+
+    #region Read
 
     internal static async Task<DataTable> GetAllChangeLogEntriesAsync(bool useAsync = false)
     {
@@ -52,7 +56,7 @@ internal static class Dao_ChangeLog
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return new DataTable();
         }
@@ -73,11 +77,15 @@ internal static class Dao_ChangeLog
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return null;
         }
     }
+
+    #endregion
+
+    #region Insert
 
     internal static async Task InsertChangeLogEntryAsync(string version, string notes, bool useAsync = false)
     {
@@ -94,10 +102,14 @@ internal static class Dao_ChangeLog
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
+
+    #endregion
+
+    #region Update
 
     internal static async Task UpdateChangeLogNotesAsync(string version, string notes, bool useAsync = false)
     {
@@ -114,14 +126,14 @@ internal static class Dao_ChangeLog
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
 
     #endregion
 
-    #region Additional Methods (Version Queries)
+    #region Additional Methods
 
     internal static async Task<List<string>> Primary_ChangeLog_Get_AllVersionsAsync(bool useAsync = false)
     {
@@ -138,7 +150,7 @@ internal static class Dao_ChangeLog
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
 
@@ -163,7 +175,7 @@ internal static class Dao_ChangeLog
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogDatabaseError(ex);
+            LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return string.Empty;
         }

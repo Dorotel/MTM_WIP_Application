@@ -5,8 +5,19 @@ using System.Data;
 
 namespace MTM_WIP_Application.Data;
 
+#region Dao_History
+
 internal class Dao_History
 {
+    #region Fields
+    // Add fields here if needed in the future
+    #endregion
+
+    #region Constructors
+    // Add constructors here if needed in the future
+    #endregion
+
+    #region History Methods
     public static async Task AddTransactionHistoryAsync(Model_TransactionHistory history)
     {
         var connectionString = Helper_SqlVariables.GetConnectionString(null, null, null, null);
@@ -30,4 +41,11 @@ internal class Dao_History
 
         await command.ExecuteNonQueryAsync();
     }
+    #endregion
+
+    #region Helpers
+    // Add helper methods here
+    #endregion
 }
+
+#endregion

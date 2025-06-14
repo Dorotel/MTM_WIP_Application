@@ -58,13 +58,13 @@ public class Core_DgvPrinter
         {
             _dgv = dgv ?? throw new ArgumentNullException(nameof(dgv));
             _currentRow = 0;
-            ApplicationLog.Log("Starting print operation in Core_DgvPrinter.");
+            LoggingUtility.Log("Starting print operation in Core_DgvPrinter.");
             _printDocument.Print();
-            ApplicationLog.Log("Print operation completed in Core_DgvPrinter.");
+            LoggingUtility.Log("Print operation completed in Core_DgvPrinter.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(
                 ex, false,
                 new System.Text.StringBuilder().Append("Core_DgvPrinter.Print").ToString());
@@ -78,7 +78,7 @@ public class Core_DgvPrinter
         {
             if (_dgv == null || e.Graphics == null)
             {
-                ApplicationLog.Log("PrintPage aborted: _dgv or Graphics is null.");
+                LoggingUtility.Log("PrintPage aborted: _dgv or Graphics is null.");
                 e.HasMorePages = false;
                 return;
             }
@@ -129,17 +129,17 @@ public class Core_DgvPrinter
                 if (y + rowHeight > e.MarginBounds.Bottom)
                 {
                     e.HasMorePages = true;
-                    ApplicationLog.Log("PrintPage: more pages required.");
+                    LoggingUtility.Log("PrintPage: more pages required.");
                     return;
                 }
             }
 
             e.HasMorePages = false;
-            ApplicationLog.Log("PrintPage finished without more pages required.");
+            LoggingUtility.Log("PrintPage finished without more pages required.");
         }
         catch (Exception ex)
         {
-            ApplicationLog.LogApplicationError(ex);
+            LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(
                 ex, false,
                 new System.Text.StringBuilder().Append("Core_DgvPrinter.PrintPage").ToString());
