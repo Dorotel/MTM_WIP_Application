@@ -50,11 +50,9 @@ partial class AdvancedInventoryEntryForm
 
     // --- Tab 3: Import ---
     private DataGridView AdvancedEntry_Import_DataGridView;
-    private Panel AdvancedEntry_Import_Panel_Buttons;
+    private Panel AdvancedEntry_Import_Panel_Bottom;
     private Button AdvancedEntry_Import_Button_OpenExcel;
     private Button AdvancedEntry_Import_Button_ImportExcel;
-    private Button AdvancedEntry_Import_Button_OpenCsv;
-    private Button AdvancedEntry_Import_Button_ImportCsv;
     private Button AdvancedEntry_Import_Button_Save;
     private Button AdvancedEntry_Import_Button_Close;
 
@@ -95,14 +93,15 @@ partial class AdvancedInventoryEntryForm
         AdvancedEntry_MultiLoc_Button_SaveAll = new Button();
         AdvancedEntry_MultiLoc_Button_Reset = new Button();
         AdvancedEntry_TabControl_Import = new TabPage();
+        AdvancedEntry_Import_TableLayout = new TableLayoutPanel();
+        AdvancedEntry_Import_Panel_Middle = new Panel();
+        AdvancedEntry_Import_DataGridView = new DataGridView();
+        AdvancedEntry_Import_Panel_Top = new Panel();
         AdvancedEntry_Import_Button_OpenExcel = new Button();
-        AdvancedEntry_Import_Panel_Buttons = new Panel();
+        AdvancedEntry_Import_Button_ImportExcel = new Button();
+        AdvancedEntry_Import_Panel_Bottom = new Panel();
         AdvancedEntry_Import_Button_Save = new Button();
         AdvancedEntry_Import_Button_Close = new Button();
-        AdvancedEntry_Import_Button_ImportExcel = new Button();
-        AdvancedEntry_Import_Button_ImportCsv = new Button();
-        AdvancedEntry_Import_DataGridView = new DataGridView();
-        AdvancedEntry_Import_Button_OpenCsv = new Button();
         AdvancedEntry_TabControl.SuspendLayout();
         AdvancedEntry_TabControl_Single.SuspendLayout();
         AdvancedEntry_Single_GroupBox_Main.SuspendLayout();
@@ -110,8 +109,11 @@ partial class AdvancedInventoryEntryForm
         AdvancedEntry_MultiLoc_GroupBox_Item.SuspendLayout();
         AdvancedEntry_MultiLoc_GroupBox_Preview.SuspendLayout();
         AdvancedEntry_TabControl_Import.SuspendLayout();
-        AdvancedEntry_Import_Panel_Buttons.SuspendLayout();
+        AdvancedEntry_Import_TableLayout.SuspendLayout();
+        AdvancedEntry_Import_Panel_Middle.SuspendLayout();
         ((ISupportInitialize)AdvancedEntry_Import_DataGridView).BeginInit();
+        AdvancedEntry_Import_Panel_Top.SuspendLayout();
+        AdvancedEntry_Import_Panel_Bottom.SuspendLayout();
         SuspendLayout();
         // 
         // AdvancedEntry_TabControl
@@ -450,82 +452,102 @@ partial class AdvancedInventoryEntryForm
         // 
         // AdvancedEntry_TabControl_Import
         // 
-        AdvancedEntry_TabControl_Import.Controls.Add(AdvancedEntry_Import_Button_OpenExcel);
-        AdvancedEntry_TabControl_Import.Controls.Add(AdvancedEntry_Import_Panel_Buttons);
-        AdvancedEntry_TabControl_Import.Controls.Add(AdvancedEntry_Import_Button_ImportExcel);
-        AdvancedEntry_TabControl_Import.Controls.Add(AdvancedEntry_Import_Button_ImportCsv);
-        AdvancedEntry_TabControl_Import.Controls.Add(AdvancedEntry_Import_DataGridView);
-        AdvancedEntry_TabControl_Import.Controls.Add(AdvancedEntry_Import_Button_OpenCsv);
+        AdvancedEntry_TabControl_Import.Controls.Add(AdvancedEntry_Import_TableLayout);
         AdvancedEntry_TabControl_Import.Location = new Point(4, 24);
         AdvancedEntry_TabControl_Import.Name = "AdvancedEntry_TabControl_Import";
         AdvancedEntry_TabControl_Import.Size = new Size(827, 281);
         AdvancedEntry_TabControl_Import.TabIndex = 2;
         AdvancedEntry_TabControl_Import.Text = "Import";
         // 
-        // AdvancedEntry_Import_Button_OpenExcel
+        // AdvancedEntry_Import_TableLayout
         // 
-        AdvancedEntry_Import_Button_OpenExcel.Location = new Point(8, 3);
-        AdvancedEntry_Import_Button_OpenExcel.Name = "AdvancedEntry_Import_Button_OpenExcel";
-        AdvancedEntry_Import_Button_OpenExcel.Size = new Size(90, 30);
-        AdvancedEntry_Import_Button_OpenExcel.TabIndex = 0;
-        AdvancedEntry_Import_Button_OpenExcel.Text = "Open Excel";
+        AdvancedEntry_Import_TableLayout.ColumnCount = 1;
+        AdvancedEntry_Import_TableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        AdvancedEntry_Import_TableLayout.Controls.Add(AdvancedEntry_Import_Panel_Middle, 0, 1);
+        AdvancedEntry_Import_TableLayout.Controls.Add(AdvancedEntry_Import_Panel_Top, 0, 0);
+        AdvancedEntry_Import_TableLayout.Controls.Add(AdvancedEntry_Import_Panel_Bottom, 0, 2);
+        AdvancedEntry_Import_TableLayout.Dock = DockStyle.Fill;
+        AdvancedEntry_Import_TableLayout.Location = new Point(0, 0);
+        AdvancedEntry_Import_TableLayout.Name = "AdvancedEntry_Import_TableLayout";
+        AdvancedEntry_Import_TableLayout.RowCount = 3;
+        AdvancedEntry_Import_TableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 44F));
+        AdvancedEntry_Import_TableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        AdvancedEntry_Import_TableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 44F));
+        AdvancedEntry_Import_TableLayout.Size = new Size(827, 281);
+        AdvancedEntry_Import_TableLayout.TabIndex = 6;
         // 
-        // AdvancedEntry_Import_Panel_Buttons
+        // AdvancedEntry_Import_Panel_Middle
         // 
-        AdvancedEntry_Import_Panel_Buttons.Controls.Add(AdvancedEntry_Import_Button_Save);
-        AdvancedEntry_Import_Panel_Buttons.Controls.Add(AdvancedEntry_Import_Button_Close);
-        AdvancedEntry_Import_Panel_Buttons.Dock = DockStyle.Bottom;
-        AdvancedEntry_Import_Panel_Buttons.Location = new Point(0, 241);
-        AdvancedEntry_Import_Panel_Buttons.Name = "AdvancedEntry_Import_Panel_Buttons";
-        AdvancedEntry_Import_Panel_Buttons.Size = new Size(827, 40);
-        AdvancedEntry_Import_Panel_Buttons.TabIndex = 1;
-        // 
-        // AdvancedEntry_Import_Button_Save
-        // 
-        AdvancedEntry_Import_Button_Save.Location = new Point(8, 3);
-        AdvancedEntry_Import_Button_Save.Name = "AdvancedEntry_Import_Button_Save";
-        AdvancedEntry_Import_Button_Save.Size = new Size(110, 30);
-        AdvancedEntry_Import_Button_Save.TabIndex = 4;
-        AdvancedEntry_Import_Button_Save.Text = "Save Imported";
-        // 
-        // AdvancedEntry_Import_Button_Close
-        // 
-        AdvancedEntry_Import_Button_Close.Location = new Point(739, 3);
-        AdvancedEntry_Import_Button_Close.Name = "AdvancedEntry_Import_Button_Close";
-        AdvancedEntry_Import_Button_Close.Size = new Size(80, 30);
-        AdvancedEntry_Import_Button_Close.TabIndex = 5;
-        AdvancedEntry_Import_Button_Close.Text = "Close";
-        // 
-        // AdvancedEntry_Import_Button_ImportExcel
-        // 
-        AdvancedEntry_Import_Button_ImportExcel.Location = new Point(104, 3);
-        AdvancedEntry_Import_Button_ImportExcel.Name = "AdvancedEntry_Import_Button_ImportExcel";
-        AdvancedEntry_Import_Button_ImportExcel.Size = new Size(90, 30);
-        AdvancedEntry_Import_Button_ImportExcel.TabIndex = 1;
-        AdvancedEntry_Import_Button_ImportExcel.Text = "Import Excel";
-        // 
-        // AdvancedEntry_Import_Button_ImportCsv
-        // 
-        AdvancedEntry_Import_Button_ImportCsv.Location = new Point(729, 3);
-        AdvancedEntry_Import_Button_ImportCsv.Name = "AdvancedEntry_Import_Button_ImportCsv";
-        AdvancedEntry_Import_Button_ImportCsv.Size = new Size(90, 30);
-        AdvancedEntry_Import_Button_ImportCsv.TabIndex = 3;
-        AdvancedEntry_Import_Button_ImportCsv.Text = "Import CSV";
+        AdvancedEntry_Import_Panel_Middle.Controls.Add(AdvancedEntry_Import_DataGridView);
+        AdvancedEntry_Import_Panel_Middle.Dock = DockStyle.Fill;
+        AdvancedEntry_Import_Panel_Middle.Location = new Point(3, 47);
+        AdvancedEntry_Import_Panel_Middle.Name = "AdvancedEntry_Import_Panel_Middle";
+        AdvancedEntry_Import_Panel_Middle.Size = new Size(821, 187);
+        AdvancedEntry_Import_Panel_Middle.TabIndex = 2;
         // 
         // AdvancedEntry_Import_DataGridView
         // 
-        AdvancedEntry_Import_DataGridView.Location = new Point(8, 39);
+        AdvancedEntry_Import_DataGridView.Dock = DockStyle.Fill;
+        AdvancedEntry_Import_DataGridView.Location = new Point(0, 0);
         AdvancedEntry_Import_DataGridView.Name = "AdvancedEntry_Import_DataGridView";
-        AdvancedEntry_Import_DataGridView.Size = new Size(811, 344);
+        AdvancedEntry_Import_DataGridView.Size = new Size(821, 187);
         AdvancedEntry_Import_DataGridView.TabIndex = 0;
         // 
-        // AdvancedEntry_Import_Button_OpenCsv
+        // AdvancedEntry_Import_Panel_Top
         // 
-        AdvancedEntry_Import_Button_OpenCsv.Location = new Point(633, 3);
-        AdvancedEntry_Import_Button_OpenCsv.Name = "AdvancedEntry_Import_Button_OpenCsv";
-        AdvancedEntry_Import_Button_OpenCsv.Size = new Size(90, 30);
-        AdvancedEntry_Import_Button_OpenCsv.TabIndex = 2;
-        AdvancedEntry_Import_Button_OpenCsv.Text = "Open CSV";
+        AdvancedEntry_Import_Panel_Top.Controls.Add(AdvancedEntry_Import_Button_OpenExcel);
+        AdvancedEntry_Import_Panel_Top.Controls.Add(AdvancedEntry_Import_Button_ImportExcel);
+        AdvancedEntry_Import_Panel_Top.Dock = DockStyle.Fill;
+        AdvancedEntry_Import_Panel_Top.Location = new Point(3, 3);
+        AdvancedEntry_Import_Panel_Top.Name = "AdvancedEntry_Import_Panel_Top";
+        AdvancedEntry_Import_Panel_Top.Size = new Size(821, 38);
+        AdvancedEntry_Import_Panel_Top.TabIndex = 2;
+        // 
+        // AdvancedEntry_Import_Button_OpenExcel
+        // 
+        AdvancedEntry_Import_Button_OpenExcel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        AdvancedEntry_Import_Button_OpenExcel.Location = new Point(728, 3);
+        AdvancedEntry_Import_Button_OpenExcel.Name = "AdvancedEntry_Import_Button_OpenExcel";
+        AdvancedEntry_Import_Button_OpenExcel.Size = new Size(90, 32);
+        AdvancedEntry_Import_Button_OpenExcel.TabIndex = 0;
+        AdvancedEntry_Import_Button_OpenExcel.Text = "Open Excel";
+        // 
+        // AdvancedEntry_Import_Button_ImportExcel
+        // 
+        AdvancedEntry_Import_Button_ImportExcel.Location = new Point(3, 3);
+        AdvancedEntry_Import_Button_ImportExcel.Name = "AdvancedEntry_Import_Button_ImportExcel";
+        AdvancedEntry_Import_Button_ImportExcel.Size = new Size(90, 32);
+        AdvancedEntry_Import_Button_ImportExcel.TabIndex = 1;
+        AdvancedEntry_Import_Button_ImportExcel.Text = "Import Excel";
+        AdvancedEntry_Import_Button_ImportExcel.Click += AdvancedEntry_Import_Button_ImportExcel_Click;
+        // 
+        // AdvancedEntry_Import_Panel_Bottom
+        // 
+        AdvancedEntry_Import_Panel_Bottom.Controls.Add(AdvancedEntry_Import_Button_Save);
+        AdvancedEntry_Import_Panel_Bottom.Controls.Add(AdvancedEntry_Import_Button_Close);
+        AdvancedEntry_Import_Panel_Bottom.Dock = DockStyle.Fill;
+        AdvancedEntry_Import_Panel_Bottom.Location = new Point(3, 240);
+        AdvancedEntry_Import_Panel_Bottom.Name = "AdvancedEntry_Import_Panel_Bottom";
+        AdvancedEntry_Import_Panel_Bottom.Size = new Size(821, 38);
+        AdvancedEntry_Import_Panel_Bottom.TabIndex = 1;
+        // 
+        // AdvancedEntry_Import_Button_Save
+        // 
+        AdvancedEntry_Import_Button_Save.Location = new Point(3, 3);
+        AdvancedEntry_Import_Button_Save.Name = "AdvancedEntry_Import_Button_Save";
+        AdvancedEntry_Import_Button_Save.Size = new Size(90, 32);
+        AdvancedEntry_Import_Button_Save.TabIndex = 4;
+        AdvancedEntry_Import_Button_Save.Text = "Save";
+        AdvancedEntry_Import_Button_Save.Click += AdvancedEntry_Import_Button_Save_Click;
+        // 
+        // AdvancedEntry_Import_Button_Close
+        // 
+        AdvancedEntry_Import_Button_Close.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        AdvancedEntry_Import_Button_Close.Location = new Point(728, 3);
+        AdvancedEntry_Import_Button_Close.Name = "AdvancedEntry_Import_Button_Close";
+        AdvancedEntry_Import_Button_Close.Size = new Size(90, 32);
+        AdvancedEntry_Import_Button_Close.TabIndex = 5;
+        AdvancedEntry_Import_Button_Close.Text = "Close";
         // 
         // AdvancedInventoryEntryForm
         // 
@@ -534,7 +556,7 @@ partial class AdvancedInventoryEntryForm
         Controls.Add(AdvancedEntry_TabControl);
         HelpButton = true;
         MaximizeBox = false;
-        MaximumSize = new Size(851, 496);
+        MaximumSize = new Size(851, 600);
         MinimumSize = new Size(431, 348);
         Name = "AdvancedInventoryEntryForm";
         ShowIcon = false;
@@ -550,8 +572,14 @@ partial class AdvancedInventoryEntryForm
         AdvancedEntry_MultiLoc_GroupBox_Item.PerformLayout();
         AdvancedEntry_MultiLoc_GroupBox_Preview.ResumeLayout(false);
         AdvancedEntry_TabControl_Import.ResumeLayout(false);
-        AdvancedEntry_Import_Panel_Buttons.ResumeLayout(false);
+        AdvancedEntry_Import_TableLayout.ResumeLayout(false);
+        AdvancedEntry_Import_Panel_Middle.ResumeLayout(false);
         ((ISupportInitialize)AdvancedEntry_Import_DataGridView).EndInit();
+        AdvancedEntry_Import_Panel_Top.ResumeLayout(false);
+        AdvancedEntry_Import_Panel_Bottom.ResumeLayout(false);
         ResumeLayout(false);
     }
+    private Panel AdvancedEntry_Import_Panel_Top;
+    private Panel AdvancedEntry_Import_Panel_Middle;
+    private TableLayoutPanel AdvancedEntry_Import_TableLayout;
 }

@@ -18,6 +18,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Forms\AdvancedInventoryEntryForm\WIPAppTemplate.xlsx" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <COMReference Include="IWshRuntimeLibrary">
 	    <WrapperTool>tlbimp</WrapperTool>
 	    <VersionMinor>0</VersionMinor>
@@ -36,9 +40,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
+		<PackageReference Include="ExcelDataReader" Version="3.7.0" />
+		<PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0" />
 		<PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
 		<PackageReference Include="Microsoft.TestPlatform" Version="17.14.1" />
 		<PackageReference Include="MySql.Data" Version="9.3.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Forms\AdvancedInventoryEntryForm\WIPAppTemplate.xlsx">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 
 	<ItemGroup>
