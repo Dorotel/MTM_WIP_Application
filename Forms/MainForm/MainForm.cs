@@ -29,6 +29,10 @@ public partial class MainForm : Form
         {
             InitializeComponent();
 
+            Debug.WriteLine(
+                $"[DEBUG] MainForm_InventoryTab after InitializeComponent: {(MainForm_InventoryTab == null ? "null" : "not null")}");
+
+
             AppLogger.Log("MainForm constructor called.");
 
             ConnectionStrengthChecker = new MySqlConnectionStrengthChecker();
@@ -39,8 +43,14 @@ public partial class MainForm : Form
 
             MainForm_OnStartup_WireUpEvents();
 
-            _ = OnStartupAsync();
-
+            Shown += async (s, e) =>
+            {
+                await OnStartupAsync();
+                await Task.Delay(100); // Ensure controls are visible
+                MainForm_InventoryTab.Control_InventoryTab_ComboBox_Part.Focus();
+                MainForm_InventoryTab.Control_InventoryTab_ComboBox_Part.SelectAll();
+                MainForm_InventoryTab.Control_InventoryTab_ComboBox_Part.BackColor = Color.LightBlue;
+            };
 
             AppLogger.Log("MainForm initialized.");
         }
@@ -56,42 +66,52 @@ public partial class MainForm : Form
         // Wire up tab selection event to focus part ComboBox
         MainForm_TabControl.SelectedIndexChanged += (s, e) =>
         {
+#if DEBUG
+            Debug.WriteLine(
+                $"[DEBUG] MainForm_InventoryTab in SelectedIndexChanged: {(MainForm_InventoryTab == null ? "null" : "not null")}");
+#endif
+            ComboBox? partCombo = null;
             // Inventory Tab (index 0)
-            if (MainForm_TabControl.SelectedIndex == 0 && controlInventoryTab1 != null)
+            if (MainForm_TabControl.SelectedIndex == 0 && MainForm_InventoryTab != null)
             {
-                controlInventoryTab1.UpdateToggleRightPanelButton();
-
-                var partCombo = controlInventoryTab1.GetType()
+                MainForm_InventoryTab.UpdateToggleRightPanelButton();
+                partCombo = MainForm_InventoryTab.GetType()
                     .GetField("Control_InventoryTab_ComboBox_Part",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    ?.GetValue(controlInventoryTab1) as ComboBox;
-
-                ComboBoxHelpers.DeselectAllComboBoxText(this);
-                partCombo?.SelectAll();
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(MainForm_InventoryTab) as ComboBox;
             }
             // Remove Tab (index 1)
             else if (MainForm_TabControl.SelectedIndex == 1 && MainForm_RemoveTab != null)
             {
                 MainForm_RemoveTab.UpdateToggleRightPanelButton();
-
-                var partCombo = MainForm_RemoveTab.GetType()
+                partCombo = MainForm_RemoveTab.GetType()
                     .GetField("Control_RemoveTab_ComboBox_Part",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     ?.GetValue(MainForm_RemoveTab) as ComboBox;
-                ComboBoxHelpers.DeselectAllComboBoxText(this);
-                partCombo?.SelectAll();
             }
             // Transfer Tab (index 2)
             else if (MainForm_TabControl.SelectedIndex == 2 && controlTransferTab1 != null)
             {
                 controlTransferTab1.UpdateToggleRightPanelButton();
-
-                var partCombo = controlTransferTab1.GetType()
+                partCombo = controlTransferTab1.GetType()
                     .GetField("Control_TransferTab_ComboBox_Part",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     ?.GetValue(controlTransferTab1) as ComboBox;
-                ComboBoxHelpers.DeselectAllComboBoxText(this);
-                partCombo?.SelectAll();
+            }
+
+            ComboBoxHelpers.DeselectAllComboBoxText(this);
+#if DEBUG
+            Debug.WriteLine(
+                $"[DEBUG] TabIndex: {MainForm_TabControl.SelectedIndex}, partCombo: {(partCombo != null ? partCombo.Name : "null")}");
+#endif
+            if (partCombo != null)
+            {
+#if DEBUG
+                Debug.WriteLine($"[DEBUG] Focusing and selecting all for: {partCombo.Name}");
+#endif
+                partCombo.Focus();
+                partCombo.SelectAll();
+                partCombo.BackColor = Color.LightBlue;
             }
         };
 
@@ -100,10 +120,10 @@ public partial class MainForm : Form
         {
             // Wait for InventoryTab controls to be loaded and visible
             await Task.Delay(100); // Small delay to ensure controls are ready
-            var partCombo = controlInventoryTab1.GetType()
+            var partCombo = MainForm_InventoryTab.GetType()
                 .GetField("Control_InventoryTab_ComboBox_Part",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                ?.GetValue(controlInventoryTab1) as ComboBox;
+                ?.GetValue(MainForm_InventoryTab) as ComboBox;
         };
     }
 
@@ -121,8 +141,6 @@ public partial class MainForm : Form
                     WipAppVariables.UserFullName = WipAppVariables.User; // Fallback to username if full name not found
 
                 AppLogger.Log($"User full name loaded: {WipAppVariables.UserFullName}");
-                await Task.Run(() => { controlInventoryTab1.Control_InventoryTab_ComboBox_Part.Focus(); });
-                controlInventoryTab1.Control_InventoryTab_ComboBox_Part.SelectAll();
             }
             catch (Exception ex)
             {

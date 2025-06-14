@@ -38,7 +38,7 @@
             Control_TransferTab_ComboBox_Part = new ComboBox();
             Control_TransferTab_Button_Reset = new Button();
             Control_TransferTab_Label_Part = new Label();
-            Control_TransferTab_Button_Delete = new Button();
+            Control_TransferTab_Button_Transfer = new Button();
             Control_TransferTab_Label_Operation = new Label();
             Control_TransferTab_Button_Search = new Button();
             Control_TransferTab_Label_ToLocation = new Label();
@@ -94,7 +94,6 @@
             Control_TransferTab_Image_NothingFound.SizeMode = PictureBoxSizeMode.CenterImage;
             Control_TransferTab_Image_NothingFound.TabIndex = 6;
             Control_TransferTab_Image_NothingFound.TabStop = false;
-            Control_TransferTab_Image_NothingFound.Visible = false;
             // 
             // Control_TransferTab_DataGridView_Main
             // 
@@ -131,7 +130,7 @@
             Control_TransferTab_Panel_Header.Controls.Add(Control_TransferTab_ComboBox_Part);
             Control_TransferTab_Panel_Header.Controls.Add(Control_TransferTab_Button_Reset);
             Control_TransferTab_Panel_Header.Controls.Add(Control_TransferTab_Label_Part);
-            Control_TransferTab_Panel_Header.Controls.Add(Control_TransferTab_Button_Delete);
+            Control_TransferTab_Panel_Header.Controls.Add(Control_TransferTab_Button_Transfer);
             Control_TransferTab_Panel_Header.Controls.Add(Control_TransferTab_Label_Operation);
             Control_TransferTab_Panel_Header.Controls.Add(Control_TransferTab_Button_Search);
             Control_TransferTab_Panel_Header.Controls.Add(Control_TransferTab_Label_ToLocation);
@@ -198,15 +197,16 @@
             Control_TransferTab_Label_Part.TabIndex = 4;
             Control_TransferTab_Label_Part.Text = "Part Number:";
             // 
-            // Control_TransferTab_Button_Delete
+            // Control_TransferTab_Button_Transfer
             // 
-            Control_TransferTab_Button_Delete.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            Control_TransferTab_Button_Delete.Location = new Point(547, 34);
-            Control_TransferTab_Button_Delete.Name = "Control_TransferTab_Button_Delete";
-            Control_TransferTab_Button_Delete.Size = new Size(213, 28);
-            Control_TransferTab_Button_Delete.TabIndex = 6;
-            Control_TransferTab_Button_Delete.Text = "&Save";
-            Control_TransferTab_Button_Delete.UseVisualStyleBackColor = true;
+            Control_TransferTab_Button_Transfer.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Control_TransferTab_Button_Transfer.Enabled = false;
+            Control_TransferTab_Button_Transfer.Location = new Point(547, 34);
+            Control_TransferTab_Button_Transfer.Name = "Control_TransferTab_Button_Transfer";
+            Control_TransferTab_Button_Transfer.Size = new Size(213, 28);
+            Control_TransferTab_Button_Transfer.TabIndex = 6;
+            Control_TransferTab_Button_Transfer.Text = "&Save";
+            Control_TransferTab_Button_Transfer.UseVisualStyleBackColor = true;
             // 
             // Control_TransferTab_Label_Operation
             // 
@@ -220,6 +220,7 @@
             // Control_TransferTab_Button_Search
             // 
             Control_TransferTab_Button_Search.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Control_TransferTab_Button_Search.Enabled = false;
             Control_TransferTab_Button_Search.Location = new Point(547, 5);
             Control_TransferTab_Button_Search.Name = "Control_TransferTab_Button_Search";
             Control_TransferTab_Button_Search.Size = new Size(118, 28);
@@ -243,6 +244,7 @@
             Control_TransferTab_ComboBox_ToLocation.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             Control_TransferTab_ComboBox_ToLocation.AutoCompleteSource = AutoCompleteSource.ListItems;
             Control_TransferTab_ComboBox_ToLocation.DrawMode = DrawMode.OwnerDrawVariable;
+            Control_TransferTab_ComboBox_ToLocation.Enabled = false;
             Control_TransferTab_ComboBox_ToLocation.FormattingEnabled = true;
             Control_TransferTab_ComboBox_ToLocation.Location = new Point(363, 7);
             Control_TransferTab_ComboBox_ToLocation.Name = "Control_TransferTab_ComboBox_ToLocation";
@@ -261,6 +263,7 @@
             // Control_TransferTab_NumericUpDown_Quantity
             // 
             Control_TransferTab_NumericUpDown_Quantity.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            Control_TransferTab_NumericUpDown_Quantity.Enabled = false;
             Control_TransferTab_NumericUpDown_Quantity.Location = new Point(363, 37);
             Control_TransferTab_NumericUpDown_Quantity.Maximum = new decimal(new int[] { 1000000, 0, 0, 0 });
             Control_TransferTab_NumericUpDown_Quantity.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
@@ -309,7 +312,7 @@
         private DataGridView Control_TransferTab_DataGridView_Main;
         private Button Control_TransferTab_Button_Toggle_RightPanel;
         private Button Control_TransferTab_Button_Reset;
-        private Button Control_TransferTab_Button_Delete;
+        private Button Control_TransferTab_Button_Transfer;
         private Button Control_TransferTab_Button_Search;
         private Panel Control_TransferTab_Panel_Header;
         private ComboBox Control_TransferTab_ComboBox_Part;

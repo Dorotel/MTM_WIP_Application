@@ -84,7 +84,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_SplitContainer_Middle = new SplitContainer();
             MainForm_TabControl = new TabControl();
             MainForm_TabControl_Inventory = new TabPage();
-            controlInventoryTab1 = new ControlInventoryTab();
+            MainForm_InventoryTab = new ControlInventoryTab();
             MainForm_TabControl_Remove = new TabPage();
             MainForm_RemoveTab = new ControlRemoveTab();
             MainForm_TabControl_Transfer = new TabPage();
@@ -420,7 +420,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_TabControl_Inventory
             // 
-            MainForm_TabControl_Inventory.Controls.Add(controlInventoryTab1);
+            MainForm_TabControl_Inventory.Controls.Add(MainForm_InventoryTab);
             MainForm_TabControl_Inventory.Location = new Point(4, 24);
             MainForm_TabControl_Inventory.Name = "MainForm_TabControl_Inventory";
             MainForm_TabControl_Inventory.Padding = new Padding(3);
@@ -430,14 +430,14 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Inventory.ToolTipText = "Shortcut: Ctrl+1";
             MainForm_TabControl_Inventory.UseVisualStyleBackColor = true;
             // 
-            // controlInventoryTab1
+            // MainForm_InventoryTab
             // 
-            controlInventoryTab1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            controlInventoryTab1.Dock = DockStyle.Fill;
-            controlInventoryTab1.Location = new Point(3, 3);
-            controlInventoryTab1.Name = "controlInventoryTab1";
-            controlInventoryTab1.Size = new Size(809, 384);
-            controlInventoryTab1.TabIndex = 0;
+            MainForm_InventoryTab.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            MainForm_InventoryTab.Dock = DockStyle.Fill;
+            MainForm_InventoryTab.Location = new Point(3, 3);
+            MainForm_InventoryTab.Name = "MainForm_InventoryTab";
+            MainForm_InventoryTab.Size = new Size(809, 384);
+            MainForm_InventoryTab.TabIndex = 0;
             // 
             // MainForm_TabControl_Remove
             // 
@@ -573,7 +573,7 @@ namespace MTM_WIP_Application.Forms.MainForm
         private TabPage MainForm_TabControl_Inventory;
         private TabPage MainForm_TabControl_Remove;
         private TabPage MainForm_TabControl_Transfer;
-        private ControlInventoryTab controlInventoryTab1;
+        private ControlInventoryTab MainForm_InventoryTab;
         private ControlRemoveTab MainForm_RemoveTab;
         private ControlTransferTab controlTransferTab1;
     }

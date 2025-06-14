@@ -311,7 +311,7 @@ internal static class ErrorLogDao
             (`User`, `Severity`, `ErrorType`, `ErrorMessage`, `StackTrace`, `ModuleName`, `MethodName`, `AdditionalInfo`, `MachineName`, `OSVersion`, `AppVersion`, `ErrorTime`) 
             VALUES 
             (@User, @Severity, @ErrorType, @ErrorMessage, @StackTrace, @ModuleName, @MethodName, @AdditionalInfo, @MachineName, @OSVersion, @AppVersion, @ErrorTime)";
-        await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync);
+        await SqlHelper.ExecuteNonQuery(sql, parameters, useAsync, CommandType.Text);
     }
 
     internal static List<(string MethodName, string ErrorMessage)> GetUniqueErrors()

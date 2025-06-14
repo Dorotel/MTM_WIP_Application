@@ -67,6 +67,7 @@ public static class InventoryDao
         string partId,
         string location,
         string operation,
+        string batchNumber,
         int quantity,
         bool useAsync = false)
     {
@@ -77,7 +78,8 @@ public static class InventoryDao
                 { "p_PartID", partId },
                 { "p_Location", location },
                 { "p_Operation", operation },
-                { "p_Quantity", quantity }
+                { "p_Quantity", quantity },
+                { "p_BatchNumber", batchNumber }
             },
             useAsync, CommandType.StoredProcedure);
     }
@@ -99,6 +101,36 @@ public static class InventoryDao
         command.Parameters.AddWithValue("@in_Quantity", quantity);
         command.Parameters.AddWithValue("@in_NewLocation", newLocation);
 
+        await command.ExecuteNonQueryAsync();
+    }
+
+    public static async Task TransferInventoryQuantityAsync(string batchNumber, string partId, string operation,
+        int transferQuantity, int originalQuantity, string newLocation, string user)
+    {
+        var connectionString = SqlVariables.GetConnectionString(null, null, null, null);
+        await using var connection = new MySqlConnection(connectionString);
+        await connection.OpenAsync();
+        await using var command = new MySqlCommand("inv_inventory_transfer_quantity", connection);
+        command.CommandType = CommandType.StoredProcedure;
+        command.Parameters.AddWithValue("@in_BatchNumber", batchNumber);
+        command.Parameters.AddWithValue("@in_PartID", partId);
+        command.Parameters.AddWithValue("@in_Operation", operation);
+        command.Parameters.AddWithValue("@in_TransferQuantity", transferQuantity);
+        command.Parameters.AddWithValue("@in_OriginalQuantity", originalQuantity);
+        command.Parameters.AddWithValue("@in_NewLocation", newLocation);
+        command.Parameters.AddWithValue("@in_User", user);
+        await command.ExecuteNonQueryAsync();
+        await FixBatchNumbersAsync();
+    }
+
+    // Runs the inv_inventory_Fix_BatchNumbers stored procedure with no parameters.
+    public static async Task FixBatchNumbersAsync()
+    {
+        var connectionString = SqlVariables.GetConnectionString(null, null, null, null);
+        await using var connection = new MySqlConnection(connectionString);
+        await connection.OpenAsync();
+        await using var command = new MySqlCommand("inv_inventory_Fix_BatchNumbers", connection);
+        command.CommandType = CommandType.StoredProcedure;
         await command.ExecuteNonQueryAsync();
     }
 

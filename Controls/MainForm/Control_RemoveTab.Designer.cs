@@ -34,6 +34,7 @@
             Control_RemoveTab_Image_NothingFound = new PictureBox();
             Control_RemoveTab_DataGridView_Main = new DataGridView();
             Control_RemoveTab_Panel_Footer = new Panel();
+            Control_RemoveTab_Button_Undo = new Button();
             Control_RemoveTab_Button_Toggle_RightPanel = new Button();
             Control_RemoveTab_Button_AdvancedItemRemoval = new Button();
             Control_RemoveTab_Button_Reset = new Button();
@@ -137,6 +138,7 @@
             // 
             // Control_RemoveTab_Panel_Footer
             // 
+            Control_RemoveTab_Panel_Footer.Controls.Add(Control_RemoveTab_Button_Undo);
             Control_RemoveTab_Panel_Footer.Controls.Add(Control_RemoveTab_Button_Toggle_RightPanel);
             Control_RemoveTab_Panel_Footer.Controls.Add(Control_RemoveTab_Button_AdvancedItemRemoval);
             Control_RemoveTab_Panel_Footer.Controls.Add(Control_RemoveTab_Button_Reset);
@@ -148,6 +150,19 @@
             Control_RemoveTab_Panel_Footer.Padding = new Padding(3);
             Control_RemoveTab_Panel_Footer.Size = new Size(803, 36);
             Control_RemoveTab_Panel_Footer.TabIndex = 20;
+            // 
+            // Control_RemoveTab_Button_Undo
+            // 
+            Control_RemoveTab_Button_Undo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Control_RemoveTab_Button_Undo.Enabled = false;
+            Control_RemoveTab_Button_Undo.Location = new Point(637, 5);
+            Control_RemoveTab_Button_Undo.Name = "Control_RemoveTab_Button_Undo";
+            Control_RemoveTab_Button_Undo.Size = new Size(60, 28);
+            Control_RemoveTab_Button_Undo.TabIndex = 15;
+            Control_RemoveTab_Button_Undo.TabStop = false;
+            Control_RemoveTab_Button_Undo.Text = "Undo";
+            Control_RemoveTab_Button_Undo.UseVisualStyleBackColor = true;
+            Control_RemoveTab_Button_Undo.Click += Control_RemoveTab_Button_Undo_Click;
             // 
             // Control_RemoveTab_Button_Toggle_RightPanel
             // 
@@ -290,5 +305,6 @@
         private Button Control_RemoveTab_Button_Search;
         private Button Control_RemoveTab_Button_Toggle_RightPanel;
         private TableLayoutPanel Control_RemoveTab_Panel_Main;
+        private Button Control_RemoveTab_Button_Undo;
     }
 }
