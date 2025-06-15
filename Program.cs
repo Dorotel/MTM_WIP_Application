@@ -5,6 +5,7 @@ using MTM_WIP_Application.Logging;
 using MTM_WIP_Application.Services;
 using MySql.Data.MySqlClient;
 using System.Diagnostics;
+using Xceed.Words.NET;
 
 namespace MTM_WIP_Application;
 
@@ -74,6 +75,7 @@ internal static class Program
         ControlRemoveTab.MainFormInstance = mainForm;
         ControlInventoryTab.MainFormInstance = mainForm;
         ControlTransferTab.MainFormInstance = mainForm;
+        Control_AdvancedInventory.MainFormInstance = mainForm;
 
         // Register the MainForm instance for live updates (if desired)
         Service_Timer_VersionChecker.MainFormInstance = mainForm;

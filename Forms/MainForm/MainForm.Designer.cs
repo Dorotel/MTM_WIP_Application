@@ -85,10 +85,12 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl = new TabControl();
             MainForm_TabControl_Inventory = new TabPage();
             MainForm_InventoryTab = new ControlInventoryTab();
+            MainForm_AdvancedInventory = new Control_AdvancedInventory();
             MainForm_TabControl_Remove = new TabPage();
             MainForm_RemoveTab = new ControlRemoveTab();
             MainForm_TabControl_Transfer = new TabPage();
             controlTransferTab1 = new ControlTransferTab();
+            changeLogMakerToolStripMenuItem = new ToolStripMenuItem();
             MainForm_MenuStrip.SuspendLayout();
             MainForm_StatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Lower).BeginInit();
@@ -189,7 +191,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_MenuStrip_View
             // 
-            MainForm_MenuStrip_View.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_View_PersonalHistory, MainForm_MenuStrip_View_Reset, MainForm_MenuStrip_View_Separator1, MainForm_MenuStrip_View_AddToInventory, MainForm_MenuStrip_View_RemoveFromInventory, MainForm_MenuStrip_View_LocationToLocation, MainForm_MenuStrip_View_Separator2, MainForm_MenuStrip_View_ViewAllWIP, MainForm_MenuStrip_View_ViewOutsideService, MainForm_MenuStrip_View_Separator3, MainForm_MenuStrip_View_ViewChangelog });
+            MainForm_MenuStrip_View.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_View_PersonalHistory, MainForm_MenuStrip_View_Reset, MainForm_MenuStrip_View_Separator1, MainForm_MenuStrip_View_AddToInventory, MainForm_MenuStrip_View_RemoveFromInventory, MainForm_MenuStrip_View_LocationToLocation, MainForm_MenuStrip_View_Separator2, MainForm_MenuStrip_View_ViewAllWIP, MainForm_MenuStrip_View_ViewOutsideService, MainForm_MenuStrip_View_Separator3, MainForm_MenuStrip_View_ViewChangelog, changeLogMakerToolStripMenuItem });
             MainForm_MenuStrip_View.Name = "MainForm_MenuStrip_View";
             MainForm_MenuStrip_View.Size = new Size(44, 22);
             MainForm_MenuStrip_View.Text = "View";
@@ -421,6 +423,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // MainForm_TabControl_Inventory
             // 
             MainForm_TabControl_Inventory.Controls.Add(MainForm_InventoryTab);
+            MainForm_TabControl_Inventory.Controls.Add(MainForm_AdvancedInventory);
             MainForm_TabControl_Inventory.Location = new Point(4, 24);
             MainForm_TabControl_Inventory.Name = "MainForm_TabControl_Inventory";
             MainForm_TabControl_Inventory.Padding = new Padding(3);
@@ -438,6 +441,14 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_InventoryTab.Name = "MainForm_InventoryTab";
             MainForm_InventoryTab.Size = new Size(809, 384);
             MainForm_InventoryTab.TabIndex = 0;
+            // 
+            // MainForm_AdvancedInventory
+            // 
+            MainForm_AdvancedInventory.Dock = DockStyle.Fill;
+            MainForm_AdvancedInventory.Location = new Point(3, 3);
+            MainForm_AdvancedInventory.Name = "MainForm_AdvancedInventory";
+            MainForm_AdvancedInventory.Size = new Size(809, 384);
+            MainForm_AdvancedInventory.TabIndex = 1;
             // 
             // MainForm_TabControl_Remove
             // 
@@ -480,6 +491,13 @@ namespace MTM_WIP_Application.Forms.MainForm
             controlTransferTab1.Name = "controlTransferTab1";
             controlTransferTab1.Size = new Size(809, 384);
             controlTransferTab1.TabIndex = 0;
+            // 
+            // changeLogMakerToolStripMenuItem
+            // 
+            changeLogMakerToolStripMenuItem.Name = "changeLogMakerToolStripMenuItem";
+            changeLogMakerToolStripMenuItem.Size = new Size(234, 22);
+            changeLogMakerToolStripMenuItem.Text = "ChangeLog Maker";
+            changeLogMakerToolStripMenuItem.Click += changeLogMakerToolStripMenuItem_Click;
             // 
             // MainForm
             // 
@@ -573,8 +591,10 @@ namespace MTM_WIP_Application.Forms.MainForm
         private TabPage MainForm_TabControl_Inventory;
         private TabPage MainForm_TabControl_Remove;
         private TabPage MainForm_TabControl_Transfer;
-        private ControlInventoryTab MainForm_InventoryTab;
         private ControlRemoveTab MainForm_RemoveTab;
         private ControlTransferTab controlTransferTab1;
+        public ControlInventoryTab MainForm_InventoryTab;
+        public Control_AdvancedInventory MainForm_AdvancedInventory;
+        private ToolStripMenuItem changeLogMakerToolStripMenuItem;
     }
 }

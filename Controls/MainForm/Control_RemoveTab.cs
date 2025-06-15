@@ -3,7 +3,6 @@ using System.Data;
 using System.Text;
 using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Data;
-using MTM_WIP_Application.Forms.AdvancedInventoryEntryForm;
 using MTM_WIP_Application.Forms.MainForm.Classes;
 using MTM_WIP_Application.Helpers;
 using MTM_WIP_Application.Logging;

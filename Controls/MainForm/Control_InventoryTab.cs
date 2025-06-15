@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Data;
 using System.Text;
+using DocumentFormat.OpenXml.Office.PowerPoint.Y2021.M06.Main;
 using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Data;
-using MTM_WIP_Application.Forms.AdvancedInventoryEntryForm;
 using MTM_WIP_Application.Forms.MainForm.Classes;
 using MTM_WIP_Application.Helpers;
 using MTM_WIP_Application.Logging;
@@ -191,9 +191,8 @@ public partial class ControlInventoryTab : UserControl
                 return;
             }
 
-            var advancedEntryForm = new AdvancedInventoryEntryForm();
-            advancedEntryForm.ShowDialog(Service_Timer_VersionChecker.MainFormInstance);
-            LoggingUtility.Log("Inventory Advanced Entry button clicked.");
+            if (MainFormInstance != null) MainFormInstance.MainForm_InventoryTab.Visible = false;
+            if (MainFormInstance != null) MainFormInstance.MainForm_AdvancedInventory.Visible = true;
         }
         catch (Exception ex)
         {

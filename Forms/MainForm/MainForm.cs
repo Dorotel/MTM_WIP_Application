@@ -231,6 +231,15 @@ public partial class MainForm : Form
     }
 
     #endregion
+
+    private void changeLogMakerToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        // Open the Exporter_Do_Not_Pack form as a dialog, disabling the main form while open
+        using var exporter = new Exporter_Do_Not_Pack();
+        Enabled = false;
+        exporter.FormClosed += (_, _) => Enabled = true;
+        exporter.Show(this);
+    }
 }
 
 #endregion
