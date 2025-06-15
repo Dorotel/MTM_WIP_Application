@@ -636,11 +636,15 @@ public partial class Control_AdvancedInventory : UserControl
             // Only process if there are items in the ListView
             if (AdvancedInventory_Single_ListView.Items.Count == 0)
             {
-                MessageBox.Show("No items to inventory. Please add at least one item to the list.", "No Items",
+                MessageBox.Show("No items to inventory. Please add at least one item to the list.", @"No Items",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
+            var partIds = new HashSet<string>();
+            var operations = new HashSet<string>();
+            var locations = new HashSet<string>();
+            var totalQty = 0;
             var savedCount = 0;
             foreach (ListViewItem item in AdvancedInventory_Single_ListView.Items)
             {
@@ -677,6 +681,10 @@ public partial class Control_AdvancedInventory : UserControl
                     notes,
                     true);
 
+                partIds.Add(partId);
+                operations.Add(op);
+                locations.Add(loc);
+                totalQty += qty;
                 savedCount++;
             }
 
@@ -688,6 +696,22 @@ public partial class Control_AdvancedInventory : UserControl
 
             LoggingUtility.Log(
                 $"Saved {savedCount} inventory transaction(s) from ListView.");
+
+            // Update status strip
+            if (MainFormInstance != null && savedCount > 0)
+            {
+                var time = DateTime.Now.ToString("hh:mm tt");
+                var locDisplay = locations.Count > 1 ? "Multiple Locations" : locations.FirstOrDefault() ?? "";
+                if (partIds.Count == 1 && operations.Count == 1)
+                    MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
+                        $"Last Inventoried: {partIds.First()} (Op: {operations.First()}), Location: {locDisplay}, Quantity: {totalQty} @ {time}";
+                else if (partIds.Count == 1 && operations.Count > 1)
+                    MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
+                        $"Last Inventoried: {partIds.First()} (Multiple Ops), Location: {locDisplay}, Quantity: {totalQty} @ {time}";
+                else
+                    MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
+                        $"Last Inventoried: Multiple Part IDs, Location: {locDisplay}, Quantity: Multiple @ {time}";
+            }
 
             // Optionally reset the form after save
             AdvancedInventory_Single_Button_Reset_Click(null, EventArgs.Empty);
@@ -761,13 +785,12 @@ public partial class Control_AdvancedInventory : UserControl
             // Add the specified number of entries to the ListView
             for (var i = 0; i < count; i++)
             {
-                var listViewItem = new ListViewItem(new[]
-                {
+                var listViewItem = new ListViewItem([
                     partId,
                     op,
                     loc,
                     qty.ToString()
-                });
+                ]);
                 AdvancedInventory_Single_ListView.Items.Add(listViewItem);
                 Debug.WriteLine(
                     $"Added item to ListView: Part={partId}, Op={op}, Loc={loc}, Qty={qty}, Notes={notes}");
@@ -806,7 +829,7 @@ public partial class Control_AdvancedInventory : UserControl
                 return;
             }
 
-            if (MainFormInstance != null) MainFormInstance.MainForm_InventoryTab.Visible = true;
+            if (MainFormInstance != null) MainFormInstance.MainForm_Control_InventoryTab.Visible = true;
             if (MainFormInstance != null) MainFormInstance.MainForm_AdvancedInventory.Visible = false;
         }
         catch (Exception ex)
@@ -946,10 +969,9 @@ public partial class Control_AdvancedInventory : UserControl
 
             // Add to ListView
             var listViewItem = new ListViewItem([
-                partId,
-                op,
                 loc,
-                qty.ToString()
+                qty.ToString(),
+                notes
             ]);
             AdvancedInventory_MultiLoc_ListView_Preview.Items.Add(listViewItem);
 
@@ -1009,6 +1031,8 @@ public partial class Control_AdvancedInventory : UserControl
             }
 
             // Save each entry in the ListView
+            var locations = new HashSet<string>();
+            var totalQty = 0;
             var savedCount = 0;
             foreach (ListViewItem item in AdvancedInventory_MultiLoc_ListView_Preview.Items)
             {
@@ -1043,6 +1067,8 @@ public partial class Control_AdvancedInventory : UserControl
                     notes,
                     true);
 
+                locations.Add(loc);
+                totalQty += qty;
                 savedCount++;
             }
 
@@ -1054,6 +1080,15 @@ public partial class Control_AdvancedInventory : UserControl
 
             LoggingUtility.Log(
                 $"Saved {savedCount} multi-location inventory transaction(s) for Part: {partId}, Op: {op}");
+
+            // Update status strip
+            if (MainFormInstance != null && savedCount > 0)
+            {
+                var time = DateTime.Now.ToString("hh:mm tt");
+                var locDisplay = locations.Count > 1 ? "Multiple Locations" : locations.FirstOrDefault() ?? "";
+                MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
+                    $"Last Inventoried: {partId} (Op: {op}), Location: {locDisplay}, Quantity: {totalQty} @ {time}";
+            }
 
             // Optionally reset the form after save
             AdvancedInventory_MultiLoc_Button_Reset_Click(null, EventArgs.Empty);
@@ -1112,7 +1147,7 @@ public partial class Control_AdvancedInventory : UserControl
                 }
                 else
                 {
-                    MessageBox.Show($"Excel template not found: {templatePath}", "Template Not Found",
+                    MessageBox.Show($"Excel template not found: {templatePath}", @"Template Not Found",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -1124,7 +1159,7 @@ public partial class Control_AdvancedInventory : UserControl
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
-            MessageBox.Show($"Failed to open Excel file: {ex.Message}", "Error", MessageBoxButtons.OK,
+            MessageBox.Show($"Failed to open Excel file: {ex.Message}", @"Error", MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
     }
@@ -1140,7 +1175,7 @@ public partial class Control_AdvancedInventory : UserControl
             var excelPath = GetUserExcelFilePath();
             if (!File.Exists(excelPath))
             {
-                MessageBox.Show("Excel file not found. Please create or open the Excel file first.", "File Not Found",
+                MessageBox.Show("Excel file not found. Please create or open the Excel file first.", @"File Not Found",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -1151,7 +1186,7 @@ public partial class Control_AdvancedInventory : UserControl
                 var worksheet = workbook.Worksheet("Tab 1");
                 if (worksheet == null)
                 {
-                    MessageBox.Show("Worksheet 'Tab 1' not found in the Excel file.", "Worksheet Not Found",
+                    MessageBox.Show("Worksheet 'Tab 1' not found in the Excel file.", @"Worksheet Not Found",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -1160,7 +1195,7 @@ public partial class Control_AdvancedInventory : UserControl
                 var usedRange = worksheet.RangeUsed();
                 if (usedRange == null)
                 {
-                    MessageBox.Show("No data found in 'Tab 1'.", "No Data", MessageBoxButtons.OK,
+                    MessageBox.Show("No data found in 'Tab 1'.", @"No Data", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     return;
                 }
@@ -1190,7 +1225,7 @@ public partial class Control_AdvancedInventory : UserControl
 
             if (dt.Rows.Count == 0)
             {
-                MessageBox.Show("No data found in the Excel file to import.", "No Data", MessageBoxButtons.OK,
+                MessageBox.Show("No data found in the Excel file to import.", @"No Data", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
                 return;
             }
@@ -1200,7 +1235,7 @@ public partial class Control_AdvancedInventory : UserControl
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
-            MessageBox.Show($"Failed to import Excel data: {ex.Message}", "Import Error", MessageBoxButtons.OK,
+            MessageBox.Show($"Failed to import Excel data: {ex.Message}", @"Import Error", MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
     }
@@ -1285,15 +1320,6 @@ public partial class Control_AdvancedInventory : UserControl
                 rowValid = false;
             }
 
-            foreach (ListViewItem item in AdvancedInventory_MultiLoc_ListView_Preview.Items)
-                if (string.Equals(item.SubItems[0].Text, loc, StringComparison.OrdinalIgnoreCase))
-                {
-                    MessageBox.Show(@"This location has already been added.", @"Duplicate Entry", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    AdvancedInventory_MultiLoc_ComboBox_Loc.Focus();
-                    return;
-                }
-
             if (rowValid)
                 try
                 {
@@ -1359,11 +1385,18 @@ public partial class Control_AdvancedInventory : UserControl
         RefreshImportDataGridView();
 
         if (!anyError)
-            MessageBox.Show("All transactions saved successfully.", "Success", MessageBoxButtons.OK,
+        {
+            MessageBox.Show("All transactions saved successfully.", @"Success", MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
+            if (MainFormInstance != null)
+                MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
+                    $"Last Import: {DateTime.Now:hh:mm tt} ({dgv.Rows.Count} rows imported)";
+        }
         else
-            MessageBox.Show("Some rows could not be saved. Please correct highlighted errors.", "Validation Error",
+        {
+            MessageBox.Show("Some rows could not be saved. Please correct highlighted errors.", @"Validation Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
     }
 
     private void RefreshImportDataGridView()

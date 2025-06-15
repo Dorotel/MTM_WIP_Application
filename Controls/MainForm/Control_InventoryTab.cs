@@ -191,7 +191,7 @@ public partial class ControlInventoryTab : UserControl
                 return;
             }
 
-            if (MainFormInstance != null) MainFormInstance.MainForm_InventoryTab.Visible = false;
+            if (MainFormInstance != null) MainFormInstance.MainForm_Control_InventoryTab.Visible = false;
             if (MainFormInstance != null) MainFormInstance.MainForm_AdvancedInventory.Visible = true;
         }
         catch (Exception ex)
@@ -337,8 +337,9 @@ public partial class ControlInventoryTab : UserControl
                 MessageBoxIcon.Information);
 
             if (MainFormInstance != null)
+                // If in the future, multi-row inventory is supported, update this logic to handle multiple partIds/ops/locs
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
-                    $@"Last Inventoried Part: {partId} (Op: {op}), Location: {loc}, Quantity: {qty} @ {DateTime.Now:hh:mm tt}";
+                    $@"Last Inventoried Part: {partId} (Op: {op}), Location: {(string.IsNullOrWhiteSpace(loc) ? "" : loc)}, Quantity: {qty} @ {DateTime.Now:hh:mm tt}";
 
             Control_InventoryTab_Button_Reset_Click();
         }

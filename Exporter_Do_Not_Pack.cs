@@ -17,7 +17,7 @@ public partial class Exporter_Do_Not_Pack : Form
     {
         try
         {
-            using (var doc = DocX.Create("WIPAppChangeLog.docx"))
+            using (var doc = DocX.Create(@"C:\Users\johnk\Documents\WIPAppChangeLog.docx"))
             {
                 // Title
                 doc.InsertParagraph("WIP App – Weekly Change Log")
@@ -83,12 +83,12 @@ public partial class Exporter_Do_Not_Pack : Form
                 doc.Save();
             }
 
-            MessageBox.Show("Change log exported successfully to WIPAppChangeLog.docx.", "Export Complete",
+            MessageBox.Show("Change log exported successfully to WIPAppChangeLog.docx.", @"Export Complete",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"An error occurred: {ex.Message}", "Export Error",
+            MessageBox.Show($"An error occurred: {ex.Message}", @"Export Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -98,7 +98,7 @@ public partial class Exporter_Do_Not_Pack : Form
         if (string.IsNullOrWhiteSpace(sectionText))
             return string.Empty;
 
-        var lines = sectionText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        var lines = sectionText.Split(["\r\n", "\n"], StringSplitOptions.None);
         var formattedLines = lines.Select(line =>
         {
             var trimmed = line.Trim();
@@ -117,29 +117,39 @@ public partial class Exporter_Do_Not_Pack : Form
     {
         return updateType.ToLower() switch
         {
-            "added" => "🟢",         // Green circle
-            "fixed" => "🛠️",        // Hammer and wrench
-            "removed" => "❌",       // Cross mark
-            "updated" => "🔄",       // Update arrows
-            "improved" => "✨",      // Sparkles
-            "deprecated" => "⚠️",   // Warning
-            "security" => "🔒",      // Lock
-            "performance" => "🚀",   // Rocket
-            "refactored" => "♻️",   // Recycling symbol
-            "docs" => "📄",         // Document
-            "breaking" => "💥",      // Collision
-            "feature" => "🌟",       // Star
-            "ui" => "🖥️",           // Monitor
-            "ux" => "🎨",           // Palette
-            "test" => "✅",          // Check mark
-            "build" => "🏗️",        // Building construction
-            "ci" => "🤖",           // Robot
-            "chore" => "🧹",        // Broom
-            "hotfix" => "🔥",       // Fire
-            "rollback" => "⏪",      // Rewind
-            "merge" => "🔀",        // Merge arrows
-            "config" => "⚙️",       // Gear
-            _ => "•"                // Bullet for unknown types
+            "added" => "🟢",
+            "fixed" => "🛠️",
+            "removed" => "❌",
+            "updated" => "🔄",
+            "refactored" => "♻️",
+            "bulk" => "💾",
+            "async" => "🔄",
+            "import" => "📥",
+            "export" => "📤",
+            "search" => "🔍",
+            "validation" => "✅",
+            "nothing" => "❗",
+            "undo" => "↩️",
+            "tracking" => "📋",
+            "transaction" => "📈",
+            "centralizes" => "🗃️",
+            "error" => "🚨",
+            "thread" => "🧵",
+            "connection" => "🧩",
+            "file" => "📄",
+            "standardized" => "⚙️",
+            "general" => "🧹",
+            "tab" => "🖥️",
+            "resource" => "📁",
+            "focus" => "🎯",
+            "handler" => "✂️",
+            "feature" => "🆕",
+            "move" => "🚚",
+            "template" => "📦",
+            "code" => "🔧",
+            "namespace" => "🧩",
+            "improved" => "✨",
+            _ => "•"
         };
     }
 }

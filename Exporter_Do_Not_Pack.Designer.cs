@@ -187,6 +187,7 @@
             Name = "Exporter_Do_Not_Pack";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Change Log Exporter";
+            TopMost = true;
             ResumeLayout(false);
             PerformLayout();
         }

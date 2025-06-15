@@ -91,7 +91,7 @@
             Control_TransferTab_Image_NothingFound.Location = new Point(0, 0);
             Control_TransferTab_Image_NothingFound.Name = "Control_TransferTab_Image_NothingFound";
             Control_TransferTab_Image_NothingFound.Size = new Size(803, 281);
-            Control_TransferTab_Image_NothingFound.SizeMode = PictureBoxSizeMode.CenterImage;
+            Control_TransferTab_Image_NothingFound.SizeMode = PictureBoxSizeMode.Zoom;
             Control_TransferTab_Image_NothingFound.TabIndex = 6;
             Control_TransferTab_Image_NothingFound.TabStop = false;
             // 
@@ -283,7 +283,7 @@
             Control_TransferTab_GroupBox_MainControl.Size = new Size(815, 384);
             Control_TransferTab_GroupBox_MainControl.TabIndex = 17;
             Control_TransferTab_GroupBox_MainControl.TabStop = false;
-            Control_TransferTab_GroupBox_MainControl.Text = "Part Lookup and Transfer";
+            Control_TransferTab_GroupBox_MainControl.Text = "Inventory Transfer";
             // 
             // ControlTransferTab
             // 

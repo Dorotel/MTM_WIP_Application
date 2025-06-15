@@ -76,7 +76,8 @@ public partial class ControlTransferTab : UserControl
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
-            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_ProcessCmdKey");
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
+                new StringBuilder().Append("MainForm_ProcessCmdKey").ToString());
             return false;
         }
     }
@@ -109,13 +110,14 @@ public partial class ControlTransferTab : UserControl
             {
                 LoggingUtility.LogApplicationError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
-                    "Control_TransferTab_OnStartup_GetUserFullName");
+                    new StringBuilder().Append("Control_TransferTab_OnStartup_GetUserFullName").ToString());
             }
         }
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "Control_TransferTab_OnStartup");
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
+                new StringBuilder().Append("Control_TransferTab_OnStartup").ToString());
         }
     }
 
@@ -143,7 +145,7 @@ public partial class ControlTransferTab : UserControl
         {
             LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
-                "MainForm_LoadTransferTabComboBoxesAsync");
+                new StringBuilder().Append("MainForm_LoadTransferTabComboBoxesAsync").ToString());
         }
     }
 
@@ -209,7 +211,8 @@ public partial class ControlTransferTab : UserControl
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
-            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_Button_Reset");
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
+                new StringBuilder().Append("MainForm_Inventory_Button_Reset").ToString());
         }
     }
 
@@ -261,7 +264,7 @@ public partial class ControlTransferTab : UserControl
         {
             LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
-                "Control_TransferTab_Button_Search_Click");
+                new StringBuilder().Append("Control_TransferTab_Button_Search_Click").ToString());
         }
     }
 
@@ -296,7 +299,7 @@ public partial class ControlTransferTab : UserControl
         {
             LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
-                "Control_TransferTab_Button_Transfer_Click");
+                new StringBuilder().Append("Control_TransferTab_Button_Transfer_Click").ToString());
         }
     }
 
@@ -315,7 +318,13 @@ public partial class ControlTransferTab : UserControl
         var notes = drv["Notes"]?.ToString() ?? "";
         var operation = drv["Operation"]?.ToString() ?? "";
         var quantityStr = drv["Quantity"]?.ToString() ?? "";
-        int.TryParse(quantityStr, out var originalQuantity);
+        if (!int.TryParse(quantityStr, out var originalQuantity))
+        {
+            LoggingUtility.LogApplicationError(
+                new Exception($"Invalid quantity value: '{quantityStr}' for PartID={partId}, Location={fromLocation}"));
+            return;
+        }
+
         var transferQuantity = Math.Min((int)Control_TransferTab_NumericUpDown_Quantity.Value, originalQuantity);
         var newLocation = Control_TransferTab_ComboBox_ToLocation.Text;
         var user = Core_WipAppVariables.User ?? Environment.UserName;
@@ -339,12 +348,20 @@ public partial class ControlTransferTab : UserControl
             BatchNumber = batchNumber,
             DateTime = DateTime.Now
         });
+        // Update status strip
+        if (MainFormInstance != null)
+            MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
+                $@"Last Transfer: {partId} (Op: {operation}), From: {fromLocation} To: {newLocation}, Qty: {transferQuantity} @ {DateTime.Now:hh:mm tt}";
     }
 
     private async Task TransferMultipleRowsAsync(DataGridViewSelectedRowCollection selectedRows)
     {
         var newLocation = Control_TransferTab_ComboBox_ToLocation.Text;
         var user = Core_WipAppVariables.User ?? Environment.UserName;
+        var partIds = new HashSet<string>();
+        var operations = new HashSet<string>();
+        var fromLocations = new HashSet<string>();
+        var totalQty = 0;
         foreach (DataGridViewRow row in selectedRows)
         {
             if (row.DataBoundItem is not DataRowView drv) continue;
@@ -355,7 +372,13 @@ public partial class ControlTransferTab : UserControl
             var operation = drv["Operation"]?.ToString() ?? "";
             var quantityStr = drv["Quantity"]?.ToString() ?? "";
             var notes = drv["Notes"]?.ToString() ?? "";
-            int.TryParse(quantityStr, out var originalQuantity);
+            if (!int.TryParse(quantityStr, out var originalQuantity))
+            {
+                LoggingUtility.LogApplicationError(new Exception(
+                    $"Invalid quantity value: '{quantityStr}' for PartID={partId}, Location={fromLocation}"));
+                continue;
+            }
+
             var transferQuantity = Math.Min((int)Control_TransferTab_NumericUpDown_Quantity.Value, originalQuantity);
             await Dao_Inventory.TransferPartSimpleAsync(
                 batchNumber, partId, operation, quantityStr, newLocation);
@@ -373,6 +396,33 @@ public partial class ControlTransferTab : UserControl
                 BatchNumber = batchNumber,
                 DateTime = DateTime.Now
             });
+            partIds.Add(partId);
+            operations.Add(operation);
+            fromLocations.Add(fromLocation);
+            totalQty += transferQuantity;
+        }
+
+        // Update status strip for the last transfer
+        if (MainFormInstance != null)
+        {
+            var time = DateTime.Now.ToString("hh:mm tt");
+            var fromLocDisplay = fromLocations.Count > 1 ? "Multiple Locations" : fromLocations.FirstOrDefault() ?? "";
+            if (partIds.Count == 1 && operations.Count == 1)
+            {
+                MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
+                    $@"Last Transfer: {partIds.First()} (Op: {operations.First()}), From: {fromLocDisplay} To: {newLocation}, Qty: {totalQty} @ {time}";
+            }
+            else if (partIds.Count == 1 && operations.Count > 1)
+            {
+                MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
+                    $@"Last Transfer: {partIds.First()} (Multiple Ops), From: {fromLocDisplay} To: {newLocation}, Qty: {totalQty} @ {time}";
+            }
+            else
+            {
+                var qtyDisplay = partIds.Count == 1 ? totalQty.ToString() : "Multiple";
+                MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
+                    $@"Last Transfer: Multiple Part IDs, From: {fromLocDisplay} To: {newLocation}, Qty: {qtyDisplay} @ {time}";
+            }
         }
     }
 
@@ -402,7 +452,8 @@ public partial class ControlTransferTab : UserControl
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
-            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Op");
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
+                new StringBuilder().Append("MainForm_Inventory_ComboBox_Op").ToString());
         }
     }
 
@@ -428,7 +479,8 @@ public partial class ControlTransferTab : UserControl
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
-            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_ComboBox_Part");
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
+                new StringBuilder().Append("MainForm_Inventory_ComboBox_Part").ToString());
         }
     }
 
@@ -471,7 +523,7 @@ public partial class ControlTransferTab : UserControl
         {
             LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
-                "Control_TransferTab_Update_ButtonStates");
+                new StringBuilder().Append("Control_TransferTab_Update_ButtonStates").ToString());
         }
     }
 
@@ -532,7 +584,8 @@ public partial class ControlTransferTab : UserControl
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
-            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_WireUpTransferTabEvents");
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
+                new StringBuilder().Append("MainForm_WireUpTransferTabEvents").ToString());
         }
     }
 

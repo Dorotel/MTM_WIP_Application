@@ -103,7 +103,7 @@
             Control_RemoveTab_Image_NothingFound.Location = new Point(0, 0);
             Control_RemoveTab_Image_NothingFound.Name = "Control_RemoveTab_Image_NothingFound";
             Control_RemoveTab_Image_NothingFound.Size = new Size(803, 272);
-            Control_RemoveTab_Image_NothingFound.SizeMode = PictureBoxSizeMode.CenterImage;
+            Control_RemoveTab_Image_NothingFound.SizeMode = PictureBoxSizeMode.Zoom;
             Control_RemoveTab_Image_NothingFound.TabIndex = 6;
             Control_RemoveTab_Image_NothingFound.TabStop = false;
             Control_RemoveTab_Image_NothingFound.Visible = false;

@@ -66,6 +66,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_MenuStrip_View_ViewOutsideService = new ToolStripMenuItem();
             MainForm_MenuStrip_View_Separator3 = new ToolStripSeparator();
             MainForm_MenuStrip_View_ViewChangelog = new ToolStripMenuItem();
+            MainForm_MenuItem_ChangeLogMaker = new ToolStripMenuItem();
             MainForm_StatusStrip = new StatusStrip();
             MainForm_StatusStrip_SavedStatus = new ToolStripStatusLabel();
             MainForm_StatusStrip_Disconnected = new ToolStripStatusLabel();
@@ -75,22 +76,17 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Last10_Timer = new System.Windows.Forms.Timer(components);
             MainForm_SplitContainer_Lower = new SplitContainer();
             MainForm_Control_SignalStrength = new ConnectionStrengthControl();
-            BottomToolStripPanel = new ToolStripPanel();
-            TopToolStripPanel = new ToolStripPanel();
-            RightToolStripPanel = new ToolStripPanel();
-            LeftToolStripPanel = new ToolStripPanel();
-            ContentPanel = new ToolStripContentPanel();
             MainForm_TableLayout = new TableLayoutPanel();
             MainForm_SplitContainer_Middle = new SplitContainer();
             MainForm_TabControl = new TabControl();
-            MainForm_TabControl_Inventory = new TabPage();
-            MainForm_InventoryTab = new ControlInventoryTab();
+            MainForm_TabPage_Inventory = new TabPage();
+            MainForm_Control_InventoryTab = new ControlInventoryTab();
             MainForm_AdvancedInventory = new Control_AdvancedInventory();
             MainForm_TabControl_Remove = new TabPage();
-            MainForm_RemoveTab = new ControlRemoveTab();
+            MainForm_RemoveTabNormalControl = new ControlRemoveTab();
+            MainForm_Control_AdvancedRemove = new Control_AdvancedRemove();
             MainForm_TabControl_Transfer = new TabPage();
-            controlTransferTab1 = new ControlTransferTab();
-            changeLogMakerToolStripMenuItem = new ToolStripMenuItem();
+            MainForm_Control_TransferTab = new ControlTransferTab();
             MainForm_MenuStrip.SuspendLayout();
             MainForm_StatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Lower).BeginInit();
@@ -102,7 +98,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_SplitContainer_Middle.Panel1.SuspendLayout();
             MainForm_SplitContainer_Middle.SuspendLayout();
             MainForm_TabControl.SuspendLayout();
-            MainForm_TabControl_Inventory.SuspendLayout();
+            MainForm_TabPage_Inventory.SuspendLayout();
             MainForm_TabControl_Remove.SuspendLayout();
             MainForm_TabControl_Transfer.SuspendLayout();
             SuspendLayout();
@@ -191,7 +187,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_MenuStrip_View
             // 
-            MainForm_MenuStrip_View.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_View_PersonalHistory, MainForm_MenuStrip_View_Reset, MainForm_MenuStrip_View_Separator1, MainForm_MenuStrip_View_AddToInventory, MainForm_MenuStrip_View_RemoveFromInventory, MainForm_MenuStrip_View_LocationToLocation, MainForm_MenuStrip_View_Separator2, MainForm_MenuStrip_View_ViewAllWIP, MainForm_MenuStrip_View_ViewOutsideService, MainForm_MenuStrip_View_Separator3, MainForm_MenuStrip_View_ViewChangelog, changeLogMakerToolStripMenuItem });
+            MainForm_MenuStrip_View.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_View_PersonalHistory, MainForm_MenuStrip_View_Reset, MainForm_MenuStrip_View_Separator1, MainForm_MenuStrip_View_AddToInventory, MainForm_MenuStrip_View_RemoveFromInventory, MainForm_MenuStrip_View_LocationToLocation, MainForm_MenuStrip_View_Separator2, MainForm_MenuStrip_View_ViewAllWIP, MainForm_MenuStrip_View_ViewOutsideService, MainForm_MenuStrip_View_Separator3, MainForm_MenuStrip_View_ViewChangelog, MainForm_MenuItem_ChangeLogMaker });
             MainForm_MenuStrip_View.Name = "MainForm_MenuStrip_View";
             MainForm_MenuStrip_View.Size = new Size(44, 22);
             MainForm_MenuStrip_View.Text = "View";
@@ -263,6 +259,13 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_MenuStrip_View_ViewChangelog.Name = "MainForm_MenuStrip_View_ViewChangelog";
             MainForm_MenuStrip_View_ViewChangelog.Size = new Size(234, 22);
             MainForm_MenuStrip_View_ViewChangelog.Text = "View Changelog";
+            // 
+            // MainForm_MenuItem_ChangeLogMaker
+            // 
+            MainForm_MenuItem_ChangeLogMaker.Name = "MainForm_MenuItem_ChangeLogMaker";
+            MainForm_MenuItem_ChangeLogMaker.Size = new Size(234, 22);
+            MainForm_MenuItem_ChangeLogMaker.Text = "ChangeLog Maker";
+            MainForm_MenuItem_ChangeLogMaker.Click += changeLogMakerToolStripMenuItem_Click;
             // 
             // MainForm_StatusStrip
             // 
@@ -337,42 +340,6 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Control_SignalStrength.Strength = 0;
             MainForm_Control_SignalStrength.TabIndex = 0;
             // 
-            // BottomToolStripPanel
-            // 
-            BottomToolStripPanel.Location = new Point(0, 0);
-            BottomToolStripPanel.Name = "BottomToolStripPanel";
-            BottomToolStripPanel.Orientation = Orientation.Horizontal;
-            BottomToolStripPanel.RowMargin = new Padding(3, 0, 0, 0);
-            BottomToolStripPanel.Size = new Size(0, 0);
-            // 
-            // TopToolStripPanel
-            // 
-            TopToolStripPanel.Location = new Point(0, 0);
-            TopToolStripPanel.Name = "TopToolStripPanel";
-            TopToolStripPanel.Orientation = Orientation.Horizontal;
-            TopToolStripPanel.RowMargin = new Padding(3, 0, 0, 0);
-            TopToolStripPanel.Size = new Size(0, 0);
-            // 
-            // RightToolStripPanel
-            // 
-            RightToolStripPanel.Location = new Point(0, 0);
-            RightToolStripPanel.Name = "RightToolStripPanel";
-            RightToolStripPanel.Orientation = Orientation.Horizontal;
-            RightToolStripPanel.RowMargin = new Padding(3, 0, 0, 0);
-            RightToolStripPanel.Size = new Size(0, 0);
-            // 
-            // LeftToolStripPanel
-            // 
-            LeftToolStripPanel.Location = new Point(0, 0);
-            LeftToolStripPanel.Name = "LeftToolStripPanel";
-            LeftToolStripPanel.Orientation = Orientation.Horizontal;
-            LeftToolStripPanel.RowMargin = new Padding(3, 0, 0, 0);
-            LeftToolStripPanel.Size = new Size(0, 0);
-            // 
-            // ContentPanel
-            // 
-            ContentPanel.Size = new Size(125, 175);
-            // 
             // MainForm_TableLayout
             // 
             MainForm_TableLayout.ColumnCount = 1;
@@ -406,7 +373,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_TabControl
             // 
-            MainForm_TabControl.Controls.Add(MainForm_TabControl_Inventory);
+            MainForm_TabControl.Controls.Add(MainForm_TabPage_Inventory);
             MainForm_TabControl.Controls.Add(MainForm_TabControl_Remove);
             MainForm_TabControl.Controls.Add(MainForm_TabControl_Transfer);
             MainForm_TabControl.Dock = DockStyle.Fill;
@@ -420,27 +387,27 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl.TabIndex = 91;
             MainForm_TabControl.TabStop = false;
             // 
-            // MainForm_TabControl_Inventory
+            // MainForm_TabPage_Inventory
             // 
-            MainForm_TabControl_Inventory.Controls.Add(MainForm_InventoryTab);
-            MainForm_TabControl_Inventory.Controls.Add(MainForm_AdvancedInventory);
-            MainForm_TabControl_Inventory.Location = new Point(4, 24);
-            MainForm_TabControl_Inventory.Name = "MainForm_TabControl_Inventory";
-            MainForm_TabControl_Inventory.Padding = new Padding(3);
-            MainForm_TabControl_Inventory.Size = new Size(815, 390);
-            MainForm_TabControl_Inventory.TabIndex = 0;
-            MainForm_TabControl_Inventory.Text = "New Transaction (Ctrl+1)";
-            MainForm_TabControl_Inventory.ToolTipText = "Shortcut: Ctrl+1";
-            MainForm_TabControl_Inventory.UseVisualStyleBackColor = true;
+            MainForm_TabPage_Inventory.Controls.Add(MainForm_Control_InventoryTab);
+            MainForm_TabPage_Inventory.Controls.Add(MainForm_AdvancedInventory);
+            MainForm_TabPage_Inventory.Location = new Point(4, 24);
+            MainForm_TabPage_Inventory.Name = "MainForm_TabPage_Inventory";
+            MainForm_TabPage_Inventory.Padding = new Padding(3);
+            MainForm_TabPage_Inventory.Size = new Size(815, 390);
+            MainForm_TabPage_Inventory.TabIndex = 0;
+            MainForm_TabPage_Inventory.Text = "New Transaction (Ctrl+1)";
+            MainForm_TabPage_Inventory.ToolTipText = "Shortcut: Ctrl+1";
+            MainForm_TabPage_Inventory.UseVisualStyleBackColor = true;
             // 
-            // MainForm_InventoryTab
+            // MainForm_Control_InventoryTab
             // 
-            MainForm_InventoryTab.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            MainForm_InventoryTab.Dock = DockStyle.Fill;
-            MainForm_InventoryTab.Location = new Point(3, 3);
-            MainForm_InventoryTab.Name = "MainForm_InventoryTab";
-            MainForm_InventoryTab.Size = new Size(809, 384);
-            MainForm_InventoryTab.TabIndex = 0;
+            MainForm_Control_InventoryTab.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            MainForm_Control_InventoryTab.Dock = DockStyle.Fill;
+            MainForm_Control_InventoryTab.Location = new Point(3, 3);
+            MainForm_Control_InventoryTab.Name = "MainForm_Control_InventoryTab";
+            MainForm_Control_InventoryTab.Size = new Size(809, 384);
+            MainForm_Control_InventoryTab.TabIndex = 0;
             // 
             // MainForm_AdvancedInventory
             // 
@@ -452,7 +419,8 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_TabControl_Remove
             // 
-            MainForm_TabControl_Remove.Controls.Add(MainForm_RemoveTab);
+            MainForm_TabControl_Remove.Controls.Add(MainForm_RemoveTabNormalControl);
+            MainForm_TabControl_Remove.Controls.Add(MainForm_Control_AdvancedRemove);
             MainForm_TabControl_Remove.Location = new Point(4, 24);
             MainForm_TabControl_Remove.Name = "MainForm_TabControl_Remove";
             MainForm_TabControl_Remove.Padding = new Padding(3);
@@ -462,18 +430,27 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Remove.ToolTipText = "Shortcut: Ctrl+2";
             MainForm_TabControl_Remove.UseVisualStyleBackColor = true;
             // 
-            // MainForm_RemoveTab
+            // MainForm_RemoveTabNormalControl
             // 
-            MainForm_RemoveTab.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            MainForm_RemoveTab.Dock = DockStyle.Fill;
-            MainForm_RemoveTab.Location = new Point(3, 3);
-            MainForm_RemoveTab.Name = "MainForm_RemoveTab";
-            MainForm_RemoveTab.Size = new Size(809, 384);
-            MainForm_RemoveTab.TabIndex = 0;
+            MainForm_RemoveTabNormalControl.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            MainForm_RemoveTabNormalControl.Dock = DockStyle.Fill;
+            MainForm_RemoveTabNormalControl.Location = new Point(3, 3);
+            MainForm_RemoveTabNormalControl.Name = "MainForm_RemoveTabNormalControl";
+            MainForm_RemoveTabNormalControl.Size = new Size(809, 384);
+            MainForm_RemoveTabNormalControl.TabIndex = 0;
+            // 
+            // MainForm_Control_AdvancedRemove
+            // 
+            MainForm_Control_AdvancedRemove.Dock = DockStyle.Fill;
+            MainForm_Control_AdvancedRemove.Location = new Point(3, 3);
+            MainForm_Control_AdvancedRemove.Name = "MainForm_Control_AdvancedRemove";
+            MainForm_Control_AdvancedRemove.Size = new Size(809, 384);
+            MainForm_Control_AdvancedRemove.TabIndex = 1;
+            MainForm_Control_AdvancedRemove.Visible = false;
             // 
             // MainForm_TabControl_Transfer
             // 
-            MainForm_TabControl_Transfer.Controls.Add(controlTransferTab1);
+            MainForm_TabControl_Transfer.Controls.Add(MainForm_Control_TransferTab);
             MainForm_TabControl_Transfer.Location = new Point(4, 24);
             MainForm_TabControl_Transfer.Name = "MainForm_TabControl_Transfer";
             MainForm_TabControl_Transfer.Padding = new Padding(3);
@@ -483,21 +460,14 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Transfer.ToolTipText = "Shortcut: Ctrl+3";
             MainForm_TabControl_Transfer.UseVisualStyleBackColor = true;
             // 
-            // controlTransferTab1
+            // MainForm_Control_TransferTab
             // 
-            controlTransferTab1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            controlTransferTab1.Dock = DockStyle.Fill;
-            controlTransferTab1.Location = new Point(3, 3);
-            controlTransferTab1.Name = "controlTransferTab1";
-            controlTransferTab1.Size = new Size(809, 384);
-            controlTransferTab1.TabIndex = 0;
-            // 
-            // changeLogMakerToolStripMenuItem
-            // 
-            changeLogMakerToolStripMenuItem.Name = "changeLogMakerToolStripMenuItem";
-            changeLogMakerToolStripMenuItem.Size = new Size(234, 22);
-            changeLogMakerToolStripMenuItem.Text = "ChangeLog Maker";
-            changeLogMakerToolStripMenuItem.Click += changeLogMakerToolStripMenuItem_Click;
+            MainForm_Control_TransferTab.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            MainForm_Control_TransferTab.Dock = DockStyle.Fill;
+            MainForm_Control_TransferTab.Location = new Point(3, 3);
+            MainForm_Control_TransferTab.Name = "MainForm_Control_TransferTab";
+            MainForm_Control_TransferTab.Size = new Size(809, 384);
+            MainForm_Control_TransferTab.TabIndex = 0;
             // 
             // MainForm
             // 
@@ -531,7 +501,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Middle).EndInit();
             MainForm_SplitContainer_Middle.ResumeLayout(false);
             MainForm_TabControl.ResumeLayout(false);
-            MainForm_TabControl_Inventory.ResumeLayout(false);
+            MainForm_TabPage_Inventory.ResumeLayout(false);
             MainForm_TabControl_Remove.ResumeLayout(false);
             MainForm_TabControl_Transfer.ResumeLayout(false);
             ResumeLayout(false);
@@ -580,21 +550,17 @@ namespace MTM_WIP_Application.Forms.MainForm
         private System.Windows.Forms.Timer MainForm_Last10_Timer;
         public SplitContainer MainForm_SplitContainer_Lower;
         public ConnectionStrengthControl MainForm_Control_SignalStrength;
-        private ToolStripPanel BottomToolStripPanel;
-        private ToolStripPanel TopToolStripPanel;
-        private ToolStripPanel LeftToolStripPanel;
-        private ToolStripContentPanel ContentPanel;
-        private ToolStripPanel RightToolStripPanel;
         private TableLayoutPanel MainForm_TableLayout;
         public SplitContainer MainForm_SplitContainer_Middle;
         public TabControl MainForm_TabControl;
-        private TabPage MainForm_TabControl_Inventory;
+        private TabPage MainForm_TabPage_Inventory;
         private TabPage MainForm_TabControl_Remove;
         private TabPage MainForm_TabControl_Transfer;
-        private ControlRemoveTab MainForm_RemoveTab;
-        private ControlTransferTab controlTransferTab1;
-        public ControlInventoryTab MainForm_InventoryTab;
+        private ControlRemoveTab MainForm_RemoveTabNormalControl;
+        private ControlTransferTab MainForm_Control_TransferTab;
+        public ControlInventoryTab MainForm_Control_InventoryTab;
         public Control_AdvancedInventory MainForm_AdvancedInventory;
-        private ToolStripMenuItem changeLogMakerToolStripMenuItem;
+        private ToolStripMenuItem MainForm_MenuItem_ChangeLogMaker;
+        private Control_AdvancedRemove MainForm_Control_AdvancedRemove;
     }
 }
