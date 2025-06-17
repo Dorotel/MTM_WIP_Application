@@ -19,6 +19,14 @@ public partial class ControlTransferTab : UserControl
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
 
+    // Shared DataTables and Adapters for ComboBoxes
+    private readonly DataTable _partCbDataTable = new();
+    private readonly DataTable _opCbDataTable = new();
+    private readonly DataTable _locCbDataTable = new();
+    private readonly MySqlDataAdapter _partCbDataAdapter = new();
+    private readonly MySqlDataAdapter _opCbDataAdapter = new();
+    private readonly MySqlDataAdapter _locCbDataAdapter = new();
+
     #region Initialization
 
     public ControlTransferTab()
@@ -126,19 +134,38 @@ public partial class ControlTransferTab : UserControl
         try
         {
             await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
-            var comboBoxSets = new[]
-            {
-                (new MySqlDataAdapter(), new DataTable(), Control_TransferTab_ComboBox_Part, "md_part_ids_Get_All",
-                    "Item Number", "ID", "[ Enter Part ID ]", CommandType.StoredProcedure),
-                (new MySqlDataAdapter(), new DataTable(), Control_TransferTab_ComboBox_Operation,
-                    "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
-                    CommandType.StoredProcedure),
-                (new MySqlDataAdapter(), new DataTable(), Control_TransferTab_ComboBox_ToLocation,
-                    "md_locations_Get_All", "Location", "Location", "[ Enter Location ]", CommandType.StoredProcedure)
-            };
-            foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await Helper_ComboBoxes.FillComboBoxAsync(
-                    procName, connection, adapter, table, comboBox, display, value, placeholder, cmdType);
+            await Helper_ComboBoxes.FillComboBoxAsync(
+                "md_part_ids_Get_All",
+                connection,
+                _partCbDataAdapter,
+                _partCbDataTable,
+                Control_TransferTab_ComboBox_Part,
+                "Item Number",
+                "ID",
+                "[ Enter Part ID ]",
+                CommandType.StoredProcedure);
+
+            await Helper_ComboBoxes.FillComboBoxAsync(
+                "md_operation_numbers_Get_All",
+                connection,
+                _opCbDataAdapter,
+                _opCbDataTable,
+                Control_TransferTab_ComboBox_Operation,
+                "Operation",
+                "Operation",
+                "[ Enter Op # ]",
+                CommandType.StoredProcedure);
+
+            await Helper_ComboBoxes.FillComboBoxAsync(
+                "md_locations_Get_All",
+                connection,
+                _locCbDataAdapter,
+                _locCbDataTable,
+                Control_TransferTab_ComboBox_ToLocation,
+                "Location",
+                "Location",
+                "[ Enter Location ]",
+                CommandType.StoredProcedure);
             LoggingUtility.Log("Transfer tab ComboBoxes loaded.");
         }
         catch (Exception ex)
@@ -165,11 +192,13 @@ public partial class ControlTransferTab : UserControl
             Control_TransferTab_DataGridView_Main.DataSource = null;
             Control_TransferTab_DataGridView_Main.Rows.Clear();
             Control_TransferTab_DataGridView_Main.Refresh();
+            // Reinitialize ComboBox DataTables using shared DataTables/adapters
+            await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_part_ids_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                connection,
+                _partCbDataAdapter,
+                _partCbDataTable,
                 Control_TransferTab_ComboBox_Part,
                 "Item Number",
                 "ID",
@@ -177,9 +206,9 @@ public partial class ControlTransferTab : UserControl
                 CommandType.StoredProcedure);
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                connection,
+                _opCbDataAdapter,
+                _opCbDataTable,
                 Control_TransferTab_ComboBox_Operation,
                 "Operation",
                 "Operation",
@@ -187,9 +216,9 @@ public partial class ControlTransferTab : UserControl
                 CommandType.StoredProcedure);
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_locations_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                connection,
+                _locCbDataAdapter,
+                _locCbDataTable,
                 Control_TransferTab_ComboBox_ToLocation,
                 "Location",
                 "Location",

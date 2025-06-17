@@ -17,7 +17,17 @@ namespace MTM_WIP_Application.Controls.MainForm;
 
 public partial class Control_AdvancedRemove : UserControl
 {
-    private readonly List<Model_HistoryRemove> _lastRemovedItems = [];
+    private readonly List<Model_HistoryRemove> _lastRemovedItems = new();
+
+    // Shared DataTables and Adapters for ComboBoxes
+    private readonly DataTable _partCbDataTable = new();
+    private readonly DataTable _opCbDataTable = new();
+    private readonly DataTable _locCbDataTable = new();
+    private readonly DataTable _userCbDataTable = new();
+    private readonly MySqlDataAdapter _partCbDataAdapter = new();
+    private readonly MySqlDataAdapter _opCbDataAdapter = new();
+    private readonly MySqlDataAdapter _locCbDataAdapter = new();
+    private readonly MySqlDataAdapter _userCbDataAdapter = new();
 
     private static void Control_AdvancedSearch_Button_Normal_Click(object? sender, EventArgs? e)
     {
@@ -132,21 +142,50 @@ public partial class Control_AdvancedRemove : UserControl
         try
         {
             await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
-            var comboBoxSets = new[]
-            {
-                (new MySqlDataAdapter(), new DataTable(), Control_AdvancedSearch_ComboBox_Part, "md_part_ids_Get_All",
-                    "Item Number", "ID", "[ Enter Part ID ]", CommandType.StoredProcedure),
-                (new MySqlDataAdapter(), new DataTable(), Control_AdvancedSearch_ComboBox_Op,
-                    "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
-                    CommandType.StoredProcedure),
-                (new MySqlDataAdapter(), new DataTable(), Control_AdvancedSearch_ComboBox_Loc, "md_locations_Get_All",
-                    "Location", "Location", "[ Enter Location ]", CommandType.StoredProcedure),
-                (new MySqlDataAdapter(), new DataTable(), Control_AdvancedSearch_ComboBox_User, "usr_users_Get_All",
-                    "User", "User", "[ Enter User ]", CommandType.StoredProcedure)
-            };
-            foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await Helper_ComboBoxes.FillComboBoxAsync(
-                    procName, connection, adapter, table, comboBox, display, value, placeholder, cmdType);
+            await Helper_ComboBoxes.FillComboBoxAsync(
+                "md_part_ids_Get_All",
+                connection,
+                _partCbDataAdapter,
+                _partCbDataTable,
+                Control_AdvancedSearch_ComboBox_Part,
+                "Item Number",
+                "ID",
+                "[ Enter Part ID ]",
+                CommandType.StoredProcedure);
+
+            await Helper_ComboBoxes.FillComboBoxAsync(
+                "md_operation_numbers_Get_All",
+                connection,
+                _opCbDataAdapter,
+                _opCbDataTable,
+                Control_AdvancedSearch_ComboBox_Op,
+                "Operation",
+                "Operation",
+                "[ Enter Op # ]",
+                CommandType.StoredProcedure);
+
+            await Helper_ComboBoxes.FillComboBoxAsync(
+                "md_locations_Get_All",
+                connection,
+                _locCbDataAdapter,
+                _locCbDataTable,
+                Control_AdvancedSearch_ComboBox_Loc,
+                "Location",
+                "Location",
+                "[ Enter Location ]",
+                CommandType.StoredProcedure);
+
+            await Helper_ComboBoxes.FillComboBoxAsync(
+                "usr_users_Get_All",
+                connection,
+                _userCbDataAdapter,
+                _userCbDataTable,
+                Control_AdvancedSearch_ComboBox_User,
+                "User",
+                "User",
+                "[ Enter User ]",
+                CommandType.StoredProcedure);
+
             Control_AdvancedSearch_ComboBox_Part.Visible = true;
             Control_AdvancedSearch_ComboBox_Op.Visible = true;
             Control_AdvancedSearch_ComboBox_Loc.Visible = true;
@@ -211,7 +250,6 @@ public partial class Control_AdvancedRemove : UserControl
     {
         try
         {
-            // Validate input fields
             var part = Control_AdvancedSearch_ComboBox_Part.Text.Trim();
             var op = Control_AdvancedSearch_ComboBox_Op.Text.Trim();
             var loc = Control_AdvancedSearch_ComboBox_Loc.Text.Trim();
@@ -226,15 +264,11 @@ public partial class Control_AdvancedRemove : UserControl
             int? qtyMin = int.TryParse(qtyMinText, out var qmin) ? qmin : null;
             int? qtyMax = int.TryParse(qtyMaxText, out var qmax) ? qmax : null;
 
-            // Treat ComboBox SelectedIndex == 0 as nothing selected
-            var partSelected = Control_AdvancedSearch_ComboBox_Part.SelectedIndex > 0 &&
-                               !string.IsNullOrWhiteSpace(part);
+            var partSelected = Control_AdvancedSearch_ComboBox_Part.SelectedIndex > 0 && !string.IsNullOrWhiteSpace(part);
             var opSelected = Control_AdvancedSearch_ComboBox_Op.SelectedIndex > 0 && !string.IsNullOrWhiteSpace(op);
             var locSelected = Control_AdvancedSearch_ComboBox_Loc.SelectedIndex > 0 && !string.IsNullOrWhiteSpace(loc);
-            var userSelected = Control_AdvancedSearch_ComboBox_User.SelectedIndex > 0 &&
-                               !string.IsNullOrWhiteSpace(user);
+            var userSelected = Control_AdvancedSearch_ComboBox_User.SelectedIndex > 0 && !string.IsNullOrWhiteSpace(user);
 
-            // Check if at least one field is filled
             var anyFieldFilled =
                 partSelected ||
                 opSelected ||
@@ -259,44 +293,26 @@ public partial class Control_AdvancedRemove : UserControl
                 return;
             }
 
-            // Debug: Log parameter values
             LoggingUtility.Log(
                 $"[DEBUG] Advanced Search Parameters: PartID='{(partSelected ? part : null)}', Operation='{(opSelected ? op : null)}', Location='{(locSelected ? loc : null)}', QtyMin='{qtyMin}', QtyMax='{qtyMax}', Notes='{notes}', User='{(userSelected ? user : null)}', DateFrom='{(dateFrom.HasValue ? dateFrom.Value.ToString("yyyy-MM-dd") : "NULL")}', DateTo='{(dateTo.HasValue ? dateTo.Value.ToString("yyyy-MM-dd") : "NULL")}'");
             System.Diagnostics.Debug.WriteLine(
                 $"[DEBUG] Advanced Search Parameters: PartID='{(partSelected ? part : null)}', Operation='{(opSelected ? op : null)}', Location='{(locSelected ? loc : null)}', QtyMin='{qtyMin}', QtyMax='{qtyMax}', Notes='{notes}', User='{(userSelected ? user : null)}', DateFrom='{(dateFrom.HasValue ? dateFrom.Value.ToString("yyyy-MM-dd") : "NULL")}', DateTo='{(dateTo.HasValue ? dateTo.Value.ToString("yyyy-MM-dd") : "NULL")}'");
 
-            // Build query
-            var dt = new DataTable();
-            await using var conn = new MySqlConnection(Core_WipAppVariables.ConnectionString);
-            await using var cmd = new MySqlCommand("inv_inventory_Advanced_Search", conn)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-            cmd.Parameters.AddWithValue("@p_PartID", partSelected ? part : (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@p_Operation", opSelected ? op : (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@p_Location", locSelected ? loc : (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@p_QtyMin", qtyMin ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@p_QtyMax", qtyMax ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@p_Notes", string.IsNullOrWhiteSpace(notes) ? (object)DBNull.Value : notes);
-            cmd.Parameters.AddWithValue("@p_User", userSelected ? user : (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@p_DateFrom", dateFrom ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@p_DateTo", dateTo ?? (object)DBNull.Value);
+            var dt = await Dao_Inventory.GetInventoryAdvancedSearchAsync(
+                partSelected ? part : null,
+                opSelected ? op : null,
+                locSelected ? loc : null,
+                qtyMin,
+                qtyMax,
+                string.IsNullOrWhiteSpace(notes) ? null : notes,
+                userSelected ? user : null,
+                dateFrom,
+                dateTo
+            );
 
-            // Debug: Show SQL command and parameters
-            var debugSql =
-                $"CALL inv_inventory_Advanced_Search(\n  @p_PartID = '{cmd.Parameters["@p_PartID"].Value}',\n  @p_Operation = '{cmd.Parameters["@p_Operation"].Value}',\n  @p_Location = '{cmd.Parameters["@p_Location"].Value}',\n  @p_QtyMin = '{cmd.Parameters["@p_QtyMin"].Value}',\n  @p_QtyMax = '{cmd.Parameters["@p_QtyMax"].Value}',\n  @p_Notes = '{cmd.Parameters["@p_Notes"].Value}',\n  @p_User = '{cmd.Parameters["@p_User"].Value}',\n  @p_DateFrom = '{cmd.Parameters["@p_DateFrom"].Value}',\n  @p_DateTo = '{cmd.Parameters["@p_DateTo"].Value}'\n)";
-            LoggingUtility.Log($"[DEBUG] SQL Command: {debugSql}");
-            System.Diagnostics.Debug.WriteLine($"[DEBUG] SQL Command: {debugSql}");
-
-            await conn.OpenAsync();
-            using var adapter = new MySqlDataAdapter(cmd);
-            adapter.Fill(dt);
-
-            // Debug: Log result count
             LoggingUtility.Log($"[DEBUG] Advanced Search Results: {dt.Rows.Count} rows returned.");
             System.Diagnostics.Debug.WriteLine($"[DEBUG] Advanced Search Results: {dt.Rows.Count} rows returned.");
 
-            // Only show columns that exist in the procedure's SELECT
             var allowedColumns = new[]
             {
                 "PartID", "Operation", "Location", "Quantity", "Notes", "User", "ReceiveDate", "LastUpdated",
@@ -322,7 +338,7 @@ public partial class Control_AdvancedRemove : UserControl
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
-            MessageBox.Show($@"Error during advanced search: {ex.Message}", @"Search Error", MessageBoxButtons.OK,
+            MessageBox.Show(@$"Error during advanced search: {ex.Message}", @"Search Error", MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
     }
@@ -485,12 +501,13 @@ public partial class Control_AdvancedRemove : UserControl
         Control_AdvancedSearch_ComboBox_Loc.Visible = false;
         Control_AdvancedSearch_ComboBox_User.Visible = false;
 
-        // Reinitialize ComboBox DataTables
+        // Reinitialize ComboBox DataTables using shared DataTables/adapters
+        await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
         await Helper_ComboBoxes.FillComboBoxAsync(
             "md_part_ids_Get_All",
-            new MySqlConnection(Core_WipAppVariables.ConnectionString),
-            new MySqlDataAdapter(),
-            new DataTable(),
+            connection,
+            _partCbDataAdapter,
+            _partCbDataTable,
             Control_AdvancedSearch_ComboBox_Part,
             "Item Number",
             "ID",
@@ -499,9 +516,9 @@ public partial class Control_AdvancedRemove : UserControl
 
         await Helper_ComboBoxes.FillComboBoxAsync(
             "md_operation_numbers_Get_All",
-            new MySqlConnection(Core_WipAppVariables.ConnectionString),
-            new MySqlDataAdapter(),
-            new DataTable(),
+            connection,
+            _opCbDataAdapter,
+            _opCbDataTable,
             Control_AdvancedSearch_ComboBox_Op,
             "Operation",
             "Operation",
@@ -510,9 +527,9 @@ public partial class Control_AdvancedRemove : UserControl
 
         await Helper_ComboBoxes.FillComboBoxAsync(
             "md_locations_Get_All",
-            new MySqlConnection(Core_WipAppVariables.ConnectionString),
-            new MySqlDataAdapter(),
-            new DataTable(),
+            connection,
+            _locCbDataAdapter,
+            _locCbDataTable,
             Control_AdvancedSearch_ComboBox_Loc,
             "Location",
             "Location",
@@ -521,9 +538,9 @@ public partial class Control_AdvancedRemove : UserControl
 
         await Helper_ComboBoxes.FillComboBoxAsync(
             "usr_users_Get_All",
-            new MySqlConnection(Core_WipAppVariables.ConnectionString),
-            new MySqlDataAdapter(),
-            new DataTable(),
+            connection,
+            _userCbDataAdapter,
+            _userCbDataTable,
             Control_AdvancedSearch_ComboBox_User,
             "User",
             "User",

@@ -13,8 +13,6 @@ using static System.Int32;
 
 namespace MTM_WIP_Application.Controls.MainForm;
 
-#region RemoveTab
-
 public partial class ControlRemoveTab : UserControl
 {
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -22,7 +20,10 @@ public partial class ControlRemoveTab : UserControl
 
     private readonly List<Model_HistoryRemove> _lastRemovedItems = [];
 
-    #region Initialization
+    private readonly DataTable _partCbDataTable = new();
+    private readonly DataTable _opCbDataTable = new();
+    private readonly MySqlDataAdapter _partCbDataAdapter = new();
+    private readonly MySqlDataAdapter _opCbDataAdapter = new();
 
     public ControlRemoveTab()
     {
@@ -55,10 +56,6 @@ public partial class ControlRemoveTab : UserControl
         Control_RemoveTab_ComboBox_Part.Visible = false;
         Control_RemoveTab_Button_Reset.TabStop = false;
     }
-
-    #endregion
-
-    #region Startup / ComboBox Loading
 
     private async Task Control_RemoveTab_OnStartup_LoadComboBoxesAsync()
     {
@@ -102,29 +99,28 @@ public partial class ControlRemoveTab : UserControl
         try
         {
             await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
-            var comboBoxSets =
-                new (MySqlDataAdapter Adapter, DataTable Table, ComboBox ComboBox, string ProcName, string Display,
-                    string Value, string Placeholder, CommandType CommandType)[]
-                    {
-                        (new MySqlDataAdapter(), new DataTable(), Control_RemoveTab_ComboBox_Part,
-                            "md_part_ids_Get_All", "Item Number", "ID", "[ Enter Part ID ]",
-                            CommandType.StoredProcedure),
-                        (new MySqlDataAdapter(), new DataTable(), Control_RemoveTab_ComboBox_Operation,
-                            "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
-                            CommandType.StoredProcedure)
-                    };
-            foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await Helper_ComboBoxes.FillComboBoxAsync(
-                    procName,
-                    connection,
-                    adapter,
-                    table,
-                    comboBox,
-                    display,
-                    value,
-                    placeholder,
-                    cmdType
-                );
+            await Helper_ComboBoxes.FillComboBoxAsync(
+                "md_part_ids_Get_All",
+                connection,
+                _partCbDataAdapter,
+                _partCbDataTable,
+                Control_RemoveTab_ComboBox_Part,
+                "Item Number",
+                "ID",
+                "[ Enter Part ID ]",
+                CommandType.StoredProcedure);
+
+            await Helper_ComboBoxes.FillComboBoxAsync(
+                "md_operation_numbers_Get_All",
+                connection,
+                _opCbDataAdapter,
+                _opCbDataTable,
+                Control_RemoveTab_ComboBox_Operation,
+                "Operation",
+                "Operation",
+                "[ Enter Op # ]",
+                CommandType.StoredProcedure);
+
             LoggingUtility.Log("Remove tab ComboBoxes loaded.");
         }
         catch (Exception ex)
@@ -134,10 +130,6 @@ public partial class ControlRemoveTab : UserControl
                 new StringBuilder().Append("MainForm_LoadRemoveTabComboBoxesAsync").ToString());
         }
     }
-
-    #endregion
-
-    #region Key Processing
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
@@ -157,7 +149,6 @@ public partial class ControlRemoveTab : UserControl
 
             if (keyData == Keys.Delete)
             {
-                // Simulate Delete button click
                 Control_RemoveTab_Button_Delete.PerformClick();
                 return true;
             }
@@ -186,10 +177,6 @@ public partial class ControlRemoveTab : UserControl
             return false;
         }
     }
-
-    #endregion
-
-    #region Button Clicks
 
     private async void Control_RemoveTab_Button_Delete_Click(object? sender, EventArgs? e)
     {
@@ -249,7 +236,7 @@ Are you sure?",
                     var batchNumber = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Batch Number")
                         ? drv["Batch Number"]?.ToString() ?? ""
                         : "";
-                    var itemType = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Item Type")
+                    var partType = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Item Type")
                         ? drv["Item Type"]?.ToString() ?? ""
                         : "";
                     var receivedDate =
@@ -272,7 +259,7 @@ Are you sure?",
                         Location = location,
                         Operation = operation,
                         Quantity = quantity,
-                        ItemType = itemType,
+                        ItemType = partType, // Use ItemType property for both ItemType/PartType
                         ReceiveDate = receivedDate,
                         LastUpdated = lastUpdate,
                         User = user,
@@ -311,7 +298,6 @@ Are you sure?",
             LoggingUtility.Log("Selected inventory items deleted.");
             System.Diagnostics.Debug.WriteLine("[DEBUG] Selected inventory items deleted.");
 
-            // Update status strip
             if (MainFormInstance != null && itemsToDelete.Count > 0)
             {
                 var time = DateTime.Now.ToString("hh:mm tt");
@@ -351,7 +337,7 @@ Are you sure?",
                     item.Location,
                     item.Operation,
                     item.Quantity,
-                    item.ItemType,
+                    item.ItemType, // Use ItemType property for both ItemType/PartType
                     item.User,
                     item.BatchNumber,
                     "Removal reversed via Undo Button.",
@@ -384,15 +370,15 @@ Are you sure?",
             Control_RemoveTab_ComboBox_Part.Visible = false;
             Control_RemoveTab_Image_NothingFound.Visible = false;
 
-            // Clear the DataGridView
             Control_RemoveTab_DataGridView_Main.DataSource = null;
             Control_RemoveTab_DataGridView_Main.Rows.Clear();
 
+            await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_part_ids_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                connection,
+                _partCbDataAdapter,
+                _partCbDataTable,
                 Control_RemoveTab_ComboBox_Part,
                 "Item Number",
                 "ID",
@@ -401,9 +387,9 @@ Are you sure?",
 
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                connection,
+                _opCbDataAdapter,
+                _opCbDataTable,
                 Control_RemoveTab_ComboBox_Operation,
                 "Operation",
                 "Operation",
@@ -520,10 +506,6 @@ Are you sure?",
         }
     }
 
-    #endregion
-
-    #region ComboBox & UI Events
-
     private void Control_RemoveTab_ComboBox_Operation_SelectedIndexChanged()
     {
         try
@@ -616,7 +598,6 @@ Are you sure?",
             Control_RemoveTab_Button_AdvancedItemRemoval.Click +=
                 (s, e) => Control_RemoveTab_Button_AdvancedItemRemoval_Click();
 
-            // Add event handler for Back to Normal button in advanced control
             if (MainFormInstance != null)
             {
                 var adv = MainFormInstance.MainForm_RemoveTabAdvancedControl_Public;
@@ -698,10 +679,6 @@ Are you sure?",
         }
     }
 
-    #endregion
-
-    #region Helpers
-
     private List<(string PartID, string Location, int Quantity)> GetSelectedItemsToDelete(out string summary)
     {
         var sb = new StringBuilder();
@@ -730,8 +707,4 @@ Are you sure?",
         summary = sb.ToString();
         return itemsToDelete;
     }
-
-    #endregion
 }
-
-#endregion

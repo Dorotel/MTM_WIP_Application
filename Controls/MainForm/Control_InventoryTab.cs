@@ -16,6 +16,14 @@ namespace MTM_WIP_Application.Controls.MainForm;
 
 public partial class ControlInventoryTab : UserControl
 {
+    // Shared DataTables and Adapters for ComboBoxes
+    private readonly DataTable _partCbDataTable = new();
+    private readonly DataTable _opCbDataTable = new();
+    private readonly DataTable _locationCbDataTable = new();
+    private readonly MySqlDataAdapter _partCbDataAdapter = new();
+    private readonly MySqlDataAdapter _opCbDataAdapter = new();
+    private readonly MySqlDataAdapter _locationCbDataAdapter = new();
+
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
 
@@ -97,32 +105,25 @@ public partial class ControlInventoryTab : UserControl
         try
         {
             await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
-            var comboBoxSets =
-                new (MySqlDataAdapter Adapter, DataTable Table, ComboBox ComboBox, string ProcName, string Display,
-                    string Value, string Placeholder, CommandType CommandType)[]
-                    {
-                        (new MySqlDataAdapter(), new DataTable(), Control_InventoryTab_ComboBox_Part,
-                            "md_part_ids_Get_All", "Item Number", "ID", "[ Enter Part ID ]",
-                            CommandType.StoredProcedure),
-                        (new MySqlDataAdapter(), new DataTable(), Control_InventoryTab_ComboBox_Operation,
-                            "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
-                            CommandType.StoredProcedure),
-                        (new MySqlDataAdapter(), new DataTable(), Control_InventoryTab_ComboBox_Location,
-                            "md_locations_Get_All", "Location", "Location", "[ Enter Location ]",
-                            CommandType.StoredProcedure)
-                    };
-            foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await Helper_ComboBoxes.FillComboBoxAsync(
-                    procName,
-                    connection,
-                    adapter,
-                    table,
-                    comboBox,
-                    display,
-                    value,
-                    placeholder,
-                    cmdType
-                );
+            await Helper_ComboBoxes.FillAllComboBoxesAsync(
+                connection,
+                _partCbDataAdapter,
+                _partCbDataTable,
+                Control_InventoryTab_ComboBox_Part,
+                null!, // removeTabComboBoxPart (not used here)
+                null!, // transferTabComboBoxPart (not used here)
+                _opCbDataAdapter,
+                _opCbDataTable,
+                Control_InventoryTab_ComboBox_Operation,
+                null!, // removeTabComboBoxOp (not used here)
+                _locationCbDataAdapter,
+                _locationCbDataTable,
+                Control_InventoryTab_ComboBox_Location,
+                null!, // transferTabComboBoxLoc (not used here)
+                null!, // removeTabCBoxSearchByTypeDataAdapter (not used here)
+                null!, // removeTabComboBoxSearchByTypeDataTable (not used here)
+                null!  // removeTabCBoxShowAll (not used here)
+            );
             LoggingUtility.Log("Inventory tab ComboBoxes loaded.");
         }
         catch (Exception ex)
@@ -211,40 +212,27 @@ public partial class ControlInventoryTab : UserControl
             Control_InventoryTab_ComboBox_Operation.Visible = false;
             Control_InventoryTab_ComboBox_Part.Visible = false;
 
-
-            // Reinitialize ComboBox DataTables
-            await Helper_ComboBoxes.FillComboBoxAsync(
-                "md_part_ids_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+            // Use shared DataTables/adapters and FillAllComboBoxesAsync
+            await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
+            await Helper_ComboBoxes.FillAllComboBoxesAsync(
+                connection,
+                _partCbDataAdapter,
+                _partCbDataTable,
                 Control_InventoryTab_ComboBox_Part,
-                "Item Number",
-                "ID",
-                "[ Enter Part ID ]",
-                CommandType.StoredProcedure);
-
-            await Helper_ComboBoxes.FillComboBoxAsync(
-                "md_operation_numbers_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                null!, // removeTabComboBoxPart (not used here)
+                null!, // transferTabComboBoxPart (not used here)
+                _opCbDataAdapter,
+                _opCbDataTable,
                 Control_InventoryTab_ComboBox_Operation,
-                "Operation",
-                "Operation",
-                "[ Enter Op # ]",
-                CommandType.StoredProcedure);
-
-            await Helper_ComboBoxes.FillComboBoxAsync(
-                "md_locations_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                null!, // removeTabComboBoxOp (not used here)
+                _locationCbDataAdapter,
+                _locationCbDataTable,
                 Control_InventoryTab_ComboBox_Location,
-                "Location",
-                "Location",
-                "[ Enter Location ]",
-                CommandType.StoredProcedure);
+                null!, // transferTabComboBoxLoc (not used here)
+                null!, // removeTabCBoxSearchByTypeDataAdapter (not used here)
+                null!, // removeTabComboBoxSearchByTypeDataTable (not used here)
+                null!  // removeTabCBoxShowAll (not used here)
+            );
 
             if (MainFormInstance != null)
                 MainFormTabResetHelper.ResetInventoryTab(

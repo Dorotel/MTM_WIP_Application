@@ -44,6 +44,36 @@ public static class Dao_Inventory
             useAsync, CommandType.StoredProcedure);
     }
 
+    public static async Task<DataTable> GetInventoryAdvancedSearchAsync(
+        string? partId,
+        string? operation,
+        string? location,
+        int? qtyMin,
+        int? qtyMax,
+        string? notes,
+        string? user,
+        DateTime? dateFrom,
+        DateTime? dateTo)
+    {
+        var parameters = new Dictionary<string, object>
+        {
+            { "@p_PartID", string.IsNullOrWhiteSpace(partId) ? DBNull.Value : partId },
+            { "@p_Operation", string.IsNullOrWhiteSpace(operation) ? DBNull.Value : operation },
+            { "@p_Location", string.IsNullOrWhiteSpace(location) ? DBNull.Value : location },
+            { "@p_QtyMin", qtyMin ?? (object)DBNull.Value },
+            { "@p_QtyMax", qtyMax ?? (object)DBNull.Value },
+            { "@p_Notes", string.IsNullOrWhiteSpace(notes) ? DBNull.Value : notes },
+            { "@p_User", string.IsNullOrWhiteSpace(user) ? DBNull.Value : user },
+            { "@p_DateFrom", dateFrom ?? (object)DBNull.Value },
+            { "@p_DateTo", dateTo ?? (object)DBNull.Value }
+        };
+        return await HelperMySql.ExecuteDataTable(
+            "inv_inventory_Advanced_Search",
+            parameters,
+            true,
+            CommandType.StoredProcedure);
+    }
+
     #endregion
 
     #region Modification Methods

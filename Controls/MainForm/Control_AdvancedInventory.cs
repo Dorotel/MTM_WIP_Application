@@ -24,6 +24,23 @@ public partial class Control_AdvancedInventory : UserControl
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
 
+    #region Shared DataTables and Adapters
+
+    private readonly DataTable _singlePartCbDataTable = new();
+    private readonly DataTable _singleOpCbDataTable = new();
+    private readonly DataTable _singleLocCbDataTable = new();
+    private readonly DataTable _multiPartCbDataTable = new();
+    private readonly DataTable _multiOpCbDataTable = new();
+    private readonly DataTable _multiLocCbDataTable = new();
+    private readonly MySqlDataAdapter _singlePartCbDataAdapter = new();
+    private readonly MySqlDataAdapter _singleOpCbDataAdapter = new();
+    private readonly MySqlDataAdapter _singleLocCbDataAdapter = new();
+    private readonly MySqlDataAdapter _multiPartCbDataAdapter = new();
+    private readonly MySqlDataAdapter _multiOpCbDataAdapter = new();
+    private readonly MySqlDataAdapter _multiLocCbDataAdapter = new();
+
+    #endregion
+
     #region Constructor and Initialization
 
     public Control_AdvancedInventory()
@@ -164,11 +181,12 @@ public partial class Control_AdvancedInventory : UserControl
         {
             await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
 
+            // Single tab ComboBoxes
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_part_ids_Get_All",
                 connection,
-                new MySqlDataAdapter(),
-                new DataTable(),
+                _singlePartCbDataAdapter,
+                _singlePartCbDataTable,
                 AdvancedInventory_Single_ComboBox_Part,
                 "Item Number",
                 "ID",
@@ -178,8 +196,8 @@ public partial class Control_AdvancedInventory : UserControl
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
                 connection,
-                new MySqlDataAdapter(),
-                new DataTable(),
+                _singleOpCbDataAdapter,
+                _singleOpCbDataTable,
                 AdvancedInventory_Single_ComboBox_Op,
                 "Operation",
                 "Operation",
@@ -189,19 +207,20 @@ public partial class Control_AdvancedInventory : UserControl
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_locations_Get_All",
                 connection,
-                new MySqlDataAdapter(),
-                new DataTable(),
+                _singleLocCbDataAdapter,
+                _singleLocCbDataTable,
                 AdvancedInventory_Single_ComboBox_Loc,
                 "Location",
                 "Location",
                 "[ Enter Location ]",
                 CommandType.StoredProcedure);
 
+            // Multi tab ComboBoxes
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_part_ids_Get_All",
                 connection,
-                new MySqlDataAdapter(),
-                new DataTable(),
+                _multiPartCbDataAdapter,
+                _multiPartCbDataTable,
                 AdvancedInventory_MultiLoc_ComboBox_Part,
                 "Item Number",
                 "ID",
@@ -211,8 +230,8 @@ public partial class Control_AdvancedInventory : UserControl
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
                 connection,
-                new MySqlDataAdapter(),
-                new DataTable(),
+                _multiOpCbDataAdapter,
+                _multiOpCbDataTable,
                 AdvancedInventory_MultiLoc_ComboBox_Op,
                 "Operation",
                 "Operation",
@@ -222,8 +241,8 @@ public partial class Control_AdvancedInventory : UserControl
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_locations_Get_All",
                 connection,
-                new MySqlDataAdapter(),
-                new DataTable(),
+                _multiLocCbDataAdapter,
+                _multiLocCbDataTable,
                 AdvancedInventory_MultiLoc_ComboBox_Loc,
                 "Location",
                 "Location",
@@ -569,12 +588,13 @@ public partial class Control_AdvancedInventory : UserControl
             AdvancedInventory_Single_ComboBox_Op.Visible = false;
             AdvancedInventory_Single_ComboBox_Loc.Visible = false;
 
-            // Reinitialize ComboBox DataTables
+            // Reinitialize ComboBox DataTables using shared DataTables/adapters
+            await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_part_ids_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                connection,
+                _singlePartCbDataAdapter,
+                _singlePartCbDataTable,
                 AdvancedInventory_Single_ComboBox_Part,
                 "Item Number",
                 "ID",
@@ -583,9 +603,9 @@ public partial class Control_AdvancedInventory : UserControl
 
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                connection,
+                _singleOpCbDataAdapter,
+                _singleOpCbDataTable,
                 AdvancedInventory_Single_ComboBox_Op,
                 "Operation",
                 "Operation",
@@ -594,9 +614,9 @@ public partial class Control_AdvancedInventory : UserControl
 
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_locations_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                connection,
+                _singleLocCbDataAdapter,
+                _singleLocCbDataTable,
                 AdvancedInventory_Single_ComboBox_Loc,
                 "Location",
                 "Location",
@@ -785,12 +805,13 @@ public partial class Control_AdvancedInventory : UserControl
             // Add the specified number of entries to the ListView
             for (var i = 0; i < count; i++)
             {
-                var listViewItem = new ListViewItem([
+                var listViewItem = new ListViewItem(new[]
+                {
                     partId,
                     op,
                     loc,
                     qty.ToString()
-                ]);
+                });
                 AdvancedInventory_Single_ListView.Items.Add(listViewItem);
                 Debug.WriteLine(
                     $"Added item to ListView: Part={partId}, Op={op}, Loc={loc}, Qty={qty}, Notes={notes}");
@@ -854,12 +875,13 @@ public partial class Control_AdvancedInventory : UserControl
             AdvancedInventory_MultiLoc_ComboBox_Op.Visible = false;
             AdvancedInventory_MultiLoc_ComboBox_Loc.Visible = false;
 
-            // Reinitialize ComboBox DataTables
+            // Reinitialize ComboBox DataTables using shared DataTables/adapters
+            await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_part_ids_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                connection,
+                _multiPartCbDataAdapter,
+                _multiPartCbDataTable,
                 AdvancedInventory_MultiLoc_ComboBox_Part,
                 "Item Number",
                 "ID",
@@ -868,9 +890,9 @@ public partial class Control_AdvancedInventory : UserControl
 
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_operation_numbers_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                connection,
+                _multiOpCbDataAdapter,
+                _multiOpCbDataTable,
                 AdvancedInventory_MultiLoc_ComboBox_Op,
                 "Operation",
                 "Operation",
@@ -879,9 +901,9 @@ public partial class Control_AdvancedInventory : UserControl
 
             await Helper_ComboBoxes.FillComboBoxAsync(
                 "md_locations_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
+                connection,
+                _multiLocCbDataAdapter,
+                _multiLocCbDataTable,
                 AdvancedInventory_MultiLoc_ComboBox_Loc,
                 "Location",
                 "Location",
@@ -968,11 +990,12 @@ public partial class Control_AdvancedInventory : UserControl
                 }
 
             // Add to ListView
-            var listViewItem = new ListViewItem([
+            var listViewItem = new ListViewItem(new[]
+            {
                 loc,
                 qty.ToString(),
                 notes
-            ]);
+            });
             AdvancedInventory_MultiLoc_ListView_Preview.Items.Add(listViewItem);
 
             LoggingUtility.Log(
@@ -1258,13 +1281,13 @@ public partial class Control_AdvancedInventory : UserControl
         var validParts =
             partTable?.AsEnumerable().Select(r => r.Field<string>("Item Number"))
                 .Where(s => !string.IsNullOrWhiteSpace(s)).ToHashSet(StringComparer.OrdinalIgnoreCase) ??
-            [];
+            new HashSet<string>();
         var validOps =
             opTable?.AsEnumerable().Select(r => r.Field<string>("Operation")).Where(s => !string.IsNullOrWhiteSpace(s))
-                .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
+                .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? new HashSet<string>();
         var validLocs =
             locTable?.AsEnumerable().Select(r => r.Field<string>("Location")).Where(s => !string.IsNullOrWhiteSpace(s))
-                .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
+                .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? new HashSet<string>();
 
         // Load Excel file for row removal
         var excelPath = GetUserExcelFilePath();
