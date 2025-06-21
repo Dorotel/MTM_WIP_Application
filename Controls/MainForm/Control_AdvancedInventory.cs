@@ -211,13 +211,13 @@ public partial class Control_AdvancedInventory : UserControl
             // ComboBox SelectedIndexChanged events
             AdvancedInventory_Single_ComboBox_Part.SelectedIndexChanged += (s, e) =>
             {
-                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_Single_ComboBox_Part, "[ Enter Part ID ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_Single_ComboBox_Part, "[ Enter Part Number ]");
                 UpdateSingleSaveButtonState();
                 LoggingUtility.Log("Single Part ComboBox selection changed.");
             };
             AdvancedInventory_Single_ComboBox_Op.SelectedIndexChanged += (s, e) =>
             {
-                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_Single_ComboBox_Op, "[ Enter Op # ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_Single_ComboBox_Op, "[ Enter Operation ]");
                 UpdateSingleSaveButtonState();
                 LoggingUtility.Log("Single Op ComboBox selection changed.");
             };
@@ -229,13 +229,14 @@ public partial class Control_AdvancedInventory : UserControl
             };
             AdvancedInventory_MultiLoc_ComboBox_Part.SelectedIndexChanged += (s, e) =>
             {
-                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_MultiLoc_ComboBox_Part, "[ Enter Part ID ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_MultiLoc_ComboBox_Part,
+                    "[ Enter Part Number ]");
                 UpdateMultiSaveButtonState();
                 LoggingUtility.Log("Multi Part ComboBox selection changed.");
             };
             AdvancedInventory_MultiLoc_ComboBox_Op.SelectedIndexChanged += (s, e) =>
             {
-                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_MultiLoc_ComboBox_Op, "[ Enter Op # ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_MultiLoc_ComboBox_Op, "[ Enter Operation ]");
                 UpdateMultiSaveButtonState();
                 LoggingUtility.Log("Multi Op ComboBox selection changed.");
             };
@@ -326,14 +327,14 @@ public partial class Control_AdvancedInventory : UserControl
             AdvancedInventory_Single_ComboBox_Part.Leave += (s, e) =>
             {
                 AdvancedInventory_Single_ComboBox_Part.BackColor = SystemColors.Window;
-                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_Single_ComboBox_Part, "[ Enter Part ID ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_Single_ComboBox_Part, "[ Enter Part Number ]");
             };
             AdvancedInventory_Single_ComboBox_Op.Enter +=
                 (s, e) => AdvancedInventory_Single_ComboBox_Op.BackColor = Color.LightBlue;
             AdvancedInventory_Single_ComboBox_Op.Leave += (s, e) =>
             {
                 AdvancedInventory_Single_ComboBox_Op.BackColor = SystemColors.Window;
-                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_Single_ComboBox_Op, "[ Enter Op # ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_Single_ComboBox_Op, "[ Enter Operation ]");
             };
             AdvancedInventory_Single_ComboBox_Loc.Enter +=
                 (s, e) => AdvancedInventory_Single_ComboBox_Loc.BackColor = Color.LightBlue;
@@ -347,14 +348,15 @@ public partial class Control_AdvancedInventory : UserControl
             AdvancedInventory_MultiLoc_ComboBox_Part.Leave += (s, e) =>
             {
                 AdvancedInventory_MultiLoc_ComboBox_Part.BackColor = SystemColors.Window;
-                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_MultiLoc_ComboBox_Part, "[ Enter Part ID ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_MultiLoc_ComboBox_Part,
+                    "[ Enter Part Number ]");
             };
             AdvancedInventory_MultiLoc_ComboBox_Op.Enter += (s, e) =>
                 AdvancedInventory_MultiLoc_ComboBox_Op.BackColor = Color.LightBlue;
             AdvancedInventory_MultiLoc_ComboBox_Op.Leave += (s, e) =>
             {
                 AdvancedInventory_MultiLoc_ComboBox_Op.BackColor = SystemColors.Window;
-                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_MultiLoc_ComboBox_Op, "[ Enter Op # ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_MultiLoc_ComboBox_Op, "[ Enter Operation ]");
             };
             AdvancedInventory_MultiLoc_ComboBox_Loc.Enter += (s, e) =>
                 AdvancedInventory_MultiLoc_ComboBox_Loc.BackColor = Color.LightBlue;
@@ -794,8 +796,12 @@ public partial class Control_AdvancedInventory : UserControl
                 if (invTab != null)
                 {
                     var part = invTab.Control_InventoryTab_ComboBox_Part;
-                    var op = invTab.GetType().GetField("Control_InventoryTab_ComboBox_Operation", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(invTab) as ComboBox;
-                    var loc = invTab.GetType().GetField("Control_InventoryTab_ComboBox_Location", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(invTab) as ComboBox;
+                    var op = invTab.GetType().GetField("Control_InventoryTab_ComboBox_Operation",
+                            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                        ?.GetValue(invTab) as ComboBox;
+                    var loc = invTab.GetType().GetField("Control_InventoryTab_ComboBox_Location",
+                            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                        ?.GetValue(invTab) as ComboBox;
                     if (part != null)
                     {
                         part.SelectedIndex = 0;
@@ -803,6 +809,7 @@ public partial class Control_AdvancedInventory : UserControl
                         part.SelectAll();
                         part.BackColor = Color.LightBlue;
                     }
+
                     if (op != null) op.SelectedIndex = 0;
                     if (loc != null) loc.SelectedIndex = 0;
                 }

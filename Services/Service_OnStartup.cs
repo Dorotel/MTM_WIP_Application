@@ -52,6 +52,7 @@ internal class Service_OnStartup
         ControlInventoryTab.MainFormInstance = mainForm;
         ControlTransferTab.MainFormInstance = mainForm;
         Control_AdvancedInventory.MainFormInstance = mainForm;
+        Control_QuickButtons.MainFormInstance = mainForm;
 
         Service_Timer_VersionChecker.MainFormInstance = mainForm;
 

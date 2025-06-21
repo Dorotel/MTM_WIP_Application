@@ -25,26 +25,10 @@ public partial class ControlInventoryTab : UserControl
     {
         InitializeComponent();
         Service_Timer_VersionChecker.ControlInventoryInstance = this;
-        Helper_ComboBoxes.ApplyStandardComboBoxProperties(Control_InventoryTab_ComboBox_Part);
-        Helper_ComboBoxes.ApplyStandardComboBoxProperties(Control_InventoryTab_ComboBox_Operation);
-        Helper_ComboBoxes.ApplyStandardComboBoxProperties(Control_InventoryTab_ComboBox_Location);
-        Control_InventoryTab_ComboBox_Part.ForeColor = Color.Red;
-        Control_InventoryTab_ComboBox_Operation.ForeColor = Color.Red;
-        Control_InventoryTab_ComboBox_Location.ForeColor = Color.Red;
-        Control_InventoryTab_TextBox_Quantity.ForeColor = Color.Red;
 
         _ = Control_InventoryTab_OnStartup_LoadDataComboBoxesAsync();
 
         Control_InventoryTab_OnStartup_WireUpEvents();
-
-        _ = Control_InventoryTab_OnStartup_LoadComboBoxesAsync();
-
-        Control_InventoryTab_Initialize();
-    }
-
-    public void Control_InventoryTab_Initialize()
-    {
-        Control_InventoryTab_Button_Reset.TabStop = false;
 
         SetVersionLabel(Core_WipAppVariables.UserVersion,
             Service_Timer_VersionChecker.LastCheckedDatabaseVersion ?? "unknown");
@@ -53,35 +37,6 @@ public partial class ControlInventoryTab : UserControl
     #endregion
 
     #region Startup / ComboBox Loading
-
-    private async Task Control_InventoryTab_OnStartup_LoadComboBoxesAsync()
-    {
-        try
-        {
-            LoggingUtility.Log("Initial setup of ComboBoxes in the Inventory Tab.");
-            if (MainFormInstance != null)
-                MainFormTabResetHelper.ResetInventoryTab(
-                    Control_InventoryTab_ComboBox_Location,
-                    Control_InventoryTab_ComboBox_Operation,
-                    Control_InventoryTab_ComboBox_Part,
-                    new CheckBox(),
-                    new CheckBox(),
-                    null,
-                    Control_InventoryTab_TextBox_Quantity,
-                    Control_InventoryTab_RichTextBox_Notes,
-                    Control_InventoryTab_Button_Save,
-                    MainFormInstance.MainForm_MenuStrip_File_Save
-                );
-            Control_InventoryTab_ComboBox_Location.Visible = true;
-            Control_InventoryTab_ComboBox_Operation.Visible = true;
-            Control_InventoryTab_ComboBox_Part.Visible = true;
-        }
-        catch (Exception ex)
-        {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "Control_InventoryTab_OnStartup");
-        }
-    }
 
     private async Task Control_InventoryTab_OnStartup_LoadDataComboBoxesAsync()
     {
@@ -154,87 +109,72 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
-            if (Service_Timer_VersionChecker.MainFormInstance == null)
+            if (Service_Timer_VersionChecker.MainFormInstance is null)
             {
                 LoggingUtility.Log("MainForm instance is null, cannot open Advanced Inventory Removal.");
                 return;
             }
 
-            if (MainFormInstance != null) MainFormInstance.MainForm_Control_InventoryTab.Visible = false;
-            if (MainFormInstance != null) MainFormInstance.MainForm_AdvancedInventory.Visible = true;
+            if (MainFormInstance is not null) MainFormInstance.MainForm_Control_InventoryTab.Visible = false;
+            if (MainFormInstance is not null) MainFormInstance.MainForm_AdvancedInventory.Visible = true;
 
-            // Focus and select all on AdvancedInventory_Single_ComboBox_Part
-            if (MainFormInstance != null && MainFormInstance.MainForm_AdvancedInventory != null)
+            if (MainFormInstance?.MainForm_AdvancedInventory is null) return;
+            var adv = MainFormInstance.MainForm_AdvancedInventory;
+
+            if (adv.GetType().GetField("AdvancedInventory_Single_ComboBox_Part",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) is ComboBox combo && combo.Items.Count > 0)
             {
-                var adv = MainFormInstance.MainForm_AdvancedInventory;
-                var combo = adv.GetType().GetField("AdvancedInventory_Single_ComboBox_Part",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    ?.GetValue(adv) as ComboBox;
-                var op = adv.GetType().GetField("AdvancedInventory_Single_ComboBox_Op",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    ?.GetValue(adv) as ComboBox;
-                var loc = adv.GetType().GetField("AdvancedInventory_Single_ComboBox_Loc",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    ?.GetValue(adv) as ComboBox;
-                var multiPart = adv.GetType().GetField("AdvancedInventory_MultiLoc_ComboBox_Part",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    ?.GetValue(adv) as ComboBox;
-                var multiOp = adv.GetType().GetField("AdvancedInventory_MultiLoc_ComboBox_Op",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    ?.GetValue(adv) as ComboBox;
-                var multiLoc = adv.GetType().GetField("AdvancedInventory_MultiLoc_ComboBox_Loc",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    ?.GetValue(adv) as ComboBox;
-                var tab = adv.GetType().GetField("AdvancedInventory_TabControl",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    ?.GetValue(adv) as TabControl;
-
-                // Reset all AdvancedInventory ComboBoxes' SelectedIndex to 0 and color to Red
-                if (combo != null)
-                {
-                    combo.SelectedIndex = 0;
-                    combo.ForeColor = Color.Red;
-                }
-
-                if (op != null)
-                {
-                    op.SelectedIndex = 0;
-                    op.ForeColor = Color.Red;
-                }
-
-                if (loc != null)
-                {
-                    loc.SelectedIndex = 0;
-                    loc.ForeColor = Color.Red;
-                }
-
-                if (multiPart != null)
-                {
-                    multiPart.SelectedIndex = 0;
-                    multiPart.ForeColor = Color.Red;
-                }
-
-                if (multiOp != null)
-                {
-                    multiOp.SelectedIndex = 0;
-                    multiOp.ForeColor = Color.Red;
-                }
-
-                if (multiLoc != null)
-                {
-                    multiLoc.SelectedIndex = 0;
-                    multiLoc.ForeColor = Color.Red;
-                }
-
-                if (combo != null)
-                {
-                    combo.Focus();
-                    combo.SelectAll();
-                    // Optionally, set focus color to something else if needed
-                }
-
-                if (tab != null) tab.SelectedIndex = 0;
+                combo.SelectedIndex = 0;
+                combo.ForeColor = Color.Red;
+                combo.Focus();
+                combo.SelectAll();
             }
+
+            if (adv.GetType().GetField("AdvancedInventory_Single_ComboBox_Op",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) is ComboBox op && op.Items.Count > 0)
+            {
+                op.SelectedIndex = 0;
+                op.ForeColor = Color.Red;
+            }
+
+            if (adv.GetType().GetField("AdvancedInventory_Single_ComboBox_Loc",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) is ComboBox loc && loc.Items.Count > 0)
+            {
+                loc.SelectedIndex = 0;
+                loc.ForeColor = Color.Red;
+            }
+
+            if (adv.GetType().GetField("AdvancedInventory_MultiLoc_ComboBox_Part",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) is ComboBox multiPart && multiPart.Items.Count > 0)
+            {
+                multiPart.SelectedIndex = 0;
+                multiPart.ForeColor = Color.Red;
+            }
+
+            if (adv.GetType().GetField("AdvancedInventory_MultiLoc_ComboBox_Op",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) is ComboBox multiOp && multiOp.Items.Count > 0)
+            {
+                multiOp.SelectedIndex = 0;
+                multiOp.ForeColor = Color.Red;
+            }
+
+            if (adv.GetType().GetField("AdvancedInventory_MultiLoc_ComboBox_Loc",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) is ComboBox multiLoc && multiLoc.Items.Count > 0)
+            {
+                multiLoc.SelectedIndex = 0;
+                multiLoc.ForeColor = Color.Red;
+            }
+
+            if (adv.GetType().GetField("AdvancedInventory_TabControl",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) is TabControl tab)
+                tab.SelectedIndex = 0;
         }
         catch (Exception ex)
         {
@@ -368,21 +308,67 @@ public partial class ControlInventoryTab : UserControl
                 notes,
                 true);
 
+            // --- NEW LOGIC: Add to sys_last_10_transactions if not duplicate ---
+            await AddToLast10TransactionsIfUniqueAsync(Core_WipAppVariables.User, partId, op, qty);
+
             MessageBox.Show(@"Inventory transaction saved successfully.", @"Success", MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
 
             if (MainFormInstance != null)
-                // If in the future, multi-row inventory is supported, update this logic to handle multiple partIds/ops/locs
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
                     $@"Last Inventoried Part: {partId} (Op: {op}), Location: {(string.IsNullOrWhiteSpace(loc) ? "" : loc)}, Quantity: {qty} @ {DateTime.Now:hh:mm tt}";
 
             Control_InventoryTab_Button_Reset_Click();
+            Control_QuickButtons.LoadLast10Transactions(Core_WipAppVariables.User);
         }
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "MainForm_Inventory_Button_Save");
         }
+    }
+
+    // Helper method to add to sys_last_10_transactions if not duplicate
+    private static async Task AddToLast10TransactionsIfUniqueAsync(string user, string partId, string operation,
+        int quantity)
+    {
+        var connectionString = Helper_SqlVariables.GetConnectionString(null, null, null, null);
+        using var conn = new MySqlConnection(connectionString);
+        await conn.OpenAsync();
+
+        // 1. Check for duplicate in last 10
+        var checkCmd = new MySqlCommand(@"
+        SELECT COUNT(*) FROM (
+            SELECT PartID, Operation, Quantity
+            FROM sys_last_10_transactions
+            WHERE User = @User
+            ORDER BY DateTime DESC
+            LIMIT 10
+        ) AS last10
+        WHERE PartID = @PartID AND Operation = @Operation AND Quantity = @Quantity
+    ", conn);
+
+        checkCmd.Parameters.AddWithValue("@User", user);
+        checkCmd.Parameters.AddWithValue("@PartID", partId);
+        checkCmd.Parameters.AddWithValue("@Operation", operation);
+        checkCmd.Parameters.AddWithValue("@Quantity", quantity);
+
+        var exists = Convert.ToInt32(await checkCmd.ExecuteScalarAsync()) > 0;
+        if (exists)
+            return;
+
+        // 2. Insert new transaction
+        var insertCmd = new MySqlCommand(@"
+        INSERT INTO sys_last_10_transactions (User, PartID, Operation, Quantity)
+        VALUES (@User, @PartID, @Operation, @Quantity)
+    ", conn);
+
+        insertCmd.Parameters.AddWithValue("@User", user);
+        insertCmd.Parameters.AddWithValue("@PartID", partId);
+        insertCmd.Parameters.AddWithValue("@Operation", operation);
+        insertCmd.Parameters.AddWithValue("@Quantity", quantity);
+
+        await insertCmd.ExecuteNonQueryAsync();
     }
 
     private void Control_InventoryTab_Button_Toggle_RightPanel_Click(object sender, EventArgs e)
@@ -598,7 +584,7 @@ public partial class ControlInventoryTab : UserControl
             Control_InventoryTab_ComboBox_Part.Leave += (s, e) =>
             {
                 Control_InventoryTab_ComboBox_Part.BackColor = SystemColors.Window;
-                Helper_ComboBoxes.ValidateComboBoxItem(Control_InventoryTab_ComboBox_Part, "[ Enter Part ID ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(Control_InventoryTab_ComboBox_Part, "[ Enter Part Number ]");
             };
 
             Control_InventoryTab_ComboBox_Location.Enter += (s, e) =>
@@ -618,7 +604,7 @@ public partial class ControlInventoryTab : UserControl
             Control_InventoryTab_ComboBox_Operation.Leave += (s, e) =>
             {
                 Control_InventoryTab_ComboBox_Operation.BackColor = SystemColors.Window;
-                Helper_ComboBoxes.ValidateComboBoxItem(Control_InventoryTab_ComboBox_Operation, "[ Enter Op # ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(Control_InventoryTab_ComboBox_Operation, "[ Enter Operation ]");
             };
 
             Control_InventoryTab_TextBox_Quantity.Enter += (s, e) =>

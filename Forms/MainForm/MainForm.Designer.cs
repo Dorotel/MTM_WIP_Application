@@ -86,6 +86,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Control_AdvancedRemove = new Control_AdvancedRemove();
             MainForm_TabControl_Transfer = new TabPage();
             MainForm_Control_TransferTab = new ControlTransferTab();
+            control_QuickButtons1 = new Control_QuickButtons();
             MainForm_MenuStrip.SuspendLayout();
             MainForm_StatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Lower).BeginInit();
@@ -95,6 +96,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TableLayout.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Middle).BeginInit();
             MainForm_SplitContainer_Middle.Panel1.SuspendLayout();
+            MainForm_SplitContainer_Middle.Panel2.SuspendLayout();
             MainForm_SplitContainer_Middle.SuspendLayout();
             MainForm_TabControl.SuspendLayout();
             MainForm_TabPage_Inventory.SuspendLayout();
@@ -109,7 +111,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_MenuStrip.Items.AddRange(new ToolStripItem[] { MainForm_MenuStrip_File, MainForm_MenuStrip_Edit, MainForm_MenuStrip_View });
             MainForm_MenuStrip.Location = new Point(0, 0);
             MainForm_MenuStrip.Name = "MainForm_MenuStrip";
-            MainForm_MenuStrip.Size = new Size(959, 26);
+            MainForm_MenuStrip.Size = new Size(984, 26);
             MainForm_MenuStrip.TabIndex = 1;
             // 
             // MainForm_MenuStrip_File
@@ -258,7 +260,6 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_MenuStrip_View_ViewChangelog.Name = "MainForm_MenuStrip_View_ViewChangelog";
             MainForm_MenuStrip_View_ViewChangelog.Size = new Size(234, 22);
             MainForm_MenuStrip_View_ViewChangelog.Text = "View Changelog";
-
             // 
             // MainForm_StatusStrip
             // 
@@ -268,7 +269,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_StatusStrip.Location = new Point(0, 0);
             MainForm_StatusStrip.Name = "MainForm_StatusStrip";
             MainForm_StatusStrip.RenderMode = ToolStripRenderMode.Professional;
-            MainForm_StatusStrip.Size = new Size(884, 25);
+            MainForm_StatusStrip.Size = new Size(907, 25);
             MainForm_StatusStrip.SizingGrip = false;
             MainForm_StatusStrip.TabIndex = 18;
             // 
@@ -316,8 +317,8 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             MainForm_SplitContainer_Lower.Panel2.Controls.Add(MainForm_Control_SignalStrength);
             MainForm_SplitContainer_Lower.Panel2.Padding = new Padding(4);
-            MainForm_SplitContainer_Lower.Size = new Size(953, 25);
-            MainForm_SplitContainer_Lower.SplitterDistance = 884;
+            MainForm_SplitContainer_Lower.Size = new Size(978, 25);
+            MainForm_SplitContainer_Lower.SplitterDistance = 907;
             MainForm_SplitContainer_Lower.SplitterWidth = 1;
             MainForm_SplitContainer_Lower.TabIndex = 92;
             // 
@@ -329,7 +330,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Control_SignalStrength.Margin = new Padding(0);
             MainForm_Control_SignalStrength.Name = "MainForm_Control_SignalStrength";
             MainForm_Control_SignalStrength.Ping = -1;
-            MainForm_Control_SignalStrength.Size = new Size(60, 15);
+            MainForm_Control_SignalStrength.Size = new Size(62, 15);
             MainForm_Control_SignalStrength.Strength = 0;
             MainForm_Control_SignalStrength.TabIndex = 0;
             // 
@@ -348,7 +349,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 31F));
             MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            MainForm_TableLayout.Size = new Size(959, 481);
+            MainForm_TableLayout.Size = new Size(984, 481);
             MainForm_TableLayout.TabIndex = 94;
             // 
             // MainForm_SplitContainer_Middle
@@ -360,8 +361,12 @@ namespace MTM_WIP_Application.Forms.MainForm
             // MainForm_SplitContainer_Middle.Panel1
             // 
             MainForm_SplitContainer_Middle.Panel1.Controls.Add(MainForm_TabControl);
-            MainForm_SplitContainer_Middle.Size = new Size(953, 418);
-            MainForm_SplitContainer_Middle.SplitterDistance = 823;
+            // 
+            // MainForm_SplitContainer_Middle.Panel2
+            // 
+            MainForm_SplitContainer_Middle.Panel2.Controls.Add(control_QuickButtons1);
+            MainForm_SplitContainer_Middle.Size = new Size(978, 418);
+            MainForm_SplitContainer_Middle.SplitterDistance = 820;
             MainForm_SplitContainer_Middle.TabIndex = 93;
             // 
             // MainForm_TabControl
@@ -375,7 +380,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl.Name = "MainForm_TabControl";
             MainForm_TabControl.SelectedIndex = 0;
             MainForm_TabControl.ShowToolTips = true;
-            MainForm_TabControl.Size = new Size(823, 418);
+            MainForm_TabControl.Size = new Size(820, 418);
             MainForm_TabControl.SizeMode = TabSizeMode.FillToRight;
             MainForm_TabControl.TabIndex = 91;
             MainForm_TabControl.TabStop = false;
@@ -387,7 +392,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabPage_Inventory.Location = new Point(4, 24);
             MainForm_TabPage_Inventory.Name = "MainForm_TabPage_Inventory";
             MainForm_TabPage_Inventory.Padding = new Padding(3);
-            MainForm_TabPage_Inventory.Size = new Size(815, 390);
+            MainForm_TabPage_Inventory.Size = new Size(812, 390);
             MainForm_TabPage_Inventory.TabIndex = 0;
             MainForm_TabPage_Inventory.Text = "New Transaction (Ctrl+1)";
             MainForm_TabPage_Inventory.ToolTipText = "Shortcut: Ctrl+1";
@@ -399,7 +404,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Control_InventoryTab.Dock = DockStyle.Fill;
             MainForm_Control_InventoryTab.Location = new Point(3, 3);
             MainForm_Control_InventoryTab.Name = "MainForm_Control_InventoryTab";
-            MainForm_Control_InventoryTab.Size = new Size(809, 384);
+            MainForm_Control_InventoryTab.Size = new Size(806, 384);
             MainForm_Control_InventoryTab.TabIndex = 0;
             // 
             // MainForm_AdvancedInventory
@@ -407,8 +412,9 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_AdvancedInventory.Dock = DockStyle.Fill;
             MainForm_AdvancedInventory.Location = new Point(3, 3);
             MainForm_AdvancedInventory.Name = "MainForm_AdvancedInventory";
-            MainForm_AdvancedInventory.Size = new Size(809, 384);
+            MainForm_AdvancedInventory.Size = new Size(806, 384);
             MainForm_AdvancedInventory.TabIndex = 1;
+            MainForm_AdvancedInventory.Visible = false;
             // 
             // MainForm_TabControl_Remove
             // 
@@ -417,7 +423,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Remove.Location = new Point(4, 24);
             MainForm_TabControl_Remove.Name = "MainForm_TabControl_Remove";
             MainForm_TabControl_Remove.Padding = new Padding(3);
-            MainForm_TabControl_Remove.Size = new Size(815, 390);
+            MainForm_TabControl_Remove.Size = new Size(812, 390);
             MainForm_TabControl_Remove.TabIndex = 1;
             MainForm_TabControl_Remove.Text = "Remove (Ctrl + 2)";
             MainForm_TabControl_Remove.ToolTipText = "Shortcut: Ctrl+2";
@@ -429,7 +435,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_RemoveTabNormalControl.Dock = DockStyle.Fill;
             MainForm_RemoveTabNormalControl.Location = new Point(3, 3);
             MainForm_RemoveTabNormalControl.Name = "MainForm_RemoveTabNormalControl";
-            MainForm_RemoveTabNormalControl.Size = new Size(809, 384);
+            MainForm_RemoveTabNormalControl.Size = new Size(806, 384);
             MainForm_RemoveTabNormalControl.TabIndex = 0;
             // 
             // MainForm_Control_AdvancedRemove
@@ -437,7 +443,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Control_AdvancedRemove.Dock = DockStyle.Fill;
             MainForm_Control_AdvancedRemove.Location = new Point(3, 3);
             MainForm_Control_AdvancedRemove.Name = "MainForm_Control_AdvancedRemove";
-            MainForm_Control_AdvancedRemove.Size = new Size(809, 384);
+            MainForm_Control_AdvancedRemove.Size = new Size(806, 384);
             MainForm_Control_AdvancedRemove.TabIndex = 1;
             MainForm_Control_AdvancedRemove.Visible = false;
             // 
@@ -447,7 +453,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TabControl_Transfer.Location = new Point(4, 24);
             MainForm_TabControl_Transfer.Name = "MainForm_TabControl_Transfer";
             MainForm_TabControl_Transfer.Padding = new Padding(3);
-            MainForm_TabControl_Transfer.Size = new Size(815, 390);
+            MainForm_TabControl_Transfer.Size = new Size(812, 390);
             MainForm_TabControl_Transfer.TabIndex = 2;
             MainForm_TabControl_Transfer.Text = "Transfer (Ctrl+3)";
             MainForm_TabControl_Transfer.ToolTipText = "Shortcut: Ctrl+3";
@@ -459,13 +465,21 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_Control_TransferTab.Dock = DockStyle.Fill;
             MainForm_Control_TransferTab.Location = new Point(3, 3);
             MainForm_Control_TransferTab.Name = "MainForm_Control_TransferTab";
-            MainForm_Control_TransferTab.Size = new Size(809, 384);
+            MainForm_Control_TransferTab.Size = new Size(806, 384);
             MainForm_Control_TransferTab.TabIndex = 0;
+            // 
+            // control_QuickButtons1
+            // 
+            control_QuickButtons1.Dock = DockStyle.Fill;
+            control_QuickButtons1.Location = new Point(0, 0);
+            control_QuickButtons1.Name = "control_QuickButtons1";
+            control_QuickButtons1.Size = new Size(154, 418);
+            control_QuickButtons1.TabIndex = 0;
             // 
             // MainForm
             // 
             AutoScaleMode = AutoScaleMode.None;
-            ClientSize = new Size(959, 481);
+            ClientSize = new Size(984, 481);
             Controls.Add(MainForm_TableLayout);
             DoubleBuffered = true;
             HelpButton = true;
@@ -474,8 +488,8 @@ namespace MTM_WIP_Application.Forms.MainForm
             KeyPreview = true;
             MainMenuStrip = MainForm_MenuStrip;
             MaximizeBox = false;
-            MaximumSize = new Size(975, 520);
-            MinimumSize = new Size(975, 520);
+            MaximumSize = new Size(1000, 520);
+            MinimumSize = new Size(1000, 520);
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Manitowoc Tool and Manufacturing | WIP Inventory System |";
@@ -491,6 +505,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_TableLayout.ResumeLayout(false);
             MainForm_TableLayout.PerformLayout();
             MainForm_SplitContainer_Middle.Panel1.ResumeLayout(false);
+            MainForm_SplitContainer_Middle.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)MainForm_SplitContainer_Middle).EndInit();
             MainForm_SplitContainer_Middle.ResumeLayout(false);
             MainForm_TabControl.ResumeLayout(false);
@@ -550,9 +565,10 @@ namespace MTM_WIP_Application.Forms.MainForm
         private TabPage MainForm_TabControl_Remove;
         private TabPage MainForm_TabControl_Transfer;
         public ControlRemoveTab MainForm_RemoveTabNormalControl;
-        private ControlTransferTab MainForm_Control_TransferTab;
+        public ControlTransferTab MainForm_Control_TransferTab;
         public ControlInventoryTab MainForm_Control_InventoryTab;
         public Control_AdvancedInventory MainForm_AdvancedInventory;
         public Control_AdvancedRemove MainForm_Control_AdvancedRemove;
+        private Control_QuickButtons control_QuickButtons1;
     }
 }

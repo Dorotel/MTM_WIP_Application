@@ -642,7 +642,7 @@ Are you sure?",
             Control_RemoveTab_ComboBox_Part.Leave += (s, e) =>
             {
                 Control_RemoveTab_ComboBox_Part.BackColor = SystemColors.Window;
-                Helper_ComboBoxes.ValidateComboBoxItem(Control_RemoveTab_ComboBox_Part, "[ Enter Part ID ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(Control_RemoveTab_ComboBox_Part, "[ Enter Part Number ]");
             };
 
             Control_RemoveTab_ComboBox_Operation.Enter += (s, e) =>
@@ -652,7 +652,7 @@ Are you sure?",
             Control_RemoveTab_ComboBox_Operation.Leave += (s, e) =>
             {
                 Control_RemoveTab_ComboBox_Operation.BackColor = SystemColors.Window;
-                Helper_ComboBoxes.ValidateComboBoxItem(Control_RemoveTab_ComboBox_Operation, "[ Enter Op # ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(Control_RemoveTab_ComboBox_Operation, "[ Enter Operation ]");
             };
 
             Control_RemoveTab_DataGridView_Main.SelectionChanged += (s, e) => Control_RemoveTab_Update_ButtonStates();

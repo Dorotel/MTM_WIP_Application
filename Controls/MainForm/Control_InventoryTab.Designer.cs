@@ -57,9 +57,9 @@
             // 
             // Control_InventoryTab_GroupBox_Main
             // 
-            Control_InventoryTab_GroupBox_Main.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            Control_InventoryTab_GroupBox_Main.AutoSize = true;
+            Control_InventoryTab_GroupBox_Main.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             Control_InventoryTab_GroupBox_Main.Controls.Add(Control_InventoryTab_TableLayout_Main);
+            Control_InventoryTab_GroupBox_Main.Dock = DockStyle.Fill;
             Control_InventoryTab_GroupBox_Main.Location = new Point(0, 0);
             Control_InventoryTab_GroupBox_Main.Name = "Control_InventoryTab_GroupBox_Main";
             Control_InventoryTab_GroupBox_Main.Size = new Size(815, 384);
@@ -288,7 +288,6 @@
             Control_InventoryTab_Panel_Top.ResumeLayout(false);
             Control_InventoryTab_Panel_Top.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion

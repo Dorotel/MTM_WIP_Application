@@ -37,13 +37,6 @@ public partial class ControlTransferTab : UserControl
         Control_TransferTab_Button_Reset.TabStop = false;
     }
 
-    public void UpdateToggleRightPanelButton()
-    {
-        var panelCollapsed = MainFormInstance?.MainForm_SplitContainer_Middle.Panel2Collapsed ?? true;
-        Control_TransferTab_Button_Toggle_RightPanel.Text = panelCollapsed ? "←" : "→";
-        Control_TransferTab_Button_Toggle_RightPanel.ForeColor = panelCollapsed ? Color.Red : Color.Green;
-    }
-
     #endregion
 
     #region Key Processing
@@ -220,7 +213,7 @@ public partial class ControlTransferTab : UserControl
 
             DataTable results;
             if (Control_TransferTab_ComboBox_Operation.SelectedIndex > 0 &&
-                Control_TransferTab_ComboBox_Operation.Text != @"[ Enter Op # ]")
+                Control_TransferTab_ComboBox_Operation.Text != @"[ Enter Operation ]")
             {
                 LoggingUtility.Log($"Searching inventory for Part ID: {partId} and Operation: {op}");
                 results = await Dao_Inventory.GetInventoryByPartIdAndOperationAsync(partId, op, true);
@@ -540,7 +533,7 @@ public partial class ControlTransferTab : UserControl
             Control_TransferTab_ComboBox_Part.Leave += (s, e) =>
             {
                 Control_TransferTab_ComboBox_Part.BackColor = SystemColors.Window;
-                Helper_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_Part, "[ Enter Part ID ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_Part, "[ Enter Part Number ]");
             };
             Control_TransferTab_ComboBox_Operation.Enter += (s, e) =>
             {
@@ -549,7 +542,7 @@ public partial class ControlTransferTab : UserControl
             Control_TransferTab_ComboBox_Operation.Leave += (s, e) =>
             {
                 Control_TransferTab_ComboBox_Operation.BackColor = SystemColors.Window;
-                Helper_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_Operation, "[ Enter Op # ]");
+                Helper_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_Operation, "[ Enter Operation ]");
             };
             Control_TransferTab_ComboBox_ToLocation.Enter += (s, e) =>
             {
