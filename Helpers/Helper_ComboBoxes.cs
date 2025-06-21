@@ -1,7 +1,8 @@
-﻿using System.Data;
-using MySql.Data.MySqlClient;
-using System.Threading;
+﻿using MTM_WIP_Application.Core;
 using MTM_WIP_Application.Data;
+using MySql.Data.MySqlClient;
+using System.Data;
+using System.Threading;
 
 namespace MTM_WIP_Application.Helpers;
 
@@ -9,225 +10,251 @@ namespace MTM_WIP_Application.Helpers;
 
 public static class Helper_ComboBoxes
 {
-    #region ComboBox Reset & Clear
-
-    public static async Task ClearAndResetAllComboBoxesAsync(
-        ComboBox inventoryTabComboBoxPart,
-        DataTable inventoryTabPartCbDataTable,
-        ComboBox inventoryTabComboBoxOp,
-        DataTable inventoryTabOpCbDataTable,
-        ComboBox inventoryTabComboBoxLoc,
-        DataTable inventoryTabLocationCbDataTable,
-        ComboBox removeTabComboBoxPart,
-        DataTable removeTabPartCbDataTable,
-        ComboBox removeTabComboBoxOp,
-        DataTable removeTabComboBoxOpDataTable,
-        ComboBox removeTabCBoxShowAll,
-        DataTable removeTabComboBoxSearchByTypeDataTable,
-        ComboBox transferTabComboBoxPart,
-        DataTable transferTabPartCbDataTable,
-        ComboBox transferTabComboBoxLoc,
-        DataTable transferTabLocationCbDataTable,
-        Func<Task> fillAllComboBoxesAsync,
-        Action? helperTabControlResetTab1,
-        Action? helperTabControlResetTab2,
-        Action? helperTabControlResetTab3,
-        TabControl mainFormTabControl)
-    {
-        if (inventoryTabComboBoxPart.InvokeRequired)
-        {
-            await inventoryTabComboBoxPart.InvokeAsyncTask(
-                async () =>
-                {
-                    await ClearAndResetAllComboBoxesAsync(
-                        inventoryTabComboBoxPart, inventoryTabPartCbDataTable,
-                        inventoryTabComboBoxOp, inventoryTabOpCbDataTable,
-                        inventoryTabComboBoxLoc, inventoryTabLocationCbDataTable,
-                        removeTabComboBoxPart, removeTabPartCbDataTable,
-                        removeTabComboBoxOp, removeTabComboBoxOpDataTable,
-                        removeTabCBoxShowAll, removeTabComboBoxSearchByTypeDataTable,
-                        transferTabComboBoxPart, transferTabPartCbDataTable,
-                        transferTabComboBoxLoc, transferTabLocationCbDataTable,
-                        fillAllComboBoxesAsync, helperTabControlResetTab1,
-                        helperTabControlResetTab2, helperTabControlResetTab3,
-                        mainFormTabControl).ConfigureAwait(false);
-                },
-                CancellationToken.None
-            ).ConfigureAwait(false);
-            return;
-        }
-
-        inventoryTabComboBoxPart.DataSource = null;
-        inventoryTabPartCbDataTable.Clear();
-        inventoryTabPartCbDataTable.Dispose();
-
-        inventoryTabComboBoxOp.DataSource = null;
-        inventoryTabOpCbDataTable.Clear();
-        inventoryTabOpCbDataTable.Dispose();
-
-        inventoryTabComboBoxLoc.DataSource = null;
-        inventoryTabLocationCbDataTable.Clear();
-        inventoryTabLocationCbDataTable.Dispose();
-
-        removeTabComboBoxPart.DataSource = null;
-        removeTabPartCbDataTable.Clear();
-        removeTabPartCbDataTable.Dispose();
-
-        removeTabComboBoxOp.DataSource = null;
-        removeTabComboBoxOpDataTable.Clear();
-        removeTabComboBoxOpDataTable.Dispose();
-
-        removeTabCBoxShowAll.DataSource = null;
-        removeTabComboBoxSearchByTypeDataTable.Clear();
-        removeTabComboBoxSearchByTypeDataTable.Dispose();
-
-        transferTabComboBoxPart.DataSource = null;
-        transferTabPartCbDataTable.Clear();
-        transferTabPartCbDataTable.Dispose();
-
-        transferTabComboBoxLoc.DataSource = null;
-        transferTabLocationCbDataTable.Clear();
-        transferTabLocationCbDataTable.Dispose();
-
-        await fillAllComboBoxesAsync().ConfigureAwait(false);
-
-        helperTabControlResetTab1!();
-        helperTabControlResetTab2!();
-        helperTabControlResetTab3!();
-
-        if (mainFormTabControl.SelectedIndex == 0) inventoryTabComboBoxPart.Focus();
-        if (mainFormTabControl.SelectedIndex == 1) removeTabComboBoxPart.Focus();
-        if (mainFormTabControl.SelectedIndex == 2) transferTabComboBoxPart.Focus();
-    }
-
-    #endregion
-
     #region ComboBox Data Fill
 
-    public static async Task FillAllComboBoxesAsync(
-        MySqlConnection connection,
-        MySqlDataAdapter inventoryTabPartCbDataAdapter,
-        DataTable inventoryTabPartCbDataTable,
-        ComboBox inventoryTabComboBoxPart,
-        MySqlDataAdapter inventoryTabOpCbDataAdapter,
-        DataTable inventoryTabOpCbDataTable,
-        ComboBox inventoryTabComboBoxOp,
-        MySqlDataAdapter inventoryTabLocationCbDataAdapter,
-        DataTable inventoryTabLocationCbDataTable,
-        ComboBox inventoryTabComboBoxLoc,
-        MySqlDataAdapter removeTabPartCbDataAdapter,
-        DataTable removeTabPartCbDataTable,
-        ComboBox removeTabComboBoxPart,
-        MySqlDataAdapter removeTabOpCbDataAdapter,
-        DataTable removeTabComboBoxOpDataTable,
-        ComboBox removeTabComboBoxOp,
-        MySqlDataAdapter removeTabCBoxSearchByTypeDataAdapter,
-        DataTable removeTabComboBoxSearchByTypeDataTable,
-        ComboBox removeTabCBoxShowAll,
-        MySqlDataAdapter transferTabLocationCbDataAdapter,
-        DataTable transferTabLocationCbDataTable,
-        ComboBox transferTabComboBoxLoc,
-        MySqlDataAdapter transferTabPartCbDataAdapter,
-        DataTable transferTabPartCbDataTable,
-        ComboBox transferTabComboBoxPart)
+    private static readonly DataTable ComboBoxPart_DataTable = new();
+    private static readonly DataTable ComboBoxOperation_DataTable = new();
+    private static readonly DataTable ComboBoxLocation_DataTable = new();
+    private static readonly DataTable ComboBoxUser_DataTable = new();
+    private static readonly MySqlDataAdapter ComboBoxPart_DataAdapter = new();
+    private static readonly MySqlDataAdapter ComboBoxOperation_DataAdapter = new();
+    private static readonly MySqlDataAdapter ComboBoxLocation_DataAdapter = new();
+    private static readonly MySqlDataAdapter ComboBoxUser_DataAdapter = new();
+
+    private static readonly object PartDataLock = new();
+    private static readonly object OperationDataLock = new();
+    private static readonly object LocationDataLock = new();
+    private static readonly object UserDataLock = new();
+
+    public static async Task SetupPartDataTable()
     {
-        await FillComboBoxAsync("SELECT * FROM md_part_ids", connection, inventoryTabPartCbDataAdapter,
-                inventoryTabPartCbDataTable, inventoryTabComboBoxPart, "Item Number", "ID", "[ Enter Part ID ]")
-            .ConfigureAwait(false);
+        await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
+        await connection.OpenAsync();
 
-        await FillComboBoxAsync("SELECT * FROM md_operation_numbers", connection, inventoryTabOpCbDataAdapter,
-                inventoryTabOpCbDataTable, inventoryTabComboBoxOp, "Operation", "Operation", "[ Enter Op # ]")
-            .ConfigureAwait(false);
+        var command = new MySqlCommand("md_part_ids_Get_All", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
 
-        await FillComboBoxAsync("SELECT * FROM md_locations", connection, inventoryTabLocationCbDataAdapter,
-                inventoryTabLocationCbDataTable, inventoryTabComboBoxLoc, "Location", "Location", "[ Enter Location ]")
-            .ConfigureAwait(false);
-
-        await FillComboBoxAsync("SELECT * FROM md_part_ids", connection, removeTabPartCbDataAdapter,
-                removeTabPartCbDataTable, removeTabComboBoxPart, "Item Number", "Item Number", "[ Enter Part ID ]")
-            .ConfigureAwait(false);
-
-        await FillComboBoxAsync("SELECT * FROM md_operation_numbers", connection, removeTabOpCbDataAdapter,
-                removeTabComboBoxOpDataTable, removeTabComboBoxOp, "Operation", "Operation", "[ Enter Op # ]")
-            .ConfigureAwait(false);
-
-        await FillComboBoxAsync("SELECT * FROM md_item_types", connection, removeTabCBoxSearchByTypeDataAdapter,
-                removeTabComboBoxSearchByTypeDataTable, removeTabCBoxShowAll, "Type", "Type", "[ Select Type ]")
-            .ConfigureAwait(false);
-
-        await FillComboBoxAsync("SELECT * FROM md_locations", connection, transferTabLocationCbDataAdapter,
-                transferTabLocationCbDataTable, transferTabComboBoxLoc, "Location", "Location",
-                "[ Enter New Location ]")
-            .ConfigureAwait(false);
-
-        await FillComboBoxAsync("SELECT * FROM md_part_ids", connection, transferTabPartCbDataAdapter,
-                transferTabPartCbDataTable, transferTabComboBoxPart, "Item Number", "Item Number", "[ Enter Part ID ]")
-            .ConfigureAwait(false);
+        lock (PartDataLock)
+        {
+            ComboBoxPart_DataAdapter.SelectCommand = command;
+            ComboBoxPart_DataTable.Clear();
+            ComboBoxPart_DataAdapter.Fill(ComboBoxPart_DataTable);
+            // Debug: Log columns
+            System.Diagnostics.Debug.WriteLine(
+                $"[DEBUG] Part DataTable Columns: {string.Join(", ", ComboBoxPart_DataTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName))}");
+        }
     }
 
-    public static async Task FillComboBoxAsync(
-        string procedureName,
-        MySqlConnection connection,
-        MySqlDataAdapter adapter,
+    public static async Task SetupOperationDataTable()
+    {
+        await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
+        await connection.OpenAsync();
+
+        var command = new MySqlCommand("md_operation_numbers_Get_All", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        lock (OperationDataLock)
+        {
+            ComboBoxOperation_DataAdapter.SelectCommand = command;
+            ComboBoxOperation_DataTable.Clear();
+            ComboBoxOperation_DataAdapter.Fill(ComboBoxOperation_DataTable);
+            // Debug: Log columns
+            System.Diagnostics.Debug.WriteLine(
+                $"[DEBUG] Operation DataTable Columns: {string.Join(", ", ComboBoxOperation_DataTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName))}");
+        }
+    }
+
+    public static async Task SetupLocationDataTable()
+    {
+        await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
+        await connection.OpenAsync();
+
+        var command = new MySqlCommand("md_locations_Get_All", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        lock (LocationDataLock)
+        {
+            ComboBoxLocation_DataAdapter.SelectCommand = command;
+            ComboBoxLocation_DataTable.Clear();
+            ComboBoxLocation_DataAdapter.Fill(ComboBoxLocation_DataTable);
+            // Debug: Log columns
+            System.Diagnostics.Debug.WriteLine(
+                $"[DEBUG] Location DataTable Columns: {string.Join(", ", ComboBoxLocation_DataTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName))}");
+        }
+    }
+
+    public static async Task SetupUserDataTable()
+    {
+        await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
+        await connection.OpenAsync();
+
+        var command = new MySqlCommand("usr_users_Get_All", connection) { CommandType = CommandType.StoredProcedure };
+
+        lock (UserDataLock)
+        {
+            ComboBoxUser_DataAdapter.SelectCommand = command;
+            ComboBoxUser_DataTable.Clear();
+            ComboBoxUser_DataAdapter.Fill(ComboBoxUser_DataTable);
+            // Debug: Log columns
+            System.Diagnostics.Debug.WriteLine(
+                $"[DEBUG] User DataTable Columns: {string.Join(", ", ComboBoxUser_DataTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName))}");
+        }
+    }
+
+    public static async Task FillPartComboBoxesAsync(ComboBox comboBox)
+    {
+        try
+        {
+            await FillComboBoxAsync(
+                ComboBoxPart_DataTable,
+                comboBox,
+                "Item Number",
+                "ID",
+                "[ Enter Part Number ]",
+                PartDataLock
+            ).ConfigureAwait(false);
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] FillPartComboBoxesAsync: ComboBox Name: {comboBox.Name}, Owner: {comboBox.FindForm()?.Name}");
+            comboBox.ForeColor = Color.Red;
+            await Task.Delay(100);
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("An error occurred while filling part combo boxes.", ex);
+        }
+    }
+
+    public static async Task FillOperationComboBoxesAsync(ComboBox comboBox)
+    {
+        try
+        {
+            await FillComboBoxAsync(
+                ComboBoxOperation_DataTable,
+                comboBox,
+                "Operation",
+                "ID",
+                "[ Enter Operation ]",
+                OperationDataLock
+            ).ConfigureAwait(false);
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] FillOperationComboBoxesAsync: ComboBox Name: {comboBox.Name}, Owner: {comboBox.FindForm()?.Name}");
+            comboBox.ForeColor = Color.Red;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("An error occurred while filling operation combo boxes.", ex);
+        }
+    }
+
+    public static async Task FillLocationComboBoxesAsync(ComboBox comboBox)
+    {
+        try
+        {
+            await FillComboBoxAsync(
+                ComboBoxLocation_DataTable,
+                comboBox,
+                "Location",
+                "ID",
+                "[ Enter Location ]",
+                LocationDataLock
+            ).ConfigureAwait(false);
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] FillLocationComboBoxesAsync: ComboBox Name: {comboBox.Name}, Owner: {comboBox.FindForm()?.Name}");
+            comboBox.ForeColor = Color.Red;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("An error occurred while filling location combo boxes.", ex);
+        }
+    }
+
+    public static async Task FillUserComboBoxesAsync(ComboBox comboBox)
+    {
+        try
+        {
+            await FillComboBoxAsync(ComboBoxUser_DataTable, comboBox, "User", "ID", "[ Enter User ]", UserDataLock)
+                .ConfigureAwait(false);
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] FillUserComboBoxesAsync: ComboBox Name: {comboBox.Name}, Owner: {comboBox.FindForm()?.Name}");
+            comboBox.ForeColor = Color.Red;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("An error occurred while filling user combo boxes.", ex);
+        }
+    }
+
+    public static Task FillComboBoxAsync(
         DataTable dataTable,
         ComboBox comboBox,
         string displayMember,
         string valueMember,
         string placeholder,
-        CommandType commandType = CommandType.Text)
+        object? dataLock = null)
     {
-        MySqlCommand? command = null;
-        try
+        void SetComboBox()
         {
-            if (connection.State != ConnectionState.Open)
-                await connection.OpenAsync();
-
-            command = new MySqlCommand(procedureName, connection)
-            {
-                CommandType = commandType
-            };
-
-            if (adapter is { } mySqlAdapter)
-                mySqlAdapter.SelectCommand = command;
-
-            dataTable.Clear();
-            await Task.Run(() => adapter.Fill(dataTable)).ConfigureAwait(false);
-
-            void SetComboBox()
-            {
-                var needsPlaceholder = dataTable.Rows.Count == 0 ||
-                                       !Equals(dataTable.Rows[0][displayMember]?.ToString(), placeholder);
-
-                if (needsPlaceholder)
+            if (dataLock != null)
+                lock (dataLock)
                 {
-                    var row = dataTable.NewRow();
-                    row[displayMember] = placeholder;
-                    if (dataTable.Columns[valueMember] != null &&
-                        dataTable.Columns[valueMember]!.DataType == typeof(int))
-                        row[valueMember] = -1;
-                    else
-                        row[valueMember] = placeholder;
-                    dataTable.Rows.InsertAt(row, 0);
+                    SetComboBoxInternal();
                 }
+            else
+                SetComboBoxInternal();
+        }
 
-                comboBox.DataSource = dataTable;
-                comboBox.DisplayMember = displayMember;
-                comboBox.ValueMember = valueMember;
-                comboBox.SelectedIndex = 0;
+        void SetComboBoxInternal()
+        {
+            // Guard: skip if DataTable has no columns
+            if (dataTable.Columns.Count == 0)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    $"[WARNING] FillComboBoxAsync called with empty DataTable schema. Skipping ComboBox fill for '{displayMember}'/'{valueMember}'.");
+                return;
             }
 
-            if (comboBox.InvokeRequired)
-                comboBox.Invoke(SetComboBox);
-            else
-                SetComboBox();
+            // Debug: Check columns
+            System.Diagnostics.Debug.WriteLine(
+                $"[DEBUG] FillComboBoxAsync DataTable Columns: {string.Join(", ", dataTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName))}");
+            if (!dataTable.Columns.Contains(displayMember) || !dataTable.Columns.Contains(valueMember))
+                throw new InvalidOperationException(
+                    $"DataTable does not contain required columns: '{displayMember}' or '{valueMember}'. " +
+                    $"Actual columns: {string.Join(", ", dataTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName))}");
+
+            // Only insert placeholder if not present
+            var hasPlaceholder = dataTable.Rows.Count > 0 &&
+                                 dataTable.Rows[0][displayMember]?.ToString() == placeholder;
+
+            if (!hasPlaceholder)
+            {
+                var row = dataTable.NewRow();
+                row[displayMember] = placeholder;
+                if (dataTable.Columns[valueMember] != null &&
+                    dataTable.Columns[valueMember]!.DataType == typeof(int))
+                    row[valueMember] = -1;
+                else
+                    row[valueMember] = placeholder;
+                dataTable.Rows.InsertAt(row, 0);
+            }
+
+            comboBox.DataSource = dataTable;
+            comboBox.DisplayMember = displayMember;
+            comboBox.ValueMember = valueMember;
+            comboBox.SelectedIndex = 0;
         }
-        finally
-        {
-            command?.Dispose();
-        }
+
+        if (comboBox.InvokeRequired)
+            comboBox.Invoke(SetComboBox);
+        else
+            SetComboBox();
+
+        return Task.CompletedTask;
     }
 
     #endregion
+
 
     #region ComboBox Validation & State
 
@@ -262,22 +289,6 @@ public static class Helper_ComboBoxes
         return found;
     }
 
-    public static void SetComboBoxPlaceholder(ComboBox comboBox, string placeholder)
-    {
-        comboBox.Text = placeholder;
-        comboBox.ForeColor = Color.Red;
-    }
-
-    public static void SetComboBoxValid(ComboBox comboBox)
-    {
-        comboBox.ForeColor = Color.Black;
-    }
-
-    public static void SetComboBoxInvalid(ComboBox comboBox)
-    {
-        comboBox.ForeColor = Color.Red;
-    }
-
     #endregion
 
     #region ComboBox UI Helpers
@@ -309,16 +320,6 @@ public static class Helper_ComboBoxes
             if (control.HasChildren)
                 DeselectAllComboBoxText(control);
         }
-    }
-
-    #endregion
-
-    #region Internal Helpers
-
-    private static Task InvokeAsyncTask(this Control control, Action action, CancellationToken cancellationToken)
-    {
-        return Task.Factory.StartNew(() => control.Invoke(action), cancellationToken, TaskCreationOptions.None,
-            TaskScheduler.Default);
     }
 
     #endregion

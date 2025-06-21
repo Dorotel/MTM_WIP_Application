@@ -24,7 +24,7 @@ public partial class ControlInventoryTab : UserControl
     public ControlInventoryTab()
     {
         InitializeComponent();
-        Control_InventoryTab_Initialize();
+        Service_Timer_VersionChecker.ControlInventoryInstance = this;
         Helper_ComboBoxes.ApplyStandardComboBoxProperties(Control_InventoryTab_ComboBox_Part);
         Helper_ComboBoxes.ApplyStandardComboBoxProperties(Control_InventoryTab_ComboBox_Operation);
         Helper_ComboBoxes.ApplyStandardComboBoxProperties(Control_InventoryTab_ComboBox_Location);
@@ -32,15 +32,20 @@ public partial class ControlInventoryTab : UserControl
         Control_InventoryTab_ComboBox_Operation.ForeColor = Color.Red;
         Control_InventoryTab_ComboBox_Location.ForeColor = Color.Red;
         Control_InventoryTab_TextBox_Quantity.ForeColor = Color.Red;
+
+        _ = Control_InventoryTab_OnStartup_LoadDataComboBoxesAsync();
+
+        Control_InventoryTab_OnStartup_WireUpEvents();
+
         _ = Control_InventoryTab_OnStartup_LoadComboBoxesAsync();
+
+        Control_InventoryTab_Initialize();
     }
 
     public void Control_InventoryTab_Initialize()
     {
-        Control_InventoryTab_ComboBox_Location.Visible = false;
-        Control_InventoryTab_ComboBox_Operation.Visible = false;
-        Control_InventoryTab_ComboBox_Part.Visible = false;
         Control_InventoryTab_Button_Reset.TabStop = false;
+
         SetVersionLabel(Core_WipAppVariables.UserVersion,
             Service_Timer_VersionChecker.LastCheckedDatabaseVersion ?? "unknown");
     }
@@ -53,8 +58,6 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
-            await Control_InventoryTab_OnStartup_LoadDataComboBoxesAsync();
-            Control_InventoryTab_OnStartup_WireUpEvents();
             LoggingUtility.Log("Initial setup of ComboBoxes in the Inventory Tab.");
             if (MainFormInstance != null)
                 MainFormTabResetHelper.ResetInventoryTab(
@@ -72,18 +75,6 @@ public partial class ControlInventoryTab : UserControl
             Control_InventoryTab_ComboBox_Location.Visible = true;
             Control_InventoryTab_ComboBox_Operation.Visible = true;
             Control_InventoryTab_ComboBox_Part.Visible = true;
-            try
-            {
-                Core_WipAppVariables.UserFullName =
-                    await Dao_User.GetUserFullNameAsync(Core_WipAppVariables.User, true);
-                LoggingUtility.Log($"User full name loaded: {Core_WipAppVariables.UserFullName}");
-            }
-            catch (Exception ex)
-            {
-                LoggingUtility.LogApplicationError(ex);
-                await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
-                    new StringBuilder().Append("Control_InventoryTab_OnStartup_GetUserFullName").ToString());
-            }
         }
         catch (Exception ex)
         {
@@ -96,33 +87,11 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
-            await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
-            var comboBoxSets =
-                new (MySqlDataAdapter Adapter, DataTable Table, ComboBox ComboBox, string ProcName, string Display,
-                    string Value, string Placeholder, CommandType CommandType)[]
-                    {
-                        (new MySqlDataAdapter(), new DataTable(), Control_InventoryTab_ComboBox_Part,
-                            "md_part_ids_Get_All", "Item Number", "ID", "[ Enter Part ID ]",
-                            CommandType.StoredProcedure),
-                        (new MySqlDataAdapter(), new DataTable(), Control_InventoryTab_ComboBox_Operation,
-                            "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
-                            CommandType.StoredProcedure),
-                        (new MySqlDataAdapter(), new DataTable(), Control_InventoryTab_ComboBox_Location,
-                            "md_locations_Get_All", "Location", "Location", "[ Enter Location ]",
-                            CommandType.StoredProcedure)
-                    };
-            foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await Helper_ComboBoxes.FillComboBoxAsync(
-                    procName,
-                    connection,
-                    adapter,
-                    table,
-                    comboBox,
-                    display,
-                    value,
-                    placeholder,
-                    cmdType
-                );
+            await Helper_ComboBoxes.FillPartComboBoxesAsync(Control_InventoryTab_ComboBox_Part);
+            await Helper_ComboBoxes.FillOperationComboBoxesAsync(Control_InventoryTab_ComboBox_Operation);
+            await Helper_ComboBoxes.FillLocationComboBoxesAsync(Control_InventoryTab_ComboBox_Location);
+
+            await Task.Delay(100); // Small delay to ensure controls are ready
             LoggingUtility.Log("Inventory tab ComboBoxes loaded.");
         }
         catch (Exception ex)
@@ -187,18 +156,91 @@ public partial class ControlInventoryTab : UserControl
         {
             if (Service_Timer_VersionChecker.MainFormInstance == null)
             {
-                LoggingUtility.Log("MainForm instance is null, cannot open Advanced Inventory Entry.");
+                LoggingUtility.Log("MainForm instance is null, cannot open Advanced Inventory Removal.");
                 return;
             }
 
             if (MainFormInstance != null) MainFormInstance.MainForm_Control_InventoryTab.Visible = false;
             if (MainFormInstance != null) MainFormInstance.MainForm_AdvancedInventory.Visible = true;
+
+            // Focus and select all on AdvancedInventory_Single_ComboBox_Part
+            if (MainFormInstance != null && MainFormInstance.MainForm_AdvancedInventory != null)
+            {
+                var adv = MainFormInstance.MainForm_AdvancedInventory;
+                var combo = adv.GetType().GetField("AdvancedInventory_Single_ComboBox_Part",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) as ComboBox;
+                var op = adv.GetType().GetField("AdvancedInventory_Single_ComboBox_Op",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) as ComboBox;
+                var loc = adv.GetType().GetField("AdvancedInventory_Single_ComboBox_Loc",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) as ComboBox;
+                var multiPart = adv.GetType().GetField("AdvancedInventory_MultiLoc_ComboBox_Part",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) as ComboBox;
+                var multiOp = adv.GetType().GetField("AdvancedInventory_MultiLoc_ComboBox_Op",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) as ComboBox;
+                var multiLoc = adv.GetType().GetField("AdvancedInventory_MultiLoc_ComboBox_Loc",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) as ComboBox;
+                var tab = adv.GetType().GetField("AdvancedInventory_TabControl",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(adv) as TabControl;
+
+                // Reset all AdvancedInventory ComboBoxes' SelectedIndex to 0 and color to Red
+                if (combo != null)
+                {
+                    combo.SelectedIndex = 0;
+                    combo.ForeColor = Color.Red;
+                }
+
+                if (op != null)
+                {
+                    op.SelectedIndex = 0;
+                    op.ForeColor = Color.Red;
+                }
+
+                if (loc != null)
+                {
+                    loc.SelectedIndex = 0;
+                    loc.ForeColor = Color.Red;
+                }
+
+                if (multiPart != null)
+                {
+                    multiPart.SelectedIndex = 0;
+                    multiPart.ForeColor = Color.Red;
+                }
+
+                if (multiOp != null)
+                {
+                    multiOp.SelectedIndex = 0;
+                    multiOp.ForeColor = Color.Red;
+                }
+
+                if (multiLoc != null)
+                {
+                    multiLoc.SelectedIndex = 0;
+                    multiLoc.ForeColor = Color.Red;
+                }
+
+                if (combo != null)
+                {
+                    combo.Focus();
+                    combo.SelectAll();
+                    // Optionally, set focus color to something else if needed
+                }
+
+                if (tab != null) tab.SelectedIndex = 0;
+            }
         }
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
-                "Control_InventoryTab_Button_AdvancedEntry_Click");
+                new StringBuilder().Append("Control_InventoryTab_Button_AdvancedEntry_Click").ToString());
         }
     }
 
@@ -207,67 +249,60 @@ public partial class ControlInventoryTab : UserControl
         try
         {
             LoggingUtility.Log("Inventory Reset button clicked.");
-            Control_InventoryTab_ComboBox_Location.Visible = false;
-            Control_InventoryTab_ComboBox_Operation.Visible = false;
+
+            // Disable reset button to prevent spamming
+            Control_InventoryTab_Button_Reset.Enabled = false;
+
+            // Hide controls during reset (optional, for visual feedback)
             Control_InventoryTab_ComboBox_Part.Visible = false;
-
-
-            // Reinitialize ComboBox DataTables
-            await Helper_ComboBoxes.FillComboBoxAsync(
-                "md_part_ids_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                Control_InventoryTab_ComboBox_Part,
-                "Item Number",
-                "ID",
-                "[ Enter Part ID ]",
-                CommandType.StoredProcedure);
-
-            await Helper_ComboBoxes.FillComboBoxAsync(
-                "md_operation_numbers_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                Control_InventoryTab_ComboBox_Operation,
-                "Operation",
-                "Operation",
-                "[ Enter Op # ]",
-                CommandType.StoredProcedure);
-
-            await Helper_ComboBoxes.FillComboBoxAsync(
-                "md_locations_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                Control_InventoryTab_ComboBox_Location,
-                "Location",
-                "Location",
-                "[ Enter Location ]",
-                CommandType.StoredProcedure);
+            Control_InventoryTab_ComboBox_Operation.Visible = false;
+            Control_InventoryTab_ComboBox_Location.Visible = false;
 
             if (MainFormInstance != null)
-                MainFormTabResetHelper.ResetInventoryTab(
-                    Control_InventoryTab_ComboBox_Location,
-                    Control_InventoryTab_ComboBox_Operation,
-                    Control_InventoryTab_ComboBox_Part,
-                    new CheckBox(),
-                    new CheckBox(),
-                    null,
-                    Control_InventoryTab_TextBox_Quantity,
-                    Control_InventoryTab_RichTextBox_Notes,
-                    Control_InventoryTab_Button_Save,
-                    MainFormInstance.MainForm_MenuStrip_File_Save
-                );
+            {
+                MainFormInstance.MainForm_StatusStrip_Disconnected.Text = @"Please wait while resetting...";
+                MainFormInstance.MainForm_StatusStrip_Disconnected.Visible = true;
+                MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
+            }
 
-            Control_InventoryTab_ComboBox_Location.Visible = true;
-            Control_InventoryTab_ComboBox_Operation.Visible = true;
+            await Helper_ComboBoxes.SetupPartDataTable();
+            await Helper_ComboBoxes.SetupOperationDataTable();
+            await Helper_ComboBoxes.SetupLocationDataTable();
+
+            await Helper_ComboBoxes.FillPartComboBoxesAsync(Control_InventoryTab_ComboBox_Part);
+            await Helper_ComboBoxes.FillOperationComboBoxesAsync(Control_InventoryTab_ComboBox_Operation);
+            await Helper_ComboBoxes.FillLocationComboBoxesAsync(Control_InventoryTab_ComboBox_Location);
+
+            // Reset textboxes and notes
+            MainFormControlHelper.ResetTextBox(Control_InventoryTab_TextBox_Quantity, Color.Red,
+                "[ Enter Valid Quantity ]");
+            Control_InventoryTab_RichTextBox_Notes.Text = string.Empty;
+
+            // Restore visibility and focus
             Control_InventoryTab_ComboBox_Part.Visible = true;
+            Control_InventoryTab_ComboBox_Operation.Visible = true;
+            Control_InventoryTab_ComboBox_Location.Visible = true;
+            Control_InventoryTab_ComboBox_Part.Focus();
+
+            Control_InventoryTab_Update_SaveButtonState();
+
+            if (MainFormInstance != null)
+            {
+                MainFormInstance.MainForm_StatusStrip_Disconnected.Visible = false;
+                MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = true;
+                MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
+                    @"Disconnected from Server, please standby...";
+            }
         }
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_Inventory_Button_Reset");
+        }
+        finally
+        {
+            // Re-enable reset button
+            Control_InventoryTab_Button_Reset.Enabled = true;
         }
     }
 
@@ -617,20 +652,6 @@ public partial class ControlInventoryTab : UserControl
         Control_InventoryTab_Label_Version.Text =
             $@"Client Version: {currentVersion} | Server Version: {serverVersion}";
         Control_InventoryTab_Label_Version.ForeColor = isOutOfDate ? Color.Red : SystemColors.ControlText;
-    }
-
-    public void UpdateToggleRightPanelButton()
-    {
-        if (MainFormInstance != null && !MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed)
-        {
-            Control_InventoryTab_Button_Toggle_RightPanel.Text = "→";
-            Control_InventoryTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
-        }
-        else
-        {
-            Control_InventoryTab_Button_Toggle_RightPanel.Text = "←";
-            Control_InventoryTab_Button_Toggle_RightPanel.ForeColor = Color.Red;
-        }
     }
 
     #endregion

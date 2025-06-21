@@ -25,10 +25,6 @@ public partial class MainForm : Form
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public ConnectionRecoveryManager ConnectionRecoveryManager { get; private set; } = null!;
 
-    // Add public properties for RemoveTab controls
-    public ControlRemoveTab MainForm_RemoveTabNormalControl_Public => MainForm_RemoveTabNormalControl;
-    public Control_AdvancedRemove MainForm_RemoveTabAdvancedControl_Public => MainForm_Control_AdvancedRemove;
-
     #region Initialization
 
     public MainForm()
@@ -46,7 +42,7 @@ public partial class MainForm : Form
             Shown += async (s, e) =>
             {
                 await MainForm_OnStartup_GetUserFullNameAsync();
-                await Task.Delay(100); // Ensure controls are visible
+                await Task.Delay(500); // Ensure controls are visible
                 if (MainForm_Control_InventoryTab != null)
                 {
                     MainForm_Control_InventoryTab.Control_InventoryTab_ComboBox_Part.Focus();
@@ -72,64 +68,8 @@ public partial class MainForm : Form
         // Wire up tab selection event to focus part ComboBox
         MainForm_TabControl.SelectedIndexChanged += (s, e) =>
         {
-#if DEBUG
-            Debug.WriteLine(
-                $"[DEBUG] MainForm_InventoryTab in SelectedIndexChanged: {(MainForm_Control_InventoryTab == null ? "null" : "not null")}");
-#endif
-            ComboBox? partCombo = null;
-            // Inventory Tab (index 0)
-            if (MainForm_TabControl.SelectedIndex == 0 && MainForm_Control_InventoryTab != null)
-            {
-                MainForm_Control_InventoryTab.UpdateToggleRightPanelButton();
-                partCombo = MainForm_Control_InventoryTab.GetType()
-                    .GetField("Control_InventoryTab_ComboBox_Part",
-                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
-                    ?.GetValue(MainForm_Control_InventoryTab) as ComboBox;
-            }
-            // Remove Tab (index 1)
-            else if (MainForm_TabControl.SelectedIndex == 1 && MainForm_RemoveTabNormalControl != null)
-            {
-                MainForm_RemoveTabNormalControl.UpdateToggleRightPanelButton();
-                partCombo = MainForm_RemoveTabNormalControl.GetType()
-                    .GetField("Control_RemoveTab_ComboBox_Part",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    ?.GetValue(MainForm_RemoveTabNormalControl) as ComboBox;
-            }
-            // Transfer Tab (index 2)
-            else if (MainForm_TabControl.SelectedIndex == 2 && MainForm_Control_TransferTab != null)
-            {
-                MainForm_Control_TransferTab.UpdateToggleRightPanelButton();
-                partCombo = MainForm_Control_TransferTab.GetType()
-                    .GetField("Control_TransferTab_ComboBox_Part",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    ?.GetValue(MainForm_Control_TransferTab) as ComboBox;
-            }
-
-            Helper_ComboBoxes.DeselectAllComboBoxText(this);
-#if DEBUG
-            Debug.WriteLine(
-                $"[DEBUG] TabIndex: {MainForm_TabControl.SelectedIndex}, partCombo: {(partCombo != null ? partCombo.Name : "null")}");
-#endif
-            if (partCombo != null)
-            {
-#if DEBUG
-                Debug.WriteLine($"[DEBUG] Focusing and selecting all for: {partCombo.Name}");
-#endif
-                partCombo.Focus();
-                partCombo.SelectAll();
-                partCombo.BackColor = Color.LightBlue;
-            }
-        };
-
-        // Move focus logic to OnShown for after everything is loaded
-        Shown += async (s, e) =>
-        {
-            // Wait for InventoryTab controls to be loaded and visible
-            await Task.Delay(100); // Small delay to ensure controls are ready
-            var partCombo = MainForm_Control_InventoryTab.GetType()
-                .GetField("Control_InventoryTab_ComboBox_Part",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                ?.GetValue(MainForm_Control_InventoryTab) as ComboBox;
+            
+            MainForm_TabControl_SelectedIndexChanged(null!, null!);
         };
     }
 
@@ -186,6 +126,59 @@ public partial class MainForm : Form
 
     #endregion
 
+    #region Tab Control
+    
+    private void MainForm_TabControl_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            switch (MainForm_TabControl.SelectedIndex)
+            {
+                case 0: // Inventory Tab
+                    var invTab = MainForm_Control_InventoryTab;
+                    if (invTab != null)
+                    {
+                        var part = invTab.GetType().GetField("Control_InventoryTab_ComboBox_Part", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)?.GetValue(invTab) as ComboBox;
+                        var op = invTab.GetType().GetField("Control_InventoryTab_ComboBox_Operation", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)?.GetValue(invTab) as ComboBox;
+                        var loc = invTab.GetType().GetField("Control_InventoryTab_ComboBox_Location", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)?.GetValue(invTab) as ComboBox;
+                        if (part != null) { part.SelectedIndex = 0; part.Focus(); part.SelectAll(); part.BackColor = Color.LightBlue; }
+                        if (op != null) op.SelectedIndex = 0;
+                        if (loc != null) loc.SelectedIndex = 0;
+                    }
+                    break;
+                case 1: // Remove Tab
+                    var remTab = MainForm_RemoveTabNormalControl;
+                    if (remTab != null)
+                    {
+                        var part = remTab.GetType().GetField("Control_RemoveTab_ComboBox_Part", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(remTab) as ComboBox;
+                        var op = remTab.GetType().GetField("Control_RemoveTab_ComboBox_Operation", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(remTab) as ComboBox;
+                        if (part != null) { part.SelectedIndex = 0; part.Focus(); part.SelectAll(); part.BackColor = Color.LightBlue; }
+                        if (op != null) op.SelectedIndex = 0;
+                    }
+                    break;
+                case 2: // Transfer Tab
+                    var transTab = MainForm_Control_TransferTab;
+                    if (transTab != null)
+                    {
+                        var part = transTab.GetType().GetField("Control_TransferTab_ComboBox_Part", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(transTab) as ComboBox;
+                        var op = transTab.GetType().GetField("Control_TransferTab_ComboBox_Operation", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(transTab) as ComboBox;
+                        var loc = transTab.GetType().GetField("Control_TransferTab_ComboBox_ToLocation", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(transTab) as ComboBox;
+                        if (part != null) { part.SelectedIndex = 0; part.Focus(); part.SelectAll(); part.BackColor = Color.LightBlue; }
+                        if (op != null) op.SelectedIndex = 0;
+                        if (loc != null) loc.SelectedIndex = 0;
+                    }
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
+                nameof(MainForm_TabControl_SelectedIndexChanged));
+        }
+    }
+    
+    #endregion
 
     #region Form Closing
 
@@ -207,12 +200,6 @@ public partial class MainForm : Form
     }
 
     #endregion
-
-    private void changeLogMakerToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        using var exporter = new Exporter_Do_Not_Pack();
-        exporter.ShowDialog(this);
-    }
 }
 
 #endregion

@@ -30,9 +30,28 @@ public partial class Control_AdvancedRemove : UserControl
             }
 
             if (ControlRemoveTab.MainFormInstance != null)
-                ControlRemoveTab.MainFormInstance.MainForm_RemoveTabNormalControl_Public.Visible = true;
+                ControlRemoveTab.MainFormInstance.MainForm_RemoveTabNormalControl.Visible = true;
             if (ControlRemoveTab.MainFormInstance != null)
-                ControlRemoveTab.MainFormInstance.MainForm_RemoveTabAdvancedControl_Public.Visible = false;
+                ControlRemoveTab.MainFormInstance.MainForm_Control_AdvancedRemove.Visible = false;
+
+            // Reset all Control_RemoveTab.cs ComboBoxes' SelectedIndex to 0 and color to Red
+            var removeTab = ControlRemoveTab.MainFormInstance?.MainForm_RemoveTabNormalControl;
+            if (removeTab != null)
+            {
+                if (removeTab.Controls.Find("Control_RemoveTab_ComboBox_Part", true).FirstOrDefault() is ComboBox part)
+                {
+                    part.SelectedIndex = 0;
+                    part.ForeColor = Color.Red;
+                    part.Focus();
+                }
+
+                if (removeTab.Controls.Find("Control_RemoveTab_ComboBox_Operation", true).FirstOrDefault() is ComboBox
+                    op)
+                {
+                    op.SelectedIndex = 0;
+                    op.ForeColor = Color.Red;
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -109,10 +128,6 @@ public partial class Control_AdvancedRemove : UserControl
 
     private void Control_AdvancedRemove_Initialize()
     {
-        Control_AdvancedSearch_ComboBox_Part.Visible = false;
-        Control_AdvancedSearch_ComboBox_Op.Visible = false;
-        Control_AdvancedSearch_ComboBox_Loc.Visible = false;
-        Control_AdvancedSearch_ComboBox_User.Visible = false;
         Control_AdvancedSearch_ComboBox_Part.ForeColor = Color.Red;
         Control_AdvancedSearch_ComboBox_Op.ForeColor = Color.Red;
         Control_AdvancedSearch_ComboBox_Loc.ForeColor = Color.Red;
@@ -131,22 +146,12 @@ public partial class Control_AdvancedRemove : UserControl
     {
         try
         {
-            await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
-            var comboBoxSets = new[]
-            {
-                (new MySqlDataAdapter(), new DataTable(), Control_AdvancedSearch_ComboBox_Part, "md_part_ids_Get_All",
-                    "Item Number", "ID", "[ Enter Part ID ]", CommandType.StoredProcedure),
-                (new MySqlDataAdapter(), new DataTable(), Control_AdvancedSearch_ComboBox_Op,
-                    "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
-                    CommandType.StoredProcedure),
-                (new MySqlDataAdapter(), new DataTable(), Control_AdvancedSearch_ComboBox_Loc, "md_locations_Get_All",
-                    "Location", "Location", "[ Enter Location ]", CommandType.StoredProcedure),
-                (new MySqlDataAdapter(), new DataTable(), Control_AdvancedSearch_ComboBox_User, "usr_users_Get_All",
-                    "User", "User", "[ Enter User ]", CommandType.StoredProcedure)
-            };
-            foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await Helper_ComboBoxes.FillComboBoxAsync(
-                    procName, connection, adapter, table, comboBox, display, value, placeholder, cmdType);
+            await Helper_ComboBoxes.FillPartComboBoxesAsync(Control_AdvancedSearch_ComboBox_Part);
+            await Helper_ComboBoxes.FillOperationComboBoxesAsync(Control_AdvancedSearch_ComboBox_Op);
+            await Helper_ComboBoxes.FillLocationComboBoxesAsync(Control_AdvancedSearch_ComboBox_Loc);
+            await Helper_ComboBoxes.FillUserComboBoxesAsync(Control_AdvancedSearch_ComboBox_User);
+            // For user ComboBox, you may need a separate static/shared DataTable/DataAdapter if you want to cache users.
+            // Otherwise, keep your current logic for users.
             Control_AdvancedSearch_ComboBox_Part.Visible = true;
             Control_AdvancedSearch_ComboBox_Op.Visible = true;
             Control_AdvancedSearch_ComboBox_Loc.Visible = true;
@@ -479,89 +484,71 @@ public partial class Control_AdvancedRemove : UserControl
 
     private async void Control_AdvancedSearch_Button_Reset_Click(object? sender, EventArgs? e)
     {
-        // Hide controls while resetting
-        Control_AdvancedSearch_ComboBox_Part.Visible = false;
-        Control_AdvancedSearch_ComboBox_Op.Visible = false;
-        Control_AdvancedSearch_ComboBox_Loc.Visible = false;
-        Control_AdvancedSearch_ComboBox_User.Visible = false;
+        var resetBtn = Controls.Find("Control_AdvancedSearch_Button_Reset", true);
+        if (resetBtn.Length > 0 && resetBtn[0] is Button btn)
+            btn.Enabled = false;
+        try
+        {
+            // Hide controls during reset
+            Control_AdvancedSearch_ComboBox_Part.Visible = false;
+            Control_AdvancedSearch_ComboBox_Op.Visible = false;
+            Control_AdvancedSearch_ComboBox_Loc.Visible = false;
+            Control_AdvancedSearch_ComboBox_User.Visible = false;
+            if (ControlRemoveTab.MainFormInstance != null)
+            {
+                ControlRemoveTab.MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
+                    @"Please wait while resetting...";
+                ControlRemoveTab.MainFormInstance.MainForm_StatusStrip_Disconnected.Visible = true;
+                ControlRemoveTab.MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
+            }
 
-        // Reinitialize ComboBox DataTables
-        await Helper_ComboBoxes.FillComboBoxAsync(
-            "md_part_ids_Get_All",
-            new MySqlConnection(Core_WipAppVariables.ConnectionString),
-            new MySqlDataAdapter(),
-            new DataTable(),
-            Control_AdvancedSearch_ComboBox_Part,
-            "Item Number",
-            "ID",
-            "[ Enter Part ID ]",
-            CommandType.StoredProcedure);
-
-        await Helper_ComboBoxes.FillComboBoxAsync(
-            "md_operation_numbers_Get_All",
-            new MySqlConnection(Core_WipAppVariables.ConnectionString),
-            new MySqlDataAdapter(),
-            new DataTable(),
-            Control_AdvancedSearch_ComboBox_Op,
-            "Operation",
-            "Operation",
-            "[ Enter Op # ]",
-            CommandType.StoredProcedure);
-
-        await Helper_ComboBoxes.FillComboBoxAsync(
-            "md_locations_Get_All",
-            new MySqlConnection(Core_WipAppVariables.ConnectionString),
-            new MySqlDataAdapter(),
-            new DataTable(),
-            Control_AdvancedSearch_ComboBox_Loc,
-            "Location",
-            "Location",
-            "[ Enter Location ]",
-            CommandType.StoredProcedure);
-
-        await Helper_ComboBoxes.FillComboBoxAsync(
-            "usr_users_Get_All",
-            new MySqlConnection(Core_WipAppVariables.ConnectionString),
-            new MySqlDataAdapter(),
-            new DataTable(),
-            Control_AdvancedSearch_ComboBox_User,
-            "User",
-            "User",
-            "[ Enter User ]",
-            CommandType.StoredProcedure);
-
-        // Reset all ComboBoxes
-        MainFormControlHelper.ResetComboBox(Control_AdvancedSearch_ComboBox_Part, Color.Red, 0);
-        MainFormControlHelper.ResetComboBox(Control_AdvancedSearch_ComboBox_Op, Color.Red, 0);
-        MainFormControlHelper.ResetComboBox(Control_AdvancedSearch_ComboBox_Loc, Color.Red, 0);
-        MainFormControlHelper.ResetComboBox(Control_AdvancedSearch_ComboBox_User, Color.Red, 0);
-
-        // Reset TextBoxes
-        Control_AdvancedSearch_TextBox_QtyMin.Text = string.Empty;
-        Control_AdvancedSearch_TextBox_QtyMax.Text = string.Empty;
-        Control_AdvancedSearch_TextBox_Notes.Text = string.Empty;
-
-        // Reset Date controls
-        Control_AdvancedSearch_CheckBox_Date.Checked = false;
-        Control_AdvancedSearch_DateTimePicker_From.Value = DateTime.Today;
-        Control_AdvancedSearch_DateTimePicker_To.Value = DateTime.Today;
-        Control_AdvancedSearch_DateTimePicker_From.Enabled = false;
-        Control_AdvancedSearch_DateTimePicker_To.Enabled = false;
-
-        // Reset DataGridView
-        Control_AdvancedSearch_DataGridView_Results.DataSource = null;
-        Control_AdvancedSearch_DataGridView_Results.Rows.Clear();
-        Control_AdvancedSearch_Image_NothingFound.Visible = false;
-
-        // Show controls again
-        Control_AdvancedSearch_ComboBox_Part.Visible = true;
-        Control_AdvancedSearch_ComboBox_Op.Visible = true;
-        Control_AdvancedSearch_ComboBox_Loc.Visible = true;
-        Control_AdvancedSearch_ComboBox_User.Visible = true;
-
-        // Set focus to first ComboBox
-        if (Control_AdvancedSearch_ComboBox_Part.FindForm() is { } form)
-            MainFormControlHelper.SetActiveControl(form, Control_AdvancedSearch_ComboBox_Part);
+            await Helper_ComboBoxes.SetupPartDataTable();
+            await Helper_ComboBoxes.SetupOperationDataTable();
+            await Helper_ComboBoxes.SetupLocationDataTable();
+            await Helper_ComboBoxes.SetupUserDataTable();
+            await Helper_ComboBoxes.FillPartComboBoxesAsync(Control_AdvancedSearch_ComboBox_Part);
+            await Helper_ComboBoxes.FillOperationComboBoxesAsync(Control_AdvancedSearch_ComboBox_Op);
+            await Helper_ComboBoxes.FillLocationComboBoxesAsync(Control_AdvancedSearch_ComboBox_Loc);
+            await Helper_ComboBoxes.FillUserComboBoxesAsync(Control_AdvancedSearch_ComboBox_User);
+            // Reset all ComboBoxes
+            MainFormControlHelper.ResetComboBox(Control_AdvancedSearch_ComboBox_Part, Color.Red, 0);
+            MainFormControlHelper.ResetComboBox(Control_AdvancedSearch_ComboBox_Op, Color.Red, 0);
+            MainFormControlHelper.ResetComboBox(Control_AdvancedSearch_ComboBox_Loc, Color.Red, 0);
+            MainFormControlHelper.ResetComboBox(Control_AdvancedSearch_ComboBox_User, Color.Red, 0);
+            // Reset TextBoxes
+            Control_AdvancedSearch_TextBox_QtyMin.Text = string.Empty;
+            Control_AdvancedSearch_TextBox_QtyMax.Text = string.Empty;
+            Control_AdvancedSearch_TextBox_Notes.Text = string.Empty;
+            // Reset Date controls
+            Control_AdvancedSearch_CheckBox_Date.Checked = false;
+            Control_AdvancedSearch_DateTimePicker_From.Value = DateTime.Today;
+            Control_AdvancedSearch_DateTimePicker_To.Value = DateTime.Today;
+            Control_AdvancedSearch_DateTimePicker_From.Enabled = false;
+            Control_AdvancedSearch_DateTimePicker_To.Enabled = false;
+            // Reset DataGridView
+            Control_AdvancedSearch_DataGridView_Results.DataSource = null;
+            Control_AdvancedSearch_DataGridView_Results.Rows.Clear();
+            Control_AdvancedSearch_Image_NothingFound.Visible = false;
+            // Restore controls and focus
+            Control_AdvancedSearch_ComboBox_Part.Visible = true;
+            Control_AdvancedSearch_ComboBox_Op.Visible = true;
+            Control_AdvancedSearch_ComboBox_Loc.Visible = true;
+            Control_AdvancedSearch_ComboBox_User.Visible = true;
+            if (Control_AdvancedSearch_ComboBox_Part.FindForm() is { } form)
+                MainFormControlHelper.SetActiveControl(form, Control_AdvancedSearch_ComboBox_Part);
+            if (ControlRemoveTab.MainFormInstance != null)
+            {
+                ControlRemoveTab.MainFormInstance.MainForm_StatusStrip_Disconnected.Visible = false;
+                ControlRemoveTab.MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = true;
+                ControlRemoveTab.MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
+                    @"Disconnected from Server, please standby...";
+            }
+        }
+        finally
+        {
+            if (resetBtn.Length > 0 && resetBtn[0] is Button btn2)
+                btn2.Enabled = true;
+        }
     }
 
     private async void Control_AdvancedSearch_Button_Undo_Click(object? sender, EventArgs? e)
@@ -610,6 +597,7 @@ public partial class Control_AdvancedRemove : UserControl
             Control_AdvancedSearch_Button_Delete.PerformClick();
             return true;
         }
+
         return base.ProcessCmdKey(ref msg, keyData);
     }
 }

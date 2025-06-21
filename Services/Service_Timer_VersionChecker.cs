@@ -67,28 +67,27 @@ internal static class Service_Timer_VersionChecker
             };
             using (reader = command.ExecuteReader())
             {
-                if (reader.Read())
+                if (!reader.Read()) return;
+                var databaseVersion = reader.GetString(reader.GetOrdinal("Version"));
+                LastCheckedDatabaseVersion = databaseVersion;
+                Debug.WriteLine(LastCheckedDatabaseVersion);
+                ControlInventoryInstance?.SetVersionLabel(Core_WipAppVariables.UserVersion, databaseVersion);
+                if (Core_WipAppVariables.UserVersion != databaseVersion)
                 {
-                    var databaseVersion = reader.GetString(reader.GetOrdinal("Version"));
-                    LastCheckedDatabaseVersion = databaseVersion;
-                    ControlInventoryInstance?.SetVersionLabel(Core_WipAppVariables.UserVersion, databaseVersion);
-                    if (Core_WipAppVariables.UserVersion != databaseVersion)
+                    LoggingUtility.Log(
+                        $"Version mismatch detected. Current: {Core_WipAppVariables.UserVersion}, Expected: {databaseVersion}");
+                    Debug.WriteLine(
+                        $"Version mismatch detected. Current: {Core_WipAppVariables.UserVersion}, Expected: {databaseVersion}");
+                    Task.Run(() =>
                     {
-                        LoggingUtility.Log(
-                            $"Version mismatch detected. Current: {Core_WipAppVariables.UserVersion}, Expected: {databaseVersion}");
-                        Debug.WriteLine(
-                            $"Version mismatch detected. Current: {Core_WipAppVariables.UserVersion}, Expected: {databaseVersion}");
-                        Task.Run(() =>
-                        {
-                            var message = "You are using an older version of the WIP Application.\n" +
-                                          "This normally means a newer version is just about to be released.\n" +
-                                          "The program will close in 30 seconds, or by clicking OK.";
-                            var caption =
-                                $"Version Conflict Error ({Core_WipAppVariables.UserVersion}/{databaseVersion})";
-                            MessageBox.Show(message, caption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                            Application.Exit();
-                        });
-                    }
+                        var message = "You are using an older version of the WIP Application.\n" +
+                                      "This normally means a newer version is just about to be released.\n" +
+                                      "The program will close in 30 seconds, or by clicking OK.";
+                        var caption =
+                            $"Version Conflict Error ({Core_WipAppVariables.UserVersion}/{databaseVersion})";
+                        MessageBox.Show(message, caption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                        Application.Exit();
+                    });
                 }
             }
         }

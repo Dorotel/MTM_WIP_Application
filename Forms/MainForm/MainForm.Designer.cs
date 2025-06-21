@@ -66,7 +66,6 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_MenuStrip_View_ViewOutsideService = new ToolStripMenuItem();
             MainForm_MenuStrip_View_Separator3 = new ToolStripSeparator();
             MainForm_MenuStrip_View_ViewChangelog = new ToolStripMenuItem();
-            MainForm_MenuItem_ChangeLogMaker = new ToolStripMenuItem();
             MainForm_StatusStrip = new StatusStrip();
             MainForm_StatusStrip_SavedStatus = new ToolStripStatusLabel();
             MainForm_StatusStrip_Disconnected = new ToolStripStatusLabel();
@@ -187,7 +186,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             // 
             // MainForm_MenuStrip_View
             // 
-            MainForm_MenuStrip_View.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_View_PersonalHistory, MainForm_MenuStrip_View_Reset, MainForm_MenuStrip_View_Separator1, MainForm_MenuStrip_View_AddToInventory, MainForm_MenuStrip_View_RemoveFromInventory, MainForm_MenuStrip_View_LocationToLocation, MainForm_MenuStrip_View_Separator2, MainForm_MenuStrip_View_ViewAllWIP, MainForm_MenuStrip_View_ViewOutsideService, MainForm_MenuStrip_View_Separator3, MainForm_MenuStrip_View_ViewChangelog, MainForm_MenuItem_ChangeLogMaker });
+            MainForm_MenuStrip_View.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_View_PersonalHistory, MainForm_MenuStrip_View_Reset, MainForm_MenuStrip_View_Separator1, MainForm_MenuStrip_View_AddToInventory, MainForm_MenuStrip_View_RemoveFromInventory, MainForm_MenuStrip_View_LocationToLocation, MainForm_MenuStrip_View_Separator2, MainForm_MenuStrip_View_ViewAllWIP, MainForm_MenuStrip_View_ViewOutsideService, MainForm_MenuStrip_View_Separator3, MainForm_MenuStrip_View_ViewChangelog });
             MainForm_MenuStrip_View.Name = "MainForm_MenuStrip_View";
             MainForm_MenuStrip_View.Size = new Size(44, 22);
             MainForm_MenuStrip_View.Text = "View";
@@ -259,13 +258,7 @@ namespace MTM_WIP_Application.Forms.MainForm
             MainForm_MenuStrip_View_ViewChangelog.Name = "MainForm_MenuStrip_View_ViewChangelog";
             MainForm_MenuStrip_View_ViewChangelog.Size = new Size(234, 22);
             MainForm_MenuStrip_View_ViewChangelog.Text = "View Changelog";
-            // 
-            // MainForm_MenuItem_ChangeLogMaker
-            // 
-            MainForm_MenuItem_ChangeLogMaker.Name = "MainForm_MenuItem_ChangeLogMaker";
-            MainForm_MenuItem_ChangeLogMaker.Size = new Size(234, 22);
-            MainForm_MenuItem_ChangeLogMaker.Text = "ChangeLog Maker";
-            MainForm_MenuItem_ChangeLogMaker.Click += changeLogMakerToolStripMenuItem_Click;
+
             // 
             // MainForm_StatusStrip
             // 
@@ -556,11 +549,10 @@ namespace MTM_WIP_Application.Forms.MainForm
         private TabPage MainForm_TabPage_Inventory;
         private TabPage MainForm_TabControl_Remove;
         private TabPage MainForm_TabControl_Transfer;
-        private ControlRemoveTab MainForm_RemoveTabNormalControl;
+        public ControlRemoveTab MainForm_RemoveTabNormalControl;
         private ControlTransferTab MainForm_Control_TransferTab;
         public ControlInventoryTab MainForm_Control_InventoryTab;
         public Control_AdvancedInventory MainForm_AdvancedInventory;
-        private ToolStripMenuItem MainForm_MenuItem_ChangeLogMaker;
-        private Control_AdvancedRemove MainForm_Control_AdvancedRemove;
+        public Control_AdvancedRemove MainForm_Control_AdvancedRemove;
     }
 }

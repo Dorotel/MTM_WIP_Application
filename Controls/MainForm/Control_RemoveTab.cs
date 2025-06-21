@@ -51,8 +51,6 @@ public partial class ControlRemoveTab : UserControl
 
     public void Control_RemoveTab_Initialize()
     {
-        Control_RemoveTab_ComboBox_Operation.Visible = false;
-        Control_RemoveTab_ComboBox_Part.Visible = false;
         Control_RemoveTab_Button_Reset.TabStop = false;
     }
 
@@ -101,30 +99,8 @@ public partial class ControlRemoveTab : UserControl
     {
         try
         {
-            await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
-            var comboBoxSets =
-                new (MySqlDataAdapter Adapter, DataTable Table, ComboBox ComboBox, string ProcName, string Display,
-                    string Value, string Placeholder, CommandType CommandType)[]
-                    {
-                        (new MySqlDataAdapter(), new DataTable(), Control_RemoveTab_ComboBox_Part,
-                            "md_part_ids_Get_All", "Item Number", "ID", "[ Enter Part ID ]",
-                            CommandType.StoredProcedure),
-                        (new MySqlDataAdapter(), new DataTable(), Control_RemoveTab_ComboBox_Operation,
-                            "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
-                            CommandType.StoredProcedure)
-                    };
-            foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await Helper_ComboBoxes.FillComboBoxAsync(
-                    procName,
-                    connection,
-                    adapter,
-                    table,
-                    comboBox,
-                    display,
-                    value,
-                    placeholder,
-                    cmdType
-                );
+            await Helper_ComboBoxes.FillPartComboBoxesAsync(Control_RemoveTab_ComboBox_Part);
+            await Helper_ComboBoxes.FillOperationComboBoxesAsync(Control_RemoveTab_ComboBox_Operation);
             LoggingUtility.Log("Remove tab ComboBoxes loaded.");
         }
         catch (Exception ex)
@@ -377,58 +353,59 @@ Are you sure?",
 
     private async void Control_RemoveTab_Button_Reset_Click()
     {
+        Control_RemoveTab_Button_Reset.Enabled = false;
         try
         {
             LoggingUtility.Log("Inventory Reset button clicked.");
-            Control_RemoveTab_ComboBox_Operation.Visible = false;
+            // Hide controls during reset
             Control_RemoveTab_ComboBox_Part.Visible = false;
-            Control_RemoveTab_Image_NothingFound.Visible = false;
+            Control_RemoveTab_ComboBox_Operation.Visible = false;
+            if (MainFormInstance != null)
+            {
+                MainFormInstance.MainForm_StatusStrip_Disconnected.Text = @"Please wait while resetting...";
+                MainFormInstance.MainForm_StatusStrip_Disconnected.Visible = true;
+                MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
+            }
 
-            // Clear the DataGridView
-            Control_RemoveTab_DataGridView_Main.DataSource = null;
-            Control_RemoveTab_DataGridView_Main.Rows.Clear();
-
-            await Helper_ComboBoxes.FillComboBoxAsync(
-                "md_part_ids_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                Control_RemoveTab_ComboBox_Part,
-                "Item Number",
-                "ID",
-                "[ Enter Part ID ]",
-                CommandType.StoredProcedure);
-
-            await Helper_ComboBoxes.FillComboBoxAsync(
-                "md_operation_numbers_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                Control_RemoveTab_ComboBox_Operation,
-                "Operation",
-                "Operation",
-                "[ Enter Op # ]",
-                CommandType.StoredProcedure);
-
+            await Helper_ComboBoxes.SetupPartDataTable();
+            await Helper_ComboBoxes.SetupOperationDataTable();
+            await Helper_ComboBoxes.SetupLocationDataTable();
+            // Optionally reload DataTables if you have Setup*DataTable methods
+            await Helper_ComboBoxes.FillPartComboBoxesAsync(Control_RemoveTab_ComboBox_Part);
+            await Helper_ComboBoxes.FillOperationComboBoxesAsync(Control_RemoveTab_ComboBox_Operation);
+            // Reset UI fields
             MainFormControlHelper.ResetComboBox(Control_RemoveTab_ComboBox_Part, Color.Red, 0);
             MainFormControlHelper.ResetComboBox(Control_RemoveTab_ComboBox_Operation, Color.Red, 0);
-
+            Control_RemoveTab_DataGridView_Main.DataSource = null;
+            Control_RemoveTab_DataGridView_Main.Rows.Clear();
+            Control_RemoveTab_Image_NothingFound.Visible = false;
+            // Restore controls and focus
+            Control_RemoveTab_ComboBox_Operation.Visible = true;
+            Control_RemoveTab_ComboBox_Part.Visible = true;
+            Control_RemoveTab_ComboBox_Part.Focus();
             if (MainFormInstance != null)
+            {
                 MainFormTabResetHelper.ResetRemoveTab(
                     Control_RemoveTab_ComboBox_Part,
                     Control_RemoveTab_ComboBox_Operation,
                     Control_RemoveTab_Button_Search,
                     Control_RemoveTab_Button_Delete
                 );
-
-            Control_RemoveTab_ComboBox_Operation.Visible = true;
-            Control_RemoveTab_ComboBox_Part.Visible = true;
+                MainFormInstance.MainForm_StatusStrip_Disconnected.Visible = false;
+                MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = true;
+                MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
+                    @"Disconnected from Server, please standby...";
+            }
         }
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 new StringBuilder().Append("MainForm_Inventory_Button_Reset").ToString());
+        }
+        finally
+        {
+            Control_RemoveTab_Button_Reset.Enabled = true;
         }
     }
 
@@ -442,8 +419,38 @@ Are you sure?",
                 return;
             }
 
-            if (MainFormInstance != null) MainFormInstance.MainForm_RemoveTabNormalControl_Public.Visible = false;
-            if (MainFormInstance != null) MainFormInstance.MainForm_RemoveTabAdvancedControl_Public.Visible = true;
+            if (MainFormInstance != null) MainFormInstance.MainForm_RemoveTabNormalControl.Visible = false;
+            if (MainFormInstance != null) MainFormInstance.MainForm_Control_AdvancedRemove.Visible = true;
+
+            // Reset all Control_AdvancedRemove ComboBoxes' SelectedIndex to 0 and color to Red, focus Part ComboBox
+            var adv = MainFormInstance?.MainForm_Control_AdvancedRemove;
+            if (adv != null)
+            {
+                if (adv.Controls.Find("Control_AdvancedSearch_ComboBox_Part", true).FirstOrDefault() is ComboBox part)
+                {
+                    part.SelectedIndex = 0;
+                    part.ForeColor = Color.Red;
+                    part.Focus();
+                }
+
+                if (adv.Controls.Find("Control_AdvancedSearch_ComboBox_Op", true).FirstOrDefault() is ComboBox op)
+                {
+                    op.SelectedIndex = 0;
+                    op.ForeColor = Color.Red;
+                }
+
+                if (adv.Controls.Find("Control_AdvancedSearch_ComboBox_Loc", true).FirstOrDefault() is ComboBox loc)
+                {
+                    loc.SelectedIndex = 0;
+                    loc.ForeColor = Color.Red;
+                }
+
+                if (adv.Controls.Find("Control_AdvancedSearch_ComboBox_User", true).FirstOrDefault() is ComboBox user)
+                {
+                    user.SelectedIndex = 0;
+                    user.ForeColor = Color.Red;
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -463,8 +470,8 @@ Are you sure?",
                 return;
             }
 
-            if (MainFormInstance != null) MainFormInstance.MainForm_RemoveTabNormalControl_Public.Visible = true;
-            if (MainFormInstance != null) MainFormInstance.MainForm_RemoveTabAdvancedControl_Public.Visible = false;
+            if (MainFormInstance != null) MainFormInstance.MainForm_RemoveTabNormalControl.Visible = true;
+            if (MainFormInstance != null) MainFormInstance.MainForm_Control_AdvancedRemove.Visible = false;
         }
         catch (Exception ex)
         {
@@ -619,7 +626,7 @@ Are you sure?",
             // Add event handler for Back to Normal button in advanced control
             if (MainFormInstance != null)
             {
-                var adv = MainFormInstance.MainForm_RemoveTabAdvancedControl_Public;
+                var adv = MainFormInstance.MainForm_Control_AdvancedRemove;
                 var btn = adv.Controls.Find("Control_AdvancedSearch_Button_Normal", true);
                 if (btn.Length > 0 && btn[0] is Button normalBtn)
                 {
@@ -682,20 +689,6 @@ Are you sure?",
         }
 
         Helper_ComboBoxes.DeselectAllComboBoxText(this);
-    }
-
-    public void UpdateToggleRightPanelButton()
-    {
-        if (MainFormInstance != null && !MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed)
-        {
-            Control_RemoveTab_Button_Toggle_RightPanel.Text = "→";
-            Control_RemoveTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
-        }
-        else
-        {
-            Control_RemoveTab_Button_Toggle_RightPanel.Text = "←";
-            Control_RemoveTab_Button_Toggle_RightPanel.ForeColor = Color.Red;
-        }
     }
 
     #endregion

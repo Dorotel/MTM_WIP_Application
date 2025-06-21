@@ -34,8 +34,6 @@ public partial class ControlTransferTab : UserControl
 
     public void Control_TransferTab_Initialize()
     {
-        Control_TransferTab_ComboBox_Operation.Visible = false;
-        Control_TransferTab_ComboBox_Part.Visible = false;
         Control_TransferTab_Button_Reset.TabStop = false;
     }
 
@@ -125,20 +123,9 @@ public partial class ControlTransferTab : UserControl
     {
         try
         {
-            await using var connection = new MySqlConnection(Core_WipAppVariables.ConnectionString);
-            var comboBoxSets = new[]
-            {
-                (new MySqlDataAdapter(), new DataTable(), Control_TransferTab_ComboBox_Part, "md_part_ids_Get_All",
-                    "Item Number", "ID", "[ Enter Part ID ]", CommandType.StoredProcedure),
-                (new MySqlDataAdapter(), new DataTable(), Control_TransferTab_ComboBox_Operation,
-                    "md_operation_numbers_Get_All", "Operation", "Operation", "[ Enter Op # ]",
-                    CommandType.StoredProcedure),
-                (new MySqlDataAdapter(), new DataTable(), Control_TransferTab_ComboBox_ToLocation,
-                    "md_locations_Get_All", "Location", "Location", "[ Enter Location ]", CommandType.StoredProcedure)
-            };
-            foreach (var (adapter, table, comboBox, procName, display, value, placeholder, cmdType) in comboBoxSets)
-                await Helper_ComboBoxes.FillComboBoxAsync(
-                    procName, connection, adapter, table, comboBox, display, value, placeholder, cmdType);
+            await Helper_ComboBoxes.FillPartComboBoxesAsync(Control_TransferTab_ComboBox_Part);
+            await Helper_ComboBoxes.FillOperationComboBoxesAsync(Control_TransferTab_ComboBox_Operation);
+            await Helper_ComboBoxes.FillLocationComboBoxesAsync(Control_TransferTab_ComboBox_ToLocation);
             LoggingUtility.Log("Transfer tab ComboBoxes loaded.");
         }
         catch (Exception ex)
@@ -155,64 +142,64 @@ public partial class ControlTransferTab : UserControl
 
     private async void Control_TransferTab_Button_Reset_Click()
     {
+        Control_TransferTab_Button_Reset.Enabled = false;
         try
         {
             LoggingUtility.Log("Inventory Reset button clicked.");
-            Control_TransferTab_ComboBox_Operation.Visible = false;
+            // Hide controls during reset
             Control_TransferTab_ComboBox_Part.Visible = false;
+            Control_TransferTab_ComboBox_Operation.Visible = false;
             Control_TransferTab_ComboBox_ToLocation.Visible = false;
-            Control_TransferTab_Image_NothingFound.Visible = false;
-            Control_TransferTab_DataGridView_Main.DataSource = null;
-            Control_TransferTab_DataGridView_Main.Rows.Clear();
-            Control_TransferTab_DataGridView_Main.Refresh();
-            await Helper_ComboBoxes.FillComboBoxAsync(
-                "md_part_ids_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                Control_TransferTab_ComboBox_Part,
-                "Item Number",
-                "ID",
-                "[ Enter Part ID ]",
-                CommandType.StoredProcedure);
-            await Helper_ComboBoxes.FillComboBoxAsync(
-                "md_operation_numbers_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                Control_TransferTab_ComboBox_Operation,
-                "Operation",
-                "Operation",
-                "[ Enter Op # ]",
-                CommandType.StoredProcedure);
-            await Helper_ComboBoxes.FillComboBoxAsync(
-                "md_locations_Get_All",
-                new MySqlConnection(Core_WipAppVariables.ConnectionString),
-                new MySqlDataAdapter(),
-                new DataTable(),
-                Control_TransferTab_ComboBox_ToLocation,
-                "Location",
-                "Location",
-                "[ Enter Location ]",
-                CommandType.StoredProcedure);
+            if (MainFormInstance != null)
+            {
+                MainFormInstance.MainForm_StatusStrip_Disconnected.Text = @"Please wait while resetting...";
+                MainFormInstance.MainForm_StatusStrip_Disconnected.Visible = true;
+                MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
+            }
+
+            await Helper_ComboBoxes.SetupPartDataTable();
+            await Helper_ComboBoxes.SetupOperationDataTable();
+            await Helper_ComboBoxes.SetupLocationDataTable();
+            // Optionally reload DataTables if you have Setup*DataTable methods
+            await Helper_ComboBoxes.FillPartComboBoxesAsync(Control_TransferTab_ComboBox_Part);
+            await Helper_ComboBoxes.FillOperationComboBoxesAsync(Control_TransferTab_ComboBox_Operation);
+            await Helper_ComboBoxes.FillLocationComboBoxesAsync(Control_TransferTab_ComboBox_ToLocation);
+            // Reset UI fields
             MainFormControlHelper.ResetComboBox(Control_TransferTab_ComboBox_Part, Color.Red, 0);
             MainFormControlHelper.ResetComboBox(Control_TransferTab_ComboBox_Operation, Color.Red, 0);
             MainFormControlHelper.ResetComboBox(Control_TransferTab_ComboBox_ToLocation, Color.Red, 0);
             Control_TransferTab_NumericUpDown_Quantity.Value = Control_TransferTab_NumericUpDown_Quantity.Minimum;
-            MainFormTabResetHelper.ResetTransferTab(
-                Control_TransferTab_ComboBox_Part,
-                Control_TransferTab_ComboBox_Operation,
-                Control_TransferTab_Button_Search,
-                Control_TransferTab_Button_Transfer);
+            Control_TransferTab_DataGridView_Main.DataSource = null;
+            Control_TransferTab_DataGridView_Main.Rows.Clear();
+            Control_TransferTab_DataGridView_Main.Refresh();
+            Control_TransferTab_Image_NothingFound.Visible = false;
+            // Restore controls and focus
             Control_TransferTab_ComboBox_Operation.Visible = true;
             Control_TransferTab_ComboBox_Part.Visible = true;
             Control_TransferTab_ComboBox_ToLocation.Visible = true;
+            Control_TransferTab_ComboBox_Part.Focus();
+            if (MainFormInstance != null)
+            {
+                MainFormTabResetHelper.ResetTransferTab(
+                    Control_TransferTab_ComboBox_Part,
+                    Control_TransferTab_ComboBox_Operation,
+                    Control_TransferTab_Button_Search,
+                    Control_TransferTab_Button_Transfer);
+                MainFormInstance.MainForm_StatusStrip_Disconnected.Visible = false;
+                MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = true;
+                MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
+                    @"Disconnected from Server, please standby...";
+            }
         }
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 new StringBuilder().Append("MainForm_Inventory_Button_Reset").ToString());
+        }
+        finally
+        {
+            Control_TransferTab_Button_Reset.Enabled = true;
         }
     }
 

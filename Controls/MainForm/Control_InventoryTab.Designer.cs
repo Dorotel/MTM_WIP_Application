@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             Control_InventoryTab_GroupBox_Main = new GroupBox();
             Control_InventoryTab_TableLayout_Main = new TableLayoutPanel();
             Control_InventoryTab_Panel_BottomGroup = new Panel();
@@ -47,6 +48,7 @@
             Control_InventoryTab_TextBox_Quantity = new TextBox();
             Control_InventoryTab_ComboBox_Part = new ComboBox();
             Control_InventoryTab_Label_Notes = new Label();
+            Control_InventoryTab_Tooltip = new ToolTip(components);
             Control_InventoryTab_GroupBox_Main.SuspendLayout();
             Control_InventoryTab_TableLayout_Main.SuspendLayout();
             Control_InventoryTab_Panel_BottomGroup.SuspendLayout();
@@ -310,5 +312,6 @@
         private Panel Control_InventoryTab_Panel_Top;
         private Button Control_InventoryTab_Button_Toggle_RightPanel;
         public ComboBox Control_InventoryTab_ComboBox_Part;
+        private ToolTip Control_InventoryTab_Tooltip;
     }
 }
