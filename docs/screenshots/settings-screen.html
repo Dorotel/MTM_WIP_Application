@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM WIP Application - Settings</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+        }
+        
+        .settings-window {
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 800px;
+            height: 600px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .title-bar {
+            background: linear-gradient(to bottom, #e8e8e8, #d0d0d0);
+            border-bottom: 1px solid #bbb;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .window-icon {
+            width: 16px;
+            height: 16px;
+            background-color: #4a90e2;
+            border-radius: 2px;
+            margin-right: 8px;
+        }
+        
+        .settings-content {
+            display: flex;
+            height: calc(100% - 80px);
+        }
+        
+        .settings-sidebar {
+            width: 200px;
+            background-color: #f8f8f8;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px 0;
+        }
+        
+        .settings-nav-item {
+            display: block;
+            padding: 12px 20px;
+            font-size: 13px;
+            color: #333;
+            text-decoration: none;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .settings-nav-item:hover {
+            background-color: #e8e8e8;
+        }
+        
+        .settings-nav-item.active {
+            background-color: #4a90e2;
+            color: white;
+        }
+        
+        .settings-main {
+            flex: 1;
+            padding: 30px;
+        }
+        
+        .settings-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        
+        .settings-group {
+            margin-bottom: 30px;
+        }
+        
+        .settings-group-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .setting-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .setting-label {
+            width: 200px;
+            font-size: 13px;
+            color: #333;
+        }
+        
+        .setting-control {
+            flex: 1;
+        }
+        
+        .form-input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+            width: 200px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+        
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-wrapper input {
+            margin-right: 8px;
+        }
+        
+        .button {
+            background: linear-gradient(to bottom, #4a90e2, #357abd);
+            color: white;
+            border: 1px solid #2e6da4;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-right: 10px;
+            transition: background 0.2s;
+        }
+        
+        .button:hover {
+            background: linear-gradient(to bottom, #357abd, #2e6da4);
+        }
+        
+        .button.secondary {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            color: #333;
+            border: 1px solid #ccc;
+        }
+        
+        .button.secondary:hover {
+            background: linear-gradient(to bottom, #e8e8e8, #d8d8d8);
+        }
+        
+        .settings-footer {
+            background-color: #f8f8f8;
+            border-top: 1px solid #e0e0e0;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .connection-panel {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-indicator.connected {
+            background-color: #28a745;
+        }
+        
+        .status-indicator.disconnected {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-window">
+        <div class="title-bar">
+            <div class="window-icon"></div>
+            Settings - MTM WIP Application
+        </div>
+        
+        <div class="settings-content">
+            <div class="settings-sidebar">
+                <button class="settings-nav-item active">Database</button>
+                <button class="settings-nav-item">Theme</button>
+                <button class="settings-nav-item">Printing</button>
+                <button class="settings-nav-item">Export</button>
+                <button class="settings-nav-item">Advanced</button>
+                <button class="settings-nav-item">About</button>
+            </div>
+            
+            <div class="settings-main">
+                <h2 class="settings-section-title">Database Configuration</h2>
+                
+                <div class="settings-group">
+                    <h3 class="settings-group-title">Connection Settings</h3>
+                    
+                    <div class="setting-row">
+                        <label class="setting-label">Server Address:</label>
+                        <div class="setting-control">
+                            <input type="text" class="form-input" value="192.168.1.100" placeholder="Enter server IP or hostname">
+                        </div>
+                    </div>
+                    
+                    <div class="setting-row">
+                        <label class="setting-label">Port:</label>
+                        <div class="setting-control">
+                            <input type="number" class="form-input" value="3306" placeholder="3306">
+                        </div>
+                    </div>
+                    
+                    <div class="setting-row">
+                        <label class="setting-label">Database Name:</label>
+                        <div class="setting-control">
+                            <input type="text" class="form-input" value="mtm_inventory" placeholder="Database name">
+                        </div>
+                    </div>
+                    
+                    <div class="setting-row">
+                        <label class="setting-label">Username:</label>
+                        <div class="setting-control">
+                            <input type="text" class="form-input" value="mtm_user" placeholder="Database username">
+                        </div>
+                    </div>
+                    
+                    <div class="setting-row">
+                        <label class="setting-label">Password:</label>
+                        <div class="setting-control">
+                            <input type="password" class="form-input" value="••••••••" placeholder="Database password">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <h3 class="settings-group-title">Connection Options</h3>
+                    
+                    <div class="setting-row">
+                        <label class="setting-label">Connection Timeout:</label>
+                        <div class="setting-control">
+                            <input type="number" class="form-input" value="30" placeholder="30"> seconds
+                        </div>
+                    </div>
+                    
+                    <div class="setting-row">
+                        <label class="setting-label">Auto-reconnect:</label>
+                        <div class="setting-control">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" checked> Enable automatic reconnection
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="connection-panel">
+                    <div class="connection-status">
+                        <div class="status-indicator connected"></div>
+                        <strong>Database Status: Connected</strong>
+                    </div>
+                    <div style="font-size: 12px; color: #666;">
+                        Last connected: January 15, 2025 at 10:30 AM<br>
+                        Connection uptime: 2 hours 15 minutes
+                    </div>
+                    <button class="button secondary" style="margin-top: 10px;">Test Connection</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-footer">
+            <button class="button secondary">Cancel</button>
+            <button class="button">Save Changes</button>
+        </div>
+    </div>
+</body>
+</html>
