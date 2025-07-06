@@ -1,0 +1,1524 @@
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `Reload_md_operation_numbers_from_md_part_ids`(
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE
+EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+        SET
+p_Status = 1;
+        SET
+p_ErrorMsg = 'Database error occurred in Reload_md_operation_numbers_from_md_part_ids';
+ROLLBACK;
+END;
+
+START TRANSACTION;
+INSERT
+IGNORE INTO mtm_wip_application.md_operation_numbers (`Operation`)
+SELECT DISTINCT op_num
+FROM (SELECT TRIM(BOTH '"' FROM
+                  JSON_UNQUOTE(
+                          JSON_EXTRACT(mpi.Operations, CONCAT('$[', n.n, ']'))
+                  )
+             ) AS op_num
+      FROM mtm_wip_application.md_part_ids mpi
+               JOIN (SELECT 0 AS n
+                     UNION ALL
+                     SELECT 1
+                     UNION ALL
+                     SELECT 2
+                     UNION ALL
+                     SELECT 3
+                     UNION ALL
+                     SELECT 4
+                     UNION ALL
+                     SELECT 5
+                     UNION ALL
+                     SELECT 6
+                     UNION ALL
+                     SELECT 7
+                     UNION ALL
+                     SELECT 8
+                     UNION ALL
+                     SELECT 9
+                     UNION ALL
+                     SELECT 10
+                     UNION ALL
+                     SELECT 11
+                     UNION ALL
+                     SELECT 12
+                     UNION ALL
+                     SELECT 13
+                     UNION ALL
+                     SELECT 14
+                     UNION ALL
+                     SELECT 15) n
+                    ON n.n < JSON_LENGTH(mpi.Operations)
+      WHERE mpi.Operations IS NOT NULL) AS all_ops
+WHERE op_num IS NOT NULL
+  AND op_num <> '';
+COMMIT;
+
+SET
+p_Status = 0;
+    SET
+p_ErrorMsg = NULL;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `Reload_md_part_ids_from_sequences`(
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE
+EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+        SET
+p_Status = 1;
+        SET
+p_ErrorMsg = 'Database error occurred in Reload_md_part_ids_from_sequences';
+ROLLBACK;
+END;
+
+START TRANSACTION;
+TRUNCATE TABLE mtm_wip_application.md_part_ids;
+
+INSERT INTO mtm_wip_application.md_part_ids (`Item Number`,
+                                             `Operations`,
+                                             `Customer`,
+                                             `Description`,
+                                             `Issued By`,
+                                             `Type`)
+SELECT seqs.ID                           AS `Item Number`,
+       CAST(seqs.sequence_array AS JSON) AS `Operations`,
+       ''                                AS `Customer`,
+       descs.Description                 AS `Description`,
+       '[ System ]'                      AS `Issued By`,
+       'WIP'                             AS `Type`
+FROM (SELECT ID,
+             CONCAT('[', GROUP_CONCAT(DISTINCT SEQUENCE_NO ORDER BY SEQUENCE_NO), ']') AS sequence_array
+      FROM `mtm database`.part_requirement
+      GROUP BY ID) seqs
+         LEFT JOIN (SELECT ID,
+                           MIN(Description) AS Description
+                    FROM `mtm database`.part_requirement
+                    WHERE Description IS NOT NULL
+                      AND Description <> ''
+                    GROUP BY ID) descs
+                   ON seqs.ID = descs.ID;
+COMMIT;
+
+SET
+p_Status = 0;
+    SET
+p_ErrorMsg = NULL;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `db_maint_inv_inventory_FixDuplicateBatchNumbers`(
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE
+EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+        SET
+p_Status = 1;
+        SET
+p_ErrorMsg = 'Database error occurred in db_maint_inv_inventory_FixDuplicateBatchNumbers';
+ROLLBACK;
+END;
+
+START TRANSACTION;
+CREATE
+TEMPORARY TABLE tmp_dups (ID INT, BatchNumber VARCHAR(6), LastUpdated DATETIME);
+
+INSERT INTO tmp_dups (ID, BatchNumber, LastUpdated)
+SELECT t1.ID, t1.BatchNumber, t1.LastUpdated
+FROM inv_inventory t1
+         JOIN (SELECT BatchNumber
+               FROM inv_inventory
+               WHERE BatchNumber IS NOT NULL
+               GROUP BY BatchNumber
+               HAVING COUNT(*) > 1) t2 ON t1.BatchNumber = t2.BatchNumber
+WHERE t1.BatchNumber IS NOT NULL
+  AND t1.ID NOT IN (SELECT ID
+                    FROM (SELECT MIN(ID) AS ID
+                          FROM inv_inventory
+                          WHERE BatchNumber IS NOT NULL
+                          GROUP BY BatchNumber) t3);
+
+WHILE
+EXISTS (SELECT 1 FROM tmp_dups) DO
+        SET @dupId = (SELECT ID FROM tmp_dups ORDER BY LastUpdated DESC LIMIT 1);
+        SET
+@currentBatch = (SELECT BatchNumber FROM tmp_dups WHERE ID = @dupId);
+SELECT IFNULL(MAX(CAST(BatchNumber AS UNSIGNED)), 0)
+INTO @maxBatch
+FROM inv_inventory
+WHERE BatchNumber REGEXP '^[0-9]+$';
+UPDATE inv_inventory
+SET BatchNumber = (@maxBatch + 1)
+WHERE ID = @dupId;
+DELETE
+FROM tmp_dups
+WHERE ID = @dupId;
+END WHILE;
+
+    DROP
+TEMPORARY TABLE IF EXISTS tmp_dups;
+COMMIT;
+
+SET
+p_Status = 0;
+    SET
+p_ErrorMsg = NULL;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Add_Item`(IN `p_PartID` VARCHAR(300), IN `p_Location` VARCHAR(100), IN `p_Operation` VARCHAR(100), IN `p_Quantity` INT, IN `p_ItemType` VARCHAR(100), IN `p_User` VARCHAR(100), IN `p_BatchNumber` VARCHAR(100), IN `p_Notes` VARCHAR(1000))
+BEGIN
+INSERT INTO inv_inventory
+(PartID, Location, Operation, Quantity, ItemType, User, BatchNumber, Notes)
+VALUES (p_PartID, p_Location, p_Operation, p_Quantity, p_ItemType, p_User, p_BatchNumber, p_Notes);
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Advanced_Search`(IN `p_PartID` VARCHAR(300), IN `p_Operation` VARCHAR(100), IN `p_Location` VARCHAR(100), IN `p_QtyMin` INT, IN `p_QtyMax` INT, IN `p_Notes` VARCHAR(1000), IN `p_User` VARCHAR(100), IN `p_DateFrom` DATE, IN `p_DateTo` DATE)
+BEGIN
+SELECT PartID,
+       Operation,
+       Location,
+       Quantity,
+       Notes,
+       User,
+       ReceiveDate,
+       LastUpdated,
+       BatchNumber
+FROM inv_inventory
+WHERE (p_PartID IS NULL OR p_PartID = '' OR PartID = p_PartID)
+  AND (p_Operation IS NULL OR p_Operation = '' OR Operation = p_Operation)
+  AND (p_Location IS NULL OR p_Location = '' OR Location = p_Location)
+  AND (p_QtyMin IS NULL OR p_QtyMin = '' OR Quantity >= CAST(p_QtyMin AS SIGNED))
+  AND (p_QtyMax IS NULL OR p_QtyMax = '' OR Quantity <= CAST(p_QtyMax AS SIGNED))
+  AND (p_Notes IS NULL OR p_Notes = '' OR Notes LIKE CONCAT('%', p_Notes, '%'))
+  AND (p_User IS NULL OR p_User = '' OR User = p_User)
+  AND (p_DateFrom IS NULL OR p_DateFrom = '' OR ReceiveDate >= p_DateFrom)
+  AND (p_DateTo IS NULL OR p_DateTo = '' OR ReceiveDate <= p_DateTo)
+ORDER BY ReceiveDate DESC,
+         PartID,
+         Operation,
+         Location;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_BulkDelete_ByLocation`(IN `p_Location` VARCHAR(100))
+BEGIN
+DELETE
+FROM inv_inventory
+WHERE Location = p_Location;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Delete_ById`(IN `p_ID` INT)
+BEGIN
+DELETE
+FROM inv_inventory
+WHERE ID = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Fix_BatchNumbers`()
+BEGIN
+    -- Temporary table to hold duplicate IDs and their BatchNumbers
+    CREATE
+TEMPORARY TABLE tmp_dups (ID INT, BatchNumber VARCHAR(6), LastUpdated DATETIME);
+
+    -- Insert all but the oldest (by LastUpdated) for each duplicate BatchNumber
+INSERT INTO tmp_dups (ID, BatchNumber, LastUpdated)
+SELECT t1.ID, t1.BatchNumber, t1.LastUpdated
+FROM inv_inventory t1
+         JOIN (SELECT BatchNumber
+               FROM inv_inventory
+               WHERE BatchNumber IS NOT NULL
+               GROUP BY BatchNumber
+               HAVING COUNT(*) > 1) t2 ON t1.BatchNumber = t2.BatchNumber
+WHERE t1.BatchNumber IS NOT NULL
+  AND t1.ID NOT IN (SELECT ID
+                    FROM (SELECT MIN(ID) AS ID
+                          FROM inv_inventory
+                          WHERE BatchNumber IS NOT NULL
+                          GROUP BY BatchNumber) t3);
+
+-- For each duplicate, assign the next highest BatchNumber
+WHILE
+EXISTS (SELECT 1 FROM tmp_dups) DO
+        -- Get the next duplicate to fix
+        SET @dupId = (SELECT ID FROM tmp_dups ORDER BY LastUpdated DESC LIMIT 1);
+        SET
+@currentBatch = (SELECT BatchNumber FROM tmp_dups WHERE ID = @dupId);
+        -- Find the max BatchNumber in the table (as integer)
+SELECT IFNULL(MAX(CAST(BatchNumber AS UNSIGNED)), 0)
+INTO @maxBatch
+FROM inv_inventory
+WHERE BatchNumber REGEXP '^[0-9]+$';
+-- Update the duplicate row
+UPDATE inv_inventory
+SET BatchNumber = (@maxBatch + 1)
+WHERE ID = @dupId;
+-- Remove from temp table
+DELETE
+FROM tmp_dups
+WHERE ID = @dupId;
+END WHILE;
+
+    DROP
+TEMPORARY TABLE IF EXISTS tmp_dups;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_All`()
+BEGIN
+SELECT *
+FROM inv_inventory
+ORDER BY LastUpdated DESC;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByDateRange`(IN `p_StartDate` DATETIME, IN `p_EndDate` DATETIME)
+BEGIN
+SELECT *
+FROM inv_inventory
+WHERE ReceiveDate BETWEEN p_StartDate AND p_EndDate;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ById`(IN `p_ID` INT)
+BEGIN
+SELECT *
+FROM inv_inventory
+WHERE ID = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByItemType`(IN `p_ItemType` VARCHAR(100))
+BEGIN
+SELECT *
+FROM inv_inventory
+WHERE ItemType = p_ItemType;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByLocation`(IN `p_Location` VARCHAR(100))
+BEGIN
+SELECT *
+FROM inv_inventory
+WHERE Location = p_Location
+ORDER BY LastUpdated DESC;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByPartID`(IN `p_PartID` VARCHAR(300))
+BEGIN
+SELECT ID,
+       PartID,
+       Location,
+       Operation,
+       Quantity,
+       ItemType,
+       ReceiveDate,
+       LastUpdated,
+       User,
+       BatchNumber AS `Batch Number`,
+       Notes
+FROM inv_inventory
+WHERE PartID = p_PartID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByPartIDLocation`(IN `p_PartID` VARCHAR(300), IN `p_Location` VARCHAR(100))
+BEGIN
+SELECT *
+FROM inv_inventory
+WHERE PartID = p_PartID
+  AND Location = p_Location;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByPartIDandOperation`(IN `p_PartID` VARCHAR(300), IN `o_Operation` VARCHAR(300))
+BEGIN
+SELECT ID,
+       PartID,
+       Location,
+       Operation,
+       Quantity,
+       ItemType,
+       ReceiveDate,
+       LastUpdated,
+       User,
+       BatchNumber AS `Batch Number`,
+       Notes
+FROM inv_inventory
+WHERE PartID = p_PartID
+  AND Operation = o_Operation;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByUser`(IN `p_User` VARCHAR(100))
+BEGIN
+SELECT *
+FROM inv_inventory
+WHERE User = p_User
+ORDER BY LastUpdated DESC;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_TotalQuantityByPartId`(IN `p_PartID` VARCHAR(300))
+BEGIN
+SELECT SUM(Quantity) AS TotalQuantity
+FROM inv_inventory
+WHERE PartID = p_PartID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Remove_Item`(IN `p_PartID` VARCHAR(50), IN `p_Location` VARCHAR(50), IN `p_Operation` VARCHAR(50), IN `p_Quantity` INT)
+BEGIN
+    -- Delete only one matching row
+DELETE
+FROM mtm_wip_application.inv_inventory
+WHERE PartID = p_PartID
+  AND Location = p_Location
+  AND Operation = p_Operation
+  AND Quantity = p_Quantity LIMIT 1;
+
+-- Return affected rows count
+SELECT ROW_COUNT() AS affected_rows;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Transfer_Part`(
+    IN in_BatchNumber VARCHAR(6),
+    IN in_PartID VARCHAR(300),
+    IN in_Operation VARCHAR(100),
+    IN in_NewLocation VARCHAR(100)
+)
+BEGIN
+    -- Validate that the record exists
+    IF
+EXISTS (
+        SELECT 1 FROM inv_inventory
+        WHERE BatchNumber = in_BatchNumber
+          AND PartID = in_PartID
+          AND Operation = in_Operation
+    ) THEN
+        -- Update the location
+UPDATE inv_inventory
+SET Location    = in_NewLocation,
+    LastUpdated = CURRENT_TIMESTAMP
+WHERE BatchNumber = in_BatchNumber
+  AND PartID = in_PartID
+  AND Operation = in_Operation;
+END IF;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Transfer_Quantity`(IN `in_BatchNumber` VARCHAR(255), IN `in_PartID` VARCHAR(255), IN `in_Operation` VARCHAR(255), IN `in_TransferQuantity` INT, IN `in_OriginalQuantity` INT, IN `in_NewLocation` VARCHAR(255), IN `in_User` VARCHAR(255))
+BEGIN
+    -- Check if transfer quantity is valid
+    IF
+in_TransferQuantity <= 0 OR in_TransferQuantity > in_OriginalQuantity THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid transfer quantity';
+END IF;
+
+    -- Subtract the transfer quantity from the original inventory record and update User
+UPDATE inv_inventory
+SET Quantity = Quantity - in_TransferQuantity,
+    User     = in_User
+WHERE BatchNumber = in_BatchNumber
+  AND PartID = in_PartID
+  AND Operation = in_Operation
+  AND Quantity = in_OriginalQuantity;
+
+-- Insert a new record for the transferred quantity at the new location with User
+INSERT INTO inv_inventory (BatchNumber, PartID, Operation, Quantity, Location, User)
+VALUES (in_BatchNumber, in_PartID, in_Operation, in_TransferQuantity, in_NewLocation, in_User);
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Update_Notes`(IN `p_ID` INT, IN `p_Notes` VARCHAR(1000))
+BEGIN
+UPDATE inv_inventory
+SET Notes       = p_Notes,
+    LastUpdated = CURRENT_TIMESTAMP
+WHERE ID = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Update_Quantity`(IN `p_ID` INT, IN `p_Quantity` INT)
+BEGIN
+UPDATE inv_inventory
+SET Quantity    = p_Quantity,
+    LastUpdated = CURRENT_TIMESTAMP
+WHERE ID = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `inv_transaction_Add`(
+    IN in_TransactionType ENUM('IN','OUT','TRANSFER'),
+    IN in_PartID VARCHAR(300),
+    IN in_BatchNumber VARCHAR(100),
+    IN in_FromLocation VARCHAR(300),
+    IN in_ToLocation VARCHAR(100),
+    IN in_Operation VARCHAR(100),
+    IN in_Quantity INT,
+    IN in_Notes VARCHAR(1000),
+    IN in_User VARCHAR(100),
+    IN in_ItemType VARCHAR(100),
+    IN in_DateTime DATETIME
+)
+INSERT INTO inv_transaction (
+        TransactionType, PartID, `Batch Number`, FromLocation, ToLocation, Operation, Quantity, Notes, User, ItemType, DateTime
+    ) VALUES (
+        in_TransactionType, in_PartID, in_BatchNumber, in_FromLocation, in_ToLocation, in_Operation, in_Quantity, in_Notes, in_User, in_ItemType, in_DateTime
+    )$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Add_ChangeLog`(IN `p_Version` VARCHAR(50), IN `p_Notes` LONGTEXT)
+BEGIN
+INSERT INTO log_changelog (Version, Notes)
+VALUES (p_Version, p_Notes);
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Delete_ByVersion`(IN `p_Version` VARCHAR(50))
+BEGIN
+DELETE
+FROM log_changelog
+WHERE Version = p_Version;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Get_All`()
+BEGIN
+SELECT *
+FROM log_changelog;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Get_ByVersion`(IN `p_Version` VARCHAR(50))
+BEGIN
+SELECT *
+FROM log_changelog
+WHERE Version = p_Version;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Get_Current`()
+BEGIN
+SELECT *
+FROM log_changelog
+ORDER BY Version DESC LIMIT 1;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Update_Notes`(IN `p_Version` VARCHAR(50), IN `p_Notes` LONGTEXT)
+BEGIN
+UPDATE log_changelog
+SET Notes = p_Notes
+WHERE Version = p_Version;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_error_Add_Error`(IN `p_User` VARCHAR(100), IN `p_Severity` ENUM('Information','Warning','Error','Critical'), IN `p_ErrorType` VARCHAR(100), IN `p_ErrorMessage` TEXT, IN `p_StackTrace` TEXT, IN `p_ModuleName` VARCHAR(200), IN `p_MethodName` VARCHAR(200), IN `p_AdditionalInfo` TEXT, IN `p_MachineName` VARCHAR(100), IN `p_OSVersion` VARCHAR(100), IN `p_AppVersion` VARCHAR(50), IN `p_ErrorTime` DATETIME)
+BEGIN
+INSERT INTO log_error (`User`, `Severity`, `ErrorType`, `ErrorMessage`, `StackTrace`,
+                       `ModuleName`, `MethodName`, `AdditionalInfo`, `MachineName`, `OSVersion`, `AppVersion`,
+                       `ErrorTime`)
+VALUES (p_User, p_Severity, p_ErrorType, p_ErrorMessage, p_StackTrace,
+        p_ModuleName, p_MethodName, p_AdditionalInfo, p_MachineName, p_OSVersion, p_AppVersion, p_ErrorTime);
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_error_Delete_All`()
+BEGIN
+DELETE
+FROM log_error;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_error_Delete_ById`(IN `p_ID` INT)
+BEGIN
+DELETE
+FROM log_error
+WHERE ID = p_ID;
+SELECT ROW_COUNT() AS RowsDeleted;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_error_Get_All`()
+BEGIN
+SELECT *
+FROM log_error
+ORDER BY ErrorTime DESC;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_error_Get_ByDateRange`(IN `p_Start` DATETIME, IN `p_End` DATETIME)
+BEGIN
+SELECT *
+FROM log_error
+WHERE ErrorTime BETWEEN p_Start AND p_End
+ORDER BY ErrorTime DESC;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_error_Get_ById`(IN `p_ID` INT)
+BEGIN
+SELECT *
+FROM log_error
+WHERE ID = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `log_error_Get_ByUser`(IN `p_User` VARCHAR(100))
+BEGIN
+SELECT *
+FROM log_error
+WHERE `User` COLLATE utf8mb4_general_ci = p_User COLLATE utf8mb4_general_ci
+ORDER BY ErrorTime DESC;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Add_Type`(IN `p_Type` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
+BEGIN
+INSERT INTO `md_item_types` (`Type`, `Issued By`)
+VALUES (p_Type, p_IssuedBy);
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Delete_ByID`(IN `p_ID` INT)
+BEGIN
+DELETE
+FROM `md_item_types`
+WHERE `ID` = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Delete_ByType`(IN `p_Type` VARCHAR(100))
+BEGIN
+DELETE
+FROM `md_item_types`
+WHERE `Type` = p_Type;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Get_All`()
+BEGIN
+SELECT *
+FROM `md_item_types`;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Get_ByID`(IN `p_ID` INT)
+BEGIN
+SELECT *
+FROM `md_item_types`
+WHERE `ID` = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Get_ByType`(IN `p_Type` VARCHAR(100))
+BEGIN
+SELECT *
+FROM `md_item_types`
+WHERE `Type` = p_Type;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Update_Type`(IN `p_ID` INT, IN `p_Type` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
+BEGIN
+UPDATE `md_item_types`
+SET `Type`      = p_Type,
+    `Issued By` = p_IssuedBy
+WHERE `ID` = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_locations_Add_Location`(IN `p_Location` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
+BEGIN
+INSERT INTO `md_locations` (`Location`, `Issued By`)
+VALUES (p_Location, p_IssuedBy);
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_locations_Delete_ByID`(IN `p_ID` INT)
+BEGIN
+DELETE
+FROM `md_locations`
+WHERE `ID` = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_locations_Delete_ByLocation`(IN `p_Location` VARCHAR(100))
+BEGIN
+DELETE
+FROM `md_locations`
+WHERE `Location` = p_Location;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_locations_Get_All`()
+BEGIN
+SELECT *
+FROM `md_locations`;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_locations_Get_ByID`(IN `p_ID` INT)
+BEGIN
+SELECT *
+FROM `md_locations`
+WHERE `ID` = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_locations_Get_ByLocation`(IN `p_Location` VARCHAR(100))
+BEGIN
+SELECT *
+FROM `md_locations`
+WHERE `Location` = p_Location;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_locations_Update_Location`(IN `p_ID` INT, IN `p_Location` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
+BEGIN
+UPDATE `md_locations`
+SET `Location`  = p_Location,
+    `Issued By` = p_IssuedBy
+WHERE `ID` = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Add_Operation`(IN `p_Operation` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
+BEGIN
+INSERT INTO `md_operation_numbers` (`Operation`, `Issued By`)
+VALUES (p_Operation, p_IssuedBy);
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Delete_ByID`(IN `p_ID` INT)
+BEGIN
+DELETE
+FROM `md_operation_numbers`
+WHERE `ID` = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Delete_ByOperation`(IN `p_Operation` VARCHAR(100))
+BEGIN
+DELETE
+FROM `md_operation_numbers`
+WHERE `Operation` = p_Operation;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Get_All`()
+BEGIN
+SELECT *
+FROM `md_operation_numbers`;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Get_ByID`(IN `p_ID` INT)
+BEGIN
+SELECT *
+FROM `md_operation_numbers`
+WHERE `ID` = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Get_ByOperation`(IN `p_Operation` VARCHAR(100))
+BEGIN
+SELECT *
+FROM `md_operation_numbers`
+WHERE `Operation` = p_Operation;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Update_Operation`(IN `p_ID` INT, IN `p_Operation` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
+BEGIN
+UPDATE `md_operation_numbers`
+SET `Operation` = p_Operation,
+    `Issued By` = p_IssuedBy
+WHERE `ID` = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Add_Part`(IN `p_ItemNumber` VARCHAR(300), IN `p_Customer` VARCHAR(300), IN `p_Description` VARCHAR(300), IN `p_IssuedBy` VARCHAR(100), IN `p_Type` VARCHAR(100), IN `p_DieLocation` JSON, IN `p_DieFGT` JSON)
+BEGIN
+INSERT INTO `md_part_ids` (`Item Number`, `Customer`, `Description`, `Issued By`, `Type`, `Die Location`, `Die FGT`)
+VALUES (p_ItemNumber, p_Customer, p_Description, p_IssuedBy, p_Type, p_DieLocation, p_DieFGT);
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Delete_ByID`(IN `p_ID` INT)
+BEGIN
+DELETE
+FROM `md_part_ids`
+WHERE `ID` = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Delete_ByItemNumber`(IN `p_ItemNumber` VARCHAR(300))
+BEGIN
+DELETE
+FROM `md_part_ids`
+WHERE `Item Number` = p_ItemNumber;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Get_All`()
+BEGIN
+SELECT *
+FROM `md_part_ids`;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Get_ByCustomer`(IN `p_Customer` VARCHAR(300))
+BEGIN
+SELECT *
+FROM `md_part_ids`
+WHERE `Customer` = p_Customer;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Get_ByID`(IN `p_ID` INT)
+BEGIN
+SELECT *
+FROM `md_part_ids`
+WHERE `ID` = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Get_ByItemNumber`(IN `p_ItemNumber` VARCHAR(300))
+BEGIN
+SELECT *
+FROM `md_part_ids`
+WHERE `Item Number` = p_ItemNumber;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Update_Part`(IN `p_ID` INT, IN `p_ItemNumber` VARCHAR(300), IN `p_Customer` VARCHAR(300), IN `p_Description` VARCHAR(300), IN `p_IssuedBy` VARCHAR(100), IN `p_Type` VARCHAR(100), IN `p_DieLocation` JSON, IN `p_DieFGT` JSON)
+BEGIN
+UPDATE `md_part_ids`
+SET `Item Number`  = p_ItemNumber,
+    `Customer`     = p_Customer,
+    `Description`  = p_Description,
+    `Issued By`    = p_IssuedBy,
+    `Type`         = p_Type,
+    `Die Location` = p_DieLocation,
+    `Die FGT`      = p_DieFGT
+WHERE `ID` = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Add_Transaction`(IN `p_User` VARCHAR(100), IN `p_PartID` VARCHAR(300), IN `p_Operation` VARCHAR(100), IN `p_Quantity` INT)
+BEGIN
+INSERT INTO `sys_last_10_transactions` (`User`, `PartID`, `Operation`, `Quantity`)
+VALUES (p_User, p_PartID, p_Operation, p_Quantity);
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Delete_ByUser`(IN `p_User` VARCHAR(100))
+BEGIN
+DELETE
+FROM `sys_last_10_transactions`
+WHERE `User` = p_User;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Get_All`()
+BEGIN
+SELECT *
+FROM `sys_last_10_transactions`;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Get_ByUser`(IN `p_User` VARCHAR(100))
+BEGIN
+    -- 1. Remove older duplicates for this user (keep only the most recent for each PartID+Operation)
+    DELETE
+t1 FROM sys_last_10_transactions t1
+    INNER JOIN sys_last_10_transactions t2
+        ON t1.User = t2.User
+        AND t1.PartID = t2.PartID
+        AND t1.Operation = t2.Operation
+        AND t1.DateTime < t2.DateTime
+    WHERE t1.User = p_User;
+
+    -- 2. If more than 10 entries, keep only the 10 most recent and delete the rest
+DELETE
+FROM sys_last_10_transactions
+WHERE User = p_User
+  AND ID NOT IN (SELECT id
+                 FROM (SELECT id
+                       FROM sys_last_10_transactions
+                       WHERE User = p_User
+                       ORDER BY DateTime DESC LIMIT 10) AS keepers);
+
+-- 3. Return the 10 most recent unique transactions for the user
+SELECT *
+FROM sys_last_10_transactions
+WHERE User = p_User
+ORDER BY DateTime DESC LIMIT 10;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Add_Role`(IN `p_RoleName` VARCHAR(50), IN `p_Description` VARCHAR(255), IN `p_Permissions` VARCHAR(1000), IN `p_IsSystem` TINYINT, IN `p_CreatedBy` VARCHAR(100))
+BEGIN
+INSERT INTO sys_roles (RoleName, Description, Permissions, IsSystem, CreatedBy)
+VALUES (p_RoleName, p_Description, p_Permissions, p_IsSystem, p_CreatedBy);
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Delete_Role`(IN `p_ID` INT)
+BEGIN
+DELETE
+FROM sys_roles
+WHERE ID = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Get_All`()
+BEGIN
+SELECT *
+FROM sys_roles
+ORDER BY CreatedAt DESC;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Get_ById`(IN `p_ID` INT)
+BEGIN
+SELECT *
+FROM sys_roles
+WHERE ID = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Get_ByRoleName`(IN `p_RoleName` VARCHAR(50))
+BEGIN
+SELECT *
+FROM sys_roles
+WHERE RoleName = p_RoleName;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Update_Role`(IN `p_ID` INT, IN `p_RoleName` VARCHAR(50), IN `p_Description` VARCHAR(255), IN `p_Permissions` VARCHAR(1000), IN `p_IsSystem` TINYINT)
+BEGIN
+UPDATE sys_roles
+SET RoleName    = p_RoleName,
+    Description = p_Description,
+    Permissions = p_Permissions,
+    IsSystem    = p_IsSystem
+WHERE ID = p_ID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Add`(IN `p_UserID` INT, IN `p_RoleID` INT, IN `p_AssignedBy` VARCHAR(100))
+BEGIN
+INSERT INTO sys_user_roles (UserID, RoleID, AssignedBy)
+VALUES (p_UserID, p_RoleID, p_AssignedBy);
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Delete`(IN `p_UserID` INT, IN `p_RoleID` INT)
+BEGIN
+DELETE
+FROM sys_user_roles
+WHERE UserID = p_UserID
+  AND RoleID = p_RoleID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Get_All`()
+BEGIN
+SELECT *
+FROM sys_user_roles;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Get_ByRoleID`(IN `p_RoleID` INT)
+BEGIN
+SELECT *
+FROM sys_user_roles
+WHERE RoleID = p_RoleID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Get_ByUserID`(IN `p_UserID` INT)
+BEGIN
+SELECT *
+FROM sys_user_roles
+WHERE UserID = p_UserID;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Delete`(
+    IN p_UserId VARCHAR(64),
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE
+EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+        SET
+p_Status = 1;
+        SET
+p_ErrorMsg = 'Database error occurred';
+END;
+
+DELETE
+FROM usr_ui_settings
+WHERE UserId = p_UserId;
+
+SET
+p_Status = 0;
+    SET
+p_ErrorMsg = NULL;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Get`(
+    IN p_UserId VARCHAR(64),
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE
+EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+        SET
+p_Status = 1;
+        SET
+p_ErrorMsg = 'Database error occurred';
+END;
+
+SELECT SettingsJson
+FROM usr_ui_settings
+WHERE UserId = p_UserId;
+
+SET
+p_Status = 0;
+    SET
+p_ErrorMsg = NULL;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_GetThemeName`(IN `p_UserId` VARCHAR(255), OUT `p_ThemeName` VARCHAR(255))
+BEGIN
+SELECT JSON_UNQUOTE(JSON_EXTRACT(SettingsJson, '$.Theme'))
+INTO p_ThemeName
+FROM `usr_ui_settings`
+WHERE UserId = p_UserId LIMIT 1;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Save`(
+    IN p_UserId VARCHAR(64),
+    IN p_SettingsJson TEXT,
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE
+EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+ROLLBACK;
+SET
+p_Status = 1;
+        SET
+p_ErrorMsg = 'Database error occurred';
+END;
+
+START TRANSACTION;
+INSERT INTO usr_ui_settings (UserId, SettingsJson)
+VALUES (p_UserId, p_SettingsJson) ON DUPLICATE KEY
+UPDATE SettingsJson = p_SettingsJson;
+COMMIT;
+
+SET
+p_Status = 0;
+    SET
+p_ErrorMsg = NULL;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Update`(
+    IN p_UserId VARCHAR(64),
+    IN p_SettingsJson TEXT,
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE
+EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+        SET
+p_Status = 1;
+        SET
+p_ErrorMsg = 'Database error occurred';
+END;
+
+UPDATE usr_ui_settings
+SET SettingsJson = p_SettingsJson
+WHERE UserId = p_UserId;
+
+SET
+p_Status = 0;
+    SET
+p_ErrorMsg = NULL;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_users_Add_User`(IN `p_User` VARCHAR(100), IN `p_FullName` VARCHAR(200), IN `p_Shift` VARCHAR(50), IN `p_VitsUser` TINYINT, IN `p_Pin` VARCHAR(50), IN `p_LastShownVersion` VARCHAR(50), IN `p_HideChangeLog` VARCHAR(50), IN `p_Theme_Name` VARCHAR(50), IN `p_Theme_FontSize` INT, IN `p_VisualUserName` VARCHAR(50), IN `p_VisualPassword` VARCHAR(50), IN `p_WipServerAddress` VARCHAR(15), IN `p_WipServerPort` VARCHAR(10))
+BEGIN
+    -- Insert into application users table
+INSERT INTO usr_users (`User`, `Full Name`, `Shift`, `VitsUser`, `Pin`, `LastShownVersion`, `HideChangeLog`,
+                       `Theme_Name`, `Theme_FontSize`, `VisualUserName`, `VisualPassword`, `WipServerAddress`,
+                       `WipServerPort`)
+VALUES (p_User, p_FullName, p_Shift, p_VitsUser, p_Pin, p_LastShownVersion, p_HideChangeLog,
+        p_Theme_Name, p_Theme_FontSize, p_VisualUserName, p_VisualPassword, p_WipServerAddress, p_WipServerPort);
+
+-- Create a MySQL user IF NOT EXISTS (requires MySQL 8.0.16+)
+SET
+@createUserQuery := CONCAT(
+        'CREATE USER IF NOT EXISTS \'', REPLACE(p_User, '
+\'', '\\\''), 
+        '
+\'@\'%
+\' IDENTIFIED BY \'', REPLACE(p_Pin, '
+\'', '\\\''), '
+\';'
+    );
+PREPARE stmt FROM @createUserQuery;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Grant read and write privileges to the user (SELECT, INSERT, UPDATE, DELETE)
+SET
+@grantReadWriteQuery := CONCAT(
+        'GRANT SELECT, INSERT, UPDATE, DELETE ON `mtm_wip_application`.* TO \'', REPLACE(p_User, '
+\'', '\\\''), '
+\'@\'%
+\';'
+    );
+PREPARE stmt FROM @grantReadWriteQuery;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Grant EXECUTE privileges on all procedures in the mtm_wip_application schema
+SET
+@grantExecuteQuery := CONCAT(
+        'GRANT EXECUTE ON `mtm_wip_application`.* TO \'', REPLACE(p_User, '
+\'', '\\\''), '
+\'@\'%
+\';'
+    );
+PREPARE stmt FROM @grantExecuteQuery;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Flush privileges to apply changes
+FLUSH
+PRIVILEGES;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_users_Delete_User`(IN `p_User` VARCHAR(100))
+BEGIN
+    -- Remove MySQL user
+    SET
+@d := CONCAT('DROP USER IF EXISTS \'', REPLACE(p_User, '
+\'', '\\\''), '
+\'@\'%
+\';');
+PREPARE stmt FROM @d;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Remove from application users table
+DELETE
+FROM usr_users
+WHERE `User` = p_User;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_users_Exists`(IN `p_User` VARCHAR(100))
+BEGIN
+SELECT COUNT(*) AS UserExists
+FROM usr_users
+WHERE `User` = p_User;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_users_Get_All`()
+BEGIN
+SELECT *
+FROM usr_users;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_users_Get_ByUser`(IN `p_User` VARCHAR(100))
+BEGIN
+SELECT *
+FROM usr_users
+WHERE `User` = p_User;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_users_Grant_Full`(IN `p_User` VARCHAR(100))
+BEGIN
+    SET
+@sql := CONCAT('GRANT ALL PRIVILEGES ON mtm_wip_application.* TO \'', REPLACE(p_User, '
+\'', '\\\''), '
+\'@\'%
+\';');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_users_Grant_ReadOnly`(IN `p_User` VARCHAR(100))
+BEGIN
+    SET
+@sql := CONCAT('GRANT SELECT ON mtm_wip_application.* TO \'', REPLACE(p_User, '
+\'', '\\\''), '
+\'@\'%
+\';');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_users_Grant_ReadWrite`(IN `p_User` VARCHAR(100))
+BEGIN
+    SET
+@sql := CONCAT('GRANT SELECT, INSERT, UPDATE, DELETE ON mtm_wip_application.* TO \'', REPLACE(p_User, '
+\'', '\\\''), '
+\'@\'%
+\';');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+END$$
+DELIMITER ;
+
+DELIMITER
+$$
+CREATE
+DEFINER=`root`@`localhost` PROCEDURE `usr_users_Update_User`(IN `p_User` VARCHAR(100), IN `p_FullName` VARCHAR(200), IN `p_Shift` VARCHAR(50), IN `p_VitsUser` TINYINT, IN `p_Pin` VARCHAR(50), IN `p_LastShownVersion` VARCHAR(50), IN `p_HideChangeLog` VARCHAR(50), IN `p_Theme_Name` VARCHAR(50), IN `p_Theme_FontSize` INT, IN `p_VisualUserName` VARCHAR(50), IN `p_VisualPassword` VARCHAR(50), IN `p_WipServerAddress` VARCHAR(15), IN `p_WipServerPort` VARCHAR(10))
+BEGIN
+UPDATE usr_users
+SET `Full Name`        = p_FullName,
+    `Shift`            = p_Shift,
+    `VitsUser`         = p_VitsUser,
+    `Pin`              = p_Pin,
+    `LastShownVersion` = p_LastShownVersion,
+    `HideChangeLog`    = p_HideChangeLog,
+    `Theme_Name`       = p_Theme_Name,
+    `Theme_FontSize`   = p_Theme_FontSize,
+    `VisualUserName`   = p_VisualUserName,
+    `VisualPassword`   = p_VisualPassword,
+    `WipServerAddress` = p_WipServerAddress,
+    `WipServerPort`    = p_WipServerPort
+WHERE `User` = p_User;
+END$$
+DELIMITER ;
