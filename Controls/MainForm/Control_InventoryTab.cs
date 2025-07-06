@@ -7,6 +7,7 @@ using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Services;
+using MTM_Inventory_Application.Core;
 using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Controls.MainForm;
@@ -23,6 +24,12 @@ public partial class ControlInventoryTab : UserControl
     public ControlInventoryTab()
     {
         InitializeComponent();
+        // Set tooltips for main buttons using shortcut constants
+        Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Save, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Save)}");
+        Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_AdvancedEntry, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Advanced)}");
+        Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Reset, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Reset)}");
+        Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Toggle_RightPanel, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Left)}/{Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Right)}");
+
         Service_Timer_VersionChecker.ControlInventoryInstance = this;
 
         _ = Control_InventoryTab_OnStartup_LoadDataComboBoxesAsync();
@@ -68,6 +75,35 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
+            // Shortcuts only if this control is visible
+            if (Visible)
+            {
+                // CTRL+S: Save
+                if (keyData == Core_WipAppVariables.Shortcut_Inventory_Save)
+                    if (Control_InventoryTab_Button_Save.Visible && Control_InventoryTab_Button_Save.Enabled)
+                    {
+                        Control_InventoryTab_Button_Save.PerformClick();
+                        return true;
+                    }
+
+                // CTRL+SHIFT+A: Advanced
+                if (keyData == Core_WipAppVariables.Shortcut_Inventory_Advanced)
+                    if (Control_InventoryTab_Button_AdvancedEntry.Visible &&
+                        Control_InventoryTab_Button_AdvancedEntry.Enabled)
+                    {
+                        Control_InventoryTab_Button_AdvancedEntry.PerformClick();
+                        return true;
+                    }
+
+                // CTRL+R: Reset
+                if (keyData == Core_WipAppVariables.Shortcut_Inventory_Reset)
+                    if (Control_InventoryTab_Button_Reset.Visible && Control_InventoryTab_Button_Reset.Enabled)
+                    {
+                        Control_InventoryTab_Button_Reset.PerformClick();
+                        return true;
+                    }
+            }
+
             if (keyData == Keys.Enter)
             {
                 SelectNextControl(
@@ -81,14 +117,14 @@ public partial class ControlInventoryTab : UserControl
             }
 
             if (MainFormInstance != null && !MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed &&
-                keyData == (Keys.Alt | Keys.Right))
+                keyData == Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Right)
             {
                 Control_InventoryTab_Button_Toggle_RightPanel.PerformClick();
                 return true;
             }
 
             if (MainFormInstance != null && MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed &&
-                keyData == (Keys.Alt | Keys.Left))
+                keyData == Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Left)
             {
                 Control_InventoryTab_Button_Toggle_RightPanel.PerformClick();
                 return true;

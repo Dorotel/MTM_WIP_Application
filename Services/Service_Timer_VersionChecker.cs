@@ -62,7 +62,7 @@ internal static class Service_Timer_VersionChecker
             var databaseVersion = dt.Rows[0]["Version"]?.ToString();
             LastCheckedDatabaseVersion = databaseVersion;
             Debug.WriteLine(LastCheckedDatabaseVersion);
-            ControlInventoryInstance?.SetVersionLabel(Model_AppVariables.UserVersion, databaseVersion);
+            ControlInventoryInstance?.SetVersionLabel(Model_AppVariables.UserVersion, databaseVersion ?? "Unknown");
             if (Model_AppVariables.UserVersion != databaseVersion)
             {
                 LoggingUtility.Log(

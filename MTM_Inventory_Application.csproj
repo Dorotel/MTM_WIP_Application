@@ -42,9 +42,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="bin\Debug\net9.0-windows7.0\version.txt">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
 		<Content Include="MTMWIPApp.ico">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>

@@ -2,6 +2,7 @@
 using System.Data;
 using System.Diagnostics;
 using ClosedXML.Excel;
+using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Forms.MainForm.Classes;
 using MTM_Inventory_Application.Helpers;
@@ -27,6 +28,22 @@ public partial class Control_AdvancedInventory : UserControl
             LoggingUtility.Log("Control_AdvancedInventory constructor entered.");
             InitializeComponent();
 
+            // Set tooltips for Single tab buttons using shortcut constants
+            var toolTip = new ToolTip();
+            toolTip.SetToolTip(AdvancedInventory_Single_Button_Send, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Send)}");
+            toolTip.SetToolTip(AdvancedInventory_Single_Button_Save, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Save)}");
+            toolTip.SetToolTip(AdvancedInventory_Single_Button_Reset, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Reset)}");
+            toolTip.SetToolTip(AdvancedInventory_Single_Button_Normal, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Normal)}");
+            // Set tooltips for MultiLoc tab buttons
+            toolTip.SetToolTip(AdvancedInventory_MultiLoc_Button_AddLoc, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_AddLoc)}");
+            toolTip.SetToolTip(AdvancedInventory_MultiLoc_Button_SaveAll, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_SaveAll)}");
+            toolTip.SetToolTip(AdvancedInventory_MultiLoc_Button_Reset, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_Reset)}");
+            toolTip.SetToolTip(AdvancedInventory_Multi_Button_Normal, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_Normal)}");
+            // Set tooltips for Import tab buttons
+            toolTip.SetToolTip(AdvancedInventory_Import_Button_OpenExcel, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_OpenExcel)}");
+            toolTip.SetToolTip(AdvancedInventory_Import_Button_ImportExcel, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_ImportExcel)}");
+            toolTip.SetToolTip(AdvancedInventory_Import_Button_Save, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_Save)}");
+            toolTip.SetToolTip(AdvancedInventory_Import_Button_Normal, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_Normal)}");
 
             Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(AdvancedInventory_Single_ComboBox_Part);
             Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(AdvancedInventory_Single_ComboBox_Op);
@@ -414,25 +431,112 @@ public partial class Control_AdvancedInventory : UserControl
     {
         try
         {
+            // Only handle shortcuts if the Single tab is selected
+            if (AdvancedInventory_TabControl.SelectedTab == AdvancedInventory_TabControl_Single)
+            {
+                if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Send)
+                    if (AdvancedInventory_Single_Button_Send.Visible && AdvancedInventory_Single_Button_Send.Enabled)
+                    {
+                        AdvancedInventory_Single_Button_Send.PerformClick();
+                        return true;
+                    }
+                if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Save)
+                    if (AdvancedInventory_Single_Button_Save.Visible && AdvancedInventory_Single_Button_Save.Enabled)
+                    {
+                        AdvancedInventory_Single_Button_Save.PerformClick();
+                        return true;
+                    }
+                if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Reset)
+                    if (AdvancedInventory_Single_Button_Reset.Visible && AdvancedInventory_Single_Button_Reset.Enabled)
+                    {
+                        AdvancedInventory_Single_Button_Reset.PerformClick();
+                        return true;
+                    }
+                if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Normal)
+                    if (AdvancedInventory_Single_Button_Normal.Visible && AdvancedInventory_Single_Button_Normal.Enabled)
+                    {
+                        AdvancedInventory_Single_Button_Normal.PerformClick();
+                        return true;
+                    }
+            }
+            // MultiLoc tab
+            if (AdvancedInventory_TabControl.SelectedTab == AdvancedInventory_TabControl_MultiLoc)
+            {
+                if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Multi_AddLoc)
+                    if (AdvancedInventory_MultiLoc_Button_AddLoc.Visible && AdvancedInventory_MultiLoc_Button_AddLoc.Enabled)
+                    {
+                        AdvancedInventory_MultiLoc_Button_AddLoc.PerformClick();
+                        return true;
+                    }
+                if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Multi_SaveAll)
+                    if (AdvancedInventory_MultiLoc_Button_SaveAll.Visible && AdvancedInventory_MultiLoc_Button_SaveAll.Enabled)
+                    {
+                        AdvancedInventory_MultiLoc_Button_SaveAll.PerformClick();
+                        return true;
+                    }
+                if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Multi_Reset)
+                    if (AdvancedInventory_MultiLoc_Button_Reset.Visible && AdvancedInventory_MultiLoc_Button_Reset.Enabled)
+                    {
+                        AdvancedInventory_MultiLoc_Button_Reset.PerformClick();
+                        return true;
+                    }
+                if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Multi_Normal)
+                    if (AdvancedInventory_Multi_Button_Normal.Visible && AdvancedInventory_Multi_Button_Normal.Enabled)
+                    {
+                        AdvancedInventory_Multi_Button_Normal.PerformClick();
+                        return true;
+                    }
+            }
+            // Import tab
+            if (AdvancedInventory_TabControl.SelectedTab == AdvancedInventory_TabControl_Import)
+            {
+                if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Import_OpenExcel)
+                    if (AdvancedInventory_Import_Button_OpenExcel.Visible && AdvancedInventory_Import_Button_OpenExcel.Enabled)
+                    {
+                        AdvancedInventory_Import_Button_OpenExcel.PerformClick();
+                        return true;
+                    }
+                if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Import_ImportExcel)
+                    if (AdvancedInventory_Import_Button_ImportExcel.Visible && AdvancedInventory_Import_Button_ImportExcel.Enabled)
+                    {
+                        AdvancedInventory_Import_Button_ImportExcel.PerformClick();
+                        return true;
+                    }
+                if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Import_Save)
+                    if (AdvancedInventory_Import_Button_Save.Visible && AdvancedInventory_Import_Button_Save.Enabled)
+                    {
+                        AdvancedInventory_Import_Button_Save.PerformClick();
+                        return true;
+                    }
+                if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Import_Normal)
+                    if (AdvancedInventory_Import_Button_Normal.Visible && AdvancedInventory_Import_Button_Normal.Enabled)
+                    {
+                        AdvancedInventory_Import_Button_Normal.PerformClick();
+                        return true;
+                    }
+            }
+            // Remove Advanced shortcut (global for this form)
+            if (keyData == Core_WipAppVariables.Shortcut_Remove_Advanced)
+            {
+                if (MainFormInstance != null && MainFormInstance.MainForm_Control_AdvancedRemove != null)
+                {
+                    MainFormInstance.MainForm_AdvancedInventory.Visible = false;
+                    MainFormInstance.MainForm_Control_AdvancedRemove.Visible = true;
+                    MainFormInstance.MainForm_TabControl.SelectedIndex = 2; // Assuming Remove tab index is 2
+                    return true;
+                }
+            }
             if (keyData == Keys.Enter)
             {
-                SelectNextControl(
-                    ActiveControl,
-                    true,
-                    true,
-                    true,
-                    true
-                );
+                SelectNextControl(ActiveControl, true, true, true, true);
                 return true;
             }
-
             return base.ProcessCmdKey(ref msg, keyData);
         }
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
-            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
-                "Control_AdvancedInventory_ProcessCmdKey");
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "Control_AdvancedInventory_ProcessCmdKey");
             return false;
         }
     }

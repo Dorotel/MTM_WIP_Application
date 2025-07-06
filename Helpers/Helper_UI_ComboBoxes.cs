@@ -321,14 +321,16 @@ public static class Helper_UI_ComboBoxes
         {
             comboBox.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             comboBox.Text = placeholder;
-            comboBox.SelectedIndex = 0;
+            if (comboBox.Items.Count > 0)
+                comboBox.SelectedIndex = 0;
             return false;
         }
 
         if (text.Equals(placeholder, StringComparison.OrdinalIgnoreCase))
         {
             comboBox.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-            comboBox.SelectedIndex = 0;
+            if (comboBox.Items.Count > 0)
+                comboBox.SelectedIndex = 0;
             return true;
         }
 
@@ -352,7 +354,8 @@ public static class Helper_UI_ComboBoxes
         {
             comboBox.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             comboBox.Text = placeholder;
-            comboBox.SelectedIndex = 0;
+            if (comboBox.Items.Count > 0)
+                comboBox.SelectedIndex = 0;
             return false;
         }
     }
@@ -435,7 +438,7 @@ public static class Helper_UI_ComboBoxes
             var loadAllComboBoxesAsync = advInv.GetType().GetMethod("LoadAllComboBoxesAsync",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (loadAllComboBoxesAsync != null)
-                await (Task)loadAllComboBoxesAsync.Invoke(advInv, null);
+                await ((Task)loadAllComboBoxesAsync.Invoke(advInv, null)!)!;
         }
     }
 

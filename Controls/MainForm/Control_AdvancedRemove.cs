@@ -71,6 +71,8 @@ public partial class Control_AdvancedRemove : UserControl
         {
             normalBtn.Click -= Control_AdvancedRemove_Button_Normal_Click;
             normalBtn.Click += Control_AdvancedRemove_Button_Normal_Click;
+            var toolTip = new ToolTip();
+            toolTip.SetToolTip(normalBtn, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Normal)}");
         }
 
         // Wire up Undo button
@@ -79,6 +81,8 @@ public partial class Control_AdvancedRemove : UserControl
         {
             undoButton.Click -= Control_AdvancedRemove_Button_Undo_Click;
             undoButton.Click += Control_AdvancedRemove_Button_Undo_Click;
+            var toolTip = new ToolTip();
+            toolTip.SetToolTip(undoButton, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Undo)}");
         }
 
         // Wire up Search button
@@ -87,6 +91,8 @@ public partial class Control_AdvancedRemove : UserControl
         {
             searchButton.Click -= Control_AdvancedRemove_Button_Search_Click;
             searchButton.Click += Control_AdvancedRemove_Button_Search_Click;
+            var toolTip = new ToolTip();
+            toolTip.SetToolTip(searchButton, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Search)}");
         }
 
         // Wire up Reset button
@@ -95,6 +101,8 @@ public partial class Control_AdvancedRemove : UserControl
         {
             resetButton.Click -= Control_AdvancedRemove_Button_Reset_Click;
             resetButton.Click += Control_AdvancedRemove_Button_Reset_Click;
+            var toolTip = new ToolTip();
+            toolTip.SetToolTip(resetButton, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Reset)}");
         }
 
         // Wire up Delete button
@@ -103,6 +111,8 @@ public partial class Control_AdvancedRemove : UserControl
         {
             deleteButton.Click -= Control_AdvancedRemove_Button_Delete_Click;
             deleteButton.Click += Control_AdvancedRemove_Button_Delete_Click;
+            var toolTip = new ToolTip();
+            toolTip.SetToolTip(deleteButton, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Delete)}");
         }
 
         // Add Undo button if not present
@@ -135,7 +145,7 @@ public partial class Control_AdvancedRemove : UserControl
         Control_AdvancedRemove_ComboBox_User.ForeColor =
             Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
         Control_AdvancedRemove_ComboBox_Like.Items.Clear();
-        Control_AdvancedRemove_ComboBox_Like.Items.AddRange(new string[]
+        Control_AdvancedRemove_ComboBox_Like.Items.AddRange(new object[]
         {
             "[ Deep Search ]",
             "Part ID",
@@ -144,7 +154,8 @@ public partial class Control_AdvancedRemove : UserControl
         });
 
         // Optionally set the default selected item
-        Control_AdvancedRemove_ComboBox_Like.SelectedIndex = 0;
+        if (Control_AdvancedRemove_ComboBox_Like.Items.Count > 0)
+            Control_AdvancedRemove_ComboBox_Like.SelectedIndex = 0;
     }
 
     private void ApplyStandardComboBoxProperties()
@@ -284,7 +295,7 @@ public partial class Control_AdvancedRemove : UserControl
                 string searchColumn;
 
                 // Determine which column to search based on combobox selection
-                switch (Control_AdvancedRemove_ComboBox_Like.SelectedItem.ToString())
+                switch (Control_AdvancedRemove_ComboBox_Like.SelectedItem!.ToString())
                 {
                     case "Part ID":
                         searchColumn = "PartID";
@@ -314,8 +325,6 @@ public partial class Control_AdvancedRemove : UserControl
             }
             else
             {
-                // Advanced search setup code...
-                // Validation code remains unchanged
                 var part = Control_AdvancedRemove_ComboBox_Part.Text;
                 var op = Control_AdvancedRemove_ComboBox_Op.Text;
                 var loc = Control_AdvancedRemove_ComboBox_Loc.Text;
@@ -846,11 +855,46 @@ public partial class Control_AdvancedRemove : UserControl
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
-        if (keyData == Keys.Delete)
+        if (keyData == Core_WipAppVariables.Shortcut_Remove_Delete)
         {
-            // Simulate Delete button click
             Control_AdvancedRemove_Button_Delete.PerformClick();
             return true;
+        }
+
+        if (keyData == Core_WipAppVariables.Shortcut_Remove_Undo)
+        {
+            Control_AdvancedRemove_Button_Undo.PerformClick();
+            return true;
+        }
+
+        if (keyData == Core_WipAppVariables.Shortcut_Remove_Reset)
+        {
+            var resetBtn = Controls.Find("Control_AdvancedRemove_Button_Reset", true);
+            if (resetBtn.Length > 0 && resetBtn[0] is Button btn)
+            {
+                btn.PerformClick();
+                return true;
+            }
+        }
+
+        if (keyData == Core_WipAppVariables.Shortcut_Remove_Search)
+        {
+            var searchBtn = Controls.Find("Control_AdvancedRemove_Button_Search", true);
+            if (searchBtn.Length > 0 && searchBtn[0] is Button btn)
+            {
+                btn.PerformClick();
+                return true;
+            }
+        }
+
+        if (keyData == Core_WipAppVariables.Shortcut_Remove_Normal)
+        {
+            var normalBtn = Controls.Find("Control_AdvancedRemove_Button_Normal", true);
+            if (normalBtn.Length > 0 && normalBtn[0] is Button btn)
+            {
+                btn.PerformClick();
+                return true;
+            }
         }
 
         return base.ProcessCmdKey(ref msg, keyData);
