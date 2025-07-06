@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM WIP Application - Main Interface</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+        }
+        
+        .application-window {
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 920px;
+            height: 600px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .title-bar {
+            background: linear-gradient(to bottom, #e8e8e8, #d0d0d0);
+            border-bottom: 1px solid #bbb;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .window-icon {
+            width: 16px;
+            height: 16px;
+            background-color: #4a90e2;
+            border-radius: 2px;
+            margin-right: 8px;
+        }
+        
+        .menu-bar {
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .menu-item {
+            display: inline-block;
+            padding: 6px 12px;
+            margin-right: 4px;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: background-color 0.2s;
+        }
+        
+        .menu-item:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .main-content {
+            display: flex;
+            height: calc(100% - 100px);
+        }
+        
+        .tab-container {
+            flex: 1;
+            border-right: 1px solid #e0e0e0;
+        }
+        
+        .tab-header {
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            border-right: 1px solid #e0e0e0;
+            cursor: pointer;
+            font-size: 12px;
+            background-color: #f8f8f8;
+            transition: background-color 0.2s;
+        }
+        
+        .tab.active {
+            background-color: #ffffff;
+            border-bottom: 1px solid #ffffff;
+            position: relative;
+            top: 1px;
+        }
+        
+        .tab:hover {
+            background-color: #e8e8e8;
+        }
+        
+        .tab.active:hover {
+            background-color: #ffffff;
+        }
+        
+        .tab-content {
+            padding: 20px;
+            background-color: #ffffff;
+            height: calc(100% - 50px);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-input {
+            width: 200px;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+        
+        .button {
+            background: linear-gradient(to bottom, #4a90e2, #357abd);
+            color: white;
+            border: 1px solid #2e6da4;
+            padding: 8px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 8px;
+            transition: background 0.2s;
+        }
+        
+        .button:hover {
+            background: linear-gradient(to bottom, #357abd, #2e6da4);
+        }
+        
+        .quick-buttons-panel {
+            width: 200px;
+            background-color: #f8f8f8;
+            border-left: 1px solid #e0e0e0;
+            padding: 15px;
+        }
+        
+        .quick-buttons-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .quick-button {
+            display: block;
+            width: 100%;
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        
+        .quick-button:hover {
+            background: linear-gradient(to bottom, #e8e8e8, #d8d8d8);
+        }
+        
+        .status-bar {
+            background-color: #f0f0f0;
+            border-top: 1px solid #e0e0e0;
+            padding: 6px 16px;
+            font-size: 11px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .connection-indicator {
+            display: flex;
+            align-items: center;
+        }
+        
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #28a745;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        
+        .data-grid {
+            border: 1px solid #e0e0e0;
+            border-radius: 3px;
+            margin-top: 15px;
+        }
+        
+        .grid-header {
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .grid-row {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 11px;
+            color: #555;
+        }
+        
+        .grid-row:hover {
+            background-color: #f8f8f8;
+        }
+    </style>
+</head>
+<body>
+    <div class="application-window">
+        <div class="title-bar">
+            <div class="window-icon"></div>
+            MTM WIP Application v4.6.0.0
+        </div>
+        
+        <div class="menu-bar">
+            <span class="menu-item">File</span>
+            <span class="menu-item">Edit</span>
+            <span class="menu-item">View</span>
+        </div>
+        
+        <div class="main-content">
+            <div class="tab-container">
+                <div class="tab-header">
+                    <div class="tab active">New Transaction</div>
+                    <div class="tab">Remove</div>
+                    <div class="tab">Transfer</div>
+                </div>
+                
+                <div class="tab-content">
+                    <div class="form-group">
+                        <label class="form-label">Work Order Number:</label>
+                        <input type="text" class="form-input" placeholder="Enter work order number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Location:</label>
+                        <select class="form-input">
+                            <option>Select Location</option>
+                            <option>Assembly Line 1</option>
+                            <option>Assembly Line 2</option>
+                            <option>Quality Control</option>
+                            <option>Warehouse</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Part Number:</label>
+                        <input type="text" class="form-input" placeholder="Enter part number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Quantity:</label>
+                        <input type="number" class="form-input" placeholder="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <button class="button">Add to Inventory</button>
+                        <button class="button">Clear Form</button>
+                    </div>
+                    
+                    <div class="data-grid">
+                        <div class="grid-header">Recent Transactions</div>
+                        <div class="grid-row">WO-2025001 | ASM-001 | Quantity: 50 | Added: 2025-01-15 10:30</div>
+                        <div class="grid-row">WO-2025002 | ASM-002 | Quantity: 25 | Added: 2025-01-15 09:45</div>
+                        <div class="grid-row">WO-2025003 | ASM-003 | Quantity: 100 | Added: 2025-01-15 08:15</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-buttons-panel">
+                <div class="quick-buttons-title">Quick Actions</div>
+                <button class="quick-button">Last 10 Transactions</button>
+                <button class="quick-button">Export to Excel</button>
+                <button class="quick-button">Print Report</button>
+                <button class="quick-button">View All WIP</button>
+                <button class="quick-button">Outside Service</button>
+                <button class="quick-button">Analytics</button>
+                <button class="quick-button">Settings</button>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <span>Ready</span>
+            <div class="connection-indicator">
+                <div class="connection-dot"></div>
+                Connected to Database
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM WIP Application - Advanced Inventory Operations</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+        }
+        
+        .application-window {
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 1100px;
+            height: 700px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .title-bar {
+            background: linear-gradient(to bottom, #e8e8e8, #d0d0d0);
+            border-bottom: 1px solid #bbb;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .window-icon {
+            width: 16px;
+            height: 16px;
+            background-color: #4a90e2;
+            border-radius: 2px;
+            margin-right: 8px;
+        }
+        
+        .menu-bar {
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .menu-item {
+            display: inline-block;
+            padding: 6px 12px;
+            margin-right: 4px;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: background-color 0.2s;
+        }
+        
+        .menu-item:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .main-content {
+            display: flex;
+            height: calc(100% - 100px);
+        }
+        
+        .advanced-panel {
+            flex: 1;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90e2;
+        }
+        
+        .toolbar {
+            background-color: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .toolbar-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .toolbar-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-input {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+        
+        .button {
+            background: linear-gradient(to bottom, #4a90e2, #357abd);
+            color: white;
+            border: 1px solid #2e6da4;
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+        
+        .button:hover {
+            background: linear-gradient(to bottom, #357abd, #2e6da4);
+        }
+        
+        .button.secondary {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            color: #333;
+            border: 1px solid #ccc;
+        }
+        
+        .button.secondary:hover {
+            background: linear-gradient(to bottom, #e8e8e8, #d8d8d8);
+        }
+        
+        .data-grid {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+        
+        .grid-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            display: flex;
+        }
+        
+        .grid-cell {
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            border-right: 1px solid #e0e0e0;
+            flex: 1;
+        }
+        
+        .grid-cell:last-child {
+            border-right: none;
+        }
+        
+        .grid-row {
+            display: flex;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+        
+        .grid-row:hover {
+            background-color: #f8f8f8;
+        }
+        
+        .grid-row.selected {
+            background-color: #e3f2fd;
+        }
+        
+        .grid-data-cell {
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #555;
+            border-right: 1px solid #f0f0f0;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        
+        .grid-data-cell:last-child {
+            border-right: none;
+        }
+        
+        .status-badge {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-badge.available {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-badge.low-stock {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-badge.out-of-stock {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .checkbox {
+            margin-right: 8px;
+        }
+        
+        .bulk-actions {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .bulk-actions.show {
+            display: block;
+        }
+        
+        .bulk-actions-text {
+            font-size: 12px;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+        
+        .summary-cards {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-card {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4a90e2;
+            margin-bottom: 5px;
+        }
+        
+        .summary-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-bar {
+            background-color: #f0f0f0;
+            border-top: 1px solid #e0e0e0;
+            padding: 6px 16px;
+            font-size: 11px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .progress-bar {
+            width: 100px;
+            height: 4px;
+            background-color: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #4a90e2;
+            width: 75%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="application-window">
+        <div class="title-bar">
+            <div class="window-icon"></div>
+            MTM WIP Application v4.6.0.0 - Advanced Inventory Operations
+        </div>
+        
+        <div class="menu-bar">
+            <span class="menu-item">File</span>
+            <span class="menu-item">Edit</span>
+            <span class="menu-item">View</span>
+            <span class="menu-item">Tools</span>
+            <span class="menu-item">Help</span>
+        </div>
+        
+        <div class="main-content">
+            <div class="advanced-panel">
+                <h2 class="panel-title">Advanced Inventory Operations</h2>
+                
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="summary-value">1,247</div>
+                        <div class="summary-label">Total Items</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-value">23</div>
+                        <div class="summary-label">Low Stock</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-value">5</div>
+                        <div class="summary-label">Out of Stock</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-value">156</div>
+                        <div class="summary-label">Pending Transfers</div>
+                    </div>
+                </div>
+                
+                <div class="toolbar">
+                    <div class="toolbar-section">
+                        <span class="toolbar-label">Filter:</span>
+                        <select class="form-input">
+                            <option>All Locations</option>
+                            <option>Assembly Line 1</option>
+                            <option>Assembly Line 2</option>
+                            <option>Quality Control</option>
+                            <option>Warehouse</option>
+                        </select>
+                    </div>
+                    
+                    <div class="toolbar-section">
+                        <span class="toolbar-label">Status:</span>
+                        <select class="form-input">
+                            <option>All Status</option>
+                            <option>Available</option>
+                            <option>Low Stock</option>
+                            <option>Out of Stock</option>
+                        </select>
+                    </div>
+                    
+                    <div class="toolbar-section">
+                        <span class="toolbar-label">Search:</span>
+                        <input type="text" class="form-input" placeholder="Part number or description">
+                        <button class="button">Search</button>
+                    </div>
+                    
+                    <div class="toolbar-section" style="margin-left: auto;">
+                        <button class="button">Export Selected</button>
+                        <button class="button secondary">Refresh</button>
+                    </div>
+                </div>
+                
+                <div class="bulk-actions show">
+                    <div class="bulk-actions-text">3 items selected</div>
+                    <button class="button">Bulk Transfer</button>
+                    <button class="button secondary">Bulk Remove</button>
+                    <button class="button secondary">Update Quantities</button>
+                    <button class="button secondary">Clear Selection</button>
+                </div>
+                
+                <div class="data-grid">
+                    <div class="grid-header">
+                        <div class="grid-cell" style="width: 40px;">
+                            <input type="checkbox" class="checkbox">
+                        </div>
+                        <div class="grid-cell">Part Number</div>
+                        <div class="grid-cell">Description</div>
+                        <div class="grid-cell">Location</div>
+                        <div class="grid-cell">Quantity</div>
+                        <div class="grid-cell">Min Stock</div>
+                        <div class="grid-cell">Status</div>
+                        <div class="grid-cell">Last Updated</div>
+                    </div>
+                    
+                    <div class="grid-row selected">
+                        <div class="grid-data-cell" style="width: 40px;">
+                            <input type="checkbox" class="checkbox" checked>
+                        </div>
+                        <div class="grid-data-cell">ASM-001-REV-C</div>
+                        <div class="grid-data-cell">Main Assembly Component</div>
+                        <div class="grid-data-cell">Assembly Line 1</div>
+                        <div class="grid-data-cell">450</div>
+                        <div class="grid-data-cell">100</div>
+                        <div class="grid-data-cell">
+                            <span class="status-badge available">Available</span>
+                        </div>
+                        <div class="grid-data-cell">2025-01-15 14:30</div>
+                    </div>
+                    
+                    <div class="grid-row selected">
+                        <div class="grid-data-cell" style="width: 40px;">
+                            <input type="checkbox" class="checkbox" checked>
+                        </div>
+                        <div class="grid-data-cell">PCB-002-V2.1</div>
+                        <div class="grid-data-cell">Control Board V2.1</div>
+                        <div class="grid-data-cell">Quality Control</div>
+                        <div class="grid-data-cell">75</div>
+                        <div class="grid-data-cell">50</div>
+                        <div class="grid-data-cell">
+                            <span class="status-badge low-stock">Low Stock</span>
+                        </div>
+                        <div class="grid-data-cell">2025-01-15 11:15</div>
+                    </div>
+                    
+                    <div class="grid-row selected">
+                        <div class="grid-data-cell" style="width: 40px;">
+                            <input type="checkbox" class="checkbox" checked>
+                        </div>
+                        <div class="grid-data-cell">CAB-003-MAIN</div>
+                        <div class="grid-data-cell">Main Cable Assembly</div>
+                        <div class="grid-data-cell">Warehouse</div>
+                        <div class="grid-data-cell">0</div>
+                        <div class="grid-data-cell">25</div>
+                        <div class="grid-data-cell">
+                            <span class="status-badge out-of-stock">Out of Stock</span>
+                        </div>
+                        <div class="grid-data-cell">2025-01-14 16:45</div>
+                    </div>
+                    
+                    <div class="grid-row">
+                        <div class="grid-data-cell" style="width: 40px;">
+                            <input type="checkbox" class="checkbox">
+                        </div>
+                        <div class="grid-data-cell">HSG-004-ALUM</div>
+                        <div class="grid-data-cell">Aluminum Housing</div>
+                        <div class="grid-data-cell">Assembly Line 2</div>
+                        <div class="grid-data-cell">200</div>
+                        <div class="grid-data-cell">75</div>
+                        <div class="grid-data-cell">
+                            <span class="status-badge available">Available</span>
+                        </div>
+                        <div class="grid-data-cell">2025-01-15 09:20</div>
+                    </div>
+                    
+                    <div class="grid-row">
+                        <div class="grid-data-cell" style="width: 40px;">
+                            <input type="checkbox" class="checkbox">
+                        </div>
+                        <div class="grid-data-cell">SEN-005-TEMP</div>
+                        <div class="grid-data-cell">Temperature Sensor</div>
+                        <div class="grid-data-cell">Quality Control</div>
+                        <div class="grid-data-cell">325</div>
+                        <div class="grid-data-cell">150</div>
+                        <div class="grid-data-cell">
+                            <span class="status-badge available">Available</span>
+                        </div>
+                        <div class="grid-data-cell">2025-01-15 13:10</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="progress-info">
+                <span>Loading inventory data...</span>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <span>75% complete</span>
+            </div>
+            <span>5 of 1,247 items selected | Database: Connected | Last sync: 2025-01-15 14:35</span>
+        </div>
+    </div>
+</body>
+</html>
