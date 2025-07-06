@@ -10,11 +10,12 @@ public partial class SettingsForm : Form
 {
     private bool _hasChanges = false;
     private readonly Dictionary<string, Panel> _settingsPanels;
+    private string? _originalThemeName;
 
     public SettingsForm()
     {
         InitializeComponent();
-        
+
         // Initialize settings panels dictionary
         _settingsPanels = new Dictionary<string, Panel>
         {
@@ -24,18 +25,38 @@ public partial class SettingsForm : Form
             ["About"] = aboutPanel
         };
 
+        // Store the original theme name for later comparison
+        _originalThemeName = Model_AppVariables.ThemeName;
+
+        // Wire up themeComboBox event
+        themeComboBox.SelectedIndexChanged += ThemeComboBox_SelectedIndexChanged;
+
         // Initialize the form
         InitializeForm();
+    }
+
+    private void ThemeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        if (themeComboBox.SelectedItem is string themeName && !string.IsNullOrWhiteSpace(themeName))
+        {
+            // Temporarily apply the selected theme to the settings window only
+            var theme = Core_Themes.Core_AppThemes.GetTheme(themeName);
+            // Temporarily set the theme for preview
+            var originalThemeName = Model_AppVariables.ThemeName;
+            Model_AppVariables.ThemeName = themeName;
+            Core_Themes.ApplyTheme(this);
+            Model_AppVariables.ThemeName = originalThemeName;
+        }
     }
 
     private void InitializeForm()
     {
         // Set form properties
-        this.Text = "Settings - MTM WIP Application";
-        this.FormBorderStyle = FormBorderStyle.FixedDialog;
-        this.MaximizeBox = false;
-        this.MinimizeBox = false;
-        this.StartPosition = FormStartPosition.CenterParent;
+        Text = "Settings - MTM WIP Application";
+        FormBorderStyle = FormBorderStyle.FixedDialog;
+        MaximizeBox = false;
+        MinimizeBox = false;
+        StartPosition = FormStartPosition.CenterParent;
 
         // Add all panels to the settings panel container
         foreach (var panel in _settingsPanels.Values)
@@ -50,7 +71,7 @@ public partial class SettingsForm : Form
 
         // Load current settings
         LoadSettings();
-        
+
         // Apply theme to this form
         ApplyTheme();
     }
@@ -59,7 +80,7 @@ public partial class SettingsForm : Form
     {
         try
         {
-            Core_Themes.ApplyTheme(this, Model_AppVariables.UserUiColors);
+            Core_Themes.ApplyTheme(this);
         }
         catch (Exception ex)
         {
@@ -103,7 +124,7 @@ public partial class SettingsForm : Form
         try
         {
             var user = Model_AppVariables.User;
-            
+
             serverTextBox.Text = await Dao_User.GetWipServerAddressAsync(user) ?? "localhost";
             portTextBox.Text = await Dao_User.GetWipServerPortAsync(user) ?? "3306";
             databaseTextBox.Text = "mtm_wip_application";
@@ -122,9 +143,10 @@ public partial class SettingsForm : Form
     {
         try
         {
-            // Load available themes
+            // Load available themes from Core_Themes.Core_AppThemes
             themeComboBox.Items.Clear();
-            themeComboBox.Items.AddRange(new object[] { "Default", "Dark", "Light", "Blue", "Custom" });
+            var themeNames = Core_Themes.Core_AppThemes.GetThemeNames().ToArray();
+            themeComboBox.Items.AddRange(themeNames);
 
             var user = Model_AppVariables.User;
             var themeName = await Dao_User.GetThemeNameAsync(user);
@@ -132,20 +154,16 @@ public partial class SettingsForm : Form
 
             // Set current theme
             if (!string.IsNullOrEmpty(themeName) && themeComboBox.Items.Contains(themeName))
-            {
                 themeComboBox.SelectedItem = themeName;
-            }
-            else
-            {
-                themeComboBox.SelectedIndex = 0; // Default
-            }
+            else if (themeComboBox.Items.Count > 0) themeComboBox.SelectedIndex = 0; // Default to first theme
 
             fontSizeNumericUpDown.Value = Math.Max(8, Math.Min(20, fontSize));
         }
         catch (Exception ex)
         {
             UpdateStatus($"Error loading theme settings: {ex.Message}");
-            themeComboBox.SelectedIndex = 0;
+            if (themeComboBox.Items.Count > 0)
+                themeComboBox.SelectedIndex = 0;
             fontSizeNumericUpDown.Value = 9;
         }
     }
@@ -157,16 +175,75 @@ public partial class SettingsForm : Form
             // Configure shortcuts DataGridView
             shortcutsDataGridView.Columns.Clear();
             shortcutsDataGridView.Columns.Add("Action", "Action");
-            shortcutsDataGridView.Columns.Add("PartId", "Part ID");
-            shortcutsDataGridView.Columns.Add("Operation", "Operation");
-            shortcutsDataGridView.Columns.Add("Quantity", "Quantity");
+            shortcutsDataGridView.Columns.Add("Shortcut", "Shortcut");
 
-            // Load user shortcuts (this would need to be implemented in the DAO)
-            // For now, just add sample data structure
-            shortcutsDataGridView.Rows.Add("Quick Add", "Sample Part", "Sample Op", "1");
-            shortcutsDataGridView.ReadOnly = false;
-            shortcutsDataGridView.AllowUserToAddRows = true;
-            shortcutsDataGridView.AllowUserToDeleteRows = true;
+            // Clear existing rows
+            shortcutsDataGridView.Rows.Clear();
+
+            // Add shortcut actions and their key combinations from Core_WipAppVariables
+            shortcutsDataGridView.Rows.Add("Inventory - Save",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Save));
+            shortcutsDataGridView.Rows.Add("Inventory - Advanced",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Advanced));
+            shortcutsDataGridView.Rows.Add("Inventory - Reset",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Reset));
+            shortcutsDataGridView.Rows.Add("Inventory - Toggle Right Panel (Right)",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Right));
+            shortcutsDataGridView.Rows.Add("Inventory - Toggle Right Panel (Left)",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Left));
+
+            shortcutsDataGridView.Rows.Add("Advanced Inventory - Send",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Send));
+            shortcutsDataGridView.Rows.Add("Advanced Inventory - Save",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Save));
+            shortcutsDataGridView.Rows.Add("Advanced Inventory - Reset",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Reset));
+            shortcutsDataGridView.Rows.Add("Advanced Inventory - Normal",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Normal));
+            shortcutsDataGridView.Rows.Add("Advanced Inventory MultiLoc - Add Location",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_AddLoc));
+            shortcutsDataGridView.Rows.Add("Advanced Inventory MultiLoc - Save All",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_SaveAll));
+            shortcutsDataGridView.Rows.Add("Advanced Inventory MultiLoc - Reset",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_Reset));
+            shortcutsDataGridView.Rows.Add("Advanced Inventory MultiLoc - Normal",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_Normal));
+            shortcutsDataGridView.Rows.Add("Advanced Inventory Import - Open Excel",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_OpenExcel));
+            shortcutsDataGridView.Rows.Add("Advanced Inventory Import - Import Excel",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_ImportExcel));
+            shortcutsDataGridView.Rows.Add("Advanced Inventory Import - Save",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_Save));
+            shortcutsDataGridView.Rows.Add("Advanced Inventory Import - Normal",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_Normal));
+
+            shortcutsDataGridView.Rows.Add("Remove - Search",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Search));
+            shortcutsDataGridView.Rows.Add("Remove - Delete",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Delete));
+            shortcutsDataGridView.Rows.Add("Remove - Undo",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Undo));
+            shortcutsDataGridView.Rows.Add("Remove - Reset",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Reset));
+            shortcutsDataGridView.Rows.Add("Remove - Advanced",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Advanced));
+            shortcutsDataGridView.Rows.Add("Remove - Normal",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Normal));
+
+            shortcutsDataGridView.Rows.Add("Transfer - Search",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Search));
+            shortcutsDataGridView.Rows.Add("Transfer - Transfer",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Transfer));
+            shortcutsDataGridView.Rows.Add("Transfer - Reset",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Reset));
+            shortcutsDataGridView.Rows.Add("Transfer - Toggle Right Panel (Right)",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Right));
+            shortcutsDataGridView.Rows.Add("Transfer - Toggle Right Panel (Left)",
+                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Left));
+
+            shortcutsDataGridView.ReadOnly = true;
+            shortcutsDataGridView.AllowUserToAddRows = false;
+            shortcutsDataGridView.AllowUserToDeleteRows = false;
         }
         catch (Exception ex)
         {
@@ -273,16 +350,10 @@ public partial class SettingsForm : Form
     private void ShowPanel(string panelName)
     {
         // Hide all panels
-        foreach (var panel in _settingsPanels.Values)
-        {
-            panel.Visible = false;
-        }
+        foreach (var panel in _settingsPanels.Values) panel.Visible = false;
 
         // Show selected panel
-        if (_settingsPanels.ContainsKey(panelName))
-        {
-            _settingsPanels[panelName].Visible = true;
-        }
+        if (_settingsPanels.ContainsKey(panelName)) _settingsPanels[panelName].Visible = true;
     }
 
     private void UpdateStatus(string message)
@@ -295,10 +366,7 @@ public partial class SettingsForm : Form
 
     private void categoryListBox_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if (categoryListBox.SelectedItem != null)
-        {
-            ShowPanel(categoryListBox.SelectedItem.ToString()!);
-        }
+        if (categoryListBox.SelectedItem != null) ShowPanel(categoryListBox.SelectedItem.ToString()!);
     }
 
     private async void saveButton_Click(object sender, EventArgs e)
@@ -306,20 +374,30 @@ public partial class SettingsForm : Form
         try
         {
             UpdateStatus("Saving settings...");
-            
+
             await SaveDatabaseSettings();
             await SaveThemeSettings();
             await SaveShortcuts();
 
             _hasChanges = false;
             UpdateStatus("Settings saved successfully");
-            
-            MessageBox.Show("Settings saved successfully!", "Settings", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            // If theme has changed, reinitialize theme on all forms
+            if (_originalThemeName != themeComboBox.SelectedItem?.ToString())
+            {
+                Model_AppVariables.ThemeName = themeComboBox.SelectedItem?.ToString();
+                // Reapply theme to all open forms
+                foreach (Form openForm in Application.OpenForms) Core_Themes.ApplyTheme(openForm);
+            }
+
+            MessageBox.Show("Settings saved successfully!", "Settings", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             UpdateStatus($"Error saving settings: {ex.Message}");
-            MessageBox.Show($"Error saving settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Error saving settings: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
         }
     }
 
@@ -327,15 +405,22 @@ public partial class SettingsForm : Form
     {
         if (_hasChanges)
         {
-            var result = MessageBox.Show("You have unsaved changes. Are you sure you want to cancel?", 
+            var result = MessageBox.Show("You have unsaved changes. Are you sure you want to cancel?",
                 "Unsaved Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            
+
             if (result == DialogResult.No)
                 return;
         }
 
-        this.DialogResult = DialogResult.Cancel;
-        this.Close();
+        // If theme was changed, reapply the original theme
+        if (_originalThemeName != Model_AppVariables.ThemeName)
+        {
+            Model_AppVariables.ThemeName = _originalThemeName;
+            Core_Themes.ApplyTheme(this);
+        }
+
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private async Task SaveDatabaseSettings()
@@ -343,7 +428,7 @@ public partial class SettingsForm : Form
         try
         {
             var user = Model_AppVariables.User;
-            
+
             await Dao_User.SetWipServerAddressAsync(user, serverTextBox.Text);
             await Dao_User.SetWipServerPortAsync(user, portTextBox.Text);
             await Dao_User.SetVisualUserNameAsync(user, usernameTextBox.Text);
@@ -360,12 +445,10 @@ public partial class SettingsForm : Form
         try
         {
             var user = Model_AppVariables.User;
-            
+
             if (themeComboBox.SelectedItem != null)
-            {
                 await Dao_User.SetThemeNameAsync(user, themeComboBox.SelectedItem.ToString()!);
-            }
-            
+
             await Dao_User.SetThemeFontSizeAsync(user, (int)fontSizeNumericUpDown.Value);
         }
         catch (Exception ex)
@@ -412,22 +495,19 @@ public partial class SettingsForm : Form
         {
             var selectedRow = partsDataGridView.SelectedRows[0];
             var partId = selectedRow.Cells["ItemNumber"].Value?.ToString();
-            
+
             if (!string.IsNullOrWhiteSpace(partId))
-            {
                 ShowSimpleInputDialog("Edit Part", $"Edit Part ID (current: {partId}):", async (newPartId) =>
                 {
                     if (!string.IsNullOrWhiteSpace(newPartId) && newPartId != partId)
-                    {
                         // This would need to be implemented as an update method
                         UpdateStatus($"Part editing not yet fully implemented");
-                    }
                 });
-            }
         }
         else
         {
-            MessageBox.Show("Please select a part to edit.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Please select a part to edit.", "No Selection", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
     }
 
@@ -437,14 +517,13 @@ public partial class SettingsForm : Form
         {
             var selectedRow = partsDataGridView.SelectedRows[0];
             var partId = selectedRow.Cells["ItemNumber"].Value?.ToString();
-            
+
             if (!string.IsNullOrWhiteSpace(partId))
             {
-                var result = MessageBox.Show($"Are you sure you want to delete part '{partId}'?", 
+                var result = MessageBox.Show($"Are you sure you want to delete part '{partId}'?",
                     "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                
+
                 if (result == DialogResult.Yes)
-                {
                     try
                     {
                         await Dao_Part.DeletePart(partId);
@@ -454,14 +533,15 @@ public partial class SettingsForm : Form
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error deleting part: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Error deleting part: {ex.Message}", "Error", MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
                     }
-                }
             }
         }
         else
         {
-            MessageBox.Show("Please select a part to delete.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Please select a part to delete.", "No Selection", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
     }
 
@@ -485,21 +565,19 @@ public partial class SettingsForm : Form
         {
             var selectedRow = operationsDataGridView.SelectedRows[0];
             var operation = selectedRow.Cells["Operation"].Value?.ToString();
-            
+
             if (!string.IsNullOrWhiteSpace(operation))
-            {
-                ShowSimpleInputDialog("Edit Operation", $"Edit Operation (current: {operation}):", async (newOperation) =>
-                {
-                    if (!string.IsNullOrWhiteSpace(newOperation) && newOperation != operation)
+                ShowSimpleInputDialog("Edit Operation", $"Edit Operation (current: {operation}):",
+                    async (newOperation) =>
                     {
-                        UpdateStatus($"Operation editing not yet fully implemented");
-                    }
-                });
-            }
+                        if (!string.IsNullOrWhiteSpace(newOperation) && newOperation != operation)
+                            UpdateStatus($"Operation editing not yet fully implemented");
+                    });
         }
         else
         {
-            MessageBox.Show("Please select an operation to edit.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Please select an operation to edit.", "No Selection", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
     }
 
@@ -509,14 +587,13 @@ public partial class SettingsForm : Form
         {
             var selectedRow = operationsDataGridView.SelectedRows[0];
             var operation = selectedRow.Cells["Operation"].Value?.ToString();
-            
+
             if (!string.IsNullOrWhiteSpace(operation))
             {
-                var result = MessageBox.Show($"Are you sure you want to delete operation '{operation}'?", 
+                var result = MessageBox.Show($"Are you sure you want to delete operation '{operation}'?",
                     "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                
+
                 if (result == DialogResult.Yes)
-                {
                     try
                     {
                         await Dao_Operation.DeleteOperation(operation);
@@ -526,14 +603,15 @@ public partial class SettingsForm : Form
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error deleting operation: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Error deleting operation: {ex.Message}", "Error", MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
                     }
-                }
             }
         }
         else
         {
-            MessageBox.Show("Please select an operation to delete.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Please select an operation to delete.", "No Selection", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
     }
 
@@ -557,21 +635,18 @@ public partial class SettingsForm : Form
         {
             var selectedRow = locationsDataGridView.SelectedRows[0];
             var location = selectedRow.Cells["Location"].Value?.ToString();
-            
+
             if (!string.IsNullOrWhiteSpace(location))
-            {
                 ShowSimpleInputDialog("Edit Location", $"Edit Location (current: {location}):", async (newLocation) =>
                 {
                     if (!string.IsNullOrWhiteSpace(newLocation) && newLocation != location)
-                    {
                         UpdateStatus($"Location editing not yet fully implemented");
-                    }
                 });
-            }
         }
         else
         {
-            MessageBox.Show("Please select a location to edit.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Please select a location to edit.", "No Selection", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
     }
 
@@ -581,14 +656,13 @@ public partial class SettingsForm : Form
         {
             var selectedRow = locationsDataGridView.SelectedRows[0];
             var location = selectedRow.Cells["Location"].Value?.ToString();
-            
+
             if (!string.IsNullOrWhiteSpace(location))
             {
-                var result = MessageBox.Show($"Are you sure you want to delete location '{location}'?", 
+                var result = MessageBox.Show($"Are you sure you want to delete location '{location}'?",
                     "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                
+
                 if (result == DialogResult.Yes)
-                {
                     try
                     {
                         await Dao_Location.DeleteLocation(location);
@@ -598,32 +672,36 @@ public partial class SettingsForm : Form
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error deleting location: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Error deleting location: {ex.Message}", "Error", MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
                     }
-                }
             }
         }
         else
         {
-            MessageBox.Show("Please select a location to delete.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Please select a location to delete.", "No Selection", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
     }
 
     private void addUserToolStripButton_Click(object sender, EventArgs e)
     {
-        MessageBox.Show("User management requires a more complex dialog. This feature will be implemented in a future update.", 
+        MessageBox.Show(
+            "User management requires a more complex dialog. This feature will be implemented in a future update.",
             "Feature Not Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private void editUserToolStripButton_Click(object sender, EventArgs e)
     {
-        MessageBox.Show("User management requires a more complex dialog. This feature will be implemented in a future update.", 
+        MessageBox.Show(
+            "User management requires a more complex dialog. This feature will be implemented in a future update.",
             "Feature Not Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private void deleteUserToolStripButton_Click(object sender, EventArgs e)
     {
-        MessageBox.Show("User management requires a more complex dialog. This feature will be implemented in a future update.", 
+        MessageBox.Show(
+            "User management requires a more complex dialog. This feature will be implemented in a future update.",
             "Feature Not Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
@@ -676,7 +754,7 @@ public partial class SettingsForm : Form
         // Apply theme if possible
         try
         {
-            Core_Themes.ApplyTheme(inputForm, Model_AppVariables.UserUiColors);
+            Core_Themes.ApplyTheme(inputForm);
         }
         catch
         {

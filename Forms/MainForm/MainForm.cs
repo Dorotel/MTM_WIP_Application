@@ -5,6 +5,7 @@ using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Services;
 using System.ComponentModel;
+using MTM_Inventory_Application.Forms.Settings;
 using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Forms.MainForm;
@@ -356,6 +357,16 @@ public partial class MainForm : Form
     }
 
     #endregion
+
+    private void MainForm_MenuStrip_File_Settings_Click(object sender, EventArgs e)
+    {
+        using (var settingsForm = new SettingsForm())
+        {
+            if (settingsForm.ShowDialog(this) == DialogResult.OK)
+                // Apply settings changes if needed
+                CycleThemeAndUpdateUIAsync();
+        }
+    }
 }
 
 #endregion

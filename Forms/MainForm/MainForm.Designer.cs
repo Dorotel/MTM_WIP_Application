@@ -140,6 +140,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_MenuStrip_File_Settings.ShortcutKeys = Keys.Control | Keys.Shift | Keys.S;
             MainForm_MenuStrip_File_Settings.Size = new Size(188, 22);
             MainForm_MenuStrip_File_Settings.Text = "Settings";
+            MainForm_MenuStrip_File_Settings.Click += MainForm_MenuStrip_File_Settings_Click;
             // 
             // MainForm_MenuStrip_Exit
             // 
