@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Data;
 using System.Diagnostics;
 
+
 namespace MTM_Inventory_Application.Core;
 
 public static class Core_Themes
