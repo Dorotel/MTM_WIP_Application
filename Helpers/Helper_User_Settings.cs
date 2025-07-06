@@ -33,6 +33,9 @@ public static class Helper_User_Settings
 
         var fontSize = await Dao_User.GetThemeFontSizeAsync(Core_WipAppVariables.User);
         Core_WipAppVariables.ThemeFontSize = fontSize ?? 9;
+
+        // Load shortcuts from database
+        await LoadShortcutsAsync();
     }
 
     /// <summary>
@@ -47,6 +50,33 @@ public static class Helper_User_Settings
         await Dao_User.SetThemeFontSizeAsync(Core_WipAppVariables.User, (int)Core_WipAppVariables.ThemeFontSize);
         await Dao_User.SetVisualUserNameAsync(Core_WipAppVariables.User, Core_WipAppVariables.VisualUserName ?? "");
         await Dao_User.SetVisualPasswordAsync(Core_WipAppVariables.User, Core_WipAppVariables.VisualPassword ?? "");
+    }
+
+    /// <summary>
+    ///     Loads user shortcuts from the database and applies them to Core_WipAppVariables.
+    /// </summary>
+    private static async Task LoadShortcutsAsync()
+    {
+        try
+        {
+            var shortcutsJson = await Dao_User.GetShortcutsAsync(Core_WipAppVariables.User);
+            if (!string.IsNullOrEmpty(shortcutsJson))
+            {
+                var shortcuts = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(shortcutsJson);
+                if (shortcuts != null)
+                {
+                    foreach (var shortcut in shortcuts)
+                    {
+                        var keys = Core_WipAppVariables.FromShortcutString(shortcut.Value);
+                        Core_WipAppVariables.ApplyShortcutFromDictionary(shortcut.Key, keys);
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // If loading fails, use default shortcuts (no action needed)
+        }
     }
 
     /// <summary>

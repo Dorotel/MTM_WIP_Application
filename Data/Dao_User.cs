@@ -117,6 +117,16 @@ internal static class Dao_User
         await SetUserSettingAsync("WipServerPort", user, value, useAsync);
     }
 
+    internal static async Task<string> GetShortcutsAsync(string user, bool useAsync = false)
+    {
+        return await GetUserSettingAsync("Shortcuts", user, useAsync);
+    }
+
+    internal static async Task SetShortcutsAsync(string user, string value, bool useAsync = false)
+    {
+        await SetUserSettingAsync("Shortcuts", user, value, useAsync);
+    }
+
     internal static async Task<string?> GetUserFullNameAsync(string user, bool useAsync = false)
     {
         try

@@ -172,6 +172,9 @@ public partial class SettingsForm : Form
     {
         try
         {
+            // Load saved shortcuts from database
+            await LoadShortcutsFromDatabase();
+
             // Configure shortcuts DataGridView
             shortcutsDataGridView.Columns.Clear();
             shortcutsDataGridView.Columns.Add("Action", "Action");
@@ -180,74 +183,108 @@ public partial class SettingsForm : Form
             // Clear existing rows
             shortcutsDataGridView.Rows.Clear();
 
-            // Add shortcut actions and their key combinations from Core_WipAppVariables
-            shortcutsDataGridView.Rows.Add("Inventory - Save",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Save));
-            shortcutsDataGridView.Rows.Add("Inventory - Advanced",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Advanced));
-            shortcutsDataGridView.Rows.Add("Inventory - Reset",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Reset));
-            shortcutsDataGridView.Rows.Add("Inventory - Toggle Right Panel (Right)",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Right));
-            shortcutsDataGridView.Rows.Add("Inventory - Toggle Right Panel (Left)",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Left));
+            // Get current shortcuts from Core_WipAppVariables
+            var shortcuts = Core_WipAppVariables.GetShortcutDictionary();
 
-            shortcutsDataGridView.Rows.Add("Advanced Inventory - Send",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Send));
-            shortcutsDataGridView.Rows.Add("Advanced Inventory - Save",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Save));
-            shortcutsDataGridView.Rows.Add("Advanced Inventory - Reset",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Reset));
-            shortcutsDataGridView.Rows.Add("Advanced Inventory - Normal",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Normal));
-            shortcutsDataGridView.Rows.Add("Advanced Inventory MultiLoc - Add Location",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_AddLoc));
-            shortcutsDataGridView.Rows.Add("Advanced Inventory MultiLoc - Save All",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_SaveAll));
-            shortcutsDataGridView.Rows.Add("Advanced Inventory MultiLoc - Reset",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_Reset));
-            shortcutsDataGridView.Rows.Add("Advanced Inventory MultiLoc - Normal",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_Normal));
-            shortcutsDataGridView.Rows.Add("Advanced Inventory Import - Open Excel",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_OpenExcel));
-            shortcutsDataGridView.Rows.Add("Advanced Inventory Import - Import Excel",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_ImportExcel));
-            shortcutsDataGridView.Rows.Add("Advanced Inventory Import - Save",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_Save));
-            shortcutsDataGridView.Rows.Add("Advanced Inventory Import - Normal",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_Normal));
+            // Add shortcut rows
+            foreach (var shortcut in shortcuts)
+            {
+                shortcutsDataGridView.Rows.Add(shortcut.Key, Core_WipAppVariables.ToShortcutString(shortcut.Value));
+            }
 
-            shortcutsDataGridView.Rows.Add("Remove - Search",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Search));
-            shortcutsDataGridView.Rows.Add("Remove - Delete",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Delete));
-            shortcutsDataGridView.Rows.Add("Remove - Undo",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Undo));
-            shortcutsDataGridView.Rows.Add("Remove - Reset",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Reset));
-            shortcutsDataGridView.Rows.Add("Remove - Advanced",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Advanced));
-            shortcutsDataGridView.Rows.Add("Remove - Normal",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Normal));
-
-            shortcutsDataGridView.Rows.Add("Transfer - Search",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Search));
-            shortcutsDataGridView.Rows.Add("Transfer - Transfer",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Transfer));
-            shortcutsDataGridView.Rows.Add("Transfer - Reset",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Reset));
-            shortcutsDataGridView.Rows.Add("Transfer - Toggle Right Panel (Right)",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Right));
-            shortcutsDataGridView.Rows.Add("Transfer - Toggle Right Panel (Left)",
-                Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Left));
-
-            shortcutsDataGridView.ReadOnly = true;
+            // Configure grid for editing
+            shortcutsDataGridView.ReadOnly = false;
             shortcutsDataGridView.AllowUserToAddRows = false;
             shortcutsDataGridView.AllowUserToDeleteRows = false;
+            shortcutsDataGridView.Columns[0].ReadOnly = true; // Action column is read-only
+            shortcutsDataGridView.Columns[1].ReadOnly = false; // Shortcut column is editable
+            
+            // Add event handlers for cell editing
+            shortcutsDataGridView.CellValueChanged += ShortcutsDataGridView_CellValueChanged;
+            shortcutsDataGridView.CellValidating += ShortcutsDataGridView_CellValidating;
         }
         catch (Exception ex)
         {
             UpdateStatus($"Error loading shortcuts: {ex.Message}");
+        }
+    }
+
+    private async Task LoadShortcutsFromDatabase()
+    {
+        try
+        {
+            var shortcutsJson = await Dao_User.GetShortcutsAsync(Core_WipAppVariables.User);
+            if (!string.IsNullOrEmpty(shortcutsJson))
+            {
+                var shortcuts = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(shortcutsJson);
+                if (shortcuts != null)
+                {
+                    foreach (var shortcut in shortcuts)
+                    {
+                        var keys = Core_WipAppVariables.FromShortcutString(shortcut.Value);
+                        Core_WipAppVariables.ApplyShortcutFromDictionary(shortcut.Key, keys);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // If loading fails, use default shortcuts (no action needed)
+            UpdateStatus($"Using default shortcuts: {ex.Message}");
+        }
+    }
+
+    private void ShortcutsDataGridView_CellValidating(object? sender, DataGridViewCellValidatingEventArgs e)
+    {
+        if (e.ColumnIndex == 1) // Shortcut column
+        {
+            var shortcutString = e.FormattedValue?.ToString() ?? "";
+            
+            // Allow empty shortcuts
+            if (string.IsNullOrWhiteSpace(shortcutString))
+            {
+                return;
+            }
+
+            // Validate shortcut format
+            try
+            {
+                var keys = Core_WipAppVariables.FromShortcutString(shortcutString);
+                if (keys == Keys.None && !string.IsNullOrWhiteSpace(shortcutString))
+                {
+                    e.Cancel = true;
+                    UpdateStatus("Invalid shortcut format. Use combinations like 'CTRL + S' or 'ALT + F1'");
+                }
+            }
+            catch
+            {
+                e.Cancel = true;
+                UpdateStatus("Invalid shortcut format. Use combinations like 'CTRL + S' or 'ALT + F1'");
+            }
+        }
+    }
+
+    private void ShortcutsDataGridView_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
+    {
+        if (e.ColumnIndex == 1 && e.RowIndex >= 0) // Shortcut column
+        {
+            var actionName = shortcutsDataGridView.Rows[e.RowIndex].Cells[0].Value?.ToString();
+            var shortcutString = shortcutsDataGridView.Rows[e.RowIndex].Cells[1].Value?.ToString() ?? "";
+
+            if (!string.IsNullOrEmpty(actionName))
+            {
+                try
+                {
+                    var keys = Core_WipAppVariables.FromShortcutString(shortcutString);
+                    Core_WipAppVariables.ApplyShortcutFromDictionary(actionName, keys);
+                    _hasChanges = true;
+                    UpdateStatus($"Shortcut updated: {actionName}");
+                }
+                catch (Exception ex)
+                {
+                    UpdateStatus($"Error updating shortcut: {ex.Message}");
+                }
+            }
         }
     }
 
@@ -461,9 +498,27 @@ public partial class SettingsForm : Form
     {
         try
         {
-            // This would need to be implemented to save shortcut changes
-            // For now, just acknowledge the operation
-            UpdateStatus("Shortcuts saved");
+            // Create a dictionary to store current shortcuts
+            var shortcuts = new Dictionary<string, string>();
+            
+            // Collect shortcuts from the DataGridView
+            for (int i = 0; i < shortcutsDataGridView.Rows.Count; i++)
+            {
+                var row = shortcutsDataGridView.Rows[i];
+                var actionName = row.Cells[0].Value?.ToString();
+                var shortcutString = row.Cells[1].Value?.ToString() ?? "";
+                
+                if (!string.IsNullOrEmpty(actionName))
+                {
+                    shortcuts[actionName] = shortcutString;
+                }
+            }
+            
+            // Serialize to JSON and save to database
+            var shortcutsJson = System.Text.Json.JsonSerializer.Serialize(shortcuts);
+            await Dao_User.SetShortcutsAsync(Core_WipAppVariables.User, shortcutsJson);
+            
+            UpdateStatus("Shortcuts saved successfully");
         }
         catch (Exception ex)
         {
