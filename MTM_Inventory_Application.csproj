@@ -14,8 +14,11 @@
 
 	<ItemGroup>
 		<Compile Remove="Backups\**" />
+		<Compile Remove="Documents\**" />
 		<EmbeddedResource Remove="Backups\**" />
+		<EmbeddedResource Remove="Documents\**" />
 		<None Remove="Backups\**" />
+		<None Remove="Documents\**" />
 	</ItemGroup>
 
 	<ItemGroup>

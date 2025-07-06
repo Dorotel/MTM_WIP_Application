@@ -1,4 +1,4 @@
-Create a comprehensive Markdown reference
+Create a comprehensive Markdown reference - File name will be provided in the fileName variable
 The summary should be robust enough to answer any possible question about the file, including:
 •	File metadata (file name, namespace, main classes, target framework, language version, dependencies)
 •	The file’s purpose and all intended use cases
@@ -22,6 +22,16 @@ Do not allow your answer to be truncated
 Do not use the active document
 Only reference files that I provide
 
+When complete.
 
-File Name: 
+Regenerate the _AllFileSummaries.md file so that it includes an up-to-date, alphabetically sorted list of all .md files currently present in the Documents/File Summarys directory.
+•	Each file should be listed as a markdown link.
+•	The list should include both Designer and non-Designer files.
+•	Overwrite the existing _AllFileSummaries.md file with the new index.
+•	Do not include any files from subdirectories.
+•	The rest of the file (header, description, etc.) should remain as in the previous version, just update the file list.
+
+
+
+fileName: 
 MD File name: {fileName}.md
