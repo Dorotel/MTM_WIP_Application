@@ -10,7 +10,7 @@
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /// <param name="disposing">true if managed resources should be disposed.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -35,6 +35,7 @@
             this.statusLabel = new System.Windows.Forms.Label();
             this.cancelButton = new System.Windows.Forms.Button();
             this.saveButton = new System.Windows.Forms.Button();
+            this.resetDefaultsButton = new System.Windows.Forms.Button();
             this.databasePanel = new System.Windows.Forms.Panel();
             this.databaseTabControl = new System.Windows.Forms.TabControl();
             this.connectionTabPage = new System.Windows.Forms.TabPage();
@@ -167,6 +168,7 @@
             this.bottomPanel.Controls.Add(this.statusLabel);
             this.bottomPanel.Controls.Add(this.cancelButton);
             this.bottomPanel.Controls.Add(this.saveButton);
+            this.bottomPanel.Controls.Add(this.resetDefaultsButton);
             this.bottomPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.bottomPanel.Location = new System.Drawing.Point(0, 410);
             this.bottomPanel.Name = "bottomPanel";
@@ -203,6 +205,17 @@
             this.saveButton.Text = "Save";
             this.saveButton.UseVisualStyleBackColor = true;
             this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
+            // 
+            // resetDefaultsButton
+            // 
+            this.resetDefaultsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.resetDefaultsButton.Location = new System.Drawing.Point(352, 9);
+            this.resetDefaultsButton.Name = "resetDefaultsButton";
+            this.resetDefaultsButton.Size = new System.Drawing.Size(75, 23);
+            this.resetDefaultsButton.TabIndex = 3;
+            this.resetDefaultsButton.Text = "Reset";
+            this.resetDefaultsButton.UseVisualStyleBackColor = true;
+            this.resetDefaultsButton.Click += new System.EventHandler(this.resetDefaultsButton_Click);
             // 
             // databasePanel
             // 
@@ -766,6 +779,7 @@
         private System.Windows.Forms.Label statusLabel;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button saveButton;
+        private System.Windows.Forms.Button resetDefaultsButton;
         private System.Windows.Forms.Panel databasePanel;
         private System.Windows.Forms.TabControl databaseTabControl;
         private System.Windows.Forms.TabPage connectionTabPage;

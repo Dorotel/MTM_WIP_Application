@@ -25,10 +25,14 @@ public partial class ControlInventoryTab : UserControl
     {
         InitializeComponent();
         // Set tooltips for main buttons using shortcut constants
-        Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Save, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Save)}");
-        Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_AdvancedEntry, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Advanced)}");
-        Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Reset, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Reset)}");
-        Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Toggle_RightPanel, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Left)}/{Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Right)}");
+        Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Save,
+            $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Save)}");
+        Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_AdvancedEntry,
+            $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Advanced)}");
+        Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Reset,
+            $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Reset)}");
+        Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Toggle_RightPanel,
+            $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Left)}/{Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Right)}");
 
         Service_Timer_VersionChecker.ControlInventoryInstance = this;
 
@@ -38,7 +42,7 @@ public partial class ControlInventoryTab : UserControl
 
         SetVersionLabel(Model_AppVariables.UserVersion,
             Service_Timer_VersionChecker.LastCheckedDatabaseVersion ?? "unknown");
-        Core.Core_Themes.ApplyFocusHighlighting(this);
+        Core_Themes.ApplyFocusHighlighting(this);
         Control_InventoryTab_ComboBox_Part.ForeColor = Control_InventoryTab_ComboBox_Operation.ForeColor =
             Control_InventoryTab_ComboBox_Location.ForeColor =
                 Model_AppVariables.UserUiColors.ComboBoxForeColor ?? Color.Red;

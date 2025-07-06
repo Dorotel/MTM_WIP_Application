@@ -3,6 +3,7 @@ using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using System.Data;
+using System.Text.Json;
 
 namespace MTM_Inventory_Application.Forms.Settings;
 
@@ -30,6 +31,9 @@ public partial class SettingsForm : Form
 
         // Wire up themeComboBox event
         themeComboBox.SelectedIndexChanged += ThemeComboBox_SelectedIndexChanged;
+
+        // Wire up shortcutsDataGridView event
+        shortcutsDataGridView.CellBeginEdit += ShortcutsDataGridView_CellBeginEdit;
 
         // Initialize the form
         InitializeForm();
@@ -81,6 +85,8 @@ public partial class SettingsForm : Form
         try
         {
             Core_Themes.ApplyTheme(this);
+            Core_Themes.ApplyThemeToDataGridView(shortcutsDataGridView);
+            Core_Themes.SizeDataGrid(shortcutsDataGridView);
         }
         catch (Exception ex)
         {
@@ -172,34 +178,54 @@ public partial class SettingsForm : Form
     {
         try
         {
-            // Load saved shortcuts from database
-            await LoadShortcutsFromDatabase();
-
-            // Configure shortcuts DataGridView
+            // Configure DataGridView
             shortcutsDataGridView.Columns.Clear();
             shortcutsDataGridView.Columns.Add("Action", "Action");
             shortcutsDataGridView.Columns.Add("Shortcut", "Shortcut");
-
-            // Clear existing rows
             shortcutsDataGridView.Rows.Clear();
 
-            // Get current shortcuts from Core_WipAppVariables
-            var shortcuts = Core_WipAppVariables.GetShortcutDictionary();
+            var user = Core_WipAppVariables.User;
+            var shortcutsJson = await Dao_User.GetShortcutsJsonAsync(user);
 
-            // Add shortcut rows
-            foreach (var shortcut in shortcuts)
+            var shortcutDict = Helper_UI_Shortcuts.GetShortcutDictionary();
+
+            Dictionary<string, string> userShortcuts = new();
+            if (!string.IsNullOrWhiteSpace(shortcutsJson))
+                try
+                {
+                    using var doc = JsonDocument.Parse(shortcutsJson);
+                    if (doc.RootElement.ValueKind == JsonValueKind.Object &&
+                        doc.RootElement.TryGetProperty("Shortcuts", out var shortcutsElement) &&
+                        shortcutsElement.ValueKind == JsonValueKind.Object)
+                        foreach (var prop in shortcutsElement.EnumerateObject())
+                            userShortcuts[prop.Name] = prop.Value.GetString() ?? "";
+                }
+                catch (JsonException)
+                {
+                    // Log or handle malformed JSON, fallback to defaults
+                    UpdateStatus("Warning: Shortcuts JSON is malformed. Using defaults.");
+                }
+
+            foreach (var kvp in shortcutDict)
             {
-                shortcutsDataGridView.Rows.Add(shortcut.Key, Core_WipAppVariables.ToShortcutString(shortcut.Value));
+                var action = kvp.Key;
+                var defaultKeys = kvp.Value;
+                var shortcutValue = userShortcuts.TryGetValue(action, out var val) && !string.IsNullOrWhiteSpace(val)
+                    ? val
+                    : Helper_UI_Shortcuts.ToShortcutString(defaultKeys);
+
+                // Update in-memory shortcut for runtime
+                Helper_UI_Shortcuts.ApplyShortcutFromDictionary(action,
+                    Helper_UI_Shortcuts.FromShortcutString(shortcutValue));
+
+                shortcutsDataGridView.Rows.Add(action, shortcutValue);
             }
 
-            // Configure grid for editing
             shortcutsDataGridView.ReadOnly = false;
             shortcutsDataGridView.AllowUserToAddRows = false;
             shortcutsDataGridView.AllowUserToDeleteRows = false;
-            shortcutsDataGridView.Columns[0].ReadOnly = true; // Action column is read-only
-            shortcutsDataGridView.Columns[1].ReadOnly = false; // Shortcut column is editable
-            
-            // Add event handlers for cell editing
+            shortcutsDataGridView.Columns[0].ReadOnly = true;
+            shortcutsDataGridView.Columns[1].ReadOnly = false;
             shortcutsDataGridView.CellValueChanged += ShortcutsDataGridView_CellValueChanged;
             shortcutsDataGridView.CellValidating += ShortcutsDataGridView_CellValidating;
         }
@@ -209,47 +235,19 @@ public partial class SettingsForm : Form
         }
     }
 
-    private async Task LoadShortcutsFromDatabase()
-    {
-        try
-        {
-            var shortcutsJson = await Dao_User.GetShortcutsAsync(Core_WipAppVariables.User);
-            if (!string.IsNullOrEmpty(shortcutsJson))
-            {
-                var shortcuts = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(shortcutsJson);
-                if (shortcuts != null)
-                {
-                    foreach (var shortcut in shortcuts)
-                    {
-                        var keys = Core_WipAppVariables.FromShortcutString(shortcut.Value);
-                        Core_WipAppVariables.ApplyShortcutFromDictionary(shortcut.Key, keys);
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            // If loading fails, use default shortcuts (no action needed)
-            UpdateStatus($"Using default shortcuts: {ex.Message}");
-        }
-    }
-
     private void ShortcutsDataGridView_CellValidating(object? sender, DataGridViewCellValidatingEventArgs e)
     {
         if (e.ColumnIndex == 1) // Shortcut column
         {
             var shortcutString = e.FormattedValue?.ToString() ?? "";
-            
+
             // Allow empty shortcuts
-            if (string.IsNullOrWhiteSpace(shortcutString))
-            {
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(shortcutString)) return;
 
             // Validate shortcut format
             try
             {
-                var keys = Core_WipAppVariables.FromShortcutString(shortcutString);
+                var keys = Helper_UI_Shortcuts.FromShortcutString(shortcutString);
                 if (keys == Keys.None && !string.IsNullOrWhiteSpace(shortcutString))
                 {
                     e.Cancel = true;
@@ -272,11 +270,10 @@ public partial class SettingsForm : Form
             var shortcutString = shortcutsDataGridView.Rows[e.RowIndex].Cells[1].Value?.ToString() ?? "";
 
             if (!string.IsNullOrEmpty(actionName))
-            {
                 try
                 {
-                    var keys = Core_WipAppVariables.FromShortcutString(shortcutString);
-                    Core_WipAppVariables.ApplyShortcutFromDictionary(actionName, keys);
+                    var keys = Helper_UI_Shortcuts.FromShortcutString(shortcutString);
+                    Helper_UI_Shortcuts.ApplyShortcutFromDictionary(actionName, keys);
                     _hasChanges = true;
                     UpdateStatus($"Shortcut updated: {actionName}");
                 }
@@ -284,8 +281,188 @@ public partial class SettingsForm : Form
                 {
                     UpdateStatus($"Error updating shortcut: {ex.Message}");
                 }
+        }
+    }
+
+    private void ShortcutsDataGridView_CellBeginEdit(object? sender, DataGridViewCellCancelEventArgs e)
+    {
+        if (e.ColumnIndex == 1 && e.RowIndex >= 0)
+        {
+            e.Cancel = true; // Prevent direct editing
+
+            var actionName = shortcutsDataGridView.Rows[e.RowIndex].Cells[0].Value?.ToString();
+            var currentShortcut = shortcutsDataGridView.Rows[e.RowIndex].Cells[1].Value?.ToString() ?? "";
+
+            using (var inputForm = new Form())
+            {
+                inputForm.Text = $"Set Shortcut for '{actionName}'";
+                inputForm.Size = new Size(400, 180);
+                inputForm.StartPosition = FormStartPosition.CenterParent;
+                inputForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+                inputForm.MaximizeBox = false;
+                inputForm.MinimizeBox = false;
+
+                var label = new Label
+                {
+                    Text = "Press the new shortcut key combination:",
+                    Location = new Point(10, 20),
+                    Size = new Size(360, 20)
+                };
+                var shortcutBox = new TextBox
+                {
+                    Location = new Point(10, 45),
+                    Size = new Size(360, 20),
+                    ReadOnly = true,
+                    TabStop = false,
+                    BackColor = SystemColors.Control,
+                    ForeColor = SystemColors.GrayText
+                };
+                shortcutBox.Text = currentShortcut;
+
+                var errorLabel = new Label
+                {
+                    Text = "",
+                    ForeColor = Color.Red,
+                    Location = new Point(10, 70),
+                    Size = new Size(360, 30),
+                    Visible = false
+                };
+
+                var newKeys = Helper_UI_Shortcuts.FromShortcutString(currentShortcut);
+
+                inputForm.KeyPreview = true;
+                inputForm.KeyDown += (s, ke) =>
+                {
+                    if (ke.KeyCode == Keys.Escape)
+                    {
+                        inputForm.DialogResult = DialogResult.Cancel;
+                        inputForm.Close();
+                        return;
+                    }
+
+                    // Ignore modifier-only presses
+                    if (ke.KeyCode == Keys.ControlKey || ke.KeyCode == Keys.ShiftKey || ke.KeyCode == Keys.Menu)
+                        return;
+
+                    newKeys = ke.KeyData;
+                    shortcutBox.Text = Helper_UI_Shortcuts.ToShortcutString(newKeys);
+
+                    // Validation: must include at least one modifier
+                    var hasModifier = (newKeys & Keys.Control) == Keys.Control ||
+                                      (newKeys & Keys.Alt) == Keys.Alt ||
+                                      (newKeys & Keys.Shift) == Keys.Shift;
+
+                    if (!hasModifier)
+                    {
+                        errorLabel.Text = "Shortcut must include ALT, CTRL, SHIFT, or a combination.";
+                        errorLabel.Visible = true;
+                    }
+                    else if (IsShortcutConflict(actionName, newKeys))
+                    {
+                        errorLabel.Text = "This shortcut is already assigned to another action in the same tab.";
+                        errorLabel.Visible = true;
+                    }
+                    else
+                    {
+                        errorLabel.Text = "";
+                        errorLabel.Visible = false;
+                    }
+
+                    ke.SuppressKeyPress = true;
+                };
+
+                var okButton = new Button { Text = "OK", Location = new Point(215, 110), Size = new Size(75, 23) };
+                var cancelButton = new Button
+                    { Text = "Cancel", Location = new Point(295, 110), Size = new Size(75, 23) };
+
+                okButton.Click += (s, args) =>
+                {
+                    var hasModifier = (newKeys & Keys.Control) == Keys.Control ||
+                                      (newKeys & Keys.Alt) == Keys.Alt ||
+                                      (newKeys & Keys.Shift) == Keys.Shift;
+
+                    if (newKeys == Keys.None || !hasModifier)
+                    {
+                        errorLabel.Text = "Shortcut must include ALT, CTRL, SHIFT, or a combination.";
+                        errorLabel.Visible = true;
+                        return;
+                    }
+
+                    if (IsShortcutConflict(actionName, newKeys))
+                    {
+                        errorLabel.Text = "This shortcut is already assigned to another action in the same tab.";
+                        errorLabel.Visible = true;
+                        return;
+                    }
+
+                    errorLabel.Text = "";
+                    errorLabel.Visible = false;
+                    inputForm.DialogResult = DialogResult.OK;
+                    inputForm.Close();
+                };
+                cancelButton.Click += (s, args) =>
+                {
+                    inputForm.DialogResult = DialogResult.Cancel;
+                    inputForm.Close();
+                };
+
+                inputForm.Controls.AddRange(new Control[] { label, shortcutBox, errorLabel, okButton, cancelButton });
+                inputForm.AcceptButton = okButton;
+                inputForm.CancelButton = cancelButton;
+
+                try
+                {
+                    Core_Themes.ApplyTheme(inputForm);
+                }
+                catch
+                {
+                }
+
+                if (inputForm.ShowDialog(this) == DialogResult.OK)
+                {
+                    var newShortcut = shortcutBox.Text.Trim();
+                    shortcutsDataGridView.Rows[e.RowIndex].Cells[1].Value = newShortcut;
+                    if (!string.IsNullOrEmpty(actionName))
+                        Helper_UI_Shortcuts.ApplyShortcutFromDictionary(actionName, newKeys);
+                    _hasChanges = true;
+                    UpdateStatus($"Shortcut updated: {actionName}");
+                }
             }
         }
+    }
+
+    private bool IsShortcutConflict(string? actionName, Keys newKeys)
+    {
+        if (string.IsNullOrEmpty(actionName) || newKeys == Keys.None)
+            return false;
+
+        var group = GetShortcutGroup(actionName);
+
+        for (var i = 0; i < shortcutsDataGridView.Rows.Count; i++)
+        {
+            var otherAction = shortcutsDataGridView.Rows[i].Cells[0].Value?.ToString();
+            if (otherAction == actionName) continue;
+            if (GetShortcutGroup(otherAction) != group) continue;
+
+            var shortcutString = shortcutsDataGridView.Rows[i].Cells[1].Value?.ToString() ?? "";
+            var otherKeys = Helper_UI_Shortcuts.FromShortcutString(shortcutString);
+            if (otherKeys == newKeys)
+                return true;
+        }
+
+        return false;
+    }
+
+    private string GetShortcutGroup(string? actionName)
+    {
+        if (string.IsNullOrEmpty(actionName)) return "";
+        if (actionName.StartsWith("Inventory")) return "Inventory";
+        if (actionName.StartsWith("Advanced Inventory MultiLoc")) return "AdvancedInventoryMultiLoc";
+        if (actionName.StartsWith("Advanced Inventory Import")) return "AdvancedInventoryImport";
+        if (actionName.StartsWith("Advanced Inventory")) return "AdvancedInventory";
+        if (actionName.StartsWith("Remove")) return "Remove";
+        if (actionName.StartsWith("Transfer")) return "Transfer";
+        return "";
     }
 
     private void LoadAboutInfo()
@@ -498,31 +675,88 @@ public partial class SettingsForm : Form
     {
         try
         {
-            // Create a dictionary to store current shortcuts
+            // Ensure any edits are committed before saving
+            if (shortcutsDataGridView.IsCurrentCellInEditMode)
+                shortcutsDataGridView.EndEdit();
+
+            var user = Core_WipAppVariables.User;
             var shortcuts = new Dictionary<string, string>();
-            
-            // Collect shortcuts from the DataGridView
-            for (int i = 0; i < shortcutsDataGridView.Rows.Count; i++)
+
+            for (var i = 0; i < shortcutsDataGridView.Rows.Count; i++)
             {
                 var row = shortcutsDataGridView.Rows[i];
                 var actionName = row.Cells[0].Value?.ToString();
                 var shortcutString = row.Cells[1].Value?.ToString() ?? "";
-                
+
                 if (!string.IsNullOrEmpty(actionName))
                 {
                     shortcuts[actionName] = shortcutString;
+                    // Update in-memory shortcut for runtime
+                    Helper_UI_Shortcuts.ApplyShortcutFromDictionary(actionName,
+                        Helper_UI_Shortcuts.FromShortcutString(shortcutString));
                 }
             }
-            
-            // Serialize to JSON and save to database
-            var shortcutsJson = System.Text.Json.JsonSerializer.Serialize(shortcuts);
-            await Dao_User.SetShortcutsAsync(Core_WipAppVariables.User, shortcutsJson);
-            
+
+            // Wrap in { "Shortcuts": { ... } }
+            var json = JsonSerializer.Serialize(new { Shortcuts = shortcuts });
+
+            await Dao_User.SetShortcutsJsonAsync(user, json);
+
             UpdateStatus("Shortcuts saved successfully");
         }
         catch (Exception ex)
         {
             throw new Exception($"Failed to save shortcuts: {ex.Message}");
+        }
+    }
+
+    private async void resetDefaultsButton_Click(object? sender, EventArgs e)
+    {
+        var result = MessageBox.Show(
+            "Are you sure you want to reset all settings, theme, and shortcuts to their default values?",
+            "Reset to Defaults",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning);
+
+        if (result != DialogResult.Yes)
+            return;
+
+        try
+        {
+            // Reset database settings to defaults
+            serverTextBox.Text = "localhost";
+            portTextBox.Text = "3306";
+            databaseTextBox.Text = "mtm_wip_application";
+            usernameTextBox.Text = "";
+            passwordTextBox.Text = "";
+            timeoutTextBox.Text = "30";
+            autoReconnectCheckBox.Checked = true;
+
+            // Reset theme to default
+            var defaultTheme = Core_Themes.Core_AppThemes.GetThemeNames().FirstOrDefault() ?? "";
+            if (!string.IsNullOrEmpty(defaultTheme))
+                themeComboBox.SelectedItem = defaultTheme;
+            fontSizeNumericUpDown.Value = 9;
+
+            // Reset shortcuts to defaults
+            var shortcutDict = Helper_UI_Shortcuts.GetShortcutDictionary();
+            shortcutsDataGridView.Rows.Clear();
+            foreach (var kvp in shortcutDict)
+            {
+                var action = kvp.Key;
+                var defaultKeys = kvp.Value;
+                var shortcutValue = Helper_UI_Shortcuts.ToShortcutString(defaultKeys);
+
+                Helper_UI_Shortcuts.ApplyShortcutFromDictionary(action, defaultKeys);
+                shortcutsDataGridView.Rows.Add(action, shortcutValue);
+            }
+
+            _hasChanges = true;
+            UpdateStatus("All settings reset to defaults. Click Save to apply.");
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus($"Error resetting to defaults: {ex.Message}");
         }
     }
 

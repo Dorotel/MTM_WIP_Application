@@ -629,10 +629,85 @@ public static class Core_Themes
 
         public static void ApplyThemeToDataGridView(DataGridView dataGridView)
         {
+            if (dataGridView == null) return;
+
+            var colors = new Model_UserUiColors(); // Assuming colors are fetched or instantiated here.
+
+            // Apply general styling
+            if (colors.CustomControlBackColor.HasValue)
+                dataGridView.BackgroundColor = colors.CustomControlBackColor.Value;
+
+            if (colors.CustomControlForeColor.HasValue) dataGridView.ForeColor = colors.CustomControlForeColor.Value;
+
+            // Apply header style
+            if (dataGridView.ColumnHeadersDefaultCellStyle != null)
+            {
+                if (colors.CustomControlBackColor.HasValue)
+                    dataGridView.ColumnHeadersDefaultCellStyle.BackColor = colors.CustomControlBackColor.Value;
+
+                if (colors.CustomControlForeColor.HasValue)
+                    dataGridView.ColumnHeadersDefaultCellStyle.ForeColor = colors.CustomControlForeColor.Value;
+            }
+
+            // Apply row style
+            if (dataGridView.RowsDefaultCellStyle != null)
+            {
+                if (colors.CustomControlBackColor.HasValue)
+                    dataGridView.RowsDefaultCellStyle.BackColor = colors.CustomControlBackColor.Value;
+
+                if (colors.CustomControlForeColor.HasValue)
+                    dataGridView.RowsDefaultCellStyle.ForeColor = colors.CustomControlForeColor.Value;
+            }
+
+            // Apply alternating row style
+            if (dataGridView.AlternatingRowsDefaultCellStyle != null)
+            {
+                if (colors.CustomControlBackColor.HasValue)
+                    dataGridView.AlternatingRowsDefaultCellStyle.BackColor = colors.CustomControlBackColor.Value;
+
+                if (colors.CustomControlForeColor.HasValue)
+                    dataGridView.AlternatingRowsDefaultCellStyle.ForeColor = colors.CustomControlForeColor.Value;
+            }
+
+            // Ensure grid lines and selection colors are consistent
+            if (colors.CustomControlBackColor.HasValue) dataGridView.GridColor = colors.CustomControlBackColor.Value;
+
+            if (colors.CustomControlForeColor.HasValue)
+            {
+                dataGridView.DefaultCellStyle.SelectionBackColor = colors.CustomControlForeColor.Value;
+                dataGridView.DefaultCellStyle.SelectionForeColor =
+                    colors.CustomControlBackColor ?? SystemColors.ControlText;
+            }
         }
 
         public static void SizeDataGrid(DataGridView dataGridView)
         {
+            if (dataGridView == null) throw new ArgumentNullException(nameof(dataGridView));
+
+            // Step 1: Auto-size columns to fit their content
+            dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            dataGridView.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+
+            // Step 2: Store preferred widths
+            var preferredWidths = new int[dataGridView.Columns.Count];
+            var totalPreferredWidth = 0;
+            for (var i = 0; i < dataGridView.Columns.Count; i++)
+            {
+                preferredWidths[i] = dataGridView.Columns[i].Width;
+                totalPreferredWidth += preferredWidths[i];
+            }
+
+            // Step 3: Set columns to fill mode
+            dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            // Step 4: Set FillWeight for each column proportional to its preferred width
+            for (var i = 0; i < dataGridView.Columns.Count; i++)
+                if (totalPreferredWidth > 0)
+                    dataGridView.Columns[i].FillWeight = (float)preferredWidths[i] / totalPreferredWidth * 100f;
+                else
+                    dataGridView.Columns[i].FillWeight = 100f / dataGridView.Columns.Count;
         }
 
         private static void Button_AutoShrinkText_Paint(object? sender, PaintEventArgs e)

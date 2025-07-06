@@ -1522,3 +1522,61 @@ SET `Full Name`        = p_FullName,
 WHERE `User` = p_User;
 END$$
 DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_GetShortcut` (
+    IN p_UserId VARCHAR(64),
+    IN p_ActionName VARCHAR(255),
+    OUT p_ShortcutValue VARCHAR(255)
+)
+BEGIN
+    DECLARE v_ShortcutsJson JSON;
+    DECLARE v_Value VARCHAR(255);
+
+    SELECT SettingsJson INTO v_ShortcutsJson
+    FROM usr_ui_settings
+    WHERE UserId = p_UserId
+    LIMIT 1;
+
+    SET v_Value = JSON_UNQUOTE(JSON_EXTRACT(v_ShortcutsJson, CONCAT('$.Shortcuts."', p_ActionName, '"')));
+
+    SET p_ShortcutValue = v_Value;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_SetShortcut` (
+    IN p_UserId VARCHAR(64),
+    IN p_ActionName VARCHAR(255),
+    IN p_ShortcutValue VARCHAR(255),
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_Status = 1;
+        SET p_ErrorMsg = 'Database error occurred';
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO usr_ui_settings (UserId, SettingsJson)
+    VALUES (
+        p_UserId,
+        JSON_OBJECT('Shortcuts', JSON_OBJECT(p_ActionName, p_ShortcutValue))
+    )
+    ON DUPLICATE KEY UPDATE
+        SettingsJson = JSON_SET(
+            SettingsJson,
+            CONCAT('$.Shortcuts."', p_ActionName, '"'),
+            p_ShortcutValue
+        );
+
+    COMMIT;
+
+    SET p_Status = 0;
+    SET p_ErrorMsg = NULL;
+END$$
+DELIMITER ;

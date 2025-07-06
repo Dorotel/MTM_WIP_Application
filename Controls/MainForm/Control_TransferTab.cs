@@ -34,10 +34,14 @@ public partial class ControlTransferTab : UserControl
 
         // Set tooltips for Transfer tab buttons using shortcut constants
         var toolTip = new ToolTip();
-        toolTip.SetToolTip(Control_TransferTab_Button_Search, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Search)}");
-        toolTip.SetToolTip(Control_TransferTab_Button_Transfer, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Transfer)}");
-        toolTip.SetToolTip(Control_TransferTab_Button_Reset, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Reset)}");
-        toolTip.SetToolTip(Control_TransferTab_Button_Toggle_RightPanel, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Left)}/{Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Right)}");
+        toolTip.SetToolTip(Control_TransferTab_Button_Search,
+            $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Search)}");
+        toolTip.SetToolTip(Control_TransferTab_Button_Transfer,
+            $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Transfer)}");
+        toolTip.SetToolTip(Control_TransferTab_Button_Reset,
+            $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Reset)}");
+        toolTip.SetToolTip(Control_TransferTab_Button_Toggle_RightPanel,
+            $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Left)}/{Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Right)}");
 
         _ = Control_TransferTab_OnStartup_LoadComboBoxesAsync();
     }
@@ -58,45 +62,42 @@ public partial class ControlTransferTab : UserControl
         try
         {
             if (keyData == Core_WipAppVariables.Shortcut_Transfer_Search)
-            {
                 if (Control_TransferTab_Button_Search.Visible && Control_TransferTab_Button_Search.Enabled)
                 {
                     Control_TransferTab_Button_Search.PerformClick();
                     return true;
                 }
-            }
+
             if (keyData == Core_WipAppVariables.Shortcut_Transfer_Transfer)
-            {
                 if (Control_TransferTab_Button_Transfer.Visible && Control_TransferTab_Button_Transfer.Enabled)
                 {
                     Control_TransferTab_Button_Transfer.PerformClick();
                     return true;
                 }
-            }
+
             if (keyData == Core_WipAppVariables.Shortcut_Transfer_Reset)
-            {
                 if (Control_TransferTab_Button_Reset.Visible && Control_TransferTab_Button_Reset.Enabled)
                 {
                     Control_TransferTab_Button_Reset.PerformClick();
                     return true;
                 }
-            }
+
             if (keyData == Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Right)
-            {
-                if (Control_TransferTab_Button_Toggle_RightPanel.Visible && Control_TransferTab_Button_Toggle_RightPanel.Enabled)
+                if (Control_TransferTab_Button_Toggle_RightPanel.Visible &&
+                    Control_TransferTab_Button_Toggle_RightPanel.Enabled)
                 {
                     Control_TransferTab_Button_Toggle_RightPanel.PerformClick();
                     return true;
                 }
-            }
+
             if (keyData == Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Left)
-            {
-                if (Control_TransferTab_Button_Toggle_RightPanel.Visible && Control_TransferTab_Button_Toggle_RightPanel.Enabled)
+                if (Control_TransferTab_Button_Toggle_RightPanel.Visible &&
+                    Control_TransferTab_Button_Toggle_RightPanel.Enabled)
                 {
                     Control_TransferTab_Button_Toggle_RightPanel.PerformClick();
                     return true;
                 }
-            }
+
             if (keyData == Keys.Enter)
             {
                 SelectNextControl(ActiveControl, true, true, true, true);

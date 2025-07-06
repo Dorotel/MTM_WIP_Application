@@ -51,12 +51,16 @@ public partial class ControlRemoveTab : UserControl
 
         // Set tooltips for Remove tab buttons using shortcut constants
         var toolTip = new ToolTip();
-        toolTip.SetToolTip(Control_RemoveTab_Button_Search, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Search)}");
-        toolTip.SetToolTip(Control_RemoveTab_Button_Delete, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Delete)}");
-        toolTip.SetToolTip(Control_RemoveTab_Button_Reset, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Reset)}");
+        toolTip.SetToolTip(Control_RemoveTab_Button_Search,
+            $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Search)}");
+        toolTip.SetToolTip(Control_RemoveTab_Button_Delete,
+            $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Delete)}");
+        toolTip.SetToolTip(Control_RemoveTab_Button_Reset,
+            $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Reset)}");
         var undoBtn = Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] as Button;
         if (undoBtn != null)
-            toolTip.SetToolTip(undoBtn, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Undo)}");
+            toolTip.SetToolTip(undoBtn,
+                $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Undo)}");
     }
 
     public void Control_RemoveTab_Initialize()

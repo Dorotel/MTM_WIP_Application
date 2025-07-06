@@ -72,7 +72,8 @@ public partial class Control_AdvancedRemove : UserControl
             normalBtn.Click -= Control_AdvancedRemove_Button_Normal_Click;
             normalBtn.Click += Control_AdvancedRemove_Button_Normal_Click;
             var toolTip = new ToolTip();
-            toolTip.SetToolTip(normalBtn, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Normal)}");
+            toolTip.SetToolTip(normalBtn,
+                $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Normal)}");
         }
 
         // Wire up Undo button
@@ -82,7 +83,8 @@ public partial class Control_AdvancedRemove : UserControl
             undoButton.Click -= Control_AdvancedRemove_Button_Undo_Click;
             undoButton.Click += Control_AdvancedRemove_Button_Undo_Click;
             var toolTip = new ToolTip();
-            toolTip.SetToolTip(undoButton, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Undo)}");
+            toolTip.SetToolTip(undoButton,
+                $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Undo)}");
         }
 
         // Wire up Search button
@@ -92,7 +94,8 @@ public partial class Control_AdvancedRemove : UserControl
             searchButton.Click -= Control_AdvancedRemove_Button_Search_Click;
             searchButton.Click += Control_AdvancedRemove_Button_Search_Click;
             var toolTip = new ToolTip();
-            toolTip.SetToolTip(searchButton, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Search)}");
+            toolTip.SetToolTip(searchButton,
+                $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Search)}");
         }
 
         // Wire up Reset button
@@ -102,7 +105,8 @@ public partial class Control_AdvancedRemove : UserControl
             resetButton.Click -= Control_AdvancedRemove_Button_Reset_Click;
             resetButton.Click += Control_AdvancedRemove_Button_Reset_Click;
             var toolTip = new ToolTip();
-            toolTip.SetToolTip(resetButton, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Reset)}");
+            toolTip.SetToolTip(resetButton,
+                $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Reset)}");
         }
 
         // Wire up Delete button
@@ -112,7 +116,8 @@ public partial class Control_AdvancedRemove : UserControl
             deleteButton.Click -= Control_AdvancedRemove_Button_Delete_Click;
             deleteButton.Click += Control_AdvancedRemove_Button_Delete_Click;
             var toolTip = new ToolTip();
-            toolTip.SetToolTip(deleteButton, $"Shortcut: {Core_WipAppVariables.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Delete)}");
+            toolTip.SetToolTip(deleteButton,
+                $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Delete)}");
         }
 
         // Add Undo button if not present
