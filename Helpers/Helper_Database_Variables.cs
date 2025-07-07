@@ -1,5 +1,6 @@
 ﻿using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
+using System.Diagnostics;
 
 namespace MTM_Inventory_Application.Helpers;
 
@@ -31,18 +32,48 @@ public static class Helper_Database_Variables
 
     public static string GetLogFilePath(string server, string userName)
     {
-        var logDirectory = server switch
+        try
         {
-            "172.16.1.104" => @"X:\MH_RESOURCE\Material_Handler\MTM WIP App\Logs",
-            "localhost" => @"C:\Users\johnk\OneDrive\Documents\Work Folder\WIP App Logs",
-            _ => throw new InvalidOperationException("Unknown server value.")
-        };
-        var userDirectory = Path.Combine(logDirectory, userName);
-        if (!Directory.Exists(userDirectory))
-            Directory.CreateDirectory(userDirectory);
-        var timestamp = DateTime.Now.ToString("MM-dd-yyyy @ h-mm tt");
-        var logFileName = $"{userName} {timestamp}.log";
-        return Path.Combine(userDirectory, logFileName);
+            var logDirectory = (Environment.UserName.Equals("johnk", StringComparison.OrdinalIgnoreCase))
+                ? @"C:\Users\johnk\OneDrive\Documents\Work Folder\WIP App Logs"
+                : server switch
+                {
+                    "172.16.1.104" => @"X:\MH_RESOURCE\Material_Handler\MTM WIP App\Logs",
+                    "localhost" => @"C:\WIPAppLogs",
+                    _ => throw new InvalidOperationException("Unknown server value.")
+                };
+
+            var userDirectory = Path.Combine(logDirectory, userName);
+            
+            // Add timeout for directory creation to prevent hanging on network shares
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            var directoryTask = Task.Run(() =>
+            {
+                if (!Directory.Exists(userDirectory))
+                {
+                    Directory.CreateDirectory(userDirectory);
+                }
+            }, cts.Token);
+            
+            try
+            {
+                directoryTask.Wait(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"Directory creation timed out for: {userDirectory}");
+            }
+            
+            var timestamp = DateTime.Now.ToString("MM-dd-yyyy @ h-mm tt");
+            var logFileName = $"{userName} {timestamp}.log";
+            return Path.Combine(userDirectory, logFileName);
+        }
+        catch (Exception ex)
+        {
+            // Don't use LoggingUtility here to avoid recursion during initialization
+            Debug.WriteLine($"[DEBUG] Error in GetLogFilePath: {ex.Message}");
+            throw; // Re-throw to let caller handle the fallback
+        }
     }
 
     #endregion

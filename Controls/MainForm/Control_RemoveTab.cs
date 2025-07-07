@@ -376,6 +376,10 @@ Are you sure?",
         Control_RemoveTab_Button_Reset.Enabled = false;
         try
         {
+            // Show progress bar
+            MainFormInstance?.TabLoadingProgress?.ShowProgress();
+            MainFormInstance?.TabLoadingProgress?.UpdateProgress(10, "Resetting Remove tab...");
+
             // 1) Hide controls during reset
             Control_RemoveTab_ComboBox_Part.Visible = false;
             Control_RemoveTab_ComboBox_Operation.Visible = false;
@@ -388,9 +392,11 @@ Are you sure?",
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
             }
 
+            MainFormInstance?.TabLoadingProgress?.UpdateProgress(30, "Resetting data tables...");
             // 3) Reset the DataTables and reinitialize them
             await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
 
+            MainFormInstance?.TabLoadingProgress?.UpdateProgress(60, "Refilling combo boxes...");
             // 4) Refill each combobox with proper data
             await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(Control_RemoveTab_ComboBox_Part);
             await Helper_UI_ComboBoxes.FillOperationComboBoxesAsync(Control_RemoveTab_ComboBox_Operation);
@@ -428,6 +434,7 @@ Are you sure?",
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = true;
                 MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
                     @"Disconnected from Server, please standby...";
+                MainFormInstance.TabLoadingProgress?.HideProgress();
             }
 
             Control_RemoveTab_Button_Reset.Enabled = true;

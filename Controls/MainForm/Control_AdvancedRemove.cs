@@ -655,6 +655,8 @@ public partial class Control_AdvancedRemove : UserControl
             btn.Enabled = false;
         try
         {
+            ControlRemoveTab.MainFormInstance?.TabLoadingProgress?.ShowProgress();
+            ControlRemoveTab.MainFormInstance?.TabLoadingProgress?.UpdateProgress(10, "Resetting Advanced Remove tab...");
             Debug.WriteLine("[DEBUG] AdvancedRemove HardReset - start");
             if (MainFormInstance != null)
             {
@@ -664,6 +666,7 @@ public partial class Control_AdvancedRemove : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
             }
 
+            ControlRemoveTab.MainFormInstance?.TabLoadingProgress?.UpdateProgress(30, "Resetting data tables...");
             // Hide controls during reset
             Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
             Control_AdvancedRemove_ComboBox_Part.Visible = false;
@@ -676,6 +679,7 @@ public partial class Control_AdvancedRemove : UserControl
             await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
             Debug.WriteLine("[DEBUG] DataTables reset complete");
 
+            ControlRemoveTab.MainFormInstance?.TabLoadingProgress?.UpdateProgress(60, "Refilling combo boxes...");
             // Refill each combobox with proper data
             Debug.WriteLine("[DEBUG] Refilling Part ComboBox");
             await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(Control_AdvancedRemove_ComboBox_Part);
@@ -741,6 +745,7 @@ public partial class Control_AdvancedRemove : UserControl
                 ControlRemoveTab.MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = true;
                 ControlRemoveTab.MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
                     @"Disconnected from Server, please standby...";
+                ControlRemoveTab.MainFormInstance?.TabLoadingProgress?.HideProgress();
             }
         }
     }

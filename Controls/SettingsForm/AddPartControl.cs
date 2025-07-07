@@ -23,7 +23,8 @@ public partial class AddPartControl : UserControl
             typeComboBox.Items.Clear();
             typeComboBox.Items.Add("Select Type");
 
-            foreach (DataRow row in partTypes.Rows) typeComboBox.Items.Add(row["Type"].ToString());
+            foreach (DataRow row in partTypes.Rows)
+                typeComboBox.Items.Add(row["Type"]?.ToString() ?? string.Empty);
 
             typeComboBox.SelectedIndex = 0;
         }

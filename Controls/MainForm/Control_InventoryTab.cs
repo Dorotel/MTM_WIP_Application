@@ -249,6 +249,8 @@ public partial class ControlInventoryTab : UserControl
         Control_InventoryTab_Button_Reset.Enabled = false;
         try
         {
+            MainFormInstance?.TabLoadingProgress?.ShowProgress();
+            MainFormInstance?.TabLoadingProgress?.UpdateProgress(10, "Resetting Inventory tab...");
             Debug.WriteLine("[DEBUG] InventoryTab Reset button clicked - start");
             // 3) Unbind DataSource before DataTable reset & Update status strip to show reset is in progress
             if (MainFormInstance != null)
@@ -259,18 +261,19 @@ public partial class ControlInventoryTab : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
             }
 
+            MainFormInstance?.TabLoadingProgress?.UpdateProgress(30, "Resetting data tables...");
             // 1) Hide controls during reset
             Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
             Control_InventoryTab_ComboBox_Part.Visible = false;
             Control_InventoryTab_ComboBox_Operation.Visible = false;
             Control_InventoryTab_ComboBox_Location.Visible = false;
 
-
             // 4) Reset the DataTables and reinitialize them
             Debug.WriteLine("[DEBUG] Resetting and refreshing all ComboBox DataTables");
             await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
             Debug.WriteLine("[DEBUG] DataTables reset complete");
 
+            MainFormInstance?.TabLoadingProgress?.UpdateProgress(60, "Refilling combo boxes...");
             // 5) Refill each combobox with proper data
             Debug.WriteLine("[DEBUG] Refilling Part ComboBox");
             await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(Control_InventoryTab_ComboBox_Part);
@@ -304,7 +307,6 @@ public partial class ControlInventoryTab : UserControl
 
             // 9) Restore status strip
 
-
             Debug.WriteLine("[DEBUG] InventoryTab Reset button clicked - end");
         }
         catch (Exception ex)
@@ -324,6 +326,7 @@ public partial class ControlInventoryTab : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = true;
                 MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
                     @"Disconnected from Server, please standby...";
+                MainFormInstance.TabLoadingProgress?.HideProgress();
             }
         }
     }

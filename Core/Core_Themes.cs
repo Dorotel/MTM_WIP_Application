@@ -55,6 +55,7 @@ public static class Core_Themes
         [typeof(ContextMenuStrip)] = ThemeAppliersInternal.ApplyContextMenuTheme,
         [typeof(Control_QuickButtons)] = ThemeAppliersInternal.ApplyQuickButtonsTheme,
         [typeof(Control_AdvancedInventory)] = ThemeAppliersInternal.ApplyAdvancedInventoryTheme,
+        [typeof(Controls.Shared.ProgressBarUserControl)] = ThemeAppliersInternal.ApplyProgressBarUserControlTheme,
         [typeof(Control_AdvancedRemove)] = ThemeAppliersInternal.ApplyAdvancedRemoveTheme,
         [typeof(ConnectionStrengthControl)] = ThemeAppliersInternal.ApplyConnectionStrengthTheme,
         [typeof(ControlInventoryTab)] = ThemeAppliersInternal.ApplyInventoryTabTheme,
@@ -542,6 +543,15 @@ public static class Core_Themes
             {
                 if (colors.ProgressBarBackColor.HasValue) pb.BackColor = colors.ProgressBarBackColor.Value;
                 if (colors.ProgressBarForeColor.HasValue) pb.ForeColor = colors.ProgressBarForeColor.Value;
+            }
+        }
+
+        public static void ApplyProgressBarUserControlTheme(Control control, Model_UserUiColors colors)
+        {
+            if (control is Controls.Shared.ProgressBarUserControl pbuc)
+            {
+                if (colors.UserControlBackColor.HasValue) pbuc.BackColor = colors.UserControlBackColor.Value;
+                if (colors.UserControlForeColor.HasValue) pbuc.ForeColor = colors.UserControlForeColor.Value;
             }
         }
 

@@ -3,6 +3,7 @@ using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Controls.SettingsForm;
+using MTM_Inventory_Application.Controls.Shared;
 using System.Data;
 using System.Text.Json;
 
@@ -13,6 +14,7 @@ public partial class SettingsForm : Form
     private bool _hasChanges = false;
     private readonly Dictionary<string, Panel> _settingsPanels;
     private string? _originalThemeName;
+    private ProgressBarUserControl _loadingProgress = null!;
 
     public SettingsForm()
     {
@@ -32,6 +34,9 @@ public partial class SettingsForm : Form
 
         // Store the original theme name for later comparison
         _originalThemeName = Model_AppVariables.ThemeName;
+
+        // Initialize progress control
+        InitializeProgressControl();
 
         // Wire up themeComboBox event
         themeComboBox.SelectedIndexChanged += ThemeComboBox_SelectedIndexChanged;
@@ -136,25 +141,36 @@ public partial class SettingsForm : Form
     {
         try
         {
-            UpdateStatus("Loading settings...");
+            ShowLoadingProgress("Loading settings...");
+            UpdateLoadingProgress(10, "Loading settings...");
 
             // Load database connection settings
+            UpdateLoadingProgress(25, "Loading database settings...");
             await LoadDatabaseSettings();
 
             // Load theme settings
+            UpdateLoadingProgress(50, "Loading theme settings...");
             await LoadThemeSettings();
 
             // Load shortcuts
+            UpdateLoadingProgress(75, "Loading shortcuts...");
             await LoadShortcuts();
 
             // Load about information
+            UpdateLoadingProgress(90, "Loading about information...");
             LoadAboutInfo();
 
+            UpdateLoadingProgress(100, "Settings loaded successfully");
             UpdateStatus("Settings loaded successfully");
             _hasChanges = false;
+            
+            // Hide progress after a brief delay
+            await Task.Delay(500);
+            HideLoadingProgress();
         }
         catch (Exception ex)
         {
+            HideLoadingProgress();
             UpdateStatus($"Error loading settings: {ex.Message}");
         }
     }
@@ -514,6 +530,57 @@ public partial class SettingsForm : Form
         }
     }
 
+    private async void categoryListBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (categoryListBox.SelectedItem == null)
+            return;
+
+        string selected = categoryListBox.SelectedItem.ToString()!;
+        ShowLoadingProgress($"Loading {selected} settings...");
+        UpdateLoadingProgress(0, $"Loading {selected} settings...");
+
+        // Load the relevant panel with progress updates
+        await LoadPanelAsync(selected);
+
+        UpdateLoadingProgress(100, $"{selected} loaded");
+        await Task.Delay(300);
+        HideLoadingProgress();
+        ShowPanel(selected);
+    }
+
+    private async Task LoadPanelAsync(string panelName)
+    {
+        switch (panelName)
+        {
+            case "Database":
+                UpdateLoadingProgress(20, "Loading database settings...");
+                await LoadDatabaseSettings();
+                UpdateLoadingProgress(80, "Database settings loaded");
+                break;
+            case "Theme":
+                UpdateLoadingProgress(20, "Loading theme settings...");
+                await LoadThemeSettings();
+                UpdateLoadingProgress(80, "Theme settings loaded");
+                break;
+            case "Shortcuts":
+                UpdateLoadingProgress(20, "Loading shortcuts...");
+                await LoadShortcuts();
+                UpdateLoadingProgress(80, "Shortcuts loaded");
+                break;
+            case "About":
+                UpdateLoadingProgress(20, "Loading about info...");
+                LoadAboutInfo();
+                UpdateLoadingProgress(80, "About info loaded");
+                break;
+            default:
+                // For Add/Edit/Remove Part panels, just a short delay for effect
+                UpdateLoadingProgress(50, $"Loading {panelName}...");
+                await Task.Delay(200);
+                UpdateLoadingProgress(80, $"{panelName} loaded");
+                break;
+        }
+    }
+
     private void ShowPanel(string panelName)
     {
         // Hide all panels
@@ -526,26 +593,27 @@ public partial class SettingsForm : Form
     private void UpdateStatus(string message)
     {
         statusLabel.Text = message;
-        Application.DoEvents();
     }
 
     #region Event Handlers
-
-    private void categoryListBox_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        if (categoryListBox.SelectedItem != null) ShowPanel(categoryListBox.SelectedItem.ToString()!);
-    }
 
     private async void saveButton_Click(object sender, EventArgs e)
     {
         try
         {
-            UpdateStatus("Saving settings...");
+            ShowLoadingProgress("Saving settings...");
+            UpdateLoadingProgress(10, "Saving settings...");
 
+            UpdateLoadingProgress(25, "Saving database settings...");
             await SaveDatabaseSettings();
+            
+            UpdateLoadingProgress(50, "Saving application settings...");
             await SaveSettingsJson();
+            
+            UpdateLoadingProgress(75, "Saving shortcuts...");
             await SaveShortcutsJson();
 
+            UpdateLoadingProgress(90, "Applying theme changes...");
             _hasChanges = false;
             UpdateStatus("Settings saved successfully");
 
@@ -557,11 +625,18 @@ public partial class SettingsForm : Form
                 foreach (Form openForm in Application.OpenForms) Core_Themes.ApplyTheme(openForm);
             }
 
+            UpdateLoadingProgress(100, "Settings saved successfully");
+            
+            // Hide progress after a brief delay
+            await Task.Delay(500);
+            HideLoadingProgress();
+
             MessageBox.Show("Settings saved successfully!", "Settings", MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
+            HideLoadingProgress();
             UpdateStatus($"Error saving settings: {ex.Message}");
             MessageBox.Show($"Error saving settings: {ex.Message}", "Error", MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -724,61 +799,84 @@ public partial class SettingsForm : Form
 
     #endregion
 
-    #region Helper Methods
 
-    private void ShowSimpleInputDialog(string title, string prompt, Func<string, Task> onConfirm)
+    #region Progress Control
+
+    private void InitializeProgressControl()
     {
-        using var inputForm = new Form();
-        inputForm.Text = title;
-        inputForm.Size = new Size(400, 150);
-        inputForm.StartPosition = FormStartPosition.CenterParent;
-        inputForm.FormBorderStyle = FormBorderStyle.FixedDialog;
-        inputForm.MaximizeBox = false;
-        inputForm.MinimizeBox = false;
-
-        var label = new Label { Text = prompt, Location = new Point(10, 20), Size = new Size(360, 20) };
-        var textBox = new TextBox { Location = new Point(10, 45), Size = new Size(360, 20) };
-        var okButton = new Button { Text = "OK", Location = new Point(215, 75), Size = new Size(75, 23) };
-        var cancelButton = new Button { Text = "Cancel", Location = new Point(295, 75), Size = new Size(75, 23) };
-
-        okButton.Click += async (s, e) =>
-        {
-            if (!string.IsNullOrWhiteSpace(textBox.Text))
-            {
-                inputForm.DialogResult = DialogResult.OK;
-                inputForm.Close();
-                try
-                {
-                    await onConfirm(textBox.Text);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        };
-
-        cancelButton.Click += (s, e) =>
-        {
-            inputForm.DialogResult = DialogResult.Cancel;
-            inputForm.Close();
-        };
-
-        inputForm.Controls.AddRange(new Control[] { label, textBox, okButton, cancelButton });
-        inputForm.AcceptButton = okButton;
-        inputForm.CancelButton = cancelButton;
-
-        // Apply theme if possible
         try
         {
-            Core_Themes.ApplyTheme(inputForm);
-        }
-        catch
-        {
-            // Theme application failed, continue without theming
-        }
+            // Create and configure the progress control
+            _loadingProgress = new ProgressBarUserControl
+            {
+                Size = new Size(350, 120),
+                Visible = false,
+                Anchor = AnchorStyles.None,
+                StatusText = "Loading settings..."
+            };
 
-        inputForm.ShowDialog(this);
+            // Position the progress control at the center of the form
+            _loadingProgress.Location = new Point(
+                (Width - _loadingProgress.Width) / 2,
+                (Height - _loadingProgress.Height) / 2
+            );
+
+            // Add to form so it appears on top
+            Controls.Add(_loadingProgress);
+            _loadingProgress.BringToFront();
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail initialization
+            UpdateStatus($"Warning: Could not initialize progress control - {ex.Message}");
+        }
+    }
+
+    private void ShowLoadingProgress(string status = "Loading...")
+    {
+        try
+        {
+            if (_loadingProgress != null)
+            {
+                // Center the progress control on the form
+                _loadingProgress.Location = new Point(
+                    (Width - _loadingProgress.Width) / 2,
+                    (Height - _loadingProgress.Height) / 2
+                );
+
+                _loadingProgress.StatusText = status;
+                _loadingProgress.ShowProgress();
+                _loadingProgress.UpdateProgress(0, status);
+            }
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus($"Warning: Progress display error - {ex.Message}");
+        }
+    }
+
+    private void UpdateLoadingProgress(int progress, string status)
+    {
+        try
+        {
+            _loadingProgress?.UpdateProgress(progress, status);
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus($"Warning: Progress update error - {ex.Message}");
+        }
+    }
+
+    private void HideLoadingProgress()
+    {
+        try
+        {
+            _loadingProgress?.HideProgress();
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus($"Warning: Progress hide error - {ex.Message}");
+        }
     }
 
     #endregion

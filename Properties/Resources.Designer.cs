@@ -63,19 +63,20 @@ namespace MTM_Inventory_Application.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap NothingFound {
+        internal static System.Drawing.Bitmap MTM {
             get {
-                object obj = ResourceManager.GetObject("NothingFound", resourceCulture);
+                object obj = ResourceManager.GetObject("MTM", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 4.6.0.0.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static string version {
+        internal static System.Drawing.Bitmap NothingFound {
             get {
-                return ResourceManager.GetString("version", resourceCulture);
+                object obj = ResourceManager.GetObject("NothingFound", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }
