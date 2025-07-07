@@ -98,6 +98,112 @@ internal static class Dao_Part
 
     #endregion
 
+    #region New Stored Procedure Methods
+
+    internal static async Task AddPartWithStoredProcedure(string itemNumber, string customer, string description, string issuedBy, string type, bool useAsync = false)
+    {
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["p_ItemNumber"] = itemNumber,
+                ["p_Customer"] = customer,
+                ["p_Description"] = description,
+                ["p_IssuedBy"] = issuedBy,
+                ["p_Type"] = type,
+                ["p_DieLocation"] = "null", // JSON null for now
+                ["p_DieFGT"] = "null" // JSON null for now
+            };
+
+            await HelperDatabaseCore.ExecuteNonQuery("md_part_ids_Add_Part", parameters, useAsync, CommandType.StoredProcedure);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    internal static async Task UpdatePartWithStoredProcedure(int id, string itemNumber, string customer, string description, string issuedBy, string type, bool useAsync = false)
+    {
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["p_ID"] = id,
+                ["p_ItemNumber"] = itemNumber,
+                ["p_Customer"] = customer,
+                ["p_Description"] = description,
+                ["p_IssuedBy"] = issuedBy,
+                ["p_Type"] = type,
+                ["p_DieLocation"] = "null", // JSON null for now
+                ["p_DieFGT"] = "null" // JSON null for now
+            };
+
+            await HelperDatabaseCore.ExecuteNonQuery("md_part_ids_Update_Part", parameters, useAsync, CommandType.StoredProcedure);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    internal static async Task DeletePartByItemNumber(string itemNumber, bool useAsync = false)
+    {
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["p_ItemNumber"] = itemNumber
+            };
+
+            await HelperDatabaseCore.ExecuteNonQuery("md_part_ids_Delete_ByItemNumber", parameters, useAsync, CommandType.StoredProcedure);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    internal static async Task<DataTable> GetPartTypes(bool useAsync = false)
+    {
+        try
+        {
+            return await HelperDatabaseCore.ExecuteDataTable("SELECT DISTINCT `Type` FROM `md_item_types` ORDER BY `Type`", useAsync: useAsync, commandType: CommandType.Text);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+            return new DataTable();
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return new DataTable();
+        }
+    }
+
+    #endregion
+
     #region Helpers
 
     private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)

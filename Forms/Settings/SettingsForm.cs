@@ -2,6 +2,7 @@
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
+using MTM_Inventory_Application.Controls.SettingsForm;
 using System.Data;
 using System.Text.Json;
 
@@ -21,6 +22,9 @@ public partial class SettingsForm : Form
         _settingsPanels = new Dictionary<string, Panel>
         {
             ["Database"] = databasePanel,
+            ["Add Part Number"] = addPartPanel,
+            ["Edit Part Number"] = editPartPanel,
+            ["Remove Part Number"] = removePartPanel,
             ["Theme"] = themePanel,
             ["Shortcuts"] = shortcutsPanel,
             ["About"] = aboutPanel
@@ -35,8 +39,41 @@ public partial class SettingsForm : Form
         // Wire up shortcutsDataGridView event
         shortcutsDataGridView.CellBeginEdit += ShortcutsDataGridView_CellBeginEdit;
 
+        // Initialize user controls
+        InitializeUserControls();
+
         // Initialize the form
         InitializeForm();
+    }
+
+    private void InitializeUserControls()
+    {
+        // Initialize Add Part Control
+        var addPartControl = new AddPartControl();
+        addPartControl.Dock = DockStyle.Fill;
+        addPartControl.PartAdded += (s, e) => {
+            // Refresh other controls when a part is added
+            UpdateStatus("Part added successfully - lists refreshed");
+        };
+        addPartPanel.Controls.Add(addPartControl);
+
+        // Initialize Edit Part Control
+        var editPartControl = new EditPartControl();
+        editPartControl.Dock = DockStyle.Fill;
+        editPartControl.PartUpdated += (s, e) => {
+            // Refresh other controls when a part is updated
+            UpdateStatus("Part updated successfully - lists refreshed");
+        };
+        editPartPanel.Controls.Add(editPartControl);
+
+        // Initialize Remove Part Control
+        var removePartControl = new RemovePartControl();
+        removePartControl.Dock = DockStyle.Fill;
+        removePartControl.PartRemoved += (s, e) => {
+            // Refresh other controls when a part is removed
+            UpdateStatus("Part removed successfully - lists refreshed");
+        };
+        removePartPanel.Controls.Add(removePartControl);
     }
 
     private void ThemeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
@@ -112,9 +149,6 @@ public partial class SettingsForm : Form
 
             // Load about information
             LoadAboutInfo();
-
-            // Load database objects
-            await LoadDatabaseObjects();
 
             UpdateStatus("Settings loaded successfully");
             _hasChanges = false;
@@ -480,89 +514,6 @@ public partial class SettingsForm : Form
         }
     }
 
-    private async Task LoadDatabaseObjects()
-    {
-        try
-        {
-            await LoadParts();
-            await LoadOperations();
-            await LoadLocations();
-            await LoadUsers();
-        }
-        catch (Exception ex)
-        {
-            UpdateStatus($"Error loading database objects: {ex.Message}");
-        }
-    }
-
-    private async Task LoadParts()
-    {
-        try
-        {
-            // This would need to be implemented in Dao_Part
-            // For now, just set up the grid structure
-            partsDataGridView.Columns.Clear();
-            partsDataGridView.Columns.Add("ItemNumber", "Item Number");
-            partsDataGridView.Columns.Add("Type", "Type");
-            partsDataGridView.Columns.Add("IssuedBy", "Issued By");
-            partsDataGridView.ReadOnly = true;
-            partsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        }
-        catch (Exception ex)
-        {
-            UpdateStatus($"Error loading parts: {ex.Message}");
-        }
-    }
-
-    private async Task LoadOperations()
-    {
-        try
-        {
-            operationsDataGridView.Columns.Clear();
-            operationsDataGridView.Columns.Add("Operation", "Operation");
-            operationsDataGridView.Columns.Add("IssuedBy", "Issued By");
-            operationsDataGridView.ReadOnly = true;
-            operationsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        }
-        catch (Exception ex)
-        {
-            UpdateStatus($"Error loading operations: {ex.Message}");
-        }
-    }
-
-    private async Task LoadLocations()
-    {
-        try
-        {
-            locationsDataGridView.Columns.Clear();
-            locationsDataGridView.Columns.Add("Location", "Location");
-            locationsDataGridView.Columns.Add("IssuedBy", "Issued By");
-            locationsDataGridView.ReadOnly = true;
-            locationsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        }
-        catch (Exception ex)
-        {
-            UpdateStatus($"Error loading locations: {ex.Message}");
-        }
-    }
-
-    private async Task LoadUsers()
-    {
-        try
-        {
-            usersDataGridView.Columns.Clear();
-            usersDataGridView.Columns.Add("User", "User");
-            usersDataGridView.Columns.Add("FullName", "Full Name");
-            usersDataGridView.Columns.Add("Shift", "Shift");
-            usersDataGridView.ReadOnly = true;
-            usersDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        }
-        catch (Exception ex)
-        {
-            UpdateStatus($"Error loading users: {ex.Message}");
-        }
-    }
-
     private void ShowPanel(string panelName)
     {
         // Hide all panels
@@ -769,240 +720,6 @@ public partial class SettingsForm : Form
         {
             UpdateStatus($"Error resetting to defaults: {ex.Message}");
         }
-    }
-
-    #endregion
-
-    #region Database Object Management Event Handlers
-
-    private void addPartToolStripButton_Click(object sender, EventArgs e)
-    {
-        ShowSimpleInputDialog("Add Part", "Enter Part ID:", async (partId) =>
-        {
-            if (!string.IsNullOrWhiteSpace(partId))
-            {
-                await Dao_Part.InsertPart(partId, Model_AppVariables.User, "Standard");
-                await LoadParts();
-                _hasChanges = true;
-                UpdateStatus($"Part '{partId}' added successfully");
-            }
-        });
-    }
-
-    private void editPartToolStripButton_Click(object sender, EventArgs e)
-    {
-        if (partsDataGridView.SelectedRows.Count > 0)
-        {
-            var selectedRow = partsDataGridView.SelectedRows[0];
-            var partId = selectedRow.Cells["ItemNumber"].Value?.ToString();
-
-            if (!string.IsNullOrWhiteSpace(partId))
-                ShowSimpleInputDialog("Edit Part", $"Edit Part ID (current: {partId}):", async (newPartId) =>
-                {
-                    if (!string.IsNullOrWhiteSpace(newPartId) && newPartId != partId)
-                        // This would need to be implemented as an update method
-                        UpdateStatus($"Part editing not yet fully implemented");
-                });
-        }
-        else
-        {
-            MessageBox.Show("Please select a part to edit.", "No Selection", MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-    }
-
-    private async void deletePartToolStripButton_Click(object sender, EventArgs e)
-    {
-        if (partsDataGridView.SelectedRows.Count > 0)
-        {
-            var selectedRow = partsDataGridView.SelectedRows[0];
-            var partId = selectedRow.Cells["ItemNumber"].Value?.ToString();
-
-            if (!string.IsNullOrWhiteSpace(partId))
-            {
-                var result = MessageBox.Show($"Are you sure you want to delete part '{partId}'?",
-                    "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                if (result == DialogResult.Yes)
-                    try
-                    {
-                        await Dao_Part.DeletePart(partId);
-                        await LoadParts();
-                        _hasChanges = true;
-                        UpdateStatus($"Part '{partId}' deleted successfully");
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Error deleting part: {ex.Message}", "Error", MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
-                    }
-            }
-        }
-        else
-        {
-            MessageBox.Show("Please select a part to delete.", "No Selection", MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-    }
-
-    private void addOperationToolStripButton_Click(object sender, EventArgs e)
-    {
-        ShowSimpleInputDialog("Add Operation", "Enter Operation:", async (operation) =>
-        {
-            if (!string.IsNullOrWhiteSpace(operation))
-            {
-                await Dao_Operation.InsertOperation(operation, Model_AppVariables.User);
-                await LoadOperations();
-                _hasChanges = true;
-                UpdateStatus($"Operation '{operation}' added successfully");
-            }
-        });
-    }
-
-    private void editOperationToolStripButton_Click(object sender, EventArgs e)
-    {
-        if (operationsDataGridView.SelectedRows.Count > 0)
-        {
-            var selectedRow = operationsDataGridView.SelectedRows[0];
-            var operation = selectedRow.Cells["Operation"].Value?.ToString();
-
-            if (!string.IsNullOrWhiteSpace(operation))
-                ShowSimpleInputDialog("Edit Operation", $"Edit Operation (current: {operation}):",
-                    async (newOperation) =>
-                    {
-                        if (!string.IsNullOrWhiteSpace(newOperation) && newOperation != operation)
-                            UpdateStatus($"Operation editing not yet fully implemented");
-                    });
-        }
-        else
-        {
-            MessageBox.Show("Please select an operation to edit.", "No Selection", MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-    }
-
-    private async void deleteOperationToolStripButton_Click(object sender, EventArgs e)
-    {
-        if (operationsDataGridView.SelectedRows.Count > 0)
-        {
-            var selectedRow = operationsDataGridView.SelectedRows[0];
-            var operation = selectedRow.Cells["Operation"].Value?.ToString();
-
-            if (!string.IsNullOrWhiteSpace(operation))
-            {
-                var result = MessageBox.Show($"Are you sure you want to delete operation '{operation}'?",
-                    "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                if (result == DialogResult.Yes)
-                    try
-                    {
-                        await Dao_Operation.DeleteOperation(operation);
-                        await LoadOperations();
-                        _hasChanges = true;
-                        UpdateStatus($"Operation '{operation}' deleted successfully");
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Error deleting operation: {ex.Message}", "Error", MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
-                    }
-            }
-        }
-        else
-        {
-            MessageBox.Show("Please select an operation to delete.", "No Selection", MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-    }
-
-    private void addLocationToolStripButton_Click(object sender, EventArgs e)
-    {
-        ShowSimpleInputDialog("Add Location", "Enter Location:", async (location) =>
-        {
-            if (!string.IsNullOrWhiteSpace(location))
-            {
-                await Dao_Location.InsertLocation(location, Model_AppVariables.User);
-                await LoadLocations();
-                _hasChanges = true;
-                UpdateStatus($"Location '{location}' added successfully");
-            }
-        });
-    }
-
-    private void editLocationToolStripButton_Click(object sender, EventArgs e)
-    {
-        if (locationsDataGridView.SelectedRows.Count > 0)
-        {
-            var selectedRow = locationsDataGridView.SelectedRows[0];
-            var location = selectedRow.Cells["Location"].Value?.ToString();
-
-            if (!string.IsNullOrWhiteSpace(location))
-                ShowSimpleInputDialog("Edit Location", $"Edit Location (current: {location}):", async (newLocation) =>
-                {
-                    if (!string.IsNullOrWhiteSpace(newLocation) && newLocation != location)
-                        UpdateStatus($"Location editing not yet fully implemented");
-                });
-        }
-        else
-        {
-            MessageBox.Show("Please select a location to edit.", "No Selection", MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-    }
-
-    private async void deleteLocationToolStripButton_Click(object sender, EventArgs e)
-    {
-        if (locationsDataGridView.SelectedRows.Count > 0)
-        {
-            var selectedRow = locationsDataGridView.SelectedRows[0];
-            var location = selectedRow.Cells["Location"].Value?.ToString();
-
-            if (!string.IsNullOrWhiteSpace(location))
-            {
-                var result = MessageBox.Show($"Are you sure you want to delete location '{location}'?",
-                    "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                if (result == DialogResult.Yes)
-                    try
-                    {
-                        await Dao_Location.DeleteLocation(location);
-                        await LoadLocations();
-                        _hasChanges = true;
-                        UpdateStatus($"Location '{location}' deleted successfully");
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Error deleting location: {ex.Message}", "Error", MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
-                    }
-            }
-        }
-        else
-        {
-            MessageBox.Show("Please select a location to delete.", "No Selection", MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-    }
-
-    private void addUserToolStripButton_Click(object sender, EventArgs e)
-    {
-        MessageBox.Show(
-            "User management requires a more complex dialog. This feature will be implemented in a future update.",
-            "Feature Not Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
-    }
-
-    private void editUserToolStripButton_Click(object sender, EventArgs e)
-    {
-        MessageBox.Show(
-            "User management requires a more complex dialog. This feature will be implemented in a future update.",
-            "Feature Not Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
-    }
-
-    private void deleteUserToolStripButton_Click(object sender, EventArgs e)
-    {
-        MessageBox.Show(
-            "User management requires a more complex dialog. This feature will be implemented in a future update.",
-            "Feature Not Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     #endregion

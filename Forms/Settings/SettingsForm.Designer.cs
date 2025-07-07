@@ -89,6 +89,9 @@
             this.aboutPanel = new System.Windows.Forms.Panel();
             this.versionLabel = new System.Windows.Forms.Label();
             this.appNameLabel = new System.Windows.Forms.Label();
+            this.addPartPanel = new System.Windows.Forms.Panel();
+            this.editPartPanel = new System.Windows.Forms.Panel();
+            this.removePartPanel = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -146,6 +149,9 @@
             this.categoryListBox.ItemHeight = 15;
             this.categoryListBox.Items.AddRange(new object[] {
             "Database",
+            "Add Part Number",
+            "Edit Part Number", 
+            "Remove Part Number",
             "Theme",
             "Shortcuts",
             "About"});
@@ -230,7 +236,6 @@
             // databaseTabControl
             // 
             this.databaseTabControl.Controls.Add(this.connectionTabPage);
-            this.databaseTabControl.Controls.Add(this.objectsTabPage);
             this.databaseTabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.databaseTabControl.Location = new System.Drawing.Point(0, 0);
             this.databaseTabControl.Name = "databaseTabControl";
@@ -710,11 +715,41 @@
             this.appNameLabel.TabIndex = 0;
             this.appNameLabel.Text = "MTM WIP Application";
             // 
+            // addPartPanel
+            // 
+            this.addPartPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.addPartPanel.Location = new System.Drawing.Point(0, 0);
+            this.addPartPanel.Name = "addPartPanel";
+            this.addPartPanel.Size = new System.Drawing.Size(596, 410);
+            this.addPartPanel.TabIndex = 6;
+            this.addPartPanel.Visible = false;
+            // 
+            // editPartPanel
+            // 
+            this.editPartPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.editPartPanel.Location = new System.Drawing.Point(0, 0);
+            this.editPartPanel.Name = "editPartPanel";
+            this.editPartPanel.Size = new System.Drawing.Size(596, 410);
+            this.editPartPanel.TabIndex = 7;
+            this.editPartPanel.Visible = false;
+            // 
+            // removePartPanel
+            // 
+            this.removePartPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.removePartPanel.Location = new System.Drawing.Point(0, 0);
+            this.removePartPanel.Name = "removePartPanel";
+            this.removePartPanel.Size = new System.Drawing.Size(596, 410);
+            this.removePartPanel.TabIndex = 8;
+            this.removePartPanel.Visible = false;
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.removePartPanel);
+            this.Controls.Add(this.editPartPanel);
+            this.Controls.Add(this.addPartPanel);
             this.Controls.Add(this.aboutPanel);
             this.Controls.Add(this.shortcutsPanel);
             this.Controls.Add(this.themePanel);
@@ -833,5 +868,8 @@
         private System.Windows.Forms.Panel aboutPanel;
         private System.Windows.Forms.Label versionLabel;
         private System.Windows.Forms.Label appNameLabel;
+        private System.Windows.Forms.Panel addPartPanel;
+        private System.Windows.Forms.Panel editPartPanel;
+        private System.Windows.Forms.Panel removePartPanel;
     }
 }
