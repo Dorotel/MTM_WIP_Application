@@ -2,7 +2,7 @@
 -- version 5.2.2
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
+-- Host: 172.16.1.104:3306
 -- Generation Time: Jul 06, 2025 at 06:45 PM
 -- Server version: 5.7.24
 -- PHP Version: 8.3.1
@@ -25,7 +25,7 @@ DELIMITER $$
 --
 -- Procedures
 --
-CREATE DEFINER=`root`@`localhost` PROCEDURE `db_maint_inv_inventory_FixDuplicateBatchNumbers` (OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `db_maint_inv_inventory_FixDuplicateBatchNumbers` (OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET p_Status = 1;
@@ -71,14 +71,14 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `db_maint_inv_inventory_FixDuplicate
     SET p_ErrorMsg = NULL;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Add_Item` (IN `p_PartID` VARCHAR(300), IN `p_Location` VARCHAR(100), IN `p_Operation` VARCHAR(100), IN `p_Quantity` INT, IN `p_ItemType` VARCHAR(100), IN `p_User` VARCHAR(100), IN `p_BatchNumber` VARCHAR(100), IN `p_Notes` VARCHAR(1000))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Add_Item` (IN `p_PartID` VARCHAR(300), IN `p_Location` VARCHAR(100), IN `p_Operation` VARCHAR(100), IN `p_Quantity` INT, IN `p_ItemType` VARCHAR(100), IN `p_User` VARCHAR(100), IN `p_BatchNumber` VARCHAR(100), IN `p_Notes` VARCHAR(1000))   BEGIN
     INSERT INTO inv_inventory
         (PartID, Location, Operation, Quantity, ItemType, User, BatchNumber, Notes)
     VALUES
         (p_PartID, p_Location, p_Operation, p_Quantity, p_ItemType, p_User, p_BatchNumber, p_Notes);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Advanced_Search` (IN `p_PartID` VARCHAR(300), IN `p_Operation` VARCHAR(100), IN `p_Location` VARCHAR(100), IN `p_QtyMin` INT, IN `p_QtyMax` INT, IN `p_Notes` VARCHAR(1000), IN `p_User` VARCHAR(100), IN `p_DateFrom` DATE, IN `p_DateTo` DATE)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Advanced_Search` (IN `p_PartID` VARCHAR(300), IN `p_Operation` VARCHAR(100), IN `p_Location` VARCHAR(100), IN `p_QtyMin` INT, IN `p_QtyMax` INT, IN `p_Notes` VARCHAR(1000), IN `p_User` VARCHAR(100), IN `p_DateFrom` DATE, IN `p_DateTo` DATE)   BEGIN
     SELECT
         PartID,
         Operation,
@@ -108,15 +108,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Advanced_Search` (IN 
         Location;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_BulkDelete_ByLocation` (IN `p_Location` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_BulkDelete_ByLocation` (IN `p_Location` VARCHAR(100))   BEGIN
     DELETE FROM inv_inventory WHERE Location = p_Location;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Delete_ById` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Delete_ById` (IN `p_ID` INT)   BEGIN
     DELETE FROM inv_inventory WHERE ID = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Fix_BatchNumbers` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Fix_BatchNumbers` ()   BEGIN
     -- Temporary table to hold duplicate IDs and their BatchNumbers
     CREATE TEMPORARY TABLE tmp_dups (ID INT, BatchNumber VARCHAR(6), LastUpdated DATETIME);
 
@@ -157,31 +157,31 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Fix_BatchNumbers` () 
     DROP TEMPORARY TABLE IF EXISTS tmp_dups;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_All` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_All` ()   BEGIN
     SELECT * FROM inv_inventory ORDER BY LastUpdated DESC;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByDateRange` (IN `p_StartDate` DATETIME, IN `p_EndDate` DATETIME)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByDateRange` (IN `p_StartDate` DATETIME, IN `p_EndDate` DATETIME)   BEGIN
     SELECT * FROM inv_inventory
     WHERE ReceiveDate BETWEEN p_StartDate AND p_EndDate;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ById` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ById` (IN `p_ID` INT)   BEGIN
     SELECT * FROM inv_inventory WHERE ID = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByItemType` (IN `p_ItemType` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByItemType` (IN `p_ItemType` VARCHAR(100))   BEGIN
     SELECT * FROM inv_inventory
     WHERE ItemType = p_ItemType;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByLocation` (IN `p_Location` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByLocation` (IN `p_Location` VARCHAR(100))   BEGIN
     SELECT * FROM inv_inventory
     WHERE Location = p_Location
     ORDER BY LastUpdated DESC;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByPartID` (IN `p_PartID` VARCHAR(300))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByPartID` (IN `p_PartID` VARCHAR(300))   BEGIN
 SELECT 
     ID,
     PartID,
@@ -198,7 +198,7 @@ FROM inv_inventory
     WHERE PartID = p_PartID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByPartIDandOperation` (IN `p_PartID` VARCHAR(300), IN `o_Operation` VARCHAR(300))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByPartIDandOperation` (IN `p_PartID` VARCHAR(300), IN `o_Operation` VARCHAR(300))   BEGIN
 SELECT 
     ID,
     PartID,
@@ -215,22 +215,22 @@ FROM inv_inventory
     WHERE PartID = p_PartID AND Operation = o_Operation;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByPartIDLocation` (IN `p_PartID` VARCHAR(300), IN `p_Location` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByPartIDLocation` (IN `p_PartID` VARCHAR(300), IN `p_Location` VARCHAR(100))   BEGIN
     SELECT * FROM inv_inventory
     WHERE PartID = p_PartID AND Location = p_Location;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByUser` (IN `p_User` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByUser` (IN `p_User` VARCHAR(100))   BEGIN
     SELECT * FROM inv_inventory
     WHERE User = p_User
     ORDER BY LastUpdated DESC;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_TotalQuantityByPartId` (IN `p_PartID` VARCHAR(300))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_TotalQuantityByPartId` (IN `p_PartID` VARCHAR(300))   BEGIN
     SELECT SUM(Quantity) AS TotalQuantity FROM inv_inventory WHERE PartID = p_PartID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Remove_Item` (IN `p_PartID` VARCHAR(50), IN `p_Location` VARCHAR(50), IN `p_Operation` VARCHAR(50), IN `p_Quantity` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Remove_Item` (IN `p_PartID` VARCHAR(50), IN `p_Location` VARCHAR(50), IN `p_Operation` VARCHAR(50), IN `p_Quantity` INT)   BEGIN
     -- Delete only one matching row
     DELETE FROM mtm_wip_application.inv_inventory
     WHERE PartID = p_PartID
@@ -243,7 +243,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Remove_Item` (IN `p_P
     SELECT ROW_COUNT() AS affected_rows;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Transfer_Part` (IN `in_BatchNumber` VARCHAR(6), IN `in_PartID` VARCHAR(300), IN `in_Operation` VARCHAR(100), IN `in_NewLocation` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Transfer_Part` (IN `in_BatchNumber` VARCHAR(6), IN `in_PartID` VARCHAR(300), IN `in_Operation` VARCHAR(100), IN `in_NewLocation` VARCHAR(100))   BEGIN
     -- Validate that the record exists
     IF EXISTS (
         SELECT 1 FROM inv_inventory
@@ -261,7 +261,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Transfer_Part` (IN `i
     END IF;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Transfer_Quantity` (IN `in_BatchNumber` VARCHAR(255), IN `in_PartID` VARCHAR(255), IN `in_Operation` VARCHAR(255), IN `in_TransferQuantity` INT, IN `in_OriginalQuantity` INT, IN `in_NewLocation` VARCHAR(255), IN `in_User` VARCHAR(255))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Transfer_Quantity` (IN `in_BatchNumber` VARCHAR(255), IN `in_PartID` VARCHAR(255), IN `in_Operation` VARCHAR(255), IN `in_TransferQuantity` INT, IN `in_OriginalQuantity` INT, IN `in_NewLocation` VARCHAR(255), IN `in_User` VARCHAR(255))   BEGIN
     -- Check if transfer quantity is valid
     IF in_TransferQuantity <= 0 OR in_TransferQuantity > in_OriginalQuantity THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid transfer quantity';
@@ -281,55 +281,55 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Transfer_Quantity` (I
     VALUES (in_BatchNumber, in_PartID, in_Operation, in_TransferQuantity, in_NewLocation, in_User);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Update_Notes` (IN `p_ID` INT, IN `p_Notes` VARCHAR(1000))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Update_Notes` (IN `p_ID` INT, IN `p_Notes` VARCHAR(1000))   BEGIN
     UPDATE inv_inventory
     SET Notes = p_Notes, LastUpdated = CURRENT_TIMESTAMP
     WHERE ID = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Update_Quantity` (IN `p_ID` INT, IN `p_Quantity` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Update_Quantity` (IN `p_ID` INT, IN `p_Quantity` INT)   BEGIN
     UPDATE inv_inventory
     SET Quantity = p_Quantity, LastUpdated = CURRENT_TIMESTAMP
     WHERE ID = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_transaction_Add` (IN `in_TransactionType` ENUM('IN','OUT','TRANSFER'), IN `in_PartID` VARCHAR(300), IN `in_BatchNumber` VARCHAR(100), IN `in_FromLocation` VARCHAR(300), IN `in_ToLocation` VARCHAR(100), IN `in_Operation` VARCHAR(100), IN `in_Quantity` INT, IN `in_Notes` VARCHAR(1000), IN `in_User` VARCHAR(100), IN `in_ItemType` VARCHAR(100), IN `in_DateTime` DATETIME)   INSERT INTO inv_transaction (
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_transaction_Add` (IN `in_TransactionType` ENUM('IN','OUT','TRANSFER'), IN `in_PartID` VARCHAR(300), IN `in_BatchNumber` VARCHAR(100), IN `in_FromLocation` VARCHAR(300), IN `in_ToLocation` VARCHAR(100), IN `in_Operation` VARCHAR(100), IN `in_Quantity` INT, IN `in_Notes` VARCHAR(1000), IN `in_User` VARCHAR(100), IN `in_ItemType` VARCHAR(100), IN `in_DateTime` DATETIME)   INSERT INTO inv_transaction (
         TransactionType, PartID, `Batch Number`, FromLocation, ToLocation, Operation, Quantity, Notes, User, ItemType, DateTime
     ) VALUES (
         in_TransactionType, in_PartID, in_BatchNumber, in_FromLocation, in_ToLocation, in_Operation, in_Quantity, in_Notes, in_User, in_ItemType, in_DateTime
     )$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Add_ChangeLog` (IN `p_Version` VARCHAR(50), IN `p_Notes` LONGTEXT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_changelog_Add_ChangeLog` (IN `p_Version` VARCHAR(50), IN `p_Notes` LONGTEXT)   BEGIN
     INSERT INTO log_changelog (Version, Notes)
     VALUES (p_Version, p_Notes);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Delete_ByVersion` (IN `p_Version` VARCHAR(50))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_changelog_Delete_ByVersion` (IN `p_Version` VARCHAR(50))   BEGIN
     DELETE FROM log_changelog WHERE Version = p_Version;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Get_All` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_changelog_Get_All` ()   BEGIN
     SELECT * FROM log_changelog;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Get_ByVersion` (IN `p_Version` VARCHAR(50))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_changelog_Get_ByVersion` (IN `p_Version` VARCHAR(50))   BEGIN
     SELECT * FROM log_changelog WHERE Version = p_Version;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Get_Current` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_changelog_Get_Current` ()   BEGIN
     SELECT *
     FROM log_changelog
     ORDER BY Version DESC
     LIMIT 1;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Update_Notes` (IN `p_Version` VARCHAR(50), IN `p_Notes` LONGTEXT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_changelog_Update_Notes` (IN `p_Version` VARCHAR(50), IN `p_Notes` LONGTEXT)   BEGIN
     UPDATE log_changelog
     SET Notes = p_Notes
     WHERE Version = p_Version;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_error_Add_Error` (IN `p_User` VARCHAR(100), IN `p_Severity` ENUM('Information','Warning','Error','Critical'), IN `p_ErrorType` VARCHAR(100), IN `p_ErrorMessage` TEXT, IN `p_StackTrace` TEXT, IN `p_ModuleName` VARCHAR(200), IN `p_MethodName` VARCHAR(200), IN `p_AdditionalInfo` TEXT, IN `p_MachineName` VARCHAR(100), IN `p_OSVersion` VARCHAR(100), IN `p_AppVersion` VARCHAR(50), IN `p_ErrorTime` DATETIME)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Add_Error` (IN `p_User` VARCHAR(100), IN `p_Severity` ENUM('Information','Warning','Error','Critical'), IN `p_ErrorType` VARCHAR(100), IN `p_ErrorMessage` TEXT, IN `p_StackTrace` TEXT, IN `p_ModuleName` VARCHAR(200), IN `p_MethodName` VARCHAR(200), IN `p_AdditionalInfo` TEXT, IN `p_MachineName` VARCHAR(100), IN `p_OSVersion` VARCHAR(100), IN `p_AppVersion` VARCHAR(50), IN `p_ErrorTime` DATETIME)   BEGIN
     INSERT INTO log_error (
         `User`, `Severity`, `ErrorType`, `ErrorMessage`, `StackTrace`,
         `ModuleName`, `MethodName`, `AdditionalInfo`, `MachineName`, `OSVersion`, `AppVersion`, `ErrorTime`
@@ -339,176 +339,176 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `log_error_Add_Error` (IN `p_User` V
     );
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_error_Delete_All` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Delete_All` ()   BEGIN
     DELETE FROM log_error;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_error_Delete_ById` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Delete_ById` (IN `p_ID` INT)   BEGIN
     DELETE FROM log_error WHERE ID = p_ID;
     SELECT ROW_COUNT() AS RowsDeleted;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_error_Get_All` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Get_All` ()   BEGIN
     SELECT * FROM log_error ORDER BY ErrorTime DESC;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_error_Get_ByDateRange` (IN `p_Start` DATETIME, IN `p_End` DATETIME)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Get_ByDateRange` (IN `p_Start` DATETIME, IN `p_End` DATETIME)   BEGIN
     SELECT * FROM log_error WHERE ErrorTime BETWEEN p_Start AND p_End ORDER BY ErrorTime DESC;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_error_Get_ById` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Get_ById` (IN `p_ID` INT)   BEGIN
     SELECT * FROM log_error WHERE ID = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `log_error_Get_ByUser` (IN `p_User` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Get_ByUser` (IN `p_User` VARCHAR(100))   BEGIN
         SELECT * FROM log_error
     WHERE `User` COLLATE utf8mb4_general_ci = p_User COLLATE utf8mb4_general_ci
     ORDER BY ErrorTime DESC;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Add_Type` (IN `p_Type` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Add_Type` (IN `p_Type` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))   BEGIN
     INSERT INTO `md_item_types` (`Type`, `Issued By`)
     VALUES (p_Type, p_IssuedBy);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Delete_ByID` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Delete_ByID` (IN `p_ID` INT)   BEGIN
     DELETE FROM `md_item_types`
     WHERE `ID` = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Delete_ByType` (IN `p_Type` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Delete_ByType` (IN `p_Type` VARCHAR(100))   BEGIN
     DELETE FROM `md_item_types`
     WHERE `Type` = p_Type;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Get_All` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Get_All` ()   BEGIN
     SELECT * FROM `md_item_types`;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Get_ByID` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Get_ByID` (IN `p_ID` INT)   BEGIN
     SELECT * FROM `md_item_types`
     WHERE `ID` = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Get_ByType` (IN `p_Type` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Get_ByType` (IN `p_Type` VARCHAR(100))   BEGIN
     SELECT * FROM `md_item_types`
     WHERE `Type` = p_Type;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Update_Type` (IN `p_ID` INT, IN `p_Type` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Update_Type` (IN `p_ID` INT, IN `p_Type` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))   BEGIN
     UPDATE `md_item_types`
     SET `Type` = p_Type,
         `Issued By` = p_IssuedBy
     WHERE `ID` = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_locations_Add_Location` (IN `p_Location` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Add_Location` (IN `p_Location` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))   BEGIN
     INSERT INTO `md_locations` (`Location`, `Issued By`)
     VALUES (p_Location, p_IssuedBy);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_locations_Delete_ByID` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Delete_ByID` (IN `p_ID` INT)   BEGIN
     DELETE FROM `md_locations`
     WHERE `ID` = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_locations_Delete_ByLocation` (IN `p_Location` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Delete_ByLocation` (IN `p_Location` VARCHAR(100))   BEGIN
     DELETE FROM `md_locations`
     WHERE `Location` = p_Location;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_locations_Get_All` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Get_All` ()   BEGIN
     SELECT * FROM `md_locations`;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_locations_Get_ByID` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Get_ByID` (IN `p_ID` INT)   BEGIN
     SELECT * FROM `md_locations`
     WHERE `ID` = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_locations_Get_ByLocation` (IN `p_Location` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Get_ByLocation` (IN `p_Location` VARCHAR(100))   BEGIN
     SELECT * FROM `md_locations`
     WHERE `Location` = p_Location;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_locations_Update_Location` (IN `p_ID` INT, IN `p_Location` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Update_Location` (IN `p_ID` INT, IN `p_Location` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))   BEGIN
     UPDATE `md_locations`
     SET `Location` = p_Location,
         `Issued By` = p_IssuedBy
     WHERE `ID` = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Add_Operation` (IN `p_Operation` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Add_Operation` (IN `p_Operation` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))   BEGIN
     INSERT INTO `md_operation_numbers` (`Operation`, `Issued By`)
     VALUES (p_Operation, p_IssuedBy);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Delete_ByID` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Delete_ByID` (IN `p_ID` INT)   BEGIN
     DELETE FROM `md_operation_numbers`
     WHERE `ID` = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Delete_ByOperation` (IN `p_Operation` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Delete_ByOperation` (IN `p_Operation` VARCHAR(100))   BEGIN
     DELETE FROM `md_operation_numbers`
     WHERE `Operation` = p_Operation;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Get_All` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Get_All` ()   BEGIN
     SELECT * FROM `md_operation_numbers`;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Get_ByID` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Get_ByID` (IN `p_ID` INT)   BEGIN
     SELECT * FROM `md_operation_numbers`
     WHERE `ID` = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Get_ByOperation` (IN `p_Operation` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Get_ByOperation` (IN `p_Operation` VARCHAR(100))   BEGIN
     SELECT * FROM `md_operation_numbers`
     WHERE `Operation` = p_Operation;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Update_Operation` (IN `p_ID` INT, IN `p_Operation` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Update_Operation` (IN `p_ID` INT, IN `p_Operation` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))   BEGIN
     UPDATE `md_operation_numbers`
     SET `Operation` = p_Operation,
         `Issued By` = p_IssuedBy
     WHERE `ID` = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Add_Part` (IN `p_ItemNumber` VARCHAR(300), IN `p_Customer` VARCHAR(300), IN `p_Description` VARCHAR(300), IN `p_IssuedBy` VARCHAR(100), IN `p_Type` VARCHAR(100), IN `p_DieLocation` JSON, IN `p_DieFGT` JSON)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Add_Part` (IN `p_ItemNumber` VARCHAR(300), IN `p_Customer` VARCHAR(300), IN `p_Description` VARCHAR(300), IN `p_IssuedBy` VARCHAR(100), IN `p_Type` VARCHAR(100), IN `p_DieLocation` JSON, IN `p_DieFGT` JSON)   BEGIN
     INSERT INTO `md_part_ids` (`Item Number`, `Customer`, `Description`, `Issued By`, `Type`, `Die Location`, `Die FGT`)
     VALUES (p_ItemNumber, p_Customer, p_Description, p_IssuedBy, p_Type, p_DieLocation, p_DieFGT);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Delete_ByID` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Delete_ByID` (IN `p_ID` INT)   BEGIN
     DELETE FROM `md_part_ids`
     WHERE `ID` = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Delete_ByItemNumber` (IN `p_ItemNumber` VARCHAR(300))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Delete_ByItemNumber` (IN `p_ItemNumber` VARCHAR(300))   BEGIN
     DELETE FROM `md_part_ids`
     WHERE `Item Number` = p_ItemNumber;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Get_All` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Get_All` ()   BEGIN
     SELECT * FROM `md_part_ids`;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Get_ByCustomer` (IN `p_Customer` VARCHAR(300))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Get_ByCustomer` (IN `p_Customer` VARCHAR(300))   BEGIN
     SELECT * FROM `md_part_ids`
     WHERE `Customer` = p_Customer;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Get_ByID` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Get_ByID` (IN `p_ID` INT)   BEGIN
     SELECT * FROM `md_part_ids`
     WHERE `ID` = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Get_ByItemNumber` (IN `p_ItemNumber` VARCHAR(300))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Get_ByItemNumber` (IN `p_ItemNumber` VARCHAR(300))   BEGIN
     SELECT * FROM `md_part_ids`
     WHERE `Item Number` = p_ItemNumber;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Update_Part` (IN `p_ID` INT, IN `p_ItemNumber` VARCHAR(300), IN `p_Customer` VARCHAR(300), IN `p_Description` VARCHAR(300), IN `p_IssuedBy` VARCHAR(100), IN `p_Type` VARCHAR(100), IN `p_DieLocation` JSON, IN `p_DieFGT` JSON)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Update_Part` (IN `p_ID` INT, IN `p_ItemNumber` VARCHAR(300), IN `p_Customer` VARCHAR(300), IN `p_Description` VARCHAR(300), IN `p_IssuedBy` VARCHAR(100), IN `p_Type` VARCHAR(100), IN `p_DieLocation` JSON, IN `p_DieFGT` JSON)   BEGIN
     UPDATE `md_part_ids`
     SET `Item Number` = p_ItemNumber,
         `Customer` = p_Customer,
@@ -520,7 +520,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Update_Part` (IN `p_ID`
     WHERE `ID` = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `Reload_md_operation_numbers_from_md_part_ids` (OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `Reload_md_operation_numbers_from_md_part_ids` (OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET p_Status = 1;
@@ -556,7 +556,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `Reload_md_operation_numbers_from_md
     SET p_ErrorMsg = NULL;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `Reload_md_part_ids_from_sequences` (OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `Reload_md_part_ids_from_sequences` (OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET p_Status = 1;
@@ -609,21 +609,21 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `Reload_md_part_ids_from_sequences` 
     SET p_ErrorMsg = NULL;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Add_Transaction` (IN `p_User` VARCHAR(100), IN `p_PartID` VARCHAR(300), IN `p_Operation` VARCHAR(100), IN `p_Quantity` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_last_10_transactions_Add_Transaction` (IN `p_User` VARCHAR(100), IN `p_PartID` VARCHAR(300), IN `p_Operation` VARCHAR(100), IN `p_Quantity` INT)   BEGIN
     INSERT INTO `sys_last_10_transactions` (`User`, `PartID`, `Operation`, `Quantity`)
     VALUES (p_User, p_PartID, p_Operation, p_Quantity);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Delete_ByUser` (IN `p_User` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_last_10_transactions_Delete_ByUser` (IN `p_User` VARCHAR(100))   BEGIN
     DELETE FROM `sys_last_10_transactions`
     WHERE `User` = p_User;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Get_All` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_last_10_transactions_Get_All` ()   BEGIN
     SELECT * FROM `sys_last_10_transactions`;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Get_ByUser` (IN `p_User` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_last_10_transactions_Get_ByUser` (IN `p_User` VARCHAR(100))   BEGIN
     -- 1. Remove older duplicates for this user (keep only the most recent for each PartID+Operation)
     DELETE t1 FROM sys_last_10_transactions t1
     INNER JOIN sys_last_10_transactions t2
@@ -654,28 +654,28 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Get_ByUser
     LIMIT 10;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Add_Role` (IN `p_RoleName` VARCHAR(50), IN `p_Description` VARCHAR(255), IN `p_Permissions` VARCHAR(1000), IN `p_IsSystem` TINYINT, IN `p_CreatedBy` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_roles_Add_Role` (IN `p_RoleName` VARCHAR(50), IN `p_Description` VARCHAR(255), IN `p_Permissions` VARCHAR(1000), IN `p_IsSystem` TINYINT, IN `p_CreatedBy` VARCHAR(100))   BEGIN
     INSERT INTO sys_roles (RoleName, Description, Permissions, IsSystem, CreatedBy)
     VALUES (p_RoleName, p_Description, p_Permissions, p_IsSystem, p_CreatedBy);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Delete_Role` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_roles_Delete_Role` (IN `p_ID` INT)   BEGIN
     DELETE FROM sys_roles WHERE ID = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Get_All` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_roles_Get_All` ()   BEGIN
     SELECT * FROM sys_roles ORDER BY CreatedAt DESC;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Get_ById` (IN `p_ID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_roles_Get_ById` (IN `p_ID` INT)   BEGIN
     SELECT * FROM sys_roles WHERE ID = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Get_ByRoleName` (IN `p_RoleName` VARCHAR(50))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_roles_Get_ByRoleName` (IN `p_RoleName` VARCHAR(50))   BEGIN
     SELECT * FROM sys_roles WHERE RoleName = p_RoleName;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Update_Role` (IN `p_ID` INT, IN `p_RoleName` VARCHAR(50), IN `p_Description` VARCHAR(255), IN `p_Permissions` VARCHAR(1000), IN `p_IsSystem` TINYINT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_roles_Update_Role` (IN `p_ID` INT, IN `p_RoleName` VARCHAR(50), IN `p_Description` VARCHAR(255), IN `p_Permissions` VARCHAR(1000), IN `p_IsSystem` TINYINT)   BEGIN
     UPDATE sys_roles
     SET RoleName = p_RoleName,
         Description = p_Description,
@@ -684,29 +684,29 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Update_Role` (IN `p_ID` I
     WHERE ID = p_ID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Add` (IN `p_UserID` INT, IN `p_RoleID` INT, IN `p_AssignedBy` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_user_roles_Add` (IN `p_UserID` INT, IN `p_RoleID` INT, IN `p_AssignedBy` VARCHAR(100))   BEGIN
     INSERT INTO sys_user_roles (UserID, RoleID, AssignedBy)
     VALUES (p_UserID, p_RoleID, p_AssignedBy);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Delete` (IN `p_UserID` INT, IN `p_RoleID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_user_roles_Delete` (IN `p_UserID` INT, IN `p_RoleID` INT)   BEGIN
     DELETE FROM sys_user_roles
     WHERE UserID = p_UserID AND RoleID = p_RoleID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Get_All` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_user_roles_Get_All` ()   BEGIN
     SELECT * FROM sys_user_roles;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Get_ByRoleID` (IN `p_RoleID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_user_roles_Get_ByRoleID` (IN `p_RoleID` INT)   BEGIN
     SELECT * FROM sys_user_roles WHERE RoleID = p_RoleID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Get_ByUserID` (IN `p_UserID` INT)   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_user_roles_Get_ByUserID` (IN `p_UserID` INT)   BEGIN
     SELECT * FROM sys_user_roles WHERE UserID = p_UserID;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Delete` (IN `p_UserId` VARCHAR(64), OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_ui_settings_Delete` (IN `p_UserId` VARCHAR(64), OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET p_Status = 1;
@@ -720,7 +720,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Delete` (IN `p_User
     SET p_ErrorMsg = NULL;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Get` (IN `p_UserId` VARCHAR(64), OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_ui_settings_Get` (IN `p_UserId` VARCHAR(64), OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET p_Status = 1;
@@ -735,14 +735,14 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Get` (IN `p_UserId`
     SET p_ErrorMsg = NULL;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_GetThemeName` (IN `p_UserId` VARCHAR(255), OUT `p_ThemeName` VARCHAR(255))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_ui_settings_GetThemeName` (IN `p_UserId` VARCHAR(255), OUT `p_ThemeName` VARCHAR(255))   BEGIN
     SELECT JSON_UNQUOTE(JSON_EXTRACT(SettingsJson, '$.Theme')) INTO p_ThemeName
     FROM `usr_ui_settings`
     WHERE UserId = p_UserId
     LIMIT 1;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Save` (IN `p_UserId` VARCHAR(64), IN `p_SettingsJson` TEXT, OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_ui_settings_Save` (IN `p_UserId` VARCHAR(64), IN `p_SettingsJson` TEXT, OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -760,7 +760,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Save` (IN `p_UserId
     SET p_ErrorMsg = NULL;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Update` (IN `p_UserId` VARCHAR(64), IN `p_SettingsJson` TEXT, OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_ui_settings_Update` (IN `p_UserId` VARCHAR(64), IN `p_SettingsJson` TEXT, OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))   BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET p_Status = 1;
@@ -775,7 +775,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Update` (IN `p_User
     SET p_ErrorMsg = NULL;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_Add_User` (IN `p_User` VARCHAR(100), IN `p_FullName` VARCHAR(200), IN `p_Shift` VARCHAR(50), IN `p_VitsUser` TINYINT, IN `p_Pin` VARCHAR(50), IN `p_LastShownVersion` VARCHAR(50), IN `p_HideChangeLog` VARCHAR(50), IN `p_Theme_Name` VARCHAR(50), IN `p_Theme_FontSize` INT, IN `p_VisualUserName` VARCHAR(50), IN `p_VisualPassword` VARCHAR(50), IN `p_WipServerAddress` VARCHAR(15), IN `p_WipServerPort` VARCHAR(10))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Add_User` (IN `p_User` VARCHAR(100), IN `p_FullName` VARCHAR(200), IN `p_Shift` VARCHAR(50), IN `p_VitsUser` TINYINT, IN `p_Pin` VARCHAR(50), IN `p_LastShownVersion` VARCHAR(50), IN `p_HideChangeLog` VARCHAR(50), IN `p_Theme_Name` VARCHAR(50), IN `p_Theme_FontSize` INT, IN `p_VisualUserName` VARCHAR(50), IN `p_VisualPassword` VARCHAR(50), IN `p_WipServerAddress` VARCHAR(15), IN `p_WipServerPort` VARCHAR(10))   BEGIN
     -- Insert into application users table
     INSERT INTO usr_users (
         `User`, `Full Name`, `Shift`, `VitsUser`, `Pin`, `LastShownVersion`, `HideChangeLog`, 
@@ -814,7 +814,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_Add_User` (IN `p_User` VA
     FLUSH PRIVILEGES;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_Delete_User` (IN `p_User` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Delete_User` (IN `p_User` VARCHAR(100))   BEGIN
     -- Remove MySQL user
     SET @d := CONCAT('DROP USER IF EXISTS \'', REPLACE(p_User, '\'', '\\\''), '\'@\'%\';');
     PREPARE stmt FROM @d;
@@ -825,40 +825,40 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_Delete_User` (IN `p_User`
     DELETE FROM usr_users WHERE `User` = p_User;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_Exists` (IN `p_User` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Exists` (IN `p_User` VARCHAR(100))   BEGIN
     SELECT COUNT(*) AS UserExists FROM usr_users WHERE `User` = p_User;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_Get_All` ()   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Get_All` ()   BEGIN
     SELECT * FROM usr_users;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_Get_ByUser` (IN `p_User` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Get_ByUser` (IN `p_User` VARCHAR(100))   BEGIN
     SELECT * FROM usr_users WHERE `User` = p_User;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_Grant_Full` (IN `p_User` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Grant_Full` (IN `p_User` VARCHAR(100))   BEGIN
     SET @sql := CONCAT('GRANT ALL PRIVILEGES ON mtm_wip_application.* TO \'', REPLACE(p_User, '\'', '\\\''), '\'@\'%\';');
     PREPARE stmt FROM @sql;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_Grant_ReadOnly` (IN `p_User` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Grant_ReadOnly` (IN `p_User` VARCHAR(100))   BEGIN
     SET @sql := CONCAT('GRANT SELECT ON mtm_wip_application.* TO \'', REPLACE(p_User, '\'', '\\\''), '\'@\'%\';');
     PREPARE stmt FROM @sql;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_Grant_ReadWrite` (IN `p_User` VARCHAR(100))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Grant_ReadWrite` (IN `p_User` VARCHAR(100))   BEGIN
     SET @sql := CONCAT('GRANT SELECT, INSERT, UPDATE, DELETE ON mtm_wip_application.* TO \'', REPLACE(p_User, '\'', '\\\''), '\'@\'%\';');
     PREPARE stmt FROM @sql;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_Update_User` (IN `p_User` VARCHAR(100), IN `p_FullName` VARCHAR(200), IN `p_Shift` VARCHAR(50), IN `p_VitsUser` TINYINT, IN `p_Pin` VARCHAR(50), IN `p_LastShownVersion` VARCHAR(50), IN `p_HideChangeLog` VARCHAR(50), IN `p_Theme_Name` VARCHAR(50), IN `p_Theme_FontSize` INT, IN `p_VisualUserName` VARCHAR(50), IN `p_VisualPassword` VARCHAR(50), IN `p_WipServerAddress` VARCHAR(15), IN `p_WipServerPort` VARCHAR(10))   BEGIN
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Update_User` (IN `p_User` VARCHAR(100), IN `p_FullName` VARCHAR(200), IN `p_Shift` VARCHAR(50), IN `p_VitsUser` TINYINT, IN `p_Pin` VARCHAR(50), IN `p_LastShownVersion` VARCHAR(50), IN `p_HideChangeLog` VARCHAR(50), IN `p_Theme_Name` VARCHAR(50), IN `p_Theme_FontSize` INT, IN `p_VisualUserName` VARCHAR(50), IN `p_VisualPassword` VARCHAR(50), IN `p_WipServerAddress` VARCHAR(15), IN `p_WipServerPort` VARCHAR(10))   BEGIN
     UPDATE usr_users SET
         `Full Name` = p_FullName,
         `Shift` = p_Shift,
@@ -1183,7 +1183,7 @@ INSERT INTO `log_error` (`ID`, `User`, `Severity`, `ErrorType`, `ErrorMessage`, 
 (55, 'JOHNK', 'Error', 'System.ApplicationException', 'An error occurred while filling location combo boxes.', '   at MTM_WIP_Application.Helpers.Helper_ComboBoxes.FillLocationComboBoxesAsync(ComboBox comboBox) in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Helpers\\Helper_ComboBoxes.cs:line 142\r\n   at MTM_WIP_Application.Controls.MainForm.ControlInventoryTab.Control_InventoryTab_OnStartup_LoadDataComboBoxesAsync() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_InventoryTab.cs:line 101', '', 'MainForm_LoadInventoryTabComboBoxesAsync', '', 'JOHNSPC', 'Microsoft Windows NT 10.0.26100.0', '4.6.0.0+ab77b684e9ec12894e9efdea82023d40591a894f', '2025-06-21 00:49:03'),
 (56, 'JOHNK', 'Error', 'System.ApplicationException', 'An error occurred while filling location combo boxes.', '   at MTM_WIP_Application.Helpers.Helper_ComboBoxes.FillLocationComboBoxesAsync(ComboBox comboBox) in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Helpers\\Helper_ComboBoxes.cs:line 142\r\n   at MTM_WIP_Application.Controls.MainForm.ControlInventoryTab.Control_InventoryTab_OnStartup_LoadDataComboBoxesAsync() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_InventoryTab.cs:line 101', '', 'MainForm_LoadInventoryTabComboBoxesAsync', '', 'JOHNSPC', 'Microsoft Windows NT 10.0.26100.0', '4.6.0.0+ab77b684e9ec12894e9efdea82023d40591a894f', '2025-06-21 00:49:20'),
 (57, 'JOHNK', 'Error', 'System.ApplicationException', 'An error occurred while filling location combo boxes.', '   at MTM_WIP_Application.Helpers.Helper_ComboBoxes.FillLocationComboBoxesAsync(ComboBox comboBox) in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Helpers\\Helper_ComboBoxes.cs:line 145\r\n   at MTM_WIP_Application.Controls.MainForm.ControlInventoryTab.Control_InventoryTab_OnStartup_LoadDataComboBoxesAsync() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_InventoryTab.cs:line 89', '', 'MainForm_LoadInventoryTabComboBoxesAsync', '', 'JOHNSPC', 'Microsoft Windows NT 10.0.26100.0', '4.6.0.0+ab77b684e9ec12894e9efdea82023d40591a894f', '2025-06-21 08:53:28'),
-(58, 'JOHNK', 'Error', 'MySql.Data.MySqlClient.MySqlException', 'Procedure or function \'sp_get_last_10_transactions\' cannot be found in database \'\' Verify that user \'JOHNK\'@\'localhost\' has enough privileges to execute', '   at MySql.Data.MySqlClient.ProcedureCache.GetProcDataAsync(MySqlConnection connection, String spName, Boolean execAsync)\r\n   at MySql.Data.MySqlClient.ProcedureCache.AddNewAsync(MySqlConnection connection, String spName, Boolean execAsync)\r\n   at MySql.Data.MySqlClient.ProcedureCache.GetProcedureAsync(MySqlConnection conn, String spName, String cacheKey, Boolean execAsync)\r\n   at MySql.Data.MySqlClient.StoredProcedure.GetParametersAsync(String procName, Boolean execAsync)\r\n   at MySql.Data.MySqlClient.StoredProcedure.CheckParametersAsync(String spName, Boolean execAsync)\r\n   at MySql.Data.MySqlClient.StoredProcedure.Resolve(Boolean preparing)\r\n   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)\r\n   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader()\r\n   at MTM_WIP_Application.Controls.MainForm.Control_QuickButtons.LoadLast10Transactions(String currentUser) in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_QuickButtons.cs:line 40\r\n   at MTM_WIP_Application.Controls.MainForm.Control_QuickButtons..ctor() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_QuickButtons.cs:line 26\r\n   at MTM_WIP_Application.Forms.MainForm.MainForm.InitializeComponent() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Forms\\MainForm\\MainForm.Designer.cs:line 89\r\n   at MTM_WIP_Application.Forms.MainForm.MainForm..ctor() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Forms\\MainForm\\MainForm.cs:line 34', '', 'MainForm', '', 'JOHNSPC', 'Microsoft Windows NT 10.0.26100.0', '4.6.0.0+f827094989642d361bdf3ff6974d99f47f6c1ada', '2025-06-21 15:47:38'),
+(58, 'JOHNK', 'Error', 'MySql.Data.MySqlClient.MySqlException', 'Procedure or function \'sp_get_last_10_transactions\' cannot be found in database \'\' Verify that user \'JOHNK\'@\'172.16.1.104\' has enough privileges to execute', '   at MySql.Data.MySqlClient.ProcedureCache.GetProcDataAsync(MySqlConnection connection, String spName, Boolean execAsync)\r\n   at MySql.Data.MySqlClient.ProcedureCache.AddNewAsync(MySqlConnection connection, String spName, Boolean execAsync)\r\n   at MySql.Data.MySqlClient.ProcedureCache.GetProcedureAsync(MySqlConnection conn, String spName, String cacheKey, Boolean execAsync)\r\n   at MySql.Data.MySqlClient.StoredProcedure.GetParametersAsync(String procName, Boolean execAsync)\r\n   at MySql.Data.MySqlClient.StoredProcedure.CheckParametersAsync(String spName, Boolean execAsync)\r\n   at MySql.Data.MySqlClient.StoredProcedure.Resolve(Boolean preparing)\r\n   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)\r\n   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader()\r\n   at MTM_WIP_Application.Controls.MainForm.Control_QuickButtons.LoadLast10Transactions(String currentUser) in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_QuickButtons.cs:line 40\r\n   at MTM_WIP_Application.Controls.MainForm.Control_QuickButtons..ctor() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_QuickButtons.cs:line 26\r\n   at MTM_WIP_Application.Forms.MainForm.MainForm.InitializeComponent() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Forms\\MainForm\\MainForm.Designer.cs:line 89\r\n   at MTM_WIP_Application.Forms.MainForm.MainForm..ctor() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Forms\\MainForm\\MainForm.cs:line 34', '', 'MainForm', '', 'JOHNSPC', 'Microsoft Windows NT 10.0.26100.0', '4.6.0.0+f827094989642d361bdf3ff6974d99f47f6c1ada', '2025-06-21 15:47:38'),
 (59, 'JOHNK', 'Error', 'System.Runtime.InteropServices.ExternalException', 'A generic error occurred in GDI+.', '   at System.Drawing.Graphics.MeasureStringInternal(ReadOnlySpan`1 text, Font font, RectangleF layoutArea, StringFormat stringFormat, Int32& charactersFitted, Int32& linesFilled)\r\n   at System.Drawing.Graphics.MeasureString(String text, Font font)\r\n   at MTM_WIP_Application.Controls.MainForm.Control_QuickButtons.TruncateTextToFitMultiline(String text, Button btn) in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_QuickButtons.cs:line 101\r\n   at MTM_WIP_Application.Controls.MainForm.Control_QuickButtons.LoadLast10Transactions(String currentUser) in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_QuickButtons.cs:line 57\r\n   at MTM_WIP_Application.Controls.MainForm.Control_QuickButtons..ctor() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_QuickButtons.cs:line 28\r\n   at MTM_WIP_Application.Forms.MainForm.MainForm.InitializeComponent() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Forms\\MainForm\\MainForm.Designer.cs:line 89\r\n   at MTM_WIP_Application.Forms.MainForm.MainForm..ctor() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Forms\\MainForm\\MainForm.cs:line 34', '', 'MainForm', '', 'JOHNSPC', 'Microsoft Windows NT 10.0.26100.0', '4.6.0.0+f827094989642d361bdf3ff6974d99f47f6c1ada', '2025-06-21 16:39:14'),
 (60, 'JOHNK', 'Error', 'System.Runtime.InteropServices.ExternalException', 'A generic error occurred in GDI+.', '   at System.Drawing.Graphics.MeasureStringInternal(ReadOnlySpan`1 text, Font font, RectangleF layoutArea, StringFormat stringFormat, Int32& charactersFitted, Int32& linesFilled)\r\n   at System.Drawing.Graphics.MeasureString(String text, Font font)\r\n   at MTM_WIP_Application.Controls.MainForm.Control_QuickButtons.TruncateTextToFitMultiline(String text, Button btn) in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_QuickButtons.cs:line 101\r\n   at MTM_WIP_Application.Controls.MainForm.Control_QuickButtons.LoadLast10Transactions(String currentUser) in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_QuickButtons.cs:line 57\r\n   at MTM_WIP_Application.Controls.MainForm.Control_QuickButtons..ctor() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_QuickButtons.cs:line 28\r\n   at MTM_WIP_Application.Forms.MainForm.MainForm.InitializeComponent() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Forms\\MainForm\\MainForm.Designer.cs:line 89\r\n   at MTM_WIP_Application.Forms.MainForm.MainForm..ctor() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Forms\\MainForm\\MainForm.cs:line 34', '', 'MainForm', '', 'JOHNSPC', 'Microsoft Windows NT 10.0.26100.0', '4.6.0.0+f827094989642d361bdf3ff6974d99f47f6c1ada', '2025-06-21 16:39:35'),
 (61, 'JOHNK', 'Error', 'System.ArgumentOutOfRangeException', 'value (\'0\') must be less than \'0\'. (Parameter \'value\')\r\nActual value was 0.', '   at System.ArgumentOutOfRangeException.ThrowGreaterEqual[T](T value, T other, String paramName)\r\n   at System.ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual[T](T value, T other, String paramName)\r\n   at System.Windows.Forms.ComboBox.set_SelectedIndex(Int32 value)\r\n   at MTM_WIP_Application.Controls.MainForm.ControlInventoryTab.Control_InventoryTab_Button_AdvancedEntry_Click() in C:\\Users\\johnk\\source\\repos\\MTM_WIP_Application\\Controls\\MainForm\\Control_InventoryTab.cs:line 205', '', 'Control_InventoryTab_Button_AdvancedEntry_Click', '', 'JOHNSPC', 'Microsoft Windows NT 10.0.26100.0', '4.6.0.0+f827094989642d361bdf3ff6974d99f47f6c1ada', '2025-06-21 17:13:46'),

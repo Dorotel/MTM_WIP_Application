@@ -14,7 +14,7 @@ public static class Helper_Database_Variables
     {
         try
         {
-            server ??= "localhost";
+            server ??= "172.16.1.104";
             database ??= "mtm_wip_application";
             uid ??= Model_AppVariables.User != null ? Model_AppVariables.User.ToUpper() : "";
             return $"SERVER={server};DATABASE={database};UID={uid};Allow User Variables=True ;";
@@ -34,14 +34,9 @@ public static class Helper_Database_Variables
     {
         try
         {
-            var logDirectory = (Environment.UserName.Equals("johnk", StringComparison.OrdinalIgnoreCase))
+            var logDirectory = Environment.UserName.Equals("johnk", StringComparison.OrdinalIgnoreCase)
                 ? @"C:\Users\johnk\OneDrive\Documents\Work Folder\WIP App Logs"
-                : server switch
-                {
-                    "172.16.1.104" => @"X:\MH_RESOURCE\Material_Handler\MTM WIP App\Logs",
-                    "localhost" => @"C:\WIPAppLogs",
-                    _ => throw new InvalidOperationException("Unknown server value.")
-                };
+                : @"X:\MH_RESOURCE\Material_Handler\MTM WIP App\Logs";
 
             var userDirectory = Path.Combine(logDirectory, userName);
             

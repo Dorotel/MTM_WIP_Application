@@ -1,7 +1,7 @@
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `Reload_md_operation_numbers_from_md_part_ids`(
+DEFINER=`root`@`172.16.1.104` PROCEDURE `Reload_md_operation_numbers_from_md_part_ids`(
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
 )
@@ -73,7 +73,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `Reload_md_part_ids_from_sequences`(
+DEFINER=`root`@`172.16.1.104` PROCEDURE `Reload_md_part_ids_from_sequences`(
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
 )
@@ -126,7 +126,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `db_maint_inv_inventory_FixDuplicateBatchNumbers`(
+DEFINER=`root`@`172.16.1.104` PROCEDURE `db_maint_inv_inventory_FixDuplicateBatchNumbers`(
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
 )
@@ -191,7 +191,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Add_Item`(IN `p_PartID` VARCHAR(300), IN `p_Location` VARCHAR(100), IN `p_Operation` VARCHAR(100), IN `p_Quantity` INT, IN `p_ItemType` VARCHAR(100), IN `p_User` VARCHAR(100), IN `p_BatchNumber` VARCHAR(100), IN `p_Notes` VARCHAR(1000))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Add_Item`(IN `p_PartID` VARCHAR(300), IN `p_Location` VARCHAR(100), IN `p_Operation` VARCHAR(100), IN `p_Quantity` INT, IN `p_ItemType` VARCHAR(100), IN `p_User` VARCHAR(100), IN `p_BatchNumber` VARCHAR(100), IN `p_Notes` VARCHAR(1000))
 BEGIN
 INSERT INTO inv_inventory
 (PartID, Location, Operation, Quantity, ItemType, User, BatchNumber, Notes)
@@ -202,7 +202,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Advanced_Search`(IN `p_PartID` VARCHAR(300), IN `p_Operation` VARCHAR(100), IN `p_Location` VARCHAR(100), IN `p_QtyMin` INT, IN `p_QtyMax` INT, IN `p_Notes` VARCHAR(1000), IN `p_User` VARCHAR(100), IN `p_DateFrom` DATE, IN `p_DateTo` DATE)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Advanced_Search`(IN `p_PartID` VARCHAR(300), IN `p_Operation` VARCHAR(100), IN `p_Location` VARCHAR(100), IN `p_QtyMin` INT, IN `p_QtyMax` INT, IN `p_Notes` VARCHAR(1000), IN `p_User` VARCHAR(100), IN `p_DateFrom` DATE, IN `p_DateTo` DATE)
 BEGIN
 SELECT PartID,
        Operation,
@@ -233,7 +233,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_BulkDelete_ByLocation`(IN `p_Location` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_BulkDelete_ByLocation`(IN `p_Location` VARCHAR(100))
 BEGIN
 DELETE
 FROM inv_inventory
@@ -244,7 +244,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Delete_ById`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Delete_ById`(IN `p_ID` INT)
 BEGIN
 DELETE
 FROM inv_inventory
@@ -255,7 +255,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Fix_BatchNumbers`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Fix_BatchNumbers`()
 BEGIN
     -- Temporary table to hold duplicate IDs and their BatchNumbers
     CREATE
@@ -307,7 +307,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_All`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_All`()
 BEGIN
 SELECT *
 FROM inv_inventory
@@ -318,7 +318,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByDateRange`(IN `p_StartDate` DATETIME, IN `p_EndDate` DATETIME)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByDateRange`(IN `p_StartDate` DATETIME, IN `p_EndDate` DATETIME)
 BEGIN
 SELECT *
 FROM inv_inventory
@@ -329,7 +329,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ById`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ById`(IN `p_ID` INT)
 BEGIN
 SELECT *
 FROM inv_inventory
@@ -340,7 +340,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByItemType`(IN `p_ItemType` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByItemType`(IN `p_ItemType` VARCHAR(100))
 BEGIN
 SELECT *
 FROM inv_inventory
@@ -351,7 +351,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByLocation`(IN `p_Location` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByLocation`(IN `p_Location` VARCHAR(100))
 BEGIN
 SELECT *
 FROM inv_inventory
@@ -363,7 +363,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByPartID`(IN `p_PartID` VARCHAR(300))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByPartID`(IN `p_PartID` VARCHAR(300))
 BEGIN
 SELECT ID,
        PartID,
@@ -384,7 +384,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByPartIDLocation`(IN `p_PartID` VARCHAR(300), IN `p_Location` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByPartIDLocation`(IN `p_PartID` VARCHAR(300), IN `p_Location` VARCHAR(100))
 BEGIN
 SELECT *
 FROM inv_inventory
@@ -396,7 +396,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByPartIDandOperation`(IN `p_PartID` VARCHAR(300), IN `o_Operation` VARCHAR(300))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByPartIDandOperation`(IN `p_PartID` VARCHAR(300), IN `o_Operation` VARCHAR(300))
 BEGIN
 SELECT ID,
        PartID,
@@ -418,7 +418,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_ByUser`(IN `p_User` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_ByUser`(IN `p_User` VARCHAR(100))
 BEGIN
 SELECT *
 FROM inv_inventory
@@ -430,7 +430,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Get_TotalQuantityByPartId`(IN `p_PartID` VARCHAR(300))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Get_TotalQuantityByPartId`(IN `p_PartID` VARCHAR(300))
 BEGIN
 SELECT SUM(Quantity) AS TotalQuantity
 FROM inv_inventory
@@ -441,7 +441,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Remove_Item`(IN `p_PartID` VARCHAR(50), IN `p_Location` VARCHAR(50), IN `p_Operation` VARCHAR(50), IN `p_Quantity` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Remove_Item`(IN `p_PartID` VARCHAR(50), IN `p_Location` VARCHAR(50), IN `p_Operation` VARCHAR(50), IN `p_Quantity` INT)
 BEGIN
     -- Delete only one matching row
 DELETE
@@ -459,7 +459,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Transfer_Part`(
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Transfer_Part`(
     IN in_BatchNumber VARCHAR(6),
     IN in_PartID VARCHAR(300),
     IN in_Operation VARCHAR(100),
@@ -488,7 +488,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Transfer_Quantity`(IN `in_BatchNumber` VARCHAR(255), IN `in_PartID` VARCHAR(255), IN `in_Operation` VARCHAR(255), IN `in_TransferQuantity` INT, IN `in_OriginalQuantity` INT, IN `in_NewLocation` VARCHAR(255), IN `in_User` VARCHAR(255))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Transfer_Quantity`(IN `in_BatchNumber` VARCHAR(255), IN `in_PartID` VARCHAR(255), IN `in_Operation` VARCHAR(255), IN `in_TransferQuantity` INT, IN `in_OriginalQuantity` INT, IN `in_NewLocation` VARCHAR(255), IN `in_User` VARCHAR(255))
 BEGIN
     -- Check if transfer quantity is valid
     IF
@@ -514,7 +514,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Update_Notes`(IN `p_ID` INT, IN `p_Notes` VARCHAR(1000))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Update_Notes`(IN `p_ID` INT, IN `p_Notes` VARCHAR(1000))
 BEGIN
 UPDATE inv_inventory
 SET Notes       = p_Notes,
@@ -526,7 +526,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Update_Quantity`(IN `p_ID` INT, IN `p_Quantity` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_inventory_Update_Quantity`(IN `p_ID` INT, IN `p_Quantity` INT)
 BEGIN
 UPDATE inv_inventory
 SET Quantity    = p_Quantity,
@@ -538,7 +538,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `inv_transaction_Add`(
+DEFINER=`root`@`172.16.1.104` PROCEDURE `inv_transaction_Add`(
     IN in_TransactionType ENUM('IN','OUT','TRANSFER'),
     IN in_PartID VARCHAR(300),
     IN in_BatchNumber VARCHAR(100),
@@ -561,7 +561,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Add_ChangeLog`(IN `p_Version` VARCHAR(50), IN `p_Notes` LONGTEXT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_changelog_Add_ChangeLog`(IN `p_Version` VARCHAR(50), IN `p_Notes` LONGTEXT)
 BEGIN
 INSERT INTO log_changelog (Version, Notes)
 VALUES (p_Version, p_Notes);
@@ -571,7 +571,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Delete_ByVersion`(IN `p_Version` VARCHAR(50))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_changelog_Delete_ByVersion`(IN `p_Version` VARCHAR(50))
 BEGIN
 DELETE
 FROM log_changelog
@@ -582,7 +582,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Get_All`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_changelog_Get_All`()
 BEGIN
 SELECT *
 FROM log_changelog;
@@ -592,7 +592,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Get_ByVersion`(IN `p_Version` VARCHAR(50))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_changelog_Get_ByVersion`(IN `p_Version` VARCHAR(50))
 BEGIN
 SELECT *
 FROM log_changelog
@@ -603,7 +603,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Get_Current`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_changelog_Get_Current`()
 BEGIN
 SELECT *
 FROM log_changelog
@@ -614,7 +614,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_changelog_Update_Notes`(IN `p_Version` VARCHAR(50), IN `p_Notes` LONGTEXT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_changelog_Update_Notes`(IN `p_Version` VARCHAR(50), IN `p_Notes` LONGTEXT)
 BEGIN
 UPDATE log_changelog
 SET Notes = p_Notes
@@ -625,7 +625,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_error_Add_Error`(IN `p_User` VARCHAR(100), IN `p_Severity` ENUM('Information','Warning','Error','Critical'), IN `p_ErrorType` VARCHAR(100), IN `p_ErrorMessage` TEXT, IN `p_StackTrace` TEXT, IN `p_ModuleName` VARCHAR(200), IN `p_MethodName` VARCHAR(200), IN `p_AdditionalInfo` TEXT, IN `p_MachineName` VARCHAR(100), IN `p_OSVersion` VARCHAR(100), IN `p_AppVersion` VARCHAR(50), IN `p_ErrorTime` DATETIME)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Add_Error`(IN `p_User` VARCHAR(100), IN `p_Severity` ENUM('Information','Warning','Error','Critical'), IN `p_ErrorType` VARCHAR(100), IN `p_ErrorMessage` TEXT, IN `p_StackTrace` TEXT, IN `p_ModuleName` VARCHAR(200), IN `p_MethodName` VARCHAR(200), IN `p_AdditionalInfo` TEXT, IN `p_MachineName` VARCHAR(100), IN `p_OSVersion` VARCHAR(100), IN `p_AppVersion` VARCHAR(50), IN `p_ErrorTime` DATETIME)
 BEGIN
 INSERT INTO log_error (`User`, `Severity`, `ErrorType`, `ErrorMessage`, `StackTrace`,
                        `ModuleName`, `MethodName`, `AdditionalInfo`, `MachineName`, `OSVersion`, `AppVersion`,
@@ -638,7 +638,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_error_Delete_All`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Delete_All`()
 BEGIN
 DELETE
 FROM log_error;
@@ -648,7 +648,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_error_Delete_ById`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Delete_ById`(IN `p_ID` INT)
 BEGIN
 DELETE
 FROM log_error
@@ -660,7 +660,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_error_Get_All`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Get_All`()
 BEGIN
 SELECT *
 FROM log_error
@@ -671,7 +671,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_error_Get_ByDateRange`(IN `p_Start` DATETIME, IN `p_End` DATETIME)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Get_ByDateRange`(IN `p_Start` DATETIME, IN `p_End` DATETIME)
 BEGIN
 SELECT *
 FROM log_error
@@ -683,7 +683,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_error_Get_ById`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Get_ById`(IN `p_ID` INT)
 BEGIN
 SELECT *
 FROM log_error
@@ -694,7 +694,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `log_error_Get_ByUser`(IN `p_User` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `log_error_Get_ByUser`(IN `p_User` VARCHAR(100))
 BEGIN
 SELECT *
 FROM log_error
@@ -706,7 +706,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Add_Type`(IN `p_Type` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Add_Type`(IN `p_Type` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
 BEGIN
 INSERT INTO `md_item_types` (`Type`, `Issued By`)
 VALUES (p_Type, p_IssuedBy);
@@ -716,7 +716,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Delete_ByID`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Delete_ByID`(IN `p_ID` INT)
 BEGIN
 DELETE
 FROM `md_item_types`
@@ -727,7 +727,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Delete_ByType`(IN `p_Type` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Delete_ByType`(IN `p_Type` VARCHAR(100))
 BEGIN
 DELETE
 FROM `md_item_types`
@@ -738,7 +738,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Get_All`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Get_All`()
 BEGIN
 SELECT *
 FROM `md_item_types`;
@@ -748,7 +748,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Get_ByID`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Get_ByID`(IN `p_ID` INT)
 BEGIN
 SELECT *
 FROM `md_item_types`
@@ -759,7 +759,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Get_ByType`(IN `p_Type` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Get_ByType`(IN `p_Type` VARCHAR(100))
 BEGIN
 SELECT *
 FROM `md_item_types`
@@ -770,7 +770,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_item_types_Update_Type`(IN `p_ID` INT, IN `p_Type` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_item_types_Update_Type`(IN `p_ID` INT, IN `p_Type` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
 BEGIN
 UPDATE `md_item_types`
 SET `Type`      = p_Type,
@@ -782,7 +782,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_locations_Add_Location`(IN `p_Location` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Add_Location`(IN `p_Location` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
 BEGIN
 INSERT INTO `md_locations` (`Location`, `Issued By`)
 VALUES (p_Location, p_IssuedBy);
@@ -792,7 +792,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_locations_Delete_ByID`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Delete_ByID`(IN `p_ID` INT)
 BEGIN
 DELETE
 FROM `md_locations`
@@ -803,7 +803,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_locations_Delete_ByLocation`(IN `p_Location` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Delete_ByLocation`(IN `p_Location` VARCHAR(100))
 BEGIN
 DELETE
 FROM `md_locations`
@@ -814,7 +814,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_locations_Get_All`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Get_All`()
 BEGIN
 SELECT *
 FROM `md_locations`;
@@ -824,7 +824,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_locations_Get_ByID`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Get_ByID`(IN `p_ID` INT)
 BEGIN
 SELECT *
 FROM `md_locations`
@@ -835,7 +835,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_locations_Get_ByLocation`(IN `p_Location` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Get_ByLocation`(IN `p_Location` VARCHAR(100))
 BEGIN
 SELECT *
 FROM `md_locations`
@@ -846,7 +846,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_locations_Update_Location`(IN `p_ID` INT, IN `p_Location` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_locations_Update_Location`(IN `p_ID` INT, IN `p_Location` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
 BEGIN
 UPDATE `md_locations`
 SET `Location`  = p_Location,
@@ -858,7 +858,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Add_Operation`(IN `p_Operation` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Add_Operation`(IN `p_Operation` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
 BEGIN
 INSERT INTO `md_operation_numbers` (`Operation`, `Issued By`)
 VALUES (p_Operation, p_IssuedBy);
@@ -868,7 +868,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Delete_ByID`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Delete_ByID`(IN `p_ID` INT)
 BEGIN
 DELETE
 FROM `md_operation_numbers`
@@ -879,7 +879,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Delete_ByOperation`(IN `p_Operation` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Delete_ByOperation`(IN `p_Operation` VARCHAR(100))
 BEGIN
 DELETE
 FROM `md_operation_numbers`
@@ -890,7 +890,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Get_All`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Get_All`()
 BEGIN
 SELECT *
 FROM `md_operation_numbers`;
@@ -900,7 +900,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Get_ByID`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Get_ByID`(IN `p_ID` INT)
 BEGIN
 SELECT *
 FROM `md_operation_numbers`
@@ -911,7 +911,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Get_ByOperation`(IN `p_Operation` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Get_ByOperation`(IN `p_Operation` VARCHAR(100))
 BEGIN
 SELECT *
 FROM `md_operation_numbers`
@@ -922,7 +922,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Update_Operation`(IN `p_ID` INT, IN `p_Operation` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_operation_numbers_Update_Operation`(IN `p_ID` INT, IN `p_Operation` VARCHAR(100), IN `p_IssuedBy` VARCHAR(100))
 BEGIN
 UPDATE `md_operation_numbers`
 SET `Operation` = p_Operation,
@@ -934,7 +934,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Add_Part`(IN `p_ItemNumber` VARCHAR(300), IN `p_Customer` VARCHAR(300), IN `p_Description` VARCHAR(300), IN `p_IssuedBy` VARCHAR(100), IN `p_Type` VARCHAR(100), IN `p_DieLocation` JSON, IN `p_DieFGT` JSON)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Add_Part`(IN `p_ItemNumber` VARCHAR(300), IN `p_Customer` VARCHAR(300), IN `p_Description` VARCHAR(300), IN `p_IssuedBy` VARCHAR(100), IN `p_Type` VARCHAR(100), IN `p_DieLocation` JSON, IN `p_DieFGT` JSON)
 BEGIN
 INSERT INTO `md_part_ids` (`Item Number`, `Customer`, `Description`, `Issued By`, `Type`, `Die Location`, `Die FGT`)
 VALUES (p_ItemNumber, p_Customer, p_Description, p_IssuedBy, p_Type, p_DieLocation, p_DieFGT);
@@ -944,7 +944,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Delete_ByID`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Delete_ByID`(IN `p_ID` INT)
 BEGIN
 DELETE
 FROM `md_part_ids`
@@ -955,7 +955,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Delete_ByItemNumber`(IN `p_ItemNumber` VARCHAR(300))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Delete_ByItemNumber`(IN `p_ItemNumber` VARCHAR(300))
 BEGIN
 DELETE
 FROM `md_part_ids`
@@ -966,7 +966,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Get_All`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Get_All`()
 BEGIN
 SELECT *
 FROM `md_part_ids`;
@@ -976,7 +976,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Get_ByCustomer`(IN `p_Customer` VARCHAR(300))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Get_ByCustomer`(IN `p_Customer` VARCHAR(300))
 BEGIN
 SELECT *
 FROM `md_part_ids`
@@ -987,7 +987,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Get_ByID`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Get_ByID`(IN `p_ID` INT)
 BEGIN
 SELECT *
 FROM `md_part_ids`
@@ -998,7 +998,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Get_ByItemNumber`(IN `p_ItemNumber` VARCHAR(300))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Get_ByItemNumber`(IN `p_ItemNumber` VARCHAR(300))
 BEGIN
 SELECT *
 FROM `md_part_ids`
@@ -1009,7 +1009,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_Update_Part`(IN `p_ID` INT, IN `p_ItemNumber` VARCHAR(300), IN `p_Customer` VARCHAR(300), IN `p_Description` VARCHAR(300), IN `p_IssuedBy` VARCHAR(100), IN `p_Type` VARCHAR(100), IN `p_DieLocation` JSON, IN `p_DieFGT` JSON)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `md_part_ids_Update_Part`(IN `p_ID` INT, IN `p_ItemNumber` VARCHAR(300), IN `p_Customer` VARCHAR(300), IN `p_Description` VARCHAR(300), IN `p_IssuedBy` VARCHAR(100), IN `p_Type` VARCHAR(100), IN `p_DieLocation` JSON, IN `p_DieFGT` JSON)
 BEGIN
 UPDATE `md_part_ids`
 SET `Item Number`  = p_ItemNumber,
@@ -1026,7 +1026,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Add_Transaction`(IN `p_User` VARCHAR(100), IN `p_PartID` VARCHAR(300), IN `p_Operation` VARCHAR(100), IN `p_Quantity` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_last_10_transactions_Add_Transaction`(IN `p_User` VARCHAR(100), IN `p_PartID` VARCHAR(300), IN `p_Operation` VARCHAR(100), IN `p_Quantity` INT)
 BEGIN
 INSERT INTO `sys_last_10_transactions` (`User`, `PartID`, `Operation`, `Quantity`)
 VALUES (p_User, p_PartID, p_Operation, p_Quantity);
@@ -1036,7 +1036,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Delete_ByUser`(IN `p_User` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_last_10_transactions_Delete_ByUser`(IN `p_User` VARCHAR(100))
 BEGIN
 DELETE
 FROM `sys_last_10_transactions`
@@ -1047,7 +1047,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Get_All`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_last_10_transactions_Get_All`()
 BEGIN
 SELECT *
 FROM `sys_last_10_transactions`;
@@ -1057,7 +1057,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Get_ByUser`(IN `p_User` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_last_10_transactions_Get_ByUser`(IN `p_User` VARCHAR(100))
 BEGIN
     -- 1. Remove older duplicates for this user (keep only the most recent for each PartID+Operation)
     DELETE
@@ -1090,7 +1090,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Add_Role`(IN `p_RoleName` VARCHAR(50), IN `p_Description` VARCHAR(255), IN `p_Permissions` VARCHAR(1000), IN `p_IsSystem` TINYINT, IN `p_CreatedBy` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_roles_Add_Role`(IN `p_RoleName` VARCHAR(50), IN `p_Description` VARCHAR(255), IN `p_Permissions` VARCHAR(1000), IN `p_IsSystem` TINYINT, IN `p_CreatedBy` VARCHAR(100))
 BEGIN
 INSERT INTO sys_roles (RoleName, Description, Permissions, IsSystem, CreatedBy)
 VALUES (p_RoleName, p_Description, p_Permissions, p_IsSystem, p_CreatedBy);
@@ -1100,7 +1100,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Delete_Role`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_roles_Delete_Role`(IN `p_ID` INT)
 BEGIN
 DELETE
 FROM sys_roles
@@ -1111,7 +1111,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Get_All`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_roles_Get_All`()
 BEGIN
 SELECT *
 FROM sys_roles
@@ -1122,7 +1122,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Get_ById`(IN `p_ID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_roles_Get_ById`(IN `p_ID` INT)
 BEGIN
 SELECT *
 FROM sys_roles
@@ -1133,7 +1133,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Get_ByRoleName`(IN `p_RoleName` VARCHAR(50))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_roles_Get_ByRoleName`(IN `p_RoleName` VARCHAR(50))
 BEGIN
 SELECT *
 FROM sys_roles
@@ -1144,7 +1144,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_roles_Update_Role`(IN `p_ID` INT, IN `p_RoleName` VARCHAR(50), IN `p_Description` VARCHAR(255), IN `p_Permissions` VARCHAR(1000), IN `p_IsSystem` TINYINT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_roles_Update_Role`(IN `p_ID` INT, IN `p_RoleName` VARCHAR(50), IN `p_Description` VARCHAR(255), IN `p_Permissions` VARCHAR(1000), IN `p_IsSystem` TINYINT)
 BEGIN
 UPDATE sys_roles
 SET RoleName    = p_RoleName,
@@ -1158,7 +1158,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Add`(IN `p_UserID` INT, IN `p_RoleID` INT, IN `p_AssignedBy` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_user_roles_Add`(IN `p_UserID` INT, IN `p_RoleID` INT, IN `p_AssignedBy` VARCHAR(100))
 BEGIN
 INSERT INTO sys_user_roles (UserID, RoleID, AssignedBy)
 VALUES (p_UserID, p_RoleID, p_AssignedBy);
@@ -1168,7 +1168,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Delete`(IN `p_UserID` INT, IN `p_RoleID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_user_roles_Delete`(IN `p_UserID` INT, IN `p_RoleID` INT)
 BEGIN
 DELETE
 FROM sys_user_roles
@@ -1180,7 +1180,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Get_All`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_user_roles_Get_All`()
 BEGIN
 SELECT *
 FROM sys_user_roles;
@@ -1190,7 +1190,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Get_ByRoleID`(IN `p_RoleID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_user_roles_Get_ByRoleID`(IN `p_RoleID` INT)
 BEGIN
 SELECT *
 FROM sys_user_roles
@@ -1201,7 +1201,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `sys_user_roles_Get_ByUserID`(IN `p_UserID` INT)
+DEFINER=`root`@`172.16.1.104` PROCEDURE `sys_user_roles_Get_ByUserID`(IN `p_UserID` INT)
 BEGIN
 SELECT *
 FROM sys_user_roles
@@ -1212,7 +1212,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Delete`(
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_ui_settings_Delete`(
     IN p_UserId VARCHAR(64),
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
@@ -1241,7 +1241,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Get`(
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_ui_settings_Get`(
     IN p_UserId VARCHAR(64),
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
@@ -1270,7 +1270,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_GetThemeName`(IN `p_UserId` VARCHAR(255), OUT `p_ThemeName` VARCHAR(255))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_ui_settings_GetThemeName`(IN `p_UserId` VARCHAR(255), OUT `p_ThemeName` VARCHAR(255))
 BEGIN
 SELECT JSON_UNQUOTE(JSON_EXTRACT(SettingsJson, '$.Theme'))
 INTO p_ThemeName
@@ -1282,7 +1282,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Save`(
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_ui_settings_Save`(
     IN p_UserId VARCHAR(64),
     IN p_SettingsJson TEXT,
     OUT p_Status INT,
@@ -1315,7 +1315,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Update`(
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_ui_settings_Update`(
     IN p_UserId VARCHAR(64),
     IN p_SettingsJson TEXT,
     OUT p_Status INT,
@@ -1345,7 +1345,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_users_Add_User`(IN `p_User` VARCHAR(100), IN `p_FullName` VARCHAR(200), IN `p_Shift` VARCHAR(50), IN `p_VitsUser` TINYINT, IN `p_Pin` VARCHAR(50), IN `p_LastShownVersion` VARCHAR(50), IN `p_HideChangeLog` VARCHAR(50), IN `p_Theme_Name` VARCHAR(50), IN `p_Theme_FontSize` INT, IN `p_VisualUserName` VARCHAR(50), IN `p_VisualPassword` VARCHAR(50), IN `p_WipServerAddress` VARCHAR(15), IN `p_WipServerPort` VARCHAR(10))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Add_User`(IN `p_User` VARCHAR(100), IN `p_FullName` VARCHAR(200), IN `p_Shift` VARCHAR(50), IN `p_VitsUser` TINYINT, IN `p_Pin` VARCHAR(50), IN `p_LastShownVersion` VARCHAR(50), IN `p_HideChangeLog` VARCHAR(50), IN `p_Theme_Name` VARCHAR(50), IN `p_Theme_FontSize` INT, IN `p_VisualUserName` VARCHAR(50), IN `p_VisualPassword` VARCHAR(50), IN `p_WipServerAddress` VARCHAR(15), IN `p_WipServerPort` VARCHAR(10))
 BEGIN
     -- Insert into application users table
 INSERT INTO usr_users (`User`, `Full Name`, `Shift`, `VitsUser`, `Pin`, `LastShownVersion`, `HideChangeLog`,
@@ -1402,7 +1402,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_users_Delete_User`(IN `p_User` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Delete_User`(IN `p_User` VARCHAR(100))
 BEGIN
     -- Remove MySQL user
     SET
@@ -1424,7 +1424,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_users_Exists`(IN `p_User` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Exists`(IN `p_User` VARCHAR(100))
 BEGIN
 SELECT COUNT(*) AS UserExists
 FROM usr_users
@@ -1435,7 +1435,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_users_Get_All`()
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Get_All`()
 BEGIN
 SELECT *
 FROM usr_users;
@@ -1445,7 +1445,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_users_Get_ByUser`(IN `p_User` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Get_ByUser`(IN `p_User` VARCHAR(100))
 BEGIN
 SELECT *
 FROM usr_users
@@ -1456,7 +1456,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_users_Grant_Full`(IN `p_User` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Grant_Full`(IN `p_User` VARCHAR(100))
 BEGIN
     SET
 @sql := CONCAT('GRANT ALL PRIVILEGES ON mtm_wip_application.* TO \'', REPLACE(p_User, '
@@ -1472,7 +1472,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_users_Grant_ReadOnly`(IN `p_User` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Grant_ReadOnly`(IN `p_User` VARCHAR(100))
 BEGIN
     SET
 @sql := CONCAT('GRANT SELECT ON mtm_wip_application.* TO \'', REPLACE(p_User, '
@@ -1488,7 +1488,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_users_Grant_ReadWrite`(IN `p_User` VARCHAR(100))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Grant_ReadWrite`(IN `p_User` VARCHAR(100))
 BEGIN
     SET
 @sql := CONCAT('GRANT SELECT, INSERT, UPDATE, DELETE ON mtm_wip_application.* TO \'', REPLACE(p_User, '
@@ -1504,7 +1504,7 @@ DELIMITER ;
 DELIMITER
 $$
 CREATE
-DEFINER=`root`@`localhost` PROCEDURE `usr_users_Update_User`(IN `p_User` VARCHAR(100), IN `p_FullName` VARCHAR(200), IN `p_Shift` VARCHAR(50), IN `p_VitsUser` TINYINT, IN `p_Pin` VARCHAR(50), IN `p_LastShownVersion` VARCHAR(50), IN `p_HideChangeLog` VARCHAR(50), IN `p_Theme_Name` VARCHAR(50), IN `p_Theme_FontSize` INT, IN `p_VisualUserName` VARCHAR(50), IN `p_VisualPassword` VARCHAR(50), IN `p_WipServerAddress` VARCHAR(15), IN `p_WipServerPort` VARCHAR(10))
+DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_users_Update_User`(IN `p_User` VARCHAR(100), IN `p_FullName` VARCHAR(200), IN `p_Shift` VARCHAR(50), IN `p_VitsUser` TINYINT, IN `p_Pin` VARCHAR(50), IN `p_LastShownVersion` VARCHAR(50), IN `p_HideChangeLog` VARCHAR(50), IN `p_Theme_Name` VARCHAR(50), IN `p_Theme_FontSize` INT, IN `p_VisualUserName` VARCHAR(50), IN `p_VisualPassword` VARCHAR(50), IN `p_WipServerAddress` VARCHAR(15), IN `p_WipServerPort` VARCHAR(10))
 BEGIN
 UPDATE usr_users
 SET `Full Name`        = p_FullName,
@@ -1524,7 +1524,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_GetShortcut` (
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_ui_settings_GetShortcut` (
     IN p_UserId VARCHAR(64),
     IN p_ActionName VARCHAR(255),
     OUT p_ShortcutValue VARCHAR(255)
@@ -1545,7 +1545,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_SetShortcut` (
+CREATE DEFINER=`root`@`172.16.1.104` PROCEDURE `usr_ui_settings_SetShortcut` (
     IN p_UserId VARCHAR(64),
     IN p_ActionName VARCHAR(255),
     IN p_ShortcutValue VARCHAR(255),

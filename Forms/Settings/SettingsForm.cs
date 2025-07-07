@@ -181,7 +181,7 @@ public partial class SettingsForm : Form
         {
             var user = Model_AppVariables.User;
 
-            serverTextBox.Text = await Dao_User.GetWipServerAddressAsync(user) ?? "localhost";
+            serverTextBox.Text = await Dao_User.GetWipServerAddressAsync(user) ?? "172.16.1.104";
             portTextBox.Text = await Dao_User.GetWipServerPortAsync(user) ?? "3306";
             databaseTextBox.Text = await Dao_User.GetDatabaseAsync(user) ?? "mtm_wip_application";
             usernameTextBox.Text = await Dao_User.GetVisualUserNameAsync(user) ?? "";
@@ -761,7 +761,7 @@ public partial class SettingsForm : Form
         try
         {
             // Reset database settings to defaults
-            serverTextBox.Text = "localhost";
+            serverTextBox.Text = "172.16.1.104";
             portTextBox.Text = "3306";
             databaseTextBox.Text = "mtm_wip_application";
             usernameTextBox.Text = "";
