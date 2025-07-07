@@ -164,9 +164,8 @@ public static class Core_Themes
 
     private static void ApplyBaseThemeColors(Control control, Core_AppThemes.AppTheme theme)
     {
-        // Use ControlBackColor as the unified background color for all controls
-        var backColor = theme.Colors.ControlBackColor ?? theme.Colors.FormBackColor ?? Color.White;
-        var foreColor = theme.Colors.ControlForeColor ?? theme.Colors.FormForeColor ?? Color.Black;
+        var backColor = theme.Colors.FormBackColor ?? Color.White;
+        var foreColor = theme.Colors.FormForeColor ?? Color.Black;
         if (control.BackColor != backColor)
             control.BackColor = backColor;
         if (control.ForeColor != foreColor)
@@ -222,9 +221,8 @@ public static class Core_Themes
                 quickButtons.ForeColor = colors.CustomControlForeColor ?? colors.ControlForeColor ?? Color.Black;
                 foreach (var btn in quickButtons.Controls.OfType<Button>())
                 {
-                    // Use unified background color for buttons too
-                    btn.BackColor = colors.ControlBackColor ?? colors.ButtonBackColor ?? Color.White;
-                    btn.ForeColor = colors.ControlForeColor ?? colors.ButtonForeColor ?? Color.Black;
+                    btn.BackColor = colors.ButtonBackColor ?? Color.White;
+                    btn.ForeColor = colors.ButtonForeColor ?? Color.Black;
                 }
             }
         }
@@ -286,11 +284,9 @@ public static class Core_Themes
 
         public static void ApplyCustomControlTheme(Control control, Model_UserUiColors colors)
         {
-            // Use unified background color for custom controls too
-            var backColor = colors.ControlBackColor ?? colors.CustomControlBackColor ?? Color.White;
-            var foreColor = colors.ControlForeColor ?? colors.CustomControlForeColor ?? Color.Black;
-            control.BackColor = backColor;
-            control.ForeColor = foreColor;
+            if (colors.CustomControlBackColor.HasValue) control.BackColor = colors.CustomControlBackColor.Value;
+
+            if (colors.CustomControlForeColor.HasValue) control.ForeColor = colors.CustomControlForeColor.Value;
         }
 
         // ...other theme appliers remain unchanged...
@@ -301,9 +297,8 @@ public static class Core_Themes
             if (control is Button btn)
             {
                 btn.Margin = new Padding(1);
-                // Use unified background color - ControlBackColor for consistency
-                var backColor = colors.ControlBackColor ?? colors.ButtonBackColor ?? SystemColors.Control;
-                var foreColor = colors.ControlForeColor ?? colors.ButtonForeColor ?? SystemColors.ControlText;
+                var backColor = colors.ButtonBackColor ?? SystemColors.Control;
+                var foreColor = colors.ButtonForeColor ?? SystemColors.ControlText;
                 btn.BackColor = backColor;
                 btn.ForeColor = foreColor;
                 btn.FlatStyle = FlatStyle.System;
@@ -316,9 +311,8 @@ public static class Core_Themes
         {
             if (control is TabControl tab)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.TabControlBackColor ?? colors.FormBackColor ?? Color.FromArgb(30, 30, 30);
-                var foreColor = colors.ControlForeColor ?? colors.TabControlForeColor ?? colors.FormForeColor ?? Color.White;
+                var backColor = colors.TabControlBackColor ?? colors.FormBackColor ?? Color.FromArgb(30, 30, 30);
+                var foreColor = colors.TabControlForeColor ?? colors.FormForeColor ?? Color.White;
 
                 tab.BackColor = backColor;
                 tab.ForeColor = foreColor;
@@ -329,24 +323,17 @@ public static class Core_Themes
         {
             if (control is TabPage tabPage)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.TabPageBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.TabPageForeColor ?? Color.Black;
-                tabPage.BackColor = backColor;
-                tabPage.ForeColor = foreColor;
+                if (colors.TabPageBackColor.HasValue) tabPage.BackColor = colors.TabPageBackColor.Value;
+                if (colors.TabPageForeColor.HasValue) tabPage.ForeColor = colors.TabPageForeColor.Value;
             }
-        }
         }
 
         public static void ApplyTextBoxTheme(Control control, Model_UserUiColors colors)
         {
             if (control is TextBox txt)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.TextBoxBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.TextBoxForeColor ?? Color.Black;
-                txt.BackColor = backColor;
-                txt.ForeColor = foreColor;
+                if (colors.TextBoxBackColor.HasValue) txt.BackColor = colors.TextBoxBackColor.Value;
+                if (colors.TextBoxForeColor.HasValue) txt.ForeColor = colors.TextBoxForeColor.Value;
             }
         }
 
@@ -354,11 +341,8 @@ public static class Core_Themes
         {
             if (control is MaskedTextBox mtxt)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.MaskedTextBoxBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.MaskedTextBoxForeColor ?? Color.Black;
-                mtxt.BackColor = backColor;
-                mtxt.ForeColor = foreColor;
+                if (colors.MaskedTextBoxBackColor.HasValue) mtxt.BackColor = colors.MaskedTextBoxBackColor.Value;
+                if (colors.MaskedTextBoxForeColor.HasValue) mtxt.ForeColor = colors.MaskedTextBoxForeColor.Value;
             }
         }
 
@@ -366,11 +350,8 @@ public static class Core_Themes
         {
             if (control is RichTextBox rtxt)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.RichTextBoxBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.RichTextBoxForeColor ?? Color.Black;
-                rtxt.BackColor = backColor;
-                rtxt.ForeColor = foreColor;
+                if (colors.RichTextBoxBackColor.HasValue) rtxt.BackColor = colors.RichTextBoxBackColor.Value;
+                if (colors.RichTextBoxForeColor.HasValue) rtxt.ForeColor = colors.RichTextBoxForeColor.Value;
             }
         }
 
@@ -378,11 +359,8 @@ public static class Core_Themes
         {
             if (control is ComboBox cb)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.ComboBoxBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.ComboBoxForeColor ?? Color.Black;
-                cb.BackColor = backColor;
-                cb.ForeColor = foreColor;
+                if (colors.ComboBoxBackColor.HasValue) cb.BackColor = colors.ComboBoxBackColor.Value;
+                if (colors.ComboBoxForeColor.HasValue) cb.ForeColor = colors.ComboBoxForeColor.Value;
             }
         }
 
@@ -390,11 +368,8 @@ public static class Core_Themes
         {
             if (control is ListBox lb)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.ListBoxBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.ListBoxForeColor ?? Color.Black;
-                lb.BackColor = backColor;
-                lb.ForeColor = foreColor;
+                if (colors.ListBoxBackColor.HasValue) lb.BackColor = colors.ListBoxBackColor.Value;
+                if (colors.ListBoxForeColor.HasValue) lb.ForeColor = colors.ListBoxForeColor.Value;
             }
         }
 
@@ -402,11 +377,8 @@ public static class Core_Themes
         {
             if (control is CheckedListBox clb)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.CheckedListBoxBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.CheckedListBoxForeColor ?? Color.Black;
-                clb.BackColor = backColor;
-                clb.ForeColor = foreColor;
+                if (colors.CheckedListBoxBackColor.HasValue) clb.BackColor = colors.CheckedListBoxBackColor.Value;
+                if (colors.CheckedListBoxForeColor.HasValue) clb.ForeColor = colors.CheckedListBoxForeColor.Value;
             }
         }
 
@@ -414,11 +386,8 @@ public static class Core_Themes
         {
             if (control is Label lbl)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.LabelBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.LabelForeColor ?? Color.Black;
-                lbl.BackColor = backColor;
-                lbl.ForeColor = foreColor;
+                if (colors.LabelBackColor.HasValue) lbl.BackColor = colors.LabelBackColor.Value;
+                if (colors.LabelForeColor.HasValue) lbl.ForeColor = colors.LabelForeColor.Value;
             }
         }
 
@@ -426,11 +395,8 @@ public static class Core_Themes
         {
             if (control is RadioButton rb)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.RadioButtonBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.RadioButtonForeColor ?? Color.Black;
-                rb.BackColor = backColor;
-                rb.ForeColor = foreColor;
+                if (colors.RadioButtonBackColor.HasValue) rb.BackColor = colors.RadioButtonBackColor.Value;
+                if (colors.RadioButtonForeColor.HasValue) rb.ForeColor = colors.RadioButtonForeColor.Value;
             }
         }
 
@@ -438,11 +404,8 @@ public static class Core_Themes
         {
             if (control is CheckBox cbx)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.CheckBoxBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.CheckBoxForeColor ?? Color.Black;
-                cbx.BackColor = backColor;
-                cbx.ForeColor = foreColor;
+                if (colors.CheckBoxBackColor.HasValue) cbx.BackColor = colors.CheckBoxBackColor.Value;
+                if (colors.CheckBoxForeColor.HasValue) cbx.ForeColor = colors.CheckBoxForeColor.Value;
             }
         }
 
@@ -450,11 +413,8 @@ public static class Core_Themes
         {
             if (control is TreeView tv)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.TreeViewBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.TreeViewForeColor ?? Color.Black;
-                tv.BackColor = backColor;
-                tv.ForeColor = foreColor;
+                if (colors.TreeViewBackColor.HasValue) tv.BackColor = colors.TreeViewBackColor.Value;
+                if (colors.TreeViewForeColor.HasValue) tv.ForeColor = colors.TreeViewForeColor.Value;
                 if (colors.TreeViewLineColor.HasValue) tv.LineColor = colors.TreeViewLineColor.Value;
             }
         }
@@ -463,11 +423,8 @@ public static class Core_Themes
         {
             if (control is ListView lv)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.ListViewBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.ListViewForeColor ?? Color.Black;
-                lv.BackColor = backColor;
-                lv.ForeColor = foreColor;
+                if (colors.ListViewBackColor.HasValue) lv.BackColor = colors.ListViewBackColor.Value;
+                if (colors.ListViewForeColor.HasValue) lv.ForeColor = colors.ListViewForeColor.Value;
             }
         }
 
@@ -475,11 +432,8 @@ public static class Core_Themes
         {
             if (control is MenuStrip ms)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.MenuStripBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.MenuStripForeColor ?? Color.Black;
-                ms.BackColor = backColor;
-                ms.ForeColor = foreColor;
+                if (colors.MenuStripBackColor.HasValue) ms.BackColor = colors.MenuStripBackColor.Value;
+                if (colors.MenuStripForeColor.HasValue) ms.ForeColor = colors.MenuStripForeColor.Value;
             }
         }
 
@@ -487,11 +441,8 @@ public static class Core_Themes
         {
             if (control is StatusStrip ss)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.StatusStripBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.StatusStripForeColor ?? Color.Black;
-                ss.BackColor = backColor;
-                ss.ForeColor = foreColor;
+                if (colors.StatusStripBackColor.HasValue) ss.BackColor = colors.StatusStripBackColor.Value;
+                if (colors.StatusStripForeColor.HasValue) ss.ForeColor = colors.StatusStripForeColor.Value;
             }
         }
 
@@ -499,11 +450,8 @@ public static class Core_Themes
         {
             if (control is ToolStrip ts)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.ToolStripBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.ToolStripForeColor ?? Color.Black;
-                ts.BackColor = backColor;
-                ts.ForeColor = foreColor;
+                if (colors.ToolStripBackColor.HasValue) ts.BackColor = colors.ToolStripBackColor.Value;
+                if (colors.ToolStripForeColor.HasValue) ts.ForeColor = colors.ToolStripForeColor.Value;
             }
         }
 
@@ -511,71 +459,47 @@ public static class Core_Themes
         {
             if (control is GroupBox gb)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.GroupBoxBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.GroupBoxForeColor ?? Color.Black;
-                gb.BackColor = backColor;
-                gb.ForeColor = foreColor;
+                if (colors.GroupBoxBackColor.HasValue) gb.BackColor = colors.GroupBoxBackColor.Value;
+                if (colors.GroupBoxForeColor.HasValue) gb.ForeColor = colors.GroupBoxForeColor.Value;
             }
         }
 
         public static void ApplyPanelTheme(Control control, Model_UserUiColors colors)
         {
             if (control is Panel pnl)
-            {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.PanelBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.PanelForeColor ?? Color.Black;
-                pnl.BackColor = backColor;
-                pnl.ForeColor = foreColor;
-            }
+                if (colors.PanelForeColor.HasValue)
+                    pnl.ForeColor = colors.PanelForeColor.Value;
         }
 
         public static void ApplySplitContainerTheme(Control control, Model_UserUiColors colors)
         {
             if (control is SplitContainer sc)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.SplitContainerBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.SplitContainerForeColor ?? Color.Black;
-                sc.BackColor = backColor;
-                sc.ForeColor = foreColor;
+                if (colors.SplitContainerBackColor.HasValue) sc.BackColor = colors.SplitContainerBackColor.Value;
+                if (colors.SplitContainerForeColor.HasValue) sc.ForeColor = colors.SplitContainerForeColor.Value;
             }
         }
 
         public static void ApplyFlowLayoutPanelTheme(Control control, Model_UserUiColors colors)
         {
             if (control is FlowLayoutPanel flp)
-            {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.FlowLayoutPanelBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.FlowLayoutPanelForeColor ?? Color.Black;
-                flp.BackColor = backColor;
-                flp.ForeColor = foreColor;
-            }
+                if (colors.FlowLayoutPanelForeColor.HasValue)
+                    flp.ForeColor = colors.FlowLayoutPanelForeColor.Value;
         }
 
         public static void ApplyTableLayoutPanelTheme(Control control, Model_UserUiColors colors)
         {
             if (control is TableLayoutPanel tlp)
-            {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.TableLayoutPanelBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.TableLayoutPanelForeColor ?? Color.Black;
-                tlp.BackColor = backColor;
-                tlp.ForeColor = foreColor;
-            }
+                if (colors.TableLayoutPanelForeColor.HasValue)
+                    tlp.ForeColor = colors.TableLayoutPanelForeColor.Value;
         }
 
         public static void ApplyDateTimePickerTheme(Control control, Model_UserUiColors colors)
         {
             if (control is DateTimePicker dtp)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.DateTimePickerBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.DateTimePickerForeColor ?? Color.Black;
-                dtp.BackColor = backColor;
-                dtp.ForeColor = foreColor;
+                if (colors.DateTimePickerBackColor.HasValue) dtp.BackColor = colors.DateTimePickerBackColor.Value;
+                if (colors.DateTimePickerForeColor.HasValue) dtp.ForeColor = colors.DateTimePickerForeColor.Value;
             }
         }
 
@@ -583,11 +507,8 @@ public static class Core_Themes
         {
             if (control is MonthCalendar mc)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.MonthCalendarBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.MonthCalendarForeColor ?? Color.Black;
-                mc.BackColor = backColor;
-                mc.ForeColor = foreColor;
+                if (colors.MonthCalendarBackColor.HasValue) mc.BackColor = colors.MonthCalendarBackColor.Value;
+                if (colors.MonthCalendarForeColor.HasValue) mc.ForeColor = colors.MonthCalendarForeColor.Value;
                 if (colors.MonthCalendarTitleBackColor.HasValue)
                     mc.TitleBackColor = colors.MonthCalendarTitleBackColor.Value;
                 if (colors.MonthCalendarTitleForeColor.HasValue)
@@ -601,11 +522,8 @@ public static class Core_Themes
         {
             if (control is NumericUpDown nud)
             {
-                // Use unified background color
-                var backColor = colors.ControlBackColor ?? colors.NumericUpDownBackColor ?? Color.White;
-                var foreColor = colors.ControlForeColor ?? colors.NumericUpDownForeColor ?? Color.Black;
-                nud.BackColor = backColor;
-                nud.ForeColor = foreColor;
+                if (colors.NumericUpDownBackColor.HasValue) nud.BackColor = colors.NumericUpDownBackColor.Value;
+                if (colors.NumericUpDownForeColor.HasValue) nud.ForeColor = colors.NumericUpDownForeColor.Value;
             }
         }
 
