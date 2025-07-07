@@ -53,32 +53,6 @@
             this.portLabel = new System.Windows.Forms.Label();
             this.serverTextBox = new System.Windows.Forms.TextBox();
             this.serverLabel = new System.Windows.Forms.Label();
-            this.objectsTabPage = new System.Windows.Forms.TabPage();
-            this.objectsTabControl = new System.Windows.Forms.TabControl();
-            this.partsTabPage = new System.Windows.Forms.TabPage();
-            this.partsDataGridView = new System.Windows.Forms.DataGridView();
-            this.partsToolStrip = new System.Windows.Forms.ToolStrip();
-            this.addPartToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.editPartToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.deletePartToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.operationsTabPage = new System.Windows.Forms.TabPage();
-            this.operationsDataGridView = new System.Windows.Forms.DataGridView();
-            this.operationsToolStrip = new System.Windows.Forms.ToolStrip();
-            this.addOperationToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.editOperationToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.deleteOperationToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.locationsTabPage = new System.Windows.Forms.TabPage();
-            this.locationsDataGridView = new System.Windows.Forms.DataGridView();
-            this.locationsToolStrip = new System.Windows.Forms.ToolStrip();
-            this.addLocationToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.editLocationToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.deleteLocationToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.usersTabPage = new System.Windows.Forms.TabPage();
-            this.usersDataGridView = new System.Windows.Forms.DataGridView();
-            this.usersToolStrip = new System.Windows.Forms.ToolStrip();
-            this.addUserToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.editUserToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.deleteUserToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.themePanel = new System.Windows.Forms.Panel();
             this.fontSizeNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.fontSizeLabel = new System.Windows.Forms.Label();
@@ -101,20 +75,6 @@
             this.databaseTabControl.SuspendLayout();
             this.connectionTabPage.SuspendLayout();
             this.connectionGroupBox.SuspendLayout();
-            this.objectsTabPage.SuspendLayout();
-            this.objectsTabControl.SuspendLayout();
-            this.partsTabPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.partsDataGridView)).BeginInit();
-            this.partsToolStrip.SuspendLayout();
-            this.operationsTabPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.operationsDataGridView)).BeginInit();
-            this.operationsToolStrip.SuspendLayout();
-            this.locationsTabPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.locationsDataGridView)).BeginInit();
-            this.locationsToolStrip.SuspendLayout();
-            this.usersTabPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.usersDataGridView)).BeginInit();
-            this.usersToolStrip.SuspendLayout();
             this.themePanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.fontSizeNumericUpDown)).BeginInit();
             this.shortcutsPanel.SuspendLayout();
@@ -383,226 +343,6 @@
             this.serverLabel.TabIndex = 0;
             this.serverLabel.Text = "Server Address:";
             // 
-            // objectsTabPage
-            // 
-            this.objectsTabPage.Controls.Add(this.objectsTabControl);
-            this.objectsTabPage.Location = new System.Drawing.Point(4, 24);
-            this.objectsTabPage.Name = "objectsTabPage";
-            this.objectsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.objectsTabPage.Size = new System.Drawing.Size(588, 382);
-            this.objectsTabPage.TabIndex = 1;
-            this.objectsTabPage.Text = "Database Objects";
-            this.objectsTabPage.UseVisualStyleBackColor = true;
-            // 
-            // objectsTabControl
-            // 
-            this.objectsTabControl.Controls.Add(this.partsTabPage);
-            this.objectsTabControl.Controls.Add(this.operationsTabPage);
-            this.objectsTabControl.Controls.Add(this.locationsTabPage);
-            this.objectsTabControl.Controls.Add(this.usersTabPage);
-            this.objectsTabControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.objectsTabControl.Location = new System.Drawing.Point(3, 3);
-            this.objectsTabControl.Name = "objectsTabControl";
-            this.objectsTabControl.SelectedIndex = 0;
-            this.objectsTabControl.Size = new System.Drawing.Size(582, 376);
-            this.objectsTabControl.TabIndex = 0;
-            // 
-            // partsTabPage
-            // 
-            this.partsTabPage.Controls.Add(this.partsDataGridView);
-            this.partsTabPage.Controls.Add(this.partsToolStrip);
-            this.partsTabPage.Location = new System.Drawing.Point(4, 24);
-            this.partsTabPage.Name = "partsTabPage";
-            this.partsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.partsTabPage.Size = new System.Drawing.Size(574, 348);
-            this.partsTabPage.TabIndex = 0;
-            this.partsTabPage.Text = "Parts";
-            this.partsTabPage.UseVisualStyleBackColor = true;
-            // 
-            // partsDataGridView
-            // 
-            this.partsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.partsDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.partsDataGridView.Location = new System.Drawing.Point(3, 28);
-            this.partsDataGridView.Name = "partsDataGridView";
-            this.partsDataGridView.RowTemplate.Height = 25;
-            this.partsDataGridView.Size = new System.Drawing.Size(568, 317);
-            this.partsDataGridView.TabIndex = 1;
-            // 
-            // partsToolStrip
-            // 
-            this.partsToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addPartToolStripButton,
-            this.editPartToolStripButton,
-            this.deletePartToolStripButton});
-            this.partsToolStrip.Location = new System.Drawing.Point(3, 3);
-            this.partsToolStrip.Name = "partsToolStrip";
-            this.partsToolStrip.Size = new System.Drawing.Size(568, 25);
-            this.partsToolStrip.TabIndex = 0;
-            this.partsToolStrip.Text = "toolStrip1";
-            // 
-            // addPartToolStripButton
-            // 
-            this.addPartToolStripButton.Text = "Add";
-            this.addPartToolStripButton.Click += new System.EventHandler(this.addPartToolStripButton_Click);
-            // 
-            // editPartToolStripButton
-            // 
-            this.editPartToolStripButton.Text = "Edit";
-            this.editPartToolStripButton.Click += new System.EventHandler(this.editPartToolStripButton_Click);
-            // 
-            // deletePartToolStripButton
-            // 
-            this.deletePartToolStripButton.Text = "Delete";
-            this.deletePartToolStripButton.Click += new System.EventHandler(this.deletePartToolStripButton_Click);
-            // 
-            // operationsTabPage
-            // 
-            this.operationsTabPage.Controls.Add(this.operationsDataGridView);
-            this.operationsTabPage.Controls.Add(this.operationsToolStrip);
-            this.operationsTabPage.Location = new System.Drawing.Point(4, 24);
-            this.operationsTabPage.Name = "operationsTabPage";
-            this.operationsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.operationsTabPage.Size = new System.Drawing.Size(574, 348);
-            this.operationsTabPage.TabIndex = 1;
-            this.operationsTabPage.Text = "Operations";
-            this.operationsTabPage.UseVisualStyleBackColor = true;
-            // 
-            // operationsDataGridView
-            // 
-            this.operationsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.operationsDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.operationsDataGridView.Location = new System.Drawing.Point(3, 28);
-            this.operationsDataGridView.Name = "operationsDataGridView";
-            this.operationsDataGridView.RowTemplate.Height = 25;
-            this.operationsDataGridView.Size = new System.Drawing.Size(568, 317);
-            this.operationsDataGridView.TabIndex = 1;
-            // 
-            // operationsToolStrip
-            // 
-            this.operationsToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addOperationToolStripButton,
-            this.editOperationToolStripButton,
-            this.deleteOperationToolStripButton});
-            this.operationsToolStrip.Location = new System.Drawing.Point(3, 3);
-            this.operationsToolStrip.Name = "operationsToolStrip";
-            this.operationsToolStrip.Size = new System.Drawing.Size(568, 25);
-            this.operationsToolStrip.TabIndex = 0;
-            this.operationsToolStrip.Text = "toolStrip2";
-            // 
-            // addOperationToolStripButton
-            // 
-            this.addOperationToolStripButton.Text = "Add";
-            this.addOperationToolStripButton.Click += new System.EventHandler(this.addOperationToolStripButton_Click);
-            // 
-            // editOperationToolStripButton
-            // 
-            this.editOperationToolStripButton.Text = "Edit";
-            this.editOperationToolStripButton.Click += new System.EventHandler(this.editOperationToolStripButton_Click);
-            // 
-            // deleteOperationToolStripButton
-            // 
-            this.deleteOperationToolStripButton.Text = "Delete";
-            this.deleteOperationToolStripButton.Click += new System.EventHandler(this.deleteOperationToolStripButton_Click);
-            // 
-            // locationsTabPage
-            // 
-            this.locationsTabPage.Controls.Add(this.locationsDataGridView);
-            this.locationsTabPage.Controls.Add(this.locationsToolStrip);
-            this.locationsTabPage.Location = new System.Drawing.Point(4, 24);
-            this.locationsTabPage.Name = "locationsTabPage";
-            this.locationsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.locationsTabPage.Size = new System.Drawing.Size(574, 348);
-            this.locationsTabPage.TabIndex = 2;
-            this.locationsTabPage.Text = "Locations";
-            this.locationsTabPage.UseVisualStyleBackColor = true;
-            // 
-            // locationsDataGridView
-            // 
-            this.locationsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.locationsDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.locationsDataGridView.Location = new System.Drawing.Point(3, 28);
-            this.locationsDataGridView.Name = "locationsDataGridView";
-            this.locationsDataGridView.RowTemplate.Height = 25;
-            this.locationsDataGridView.Size = new System.Drawing.Size(568, 317);
-            this.locationsDataGridView.TabIndex = 1;
-            // 
-            // locationsToolStrip
-            // 
-            this.locationsToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addLocationToolStripButton,
-            this.editLocationToolStripButton,
-            this.deleteLocationToolStripButton});
-            this.locationsToolStrip.Location = new System.Drawing.Point(3, 3);
-            this.locationsToolStrip.Name = "locationsToolStrip";
-            this.locationsToolStrip.Size = new System.Drawing.Size(568, 25);
-            this.locationsToolStrip.TabIndex = 0;
-            this.locationsToolStrip.Text = "toolStrip3";
-            // 
-            // addLocationToolStripButton
-            // 
-            this.addLocationToolStripButton.Text = "Add";
-            this.addLocationToolStripButton.Click += new System.EventHandler(this.addLocationToolStripButton_Click);
-            // 
-            // editLocationToolStripButton
-            // 
-            this.editLocationToolStripButton.Text = "Edit";
-            this.editLocationToolStripButton.Click += new System.EventHandler(this.editLocationToolStripButton_Click);
-            // 
-            // deleteLocationToolStripButton
-            // 
-            this.deleteLocationToolStripButton.Text = "Delete";
-            this.deleteLocationToolStripButton.Click += new System.EventHandler(this.deleteLocationToolStripButton_Click);
-            // 
-            // usersTabPage
-            // 
-            this.usersTabPage.Controls.Add(this.usersDataGridView);
-            this.usersTabPage.Controls.Add(this.usersToolStrip);
-            this.usersTabPage.Location = new System.Drawing.Point(4, 24);
-            this.usersTabPage.Name = "usersTabPage";
-            this.usersTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.usersTabPage.Size = new System.Drawing.Size(574, 348);
-            this.usersTabPage.TabIndex = 3;
-            this.usersTabPage.Text = "Users";
-            this.usersTabPage.UseVisualStyleBackColor = true;
-            // 
-            // usersDataGridView
-            // 
-            this.usersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.usersDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.usersDataGridView.Location = new System.Drawing.Point(3, 28);
-            this.usersDataGridView.Name = "usersDataGridView";
-            this.usersDataGridView.RowTemplate.Height = 25;
-            this.usersDataGridView.Size = new System.Drawing.Size(568, 317);
-            this.usersDataGridView.TabIndex = 1;
-            // 
-            // usersToolStrip
-            // 
-            this.usersToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addUserToolStripButton,
-            this.editUserToolStripButton,
-            this.deleteUserToolStripButton});
-            this.usersToolStrip.Location = new System.Drawing.Point(3, 3);
-            this.usersToolStrip.Name = "usersToolStrip";
-            this.usersToolStrip.Size = new System.Drawing.Size(568, 25);
-            this.usersToolStrip.TabIndex = 0;
-            this.usersToolStrip.Text = "toolStrip4";
-            // 
-            // addUserToolStripButton
-            // 
-            this.addUserToolStripButton.Text = "Add";
-            this.addUserToolStripButton.Click += new System.EventHandler(this.addUserToolStripButton_Click);
-            // 
-            // editUserToolStripButton
-            // 
-            this.editUserToolStripButton.Text = "Edit";
-            this.editUserToolStripButton.Click += new System.EventHandler(this.editUserToolStripButton_Click);
-            // 
-            // deleteUserToolStripButton
-            // 
-            this.deleteUserToolStripButton.Text = "Delete";
-            this.deleteUserToolStripButton.Click += new System.EventHandler(this.deleteUserToolStripButton_Click);
-            // 
             // themePanel
             // 
             this.themePanel.Controls.Add(this.fontSizeNumericUpDown);
@@ -772,28 +512,6 @@
             this.connectionTabPage.ResumeLayout(false);
             this.connectionGroupBox.ResumeLayout(false);
             this.connectionGroupBox.PerformLayout();
-            this.objectsTabPage.ResumeLayout(false);
-            this.objectsTabControl.ResumeLayout(false);
-            this.partsTabPage.ResumeLayout(false);
-            this.partsTabPage.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.partsDataGridView)).EndInit();
-            this.partsToolStrip.ResumeLayout(false);
-            this.partsToolStrip.PerformLayout();
-            this.operationsTabPage.ResumeLayout(false);
-            this.operationsTabPage.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.operationsDataGridView)).EndInit();
-            this.operationsToolStrip.ResumeLayout(false);
-            this.operationsToolStrip.PerformLayout();
-            this.locationsTabPage.ResumeLayout(false);
-            this.locationsTabPage.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.locationsDataGridView)).EndInit();
-            this.locationsToolStrip.ResumeLayout(false);
-            this.locationsToolStrip.PerformLayout();
-            this.usersTabPage.ResumeLayout(false);
-            this.usersTabPage.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.usersDataGridView)).EndInit();
-            this.usersToolStrip.ResumeLayout(false);
-            this.usersToolStrip.PerformLayout();
             this.themePanel.ResumeLayout(false);
             this.themePanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.fontSizeNumericUpDown)).EndInit();
@@ -832,32 +550,6 @@
         private System.Windows.Forms.Label portLabel;
         private System.Windows.Forms.TextBox serverTextBox;
         private System.Windows.Forms.Label serverLabel;
-        private System.Windows.Forms.TabPage objectsTabPage;
-        private System.Windows.Forms.TabControl objectsTabControl;
-        private System.Windows.Forms.TabPage partsTabPage;
-        private System.Windows.Forms.DataGridView partsDataGridView;
-        private System.Windows.Forms.ToolStrip partsToolStrip;
-        private System.Windows.Forms.ToolStripButton addPartToolStripButton;
-        private System.Windows.Forms.ToolStripButton editPartToolStripButton;
-        private System.Windows.Forms.ToolStripButton deletePartToolStripButton;
-        private System.Windows.Forms.TabPage operationsTabPage;
-        private System.Windows.Forms.DataGridView operationsDataGridView;
-        private System.Windows.Forms.ToolStrip operationsToolStrip;
-        private System.Windows.Forms.ToolStripButton addOperationToolStripButton;
-        private System.Windows.Forms.ToolStripButton editOperationToolStripButton;
-        private System.Windows.Forms.ToolStripButton deleteOperationToolStripButton;
-        private System.Windows.Forms.TabPage locationsTabPage;
-        private System.Windows.Forms.DataGridView locationsDataGridView;
-        private System.Windows.Forms.ToolStrip locationsToolStrip;
-        private System.Windows.Forms.ToolStripButton addLocationToolStripButton;
-        private System.Windows.Forms.ToolStripButton editLocationToolStripButton;
-        private System.Windows.Forms.ToolStripButton deleteLocationToolStripButton;
-        private System.Windows.Forms.TabPage usersTabPage;
-        private System.Windows.Forms.DataGridView usersDataGridView;
-        private System.Windows.Forms.ToolStrip usersToolStrip;
-        private System.Windows.Forms.ToolStripButton addUserToolStripButton;
-        private System.Windows.Forms.ToolStripButton editUserToolStripButton;
-        private System.Windows.Forms.ToolStripButton deleteUserToolStripButton;
         private System.Windows.Forms.Panel themePanel;
         private System.Windows.Forms.NumericUpDown fontSizeNumericUpDown;
         private System.Windows.Forms.Label fontSizeLabel;

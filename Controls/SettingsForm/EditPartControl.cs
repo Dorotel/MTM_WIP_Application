@@ -60,6 +60,16 @@ public partial class EditPartControl : UserControl
         }
     }
 
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        // Set the current user when the control loads
+        if (issuedByValueLabel != null)
+        {
+            issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
+        }
+    }
+
     private async void partsComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (partsComboBox.SelectedIndex <= 0)

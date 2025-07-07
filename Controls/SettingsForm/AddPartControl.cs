@@ -42,6 +42,16 @@ public partial class AddPartControl : UserControl
         return await Dao_Part.GetPartTypes();
     }
 
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        // Set the current user when the control loads
+        if (issuedByValueLabel != null)
+        {
+            issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
+        }
+    }
+
     private async void saveButton_Click(object sender, EventArgs e)
     {
         try
