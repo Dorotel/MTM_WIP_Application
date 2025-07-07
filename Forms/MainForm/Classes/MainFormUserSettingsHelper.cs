@@ -42,26 +42,6 @@ public static class MainFormUserSettingsHelper
         Debug.WriteLine("[DEBUG] Finished loading user theme settings from DB");
     }
 
-    /// <summary>
-    ///     Saves user colors when the form is closing.
-    /// </summary>
-    public static async Task SaveUserSettingsAsync()
-    {
-        Debug.WriteLine("[DEBUG] Saving user theme settings to DB");
-        // Save user colors from Model_AppVariables to DB using stored procedures
-        await Dao_User.SetWipServerAddressAsync(Model_AppVariables.User,
-            Model_AppVariables.WipServerAddress ?? "");
-        await Dao_User.SetWipServerPortAsync(Model_AppVariables.User, Model_AppVariables.WipServerPort ?? "");
-
-        // CRITICAL FIX: Synchronize WipDataGridTheme with ThemeName before saving
-        Model_AppVariables.WipDataGridTheme = Model_AppVariables.ThemeName;
-
-        await Dao_User.SetThemeNameAsync(Model_AppVariables.User, Model_AppVariables.WipDataGridTheme ?? "");
-        await Dao_User.SetThemeFontSizeAsync(Model_AppVariables.User, (int)Model_AppVariables.ThemeFontSize);
-        await Dao_User.SetVisualUserNameAsync(Model_AppVariables.User, Model_AppVariables.VisualUserName ?? "");
-        await Dao_User.SetVisualPasswordAsync(Model_AppVariables.User, Model_AppVariables.VisualPassword ?? "");
-        Debug.WriteLine("[DEBUG] Finished saving user theme settings to DB");
-    }
 
     /// <summary>
     ///     Shows the changelog on startup if the changelog visibility toggle is set to false for the current user.

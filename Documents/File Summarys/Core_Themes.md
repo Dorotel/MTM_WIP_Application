@@ -21,7 +21,8 @@
 - MTM_Inventory_Application.Models
 
 **External Dependencies:**
-- var cmd = new MySql.Data.MySqlClient.MySqlCommand("usr_ui_settings_GetThemeName", conn)
+- var cmd = new MySql.Data.MySqlClient.MySqlCommand("usr_ui_settings_
+", conn)
                 {
                     CommandType = CommandType.StoredProcedure
                 }

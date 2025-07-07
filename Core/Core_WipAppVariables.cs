@@ -11,38 +11,14 @@ internal static class Core_WipAppVariables
 {
     #region User Info
 
-    public static string EnteredUser = "Default User";
-    public static string User = Dao_System.System_GetUserName();
-    public static string? UserPin;
-    public static string? UserShift;
-    public static bool UserTypeAdmin = false;
-    public static bool UserTypeReadOnly = false;
-    public static string UserVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
-    public static string? UserFullName;
-    public static string? VisualUserName;
-    public static string? VisualPassword;
-
-    #endregion
-
-    #region Inventory State
-
-    public static int InventoryQuantity;
-    public static string? PartId;
-    public static string? PartType;
-    public static string? Location;
-    public static string? Operation;
-    public static string? Notes;
+    public static readonly string User = Dao_System.System_GetUserName();
 
     #endregion
 
     #region Theme & Version
 
-    public static float ThemeFontSize = 9f;
-    public static string? WipDataGridTheme;
-    public static string? WipServerAddress;
-    public static string? WipServerPort;
-    public static string? Version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
-    public static string ConnectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
+    public static readonly string ReConnectionString =
+        Helper_Database_Variables.GetConnectionString(null, null, null, null);
 
     #endregion
 
@@ -87,32 +63,6 @@ internal static class Core_WipAppVariables
     public static Keys Shortcut_Transfer_Reset = Keys.Control | Keys.R;
     public static Keys Shortcut_Transfer_ToggleRightPanel_Right = Keys.Alt | Keys.Right;
     public static Keys Shortcut_Transfer_ToggleRightPanel_Left = Keys.Alt | Keys.Left;
-
-    #endregion
-
-    #region Shortcut Helper
-
-    public static string ToShortcutString(Keys keys)
-    {
-        if (keys == Keys.None) return "";
-        var parts = new List<string>();
-        if (keys.HasFlag(Keys.Control)) parts.Add("CTRL");
-        if (keys.HasFlag(Keys.Shift)) parts.Add("SHIFT");
-        if (keys.HasFlag(Keys.Alt)) parts.Add("ALT");
-        // Remove modifier flags to get the main key
-        var keyOnly = keys & ~Keys.Control & ~Keys.Shift & ~Keys.Alt;
-        if (keyOnly != Keys.None)
-        {
-            // Special case for arrow keys
-            if (keyOnly == Keys.Left) parts.Add("LEFT");
-            else if (keyOnly == Keys.Right) parts.Add("RIGHT");
-            else if (keyOnly == Keys.Up) parts.Add("UP");
-            else if (keyOnly == Keys.Down) parts.Add("DOWN");
-            else parts.Add(keyOnly.ToString().ToUpper());
-        }
-
-        return string.Join(" + ", parts);
-    }
 
     #endregion
 }

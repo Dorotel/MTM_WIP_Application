@@ -75,10 +75,10 @@ public static class Core_Themes
 
     public static async Task<Model_UserUiColors> GetUserThemeColorsAsync(string userId)
     {
-        var themeName = await Dao_User.GetUserThemeNameFromUiSettingsAsync(userId) ?? "Default";
-        if (!Core_AppThemes.GetThemeNames().Contains(themeName))
+        Model_AppVariables.ThemeName = await Dao_User.GetSettingsJsonAsync("Theme_Name", userId, true) ?? "Default";
+        if (!Core_AppThemes.GetThemeNames().Contains(Model_AppVariables.ThemeName))
             await Core_AppThemes.LoadThemesFromDatabaseAsync();
-        var appTheme = Core_AppThemes.GetTheme(themeName);
+        var appTheme = Core_AppThemes.GetTheme(Model_AppVariables.ThemeName);
         return appTheme.Colors;
     }
 
@@ -629,10 +629,85 @@ public static class Core_Themes
 
         public static void ApplyThemeToDataGridView(DataGridView dataGridView)
         {
+            if (dataGridView == null) return;
+
+            var colors = new Model_UserUiColors(); // Assuming colors are fetched or instantiated here.
+
+            // Apply general styling
+            if (colors.CustomControlBackColor.HasValue)
+                dataGridView.BackgroundColor = colors.CustomControlBackColor.Value;
+
+            if (colors.CustomControlForeColor.HasValue) dataGridView.ForeColor = colors.CustomControlForeColor.Value;
+
+            // Apply header style
+            if (dataGridView.ColumnHeadersDefaultCellStyle != null)
+            {
+                if (colors.CustomControlBackColor.HasValue)
+                    dataGridView.ColumnHeadersDefaultCellStyle.BackColor = colors.CustomControlBackColor.Value;
+
+                if (colors.CustomControlForeColor.HasValue)
+                    dataGridView.ColumnHeadersDefaultCellStyle.ForeColor = colors.CustomControlForeColor.Value;
+            }
+
+            // Apply row style
+            if (dataGridView.RowsDefaultCellStyle != null)
+            {
+                if (colors.CustomControlBackColor.HasValue)
+                    dataGridView.RowsDefaultCellStyle.BackColor = colors.CustomControlBackColor.Value;
+
+                if (colors.CustomControlForeColor.HasValue)
+                    dataGridView.RowsDefaultCellStyle.ForeColor = colors.CustomControlForeColor.Value;
+            }
+
+            // Apply alternating row style
+            if (dataGridView.AlternatingRowsDefaultCellStyle != null)
+            {
+                if (colors.CustomControlBackColor.HasValue)
+                    dataGridView.AlternatingRowsDefaultCellStyle.BackColor = colors.CustomControlBackColor.Value;
+
+                if (colors.CustomControlForeColor.HasValue)
+                    dataGridView.AlternatingRowsDefaultCellStyle.ForeColor = colors.CustomControlForeColor.Value;
+            }
+
+            // Ensure grid lines and selection colors are consistent
+            if (colors.CustomControlBackColor.HasValue) dataGridView.GridColor = colors.CustomControlBackColor.Value;
+
+            if (colors.CustomControlForeColor.HasValue)
+            {
+                dataGridView.DefaultCellStyle.SelectionBackColor = colors.CustomControlForeColor.Value;
+                dataGridView.DefaultCellStyle.SelectionForeColor =
+                    colors.CustomControlBackColor ?? SystemColors.ControlText;
+            }
         }
 
         public static void SizeDataGrid(DataGridView dataGridView)
         {
+            if (dataGridView == null) throw new ArgumentNullException(nameof(dataGridView));
+
+            // Step 1: Auto-size columns to fit their content
+            dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            dataGridView.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+
+            // Step 2: Store preferred widths
+            var preferredWidths = new int[dataGridView.Columns.Count];
+            var totalPreferredWidth = 0;
+            for (var i = 0; i < dataGridView.Columns.Count; i++)
+            {
+                preferredWidths[i] = dataGridView.Columns[i].Width;
+                totalPreferredWidth += preferredWidths[i];
+            }
+
+            // Step 3: Set columns to fill mode
+            dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            // Step 4: Set FillWeight for each column proportional to its preferred width
+            for (var i = 0; i < dataGridView.Columns.Count; i++)
+                if (totalPreferredWidth > 0)
+                    dataGridView.Columns[i].FillWeight = (float)preferredWidths[i] / totalPreferredWidth * 100f;
+                else
+                    dataGridView.Columns[i].FillWeight = 100f / dataGridView.Columns.Count;
         }
 
         private static void Button_AutoShrinkText_Paint(object? sender, PaintEventArgs e)
@@ -640,7 +715,7 @@ public static class Core_Themes
         }
     }
 
-    public static class FocusUtils
+    private static class FocusUtils
     {
         public static void ApplyFocusEventHandling(Control control, Model_UserUiColors colors)
         {
@@ -794,28 +869,12 @@ public static class Core_Themes
         /// <summary>
         /// Loads the user's theme name from usr_ui_settings and sets Model_AppVariables.ThemeName.
         /// </summary>
-        public static async Task LoadAndSetUserThemeNameAsync(string userId)
+        private static async Task<string?> LoadAndSetUserThemeNameAsync(string userId)
         {
             try
             {
-                using var conn = new MySql.Data.MySqlClient.MySqlConnection(Model_AppVariables.ConnectionString);
-                await conn.OpenAsync();
-                using var cmd = new MySql.Data.MySqlClient.MySqlCommand("usr_ui_settings_GetThemeName", conn)
-                {
-                    CommandType = CommandType.StoredProcedure
-                };
-                cmd.Parameters.AddWithValue("p_UserId", userId);
-                var themeNameParam =
-                    new MySql.Data.MySqlClient.MySqlParameter("p_ThemeName", MySql.Data.MySqlClient.MySqlDbType.VarChar,
-                        255)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
-                cmd.Parameters.Add(themeNameParam);
-                await cmd.ExecuteNonQueryAsync();
-                var themeName = themeNameParam.Value?.ToString();
-                Model_AppVariables.ThemeName = string.IsNullOrWhiteSpace(themeName) ? "Default" : themeName;
                 LoggingUtility.Log($"Loaded user theme name for user: {userId} = {Model_AppVariables.ThemeName}");
+                return await Dao_User.GetSettingsJsonAsync("Theme_Name", userId, true);
             }
             catch (Exception ex)
             {
@@ -981,7 +1040,20 @@ public static class Core_Themes
             {
                 await LoadAndSetUserThemeNameAsync(userId);
                 await LoadThemesFromDatabaseAsync();
-                Debug.WriteLine($"Themes count: {Themes.Count}");
+
+                // Ensure all theme fonts use the global font size
+                foreach (var theme in Themes.Values)
+                    // Create font with the global font size if not already set
+                    if (theme.FormFont == null)
+                        // Use Segoe UI as default font face if creating a new font
+                        theme.FormFont = new Font("Segoe UI", Model_AppVariables.ThemeFontSize);
+                    else if (Math.Abs(theme.FormFont.Size - Model_AppVariables.ThemeFontSize) > 0.01f)
+                        // If font exists but size differs, create a new one with same family but global size
+                        theme.FormFont = new Font(theme.FormFont.FontFamily, Model_AppVariables.ThemeFontSize,
+                            theme.FormFont.Style);
+
+                Debug.WriteLine($"Themes count: {Themes.Count}, using font size: {Model_AppVariables.ThemeFontSize}");
+                LoggingUtility.Log($"Theme system initialized with font size: {Model_AppVariables.ThemeFontSize}");
             }
             catch (Exception ex)
             {
