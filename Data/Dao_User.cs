@@ -30,38 +30,32 @@ internal static class Dao_User
     internal static async Task<string> GetLastShownVersionAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetLastShownVersionAsync(user={user}, useAsync={useAsync})");
-        return await GetUserSettingAsync("LastShownVersion", user, useAsync);
+        return await GetSettingsJsonAsync("LastShownVersion", user, useAsync);
     }
 
     internal static async Task SetLastShownVersionAsync(string user, string value, bool useAsync = false)
     {
         Debug.WriteLine(
             $"[Dao_User] Entering SetLastShownVersionAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUserSettingAsync("LastShownVersion", user, value, useAsync);
+        await SetUsr_userFieldAsync("LastShownVersion", user, value, useAsync);
     }
 
     internal static async Task<string> GetHideChangeLogAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetHideChangeLogAsync(user={user}, useAsync={useAsync})");
-        return await GetUserSettingAsync("HideChangeLog", user, useAsync);
+        return await GetSettingsJsonAsync("HideChangeLog", user, useAsync);
     }
 
     internal static async Task SetHideChangeLogAsync(string user, string value, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering SetHideChangeLogAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUserSettingAsync("HideChangeLog", user, value, useAsync);
+        await SetUsr_userFieldAsync("HideChangeLog", user, value, useAsync);
     }
 
-    internal static async Task<string> GetThemeNameAsync(string user, bool useAsync = false)
+    internal static async Task<string?> GetThemeNameAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetThemeNameAsync(user={user}, useAsync={useAsync})");
-        return await GetUserSettingAsync("Theme_Name", user, useAsync);
-    }
-
-    internal static async Task SetThemeNameAsync(string user, string value, bool useAsync = false)
-    {
-        Debug.WriteLine($"[Dao_User] Entering SetThemeNameAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUserSettingAsync("Theme_Name", user, value, useAsync);
+        return await GetSettingsJsonAsync("Theme_Name", user, true);
     }
 
     internal static async Task<int?> GetThemeFontSizeAsync(string user, bool useAsync = false)
@@ -69,7 +63,7 @@ internal static class Dao_User
         Debug.WriteLine($"[Dao_User] Entering GetThemeFontSizeAsync(user={user}, useAsync={useAsync})");
         try
         {
-            var str = await GetUserSettingAsync("Theme_FontSize", user, useAsync);
+            var str = await GetSettingsJsonAsync("Theme_FontSize", user, useAsync);
             return int.TryParse(str, out var val) ? val : null;
         }
         catch (Exception ex)
@@ -84,68 +78,62 @@ internal static class Dao_User
     internal static async Task SetThemeFontSizeAsync(string user, int value, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering SetThemeFontSizeAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUserSettingAsync("Theme_FontSize", user, value.ToString(), useAsync);
+        await SetUsr_userFieldAsync("Theme_FontSize", user, value.ToString(), useAsync);
     }
 
     internal static async Task<string> GetVisualUserNameAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetVisualUserNameAsync(user={user}, useAsync={useAsync})");
-        return await GetUserSettingAsync("VisualUserName", user, useAsync);
+        return await GetSettingsJsonAsync("VisualUserName", user, useAsync);
     }
 
     internal static async Task SetVisualUserNameAsync(string user, string value, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering SetVisualUserNameAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUserSettingAsync("VisualUserName", user, value, useAsync);
+        await SetUsr_userFieldAsync("VisualUserName", user, value, useAsync);
     }
 
     internal static async Task<string> GetVisualPasswordAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetVisualPasswordAsync(user={user}, useAsync={useAsync})");
-        return await GetUserSettingAsync("VisualPassword", user, useAsync);
+        return await GetSettingsJsonAsync("VisualPassword", user, useAsync);
     }
 
     internal static async Task SetVisualPasswordAsync(string user, string value, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering SetVisualPasswordAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUserSettingAsync("VisualPassword", user, value, useAsync);
+        await SetUsr_userFieldAsync("VisualPassword", user, value, useAsync);
     }
 
     internal static async Task<string> GetWipServerAddressAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetWipServerAddressAsync(user={user}, useAsync={useAsync})");
-        return await GetUserSettingAsync("WipServerAddress", user, useAsync);
+        return await GetSettingsJsonAsync("WipServerAddress", user, useAsync);
     }
 
     internal static async Task SetWipServerAddressAsync(string user, string value, bool useAsync = false)
     {
         Debug.WriteLine(
             $"[Dao_User] Entering SetWipServerAddressAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUserSettingAsync("WipServerAddress", user, value, useAsync);
+        await SetUsr_userFieldAsync("WipServerAddress", user, value, useAsync);
     }
 
     internal static async Task<string> GetWipServerPortAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetWipServerPortAsync(user={user}, useAsync={useAsync})");
-        return await GetUserSettingAsync("WipServerPort", user, useAsync);
+        return await GetSettingsJsonAsync("WipServerPort", user, useAsync);
+    }
+
+    internal static async Task<string> GetDatabaseAsync(string user, bool useAsync = false)
+    {
+        Debug.WriteLine($"[Dao_User] Entering GetDatabaseAsync(user={user}, useAsync={useAsync})");
+        return await GetSettingsJsonAsync("WIPDatabase", user, useAsync);
     }
 
     internal static async Task SetWipServerPortAsync(string user, string value, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering SetWipServerPortAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUserSettingAsync("WipServerPort", user, value, useAsync);
-    }
-
-    internal static async Task<string> GetShortcutsAsync(string user, bool useAsync = false)
-    {
-        Debug.WriteLine($"[Dao_User] Entering GetShortcutsAsync(user={user}, useAsync={useAsync})");
-        return await GetUserSettingAsync("Shortcuts", user, useAsync);
-    }
-
-    internal static async Task SetShortcutsAsync(string user, string value, bool useAsync = false)
-    {
-        Debug.WriteLine($"[Dao_User] Entering SetShortcutsAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUserSettingAsync("Shortcuts", user, value, useAsync);
+        await SetUsr_userFieldAsync("WipServerPort", user, value, useAsync);
     }
 
     internal static async Task<string?> GetUserFullNameAsync(string user, bool useAsync = false)
@@ -169,39 +157,166 @@ internal static class Dao_User
         }
     }
 
-    private static async Task<string> GetUserSettingAsync(string field, string user, bool useAsync)
+    public static async Task<string> GetSettingsJsonAsync(string field, string user, bool useAsync)
     {
-        Debug.WriteLine($"[Dao_User] Entering GetUserSettingAsync(field={field}, user={user}, useAsync={useAsync})");
+        Debug.WriteLine($"[Dao_User] Entering GetSettingsJsonAsync(field={field}, user={user}, useAsync={useAsync})");
         try
         {
-            var parameters = new Dictionary<string, object> { ["@User"] = user };
-            var result = await HelperDatabaseCore.ExecuteScalar(
-                $"SELECT `{field}` FROM `usr_users` WHERE `User` = @User",
-                parameters, useAsync, CommandType.Text);
-            Debug.WriteLine($"[Dao_User] GetUserSettingAsync result: {result}");
-            return result?.ToString() ?? string.Empty;
+            // First try to get the field from the usr_ui_settings table as JSON property
+            using var conn = new MySqlConnection(Model_AppVariables.ConnectionString);
+            await conn.OpenAsync();
+
+            // Query the settings JSON directly
+            using var cmd = new MySqlCommand(
+                "SELECT SettingsJson FROM usr_ui_settings WHERE UserId = @UserId LIMIT 1", conn);
+
+            cmd.Parameters.AddWithValue("UserId", user);
+
+            var result = await cmd.ExecuteScalarAsync();
+
+            // If we found a settings JSON, try to extract the requested field
+            if (result != null && result != DBNull.Value)
+            {
+                var json = result.ToString();
+                if (!string.IsNullOrWhiteSpace(json))
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(json);
+                        if (doc.RootElement.TryGetProperty(field, out var fieldElement))
+                        {
+                            string? value;
+
+                            // Handle different JSON value types
+                            switch (fieldElement.ValueKind)
+                            {
+                                case JsonValueKind.Number:
+                                    // For numbers, directly convert to string
+                                    value = fieldElement.ToString();
+                                    break;
+
+                                case JsonValueKind.String:
+                                    // For strings, use GetString()
+                                    value = fieldElement.GetString();
+                                    break;
+
+                                case JsonValueKind.True:
+                                    value = "true";
+                                    break;
+
+                                case JsonValueKind.False:
+                                    value = "false";
+                                    break;
+
+                                default:
+                                    // For other types, use ToString() as a fallback
+                                    value = fieldElement.ToString();
+                                    break;
+                            }
+
+                            Debug.WriteLine($"[Dao_User] GetSettingsJsonAsync found value in JSON: {value}");
+                            return value ?? string.Empty;
+                        }
+                    }
+                    catch (JsonException ex)
+                    {
+                        Debug.WriteLine($"[Dao_User] JSON parsing error in GetSettingsJsonAsync: {ex.Message}");
+                        // Continue to legacy approach if JSON parsing fails
+                    }
+            }
+
+            // Fallback to legacy table approach if JSON doesn't contain the field
+
+            using var legacyCmd = new MySqlCommand(
+                $"SELECT `{field}` FROM `usr_users` WHERE `User` = @User LIMIT 1", conn);
+
+            legacyCmd.Parameters.AddWithValue("User", user);
+
+            var legacyResult = await legacyCmd.ExecuteScalarAsync();
+            Debug.WriteLine($"[Dao_User] GetSettingsJsonAsync legacy result: {legacyResult}");
+
+            return legacyResult?.ToString() ?? string.Empty;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[Dao_User] Exception in GetUserSettingAsync: {ex}");
+            Debug.WriteLine($"[Dao_User] Exception in GetSettingsJsonAsync: {ex}");
             LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return string.Empty;
         }
     }
 
-    private static async Task SetUserSettingAsync(string field, string user, string value, bool useAsync)
+    public static async Task SetSettingsJsonAsync(string userId, string themeJson)
+    {
+        Debug.WriteLine($"[Dao_User] Entering SetSettingsJsonAsync(userId={userId})");
+        try
+        {
+            using var conn = new MySqlConnection(Model_AppVariables.ConnectionString);
+            await conn.OpenAsync();
+
+            using var cmd = new MySqlCommand("usr_ui_settings_SetThemeJson", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            cmd.Parameters.AddWithValue("p_UserId", userId);
+            cmd.Parameters.AddWithValue("p_ThemeJson", themeJson);
+
+            var statusParam = new MySqlParameter("p_Status", MySqlDbType.Int32)
+            {
+                Direction = ParameterDirection.Output
+            };
+            cmd.Parameters.Add(statusParam);
+
+            var errorMsgParam = new MySqlParameter("p_ErrorMsg", MySqlDbType.VarChar, 255)
+            {
+                Direction = ParameterDirection.Output
+            };
+            cmd.Parameters.Add(errorMsgParam);
+
+            await cmd.ExecuteNonQueryAsync();
+
+            var status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
+            var errorMsg = errorMsgParam.Value?.ToString() ?? "";
+
+            Debug.WriteLine($"[Dao_User] SetSettingsJsonAsync status: {status}, errorMsg: {errorMsg}");
+
+            if (status != 0)
+                throw new Exception(errorMsg);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Dao_User] Exception in SetSettingsJsonAsync: {ex}");
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true);
+        }
+    }
+
+    private static async Task SetUsr_userFieldAsync(string field, string user, string value, bool useAsync)
     {
         Debug.WriteLine(
-            $"[Dao_User] Entering SetUserSettingAsync(field={field}, user={user}, value={value}, useAsync={useAsync})");
-        var parameters = new Dictionary<string, object>
+            $"[Dao_User] Entering SetUsr_userFieldAsync(field={field}, user={user}, value={value}, useAsync={useAsync})");
+        try
         {
-            ["@User"] = user,
-            [$"@{field}"] = value
-        };
-        await HelperDatabaseCore.ExecuteNonQuery(
-            $"UPDATE `usr_users` SET `{field}` = @{field} WHERE `User` = @User",
-            parameters, useAsync, CommandType.Text);
+            var parameters = new Dictionary<string, object>
+            {
+                ["@User"] = user,
+                [$"@{field}"] = value
+            };
+            await HelperDatabaseCore.ExecuteNonQuery(
+                $@"
+INSERT INTO `usr_users` (`User`, `{field}`)
+VALUES (@User, @{field})
+ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
+",
+                parameters, useAsync, CommandType.Text);
+            Debug.WriteLine("[Dao_User] SetUsr_userFieldAsync completed successfully.");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Dao_User] Exception in SetUsr_userFieldAsync: {ex}");
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
     }
 
     #endregion
@@ -424,42 +539,6 @@ internal static class Dao_User
 
     #region User UI Settings
 
-    public static async Task<string?> GetUserThemeNameFromUiSettingsAsync(string userId)
-    {
-        Debug.WriteLine($"[Dao_User] Entering GetUserThemeNameFromUiSettingsAsync(userId={userId})");
-        try
-        {
-            using var conn = new MySqlConnection(Model_AppVariables.ConnectionString);
-            await conn.OpenAsync();
-
-            using var cmd = new MySqlCommand("usr_ui_settings_GetThemeName", conn)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
-            cmd.Parameters.AddWithValue("p_UserId", userId);
-
-            var themeNameParam = new MySqlParameter("p_ThemeName", MySqlDbType.VarChar, 255)
-            {
-                Direction = ParameterDirection.Output
-            };
-            cmd.Parameters.Add(themeNameParam);
-
-            await cmd.ExecuteNonQueryAsync();
-
-            var themeName = themeNameParam.Value?.ToString();
-            Debug.WriteLine($"[Dao_User] GetUserThemeNameFromUiSettingsAsync result: {themeName}");
-            return string.IsNullOrWhiteSpace(themeName) ? null : themeName;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[Dao_User] Exception in GetUserThemeNameFromUiSettingsAsync: {ex}");
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true);
-            return null;
-        }
-    }
-
     public static async Task SaveUserUiSettingsAsync(string userId, Model_UserUiColors colors)
     {
         Debug.WriteLine(
@@ -680,6 +759,11 @@ internal static class Dao_User
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true);
         }
     }
+
+
+    /// <summary>
+    /// Sets the Theme_Name value in the SettingsJson column in usr_ui_settings for the given user.
+    /// </summary>
 
     #endregion
 }

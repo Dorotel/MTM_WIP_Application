@@ -296,47 +296,6 @@ public partial class MainForm : Form
 
     #endregion
 
-    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-    {
-        // Detect Ctrl + Shift + S
-        if (keyData == (Keys.Control | Keys.Shift | Keys.S))
-        {
-            _ = CycleThemeAndUpdateUIAsync();
-            return true; // Mark as handled
-        }
-
-        return base.ProcessCmdKey(ref msg, keyData);
-    }
-
-    private async Task CycleThemeAndUpdateUIAsync()
-    {
-        // 1. Get all theme names
-        var themeNames = Core_Themes.Core_AppThemes.GetThemeNames().ToList();
-        if (themeNames.Count == 0)
-            return;
-
-        // 2. Find current theme index
-        var currentTheme = Model_AppVariables.ThemeName ?? "Default";
-        var idx = themeNames.IndexOf(currentTheme);
-        var nextIdx = (idx + 1) % themeNames.Count;
-        var nextTheme = themeNames[nextIdx];
-
-        // 3. Save new theme name for user
-        await Dao_User.SetThemeNameAsync(Model_AppVariables.User, nextTheme);
-
-        // 4. Set and reload theme
-        Model_AppVariables.ThemeName = nextTheme;
-        // Optionally reload all themes if they might have changed
-        // await Core_AppThemes.LoadThemesFromDatabaseAsync();
-
-        // 5. Update UserUiColors
-        Model_AppVariables.UserUiColors = Core_Themes.Core_AppThemes.GetTheme(nextTheme).Colors;
-
-        // 6. Re-apply theme to the MainForm and all controls
-        Core_Themes.ApplyTheme(this);
-
-        // Optionally, update any other open forms or controls as needed
-    }
 
     #region Form Closing
 
@@ -362,9 +321,13 @@ public partial class MainForm : Form
     {
         using (var settingsForm = new SettingsForm())
         {
-            if (settingsForm.ShowDialog(this) == DialogResult.OK)
-                // Apply settings changes if needed
-                CycleThemeAndUpdateUIAsync();
+            if (settingsForm.ShowDialog(this) == DialogResult.OK) ;
+            {
+                Core_Themes.ApplyTheme(this);
+                MainForm_Control_InventoryTab?.Refresh();
+                MainForm_RemoveTabNormalControl?.Refresh();
+                MainForm_Control_TransferTab?.Refresh();
+            }
         }
     }
 }

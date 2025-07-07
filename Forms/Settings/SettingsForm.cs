@@ -133,11 +133,13 @@ public partial class SettingsForm : Form
 
             serverTextBox.Text = await Dao_User.GetWipServerAddressAsync(user) ?? "localhost";
             portTextBox.Text = await Dao_User.GetWipServerPortAsync(user) ?? "3306";
-            databaseTextBox.Text = "mtm_wip_application";
+            databaseTextBox.Text = await Dao_User.GetDatabaseAsync(user) ?? "mtm_wip_application";
             usernameTextBox.Text = await Dao_User.GetVisualUserNameAsync(user) ?? "";
             passwordTextBox.Text = await Dao_User.GetVisualPasswordAsync(user) ?? "";
             timeoutTextBox.Text = "30";
+            timeoutTextBox.Enabled = false;
             autoReconnectCheckBox.Checked = true;
+            autoReconnectCheckBox.Enabled = false;
         }
         catch (Exception ex)
         {
@@ -590,8 +592,8 @@ public partial class SettingsForm : Form
             UpdateStatus("Saving settings...");
 
             await SaveDatabaseSettings();
-            await SaveThemeSettings();
-            await SaveShortcuts();
+            await SaveSettingsJson();
+            await SaveShortcutsJson();
 
             _hasChanges = false;
             UpdateStatus("Settings saved successfully");
@@ -654,16 +656,25 @@ public partial class SettingsForm : Form
         }
     }
 
-    private async Task SaveThemeSettings()
+    private async Task SaveSettingsJson()
     {
         try
         {
             var user = Model_AppVariables.User;
+            var themeName = themeComboBox.SelectedItem?.ToString();
+            var fontSize = (int)fontSizeNumericUpDown.Value;
 
-            if (themeComboBox.SelectedItem != null)
-                await Dao_User.SetThemeNameAsync(user, themeComboBox.SelectedItem.ToString()!);
+            var themeObj = new
+            {
+                Theme_Name = themeName,
+                Theme_FontSize = fontSize
+            };
 
-            await Dao_User.SetThemeFontSizeAsync(user, (int)fontSizeNumericUpDown.Value);
+            var themeJson = JsonSerializer.Serialize(themeObj);
+
+            await Dao_User.SetSettingsJsonAsync(user, themeJson);
+
+            UpdateStatus("Theme settings saved successfully");
         }
         catch (Exception ex)
         {
@@ -671,7 +682,7 @@ public partial class SettingsForm : Form
         }
     }
 
-    private async Task SaveShortcuts()
+    private async Task SaveShortcutsJson()
     {
         try
         {

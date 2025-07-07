@@ -75,10 +75,10 @@ public static class Core_Themes
 
     public static async Task<Model_UserUiColors> GetUserThemeColorsAsync(string userId)
     {
-        var themeName = await Dao_User.GetUserThemeNameFromUiSettingsAsync(userId) ?? "Default";
-        if (!Core_AppThemes.GetThemeNames().Contains(themeName))
+        Model_AppVariables.ThemeName = await Dao_User.GetSettingsJsonAsync("Theme_Name", userId, true) ?? "Default";
+        if (!Core_AppThemes.GetThemeNames().Contains(Model_AppVariables.ThemeName))
             await Core_AppThemes.LoadThemesFromDatabaseAsync();
-        var appTheme = Core_AppThemes.GetTheme(themeName);
+        var appTheme = Core_AppThemes.GetTheme(Model_AppVariables.ThemeName);
         return appTheme.Colors;
     }
 
@@ -715,7 +715,7 @@ public static class Core_Themes
         }
     }
 
-    public static class FocusUtils
+    private static class FocusUtils
     {
         public static void ApplyFocusEventHandling(Control control, Model_UserUiColors colors)
         {
@@ -869,28 +869,12 @@ public static class Core_Themes
         /// <summary>
         /// Loads the user's theme name from usr_ui_settings and sets Model_AppVariables.ThemeName.
         /// </summary>
-        public static async Task LoadAndSetUserThemeNameAsync(string userId)
+        private static async Task<string?> LoadAndSetUserThemeNameAsync(string userId)
         {
             try
             {
-                using var conn = new MySql.Data.MySqlClient.MySqlConnection(Model_AppVariables.ConnectionString);
-                await conn.OpenAsync();
-                using var cmd = new MySql.Data.MySqlClient.MySqlCommand("usr_ui_settings_GetThemeName", conn)
-                {
-                    CommandType = CommandType.StoredProcedure
-                };
-                cmd.Parameters.AddWithValue("p_UserId", userId);
-                var themeNameParam =
-                    new MySql.Data.MySqlClient.MySqlParameter("p_ThemeName", MySql.Data.MySqlClient.MySqlDbType.VarChar,
-                        255)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
-                cmd.Parameters.Add(themeNameParam);
-                await cmd.ExecuteNonQueryAsync();
-                var themeName = themeNameParam.Value?.ToString();
-                Model_AppVariables.ThemeName = string.IsNullOrWhiteSpace(themeName) ? "Default" : themeName;
                 LoggingUtility.Log($"Loaded user theme name for user: {userId} = {Model_AppVariables.ThemeName}");
+                return await Dao_User.GetSettingsJsonAsync("Theme_Name", userId, true);
             }
             catch (Exception ex)
             {
@@ -1056,7 +1040,20 @@ public static class Core_Themes
             {
                 await LoadAndSetUserThemeNameAsync(userId);
                 await LoadThemesFromDatabaseAsync();
-                Debug.WriteLine($"Themes count: {Themes.Count}");
+
+                // Ensure all theme fonts use the global font size
+                foreach (var theme in Themes.Values)
+                    // Create font with the global font size if not already set
+                    if (theme.FormFont == null)
+                        // Use Segoe UI as default font face if creating a new font
+                        theme.FormFont = new Font("Segoe UI", Model_AppVariables.ThemeFontSize);
+                    else if (Math.Abs(theme.FormFont.Size - Model_AppVariables.ThemeFontSize) > 0.01f)
+                        // If font exists but size differs, create a new one with same family but global size
+                        theme.FormFont = new Font(theme.FormFont.FontFamily, Model_AppVariables.ThemeFontSize,
+                            theme.FormFont.Style);
+
+                Debug.WriteLine($"Themes count: {Themes.Count}, using font size: {Model_AppVariables.ThemeFontSize}");
+                LoggingUtility.Log($"Theme system initialized with font size: {Model_AppVariables.ThemeFontSize}");
             }
             catch (Exception ex)
             {
