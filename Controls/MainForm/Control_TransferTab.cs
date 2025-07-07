@@ -208,8 +208,6 @@ public partial class ControlTransferTab : UserControl
         Control_TransferTab_Button_Reset.Enabled = false;
         try
         {
-            MainFormInstance?.TabLoadingProgress?.ShowProgress();
-            MainFormInstance?.TabLoadingProgress?.UpdateProgress(10, "Resetting Transfer tab...");
             Debug.WriteLine("[DEBUG] TransferTab HardReset - start");
             if (MainFormInstance != null)
             {
@@ -219,7 +217,6 @@ public partial class ControlTransferTab : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
             }
 
-            MainFormInstance?.TabLoadingProgress?.UpdateProgress(30, "Resetting data tables...");
             // Hide controls during reset
             Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
             Control_TransferTab_ComboBox_Part.Visible = false;
@@ -231,7 +228,6 @@ public partial class ControlTransferTab : UserControl
             await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
             Debug.WriteLine("[DEBUG] DataTables reset complete");
 
-            MainFormInstance?.TabLoadingProgress?.UpdateProgress(60, "Refilling combo boxes...");
             // Refill each combobox with proper data
             Debug.WriteLine("[DEBUG] Refilling Part ComboBox");
             await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(Control_TransferTab_ComboBox_Part);
@@ -287,7 +283,6 @@ public partial class ControlTransferTab : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = true;
                 MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
                     @"Disconnected from Server, please standby...";
-                MainFormInstance.TabLoadingProgress?.HideProgress();
             }
         }
     }

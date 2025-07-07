@@ -6,7 +6,6 @@ using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Services;
 using System.ComponentModel;
 using MTM_Inventory_Application.Forms.Settings;
-using MTM_Inventory_Application.Controls.Shared;
 using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Forms.MainForm;
@@ -17,47 +16,26 @@ public partial class MainForm : Form
 {
     private Timer? _connectionStrengthTimer;
     public Helper_Control_MySqlSignal ConnectionStrengthChecker = null!;
-    private ProgressBarUserControl _tabLoadingProgress = null!;
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Service_ConnectionRecoveryManager ConnectionRecoveryManager { get; private set; } = null!;
-
-    // Make the progress bar accessible to other controls
-    public ProgressBarUserControl TabLoadingProgress => _tabLoadingProgress;
 
     #region Initialization
 
     public MainForm()
     {
-        System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Constructing MainForm...");
         try
         {
             // Before InitializeComponent
             InitializeComponent();
-            System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] InitializeComponent complete.");
-
-            // Initialize progress control
-            InitializeProgressControl();
-            System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Progress control initialized.");
-
             // Do NOT apply user UI settings colors here; theme will be applied globally after construction
             ConnectionStrengthChecker = new Helper_Control_MySqlSignal();
-            System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthChecker initialized.");
-
             ConnectionRecoveryManager = new Service_ConnectionRecoveryManager(this);
-            System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionRecoveryManager initialized.");
-
             MainForm_OnStartup_SetupConnectionStrengthControl();
-            System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthControl setup complete.");
-
             MainForm_OnStartup_WireUpEvents();
-            System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Events wired up.");
-
             Shown += async (s, e) =>
             {
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm Shown event triggered.");
                 await MainForm_OnStartup_GetUserFullNameAsync();
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] User full name loaded.");
                 await Task.Delay(500); // Ensure controls are visible
                 if (MainForm_Control_InventoryTab != null)
                 {
@@ -66,44 +44,12 @@ public partial class MainForm : Form
                     MainForm_Control_InventoryTab.Control_InventoryTab_ComboBox_Part.BackColor =
                         Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
                 }
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm is now idle and ready.");
             };
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[DEBUG] [MainForm.ctor] Exception: {ex}");
-            LoggingUtility.LogApplicationError(ex);
-            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm));
-        }
-        System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm constructed.");
-    }
-
-    private void InitializeProgressControl()
-    {
-        try
-        {
-            // Create and configure the progress control
-            _tabLoadingProgress = new ProgressBarUserControl
-            {
-                Size = new Size(300, 120),
-                Visible = false,
-                Anchor = AnchorStyles.None,
-                StatusText = "Loading tab..."
-            };
-
-            // Position the progress control over the tab control area
-            _tabLoadingProgress.Location = new Point(
-                (MainForm_TabControl.Width - _tabLoadingProgress.Width) / 2,
-                (MainForm_TabControl.Height - _tabLoadingProgress.Height) / 2
-            );
-
-            // Add to form so it appears on top of the tab control
-            this.Controls.Add(_tabLoadingProgress);
-            _tabLoadingProgress.BringToFront();
         }
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm));
         }
     }
 
@@ -191,13 +137,10 @@ public partial class MainForm : Form
         }
     }
 
-    private async void MainForm_TabControl_SelectedIndexChanged(object sender, EventArgs e)
+    private void MainForm_TabControl_SelectedIndexChanged(object sender, EventArgs e)
     {
         try
         {
-            // Show progress while switching tabs
-            await ShowTabLoadingProgressAsync();
-
             switch (MainForm_TabControl.SelectedIndex)
             {
                 case 0: // Inventory Tab
@@ -349,55 +292,6 @@ public partial class MainForm : Form
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                 nameof(MainForm_TabControl_SelectedIndexChanged));
         }
-        finally
-        {
-            // Hide progress when tab switching is complete
-            HideTabLoadingProgress();
-        }
-    }
-
-    private async Task ShowTabLoadingProgressAsync()
-    {
-        try
-        {
-            if (_tabLoadingProgress != null)
-            {
-                // Center the progress control on the tab control
-                _tabLoadingProgress.Location = new Point(
-                    (MainForm_TabControl.Width - _tabLoadingProgress.Width) / 2,
-                    (MainForm_TabControl.Height - _tabLoadingProgress.Height) / 2
-                );
-
-                _tabLoadingProgress.ShowProgress();
-                _tabLoadingProgress.UpdateProgress(25, "Switching tab...");
-                
-                // Simulate loading time to show progress
-                await Task.Delay(100);
-                _tabLoadingProgress.UpdateProgress(50, "Loading controls...");
-                
-                await Task.Delay(100);
-                _tabLoadingProgress.UpdateProgress(75, "Applying settings...");
-                
-                await Task.Delay(100);
-                _tabLoadingProgress.UpdateProgress(100, "Ready");
-            }
-        }
-        catch (Exception ex)
-        {
-            LoggingUtility.LogApplicationError(ex);
-        }
-    }
-
-    private void HideTabLoadingProgress()
-    {
-        try
-        {
-            _tabLoadingProgress?.HideProgress();
-        }
-        catch (Exception ex)
-        {
-            LoggingUtility.LogApplicationError(ex);
-        }
     }
 
     #endregion
@@ -429,9 +323,11 @@ public partial class MainForm : Form
         {
             if (settingsForm.ShowDialog(this) == DialogResult.OK) ;
             {
-                MainForm_Control_InventoryTab?.Control_InventoryTab_HardReset();
-                
                 Core_Themes.ApplyTheme(this);
+                MainForm_Control_InventoryTab?.Refresh();
+                MainForm_RemoveTabNormalControl?.Refresh();
+                MainForm_Control_TransferTab?.Refresh();
+                MainForm_Control_InventoryTab?.Control_InventoryTab_HardReset();
             }
         }
     }

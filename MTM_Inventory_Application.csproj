@@ -29,6 +29,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="version.txt" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -63,6 +64,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Resource Include="version.txt">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Resource>
 	</ItemGroup>
 
 	<ItemGroup>

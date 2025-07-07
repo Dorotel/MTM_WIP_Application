@@ -23,43 +23,18 @@ internal static class LoggingUtility
 
     #region LogCleanup
 
-    private static async Task CleanUpOldLogsAsync(string logDirectory, int maxLogs)
+    private static void CleanUpOldLogs(string logDirectory, int maxLogs)
     {
         try
         {
-            await Task.Run(() =>
+            var logFiles = Directory.GetFiles(logDirectory, "*.log")
+                .OrderByDescending(File.GetCreationTime)
+                .ToList();
+            if (logFiles.Count > maxLogs)
             {
-                try
-                {
-                    // Add timeout for network operations
-                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                    var task = Task.Run(() =>
-                    {
-                        var logFiles = Directory.GetFiles(logDirectory, "*.log")
-                            .OrderByDescending(File.GetCreationTime)
-                            .ToList();
-                        if (logFiles.Count > maxLogs)
-                        {
-                            var filesToDelete = logFiles.Skip(maxLogs).ToList();
-                            foreach (var logFile in filesToDelete) 
-                            {
-                                cts.Token.ThrowIfCancellationRequested();
-                                File.Delete(logFile);
-                            }
-                        }
-                    }, cts.Token);
-                    
-                    task.Wait(cts.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    Debug.WriteLine("[DEBUG] Log cleanup timed out");
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"[DEBUG] Error during log file cleanup: {ex.Message}");
-                }
-            });
+                var filesToDelete = logFiles.Skip(maxLogs).ToList();
+                foreach (var logFile in filesToDelete) File.Delete(logFile);
+            }
 
             if (Debugger.IsAttached) return;
 
@@ -72,15 +47,14 @@ internal static class LoggingUtility
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[DEBUG] Failed to clean up old log files or application data: {ex.Message}");
-            // Don't call Log() here to avoid potential recursion
+            Log($"Failed to clean up old log files or application data: {ex.Message}");
         }
     }
 
-    public static async Task CleanUpOldLogsIfNeededAsync()
+    public static void CleanUpOldLogsIfNeeded()
     {
         if (!string.IsNullOrEmpty(_logDirectory))
-            await CleanUpOldLogsAsync(_logDirectory, 20);
+            CleanUpOldLogs(_logDirectory, 20);
     }
 
     #endregion
@@ -93,23 +67,13 @@ internal static class LoggingUtility
         {
             if (!string.IsNullOrEmpty(filePath))
             {
-                // Add timeout for file writing operations
-                var task = Task.Run(() =>
-                {
-                    using var writer = new StreamWriter(filePath, true);
-                    writer.WriteLine(logEntry);
-                });
-                
-                if (!task.Wait(TimeSpan.FromSeconds(5)))
-                {
-                    Debug.WriteLine($"[DEBUG] Log write timeout for: {filePath}");
-                }
+                using var writer = new StreamWriter(filePath, true);
+                writer.WriteLine(logEntry);
             }
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[DEBUG] Failed to write log entry to file: {ex.Message}");
-            // Don't call Log() here to avoid recursion
+            Log($"Failed to write log entry to file: {ex.Message}");
         }
     }
 
@@ -117,76 +81,18 @@ internal static class LoggingUtility
 
     #region Initialization
 
-    public static async Task InitializeLoggingAsync()
+    public static void InitializeLogging()
     {
-        try
-        {
-            Debug.WriteLine("[DEBUG] Starting logging initialization...");
-            
-            var server = new MySqlConnectionStringBuilder(Model_AppVariables.ConnectionString).Server;
-            var userName = Model_AppVariables.User;
-            
-            Debug.WriteLine($"[DEBUG] Server: {server}, User: {userName}");
-            
-            // Add timeout for log path operations
-            string logFilePath = await Task.Run(async () =>
-            {
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                try
-                {
-                    return await Task.Run(() => Helper_Database_Variables.GetLogFilePath(server, userName), cts.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    Debug.WriteLine("[DEBUG] Log path creation timed out, using fallback");
-                    // Fallback to local temp directory
-                    var tempDir = Path.Combine(Path.GetTempPath(), "MTM_WIP_APP", "Logs", userName);
-                    Directory.CreateDirectory(tempDir);
-                    var timestamp = DateTime.Now.ToString("MM-dd-yyyy @ h-mm tt");
-                    return Path.Combine(tempDir, $"{userName} {timestamp}.log");
-                }
-            });
-            
-            _logDirectory = Path.GetDirectoryName(logFilePath) ?? "";
-            var baseFileName = Path.GetFileNameWithoutExtension(logFilePath);
-            _normalLogFile = Path.Combine(_logDirectory, $"{baseFileName}_normal.log");
-            _dbErrorLogFile = Path.Combine(_logDirectory, $"{baseFileName}_db_error.log");
-            _appErrorLogFile = Path.Combine(_logDirectory, $"{baseFileName}_app_error.log");
-            
-            Debug.WriteLine($"[DEBUG] Log directory: {_logDirectory}");
-            Debug.WriteLine($"[DEBUG] Normal log file: {_normalLogFile}");
-            
-            Log("Initializing logging...");
-            AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
-            
-            Debug.WriteLine("[DEBUG] Logging initialization completed");
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[DEBUG] Error during logging initialization: {ex.Message}");
-            // Create fallback logging to temp directory
-            try
-            {
-                var tempDir = Path.Combine(Path.GetTempPath(), "MTM_WIP_APP", "Logs");
-                Directory.CreateDirectory(tempDir);
-                var timestamp = DateTime.Now.ToString("MM-dd-yyyy @ h-mm tt");
-                var fallbackFile = Path.Combine(tempDir, $"fallback_{timestamp}.log");
-                _logDirectory = tempDir;
-                _normalLogFile = fallbackFile;
-                _dbErrorLogFile = fallbackFile;
-                _appErrorLogFile = fallbackFile;
-                Debug.WriteLine($"[DEBUG] Using fallback logging to: {tempDir}");
-            }
-            catch (Exception fallbackEx)
-            {
-                Debug.WriteLine($"[DEBUG] Fallback logging also failed: {fallbackEx.Message}");
-                // If even fallback fails, disable logging
-                _logDirectory = "";
-                _normalLogFile = "";
-                _dbErrorLogFile = "";
-                _appErrorLogFile = "";
-            }
-        }
+        var server = new MySqlConnectionStringBuilder(Model_AppVariables.ConnectionString).Server;
+        var userName = Model_AppVariables.User;
+        var logFilePath = Helper_Database_Variables.GetLogFilePath(server, userName);
+        _logDirectory = Path.GetDirectoryName(logFilePath) ?? "";
+        var baseFileName = Path.GetFileNameWithoutExtension(logFilePath);
+        _normalLogFile = Path.Combine(_logDirectory, $"{baseFileName}_normal.log");
+        _dbErrorLogFile = Path.Combine(_logDirectory, $"{baseFileName}_db_error.log");
+        _appErrorLogFile = Path.Combine(_logDirectory, $"{baseFileName}_app_error.log");
+        Log("Initializing logging...");
+        AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
     }
 
     #endregion

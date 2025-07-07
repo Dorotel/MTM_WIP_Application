@@ -12,62 +12,34 @@ internal static class Service_OnStartup
 {
     internal static async Task RunStartupSequenceAsync()
     {
-        async Task LogStep(string msg)
-        {
-            var logMsg = $"[STARTUP TRACE] {msg}";
-            Trace.WriteLine(logMsg);
-            System.Diagnostics.Trace.WriteLine(logMsg);
-            var logPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "startup_trace.log");
-            try { await System.IO.File.AppendAllTextAsync(logPath, logMsg + Environment.NewLine); } catch (Exception ex) { Console.WriteLine("Log write error: " + ex); }
-        }
+        // THEME: Load user theme name and all themes before anything else
 
-        await LogStep("Starting startup sequence...");
-
-        await LogStep("Initializing logging...");
-        await LoggingUtility.InitializeLoggingAsync();
-        await LogStep("Logging initialized.");
-
-        await LogStep("Cleaning up old logs...");
-        await LoggingUtility.CleanUpOldLogsIfNeededAsync();
-        await LogStep("Old logs cleaned up.");
-
-        await LogStep("Wiping app data folders...");
-        await Task.Run(() => Service_OnStartup_AppDataCleaner.WipeAppDataFolders());
-        await LogStep("App data folders wiped.");
-
-        await LogStep("Setting up part data table...");
+        LoggingUtility.InitializeLogging();
+        LoggingUtility.CleanUpOldLogsIfNeeded();
+        Service_OnStartup_AppDataCleaner.WipeAppDataFolders();
         await Helper_UI_ComboBoxes.SetupPartDataTable();
-        await LogStep("Part data table set up.");
-
-        await LogStep("Setting up operation data table...");
         await Helper_UI_ComboBoxes.SetupOperationDataTable();
-        await LogStep("Operation data table set up.");
-
-        await LogStep("Setting up location data table...");
         await Helper_UI_ComboBoxes.SetupLocationDataTable();
-        await LogStep("Location data table set up.");
-
-        await LogStep("Setting up user data table...");
         await Helper_UI_ComboBoxes.SetupUserDataTable();
-        await LogStep("User data table set up.");
 
-        await LogStep("Initializing version checker...");
+        // Write the current version to version.txt in the root folder
+        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
+        Dao_File.WriteVersionToRoot(version);
+
         Service_Timer_VersionChecker.Initialize();
-        await LogStep("Version checker initialized.");
-
-        await LogStep("Initializing theme system...");
         await Core_Themes.Core_AppThemes.InitializeThemeSystemAsync(Model_AppVariables.User);
-        await LogStep("Theme system initialized.");
+        Debug.WriteLine(
+            $"[DEBUG] User Full Name loaded: {Model_AppVariables.User}");
+        // RunStartupSequenceAsync entry        
+        Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+        ApplicationConfiguration.Initialize();
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
 
-        await LogStep($"User Full Name loaded: {Model_AppVariables.User}");
-
-        await LogStep("Loading theme settings...");
+        // Set font size and user UI colors
         var fontSize = await Dao_User.GetThemeFontSizeAsync(Model_AppVariables.User);
         Model_AppVariables.ThemeFontSize = fontSize ?? 9;
         Model_AppVariables.UserUiColors = await Core_Themes.GetUserThemeColorsAsync(Model_AppVariables.User);
-        await LogStep("Theme settings loaded.");
-
-        await LogStep("Startup sequence completed.");
     }
 }
 

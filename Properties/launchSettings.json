@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "MTM_Inventory_Application": {
-      "commandName": "Project",
-      "sqlDebugging": true
-    }
-  }
-}

@@ -582,8 +582,6 @@ public partial class Control_AdvancedInventory : UserControl
         AdvancedInventory_Single_Button_Reset.Enabled = false;
         try
         {
-            MainFormInstance?.TabLoadingProgress?.ShowProgress();
-            MainFormInstance?.TabLoadingProgress?.UpdateProgress(10, "Resetting Advanced Inventory (Single)...");
             Debug.WriteLine("[DEBUG] AdvancedInventory Single HardReset - start");
 
             // Update status strip to show reset is in progress
@@ -595,7 +593,6 @@ public partial class Control_AdvancedInventory : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
             }
 
-            MainFormInstance?.TabLoadingProgress?.UpdateProgress(30, "Resetting data tables...");
             // Hide controls during reset
             Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
             AdvancedInventory_Single_ComboBox_Part.Visible = false;
@@ -613,7 +610,6 @@ public partial class Control_AdvancedInventory : UserControl
             await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
             Debug.WriteLine("[DEBUG] DataTables reset complete");
 
-            MainFormInstance?.TabLoadingProgress?.UpdateProgress(60, "Refilling combo boxes...");
             // Refill each combobox with proper data
             Debug.WriteLine("[DEBUG] Refilling Part ComboBox");
             await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(AdvancedInventory_Single_ComboBox_Part);
@@ -678,7 +674,6 @@ public partial class Control_AdvancedInventory : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = true;
                 MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
                     @"Disconnected from Server, please standby...";
-                MainFormInstance.TabLoadingProgress?.HideProgress();
             }
         }
     }
@@ -1022,8 +1017,6 @@ public partial class Control_AdvancedInventory : UserControl
         AdvancedInventory_MultiLoc_Button_Reset.Enabled = false;
         try
         {
-            MainFormInstance?.TabLoadingProgress?.ShowProgress();
-            MainFormInstance?.TabLoadingProgress?.UpdateProgress(10, "Resetting Advanced Inventory (MultiLoc)...");
             Debug.WriteLine("[DEBUG] AdvancedInventory MultiLoc HardReset - start");
             // Update status strip to show reset is in progress
             if (MainFormInstance != null)
@@ -1034,7 +1027,6 @@ public partial class Control_AdvancedInventory : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
             }
 
-            MainFormInstance?.TabLoadingProgress?.UpdateProgress(30, "Resetting data tables...");
             // Hide controls during reset
             Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
             AdvancedInventory_MultiLoc_ComboBox_Part.Visible = false;
@@ -1052,7 +1044,6 @@ public partial class Control_AdvancedInventory : UserControl
             await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
             Debug.WriteLine("[DEBUG] DataTables reset complete");
 
-            MainFormInstance?.TabLoadingProgress?.UpdateProgress(60, "Refilling combo boxes...");
             // Refill each combobox with proper data
             Debug.WriteLine("[DEBUG] Refilling Part ComboBox");
             await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(AdvancedInventory_MultiLoc_ComboBox_Part);
@@ -1119,7 +1110,6 @@ public partial class Control_AdvancedInventory : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = true;
                 MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
                     @"Disconnected from Server, please standby...";
-                MainFormInstance.TabLoadingProgress?.HideProgress();
             }
         }
     }
