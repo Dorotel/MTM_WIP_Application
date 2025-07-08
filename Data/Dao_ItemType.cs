@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
@@ -6,9 +6,9 @@ using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Data;
 
-#region Dao_Location
+#region Dao_ItemType
 
-internal static class Dao_Location
+internal static class Dao_ItemType
 {
     #region Fields
 
@@ -24,11 +24,11 @@ internal static class Dao_Location
 
     #region Delete
 
-    internal static async Task DeleteLocation(string location, bool useAsync = false)
+    internal static async Task DeleteItemType(string itemType, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object> { ["@location"] = location };
+        var parameters = new Dictionary<string, object> { ["@itemType"] = itemType };
         await ExecuteNonQueryAsync(
-            "DELETE FROM `md_locations` WHERE `Location` = @location",
+            "DELETE FROM `md_item_types` WHERE `Type` = @itemType",
             parameters, useAsync);
     }
 
@@ -36,16 +36,15 @@ internal static class Dao_Location
 
     #region Insert
 
-    internal static async Task InsertLocation(string location, string building, string user, bool useAsync = false)
+    internal static async Task InsertItemType(string itemType, string user, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
         {
-            ["@location"] = location,
-            ["@building"] = building,
+            ["@itemType"] = itemType,
             ["@user"] = user
         };
         await ExecuteNonQueryAsync(
-            "INSERT INTO `md_locations` (`Location`, `Building`, `Issued By`) VALUES (@location, @building, @user);",
+            "INSERT INTO `md_item_types` (`Type`, `Issued By`) VALUES (@itemType, @user);",
             parameters, useAsync);
     }
 
@@ -53,17 +52,16 @@ internal static class Dao_Location
 
     #region Update
 
-    internal static async Task UpdateLocation(string location, string newLocation, string building, string user, bool useAsync = false)
+    internal static async Task UpdateItemType(string itemType, string newItemType, string user, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
         {
-            ["@location"] = location,
-            ["@newLocation"] = newLocation,
-            ["@building"] = building,
+            ["@itemType"] = itemType,
+            ["@newItemType"] = newItemType,
             ["@user"] = user
         };
         await ExecuteNonQueryAsync(
-            "UPDATE `md_locations` SET `Location` = @newLocation, `Building` = @building, `Issued By` = @user WHERE `Location` = @location",
+            "UPDATE `md_item_types` SET `Type` = @newItemType, `Issued By` = @user WHERE `Type` = @itemType",
             parameters, useAsync);
     }
 
@@ -71,16 +69,16 @@ internal static class Dao_Location
 
     #region Read
 
-    internal static async Task<DataTable> GetAllLocations(bool useAsync = false)
+    internal static async Task<DataTable> GetAllItemTypes(bool useAsync = false)
     {
-        return await GetLocationByQueryAsync("SELECT * FROM `md_locations`", null, useAsync);
+        return await GetItemTypeByQueryAsync("SELECT * FROM `md_item_types`", null, useAsync);
     }
 
-    internal static async Task<DataRow?> GetLocationByName(string location, bool useAsync = false)
+    internal static async Task<DataRow?> GetItemTypeByName(string itemType, bool useAsync = false)
     {
-        var table = await GetLocationByQueryAsync(
-            "SELECT * FROM `md_locations` WHERE `Location` = @location",
-            new Dictionary<string, object> { ["@location"] = location }, useAsync);
+        var table = await GetItemTypeByQueryAsync(
+            "SELECT * FROM `md_item_types` WHERE `Type` = @itemType",
+            new Dictionary<string, object> { ["@itemType"] = itemType }, useAsync);
         return table.Rows.Count > 0 ? table.Rows[0] : null;
     }
 
@@ -88,11 +86,11 @@ internal static class Dao_Location
 
     #region Existence Check
 
-    internal static async Task<bool> LocationExists(string location, bool useAsync = false)
+    internal static async Task<bool> ItemTypeExists(string itemType, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object> { ["@location"] = location };
+        var parameters = new Dictionary<string, object> { ["@itemType"] = itemType };
         var result = await HelperDatabaseCore.ExecuteScalar(
-            "SELECT COUNT(*) FROM `md_locations` WHERE `Location` = @location",
+            "SELECT COUNT(*) FROM `md_item_types` WHERE `Type` = @itemType",
             parameters, useAsync);
         return Convert.ToInt32(result) > 0;
     }
@@ -119,7 +117,7 @@ internal static class Dao_Location
         }
     }
 
-    private static async Task<DataTable> GetLocationByQueryAsync(string sql, Dictionary<string, object>? parameters,
+    private static async Task<DataTable> GetItemTypeByQueryAsync(string sql, Dictionary<string, object>? parameters,
         bool useAsync)
     {
         try
