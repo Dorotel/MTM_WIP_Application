@@ -84,7 +84,9 @@ internal static class Dao_User
     internal static async Task<string> GetVisualUserNameAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetVisualUserNameAsync(user={user}, useAsync={useAsync})");
-        return await GetSettingsJsonAsync("VisualUserName", user, useAsync);
+        var value = await GetSettingsJsonAsync("VisualUserName", user, useAsync);
+        Model_Users.VisualUserName = value;
+        return Model_Users.VisualUserName;
     }
 
     internal static async Task SetVisualUserNameAsync(string user, string value, bool useAsync = false)
@@ -96,7 +98,9 @@ internal static class Dao_User
     internal static async Task<string> GetVisualPasswordAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetVisualPasswordAsync(user={user}, useAsync={useAsync})");
-        return await GetSettingsJsonAsync("VisualPassword", user, useAsync);
+        var value = await GetSettingsJsonAsync("VisualPassword", user, useAsync);
+        Model_Users.VisualPassword = value;
+        return Model_Users.VisualPassword;
     }
 
     internal static async Task SetVisualPasswordAsync(string user, string value, bool useAsync = false)
@@ -108,7 +112,9 @@ internal static class Dao_User
     internal static async Task<string> GetWipServerAddressAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetWipServerAddressAsync(user={user}, useAsync={useAsync})");
-        return await GetSettingsJsonAsync("WipServerAddress", user, useAsync);
+        var value = await GetSettingsJsonAsync("WipServerAddress", user, useAsync);
+        Model_Users.WipServerAddress = value;
+        return Model_Users.WipServerAddress;
     }
 
     internal static async Task SetWipServerAddressAsync(string user, string value, bool useAsync = false)
@@ -118,23 +124,45 @@ internal static class Dao_User
         await SetUsr_userFieldAsync("WipServerAddress", user, value, useAsync);
     }
 
-    internal static async Task<string> GetWipServerPortAsync(string user, bool useAsync = false)
-    {
-        Debug.WriteLine($"[Dao_User] Entering GetWipServerPortAsync(user={user}, useAsync={useAsync})");
-        return await GetSettingsJsonAsync("WipServerPort", user, useAsync);
-    }
+
+    #region Get/Set Database
 
     internal static async Task<string> GetDatabaseAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetDatabaseAsync(user={user}, useAsync={useAsync})");
-        return await GetSettingsJsonAsync("WIPDatabase", user, useAsync);
+        var value = await GetSettingsJsonAsync("WIPDatabase", user, useAsync);
+        Model_Users.Database = value;
+        return Model_Users.Database;
+    }
+
+    internal static async Task SetDatabaseAsync(string user, string value, bool useAsync = false)
+    {
+        Debug.WriteLine(
+            $"[Dao_User] Entering SetDatabaseAsync(user={user}, value={value}, useAsync={useAsync})");
+        Model_Users.Database = value;
+        await SetUsr_userFieldAsync("WIPDatabase", user, value, useAsync);
+    }
+
+    #endregion
+
+    #region Get/Set WipServerPort
+
+    internal static async Task<string> GetWipServerPortAsync(string user, bool useAsync = false)
+    {
+        Debug.WriteLine($"[Dao_User] Entering GetWipServerPortAsync(user={user}, useAsync={useAsync})");
+        var value = await GetSettingsJsonAsync("WipServerPort", user, useAsync);
+        Model_Users.WipServerPort = value;
+        return Model_Users.WipServerPort;
     }
 
     internal static async Task SetWipServerPortAsync(string user, string value, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering SetWipServerPortAsync(user={user}, value={value}, useAsync={useAsync})");
+        Model_Users.WipServerPort = value;
         await SetUsr_userFieldAsync("WipServerPort", user, value, useAsync);
     }
+
+    #endregion
 
     internal static async Task<string?> GetUserFullNameAsync(string user, bool useAsync = false)
     {
@@ -146,6 +174,7 @@ internal static class Dao_User
                 "SELECT `Full Name` FROM `usr_users` WHERE `User` = @User",
                 parameters, useAsync, CommandType.Text);
             Debug.WriteLine($"[Dao_User] GetUserFullNameAsync result: {result}");
+            Model_Users.FullName = result?.ToString() ?? string.Empty;
             return result?.ToString();
         }
         catch (Exception ex)
@@ -155,6 +184,13 @@ internal static class Dao_User
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
             return null;
         }
+    }
+
+    internal static async Task SetUserFullNameAsync(string user, string value, bool useAsync = false)
+    {
+        Debug.WriteLine($"[Dao_User] Entering SetUserFullNameAsync(user={user}, value={value}, useAsync={useAsync})");
+        Model_Users.FullName = value;
+        await SetUsr_userFieldAsync("Full Name", user, value, useAsync);
     }
 
     public static async Task<string> GetSettingsJsonAsync(string field, string user, bool useAsync)
@@ -224,7 +260,6 @@ internal static class Dao_User
                     }
             }
 
-            // Fallback to legacy table approach if JSON doesn't contain the field
 
             using var legacyCmd = new MySqlCommand(
                 $"SELECT `{field}` FROM `usr_users` WHERE `User` = @User LIMIT 1", conn);

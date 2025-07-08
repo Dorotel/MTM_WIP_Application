@@ -14,9 +14,9 @@ public static class Helper_Database_Variables
     {
         try
         {
-            server ??= "172.16.1.104";
-            database ??= "mtm_wip_application";
-            uid ??= Model_AppVariables.User != null ? Model_AppVariables.User.ToUpper() : "";
+            server ??= Model_AppVariables.WipServerAddress ?? "localhost"; // "172.16.1.104"
+            database ??= Model_Users.Database;
+            uid ??= Model_AppVariables.User.ToUpper();
             return $"SERVER={server};DATABASE={database};UID={uid};Allow User Variables=True ;";
         }
         catch (Exception ex)
@@ -39,17 +39,14 @@ public static class Helper_Database_Variables
                 : @"X:\MH_RESOURCE\Material_Handler\MTM WIP App\Logs";
 
             var userDirectory = Path.Combine(logDirectory, userName);
-            
+
             // Add timeout for directory creation to prevent hanging on network shares
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             var directoryTask = Task.Run(() =>
             {
-                if (!Directory.Exists(userDirectory))
-                {
-                    Directory.CreateDirectory(userDirectory);
-                }
+                if (!Directory.Exists(userDirectory)) Directory.CreateDirectory(userDirectory);
             }, cts.Token);
-            
+
             try
             {
                 directoryTask.Wait(cts.Token);
@@ -58,7 +55,7 @@ public static class Helper_Database_Variables
             {
                 throw new TimeoutException($"Directory creation timed out for: {userDirectory}");
             }
-            
+
             var timestamp = DateTime.Now.ToString("MM-dd-yyyy @ h-mm tt");
             var logFileName = $"{userName} {timestamp}.log";
             return Path.Combine(userDirectory, logFileName);

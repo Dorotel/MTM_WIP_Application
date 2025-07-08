@@ -1,4 +1,5 @@
 using MTM_Inventory_Application.Data;
+using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using System.Data;
 
@@ -13,7 +14,6 @@ public partial class EditPartControl : UserControl
     {
         InitializeComponent();
         LoadPartTypes();
-        LoadParts();
     }
 
     private async void LoadPartTypes()
@@ -24,13 +24,15 @@ public partial class EditPartControl : UserControl
             typeComboBox.Items.Clear();
             typeComboBox.Items.Add("Select Type");
 
-            foreach (DataRow row in partTypes.Rows) typeComboBox.Items.Add(row["Type"].ToString());
+            foreach (DataRow row in partTypes.Rows)
+                if (row["Type"] is string type)
+                    typeComboBox.Items.Add(type);
 
             typeComboBox.SelectedIndex = 0;
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error loading part types: {ex.Message}", "Error",
+            MessageBox.Show($@"Error loading part types: {ex.Message}", @"Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -56,19 +58,28 @@ public partial class EditPartControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error loading parts: {ex.Message}", "Error",
+            MessageBox.Show($@"Error loading parts: {ex.Message}", @"Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
-    protected override void OnLoad(EventArgs e)
+    protected override async void OnLoad(EventArgs e)
     {
-        base.OnLoad(e);
-        // Set the current user when the control loads
-        if (issuedByValueLabel != null) issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
+        try
+        {
+            base.OnLoad(e);
+            if (issuedByValueLabel != null) issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
+            await LoadParts(); // Properly awaited here
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
+                "SettingsForm / " + "EditPartControl_OnLoadOverRide");
+        }
     }
 
-    private async void partsComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    private async void PartsComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (partsComboBox.SelectedIndex <= 0)
         {
@@ -79,7 +90,13 @@ public partial class EditPartControl : UserControl
 
         try
         {
-            var selectedText = partsComboBox.SelectedItem.ToString();
+            var selectedText = partsComboBox.SelectedItem?.ToString();
+            if (string.IsNullOrEmpty(selectedText))
+            {
+                MessageBox.Show(@"Invalid selection.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             var itemNumber = selectedText.Split(" - ")[0];
 
             _currentPart = await Dao_Part.GetPartByNumber(itemNumber);
@@ -91,7 +108,7 @@ public partial class EditPartControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error loading part data: {ex.Message}", "Error",
+            MessageBox.Show($@"Error loading part data: {ex.Message}", @"Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -120,7 +137,7 @@ public partial class EditPartControl : UserControl
         saveButton.Enabled = enabled;
     }
 
-    private async void saveButton_Click(object sender, EventArgs e)
+    private async void SaveButton_Click(object sender, EventArgs e)
     {
         if (_currentPart == null) return;
 
@@ -129,7 +146,7 @@ public partial class EditPartControl : UserControl
             // Validate inputs
             if (string.IsNullOrWhiteSpace(itemNumberTextBox.Text))
             {
-                MessageBox.Show("Item Number is required.", "Validation Error",
+                MessageBox.Show(@"Item Number is required.", @"Validation Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 itemNumberTextBox.Focus();
                 return;
@@ -143,7 +160,7 @@ public partial class EditPartControl : UserControl
 
             if (string.IsNullOrWhiteSpace(descriptionTextBox.Text))
             {
-                MessageBox.Show("Description is required.", "Validation Error",
+                MessageBox.Show(@"Description is required.", @"Validation Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 descriptionTextBox.Focus();
                 return;
@@ -151,7 +168,7 @@ public partial class EditPartControl : UserControl
 
             if (typeComboBox.SelectedIndex <= 0)
             {
-                MessageBox.Show("Please select a part type.", "Validation Error",
+                MessageBox.Show(@"Please select a part type.", @"Validation Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 typeComboBox.Focus();
                 return;
@@ -163,8 +180,8 @@ public partial class EditPartControl : UserControl
 
             if (originalItemNumber != newItemNumber && await Dao_Part.PartExists(newItemNumber))
             {
-                MessageBox.Show($"Part number '{newItemNumber}' already exists.",
-                    "Duplicate Part Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($@"Part number '{newItemNumber}' already exists.",
+                    @"Duplicate Part Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 itemNumberTextBox.Focus();
                 return;
             }
@@ -172,7 +189,7 @@ public partial class EditPartControl : UserControl
             // Update the part using stored procedure
             await UpdatePartAsync();
 
-            MessageBox.Show("Part updated successfully!", "Success",
+            MessageBox.Show(@"Part updated successfully!", @"Success",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             // Reload parts list
@@ -183,7 +200,7 @@ public partial class EditPartControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error updating part: {ex.Message}", "Error",
+            MessageBox.Show($@"Error updating part: {ex.Message}", @"Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -197,7 +214,7 @@ public partial class EditPartControl : UserControl
         var customer = customerTextBox.Text.Trim();
         var description = descriptionTextBox.Text.Trim();
         var issuedBy = Model_AppVariables.User;
-        var type = typeComboBox.SelectedItem.ToString();
+        var type = typeComboBox.SelectedItem?.ToString() ?? string.Empty;
 
         await Dao_Part.UpdatePartWithStoredProcedure(id, itemNumber, customer, description, issuedBy, type);
     }
@@ -212,7 +229,7 @@ public partial class EditPartControl : UserControl
         _currentPart = null;
     }
 
-    private void cancelButton_Click(object sender, EventArgs e)
+    private void CancelButton_Click(object sender, EventArgs e)
     {
         if (_currentPart != null)
             LoadPartData(); // Reload original data

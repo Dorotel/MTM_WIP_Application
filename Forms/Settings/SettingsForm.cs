@@ -56,7 +56,8 @@ public partial class SettingsForm : Form
         // Initialize Add Part Control
         var addPartControl = new AddPartControl();
         addPartControl.Dock = DockStyle.Fill;
-        addPartControl.PartAdded += (s, e) => {
+        addPartControl.PartAdded += (s, e) =>
+        {
             // Refresh other controls when a part is added
             UpdateStatus("Part added successfully - lists refreshed");
         };
@@ -65,7 +66,8 @@ public partial class SettingsForm : Form
         // Initialize Edit Part Control
         var editPartControl = new EditPartControl();
         editPartControl.Dock = DockStyle.Fill;
-        editPartControl.PartUpdated += (s, e) => {
+        editPartControl.PartUpdated += (s, e) =>
+        {
             // Refresh other controls when a part is updated
             UpdateStatus("Part updated successfully - lists refreshed");
         };
@@ -74,7 +76,8 @@ public partial class SettingsForm : Form
         // Initialize Remove Part Control
         var removePartControl = new RemovePartControl();
         removePartControl.Dock = DockStyle.Fill;
-        removePartControl.PartRemoved += (s, e) => {
+        removePartControl.PartRemoved += (s, e) =>
+        {
             // Refresh other controls when a part is removed
             UpdateStatus("Part removed successfully - lists refreshed");
         };
@@ -163,7 +166,7 @@ public partial class SettingsForm : Form
             UpdateLoadingProgress(100, "Settings loaded successfully");
             UpdateStatus("Settings loaded successfully");
             _hasChanges = false;
-            
+
             // Hide progress after a brief delay
             await Task.Delay(500);
             HideLoadingProgress();
@@ -186,10 +189,6 @@ public partial class SettingsForm : Form
             databaseTextBox.Text = await Dao_User.GetDatabaseAsync(user) ?? "mtm_wip_application";
             usernameTextBox.Text = await Dao_User.GetVisualUserNameAsync(user) ?? "";
             passwordTextBox.Text = await Dao_User.GetVisualPasswordAsync(user) ?? "";
-            timeoutTextBox.Text = "30";
-            timeoutTextBox.Enabled = false;
-            autoReconnectCheckBox.Checked = true;
-            autoReconnectCheckBox.Enabled = false;
         }
         catch (Exception ex)
         {
@@ -535,7 +534,7 @@ public partial class SettingsForm : Form
         if (categoryListBox.SelectedItem == null)
             return;
 
-        string selected = categoryListBox.SelectedItem.ToString()!;
+        var selected = categoryListBox.SelectedItem.ToString()!;
         ShowLoadingProgress($"Loading {selected} settings...");
         UpdateLoadingProgress(0, $"Loading {selected} settings...");
 
@@ -606,10 +605,10 @@ public partial class SettingsForm : Form
 
             UpdateLoadingProgress(25, "Saving database settings...");
             await SaveDatabaseSettings();
-            
+
             UpdateLoadingProgress(50, "Saving application settings...");
             await SaveSettingsJson();
-            
+
             UpdateLoadingProgress(75, "Saving shortcuts...");
             await SaveShortcutsJson();
 
@@ -626,19 +625,19 @@ public partial class SettingsForm : Form
             }
 
             UpdateLoadingProgress(100, "Settings saved successfully");
-            
+
             // Hide progress after a brief delay
             await Task.Delay(500);
             HideLoadingProgress();
 
-            MessageBox.Show("Settings saved successfully!", "Settings", MessageBoxButtons.OK,
+            MessageBox.Show(@"Settings saved successfully!", @"Settings", MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             HideLoadingProgress();
             UpdateStatus($"Error saving settings: {ex.Message}");
-            MessageBox.Show($"Error saving settings: {ex.Message}", "Error", MessageBoxButtons.OK,
+            MessageBox.Show($@"Error saving settings: {ex.Message}", @"Error", MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
     }
@@ -647,8 +646,8 @@ public partial class SettingsForm : Form
     {
         if (_hasChanges)
         {
-            var result = MessageBox.Show("You have unsaved changes. Are you sure you want to cancel?",
-                "Unsaved Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var result = MessageBox.Show(@"You have unsaved changes. Are you sure you want to cancel?",
+                @"Unsaved Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.No)
                 return;
@@ -672,6 +671,7 @@ public partial class SettingsForm : Form
             var user = Model_AppVariables.User;
 
             await Dao_User.SetWipServerAddressAsync(user, serverTextBox.Text);
+            await Dao_User.SetDatabaseAsync(user, databaseTextBox.Text);
             await Dao_User.SetWipServerPortAsync(user, portTextBox.Text);
             await Dao_User.SetVisualUserNameAsync(user, usernameTextBox.Text);
             await Dao_User.SetVisualPasswordAsync(user, passwordTextBox.Text);
@@ -747,11 +747,11 @@ public partial class SettingsForm : Form
         }
     }
 
-    private async void resetDefaultsButton_Click(object? sender, EventArgs e)
+    private void resetDefaultsButton_Click(object? sender, EventArgs e)
     {
         var result = MessageBox.Show(
-            "Are you sure you want to reset all settings, theme, and shortcuts to their default values?",
-            "Reset to Defaults",
+            @"Are you sure you want to reset all settings, theme, and shortcuts to their default values?",
+            @"Reset to Defaults",
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Warning);
 
@@ -766,8 +766,6 @@ public partial class SettingsForm : Form
             databaseTextBox.Text = "mtm_wip_application";
             usernameTextBox.Text = "";
             passwordTextBox.Text = "";
-            timeoutTextBox.Text = "30";
-            autoReconnectCheckBox.Checked = true;
 
             // Reset theme to default
             var defaultTheme = Core_Themes.Core_AppThemes.GetThemeNames().FirstOrDefault() ?? "";

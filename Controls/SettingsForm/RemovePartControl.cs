@@ -1,4 +1,6 @@
 using MTM_Inventory_Application.Data;
+using MTM_Inventory_Application.Logging;
+using MTM_Inventory_Application.Models;
 using System.Data;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm;
@@ -11,7 +13,22 @@ public partial class RemovePartControl : UserControl
     public RemovePartControl()
     {
         InitializeComponent();
-        LoadParts();
+    }
+
+    protected override async void OnLoad(EventArgs e)
+    {
+        try
+        {
+            base.OnLoad(e);
+            if (issuedByValueLabel != null) issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
+            await LoadParts(); // Properly awaited here
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
+                "SettingsForm / " + "RemovePartControl_OnLoadOverRide");
+        }
     }
 
     private async Task LoadParts()
@@ -35,12 +52,12 @@ public partial class RemovePartControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error loading parts: {ex.Message}", "Error",
+            MessageBox.Show($@"Error loading parts: {ex.Message}", @"Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
-    private async void partsComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    private async void PartsComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (partsComboBox.SelectedIndex <= 0)
         {
@@ -51,7 +68,7 @@ public partial class RemovePartControl : UserControl
 
         try
         {
-            var selectedText = partsComboBox.SelectedItem.ToString();
+            var selectedText = partsComboBox.SelectedItem?.ToString() ?? string.Empty;
             var itemNumber = selectedText.Split(" - ")[0];
 
             _currentPart = await Dao_Part.GetPartByNumber(itemNumber);
@@ -63,7 +80,7 @@ public partial class RemovePartControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error loading part data: {ex.Message}", "Error",
+            MessageBox.Show($@"Error loading part data: {ex.Message}", @"Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -85,16 +102,25 @@ public partial class RemovePartControl : UserControl
         detailsGroupBox.Visible = enabled;
     }
 
-    private async void removeButton_Click(object sender, EventArgs e)
+    private async void RemoveButton_Click(object sender, EventArgs e)
     {
         if (_currentPart == null) return;
 
-        var itemNumber = _currentPart["Item Number"].ToString();
-        var customer = _currentPart["Customer"].ToString();
+        var itemNumber = _currentPart["Item Number"]?.ToString();
+        var customer = _currentPart["Customer"]?.ToString();
+
+        if (string.IsNullOrEmpty(itemNumber))
+        {
+            MessageBox.Show(@"Item number is missing. Cannot remove part.", @"Error",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
 
         var result = MessageBox.Show(
-            $"Are you sure you want to remove part '{itemNumber}' for customer '{customer}'?\n\nThis action cannot be undone.",
-            "Confirm Part Removal",
+            $@"Are you sure you want to remove part '{itemNumber}' for customer '{customer}'?
+
+This action cannot be undone.",
+            @"Confirm Part Removal",
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Warning);
 
@@ -105,7 +131,7 @@ public partial class RemovePartControl : UserControl
             // Remove the part using stored procedure
             await Dao_Part.DeletePartByItemNumber(itemNumber);
 
-            MessageBox.Show("Part removed successfully!", "Success",
+            MessageBox.Show(@"Part removed successfully!", @"Success",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             // Reload parts list
@@ -120,7 +146,7 @@ public partial class RemovePartControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error removing part: {ex.Message}", "Error",
+            MessageBox.Show($@"Error removing part: {ex.Message}", @"Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -135,7 +161,7 @@ public partial class RemovePartControl : UserControl
         _currentPart = null;
     }
 
-    private void cancelButton_Click(object sender, EventArgs e)
+    private void CancelButton_Click(object sender, EventArgs e)
     {
         partsComboBox.SelectedIndex = 0;
         ClearForm();

@@ -76,7 +76,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             partsComboBox.Name = "partsComboBox";
             partsComboBox.Size = new Size(300, 23);
             partsComboBox.TabIndex = 2;
-            partsComboBox.SelectedIndexChanged += partsComboBox_SelectedIndexChanged;
+            partsComboBox.SelectedIndexChanged += PartsComboBox_SelectedIndexChanged;
             // 
             // detailsGroupBox
             // 
@@ -203,7 +203,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             removeButton.TabIndex = 5;
             removeButton.Text = "Remove";
             removeButton.UseVisualStyleBackColor = false;
-            removeButton.Click += removeButton_Click;
+            removeButton.Click += RemoveButton_Click;
             // 
             // cancelButton
             // 
@@ -213,7 +213,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             cancelButton.TabIndex = 6;
             cancelButton.Text = "Cancel";
             cancelButton.UseVisualStyleBackColor = true;
-            cancelButton.Click += cancelButton_Click;
+            cancelButton.Click += CancelButton_Click;
             // 
             // RemovePartControl
             // 

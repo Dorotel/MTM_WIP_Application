@@ -73,7 +73,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             partsComboBox.Name = "partsComboBox";
             partsComboBox.Size = new Size(300, 23);
             partsComboBox.TabIndex = 2;
-            partsComboBox.SelectedIndexChanged += partsComboBox_SelectedIndexChanged;
+            partsComboBox.SelectedIndexChanged += PartsComboBox_SelectedIndexChanged;
             // 
             // itemNumberLabel
             // 
@@ -172,7 +172,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             saveButton.TabIndex = 13;
             saveButton.Text = "Save";
             saveButton.UseVisualStyleBackColor = true;
-            saveButton.Click += saveButton_Click;
+            saveButton.Click += SaveButton_Click;
             // 
             // cancelButton
             // 
@@ -182,7 +182,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             cancelButton.TabIndex = 14;
             cancelButton.Text = "Cancel";
             cancelButton.UseVisualStyleBackColor = true;
-            cancelButton.Click += cancelButton_Click;
+            cancelButton.Click += CancelButton_Click;
             // 
             // EditPartControl
             // 

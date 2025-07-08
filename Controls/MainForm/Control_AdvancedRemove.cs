@@ -150,13 +150,12 @@ public partial class Control_AdvancedRemove : UserControl
         Control_AdvancedRemove_ComboBox_User.ForeColor =
             Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
         Control_AdvancedRemove_ComboBox_Like.Items.Clear();
-        Control_AdvancedRemove_ComboBox_Like.Items.AddRange(new object[]
-        {
+        Control_AdvancedRemove_ComboBox_Like.Items.AddRange([
             "[ Deep Search ]",
             "Part ID",
             "Location",
             "User"
-        });
+        ]);
 
         // Optionally set the default selected item
         if (Control_AdvancedRemove_ComboBox_Like.Items.Count > 0)
@@ -312,7 +311,7 @@ public partial class Control_AdvancedRemove : UserControl
                         searchColumn = "User";
                         break;
                     default:
-                        MessageBox.Show("Please select a valid search field.", "Search Error",
+                        MessageBox.Show(@"Please select a valid search field.", @"Search Error",
                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                 }
@@ -463,7 +462,6 @@ public partial class Control_AdvancedRemove : UserControl
                 {
                     adapter.Fill(dt);
                 }
-                // No need for explicit close, the await using handles it
             }
 
             // Filter columns if necessary
@@ -656,7 +654,8 @@ public partial class Control_AdvancedRemove : UserControl
         try
         {
             ControlRemoveTab.MainFormInstance?.TabLoadingProgress?.ShowProgress();
-            ControlRemoveTab.MainFormInstance?.TabLoadingProgress?.UpdateProgress(10, "Resetting Advanced Remove tab...");
+            ControlRemoveTab.MainFormInstance?.TabLoadingProgress?.UpdateProgress(10,
+                "Resetting Advanced Remove tab...");
             Debug.WriteLine("[DEBUG] AdvancedRemove HardReset - start");
             if (MainFormInstance != null)
             {
@@ -818,7 +817,6 @@ public partial class Control_AdvancedRemove : UserControl
     {
         Control_AdvancedRemove_TextBox_Like.Clear();
         Control_AdvancedRemove_ComboBox_Like.SelectedIndex = 0;
-        var resetBtn = Controls.Find("Control_AdvancedRemove_Button_Reset", true);
         if ((ModifierKeys & Keys.Shift) == Keys.Shift)
             await Control_AdvancedRemove_HardReset();
         else

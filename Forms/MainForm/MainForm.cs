@@ -66,6 +66,7 @@ public partial class MainForm : Form
                     MainForm_Control_InventoryTab.Control_InventoryTab_ComboBox_Part.BackColor =
                         Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
                 }
+
                 System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm is now idle and ready.");
             };
         }
@@ -75,6 +76,7 @@ public partial class MainForm : Form
             LoggingUtility.LogApplicationError(ex);
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm));
         }
+
         System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm constructed.");
     }
 
@@ -98,7 +100,7 @@ public partial class MainForm : Form
             );
 
             // Add to form so it appears on top of the tab control
-            this.Controls.Add(_tabLoadingProgress);
+            Controls.Add(_tabLoadingProgress);
             _tabLoadingProgress.BringToFront();
         }
         catch (Exception ex)
@@ -182,8 +184,8 @@ public partial class MainForm : Form
             (advancedRemoveTab != null && advancedRemoveTab.Visible))
         {
             var result = MessageBox.Show(
-                "If you change the current tab now, any work will be lost.",
-                "Warning",
+                @"If you change the current tab now, any work will be lost.",
+                @"Warning",
                 MessageBoxButtons.OKCancel,
                 MessageBoxIcon.Warning
             );
@@ -370,14 +372,14 @@ public partial class MainForm : Form
 
                 _tabLoadingProgress.ShowProgress();
                 _tabLoadingProgress.UpdateProgress(25, "Switching tab...");
-                
+
                 // Simulate loading time to show progress
                 await Task.Delay(100);
                 _tabLoadingProgress.UpdateProgress(50, "Loading controls...");
-                
+
                 await Task.Delay(100);
                 _tabLoadingProgress.UpdateProgress(75, "Applying settings...");
-                
+
                 await Task.Delay(100);
                 _tabLoadingProgress.UpdateProgress(100, "Ready");
             }
@@ -425,15 +427,10 @@ public partial class MainForm : Form
 
     private void MainForm_MenuStrip_File_Settings_Click(object sender, EventArgs e)
     {
-        using (var settingsForm = new SettingsForm())
-        {
-            if (settingsForm.ShowDialog(this) == DialogResult.OK) ;
-            {
-                MainForm_Control_InventoryTab?.Control_InventoryTab_HardReset();
-                
-                Core_Themes.ApplyTheme(this);
-            }
-        }
+        using var settingsForm = new SettingsForm();
+        if (settingsForm.ShowDialog(this) != DialogResult.OK) return;
+        MainForm_Control_InventoryTab?.Control_InventoryTab_HardReset();
+        Core_Themes.ApplyTheme(this);
     }
 }
 

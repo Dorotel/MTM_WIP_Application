@@ -1,4 +1,5 @@
-﻿namespace MTM_Inventory_Application.Forms.Splash
+﻿#nullable enable
+namespace MTM_Inventory_Application.Forms.Splash
 {
     partial class SplashScreenForm
     {

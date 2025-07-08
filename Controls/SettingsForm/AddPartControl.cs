@@ -30,12 +30,12 @@ public partial class AddPartControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error loading part types: {ex.Message}", "Error",
+            MessageBox.Show($@"Error loading part types: {ex.Message}", @"Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
-    private async Task<DataTable> GetPartTypesAsync()
+    private static async Task<DataTable> GetPartTypesAsync()
     {
         return await Dao_Part.GetPartTypes();
     }
@@ -47,14 +47,14 @@ public partial class AddPartControl : UserControl
         if (issuedByValueLabel != null) issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
     }
 
-    private async void saveButton_Click(object sender, EventArgs e)
+    private async void SaveButton_Click(object sender, EventArgs e)
     {
         try
         {
             // Validate inputs
             if (string.IsNullOrWhiteSpace(itemNumberTextBox.Text))
             {
-                MessageBox.Show("Item Number is required.", "Validation Error",
+                MessageBox.Show(@"Item Number is required.", @"Validation Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 itemNumberTextBox.Focus();
                 return;
@@ -69,7 +69,7 @@ public partial class AddPartControl : UserControl
 
             if (string.IsNullOrWhiteSpace(descriptionTextBox.Text))
             {
-                MessageBox.Show("Description is required.", "Validation Error",
+                MessageBox.Show(@"Description is required.", @"Validation Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 descriptionTextBox.Focus();
                 return;
@@ -77,7 +77,7 @@ public partial class AddPartControl : UserControl
 
             if (typeComboBox.SelectedIndex <= 0)
             {
-                MessageBox.Show("Please select a part type.", "Validation Error",
+                MessageBox.Show(@"Please select a part type.", @"Validation Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 typeComboBox.Focus();
                 return;
@@ -86,8 +86,8 @@ public partial class AddPartControl : UserControl
             // Check for duplicate part number
             if (await Dao_Part.PartExists(itemNumberTextBox.Text.Trim()))
             {
-                MessageBox.Show($"Part number '{itemNumberTextBox.Text.Trim()}' already exists.",
-                    "Duplicate Part Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($@"Part number '{itemNumberTextBox.Text.Trim()}' already exists.",
+                    @"Duplicate Part Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 itemNumberTextBox.Focus();
                 return;
             }
@@ -95,7 +95,7 @@ public partial class AddPartControl : UserControl
             // Add the part using stored procedure
             await AddPartAsync();
 
-            MessageBox.Show("Part added successfully!", "Success",
+            MessageBox.Show(@"Part added successfully!", @"Success",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             // Clear the form
@@ -106,7 +106,7 @@ public partial class AddPartControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error adding part: {ex.Message}", "Error",
+            MessageBox.Show($@"Error adding part: {ex.Message}", @"Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -117,7 +117,7 @@ public partial class AddPartControl : UserControl
         var customer = customerTextBox.Text.Trim();
         var description = descriptionTextBox.Text.Trim();
         var issuedBy = Model_AppVariables.User;
-        var type = typeComboBox.SelectedItem.ToString();
+        var type = typeComboBox.SelectedItem?.ToString() ?? string.Empty; // Ensure type is not null
 
         // This will need to be implemented in Dao_Part to use the stored procedure
         // md_part_ids_Add_Part
@@ -133,7 +133,7 @@ public partial class AddPartControl : UserControl
         itemNumberTextBox.Focus();
     }
 
-    private void cancelButton_Click(object sender, EventArgs e)
+    private void CancelButton_Click(object sender, EventArgs e)
     {
         ClearForm();
     }
