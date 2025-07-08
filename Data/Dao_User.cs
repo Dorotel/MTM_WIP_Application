@@ -361,11 +361,11 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
     internal static async Task InsertUserAsync(
         string user, string fullName, string shift, bool vitsUser, string pin,
         string lastShownVersion, string hideChangeLog, string themeName, int themeFontSize,
-        string visualUserName, string visualPassword, string wipServerAddress, string wipServerPort,
+        string visualUserName, string visualPassword, string wipServerAddress, string database ,string wipServerPort,
         bool useAsync = false)
     {
         Debug.WriteLine(
-            $"[Dao_User] Entering InsertUserAsync(user={user}, fullName={fullName}, shift={shift}, vitsUser={vitsUser}, pin={pin}, lastShownVersion={lastShownVersion}, hideChangeLog={hideChangeLog}, themeName={themeName}, themeFontSize={themeFontSize}, visualUserName={visualUserName}, visualPassword={visualPassword}, wipServerAddress={wipServerAddress}, wipServerPort={wipServerPort}, useAsync={useAsync})");
+            $"[Dao_User] Entering InsertUserAsync(user={user}, fullName={fullName}, shift={shift}, vitsUser={vitsUser}, pin={pin}, lastShownVersion={lastShownVersion}, hideChangeLog={hideChangeLog}, themeName={themeName}, themeFontSize={themeFontSize}, visualUserName={visualUserName}, visualPassword={visualPassword}, wipServerAddress={wipServerAddress}, database = {database},wipServerPort={wipServerPort}, useAsync={useAsync})");
         try
         {
             var parameters = new Dictionary<string, object>
@@ -382,6 +382,7 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
                 ["p_VisualUserName"] = visualUserName,
                 ["p_VisualPassword"] = visualPassword,
                 ["p_WipServerAddress"] = wipServerAddress,
+                ["p_WIPDatabase"] = database,
                 ["p_WipServerPort"] = wipServerPort
             };
             await HelperDatabaseCore.ExecuteNonQuery(
@@ -399,11 +400,11 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
     internal static async Task UpdateUserAsync(
         string user, string fullName, string shift, bool vitsUser, string pin,
         string lastShownVersion, string hideChangeLog, string themeName, int themeFontSize,
-        string visualUserName, string visualPassword, string wipServerAddress, string wipServerPort,
+        string visualUserName, string visualPassword, string wipServerAddress, string database, string wipServerPort,
         bool useAsync = false)
     {
         Debug.WriteLine(
-            $"[Dao_User] Entering UpdateUserAsync(user={user}, fullName={fullName}, shift={shift}, vitsUser={vitsUser}, pin={pin}, lastShownVersion={lastShownVersion}, hideChangeLog={hideChangeLog}, themeName={themeName}, themeFontSize={themeFontSize}, visualUserName={visualUserName}, visualPassword={visualPassword}, wipServerAddress={wipServerAddress}, wipServerPort={wipServerPort}, useAsync={useAsync})");
+            $"[Dao_User] Entering UpdateUserAsync(user={user}, fullName={fullName}, shift={shift}, vitsUser={vitsUser}, pin={pin}, lastShownVersion={lastShownVersion}, hideChangeLog={hideChangeLog}, themeName={themeName}, themeFontSize={themeFontSize}, visualUserName={visualUserName}, visualPassword={visualPassword}, database = {database} ,wipServerAddress={wipServerAddress}, wipServerPort={wipServerPort}, useAsync={useAsync})");
         try
         {
             var parameters = new Dictionary<string, object>
@@ -420,6 +421,7 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
                 ["p_VisualUserName"] = visualUserName,
                 ["p_VisualPassword"] = visualPassword,
                 ["p_WipServerAddress"] = wipServerAddress,
+                ["p_WIPDatabase"] = database,
                 ["p_WipServerPort"] = wipServerPort
             };
             await HelperDatabaseCore.ExecuteNonQuery(
