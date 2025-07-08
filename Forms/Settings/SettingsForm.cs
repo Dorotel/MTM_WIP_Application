@@ -146,7 +146,16 @@ public partial class SettingsForm : Form
         };
         removeLocationPanel.Controls.Add(removeLocationControl);
 
-        // Note: Item Type controls will be added when created
+        // Initialize Add Item Type Control
+        var addItemTypeControl = new AddItemTypeControl();
+        addItemTypeControl.Dock = DockStyle.Fill;
+        addItemTypeControl.ItemTypeAdded += (s, e) =>
+        {
+            UpdateStatus("Item type added successfully - lists refreshed");
+        };
+        addItemTypePanel.Controls.Add(addItemTypeControl);
+
+        // Note: Edit and Remove Item Type controls will be added when created
     }
 
     private void ThemeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
