@@ -1,0 +1,6 @@
+Analyze the selected file for any logic or stored variables that do not belong according to the architectural organization suggested in _AllFileSummaries.md.
+•	Identify any business logic, data access code, UI logic, or configuration variables that should be moved to a more appropriate file or layer (e.g., Model, Dao, Service, Helper, Control, Core, etc.).
+•	For each item found, specify where it should be migrated and briefly explain why.
+•	Provide recommendations for improving the separation of concerns in this file.
+
+fileName: 

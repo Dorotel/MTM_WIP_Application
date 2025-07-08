@@ -1,0 +1,44 @@
+Issue: Generate Comprehensive Markdown File Summaries for All Code Files
+Task:
+For every .cs file in the solution, ensure there is a corresponding .md file in Documents/File Summarys containing a comprehensive Markdown reference.
+Follow these steps for each file:
+1.	Verification:
+•	If a .md file exists, check if it contains only placeholder text (e.g., “Blank markdown file for ...”) or is empty.
+•	Only generate and overwrite documentation for .md files that are empty or contain only placeholder content.
+•	If a .md file already contains substantive documentation, skip it.
+2.	Missing Placeholders:
+•	If a .cs file does not have a corresponding .md file, create a new .md file and generate the documentation for it.
+3.	Documentation Generation:
+•	For each eligible .md file, generate a single Markdown code block that is robust enough to answer any possible question about the file, even if the reader does not have the file open.
+•	All code samples must be commented out using // syntax (not triple backticks).
+•	Do not use any markdown formatting that could break the outer code block.
+•	Keep all content as plain text with simple formatting.
+Documentation Must Include:
+•	File metadata (file name, namespace, main classes, target framework, language version, dependencies)
+•	The file’s purpose and all intended use cases
+•	Key components (classes, methods, properties, fields, events, delegates, etc.) with clear explanations
+•	How the file integrates with or is used by the rest of the application (including example usage if relevant)
+•	Error handling strategies and any known limitations or gotchas
+•	Notable implementation details, design patterns, or extensibility points
+•	Thread safety and concurrency notes
+•	Performance and resource usage considerations
+•	Security and permissions requirements
+•	Testing/mocking strategies and tips
+•	Configuration/environment dependencies
+•	Deprecation, migration, or version notes
+•	Related files or modules for further reference
+•	Any relevant code snippets (commented out to avoid breaking Markdown rendering)
+•	A summary section that explains why this file is important and when to reference it
+•	(Optional) Change history or major revision notes
+Output Format:
+•	The output for each .md file must be a single Markdown code block.
+•	All code examples must be commented out using // syntax.
+•	Do not use triple backticks inside the code block.
+•	Keep all content as plain text with simple formatting.
+Example Mapping:
+•	If the .md file is Core_DgvPrinter.md, then the file to summarize is Core_DgvPrinter.cs, and the summary should be written into Core_DgvPrinter.md.
+Goal:
+Produce a comprehensive, robust, and easily searchable Markdown reference for every .cs file in the solution, with the output written to the corresponding .md file in Documents/File Summarys.
+Do not overwrite any .md file that already contains substantive documentation.
+---
+End of Issue Prompt

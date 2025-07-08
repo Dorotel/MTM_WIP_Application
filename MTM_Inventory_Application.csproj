@@ -1,0 +1,91 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Version>4.7.0.1</Version>
+		<ApplicationIcon>MTMWIPApp.ico</ApplicationIcon>
+		<!-- Ensure files are copied locally -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Remove="Backups\**" />
+		<Compile Remove="Documents\**" />
+		<EmbeddedResource Remove="Backups\**" />
+		<EmbeddedResource Remove="Documents\**" />
+		<None Remove="Backups\**" />
+		<None Remove="Documents\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Remove="Core\Printer - Copy.cs" />
+		<Compile Remove="MainForm - BACKUP.Designer.cs" />
+		<Compile Remove="MainForm - Copy.Designer.cs" />
+		<Compile Remove="MainForm.Designer.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	</ItemGroup>
+
+	<ItemGroup>
+		<COMReference Include="IWshRuntimeLibrary">
+			<WrapperTool>tlbimp</WrapperTool>
+			<VersionMinor>0</VersionMinor>
+			<VersionMajor>1</VersionMajor>
+			<Guid>f935dc20-1cf0-11d0-adb9-00c04fd58a0b</Guid>
+			<Lcid>0</Lcid>
+			<Isolated>false</Isolated>
+			<EmbedInteropTypes>true</EmbedInteropTypes>
+		</COMReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="MTMWIPApp.ico">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
+		<PackageReference Include="Microsoft.TestPlatform" Version="17.14.1" />
+		<PackageReference Include="MySql.Data" Version="9.3.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="Controls\MainForm\WIPAppTemplate.xlsx">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Controls\MainForm\Control_TransferTab.cs" />
+		<Compile Update="Controls\MainForm\Control_RemoveTab.cs" />
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Controls\MainForm\Control_TransferTab.resx">
+			<SubType>Designer</SubType>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Controls\MainForm\Control_RemoveTab.resx">
+			<SubType>Designer</SubType>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
+
+</Project>
