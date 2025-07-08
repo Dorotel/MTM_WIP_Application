@@ -155,7 +155,23 @@ public partial class SettingsForm : Form
         };
         addItemTypePanel.Controls.Add(addItemTypeControl);
 
-        // Note: Edit and Remove Item Type controls will be added when created
+        // Initialize Edit Item Type Control
+        var editItemTypeControl = new EditItemTypeControl();
+        editItemTypeControl.Dock = DockStyle.Fill;
+        editItemTypeControl.ItemTypeUpdated += (s, e) =>
+        {
+            UpdateStatus("Item type updated successfully - lists refreshed");
+        };
+        editItemTypePanel.Controls.Add(editItemTypeControl);
+
+        // Initialize Remove Item Type Control
+        var removeItemTypeControl = new RemoveItemTypeControl();
+        removeItemTypeControl.Dock = DockStyle.Fill;
+        removeItemTypeControl.ItemTypeRemoved += (s, e) =>
+        {
+            UpdateStatus("Item type removed successfully - lists refreshed");
+        };
+        removeItemTypePanel.Controls.Add(removeItemTypeControl);
     }
 
     private void ThemeComboBox_SelectedIndexChanged(object? sender, EventArgs e)

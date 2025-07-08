@@ -26,10 +26,8 @@ internal static class Dao_Operation
 
     internal static async Task DeleteOperation(string operationNumber, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object> { ["@operationNumber"] = operationNumber };
-        await ExecuteNonQueryAsync(
-            "DELETE FROM `md_operation_numbers` WHERE `Operation` = @operationNumber",
-            parameters, useAsync);
+        var parameters = new Dictionary<string, object> { ["p_Operation"] = operationNumber };
+        await ExecuteStoredProcedureAsync("md_operation_numbers_Delete_ByOperation", parameters, useAsync);
     }
 
     #endregion
@@ -40,30 +38,26 @@ internal static class Dao_Operation
     {
         var parameters = new Dictionary<string, object>
         {
-            ["@operationNumber"] = operationNumber,
-            ["@user"] = user
+            ["p_Operation"] = operationNumber,
+            ["p_IssuedBy"] = user
         };
-        await ExecuteNonQueryAsync(
-            "INSERT INTO `md_operation_numbers` (`Operation`, `Issued By`) VALUES (@operationNumber, @user);",
-            parameters, useAsync);
+        await ExecuteStoredProcedureAsync("md_operation_numbers_Add_Operation", parameters, useAsync);
     }
 
     #endregion
 
     #region Update
 
-    internal static async Task UpdateOperation(string operationNumber, string newOperationNumber, string user,
+    internal static async Task UpdateOperation(int id, string newOperationNumber, string user,
         bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
         {
-            ["@operationNumber"] = operationNumber,
-            ["@newOperationNumber"] = newOperationNumber,
-            ["@user"] = user
+            ["p_ID"] = id,
+            ["p_Operation"] = newOperationNumber,
+            ["p_IssuedBy"] = user
         };
-        await ExecuteNonQueryAsync(
-            "UPDATE `md_operation_numbers` SET `Operation` = @newOperationNumber, `Issued By` = @user WHERE `Operation` = @operationNumber",
-            parameters, useAsync);
+        await ExecuteStoredProcedureAsync("md_operation_numbers_Update_Operation", parameters, useAsync);
     }
 
     #endregion
@@ -72,15 +66,14 @@ internal static class Dao_Operation
 
     internal static async Task<DataTable> GetAllOperations(bool useAsync = false)
     {
-        return await GetOperationByQueryAsync("SELECT * FROM `md_operation_numbers`", null, useAsync);
+        return await GetOperationByStoredProcedureAsync("md_operation_numbers_Get_All", null, useAsync);
     }
 
     internal static async Task<DataRow?> GetOperationByNumber(string operationNumber, bool useAsync = false)
     {
-        var table = await GetOperationByQueryAsync(
-            "SELECT * FROM `md_operation_numbers` WHERE `Operation` = @operationNumber",
-            new Dictionary<string, object> { ["@operationNumber"] = operationNumber }, useAsync);
-        return table.Rows.Count > 0 ? table.Rows[0] : null;
+        var table = await GetAllOperations(useAsync);
+        var rows = table.Select($"Operation = '{operationNumber.Replace("'", "''")}'");
+        return rows.Length > 0 ? rows[0] : null;
     }
 
     #endregion
@@ -100,6 +93,24 @@ internal static class Dao_Operation
 
     #region Helpers
 
+    private static async Task ExecuteStoredProcedureAsync(string storedProcedure, Dictionary<string, object> parameters, bool useAsync)
+    {
+        try
+        {
+            await HelperDatabaseCore.ExecuteStoredProcedure(storedProcedure, parameters, useAsync);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
     private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
     {
         try
@@ -115,6 +126,28 @@ internal static class Dao_Operation
         {
             LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    private static async Task<DataTable> GetOperationByStoredProcedureAsync(string storedProcedure, Dictionary<string, object>? parameters, bool useAsync)
+    {
+        try
+        {
+            return parameters == null
+                ? await HelperDatabaseCore.ExecuteStoredProcedureDataTable(storedProcedure, useAsync: useAsync)
+                : await HelperDatabaseCore.ExecuteStoredProcedureDataTable(storedProcedure, parameters, useAsync);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+            return new DataTable();
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return new DataTable();
         }
     }
 

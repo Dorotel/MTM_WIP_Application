@@ -26,10 +26,8 @@ internal static class Dao_ItemType
 
     internal static async Task DeleteItemType(string itemType, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object> { ["@itemType"] = itemType };
-        await ExecuteNonQueryAsync(
-            "DELETE FROM `md_item_types` WHERE `Type` = @itemType",
-            parameters, useAsync);
+        var parameters = new Dictionary<string, object> { ["p_Type"] = itemType };
+        await ExecuteStoredProcedureAsync("md_item_types_Delete_ByType", parameters, useAsync);
     }
 
     #endregion
@@ -40,29 +38,25 @@ internal static class Dao_ItemType
     {
         var parameters = new Dictionary<string, object>
         {
-            ["@itemType"] = itemType,
-            ["@user"] = user
+            ["p_Type"] = itemType,
+            ["p_IssuedBy"] = user
         };
-        await ExecuteNonQueryAsync(
-            "INSERT INTO `md_item_types` (`Type`, `Issued By`) VALUES (@itemType, @user);",
-            parameters, useAsync);
+        await ExecuteStoredProcedureAsync("md_item_types_Add_Type", parameters, useAsync);
     }
 
     #endregion
 
     #region Update
 
-    internal static async Task UpdateItemType(string itemType, string newItemType, string user, bool useAsync = false)
+    internal static async Task UpdateItemType(int id, string newItemType, string user, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
         {
-            ["@itemType"] = itemType,
-            ["@newItemType"] = newItemType,
-            ["@user"] = user
+            ["p_ID"] = id,
+            ["p_Type"] = newItemType,
+            ["p_IssuedBy"] = user
         };
-        await ExecuteNonQueryAsync(
-            "UPDATE `md_item_types` SET `Type` = @newItemType, `Issued By` = @user WHERE `Type` = @itemType",
-            parameters, useAsync);
+        await ExecuteStoredProcedureAsync("md_item_types_Update_Type", parameters, useAsync);
     }
 
     #endregion
@@ -71,15 +65,14 @@ internal static class Dao_ItemType
 
     internal static async Task<DataTable> GetAllItemTypes(bool useAsync = false)
     {
-        return await GetItemTypeByQueryAsync("SELECT * FROM `md_item_types`", null, useAsync);
+        return await GetItemTypeByStoredProcedureAsync("md_item_types_Get_All", null, useAsync);
     }
 
     internal static async Task<DataRow?> GetItemTypeByName(string itemType, bool useAsync = false)
     {
-        var table = await GetItemTypeByQueryAsync(
-            "SELECT * FROM `md_item_types` WHERE `Type` = @itemType",
-            new Dictionary<string, object> { ["@itemType"] = itemType }, useAsync);
-        return table.Rows.Count > 0 ? table.Rows[0] : null;
+        var table = await GetAllItemTypes(useAsync);
+        var rows = table.Select($"Type = '{itemType.Replace("'", "''")}'");
+        return rows.Length > 0 ? rows[0] : null;
     }
 
     #endregion
@@ -99,6 +92,24 @@ internal static class Dao_ItemType
 
     #region Helpers
 
+    private static async Task ExecuteStoredProcedureAsync(string storedProcedure, Dictionary<string, object> parameters, bool useAsync)
+    {
+        try
+        {
+            await HelperDatabaseCore.ExecuteStoredProcedure(storedProcedure, parameters, useAsync);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
     private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
     {
         try
@@ -114,6 +125,28 @@ internal static class Dao_ItemType
         {
             LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    private static async Task<DataTable> GetItemTypeByStoredProcedureAsync(string storedProcedure, Dictionary<string, object>? parameters, bool useAsync)
+    {
+        try
+        {
+            return parameters == null
+                ? await HelperDatabaseCore.ExecuteStoredProcedureDataTable(storedProcedure, useAsync: useAsync)
+                : await HelperDatabaseCore.ExecuteStoredProcedureDataTable(storedProcedure, parameters, useAsync);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+            return new DataTable();
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return new DataTable();
         }
     }
 

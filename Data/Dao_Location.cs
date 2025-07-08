@@ -26,45 +26,37 @@ internal static class Dao_Location
 
     internal static async Task DeleteLocation(string location, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object> { ["@location"] = location };
-        await ExecuteNonQueryAsync(
-            "DELETE FROM `md_locations` WHERE `Location` = @location",
-            parameters, useAsync);
+        var parameters = new Dictionary<string, object> { ["p_Location"] = location };
+        await ExecuteStoredProcedureAsync("md_locations_Delete_ByLocation", parameters, useAsync);
     }
 
     #endregion
 
     #region Insert
 
-    internal static async Task InsertLocation(string location, string building, string user, bool useAsync = false)
+    internal static async Task InsertLocation(string location, string user, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
         {
-            ["@location"] = location,
-            ["@building"] = building,
-            ["@user"] = user
+            ["p_Location"] = location,
+            ["p_IssuedBy"] = user
         };
-        await ExecuteNonQueryAsync(
-            "INSERT INTO `md_locations` (`Location`, `Building`, `Issued By`) VALUES (@location, @building, @user);",
-            parameters, useAsync);
+        await ExecuteStoredProcedureAsync("md_locations_Add_Location", parameters, useAsync);
     }
 
     #endregion
 
     #region Update
 
-    internal static async Task UpdateLocation(string location, string newLocation, string building, string user, bool useAsync = false)
+    internal static async Task UpdateLocation(int id, string newLocation, string user, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
         {
-            ["@location"] = location,
-            ["@newLocation"] = newLocation,
-            ["@building"] = building,
-            ["@user"] = user
+            ["p_ID"] = id,
+            ["p_Location"] = newLocation,
+            ["p_IssuedBy"] = user
         };
-        await ExecuteNonQueryAsync(
-            "UPDATE `md_locations` SET `Location` = @newLocation, `Building` = @building, `Issued By` = @user WHERE `Location` = @location",
-            parameters, useAsync);
+        await ExecuteStoredProcedureAsync("md_locations_Update_Location", parameters, useAsync);
     }
 
     #endregion
@@ -73,15 +65,14 @@ internal static class Dao_Location
 
     internal static async Task<DataTable> GetAllLocations(bool useAsync = false)
     {
-        return await GetLocationByQueryAsync("SELECT * FROM `md_locations`", null, useAsync);
+        return await GetLocationByStoredProcedureAsync("md_locations_Get_All", null, useAsync);
     }
 
     internal static async Task<DataRow?> GetLocationByName(string location, bool useAsync = false)
     {
-        var table = await GetLocationByQueryAsync(
-            "SELECT * FROM `md_locations` WHERE `Location` = @location",
-            new Dictionary<string, object> { ["@location"] = location }, useAsync);
-        return table.Rows.Count > 0 ? table.Rows[0] : null;
+        var table = await GetAllLocations(useAsync);
+        var rows = table.Select($"Location = '{location.Replace("'", "''")}'");
+        return rows.Length > 0 ? rows[0] : null;
     }
 
     #endregion
@@ -101,6 +92,24 @@ internal static class Dao_Location
 
     #region Helpers
 
+    private static async Task ExecuteStoredProcedureAsync(string storedProcedure, Dictionary<string, object> parameters, bool useAsync)
+    {
+        try
+        {
+            await HelperDatabaseCore.ExecuteStoredProcedure(storedProcedure, parameters, useAsync);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
     private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object> parameters, bool useAsync)
     {
         try
@@ -116,6 +125,28 @@ internal static class Dao_Location
         {
             LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    private static async Task<DataTable> GetLocationByStoredProcedureAsync(string storedProcedure, Dictionary<string, object>? parameters, bool useAsync)
+    {
+        try
+        {
+            return parameters == null
+                ? await HelperDatabaseCore.ExecuteStoredProcedureDataTable(storedProcedure, useAsync: useAsync)
+                : await HelperDatabaseCore.ExecuteStoredProcedureDataTable(storedProcedure, parameters, useAsync);
+        }
+        catch (MySqlException ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
+            return new DataTable();
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return new DataTable();
         }
     }
 
