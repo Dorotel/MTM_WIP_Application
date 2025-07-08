@@ -63,6 +63,15 @@
             addPartPanel = new Panel();
             editPartPanel = new Panel();
             removePartPanel = new Panel();
+            addOperationPanel = new Panel();
+            editOperationPanel = new Panel();
+            removeOperationPanel = new Panel();
+            addLocationPanel = new Panel();
+            editLocationPanel = new Panel();
+            removeLocationPanel = new Panel();
+            addItemTypePanel = new Panel();
+            editItemTypePanel = new Panel();
+            removeItemTypePanel = new Panel();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -104,7 +113,13 @@
             categoryListBox.Dock = DockStyle.Fill;
             categoryListBox.FormattingEnabled = true;
             categoryListBox.ItemHeight = 15;
-            categoryListBox.Items.AddRange(new object[] { "Database", "Add Part Number", "Edit Part Number", "Remove Part Number", "Theme", "Shortcuts", "About" });
+            categoryListBox.Items.AddRange(new object[] { 
+                "Database", 
+                "Add Part Number", "Edit Part Number", "Remove Part Number", 
+                "Add Operation", "Edit Operation", "Remove Operation",
+                "Add Location", "Edit Location", "Remove Location",
+                "Add Item Type", "Edit Item Type", "Remove Item Type",
+                "Theme", "Shortcuts", "About" });
             categoryListBox.Location = new Point(0, 0);
             categoryListBox.Name = "categoryListBox";
             categoryListBox.Size = new Size(200, 450);
@@ -430,11 +445,101 @@
             removePartPanel.TabIndex = 8;
             removePartPanel.Visible = false;
             // 
+            // addOperationPanel
+            // 
+            addOperationPanel.Dock = DockStyle.Fill;
+            addOperationPanel.Location = new Point(0, 0);
+            addOperationPanel.Name = "addOperationPanel";
+            addOperationPanel.Size = new Size(800, 450);
+            addOperationPanel.TabIndex = 9;
+            addOperationPanel.Visible = false;
+            // 
+            // editOperationPanel
+            // 
+            editOperationPanel.Dock = DockStyle.Fill;
+            editOperationPanel.Location = new Point(0, 0);
+            editOperationPanel.Name = "editOperationPanel";
+            editOperationPanel.Size = new Size(800, 450);
+            editOperationPanel.TabIndex = 10;
+            editOperationPanel.Visible = false;
+            // 
+            // removeOperationPanel
+            // 
+            removeOperationPanel.Dock = DockStyle.Fill;
+            removeOperationPanel.Location = new Point(0, 0);
+            removeOperationPanel.Name = "removeOperationPanel";
+            removeOperationPanel.Size = new Size(800, 450);
+            removeOperationPanel.TabIndex = 11;
+            removeOperationPanel.Visible = false;
+            // 
+            // addLocationPanel
+            // 
+            addLocationPanel.Dock = DockStyle.Fill;
+            addLocationPanel.Location = new Point(0, 0);
+            addLocationPanel.Name = "addLocationPanel";
+            addLocationPanel.Size = new Size(800, 450);
+            addLocationPanel.TabIndex = 12;
+            addLocationPanel.Visible = false;
+            // 
+            // editLocationPanel
+            // 
+            editLocationPanel.Dock = DockStyle.Fill;
+            editLocationPanel.Location = new Point(0, 0);
+            editLocationPanel.Name = "editLocationPanel";
+            editLocationPanel.Size = new Size(800, 450);
+            editLocationPanel.TabIndex = 13;
+            editLocationPanel.Visible = false;
+            // 
+            // removeLocationPanel
+            // 
+            removeLocationPanel.Dock = DockStyle.Fill;
+            removeLocationPanel.Location = new Point(0, 0);
+            removeLocationPanel.Name = "removeLocationPanel";
+            removeLocationPanel.Size = new Size(800, 450);
+            removeLocationPanel.TabIndex = 14;
+            removeLocationPanel.Visible = false;
+            // 
+            // addItemTypePanel
+            // 
+            addItemTypePanel.Dock = DockStyle.Fill;
+            addItemTypePanel.Location = new Point(0, 0);
+            addItemTypePanel.Name = "addItemTypePanel";
+            addItemTypePanel.Size = new Size(800, 450);
+            addItemTypePanel.TabIndex = 15;
+            addItemTypePanel.Visible = false;
+            // 
+            // editItemTypePanel
+            // 
+            editItemTypePanel.Dock = DockStyle.Fill;
+            editItemTypePanel.Location = new Point(0, 0);
+            editItemTypePanel.Name = "editItemTypePanel";
+            editItemTypePanel.Size = new Size(800, 450);
+            editItemTypePanel.TabIndex = 16;
+            editItemTypePanel.Visible = false;
+            // 
+            // removeItemTypePanel
+            // 
+            removeItemTypePanel.Dock = DockStyle.Fill;
+            removeItemTypePanel.Location = new Point(0, 0);
+            removeItemTypePanel.Name = "removeItemTypePanel";
+            removeItemTypePanel.Size = new Size(800, 450);
+            removeItemTypePanel.TabIndex = 17;
+            removeItemTypePanel.Visible = false;
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(removeItemTypePanel);
+            Controls.Add(editItemTypePanel);
+            Controls.Add(addItemTypePanel);
+            Controls.Add(removeLocationPanel);
+            Controls.Add(editLocationPanel);
+            Controls.Add(addLocationPanel);
+            Controls.Add(removeOperationPanel);
+            Controls.Add(editOperationPanel);
+            Controls.Add(addOperationPanel);
             Controls.Add(removePartPanel);
             Controls.Add(editPartPanel);
             Controls.Add(addPartPanel);
@@ -508,5 +613,14 @@
         private System.Windows.Forms.Panel addPartPanel;
         private System.Windows.Forms.Panel editPartPanel;
         private System.Windows.Forms.Panel removePartPanel;
+        private System.Windows.Forms.Panel addOperationPanel;
+        private System.Windows.Forms.Panel editOperationPanel;
+        private System.Windows.Forms.Panel removeOperationPanel;
+        private System.Windows.Forms.Panel addLocationPanel;
+        private System.Windows.Forms.Panel editLocationPanel;
+        private System.Windows.Forms.Panel removeLocationPanel;
+        private System.Windows.Forms.Panel addItemTypePanel;
+        private System.Windows.Forms.Panel editItemTypePanel;
+        private System.Windows.Forms.Panel removeItemTypePanel;
     }
 }

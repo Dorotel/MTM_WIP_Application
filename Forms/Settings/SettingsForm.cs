@@ -27,6 +27,15 @@ public partial class SettingsForm : Form
             ["Add Part Number"] = addPartPanel,
             ["Edit Part Number"] = editPartPanel,
             ["Remove Part Number"] = removePartPanel,
+            ["Add Operation"] = addOperationPanel,
+            ["Edit Operation"] = editOperationPanel,
+            ["Remove Operation"] = removeOperationPanel,
+            ["Add Location"] = addLocationPanel,
+            ["Edit Location"] = editLocationPanel,
+            ["Remove Location"] = removeLocationPanel,
+            ["Add Item Type"] = addItemTypePanel,
+            ["Edit Item Type"] = editItemTypePanel,
+            ["Remove Item Type"] = removeItemTypePanel,
             ["Theme"] = themePanel,
             ["Shortcuts"] = shortcutsPanel,
             ["About"] = aboutPanel
@@ -82,6 +91,62 @@ public partial class SettingsForm : Form
             UpdateStatus("Part removed successfully - lists refreshed");
         };
         removePartPanel.Controls.Add(removePartControl);
+
+        // Initialize Add Operation Control
+        var addOperationControl = new AddOperationControl();
+        addOperationControl.Dock = DockStyle.Fill;
+        addOperationControl.OperationAdded += (s, e) =>
+        {
+            UpdateStatus("Operation added successfully - lists refreshed");
+        };
+        addOperationPanel.Controls.Add(addOperationControl);
+
+        // Initialize Edit Operation Control
+        var editOperationControl = new EditOperationControl();
+        editOperationControl.Dock = DockStyle.Fill;
+        editOperationControl.OperationUpdated += (s, e) =>
+        {
+            UpdateStatus("Operation updated successfully - lists refreshed");
+        };
+        editOperationPanel.Controls.Add(editOperationControl);
+
+        // Initialize Remove Operation Control
+        var removeOperationControl = new RemoveOperationControl();
+        removeOperationControl.Dock = DockStyle.Fill;
+        removeOperationControl.OperationRemoved += (s, e) =>
+        {
+            UpdateStatus("Operation removed successfully - lists refreshed");
+        };
+        removeOperationPanel.Controls.Add(removeOperationControl);
+
+        // Initialize Add Location Control
+        var addLocationControl = new AddLocationControl();
+        addLocationControl.Dock = DockStyle.Fill;
+        addLocationControl.LocationAdded += (s, e) =>
+        {
+            UpdateStatus("Location added successfully - lists refreshed");
+        };
+        addLocationPanel.Controls.Add(addLocationControl);
+
+        // Initialize Edit Location Control
+        var editLocationControl = new EditLocationControl();
+        editLocationControl.Dock = DockStyle.Fill;
+        editLocationControl.LocationUpdated += (s, e) =>
+        {
+            UpdateStatus("Location updated successfully - lists refreshed");
+        };
+        editLocationPanel.Controls.Add(editLocationControl);
+
+        // Initialize Remove Location Control
+        var removeLocationControl = new RemoveLocationControl();
+        removeLocationControl.Dock = DockStyle.Fill;
+        removeLocationControl.LocationRemoved += (s, e) =>
+        {
+            UpdateStatus("Location removed successfully - lists refreshed");
+        };
+        removeLocationPanel.Controls.Add(removeLocationControl);
+
+        // Note: Item Type controls will be added when created
     }
 
     private void ThemeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
