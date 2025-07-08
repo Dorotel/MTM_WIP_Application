@@ -60,6 +60,48 @@ public partial class SettingsForm : Form
         InitializeForm();
     }
 
+    private void InitializeCategoryTreeView()
+    {
+        categoryTreeView.Nodes.Clear();
+        
+        // Add root nodes
+        var databaseNode = categoryTreeView.Nodes.Add("Database", "Database");
+        
+        // Add Part Numbers category
+        var partNumbersNode = categoryTreeView.Nodes.Add("Part Numbers", "Part Numbers");
+        partNumbersNode.Nodes.Add("Add Part Number", "Add Part Number");
+        partNumbersNode.Nodes.Add("Edit Part Number", "Edit Part Number");
+        partNumbersNode.Nodes.Add("Remove Part Number", "Remove Part Number");
+        
+        // Add Operations category
+        var operationsNode = categoryTreeView.Nodes.Add("Operations", "Operations");
+        operationsNode.Nodes.Add("Add Operation", "Add Operation");
+        operationsNode.Nodes.Add("Edit Operation", "Edit Operation");
+        operationsNode.Nodes.Add("Remove Operation", "Remove Operation");
+        
+        // Add Locations category
+        var locationsNode = categoryTreeView.Nodes.Add("Locations", "Locations");
+        locationsNode.Nodes.Add("Add Location", "Add Location");
+        locationsNode.Nodes.Add("Edit Location", "Edit Location");
+        locationsNode.Nodes.Add("Remove Location", "Remove Location");
+        
+        // Add Item Types category
+        var itemTypesNode = categoryTreeView.Nodes.Add("Item Types", "Item Types");
+        itemTypesNode.Nodes.Add("Add Item Type", "Add Item Type");
+        itemTypesNode.Nodes.Add("Edit Item Type", "Edit Item Type");
+        itemTypesNode.Nodes.Add("Remove Item Type", "Remove Item Type");
+        
+        // Add other root nodes
+        var themeNode = categoryTreeView.Nodes.Add("Theme", "Theme");
+        var shortcutsNode = categoryTreeView.Nodes.Add("Shortcuts", "Shortcuts");
+        var aboutNode = categoryTreeView.Nodes.Add("About", "About");
+        
+        // Expand all nodes by default
+        categoryTreeView.ExpandAll();
+        
+        // Select Database node by default
+        categoryTreeView.SelectedNode = databaseNode;
+
     private void InitializeUserControls()
     {
         // Initialize Add Part Control
@@ -205,7 +247,7 @@ public partial class SettingsForm : Form
         }
 
         // Set default selection
-        categoryListBox.SelectedIndex = 0;
+        InitializeCategoryTreeView();
         ShowPanel("Database");
 
         // Load current settings
@@ -619,12 +661,20 @@ public partial class SettingsForm : Form
         }
     }
 
-    private async void categoryListBox_SelectedIndexChanged(object sender, EventArgs e)
+    private async void CategoryTreeView_AfterSelect(object sender, TreeViewEventArgs e)
     {
-        if (categoryListBox.SelectedItem == null)
+        if (e.Node == null || string.IsNullOrEmpty(e.Node.Name))
             return;
 
-        var selected = categoryListBox.SelectedItem.ToString()!;
+        var selected = e.Node.Name;
+        
+        // Only show panels for leaf nodes (not category nodes)
+        if (e.Node.Nodes.Count > 0)
+        {
+            // This is a category node, don't show a panel
+            return;
+        }
+
         ShowLoadingProgress($"Loading {selected} settings...");
         UpdateLoadingProgress(0, $"Loading {selected} settings...");
 

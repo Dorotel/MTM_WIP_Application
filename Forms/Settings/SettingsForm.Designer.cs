@@ -97,7 +97,7 @@
             // 
             // splitContainer1.Panel1
             // 
-            splitContainer1.Panel1.Controls.Add(categoryListBox);
+            splitContainer1.Panel1.Controls.Add(categoryTreeView);
             splitContainer1.Panel1MinSize = 200;
             // 
             // splitContainer1.Panel2
@@ -108,23 +108,14 @@
             splitContainer1.SplitterDistance = 200;
             splitContainer1.TabIndex = 0;
             // 
-            // categoryListBox
+            // categoryTreeView
             // 
-            categoryListBox.Dock = DockStyle.Fill;
-            categoryListBox.FormattingEnabled = true;
-            categoryListBox.ItemHeight = 15;
-            categoryListBox.Items.AddRange(new object[] { 
-                "Database", 
-                "Add Part Number", "Edit Part Number", "Remove Part Number", 
-                "Add Operation", "Edit Operation", "Remove Operation",
-                "Add Location", "Edit Location", "Remove Location",
-                "Add Item Type", "Edit Item Type", "Remove Item Type",
-                "Theme", "Shortcuts", "About" });
-            categoryListBox.Location = new Point(0, 0);
-            categoryListBox.Name = "categoryListBox";
-            categoryListBox.Size = new Size(200, 450);
-            categoryListBox.TabIndex = 0;
-            categoryListBox.SelectedIndexChanged += categoryListBox_SelectedIndexChanged;
+            categoryTreeView.Dock = DockStyle.Fill;
+            categoryTreeView.Location = new Point(0, 0);
+            categoryTreeView.Name = "categoryTreeView";
+            categoryTreeView.Size = new Size(200, 450);
+            categoryTreeView.TabIndex = 0;
+            categoryTreeView.AfterSelect += CategoryTreeView_AfterSelect;
             // 
             // settingsPanel
             // 
@@ -579,7 +570,7 @@
         #endregion
 
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.ListBox categoryListBox;
+        private System.Windows.Forms.TreeView categoryTreeView;
         private System.Windows.Forms.Panel settingsPanel;
         private System.Windows.Forms.Panel bottomPanel;
         private System.Windows.Forms.Label statusLabel;
