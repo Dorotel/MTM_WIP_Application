@@ -24,6 +24,11 @@ public partial class SettingsForm : Form
         _settingsPanels = new Dictionary<string, Panel>
         {
             ["Database"] = databasePanel,
+            // --- User panels ---
+            ["Add User"] = addUserPanel,
+            ["Edit User"] = editUserPanel,
+            ["Delete User"] = deleteUserPanel,
+            // --- Existing panels ---
             ["Add Part Number"] = addPartPanel,
             ["Edit Part Number"] = editPartPanel,
             ["Remove Part Number"] = removePartPanel,
@@ -67,6 +72,12 @@ public partial class SettingsForm : Form
         // Add root nodes
         var databaseNode = categoryTreeView.Nodes.Add("Database", "Database");
 
+        // Add Users category before Part Numbers
+        var usersNode = categoryTreeView.Nodes.Add("Users", "Users");
+        usersNode.Nodes.Add("Add User", "Add User");
+        usersNode.Nodes.Add("Edit User", "Edit User");
+        usersNode.Nodes.Add("Delete User", "Delete User");
+
         // Add Part Numbers category
         var partNumbersNode = categoryTreeView.Nodes.Add("Part Numbers", "Part Numbers");
         partNumbersNode.Nodes.Add("Add Part Number", "Add Part Number");
@@ -96,8 +107,8 @@ public partial class SettingsForm : Form
         var shortcutsNode = categoryTreeView.Nodes.Add("Shortcuts", "Shortcuts");
         var aboutNode = categoryTreeView.Nodes.Add("About", "About");
 
-        // Expand all nodes by default
-        categoryTreeView.ExpandAll();
+        // Collapse all nodes by default
+        categoryTreeView.CollapseAll();
 
         // Select Database node by default
         categoryTreeView.SelectedNode = databaseNode;
@@ -105,37 +116,61 @@ public partial class SettingsForm : Form
 
     private void InitializeUserControls()
     {
-        // Initialize Add Part Control
+        // --- Add User Control ---
+        var addUserPanel = _settingsPanels["Add User"];
+        var addUserControl = new AddUserControl();
+        addUserControl.Dock = DockStyle.Fill;
+        addUserControl.UserAdded += (s, e) =>
+        {
+            UpdateStatus("User added successfully.");
+        };
+        addUserPanel.Controls.Add(addUserControl);
+
+        // --- Edit User Control ---
+        var editUserPanel = _settingsPanels["Edit User"];
+        var editUserControl = new EditUserControl();
+        editUserControl.Dock = DockStyle.Fill;
+        editUserControl.UserEdited += (s, e) =>
+        {
+            UpdateStatus("User updated successfully.");
+        };
+        editUserPanel.Controls.Add(editUserControl);
+
+        // --- Remove User Control ---
+        var deleteUserPanel = _settingsPanels["Delete User"];
+        var removeUserControl = new RemoveUserControl();
+        removeUserControl.Dock = DockStyle.Fill;
+        removeUserControl.UserRemoved += (s, e) =>
+        {
+            UpdateStatus("User removed successfully.");
+        };
+        deleteUserPanel.Controls.Add(removeUserControl);
+
+        // --- Existing controls initialization ---
         var addPartControl = new AddPartControl();
         addPartControl.Dock = DockStyle.Fill;
         addPartControl.PartAdded += (s, e) =>
         {
-            // Refresh other controls when a part is added
             UpdateStatus("Part added successfully - lists refreshed");
         };
         addPartPanel.Controls.Add(addPartControl);
 
-        // Initialize Edit Part Control
         var editPartControl = new EditPartControl();
         editPartControl.Dock = DockStyle.Fill;
         editPartControl.PartUpdated += (s, e) =>
         {
-            // Refresh other controls when a part is updated
             UpdateStatus("Part updated successfully - lists refreshed");
         };
         editPartPanel.Controls.Add(editPartControl);
 
-        // Initialize Remove Part Control
         var removePartControl = new RemovePartControl();
         removePartControl.Dock = DockStyle.Fill;
         removePartControl.PartRemoved += (s, e) =>
         {
-            // Refresh other controls when a part is removed
             UpdateStatus("Part removed successfully - lists refreshed");
         };
         removePartPanel.Controls.Add(removePartControl);
 
-        // Initialize Add Operation Control
         var addOperationControl = new AddOperationControl();
         addOperationControl.Dock = DockStyle.Fill;
         addOperationControl.OperationAdded += (s, e) =>
@@ -144,7 +179,6 @@ public partial class SettingsForm : Form
         };
         addOperationPanel.Controls.Add(addOperationControl);
 
-        // Initialize Edit Operation Control
         var editOperationControl = new EditOperationControl();
         editOperationControl.Dock = DockStyle.Fill;
         editOperationControl.OperationUpdated += (s, e) =>
@@ -153,7 +187,6 @@ public partial class SettingsForm : Form
         };
         editOperationPanel.Controls.Add(editOperationControl);
 
-        // Initialize Remove Operation Control
         var removeOperationControl = new RemoveOperationControl();
         removeOperationControl.Dock = DockStyle.Fill;
         removeOperationControl.OperationRemoved += (s, e) =>
@@ -162,7 +195,6 @@ public partial class SettingsForm : Form
         };
         removeOperationPanel.Controls.Add(removeOperationControl);
 
-        // Initialize Add Location Control
         var addLocationControl = new AddLocationControl();
         addLocationControl.Dock = DockStyle.Fill;
         addLocationControl.LocationAdded += (s, e) =>
@@ -171,7 +203,6 @@ public partial class SettingsForm : Form
         };
         addLocationPanel.Controls.Add(addLocationControl);
 
-        // Initialize Edit Location Control
         var editLocationControl = new EditLocationControl();
         editLocationControl.Dock = DockStyle.Fill;
         editLocationControl.LocationUpdated += (s, e) =>
@@ -180,7 +211,6 @@ public partial class SettingsForm : Form
         };
         editLocationPanel.Controls.Add(editLocationControl);
 
-        // Initialize Remove Location Control
         var removeLocationControl = new RemoveLocationControl();
         removeLocationControl.Dock = DockStyle.Fill;
         removeLocationControl.LocationRemoved += (s, e) =>
@@ -189,7 +219,6 @@ public partial class SettingsForm : Form
         };
         removeLocationPanel.Controls.Add(removeLocationControl);
 
-        // Initialize Add Item Type Control
         var addItemTypeControl = new AddItemTypeControl();
         addItemTypeControl.Dock = DockStyle.Fill;
         addItemTypeControl.ItemTypeAdded += (s, e) =>
@@ -198,7 +227,6 @@ public partial class SettingsForm : Form
         };
         addItemTypePanel.Controls.Add(addItemTypeControl);
 
-        // Initialize Edit Item Type Control
         var editItemTypeControl = new EditItemTypeControl();
         editItemTypeControl.Dock = DockStyle.Fill;
         editItemTypeControl.ItemTypeUpdated += (s, e) =>
@@ -207,7 +235,6 @@ public partial class SettingsForm : Form
         };
         editItemTypePanel.Controls.Add(editItemTypeControl);
 
-        // Initialize Remove Item Type Control
         var removeItemTypeControl = new RemoveItemTypeControl();
         removeItemTypeControl.Dock = DockStyle.Fill;
         removeItemTypeControl.ItemTypeRemoved += (s, e) =>
@@ -721,6 +748,19 @@ public partial class SettingsForm : Form
                 UpdateLoadingProgress(20, "Loading about info...");
                 LoadAboutInfo();
                 UpdateLoadingProgress(80, "About info loaded");
+                break;
+            // --- Add User logic ---
+            case "Add User":
+                UpdateLoadingProgress(50, "Loading Add User...");
+                await Task.Delay(200);
+                UpdateLoadingProgress(80, "Add User loaded");
+                break;
+            // --- Placeholders for Edit/Delete User ---
+            case "Edit User":
+            case "Delete User":
+                UpdateLoadingProgress(50, $"Loading {panelName}...");
+                await Task.Delay(200);
+                UpdateLoadingProgress(80, $"{panelName} loaded");
                 break;
             default:
                 // For Add/Edit/Remove Part panels, just a short delay for effect

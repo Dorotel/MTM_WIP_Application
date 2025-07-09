@@ -186,13 +186,6 @@ internal static class Dao_User
         }
     }
 
-    internal static async Task SetUserFullNameAsync(string user, string value, bool useAsync = false)
-    {
-        Debug.WriteLine($"[Dao_User] Entering SetUserFullNameAsync(user={user}, value={value}, useAsync={useAsync})");
-        Model_Users.FullName = value;
-        await SetUsr_userFieldAsync("Full Name", user, value, useAsync);
-    }
-
     public static async Task<string> GetSettingsJsonAsync(string field, string user, bool useAsync)
     {
         Debug.WriteLine($"[Dao_User] Entering GetSettingsJsonAsync(field={field}, user={user}, useAsync={useAsync})");
@@ -398,13 +391,16 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
     }
 
     internal static async Task UpdateUserAsync(
-        string user, string fullName, string shift, bool vitsUser, string pin,
-        string lastShownVersion, string hideChangeLog, string themeName, int themeFontSize,
-        string visualUserName, string visualPassword, string wipServerAddress, string database, string wipServerPort,
+        string user,
+        string fullName,
+        string shift,
+        string pin,
+        string visualUserName,
+        string visualPassword,
         bool useAsync = false)
     {
         Debug.WriteLine(
-            $"[Dao_User] Entering UpdateUserAsync(user={user}, fullName={fullName}, shift={shift}, vitsUser={vitsUser}, pin={pin}, lastShownVersion={lastShownVersion}, hideChangeLog={hideChangeLog}, themeName={themeName}, themeFontSize={themeFontSize}, visualUserName={visualUserName}, visualPassword={visualPassword}, database = {database} ,wipServerAddress={wipServerAddress}, wipServerPort={wipServerPort}, useAsync={useAsync})");
+            $"[Dao_User] Entering UpdateUserAsync(user={user}, fullName={fullName}, shift={shift}, pin={pin}, visualUserName={visualUserName}, visualPassword={visualPassword}, useAsync={useAsync})");
         try
         {
             var parameters = new Dictionary<string, object>
@@ -412,17 +408,9 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
                 ["p_User"] = user,
                 ["p_FullName"] = fullName,
                 ["p_Shift"] = shift,
-                ["p_VitsUser"] = vitsUser,
                 ["p_Pin"] = pin,
-                ["p_LastShownVersion"] = lastShownVersion,
-                ["p_HideChangeLog"] = hideChangeLog,
-                ["p_Theme_Name"] = themeName,
-                ["p_Theme_FontSize"] = themeFontSize,
                 ["p_VisualUserName"] = visualUserName,
-                ["p_VisualPassword"] = visualPassword,
-                ["p_WipServerAddress"] = wipServerAddress,
-                ["p_WIPDatabase"] = database,
-                ["p_WipServerPort"] = wipServerPort
+                ["p_VisualPassword"] = visualPassword
             };
             await HelperDatabaseCore.ExecuteNonQuery(
                 "usr_users_Update_User",
@@ -530,190 +518,7 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
 
     #endregion
 
-    #region Privileges
-
-    internal static async Task GrantFullPrivilegesAsync(string user, bool useAsync = false)
-    {
-        Debug.WriteLine($"[Dao_User] Entering GrantFullPrivilegesAsync(user={user}, useAsync={useAsync})");
-        await GrantPrivilegeAsync("usr_users_Grant_Full", user, useAsync);
-    }
-
-    internal static async Task GrantReadOnlyPrivilegesAsync(string user, bool useAsync = false)
-    {
-        Debug.WriteLine($"[Dao_User] Entering GrantReadOnlyPrivilegesAsync(user={user}, useAsync={useAsync})");
-        await GrantPrivilegeAsync("usr_users_Grant_ReadOnly", user, useAsync);
-    }
-
-    internal static async Task GrantReadWritePrivilegesAsync(string user, bool useAsync = false)
-    {
-        Debug.WriteLine($"[Dao_User] Entering GrantReadWritePrivilegesAsync(user={user}, useAsync={useAsync})");
-        await GrantPrivilegeAsync("usr_users_Grant_ReadWrite", user, useAsync);
-    }
-
-    private static async Task GrantPrivilegeAsync(string procName, string user, bool useAsync)
-    {
-        Debug.WriteLine(
-            $"[Dao_User] Entering GrantPrivilegeAsync(procName={procName}, user={user}, useAsync={useAsync})");
-        try
-        {
-            var parameters = new Dictionary<string, object>
-            {
-                ["p_User"] = user
-            };
-            await HelperDatabaseCore.ExecuteNonQuery(
-                procName,
-                parameters, useAsync, CommandType.StoredProcedure);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[Dao_User] Exception in GrantPrivilegeAsync: {ex}");
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
-        }
-    }
-
-    #endregion
-
     #region User UI Settings
-
-    public static async Task SaveUserUiSettingsAsync(string userId, Model_UserUiColors colors)
-    {
-        Debug.WriteLine(
-            $"[Dao_User] Entering SaveUserUiSettingsAsync(userId={userId}, colors={JsonSerializer.Serialize(colors)})");
-        try
-        {
-            using var conn = new MySqlConnection(Model_AppVariables.ConnectionString);
-            await conn.OpenAsync();
-
-            using var cmd = new MySqlCommand("usr_ui_settings_Save", conn)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
-            cmd.Parameters.AddWithValue("p_UserId", userId);
-            cmd.Parameters.AddWithValue("p_SettingsJson", JsonSerializer.Serialize(colors));
-
-            var statusParam = new MySqlParameter("p_Status", MySqlDbType.Int32)
-            {
-                Direction = ParameterDirection.Output
-            };
-            cmd.Parameters.Add(statusParam);
-
-            var errorMsgParam = new MySqlParameter("p_ErrorMsg", MySqlDbType.VarChar, 255)
-            {
-                Direction = ParameterDirection.Output
-            };
-            cmd.Parameters.Add(errorMsgParam);
-
-            await cmd.ExecuteNonQueryAsync();
-
-            var status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
-            var errorMsg = errorMsgParam.Value?.ToString() ?? "";
-
-            Debug.WriteLine($"[Dao_User] SaveUserUiSettingsAsync status: {status}, errorMsg: {errorMsg}");
-
-            if (status != 0)
-                throw new Exception(errorMsg);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[Dao_User] Exception in SaveUserUiSettingsAsync: {ex}");
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true);
-        }
-    }
-
-    public static async Task UpdateUserUiSettingsAsync(string userId, Model_UserUiColors colors)
-    {
-        Debug.WriteLine(
-            $"[Dao_User] Entering UpdateUserUiSettingsAsync(userId={userId}, colors={JsonSerializer.Serialize(colors)})");
-        try
-        {
-            using var conn = new MySqlConnection(Model_AppVariables.ConnectionString);
-            await conn.OpenAsync();
-
-            using var cmd = new MySqlCommand("usr_ui_settings_Update", conn)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
-            cmd.Parameters.AddWithValue("p_UserId", userId);
-            cmd.Parameters.AddWithValue("p_SettingsJson", JsonSerializer.Serialize(colors));
-
-            var statusParam = new MySqlParameter("p_Status", MySqlDbType.Int32)
-            {
-                Direction = ParameterDirection.Output
-            };
-            cmd.Parameters.Add(statusParam);
-
-            var errorMsgParam = new MySqlParameter("p_ErrorMsg", MySqlDbType.VarChar, 255)
-            {
-                Direction = ParameterDirection.Output
-            };
-            cmd.Parameters.Add(errorMsgParam);
-
-            await cmd.ExecuteNonQueryAsync();
-
-            var status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
-            var errorMsg = errorMsgParam.Value?.ToString() ?? "";
-
-            Debug.WriteLine($"[Dao_User] UpdateUserUiSettingsAsync status: {status}, errorMsg: {errorMsg}");
-
-            if (status != 0)
-                throw new Exception(errorMsg);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[Dao_User] Exception in UpdateUserUiSettingsAsync: {ex}");
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true);
-        }
-    }
-
-    public static async Task DeleteUserUiSettingsAsync(string userId)
-    {
-        Debug.WriteLine($"[Dao_User] Entering DeleteUserUiSettingsAsync(userId={userId})");
-        try
-        {
-            using var conn = new MySqlConnection(Model_AppVariables.ConnectionString);
-            await conn.OpenAsync();
-
-            using var cmd = new MySqlCommand("usr_ui_settings_Delete", conn)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
-            cmd.Parameters.AddWithValue("p_UserId", userId);
-
-            var statusParam = new MySqlParameter("p_Status", MySqlDbType.Int32)
-            {
-                Direction = ParameterDirection.Output
-            };
-            cmd.Parameters.Add(statusParam);
-
-            var errorMsgParam = new MySqlParameter("p_ErrorMsg", MySqlDbType.VarChar, 255)
-            {
-                Direction = ParameterDirection.Output
-            };
-            cmd.Parameters.Add(errorMsgParam);
-
-            await cmd.ExecuteNonQueryAsync();
-
-            var status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
-            var errorMsg = errorMsgParam.Value?.ToString() ?? "";
-
-            Debug.WriteLine($"[Dao_User] DeleteUserUiSettingsAsync status: {status}, errorMsg: {errorMsg}");
-
-            if (status != 0)
-                throw new Exception(errorMsg);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[Dao_User] Exception in DeleteUserUiSettingsAsync: {ex}");
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true);
-        }
-    }
 
     internal static async Task<string> GetShortcutsJsonAsync(string userId)
     {
@@ -797,11 +602,121 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
         }
     }
 
+    #endregion
+
+    #region User Roles
+
+    internal static async Task AddUserRoleAsync(int userId, int roleId, string assignedBy, bool useAsync = false)
+    {
+        Debug.WriteLine($"[Dao_User] Entering AddUserRoleAsync(userId={userId}, roleId={roleId}, assignedBy={assignedBy}, useAsync={useAsync})");
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["p_UserID"] = userId,
+                ["p_RoleID"] = roleId,
+                ["p_AssignedBy"] = assignedBy
+            };
+            await HelperDatabaseCore.ExecuteNonQuery(
+                "sys_user_roles_Add",
+                parameters, useAsync, CommandType.StoredProcedure);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Dao_User] Exception in AddUserRoleAsync: {ex}");
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
 
     /// <summary>
-    /// Sets the Theme_Name value in the SettingsJson column in usr_ui_settings for the given user.
+    /// Gets the RoleID for a user by their UserID using sys_user_roles and sys_roles_Get_ById.
+    /// Returns 0 if not found.
     /// </summary>
+    internal static async Task<int> GetUserRoleIdAsync(int userId, bool useAsync = false)
+    {
+        Debug.WriteLine($"[Dao_User] Entering GetUserRoleIdAsync(userId={userId}, useAsync={useAsync})");
+        try
+        {
+            // First, get the RoleID from sys_user_roles
+            var parameters = new Dictionary<string, object>
+            {
+                ["@UserID"] = userId
+            };
+            var result = await HelperDatabaseCore.ExecuteDataTable(
+                "SELECT RoleID FROM sys_user_roles WHERE UserID = @UserID LIMIT 1",
+                parameters, useAsync, CommandType.Text);
 
+            if (result.Rows.Count > 0 && int.TryParse(result.Rows[0]["RoleID"]?.ToString(), out int roleId))
+            {
+                var roleInfo = await HelperDatabaseCore.ExecuteDataTable(
+                     "sys_roles_Get_ById",
+                     new Dictionary<string, object> { ["p_ID"] = roleId },
+                     useAsync, CommandType.StoredProcedure);
+                return roleId;
+            }
+
+            return 0; // No role found
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Dao_User] Exception in GetUserRoleIdAsync: {ex}");
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            return 0;
+        }
+    }
+
+    /// <summary>
+    /// Sets the user's role by removing all roles and adding the new one using sys_user_roles_Update.
+    /// </summary>
+    internal static async Task SetUserRoleAsync(int userId, int newRoleId, string assignedBy, bool useAsync = false)
+    {
+        Debug.WriteLine($"[Dao_User] Entering SetUserRoleAsync(userId={userId}, newRoleId={newRoleId}, assignedBy={assignedBy}, useAsync={useAsync})");
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["p_UserID"] = userId,
+                ["p_NewRoleID"] = newRoleId,
+                ["p_AssignedBy"] = assignedBy
+            };
+            await HelperDatabaseCore.ExecuteNonQuery(
+                "sys_user_roles_Update",
+                parameters, useAsync, CommandType.StoredProcedure);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Dao_User] Exception in SetUserRoleAsync: {ex}");
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    /// <summary>
+    /// Removes a specific role from a user using sys_user_roles_Delete.
+    /// </summary>
+    internal static async Task RemoveUserRoleAsync(int userId, int roleId, bool useAsync = false)
+    {
+        Debug.WriteLine($"[Dao_User] Entering RemoveUserRoleAsync(userId={userId}, roleId={roleId}, useAsync={useAsync})");
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["p_UserID"] = userId,
+                ["p_RoleID"] = roleId
+            };
+            await HelperDatabaseCore.ExecuteNonQuery(
+                "sys_user_roles_Delete",
+                parameters, useAsync, CommandType.StoredProcedure);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Dao_User] Exception in RemoveUserRoleAsync: {ex}");
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
     #endregion
 }
 

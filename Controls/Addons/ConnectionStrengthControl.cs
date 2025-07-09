@@ -158,7 +158,7 @@ public partial class ConnectionStrengthControl : UserControl
     }
 
     // Call this method from MainForm after adding to the SplitContainer.Panel2
-    public void SyncBackgroundWithParent()
+    private void SyncBackgroundWithParent()
     {
         if (Parent != null)
             BackColor = Parent.BackColor;

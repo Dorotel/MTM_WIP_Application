@@ -23,8 +23,7 @@
         #region Windows Form Designer generated code
 
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        /// Required method for Designer support - do not modify the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
@@ -72,6 +71,9 @@
             addItemTypePanel = new Panel();
             editItemTypePanel = new Panel();
             removeItemTypePanel = new Panel();
+            addUserPanel = new Panel();
+            editUserPanel = new Panel();
+            deleteUserPanel = new Panel();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -517,11 +519,41 @@
             removeItemTypePanel.TabIndex = 17;
             removeItemTypePanel.Visible = false;
             // 
+            // addUserPanel
+            // 
+            addUserPanel.Dock = DockStyle.Fill;
+            addUserPanel.Location = new Point(0, 0);
+            addUserPanel.Name = "addUserPanel";
+            addUserPanel.Size = new Size(800, 450);
+            addUserPanel.TabIndex = 18;
+            addUserPanel.Visible = false;
+            // 
+            // editUserPanel
+            // 
+            editUserPanel.Dock = DockStyle.Fill;
+            editUserPanel.Location = new Point(0, 0);
+            editUserPanel.Name = "editUserPanel";
+            editUserPanel.Size = new Size(800, 450);
+            editUserPanel.TabIndex = 19;
+            editUserPanel.Visible = false;
+            // 
+            // deleteUserPanel
+            // 
+            deleteUserPanel.Dock = DockStyle.Fill;
+            deleteUserPanel.Location = new Point(0, 0);
+            deleteUserPanel.Name = "deleteUserPanel";
+            deleteUserPanel.Size = new Size(800, 450);
+            deleteUserPanel.TabIndex = 20;
+            deleteUserPanel.Visible = false;
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(deleteUserPanel);
+            Controls.Add(editUserPanel);
+            Controls.Add(addUserPanel);
             Controls.Add(removeItemTypePanel);
             Controls.Add(editItemTypePanel);
             Controls.Add(addItemTypePanel);
@@ -613,5 +645,8 @@
         private System.Windows.Forms.Panel addItemTypePanel;
         private System.Windows.Forms.Panel editItemTypePanel;
         private System.Windows.Forms.Panel removeItemTypePanel;
+        private System.Windows.Forms.Panel addUserPanel;
+        private System.Windows.Forms.Panel editUserPanel;
+        private System.Windows.Forms.Panel deleteUserPanel;
     }
 }
