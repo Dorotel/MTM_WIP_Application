@@ -890,7 +890,208 @@ public static class Core_Themes
                 }
             }
 
-            // TODO: Add owner draw for ListBox, ComboBox, other controls as needed
+            // ListBox owner-draw implementation
+            if (control is ListBox listBox)
+            {
+                if (listBox.DrawMode != DrawMode.OwnerDrawFixed)
+                    listBox.DrawMode = DrawMode.OwnerDrawFixed;
+
+                listBox.DrawItem -= ListBox_DrawItem;
+                listBox.DrawItem += ListBox_DrawItem;
+
+                void ListBox_DrawItem(object? sender, DrawItemEventArgs e)
+                {
+                    if (e.Index < 0) return;
+                    
+                    var item = listBox.Items[e.Index];
+                    var selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
+                    var focused = (e.State & DrawItemState.Focus) == DrawItemState.Focus;
+
+                    var backColor = selected
+                        ? colors.ListBoxSelectionBackColor ?? colors.AccentColor ?? Color.Blue
+                        : colors.ListBoxBackColor ?? colors.ControlBackColor ?? Color.White;
+                    var foreColor = selected
+                        ? colors.ListBoxSelectionForeColor ?? Color.White
+                        : colors.ListBoxForeColor ?? colors.ControlForeColor ?? Color.Black;
+
+                    using (var backBrush = new SolidBrush(backColor))
+                    {
+                        e.Graphics.FillRectangle(backBrush, e.Bounds);
+                    }
+
+                    // Draw border for the entire ListBox
+                    if (colors.ListBoxBorderColor.HasValue)
+                    {
+                        using (var borderPen = new Pen(colors.ListBoxBorderColor.Value, 1))
+                        {
+                            var borderRect = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width - 1, e.Bounds.Height - 1);
+                            e.Graphics.DrawRectangle(borderPen, borderRect);
+                        }
+                    }
+
+                    // Draw text
+                    if (item != null)
+                    {
+                        TextRenderer.DrawText(e.Graphics, item.ToString(), listBox.Font, e.Bounds, foreColor,
+                            TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                    }
+
+                    // Draw focus rectangle if focused
+                    if (focused)
+                    {
+                        ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
+                    }
+                }
+            }
+
+            // ComboBox owner-draw implementation
+            if (control is ComboBox comboBox)
+            {
+                if (comboBox.DrawMode != DrawMode.OwnerDrawFixed)
+                    comboBox.DrawMode = DrawMode.OwnerDrawFixed;
+
+                comboBox.DrawItem -= ComboBox_DrawItem;
+                comboBox.DrawItem += ComboBox_DrawItem;
+
+                void ComboBox_DrawItem(object? sender, DrawItemEventArgs e)
+                {
+                    if (e.Index < 0) return;
+                    
+                    var item = comboBox.Items[e.Index];
+                    var selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
+                    var focused = (e.State & DrawItemState.Focus) == DrawItemState.Focus;
+
+                    var backColor = selected
+                        ? colors.ComboBoxSelectionBackColor ?? colors.AccentColor ?? Color.Blue
+                        : colors.ComboBoxDropDownBackColor ?? colors.ComboBoxBackColor ?? colors.ControlBackColor ?? Color.White;
+                    var foreColor = selected
+                        ? colors.ComboBoxSelectionForeColor ?? Color.White
+                        : colors.ComboBoxDropDownForeColor ?? colors.ComboBoxForeColor ?? colors.ControlForeColor ?? Color.Black;
+
+                    using (var backBrush = new SolidBrush(backColor))
+                    {
+                        e.Graphics.FillRectangle(backBrush, e.Bounds);
+                    }
+
+                    // Draw border for dropdown items
+                    if (colors.ComboBoxBorderColor.HasValue)
+                    {
+                        using (var borderPen = new Pen(colors.ComboBoxBorderColor.Value, 1))
+                        {
+                            var borderRect = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width - 1, e.Bounds.Height - 1);
+                            e.Graphics.DrawRectangle(borderPen, borderRect);
+                        }
+                    }
+
+                    // Draw text
+                    if (item != null)
+                    {
+                        TextRenderer.DrawText(e.Graphics, item.ToString(), comboBox.Font, e.Bounds, foreColor,
+                            TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                    }
+
+                    // Draw focus rectangle if focused
+                    if (focused)
+                    {
+                        ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
+                    }
+                }
+            }
+
+            // CheckedListBox owner-draw implementation
+            if (control is CheckedListBox checkedListBox)
+            {
+                if (checkedListBox.DrawMode != DrawMode.OwnerDrawFixed)
+                    checkedListBox.DrawMode = DrawMode.OwnerDrawFixed;
+
+                checkedListBox.DrawItem -= CheckedListBox_DrawItem;
+                checkedListBox.DrawItem += CheckedListBox_DrawItem;
+
+                void CheckedListBox_DrawItem(object? sender, DrawItemEventArgs e)
+                {
+                    if (e.Index < 0) return;
+                    
+                    var item = checkedListBox.Items[e.Index];
+                    var selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
+                    var focused = (e.State & DrawItemState.Focus) == DrawItemState.Focus;
+                    var isChecked = checkedListBox.GetItemChecked(e.Index);
+
+                    var backColor = selected
+                        ? colors.ListBoxSelectionBackColor ?? colors.AccentColor ?? Color.Blue
+                        : colors.CheckedListBoxBackColor ?? colors.ControlBackColor ?? Color.White;
+                    var foreColor = selected
+                        ? colors.ListBoxSelectionForeColor ?? Color.White
+                        : colors.CheckedListBoxForeColor ?? colors.ControlForeColor ?? Color.Black;
+
+                    using (var backBrush = new SolidBrush(backColor))
+                    {
+                        e.Graphics.FillRectangle(backBrush, e.Bounds);
+                    }
+
+                    // Draw border
+                    if (colors.CheckedListBoxBorderColor.HasValue)
+                    {
+                        using (var borderPen = new Pen(colors.CheckedListBoxBorderColor.Value, 1))
+                        {
+                            var borderRect = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width - 1, e.Bounds.Height - 1);
+                            e.Graphics.DrawRectangle(borderPen, borderRect);
+                        }
+                    }
+
+                    // Draw checkbox
+                    var checkBoxRect = new Rectangle(e.Bounds.X + 2, e.Bounds.Y + 2, 13, 13);
+                    var checkBoxBackColor = colors.CheckedListBoxCheckBackColor ?? colors.ControlBackColor ?? Color.White;
+                    var checkBoxForeColor = colors.CheckedListBoxCheckForeColor ?? colors.AccentColor ?? Color.Blue;
+                    
+                    ControlPaint.DrawCheckBox(e.Graphics, checkBoxRect, 
+                        isChecked ? ButtonState.Checked : ButtonState.Normal);
+
+                    // Draw text
+                    if (item != null)
+                    {
+                        var textRect = new Rectangle(e.Bounds.X + 20, e.Bounds.Y, e.Bounds.Width - 20, e.Bounds.Height);
+                        TextRenderer.DrawText(e.Graphics, item.ToString(), checkedListBox.Font, textRect, foreColor,
+                            TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                    }
+
+                    // Draw focus rectangle if focused
+                    if (focused)
+                    {
+                        ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
+                    }
+                }
+            }
+
+            // Border color support for other controls
+            ApplyBorderColorToControl(control, colors);
+
+            // TreeView and ListView selection highlighting
+            if (control is TreeView treeView)
+            {
+                ApplyTreeViewSelectionTheming(treeView, colors);
+            }
+            else if (control is ListView listView)
+            {
+                ApplyListViewSelectionTheming(listView, colors);
+            }
+
+            // MenuStrip, StatusStrip, ToolStrip special handling
+            if (control is MenuStrip menuStrip)
+            {
+                ApplyMenuStripTheming(menuStrip, colors);
+            }
+            else if (control is StatusStrip statusStrip)
+            {
+                ApplyStatusStripTheming(statusStrip, colors);
+            }
+            else if (control is ToolStrip toolStrip)
+            {
+                ApplyToolStripTheming(toolStrip, colors);
+            }
+            else if (control is ContextMenuStrip contextMenuStrip)
+            {
+                ApplyContextMenuStripTheming(contextMenuStrip, colors);
+            }
         }
 
         // Attach link label hover color
@@ -917,6 +1118,275 @@ public static class Core_Themes
         public static void ApplyDataGridViewBorderColor(DataGridView dgv, Color borderColor)
         {
             dgv.GridColor = borderColor;
+        }
+
+        // Apply border colors to various controls
+        private static void ApplyBorderColorToControl(Control control, Model_UserUiColors colors)
+        {
+            // For controls that support custom border painting, we'll use Paint events
+            switch (control)
+            {
+                case TreeView treeView when colors.TreeViewBorderColor.HasValue:
+                    ApplyCustomBorderPaint(treeView, colors.TreeViewBorderColor.Value);
+                    break;
+                case ListView listView when colors.ListViewBorderColor.HasValue:
+                    ApplyCustomBorderPaint(listView, colors.ListViewBorderColor.Value);
+                    break;
+                case GroupBox groupBox when colors.GroupBoxBorderColor.HasValue:
+                    ApplyCustomBorderPaint(groupBox, colors.GroupBoxBorderColor.Value);
+                    break;
+                case Panel panel when colors.PanelBorderColor.HasValue:
+                    ApplyCustomBorderPaint(panel, colors.PanelBorderColor.Value);
+                    break;
+                case DateTimePicker dateTimePicker when colors.DateTimePickerBorderColor.HasValue:
+                    ApplyCustomBorderPaint(dateTimePicker, colors.DateTimePickerBorderColor.Value);
+                    break;
+                case MonthCalendar monthCalendar when colors.MonthCalendarBorderColor.HasValue:
+                    ApplyCustomBorderPaint(monthCalendar, colors.MonthCalendarBorderColor.Value);
+                    break;
+                case NumericUpDown numericUpDown when colors.NumericUpDownBorderColor.HasValue:
+                    ApplyCustomBorderPaint(numericUpDown, colors.NumericUpDownBorderColor.Value);
+                    break;
+                case TextBox textBox when colors.TextBoxBorderColor.HasValue:
+                    ApplyCustomBorderPaint(textBox, colors.TextBoxBorderColor.Value);
+                    break;
+                case MaskedTextBox maskedTextBox when colors.MaskedTextBoxBorderColor.HasValue:
+                    ApplyCustomBorderPaint(maskedTextBox, colors.MaskedTextBoxBorderColor.Value);
+                    break;
+                case RichTextBox richTextBox when colors.RichTextBoxBorderColor.HasValue:
+                    ApplyCustomBorderPaint(richTextBox, colors.RichTextBoxBorderColor.Value);
+                    break;
+                case PictureBox pictureBox when colors.PictureBoxBorderColor.HasValue:
+                    ApplyCustomBorderPaint(pictureBox, colors.PictureBoxBorderColor.Value);
+                    break;
+                case UserControl userControl when colors.UserControlBorderColor.HasValue:
+                    ApplyCustomBorderPaint(userControl, colors.UserControlBorderColor.Value);
+                    break;
+                case FlowLayoutPanel flowLayoutPanel when colors.FlowLayoutPanelBorderColor.HasValue:
+                    ApplyCustomBorderPaint(flowLayoutPanel, colors.FlowLayoutPanelBorderColor.Value);
+                    break;
+                case TableLayoutPanel tableLayoutPanel when colors.TableLayoutPanelBorderColor.HasValue:
+                    ApplyCustomBorderPaint(tableLayoutPanel, colors.TableLayoutPanelBorderColor.Value);
+                    break;
+                case PropertyGrid propertyGrid when colors.PropertyGridLineColor.HasValue:
+                    propertyGrid.LineColor = colors.PropertyGridLineColor.Value;
+                    break;
+                case DomainUpDown domainUpDown when colors.DomainUpDownBorderColor.HasValue:
+                    ApplyCustomBorderPaint(domainUpDown, colors.DomainUpDownBorderColor.Value);
+                    break;
+                case WebBrowser webBrowser when colors.WebBrowserBorderColor.HasValue:
+                    ApplyCustomBorderPaint(webBrowser, colors.WebBrowserBorderColor.Value);
+                    break;
+                case ProgressBar progressBar when colors.ProgressBarBorderColor.HasValue:
+                    ApplyCustomBorderPaint(progressBar, colors.ProgressBarBorderColor.Value);
+                    break;
+            }
+        }
+
+        // Apply custom border painting using Paint event
+        private static void ApplyCustomBorderPaint(Control control, Color borderColor)
+        {
+            // Remove existing paint handler to avoid duplicates
+            control.Paint -= (sender, e) => DrawControlBorder(sender, e, borderColor);
+            control.Paint += (sender, e) => DrawControlBorder(sender, e, borderColor);
+        }
+
+        // Draw border for a control
+        private static void DrawControlBorder(object? sender, PaintEventArgs e, Color borderColor)
+        {
+            if (sender is Control control)
+            {
+                using (var pen = new Pen(borderColor, 1))
+                {
+                    var rect = new Rectangle(0, 0, control.Width - 1, control.Height - 1);
+                    e.Graphics.DrawRectangle(pen, rect);
+                }
+            }
+        }
+
+        // MenuStrip theming with hover states
+        private static void ApplyMenuStripTheming(MenuStrip menuStrip, Model_UserUiColors colors)
+        {
+            if (colors.MenuStripBorderColor.HasValue)
+            {
+                ApplyCustomBorderPaint(menuStrip, colors.MenuStripBorderColor.Value);
+            }
+
+            // Apply hover colors to menu items
+            foreach (ToolStripItem item in menuStrip.Items)
+            {
+                ApplyToolStripItemHoverColors(item, colors, 
+                    colors.MenuStripItemHoverBackColor, colors.MenuStripItemHoverForeColor,
+                    colors.MenuStripItemSelectedBackColor, colors.MenuStripItemSelectedForeColor);
+            }
+        }
+
+        // StatusStrip theming
+        private static void ApplyStatusStripTheming(StatusStrip statusStrip, Model_UserUiColors colors)
+        {
+            if (colors.StatusStripBorderColor.HasValue)
+            {
+                ApplyCustomBorderPaint(statusStrip, colors.StatusStripBorderColor.Value);
+            }
+        }
+
+        // ToolStrip theming with hover states
+        private static void ApplyToolStripTheming(ToolStrip toolStrip, Model_UserUiColors colors)
+        {
+            if (colors.ToolStripBorderColor.HasValue)
+            {
+                ApplyCustomBorderPaint(toolStrip, colors.ToolStripBorderColor.Value);
+            }
+
+            // Apply hover colors to tool strip items
+            foreach (ToolStripItem item in toolStrip.Items)
+            {
+                ApplyToolStripItemHoverColors(item, colors, 
+                    colors.ToolStripItemHoverBackColor, colors.ToolStripItemHoverForeColor,
+                    colors.ToolStripItemHoverBackColor, colors.ToolStripItemHoverForeColor);
+            }
+        }
+
+        // ContextMenuStrip theming
+        private static void ApplyContextMenuStripTheming(ContextMenuStrip contextMenuStrip, Model_UserUiColors colors)
+        {
+            if (colors.ContextMenuBorderColor.HasValue)
+            {
+                ApplyCustomBorderPaint(contextMenuStrip, colors.ContextMenuBorderColor.Value);
+            }
+
+            // Apply hover colors to context menu items
+            foreach (ToolStripItem item in contextMenuStrip.Items)
+            {
+                ApplyToolStripItemHoverColors(item, colors, 
+                    colors.ContextMenuItemHoverBackColor, colors.ContextMenuItemHoverForeColor,
+                    colors.ContextMenuItemHoverBackColor, colors.ContextMenuItemHoverForeColor);
+            }
+        }
+
+        // Apply hover colors to ToolStripItem
+        private static void ApplyToolStripItemHoverColors(ToolStripItem item, Model_UserUiColors colors,
+            Color? hoverBackColor, Color? hoverForeColor, Color? selectedBackColor, Color? selectedForeColor)
+        {
+            // Store original colors
+            var originalBackColor = item.BackColor;
+            var originalForeColor = item.ForeColor;
+
+            // Remove existing event handlers to avoid duplicates
+            item.MouseEnter -= (s, e) => { };
+            item.MouseLeave -= (s, e) => { };
+
+            // Add hover event handlers
+            item.MouseEnter += (s, e) =>
+            {
+                if (hoverBackColor.HasValue) item.BackColor = hoverBackColor.Value;
+                if (hoverForeColor.HasValue) item.ForeColor = hoverForeColor.Value;
+            };
+
+            item.MouseLeave += (s, e) =>
+            {
+                item.BackColor = originalBackColor;
+                item.ForeColor = originalForeColor;
+            };
+        }
+
+        // TreeView selection theming
+        private static void ApplyTreeViewSelectionTheming(TreeView treeView, Model_UserUiColors colors)
+        {
+            if (colors.TreeViewSelectedNodeBackColor.HasValue || colors.TreeViewSelectedNodeForeColor.HasValue)
+            {
+                treeView.HideSelection = false;
+                treeView.DrawMode = TreeViewDrawMode.OwnerDrawText;
+
+                treeView.DrawNode -= TreeView_DrawNode;
+                treeView.DrawNode += TreeView_DrawNode;
+
+                void TreeView_DrawNode(object? sender, DrawTreeNodeEventArgs e)
+                {
+                    var selected = (e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected;
+                    var focused = (e.State & TreeNodeStates.Focused) == TreeNodeStates.Focused;
+
+                    var backColor = selected
+                        ? colors.TreeViewSelectedNodeBackColor ?? colors.AccentColor ?? Color.Blue
+                        : colors.TreeViewBackColor ?? colors.ControlBackColor ?? Color.White;
+                    var foreColor = selected
+                        ? colors.TreeViewSelectedNodeForeColor ?? Color.White
+                        : colors.TreeViewForeColor ?? colors.ControlForeColor ?? Color.Black;
+
+                    using (var backBrush = new SolidBrush(backColor))
+                    {
+                        e.Graphics.FillRectangle(backBrush, e.Bounds);
+                    }
+
+                    TextRenderer.DrawText(e.Graphics, e.Node.Text, treeView.Font, e.Bounds, foreColor,
+                        TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+
+                    if (focused)
+                    {
+                        ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
+                    }
+                }
+            }
+        }
+
+        // ListView selection theming
+        private static void ApplyListViewSelectionTheming(ListView listView, Model_UserUiColors colors)
+        {
+            if (colors.ListViewSelectionBackColor.HasValue || colors.ListViewSelectionForeColor.HasValue)
+            {
+                listView.OwnerDraw = true;
+                listView.HideSelection = false;
+
+                listView.DrawItem -= ListView_DrawItem;
+                listView.DrawItem += ListView_DrawItem;
+
+                void ListView_DrawItem(object? sender, DrawListViewItemEventArgs e)
+                {
+                    var selected = e.Item.Selected;
+                    var focused = e.Item.Focused;
+
+                    var backColor = selected
+                        ? colors.ListViewSelectionBackColor ?? colors.AccentColor ?? Color.Blue
+                        : colors.ListViewBackColor ?? colors.ControlBackColor ?? Color.White;
+                    var foreColor = selected
+                        ? colors.ListViewSelectionForeColor ?? Color.White
+                        : colors.ListViewForeColor ?? colors.ControlForeColor ?? Color.Black;
+
+                    using (var backBrush = new SolidBrush(backColor))
+                    {
+                        e.Graphics.FillRectangle(backBrush, e.Bounds);
+                    }
+
+                    TextRenderer.DrawText(e.Graphics, e.Item.Text, listView.Font, e.Bounds, foreColor,
+                        TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+
+                    if (focused)
+                    {
+                        ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
+                    }
+                }
+
+                // Also handle column headers if in Details view
+                if (listView.View == View.Details)
+                {
+                    listView.DrawColumnHeader -= ListView_DrawColumnHeader;
+                    listView.DrawColumnHeader += ListView_DrawColumnHeader;
+
+                    void ListView_DrawColumnHeader(object? sender, DrawListViewColumnHeaderEventArgs e)
+                    {
+                        var backColor = colors.ListViewHeaderBackColor ?? colors.ControlBackColor ?? Color.White;
+                        var foreColor = colors.ListViewHeaderForeColor ?? colors.ControlForeColor ?? Color.Black;
+
+                        using (var backBrush = new SolidBrush(backColor))
+                        {
+                            e.Graphics.FillRectangle(backBrush, e.Bounds);
+                        }
+
+                        TextRenderer.DrawText(e.Graphics, e.Header.Text, listView.Font, e.Bounds, foreColor,
+                            TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                    }
+                }
+            }
         }
     }
 
