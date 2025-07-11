@@ -1,4 +1,5 @@
-﻿using System.Security.Principal;
+﻿using System.Data;
+using System.Security.Principal;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
@@ -114,8 +115,8 @@ internal static class Dao_System
                   JOIN sys_roles r ON ur.RoleID = r.ID";
 
             using var reader = useAsync
-                ? await HelperDatabaseCore.ExecuteReader(sql, useAsync: true)
-                : HelperDatabaseCore.ExecuteReader(sql).Result;
+                ? await HelperDatabaseCore.ExecuteReader(sql, null, true, CommandType.Text)
+                : HelperDatabaseCore.ExecuteReader(sql, null, false, CommandType.Text).Result;
 
             while (reader.Read())
             {

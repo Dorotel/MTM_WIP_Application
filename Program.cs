@@ -25,7 +25,8 @@ internal static class Program
             ApplicationConfiguration.Initialize();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
+            Model_AppVariables.User = Dao_System.System_GetUserName();
+            _ = Dao_System.System_UserAccessTypeAsync(true);
             Trace.Listeners.Clear();
             Trace.Listeners.Add(new DefaultTraceListener());
             Trace.AutoFlush = true;

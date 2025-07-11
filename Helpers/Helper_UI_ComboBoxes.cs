@@ -22,10 +22,12 @@ public static class Helper_UI_ComboBoxes
     private static readonly DataTable ComboBoxOperation_DataTable = new();
     private static readonly DataTable ComboBoxLocation_DataTable = new();
     private static readonly DataTable ComboBoxUser_DataTable = new();
+    private static readonly DataTable ComboBox2ndLocation_DataTable = new();
     private static readonly MySqlDataAdapter ComboBoxPart_DataAdapter = new();
     private static readonly MySqlDataAdapter ComboBoxOperation_DataAdapter = new();
     private static readonly MySqlDataAdapter ComboBoxLocation_DataAdapter = new();
     private static readonly MySqlDataAdapter ComboBoxUser_DataAdapter = new();
+    private static readonly MySqlDataAdapter Combobox2ndLocation_DataAdapter = new();
 
     #endregion
 
@@ -35,6 +37,7 @@ public static class Helper_UI_ComboBoxes
     private static readonly object OperationDataLock = new();
     private static readonly object LocationDataLock = new();
     private static readonly object UserDataLock = new();
+    private static readonly object Combobox2ndLocationLock = new();
 
     #endregion
 
@@ -95,6 +98,26 @@ public static class Helper_UI_ComboBoxes
             ComboBoxLocation_DataAdapter.SelectCommand = command;
             ComboBoxLocation_DataTable.Clear();
             ComboBoxLocation_DataAdapter.Fill(ComboBoxLocation_DataTable);
+        }
+
+        await connection.CloseAsync();
+    }
+
+    public static async Task Setup2ndLocationDataTable()
+    {
+        await using var connection = new MySqlConnection(Model_AppVariables.ConnectionString);
+        await connection.OpenAsync();
+
+        var command = new MySqlCommand("md_locations_Get_All", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        lock (Combobox2ndLocationLock)
+        {
+            Combobox2ndLocation_DataAdapter.SelectCommand = command;
+            ComboBox2ndLocation_DataTable.Clear();
+            Combobox2ndLocation_DataAdapter.Fill(ComboBoxLocation_DataTable);
         }
 
         await connection.CloseAsync();
@@ -173,6 +196,26 @@ public static class Helper_UI_ComboBoxes
                 "ID",
                 "[ Enter Location ]",
                 LocationDataLock
+            ).ConfigureAwait(false);
+            comboBox.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("An error occurred while filling location combo boxes.", ex);
+        }
+    }
+
+    public static async Task Fill2ndLocationComboBoxesAsync(ComboBox comboBox)
+    {
+        try
+        {
+            await FillComboBoxAsync(
+                ComboBox2ndLocation_DataTable,
+                comboBox,
+                "Location",
+                "ID",
+                "[ Enter Location ]",
+                Combobox2ndLocationLock
             ).ConfigureAwait(false);
             comboBox.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
         }

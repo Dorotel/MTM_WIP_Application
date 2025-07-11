@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using MTM_Inventory_Application.Data;
-using MTM_Inventory_Application.Forms.Changelog;
 using MTM_Inventory_Application.Models;
 
 namespace MTM_Inventory_Application.Forms.MainForm.Classes;
@@ -42,19 +41,4 @@ public static class MainFormUserSettingsHelper
         Debug.WriteLine("[DEBUG] Finished loading user theme settings from DB");
     }
 
-
-    /// <summary>
-    ///     Shows the changelog on startup if the changelog visibility toggle is set to false for the current user.
-    /// </summary>
-    public static async Task ShowChangeLogIfNeededAsync(Form mainForm)
-    {
-        var show = await Dao_User.GetHideChangeLogAsync(Model_AppVariables.User);
-        if (show == "false")
-        {
-            var change = new ChangeLogForm();
-            mainForm.Enabled = false;
-            change.FormClosed += (_, _) => mainForm.Enabled = true;
-            change.Show();
-        }
-    }
 }

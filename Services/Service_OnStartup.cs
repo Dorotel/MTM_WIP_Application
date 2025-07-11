@@ -47,6 +47,10 @@ internal static class Service_OnStartup
         await Helper_UI_ComboBoxes.SetupLocationDataTable();
         await LogStep("Location data table set up.");
 
+        await LogStep("Setting up 2nd location data table...");
+        await Helper_UI_ComboBoxes.Setup2ndLocationDataTable();
+        await LogStep("2nd Location data table set up.");
+
         await LogStep("Setting up user data table...");
         await Helper_UI_ComboBoxes.SetupUserDataTable();
         await LogStep("User data table set up.");

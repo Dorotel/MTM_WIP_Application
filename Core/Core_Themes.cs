@@ -111,7 +111,7 @@ public static class Core_Themes
             var idx = form.Text.LastIndexOf('[');
             if (idx > 0)
                 form.Text = form.Text[..idx].TrimEnd();
-            var themeDisplay = $"[{themeName}] | Change (Shift + Alt + S)";
+            var themeDisplay = $"[Privlage Type: {Model_AppVariables.User} {Model_AppVariables.UserTypeAdmin}] | Change (Shift + Alt + S)";
             if (!form.Text.Contains(themeDisplay))
                 form.Text = @$"{form.Text} {themeDisplay}";
         }
@@ -880,10 +880,6 @@ public static class Core_Themes
                         e.Graphics.FillRectangle(b, rect);
                     }
 
-                    using (var p = new Pen(colors.TabControlBorderColor ?? Color.Transparent, 2))
-                    {
-                        e.Graphics.DrawRectangle(p, rect);
-                    }
 
                     TextRenderer.DrawText(e.Graphics, tabPage.Text, e.Font, rect, foreColor,
                         TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);

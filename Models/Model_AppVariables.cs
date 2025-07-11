@@ -16,6 +16,7 @@ internal static class Model_AppVariables
     public static string? UserShift { get; set; }
     public static bool UserTypeAdmin { get; set; } = false;
     public static bool UserTypeReadOnly { get; set; } = false;
+    public static bool UserTypeNormal { get; set; } = true;
 
     public static string UserVersion { get; set; } =
         Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";

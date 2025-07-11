@@ -7,6 +7,7 @@ using MTM_Inventory_Application.Services;
 using System.ComponentModel;
 using MTM_Inventory_Application.Forms.Settings;
 using MTM_Inventory_Application.Controls.Shared;
+using MTM_Inventory_Application.Forms.Transactions;
 using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Forms.MainForm;
@@ -446,6 +447,17 @@ public partial class MainForm : Form
         {
             Application.Exit();
         }
+    }
+
+    private void MainForm_MenuStrip_View_PersonalHistory_Click(object sender, EventArgs e)
+    {
+        // Use global application variables for the user and connection info
+        string connectionString = Model_AppVariables.ConnectionString;
+        string currentUser = Model_AppVariables.User;
+        bool isAdmin = Model_AppVariables.UserTypeAdmin;
+
+        var transactionsForm = new MTM_Inventory_Application.Forms.Transactions.Transactions(connectionString, currentUser, isAdmin);
+        transactionsForm.ShowDialog(this); // Show as modal dialog
     }
 }
 

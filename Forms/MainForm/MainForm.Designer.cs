@@ -42,9 +42,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_MenuStrip_Exit = new ToolStripMenuItem();
             MainForm_MenuStrip_View = new ToolStripMenuItem();
             MainForm_MenuStrip_View_PersonalHistory = new ToolStripMenuItem();
-            MainForm_MenuStrip_View_Separator1 = new ToolStripSeparator();
             MainForm_MenuStrip_View_Separator2 = new ToolStripSeparator();
-            MainForm_MenuStrip_View_Separator3 = new ToolStripSeparator();
             MainForm_MenuStrip_View_ViewChangelog = new ToolStripMenuItem();
             MainForm_StatusStrip = new StatusStrip();
             MainForm_StatusStrip_SavedStatus = new ToolStripStatusLabel();
@@ -117,7 +115,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             // MainForm_MenuStrip_View
             // 
-            MainForm_MenuStrip_View.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_View_PersonalHistory, MainForm_MenuStrip_View_Separator1, MainForm_MenuStrip_View_Separator2, MainForm_MenuStrip_View_Separator3, MainForm_MenuStrip_View_ViewChangelog });
+            MainForm_MenuStrip_View.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_View_PersonalHistory, MainForm_MenuStrip_View_Separator2, MainForm_MenuStrip_View_ViewChangelog });
             MainForm_MenuStrip_View.Name = "MainForm_MenuStrip_View";
             MainForm_MenuStrip_View.Size = new Size(44, 26);
             MainForm_MenuStrip_View.Text = "View";
@@ -126,23 +124,14 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             MainForm_MenuStrip_View_PersonalHistory.Name = "MainForm_MenuStrip_View_PersonalHistory";
             MainForm_MenuStrip_View_PersonalHistory.ShortcutKeys = Keys.Control | Keys.H;
-            MainForm_MenuStrip_View_PersonalHistory.Size = new Size(203, 22);
-            MainForm_MenuStrip_View_PersonalHistory.Text = "Personal History";
-            // 
-            // MainForm_MenuStrip_View_Separator1
-            // 
-            MainForm_MenuStrip_View_Separator1.Name = "MainForm_MenuStrip_View_Separator1";
-            MainForm_MenuStrip_View_Separator1.Size = new Size(200, 6);
+            MainForm_MenuStrip_View_PersonalHistory.Size = new Size(218, 22);
+            MainForm_MenuStrip_View_PersonalHistory.Text = "Transaction History";
+            MainForm_MenuStrip_View_PersonalHistory.Click += MainForm_MenuStrip_View_PersonalHistory_Click;
             // 
             // MainForm_MenuStrip_View_Separator2
             // 
             MainForm_MenuStrip_View_Separator2.Name = "MainForm_MenuStrip_View_Separator2";
             MainForm_MenuStrip_View_Separator2.Size = new Size(200, 6);
-            // 
-            // MainForm_MenuStrip_View_Separator3
-            // 
-            MainForm_MenuStrip_View_Separator3.Name = "MainForm_MenuStrip_View_Separator3";
-            MainForm_MenuStrip_View_Separator3.Size = new Size(200, 6);
             // 
             // MainForm_MenuStrip_View_ViewChangelog
             // 
@@ -411,9 +400,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
         private ToolStripMenuItem MainForm_MenuStrip_Exit;
         private ToolStripMenuItem MainForm_MenuStrip_View;
         private ToolStripMenuItem MainForm_MenuStrip_View_PersonalHistory;
-        private ToolStripSeparator MainForm_MenuStrip_View_Separator1;
         private ToolStripSeparator MainForm_MenuStrip_View_Separator2;
-        private ToolStripSeparator MainForm_MenuStrip_View_Separator3;
         private ToolStripMenuItem MainForm_MenuStrip_View_ViewChangelog;
 
         private StatusStrip MainForm_StatusStrip;
