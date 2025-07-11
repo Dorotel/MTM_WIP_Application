@@ -180,7 +180,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                         newRoleId = 2;
 
                     // Remove all roles, then add the new one
-                    await Dao_User.AddUserRoleAsync(userId, newRoleId, Environment.UserName, true);
+                    await Dao_User.SetUserRoleAsync(userId, newRoleId, Environment.UserName, true);
                 }
 
                 UserEdited?.Invoke(this, EventArgs.Empty);

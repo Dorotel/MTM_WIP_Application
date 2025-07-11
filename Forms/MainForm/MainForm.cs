@@ -432,6 +432,21 @@ public partial class MainForm : Form
         MainForm_Control_InventoryTab?.Control_InventoryTab_HardReset();
         Core_Themes.ApplyTheme(this);
     }
+
+    private void MainForm_MenuStrip_Exit_Click(object sender, EventArgs e)
+    {
+        // Optional: Prompt user for confirmation before exiting
+        var result = MessageBox.Show(
+            "Are you sure you want to exit?",
+            "Exit Application",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question);
+
+        if (result == DialogResult.Yes)
+        {
+            Application.Exit();
+        }
+    }
 }
 
 #endregion

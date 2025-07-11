@@ -500,82 +500,27 @@ public partial class Control_AdvancedRemove : UserControl
     {
         try
         {
-            var selectedCount = Control_AdvancedRemove_DataGridView_Results.SelectedRows.Count;
+            var dgv = Control_AdvancedRemove_DataGridView_Results;
+            var selectedCount = dgv.SelectedRows.Count;
             LoggingUtility.Log($"[ADVANCED REMOVE] Delete clicked. Selected rows: {selectedCount}");
-            Debug.WriteLine($"[ADVANCED REMOVE] Delete clicked. Selected rows: {selectedCount}");
-
             if (selectedCount == 0)
             {
                 LoggingUtility.Log("[ADVANCED REMOVE] No rows selected for deletion.");
-                Debug.WriteLine("[ADVANCED REMOVE] No rows selected for deletion.");
                 return;
             }
 
-            // Build summary and collect items
+            // Build summary for confirmation
             var sb = new StringBuilder();
-            var itemsToDelete = new List<Model_HistoryRemove>();
-            var partIds = new HashSet<string>();
-            var operations = new HashSet<string>();
-            var locations = new HashSet<string>();
-            var totalQty = 0;
-            foreach (DataGridViewRow row in Control_AdvancedRemove_DataGridView_Results.SelectedRows)
-                if (row.DataBoundItem is DataRowView drv)
-                {
-                    var partId = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("PartID")
-                        ? drv["PartID"]?.ToString() ?? ""
-                        : "";
-                    var location = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Location")
-                        ? drv["Location"]?.ToString() ?? ""
-                        : "";
-                    var quantity = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Quantity")
-                        ? Convert.ToInt32(drv["Quantity"])
-                        : 0;
-                    var operation = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Operation")
-                        ? drv["Operation"]?.ToString() ?? ""
-                        : "";
-                    var batchNumber = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Batch Number")
-                        ? drv["Batch Number"]?.ToString() ?? ""
-                        : "";
-                    var itemType = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Item Type")
-                        ? drv["Item Type"]?.ToString() ?? ""
-                        : "";
-                    var receivedDate =
-                        drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Received Date")
-                            ? Convert.ToDateTime(drv["Received Date"])
-                            : DateTime.MinValue;
-                    var lastUpdate = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Update Date")
-                        ? Convert.ToDateTime(drv["Update Date"])
-                        : DateTime.MinValue;
-                    var user = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("User")
-                        ? drv["User"]?.ToString() ?? " [ Nothing Entered ] "
-                        : " [ Nothing Entered ] ";
-                    var notes = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Notes")
-                        ? drv["Notes"]?.ToString() ?? ""
-                        : "";
+            foreach (DataGridViewRow row in dgv.SelectedRows)
+            {
+                var partId = row.Cells["PartID"].Value?.ToString() ?? "";
+                var location = row.Cells["Location"].Value?.ToString() ?? "";
+                var operation = row.Cells["Operation"].Value?.ToString() ?? "";
+                var quantity = row.Cells["Quantity"].Value?.ToString() ?? "";
+                sb.AppendLine($"PartID: {partId}, Location: {location}, Operation: {operation}, Quantity: {quantity}");
+            }
+            string summary = sb.ToString();
 
-                    itemsToDelete.Add(new Model_HistoryRemove
-                    {
-                        PartId = partId,
-                        Location = location,
-                        Operation = operation,
-                        Quantity = quantity,
-                        ItemType = itemType,
-                        ReceiveDate = receivedDate,
-                        LastUpdated = lastUpdate,
-                        User = user,
-                        BatchNumber = batchNumber,
-                        Notes = notes
-                    });
-
-                    sb.AppendLine(
-                        $"PartID: {partId}, Location: {location}, Operation: {operation}, Quantity: {quantity}");
-                    partIds.Add(partId);
-                    operations.Add(operation);
-                    locations.Add(location);
-                    totalQty += quantity;
-                }
-
-            var summary = sb.ToString();
             var confirmResult = MessageBox.Show(
                 $@"The following items will be deleted:
 
@@ -587,65 +532,23 @@ public partial class Control_AdvancedRemove : UserControl
             if (confirmResult != DialogResult.Yes)
             {
                 LoggingUtility.Log("[ADVANCED REMOVE] User cancelled deletion.");
-                Debug.WriteLine("[ADVANCED REMOVE] User cancelled deletion.");
                 return;
             }
 
-            _lastRemovedItems.Clear();
-            foreach (var item in itemsToDelete)
-            {
-                _lastRemovedItems.Add(item);
-                LoggingUtility.Log(
-                    $"[ADVANCED REMOVE] Deleting: PartID={item.PartId}, Location={item.Location}, Operation={item.Operation}, Quantity={item.Quantity}");
-                Debug.WriteLine(
-                    $"[ADVANCED REMOVE] Deleting: PartID={item.PartId}, Location={item.Location}, Operation={item.Operation}, Quantity={item.Quantity}");
-                await Dao_Inventory.DeleteInventoryByPartIdLocationOperationQuantityAsync(
-                    item.PartId,
-                    item.Location,
-                    item.Operation,
-                    item.BatchNumber,
-                    item.Quantity
-                );
-                LoggingUtility.Log(
-                    $"[ADVANCED REMOVE] Deleted: PartID={item.PartId}, Location={item.Location}, Operation={item.Operation}, Quantity={item.Quantity}");
-                Debug.WriteLine(
-                    $"[ADVANCED REMOVE] Deleted: PartID={item.PartId}, Location={item.Location}, Operation={item.Operation}, Quantity={item.Quantity}");
-            }
+            // Call DAO to remove items
+            int removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
 
-            // Enable Undo button if items were deleted
-            var undoBtn = Controls.Find("Control_AdvancedRemove_Button_Undo", true);
-            if (_lastRemovedItems.Count > 0 && undoBtn.Length > 0 && undoBtn[0] is Button btn)
-                btn.Enabled = true;
+            // Optionally update undo and status logic here...
 
-            // Update status strip
-            if (ControlRemoveTab.MainFormInstance != null && itemsToDelete.Count > 0)
-            {
-                var time = DateTime.Now.ToString("hh:mm tt");
-                var locDisplay = locations.Count > 1 ? "Multiple Locations" : locations.FirstOrDefault() ?? "";
-                if (partIds.Count == 1 && operations.Count == 1)
-                    ControlRemoveTab.MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
-                        $@"Last Deleted: {partIds.First()} (Op: {operations.First()}), Location: {locDisplay}, Quantity: {totalQty} @ {time}";
-                else if (partIds.Count == 1 && operations.Count > 1)
-                    ControlRemoveTab.MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
-                        $@"Last Deleted: {partIds.First()} (Multiple Ops), Location: {locDisplay}, Quantity: {totalQty} @ {time}";
-                else
-                    ControlRemoveTab.MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
-                        $@"Last Deleted: Multiple Part IDs, Location: {locDisplay}, Quantity: Multiple @ {time}";
-            }
-
-            LoggingUtility.Log("[ADVANCED REMOVE] Selected inventory items deleted.");
-            Debug.WriteLine("[ADVANCED REMOVE] Selected inventory items deleted.");
-
+            LoggingUtility.Log($"[ADVANCED REMOVE] {removedCount} inventory items deleted.");
             Control_AdvancedRemove_Button_Search_Click(null, null);
         }
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
-            Debug.WriteLine($"[ADVANCED REMOVE] Exception: {ex}");
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true);
         }
     }
-
     private async Task Control_AdvancedRemove_HardReset()
     {
         var resetBtn = Controls.Find("Control_AdvancedRemove_Button_Reset", true);

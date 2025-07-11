@@ -181,7 +181,8 @@ public partial class ControlRemoveTab : UserControl
     {
         try
         {
-            var selectedCount = Control_RemoveTab_DataGridView_Main.SelectedRows.Count;
+            var dgv = Control_RemoveTab_DataGridView_Main;
+            var selectedCount = dgv.SelectedRows.Count;
             LoggingUtility.Log($"Delete clicked. Selected rows: {selectedCount}");
 
             if (selectedCount == 0)
@@ -190,13 +191,22 @@ public partial class ControlRemoveTab : UserControl
                 return;
             }
 
-            var itemsToDelete = GetSelectedItemsToDelete(out var summary);
+            // Build summary for confirmation
+            var sb = new StringBuilder();
+            foreach (DataGridViewRow row in dgv.SelectedRows)
+            {
+                var partId = row.Cells["PartID"].Value?.ToString() ?? "";
+                var location = row.Cells["Location"].Value?.ToString() ?? "";
+                var operation = row.Cells["Operation"].Value?.ToString() ?? "";
+                var quantity = row.Cells["Quantity"].Value?.ToString() ?? "";
+                sb.AppendLine($"PartID: {partId}, Location: {location}, Operation: {operation}, Quantity: {quantity}");
+            }
+            string summary = sb.ToString();
 
             var confirmResult = MessageBox.Show(
                 $@"The following items will be deleted:
 
-{summary}
-Are you sure?",
+{summary}Are you sure?",
                 @"Confirm Deletion",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning);
@@ -207,104 +217,12 @@ Are you sure?",
                 return;
             }
 
-            _lastRemovedItems.Clear();
+            // Call DAO to remove items
+            int removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
 
-            var partIds = new HashSet<string>();
-            var operations = new HashSet<string>();
-            var locations = new HashSet<string>();
-            var totalQty = 0;
+            // Optionally update undo and status logic here...
 
-            foreach (DataGridViewRow row in Control_RemoveTab_DataGridView_Main.SelectedRows)
-                if (row.DataBoundItem is DataRowView drv)
-                {
-                    var partId = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("PartID")
-                        ? drv["PartID"]?.ToString() ?? ""
-                        : "";
-                    var location = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Location")
-                        ? drv["Location"]?.ToString() ?? ""
-                        : "";
-                    var quantity = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Quantity")
-                        ? Convert.ToInt32(drv["Quantity"])
-                        : 0;
-                    var operation = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Operation")
-                        ? drv["Operation"]?.ToString() ?? ""
-                        : "";
-                    var batchNumber = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Batch Number")
-                        ? drv["Batch Number"]?.ToString() ?? ""
-                        : "";
-                    var itemType = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Item Type")
-                        ? drv["Item Type"]?.ToString() ?? ""
-                        : "";
-                    var receivedDate =
-                        drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Received Date")
-                            ? Convert.ToDateTime(drv["Received Date"])
-                            : DateTime.MinValue;
-                    var lastUpdate = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Update Date")
-                        ? Convert.ToDateTime(drv["Update Date"])
-                        : DateTime.MinValue;
-                    var user = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("User")
-                        ? drv["User"]?.ToString() ?? " [ Nothing Entered ] "
-                        : " [ Nothing Entered ] ";
-                    var notes = drv.DataView.Table != null && drv.DataView.Table.Columns.Contains("Notes")
-                        ? drv["Notes"]?.ToString() ?? ""
-                        : "";
-
-                    _lastRemovedItems.Add(new Model_HistoryRemove
-                    {
-                        PartId = partId,
-                        Location = location,
-                        Operation = operation,
-                        Quantity = quantity,
-                        ItemType = itemType,
-                        ReceiveDate = receivedDate,
-                        LastUpdated = lastUpdate,
-                        User = user,
-                        BatchNumber = batchNumber,
-                        Notes = notes
-                    });
-
-                    LoggingUtility.Log(
-                        $"Deleting: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
-
-                    await Dao_Inventory.DeleteInventoryByPartIdLocationOperationQuantityAsync(
-                        partId,
-                        location,
-                        operation,
-                        quantity: quantity,
-                        batchNumber: batchNumber
-                    );
-
-                    LoggingUtility.Log(
-                        $"Deleted: PartID={partId}, Location={location}, Operation={operation}, Quantity={quantity}");
-
-                    partIds.Add(partId);
-                    operations.Add(operation);
-                    locations.Add(location);
-                    totalQty += quantity;
-                }
-
-            if (_lastRemovedItems.Count > 0 &&
-                Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] is Button undoBtn)
-                undoBtn.Enabled = true;
-
-            LoggingUtility.Log("Selected inventory items deleted.");
-
-            // Update status strip
-            if (MainFormInstance != null && itemsToDelete.Count > 0)
-            {
-                var time = DateTime.Now.ToString("hh:mm tt");
-                var locDisplay = locations.Count > 1 ? "Multiple Locations" : locations.FirstOrDefault() ?? "";
-                if (partIds.Count == 1 && operations.Count == 1)
-                    MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
-                        $@"Last Deleted: {partIds.First()} (Op: {operations.First()}), Location: {locDisplay}, Quantity: {totalQty} @ {time}";
-                else if (partIds.Count == 1 && operations.Count > 1)
-                    MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
-                        $@"Last Deleted: {partIds.First()} (Multiple Ops), Location: {locDisplay}, Quantity: {totalQty} @ {time}";
-                else
-                    MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
-                        $@"Last Deleted: Multiple Part IDs, Location: {locDisplay}, Quantity: Multiple @ {time}";
-            }
-
+            LoggingUtility.Log($"{removedCount} inventory items deleted.");
             Control_RemoveTab_Button_Search_Click(null, null);
         }
         catch (Exception ex)

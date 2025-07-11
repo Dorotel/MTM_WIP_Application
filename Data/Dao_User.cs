@@ -37,7 +37,7 @@ internal static class Dao_User
     {
         Debug.WriteLine(
             $"[Dao_User] Entering SetLastShownVersionAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUsr_userFieldAsync("LastShownVersion", user, value, useAsync);
+        await SetUserSettingAsync("LastShownVersion", user, value, useAsync);
     }
 
     internal static async Task<string> GetHideChangeLogAsync(string user, bool useAsync = false)
@@ -49,7 +49,7 @@ internal static class Dao_User
     internal static async Task SetHideChangeLogAsync(string user, string value, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering SetHideChangeLogAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUsr_userFieldAsync("HideChangeLog", user, value, useAsync);
+        await SetUserSettingAsync("HideChangeLog", user, value, useAsync);
     }
 
     internal static async Task<string?> GetThemeNameAsync(string user, bool useAsync = false)
@@ -78,7 +78,7 @@ internal static class Dao_User
     internal static async Task SetThemeFontSizeAsync(string user, int value, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering SetThemeFontSizeAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUsr_userFieldAsync("Theme_FontSize", user, value.ToString(), useAsync);
+        await SetUserSettingAsync("Theme_FontSize", user, value.ToString(), useAsync);
     }
 
     internal static async Task<string> GetVisualUserNameAsync(string user, bool useAsync = false)
@@ -92,7 +92,7 @@ internal static class Dao_User
     internal static async Task SetVisualUserNameAsync(string user, string value, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering SetVisualUserNameAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUsr_userFieldAsync("VisualUserName", user, value, useAsync);
+        await SetUserSettingAsync("VisualUserName", user, value, useAsync);
     }
 
     internal static async Task<string> GetVisualPasswordAsync(string user, bool useAsync = false)
@@ -106,7 +106,7 @@ internal static class Dao_User
     internal static async Task SetVisualPasswordAsync(string user, string value, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering SetVisualPasswordAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUsr_userFieldAsync("VisualPassword", user, value, useAsync);
+        await SetUserSettingAsync("VisualPassword", user, value, useAsync);
     }
 
     internal static async Task<string> GetWipServerAddressAsync(string user, bool useAsync = false)
@@ -121,7 +121,7 @@ internal static class Dao_User
     {
         Debug.WriteLine(
             $"[Dao_User] Entering SetWipServerAddressAsync(user={user}, value={value}, useAsync={useAsync})");
-        await SetUsr_userFieldAsync("WipServerAddress", user, value, useAsync);
+        await SetUserSettingAsync("WipServerAddress", user, value, useAsync);
     }
 
 
@@ -140,7 +140,7 @@ internal static class Dao_User
         Debug.WriteLine(
             $"[Dao_User] Entering SetDatabaseAsync(user={user}, value={value}, useAsync={useAsync})");
         Model_Users.Database = value;
-        await SetUsr_userFieldAsync("WIPDatabase", user, value, useAsync);
+        await SetUserSettingAsync("WIPDatabase", user, value, useAsync);
     }
 
     #endregion
@@ -159,7 +159,7 @@ internal static class Dao_User
     {
         Debug.WriteLine($"[Dao_User] Entering SetWipServerPortAsync(user={user}, value={value}, useAsync={useAsync})");
         Model_Users.WipServerPort = value;
-        await SetUsr_userFieldAsync("WipServerPort", user, value, useAsync);
+        await SetUserSettingAsync("WipServerPort", user, value, useAsync);
     }
 
     #endregion
@@ -319,10 +319,10 @@ internal static class Dao_User
         }
     }
 
-    private static async Task SetUsr_userFieldAsync(string field, string user, string value, bool useAsync)
+    private static async Task SetUserSettingAsync(string field, string user, string value, bool useAsync)
     {
         Debug.WriteLine(
-            $"[Dao_User] Entering SetUsr_userFieldAsync(field={field}, user={user}, value={value}, useAsync={useAsync})");
+            $"[Dao_User] Entering SetUserSettingAsync(field={field}, user={user}, value={value}, useAsync={useAsync})");
         try
         {
             var parameters = new Dictionary<string, object>
@@ -337,11 +337,11 @@ VALUES (@User, @{field})
 ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
 ",
                 parameters, useAsync, CommandType.Text);
-            Debug.WriteLine("[Dao_User] SetUsr_userFieldAsync completed successfully.");
+            Debug.WriteLine("[Dao_User] SetUserSettingAsync completed successfully.");
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[Dao_User] Exception in SetUsr_userFieldAsync: {ex}");
+            Debug.WriteLine($"[Dao_User] Exception in SetUserSettingAsync: {ex}");
             LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
@@ -688,6 +688,32 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
         catch (Exception ex)
         {
             Debug.WriteLine($"[Dao_User] Exception in SetUserRoleAsync: {ex}");
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+        }
+    }
+
+    internal static async Task SetUsersRoleAsync(IEnumerable<int> userIds, int newRoleId, string assignedBy, bool useAsync = false)
+    {
+        Debug.WriteLine($"[Dao_User] Entering SetUsersRoleAsync(userIds=[{string.Join(",", userIds)}], newRoleId={newRoleId}, assignedBy={assignedBy}, useAsync={useAsync})");
+        try
+        {
+            foreach (var userId in userIds)
+            {
+                var parameters = new Dictionary<string, object>
+                {
+                    ["p_UserID"] = userId,
+                    ["p_NewRoleID"] = newRoleId,
+                    ["p_AssignedBy"] = assignedBy
+                };
+                await HelperDatabaseCore.ExecuteNonQuery(
+                    "sys_user_roles_Update",
+                    parameters, useAsync, CommandType.StoredProcedure);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Dao_User] Exception in SetUsersRoleAsync: {ex}");
             LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }

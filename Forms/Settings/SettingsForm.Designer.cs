@@ -106,7 +106,7 @@
             // 
             splitContainer1.Panel2.Controls.Add(settingsPanel);
             splitContainer1.Panel2.Controls.Add(bottomPanel);
-            splitContainer1.Size = new Size(800, 450);
+            splitContainer1.Size = new Size(838, 492);
             splitContainer1.SplitterDistance = 200;
             splitContainer1.TabIndex = 0;
             // 
@@ -115,7 +115,7 @@
             categoryTreeView.Dock = DockStyle.Fill;
             categoryTreeView.Location = new Point(0, 0);
             categoryTreeView.Name = "categoryTreeView";
-            categoryTreeView.Size = new Size(200, 450);
+            categoryTreeView.Size = new Size(200, 492);
             categoryTreeView.TabIndex = 0;
             categoryTreeView.AfterSelect += CategoryTreeView_AfterSelect;
             // 
@@ -124,7 +124,7 @@
             settingsPanel.Dock = DockStyle.Fill;
             settingsPanel.Location = new Point(0, 0);
             settingsPanel.Name = "settingsPanel";
-            settingsPanel.Size = new Size(596, 410);
+            settingsPanel.Size = new Size(634, 452);
             settingsPanel.TabIndex = 1;
             // 
             // bottomPanel
@@ -134,9 +134,9 @@
             bottomPanel.Controls.Add(saveButton);
             bottomPanel.Controls.Add(resetDefaultsButton);
             bottomPanel.Dock = DockStyle.Bottom;
-            bottomPanel.Location = new Point(0, 410);
+            bottomPanel.Location = new Point(0, 452);
             bottomPanel.Name = "bottomPanel";
-            bottomPanel.Size = new Size(596, 40);
+            bottomPanel.Size = new Size(634, 40);
             bottomPanel.TabIndex = 0;
             // 
             // statusLabel
@@ -151,7 +151,7 @@
             // cancelButton
             // 
             cancelButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            cancelButton.Location = new Point(433, 9);
+            cancelButton.Location = new Point(471, 9);
             cancelButton.Name = "cancelButton";
             cancelButton.Size = new Size(75, 23);
             cancelButton.TabIndex = 1;
@@ -162,7 +162,7 @@
             // saveButton
             // 
             saveButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            saveButton.Location = new Point(514, 9);
+            saveButton.Location = new Point(552, 9);
             saveButton.Name = "saveButton";
             saveButton.Size = new Size(75, 23);
             saveButton.TabIndex = 0;
@@ -173,7 +173,7 @@
             // resetDefaultsButton
             // 
             resetDefaultsButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            resetDefaultsButton.Location = new Point(352, 9);
+            resetDefaultsButton.Location = new Point(390, 9);
             resetDefaultsButton.Name = "resetDefaultsButton";
             resetDefaultsButton.Size = new Size(75, 23);
             resetDefaultsButton.TabIndex = 3;
@@ -187,7 +187,7 @@
             databasePanel.Dock = DockStyle.Fill;
             databasePanel.Location = new Point(0, 0);
             databasePanel.Name = "databasePanel";
-            databasePanel.Size = new Size(800, 450);
+            databasePanel.Size = new Size(838, 492);
             databasePanel.TabIndex = 2;
             databasePanel.Visible = false;
             // 
@@ -198,7 +198,7 @@
             databaseTabControl.Location = new Point(0, 0);
             databaseTabControl.Name = "databaseTabControl";
             databaseTabControl.SelectedIndex = 0;
-            databaseTabControl.Size = new Size(800, 450);
+            databaseTabControl.Size = new Size(838, 492);
             databaseTabControl.TabIndex = 0;
             // 
             // connectionTabPage
@@ -207,7 +207,7 @@
             connectionTabPage.Location = new Point(4, 24);
             connectionTabPage.Name = "connectionTabPage";
             connectionTabPage.Padding = new Padding(3);
-            connectionTabPage.Size = new Size(792, 422);
+            connectionTabPage.Size = new Size(830, 464);
             connectionTabPage.TabIndex = 0;
             connectionTabPage.Text = "Connection Settings";
             connectionTabPage.UseVisualStyleBackColor = true;
@@ -321,7 +321,7 @@
             themePanel.Dock = DockStyle.Fill;
             themePanel.Location = new Point(0, 0);
             themePanel.Name = "themePanel";
-            themePanel.Size = new Size(800, 450);
+            themePanel.Size = new Size(838, 492);
             themePanel.TabIndex = 3;
             themePanel.Visible = false;
             // 
@@ -358,7 +358,7 @@
             themeLabel.AutoSize = true;
             themeLabel.Location = new Point(30, 23);
             themeLabel.Name = "themeLabel";
-            themeLabel.Size = new Size(47, 15);
+            themeLabel.Size = new Size(46, 15);
             themeLabel.TabIndex = 0;
             themeLabel.Text = "Theme:";
             // 
@@ -368,7 +368,7 @@
             shortcutsPanel.Dock = DockStyle.Fill;
             shortcutsPanel.Location = new Point(0, 0);
             shortcutsPanel.Name = "shortcutsPanel";
-            shortcutsPanel.Size = new Size(800, 450);
+            shortcutsPanel.Size = new Size(838, 492);
             shortcutsPanel.TabIndex = 4;
             shortcutsPanel.Visible = false;
             // 
@@ -378,7 +378,7 @@
             shortcutsDataGridView.Dock = DockStyle.Fill;
             shortcutsDataGridView.Location = new Point(0, 0);
             shortcutsDataGridView.Name = "shortcutsDataGridView";
-            shortcutsDataGridView.Size = new Size(800, 450);
+            shortcutsDataGridView.Size = new Size(838, 492);
             shortcutsDataGridView.TabIndex = 0;
             // 
             // aboutPanel
@@ -388,7 +388,7 @@
             aboutPanel.Dock = DockStyle.Fill;
             aboutPanel.Location = new Point(0, 0);
             aboutPanel.Name = "aboutPanel";
-            aboutPanel.Size = new Size(800, 450);
+            aboutPanel.Size = new Size(838, 492);
             aboutPanel.TabIndex = 5;
             aboutPanel.Visible = false;
             // 
@@ -416,7 +416,7 @@
             addPartPanel.Dock = DockStyle.Fill;
             addPartPanel.Location = new Point(0, 0);
             addPartPanel.Name = "addPartPanel";
-            addPartPanel.Size = new Size(800, 450);
+            addPartPanel.Size = new Size(838, 492);
             addPartPanel.TabIndex = 6;
             addPartPanel.Visible = false;
             // 
@@ -425,7 +425,7 @@
             editPartPanel.Dock = DockStyle.Fill;
             editPartPanel.Location = new Point(0, 0);
             editPartPanel.Name = "editPartPanel";
-            editPartPanel.Size = new Size(800, 450);
+            editPartPanel.Size = new Size(838, 492);
             editPartPanel.TabIndex = 7;
             editPartPanel.Visible = false;
             // 
@@ -434,7 +434,7 @@
             removePartPanel.Dock = DockStyle.Fill;
             removePartPanel.Location = new Point(0, 0);
             removePartPanel.Name = "removePartPanel";
-            removePartPanel.Size = new Size(800, 450);
+            removePartPanel.Size = new Size(838, 492);
             removePartPanel.TabIndex = 8;
             removePartPanel.Visible = false;
             // 
@@ -443,7 +443,7 @@
             addOperationPanel.Dock = DockStyle.Fill;
             addOperationPanel.Location = new Point(0, 0);
             addOperationPanel.Name = "addOperationPanel";
-            addOperationPanel.Size = new Size(800, 450);
+            addOperationPanel.Size = new Size(838, 492);
             addOperationPanel.TabIndex = 9;
             addOperationPanel.Visible = false;
             // 
@@ -452,7 +452,7 @@
             editOperationPanel.Dock = DockStyle.Fill;
             editOperationPanel.Location = new Point(0, 0);
             editOperationPanel.Name = "editOperationPanel";
-            editOperationPanel.Size = new Size(800, 450);
+            editOperationPanel.Size = new Size(838, 492);
             editOperationPanel.TabIndex = 10;
             editOperationPanel.Visible = false;
             // 
@@ -461,7 +461,7 @@
             removeOperationPanel.Dock = DockStyle.Fill;
             removeOperationPanel.Location = new Point(0, 0);
             removeOperationPanel.Name = "removeOperationPanel";
-            removeOperationPanel.Size = new Size(800, 450);
+            removeOperationPanel.Size = new Size(838, 492);
             removeOperationPanel.TabIndex = 11;
             removeOperationPanel.Visible = false;
             // 
@@ -470,7 +470,7 @@
             addLocationPanel.Dock = DockStyle.Fill;
             addLocationPanel.Location = new Point(0, 0);
             addLocationPanel.Name = "addLocationPanel";
-            addLocationPanel.Size = new Size(800, 450);
+            addLocationPanel.Size = new Size(838, 492);
             addLocationPanel.TabIndex = 12;
             addLocationPanel.Visible = false;
             // 
@@ -479,7 +479,7 @@
             editLocationPanel.Dock = DockStyle.Fill;
             editLocationPanel.Location = new Point(0, 0);
             editLocationPanel.Name = "editLocationPanel";
-            editLocationPanel.Size = new Size(800, 450);
+            editLocationPanel.Size = new Size(838, 492);
             editLocationPanel.TabIndex = 13;
             editLocationPanel.Visible = false;
             // 
@@ -488,7 +488,7 @@
             removeLocationPanel.Dock = DockStyle.Fill;
             removeLocationPanel.Location = new Point(0, 0);
             removeLocationPanel.Name = "removeLocationPanel";
-            removeLocationPanel.Size = new Size(800, 450);
+            removeLocationPanel.Size = new Size(838, 492);
             removeLocationPanel.TabIndex = 14;
             removeLocationPanel.Visible = false;
             // 
@@ -497,7 +497,7 @@
             addItemTypePanel.Dock = DockStyle.Fill;
             addItemTypePanel.Location = new Point(0, 0);
             addItemTypePanel.Name = "addItemTypePanel";
-            addItemTypePanel.Size = new Size(800, 450);
+            addItemTypePanel.Size = new Size(838, 492);
             addItemTypePanel.TabIndex = 15;
             addItemTypePanel.Visible = false;
             // 
@@ -506,7 +506,7 @@
             editItemTypePanel.Dock = DockStyle.Fill;
             editItemTypePanel.Location = new Point(0, 0);
             editItemTypePanel.Name = "editItemTypePanel";
-            editItemTypePanel.Size = new Size(800, 450);
+            editItemTypePanel.Size = new Size(838, 492);
             editItemTypePanel.TabIndex = 16;
             editItemTypePanel.Visible = false;
             // 
@@ -515,7 +515,7 @@
             removeItemTypePanel.Dock = DockStyle.Fill;
             removeItemTypePanel.Location = new Point(0, 0);
             removeItemTypePanel.Name = "removeItemTypePanel";
-            removeItemTypePanel.Size = new Size(800, 450);
+            removeItemTypePanel.Size = new Size(838, 492);
             removeItemTypePanel.TabIndex = 17;
             removeItemTypePanel.Visible = false;
             // 
@@ -524,7 +524,7 @@
             addUserPanel.Dock = DockStyle.Fill;
             addUserPanel.Location = new Point(0, 0);
             addUserPanel.Name = "addUserPanel";
-            addUserPanel.Size = new Size(800, 450);
+            addUserPanel.Size = new Size(838, 492);
             addUserPanel.TabIndex = 18;
             addUserPanel.Visible = false;
             // 
@@ -533,7 +533,7 @@
             editUserPanel.Dock = DockStyle.Fill;
             editUserPanel.Location = new Point(0, 0);
             editUserPanel.Name = "editUserPanel";
-            editUserPanel.Size = new Size(800, 450);
+            editUserPanel.Size = new Size(838, 492);
             editUserPanel.TabIndex = 19;
             editUserPanel.Visible = false;
             // 
@@ -542,7 +542,7 @@
             deleteUserPanel.Dock = DockStyle.Fill;
             deleteUserPanel.Location = new Point(0, 0);
             deleteUserPanel.Name = "deleteUserPanel";
-            deleteUserPanel.Size = new Size(800, 450);
+            deleteUserPanel.Size = new Size(838, 492);
             deleteUserPanel.TabIndex = 20;
             deleteUserPanel.Visible = false;
             // 
@@ -550,7 +550,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(838, 492);
             Controls.Add(deleteUserPanel);
             Controls.Add(editUserPanel);
             Controls.Add(addUserPanel);

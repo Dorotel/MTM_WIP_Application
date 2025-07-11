@@ -38,26 +38,12 @@ namespace MTM_Inventory_Application.Forms.MainForm
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             MainForm_MenuStrip = new MenuStrip();
             MainForm_MenuStrip_File = new ToolStripMenuItem();
-            MainForm_MenuStrip_File_Save = new ToolStripMenuItem();
-            MainForm_MenuStrip_File_Delete = new ToolStripMenuItem();
-            MainForm_MenuStrip_File_Print = new ToolStripMenuItem();
             MainForm_MenuStrip_File_Settings = new ToolStripMenuItem();
             MainForm_MenuStrip_Exit = new ToolStripMenuItem();
-            MainForm_MenuStrip_Edit = new ToolStripMenuItem();
-            MainForm_MenuStrip_Edit_New_Object = new ToolStripMenuItem();
-            MainForm_MenuStrip_Edit_Remove_Object = new ToolStripMenuItem();
-            MainForm_MenuStrip_Edit_Separator4 = new ToolStripSeparator();
-            MainForm_MenuStrip_Edit_ResetLast10Buttons = new ToolStripMenuItem();
             MainForm_MenuStrip_View = new ToolStripMenuItem();
             MainForm_MenuStrip_View_PersonalHistory = new ToolStripMenuItem();
-            MainForm_MenuStrip_View_Reset = new ToolStripMenuItem();
             MainForm_MenuStrip_View_Separator1 = new ToolStripSeparator();
-            MainForm_MenuStrip_View_AddToInventory = new ToolStripMenuItem();
-            MainForm_MenuStrip_View_RemoveFromInventory = new ToolStripMenuItem();
-            MainForm_MenuStrip_View_LocationToLocation = new ToolStripMenuItem();
             MainForm_MenuStrip_View_Separator2 = new ToolStripSeparator();
-            MainForm_MenuStrip_View_ViewAllWIP = new ToolStripMenuItem();
-            MainForm_MenuStrip_View_ViewOutsideService = new ToolStripMenuItem();
             MainForm_MenuStrip_View_Separator3 = new ToolStripSeparator();
             MainForm_MenuStrip_View_ViewChangelog = new ToolStripMenuItem();
             MainForm_StatusStrip = new StatusStrip();
@@ -99,7 +85,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             MainForm_MenuStrip.Dock = DockStyle.Fill;
             MainForm_MenuStrip.ImageScalingSize = new Size(24, 24);
-            MainForm_MenuStrip.Items.AddRange(new ToolStripItem[] { MainForm_MenuStrip_File, MainForm_MenuStrip_Edit, MainForm_MenuStrip_View });
+            MainForm_MenuStrip.Items.AddRange(new ToolStripItem[] { MainForm_MenuStrip_File, MainForm_MenuStrip_View });
             MainForm_MenuStrip.Location = new Point(0, 0);
             MainForm_MenuStrip.Name = "MainForm_MenuStrip";
             MainForm_MenuStrip.Padding = new Padding(0);
@@ -108,31 +94,10 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             // MainForm_MenuStrip_File
             // 
-            MainForm_MenuStrip_File.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_File_Save, MainForm_MenuStrip_File_Delete, MainForm_MenuStrip_File_Print, MainForm_MenuStrip_File_Settings, MainForm_MenuStrip_Exit });
+            MainForm_MenuStrip_File.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_File_Settings, MainForm_MenuStrip_Exit });
             MainForm_MenuStrip_File.Name = "MainForm_MenuStrip_File";
             MainForm_MenuStrip_File.Size = new Size(37, 26);
             MainForm_MenuStrip_File.Text = "File";
-            // 
-            // MainForm_MenuStrip_File_Save
-            // 
-            MainForm_MenuStrip_File_Save.Name = "MainForm_MenuStrip_File_Save";
-            MainForm_MenuStrip_File_Save.ShortcutKeys = Keys.Control | Keys.S;
-            MainForm_MenuStrip_File_Save.Size = new Size(188, 22);
-            MainForm_MenuStrip_File_Save.Text = "Save";
-            // 
-            // MainForm_MenuStrip_File_Delete
-            // 
-            MainForm_MenuStrip_File_Delete.Name = "MainForm_MenuStrip_File_Delete";
-            MainForm_MenuStrip_File_Delete.ShortcutKeys = Keys.Delete;
-            MainForm_MenuStrip_File_Delete.Size = new Size(188, 22);
-            MainForm_MenuStrip_File_Delete.Text = "Delete";
-            // 
-            // MainForm_MenuStrip_File_Print
-            // 
-            MainForm_MenuStrip_File_Print.Name = "MainForm_MenuStrip_File_Print";
-            MainForm_MenuStrip_File_Print.ShortcutKeys = Keys.Control | Keys.P;
-            MainForm_MenuStrip_File_Print.Size = new Size(188, 22);
-            MainForm_MenuStrip_File_Print.Text = "Print";
             // 
             // MainForm_MenuStrip_File_Settings
             // 
@@ -148,40 +113,11 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_MenuStrip_Exit.ShortcutKeys = Keys.Alt | Keys.F4;
             MainForm_MenuStrip_Exit.Size = new Size(188, 22);
             MainForm_MenuStrip_Exit.Text = "Exit";
-            // 
-            // MainForm_MenuStrip_Edit
-            // 
-            MainForm_MenuStrip_Edit.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_Edit_New_Object, MainForm_MenuStrip_Edit_Remove_Object, MainForm_MenuStrip_Edit_Separator4, MainForm_MenuStrip_Edit_ResetLast10Buttons });
-            MainForm_MenuStrip_Edit.Name = "MainForm_MenuStrip_Edit";
-            MainForm_MenuStrip_Edit.Size = new Size(39, 26);
-            MainForm_MenuStrip_Edit.Text = "Edit";
-            // 
-            // MainForm_MenuStrip_Edit_New_Object
-            // 
-            MainForm_MenuStrip_Edit_New_Object.Name = "MainForm_MenuStrip_Edit_New_Object";
-            MainForm_MenuStrip_Edit_New_Object.Size = new Size(185, 22);
-            MainForm_MenuStrip_Edit_New_Object.Text = "New Object";
-            // 
-            // MainForm_MenuStrip_Edit_Remove_Object
-            // 
-            MainForm_MenuStrip_Edit_Remove_Object.Name = "MainForm_MenuStrip_Edit_Remove_Object";
-            MainForm_MenuStrip_Edit_Remove_Object.Size = new Size(185, 22);
-            MainForm_MenuStrip_Edit_Remove_Object.Text = "Remove Object";
-            // 
-            // MainForm_MenuStrip_Edit_Separator4
-            // 
-            MainForm_MenuStrip_Edit_Separator4.Name = "MainForm_MenuStrip_Edit_Separator4";
-            MainForm_MenuStrip_Edit_Separator4.Size = new Size(182, 6);
-            // 
-            // MainForm_MenuStrip_Edit_ResetLast10Buttons
-            // 
-            MainForm_MenuStrip_Edit_ResetLast10Buttons.Name = "MainForm_MenuStrip_Edit_ResetLast10Buttons";
-            MainForm_MenuStrip_Edit_ResetLast10Buttons.Size = new Size(185, 22);
-            MainForm_MenuStrip_Edit_ResetLast10Buttons.Text = "Reset Last 10 Buttons";
+            MainForm_MenuStrip_Exit.Click += MainForm_MenuStrip_Exit_Click;
             // 
             // MainForm_MenuStrip_View
             // 
-            MainForm_MenuStrip_View.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_View_PersonalHistory, MainForm_MenuStrip_View_Reset, MainForm_MenuStrip_View_Separator1, MainForm_MenuStrip_View_AddToInventory, MainForm_MenuStrip_View_RemoveFromInventory, MainForm_MenuStrip_View_LocationToLocation, MainForm_MenuStrip_View_Separator2, MainForm_MenuStrip_View_ViewAllWIP, MainForm_MenuStrip_View_ViewOutsideService, MainForm_MenuStrip_View_Separator3, MainForm_MenuStrip_View_ViewChangelog });
+            MainForm_MenuStrip_View.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_View_PersonalHistory, MainForm_MenuStrip_View_Separator1, MainForm_MenuStrip_View_Separator2, MainForm_MenuStrip_View_Separator3, MainForm_MenuStrip_View_ViewChangelog });
             MainForm_MenuStrip_View.Name = "MainForm_MenuStrip_View";
             MainForm_MenuStrip_View.Size = new Size(44, 26);
             MainForm_MenuStrip_View.Text = "View";
@@ -190,68 +126,28 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             MainForm_MenuStrip_View_PersonalHistory.Name = "MainForm_MenuStrip_View_PersonalHistory";
             MainForm_MenuStrip_View_PersonalHistory.ShortcutKeys = Keys.Control | Keys.H;
-            MainForm_MenuStrip_View_PersonalHistory.Size = new Size(234, 22);
+            MainForm_MenuStrip_View_PersonalHistory.Size = new Size(203, 22);
             MainForm_MenuStrip_View_PersonalHistory.Text = "Personal History";
-            // 
-            // MainForm_MenuStrip_View_Reset
-            // 
-            MainForm_MenuStrip_View_Reset.Name = "MainForm_MenuStrip_View_Reset";
-            MainForm_MenuStrip_View_Reset.ShortcutKeys = Keys.Control | Keys.R;
-            MainForm_MenuStrip_View_Reset.Size = new Size(234, 22);
-            MainForm_MenuStrip_View_Reset.Text = "Reset New Transaction";
             // 
             // MainForm_MenuStrip_View_Separator1
             // 
             MainForm_MenuStrip_View_Separator1.Name = "MainForm_MenuStrip_View_Separator1";
-            MainForm_MenuStrip_View_Separator1.Size = new Size(231, 6);
-            // 
-            // MainForm_MenuStrip_View_AddToInventory
-            // 
-            MainForm_MenuStrip_View_AddToInventory.Name = "MainForm_MenuStrip_View_AddToInventory";
-            MainForm_MenuStrip_View_AddToInventory.ShortcutKeys = Keys.Control | Keys.D1;
-            MainForm_MenuStrip_View_AddToInventory.Size = new Size(234, 22);
-            MainForm_MenuStrip_View_AddToInventory.Text = "New Transaction";
-            // 
-            // MainForm_MenuStrip_View_RemoveFromInventory
-            // 
-            MainForm_MenuStrip_View_RemoveFromInventory.Name = "MainForm_MenuStrip_View_RemoveFromInventory";
-            MainForm_MenuStrip_View_RemoveFromInventory.ShortcutKeys = Keys.Control | Keys.D2;
-            MainForm_MenuStrip_View_RemoveFromInventory.Size = new Size(234, 22);
-            MainForm_MenuStrip_View_RemoveFromInventory.Text = "Remove";
-            // 
-            // MainForm_MenuStrip_View_LocationToLocation
-            // 
-            MainForm_MenuStrip_View_LocationToLocation.Name = "MainForm_MenuStrip_View_LocationToLocation";
-            MainForm_MenuStrip_View_LocationToLocation.ShortcutKeys = Keys.Control | Keys.D3;
-            MainForm_MenuStrip_View_LocationToLocation.Size = new Size(234, 22);
-            MainForm_MenuStrip_View_LocationToLocation.Text = "Transfer";
+            MainForm_MenuStrip_View_Separator1.Size = new Size(200, 6);
             // 
             // MainForm_MenuStrip_View_Separator2
             // 
             MainForm_MenuStrip_View_Separator2.Name = "MainForm_MenuStrip_View_Separator2";
-            MainForm_MenuStrip_View_Separator2.Size = new Size(231, 6);
-            // 
-            // MainForm_MenuStrip_View_ViewAllWIP
-            // 
-            MainForm_MenuStrip_View_ViewAllWIP.Name = "MainForm_MenuStrip_View_ViewAllWIP";
-            MainForm_MenuStrip_View_ViewAllWIP.Size = new Size(234, 22);
-            MainForm_MenuStrip_View_ViewAllWIP.Text = "View All WIP";
-            // 
-            // MainForm_MenuStrip_View_ViewOutsideService
-            // 
-            MainForm_MenuStrip_View_ViewOutsideService.Name = "MainForm_MenuStrip_View_ViewOutsideService";
-            MainForm_MenuStrip_View_ViewOutsideService.Size = new Size(234, 22);
-            MainForm_MenuStrip_View_ViewOutsideService.Text = "View Outside Service";
+            MainForm_MenuStrip_View_Separator2.Size = new Size(200, 6);
             // 
             // MainForm_MenuStrip_View_Separator3
             // 
             MainForm_MenuStrip_View_Separator3.Name = "MainForm_MenuStrip_View_Separator3";
-            MainForm_MenuStrip_View_Separator3.Size = new Size(231, 6);
+            MainForm_MenuStrip_View_Separator3.Size = new Size(200, 6);
             // 
             // MainForm_MenuStrip_View_ViewChangelog
             // 
             MainForm_MenuStrip_View_ViewChangelog.Name = "MainForm_MenuStrip_View_ViewChangelog";
-            MainForm_MenuStrip_View_ViewChangelog.Size = new Size(234, 22);
+            MainForm_MenuStrip_View_ViewChangelog.Size = new Size(203, 22);
             MainForm_MenuStrip_View_ViewChangelog.Text = "View Changelog";
             // 
             // MainForm_StatusStrip
@@ -511,26 +407,12 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         private MenuStrip MainForm_MenuStrip;
         private ToolStripMenuItem MainForm_MenuStrip_File;
-        public ToolStripMenuItem MainForm_MenuStrip_File_Save;
-        private ToolStripMenuItem MainForm_MenuStrip_File_Delete;
-        private ToolStripMenuItem MainForm_MenuStrip_File_Print;
         private ToolStripMenuItem MainForm_MenuStrip_File_Settings;
         private ToolStripMenuItem MainForm_MenuStrip_Exit;
-        private ToolStripMenuItem MainForm_MenuStrip_Edit;
-        private ToolStripMenuItem MainForm_MenuStrip_Edit_New_Object;
-        private ToolStripMenuItem MainForm_MenuStrip_Edit_Remove_Object;
-        private ToolStripSeparator MainForm_MenuStrip_Edit_Separator4;
-        private ToolStripMenuItem MainForm_MenuStrip_Edit_ResetLast10Buttons;
         private ToolStripMenuItem MainForm_MenuStrip_View;
         private ToolStripMenuItem MainForm_MenuStrip_View_PersonalHistory;
-        private ToolStripMenuItem MainForm_MenuStrip_View_Reset;
         private ToolStripSeparator MainForm_MenuStrip_View_Separator1;
-        private ToolStripMenuItem MainForm_MenuStrip_View_AddToInventory;
-        private ToolStripMenuItem MainForm_MenuStrip_View_RemoveFromInventory;
-        private ToolStripMenuItem MainForm_MenuStrip_View_LocationToLocation;
         private ToolStripSeparator MainForm_MenuStrip_View_Separator2;
-        private ToolStripMenuItem MainForm_MenuStrip_View_ViewAllWIP;
-        private ToolStripMenuItem MainForm_MenuStrip_View_ViewOutsideService;
         private ToolStripSeparator MainForm_MenuStrip_View_Separator3;
         private ToolStripMenuItem MainForm_MenuStrip_View_ViewChangelog;
 

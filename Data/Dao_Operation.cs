@@ -55,7 +55,7 @@ internal static class Dao_Operation
     {
         var parameters = new Dictionary<string, object>
         {
-            ["p_OldOperation"] = oldOperation,
+            ["p_Operation"] = oldOperation,
             ["p_NewOperation"] = newOperationNumber,
             ["p_IssuedBy"] = user
         };
