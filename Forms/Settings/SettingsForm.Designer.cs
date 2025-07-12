@@ -50,10 +50,10 @@
             serverTextBox = new TextBox();
             serverLabel = new Label();
             themePanel = new Panel();
-            fontSizeNumericUpDown = new NumericUpDown();
-            fontSizeLabel = new Label();
+            groupBox2 = new GroupBox();
+            themeGeneratorForm1 = new MTM_Inventory_Application.Controls.SettingsForm.ThemeGeneratorForm();
+            groupBox1 = new GroupBox();
             themeComboBox = new ComboBox();
-            themeLabel = new Label();
             shortcutsPanel = new Panel();
             shortcutsDataGridView = new DataGridView();
             aboutPanel = new Panel();
@@ -84,10 +84,12 @@
             connectionTabPage.SuspendLayout();
             connectionGroupBox.SuspendLayout();
             themePanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)fontSizeNumericUpDown).BeginInit();
+            groupBox2.SuspendLayout();
+            groupBox1.SuspendLayout();
             shortcutsPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)shortcutsDataGridView).BeginInit();
             aboutPanel.SuspendLayout();
+            deleteUserPanel.SuspendLayout();
             SuspendLayout();
             // 
             // splitContainer1
@@ -314,10 +316,8 @@
             // 
             // themePanel
             // 
-            themePanel.Controls.Add(fontSizeNumericUpDown);
-            themePanel.Controls.Add(fontSizeLabel);
-            themePanel.Controls.Add(themeComboBox);
-            themePanel.Controls.Add(themeLabel);
+            themePanel.Controls.Add(groupBox2);
+            themePanel.Controls.Add(groupBox1);
             themePanel.Dock = DockStyle.Fill;
             themePanel.Location = new Point(0, 0);
             themePanel.Name = "themePanel";
@@ -325,42 +325,43 @@
             themePanel.TabIndex = 3;
             themePanel.Visible = false;
             // 
-            // fontSizeNumericUpDown
+            // groupBox2
             // 
-            fontSizeNumericUpDown.Location = new Point(100, 50);
-            fontSizeNumericUpDown.Maximum = new decimal(new int[] { 20, 0, 0, 0 });
-            fontSizeNumericUpDown.Minimum = new decimal(new int[] { 8, 0, 0, 0 });
-            fontSizeNumericUpDown.Name = "fontSizeNumericUpDown";
-            fontSizeNumericUpDown.Size = new Size(120, 23);
-            fontSizeNumericUpDown.TabIndex = 3;
-            fontSizeNumericUpDown.Value = new decimal(new int[] { 9, 0, 0, 0 });
+            groupBox2.Controls.Add(themeGeneratorForm1);
+            groupBox2.Location = new Point(6, 71);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new Size(296, 363);
+            groupBox2.TabIndex = 3;
+            groupBox2.TabStop = false;
+            groupBox2.Text = "Generate a Theme";
             // 
-            // fontSizeLabel
+            // themeGeneratorForm1
             // 
-            fontSizeLabel.AutoSize = true;
-            fontSizeLabel.Location = new Point(30, 52);
-            fontSizeLabel.Name = "fontSizeLabel";
-            fontSizeLabel.Size = new Size(57, 15);
-            fontSizeLabel.TabIndex = 2;
-            fontSizeLabel.Text = "Font Size:";
+            themeGeneratorForm1.Dock = DockStyle.Fill;
+            themeGeneratorForm1.Location = new Point(3, 19);
+            themeGeneratorForm1.Margin = new Padding(3, 2, 3, 2);
+            themeGeneratorForm1.Name = "themeGeneratorForm1";
+            themeGeneratorForm1.Size = new Size(290, 341);
+            themeGeneratorForm1.TabIndex = 0;
+            // 
+            // groupBox1
+            // 
+            groupBox1.Controls.Add(themeComboBox);
+            groupBox1.Location = new Point(6, 8);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(296, 57);
+            groupBox1.TabIndex = 2;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Select A Theme";
             // 
             // themeComboBox
             // 
             themeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             themeComboBox.FormattingEnabled = true;
-            themeComboBox.Location = new Point(100, 20);
+            themeComboBox.Location = new Point(6, 22);
             themeComboBox.Name = "themeComboBox";
-            themeComboBox.Size = new Size(200, 23);
+            themeComboBox.Size = new Size(284, 23);
             themeComboBox.TabIndex = 1;
-            // 
-            // themeLabel
-            // 
-            themeLabel.AutoSize = true;
-            themeLabel.Location = new Point(30, 23);
-            themeLabel.Name = "themeLabel";
-            themeLabel.Size = new Size(46, 15);
-            themeLabel.TabIndex = 0;
-            themeLabel.Text = "Theme:";
             // 
             // shortcutsPanel
             // 
@@ -539,6 +540,7 @@
             // 
             // deleteUserPanel
             // 
+            deleteUserPanel.Controls.Add(themePanel);
             deleteUserPanel.Dock = DockStyle.Fill;
             deleteUserPanel.Location = new Point(0, 0);
             deleteUserPanel.Name = "deleteUserPanel";
@@ -568,7 +570,6 @@
             Controls.Add(addPartPanel);
             Controls.Add(aboutPanel);
             Controls.Add(shortcutsPanel);
-            Controls.Add(themePanel);
             Controls.Add(databasePanel);
             Controls.Add(splitContainer1);
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -589,12 +590,13 @@
             connectionGroupBox.ResumeLayout(false);
             connectionGroupBox.PerformLayout();
             themePanel.ResumeLayout(false);
-            themePanel.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)fontSizeNumericUpDown).EndInit();
+            groupBox2.ResumeLayout(false);
+            groupBox1.ResumeLayout(false);
             shortcutsPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)shortcutsDataGridView).EndInit();
             aboutPanel.ResumeLayout(false);
             aboutPanel.PerformLayout();
+            deleteUserPanel.ResumeLayout(false);
             ResumeLayout(false);
 
         }
@@ -624,10 +626,7 @@
         private System.Windows.Forms.TextBox serverTextBox;
         private System.Windows.Forms.Label serverLabel;
         private System.Windows.Forms.Panel themePanel;
-        private System.Windows.Forms.NumericUpDown fontSizeNumericUpDown;
-        private System.Windows.Forms.Label fontSizeLabel;
         private System.Windows.Forms.ComboBox themeComboBox;
-        private System.Windows.Forms.Label themeLabel;
         private System.Windows.Forms.Panel shortcutsPanel;
         private System.Windows.Forms.DataGridView shortcutsDataGridView;
         private System.Windows.Forms.Panel aboutPanel;
@@ -648,5 +647,8 @@
         private System.Windows.Forms.Panel addUserPanel;
         private System.Windows.Forms.Panel editUserPanel;
         private System.Windows.Forms.Panel deleteUserPanel;
+        private GroupBox groupBox2;
+        private Controls.SettingsForm.ThemeGeneratorForm themeGeneratorForm1;
+        private GroupBox groupBox1;
     }
 }

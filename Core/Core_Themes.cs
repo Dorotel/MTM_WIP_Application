@@ -14,6 +14,48 @@ namespace MTM_Inventory_Application.Core;
 
 public static class Core_Themes
 {
+    #region Public API
+
+    public static void ApplyTheme(Form form)
+    {
+        var theme = Core_AppThemes.GetCurrentTheme();
+        var themeName = Core_AppThemes.GetEffectiveThemeName();
+        form.SuspendLayout();
+        SetFormTheme(form, theme, themeName);
+        ApplyThemeToControls(form.Controls);
+        form.ResumeLayout();
+        LoggingUtility.Log($"Global theme '{themeName}' applied to form '{form.Name}'.");
+    }
+
+    public static async Task<Model_UserUiColors> GetUserThemeColorsAsync(string userId)
+    {
+        Model_AppVariables.ThemeName = await Dao_User.GetSettingsJsonAsync("Theme_Name", userId, true) ?? "Default";
+        if (!Core_AppThemes.GetThemeNames().Contains(Model_AppVariables.ThemeName))
+            await Core_AppThemes.LoadThemesFromDatabaseAsync();
+        var appTheme = Core_AppThemes.GetTheme(Model_AppVariables.ThemeName);
+        return appTheme.Colors;
+    }
+
+    public static void ApplyThemeToDataGridView(DataGridView dataGridView)
+    {
+        ThemeAppliersInternal.ApplyThemeToDataGridView(dataGridView);
+    }
+
+    public static void SizeDataGrid(DataGridView dataGridView)
+    {
+        ThemeAppliersInternal.SizeDataGrid(dataGridView);
+    }
+
+    public static void ApplyFocusHighlighting(Control parentControl)
+    {
+        var theme = Core_AppThemes.GetCurrentTheme();
+        FocusUtils.ApplyFocusEventHandlingToControls(parentControl.Controls, theme.Colors);
+    }
+
+    #endregion
+
+    #region Private Helpers
+
     private delegate void ControlThemeApplier(Control control, Model_UserUiColors colors);
 
     private static readonly ConcurrentDictionary<Type, ControlThemeApplier> ThemeAppliers = new()
@@ -64,42 +106,6 @@ public static class Core_Themes
         [typeof(ControlTransferTab)] = ThemeAppliersInternal.ApplyTransferTabTheme
     };
 
-    public static void ApplyTheme(Form form)
-    {
-        var theme = Core_AppThemes.GetCurrentTheme();
-        var themeName = Core_AppThemes.GetEffectiveThemeName();
-        form.SuspendLayout();
-        SetFormTheme(form, theme, themeName);
-        ApplyThemeToControls(form.Controls);
-        form.ResumeLayout();
-        LoggingUtility.Log($"Global theme '{themeName}' applied to form '{form.Name}'.");
-    }
-
-    public static async Task<Model_UserUiColors> GetUserThemeColorsAsync(string userId)
-    {
-        Model_AppVariables.ThemeName = await Dao_User.GetSettingsJsonAsync("Theme_Name", userId, true) ?? "Default";
-        if (!Core_AppThemes.GetThemeNames().Contains(Model_AppVariables.ThemeName))
-            await Core_AppThemes.LoadThemesFromDatabaseAsync();
-        var appTheme = Core_AppThemes.GetTheme(Model_AppVariables.ThemeName);
-        return appTheme.Colors;
-    }
-
-    public static void ApplyThemeToDataGridView(DataGridView dataGridView)
-    {
-        ThemeAppliersInternal.ApplyThemeToDataGridView(dataGridView);
-    }
-
-    public static void SizeDataGrid(DataGridView dataGridView)
-    {
-        ThemeAppliersInternal.SizeDataGrid(dataGridView);
-    }
-
-    public static void ApplyFocusHighlighting(Control parentControl)
-    {
-        var theme = Core_AppThemes.GetCurrentTheme();
-        FocusUtils.ApplyFocusEventHandlingToControls(parentControl.Controls, theme.Colors);
-    }
-
     private static void SetFormTheme(Form form, Core_AppThemes.AppTheme theme, string themeName)
     {
         form.BackColor = theme.Colors.FormBackColor ?? Color.White;
@@ -125,12 +131,43 @@ public static class Core_Themes
             $"[THEME] {ctrl.Name} ({ctrl.GetType().Name}) - {colorType}: {colorSource} = {colorValue} | Theme: {themeName}");
     }
 
+    private static Color DimColor(Color color, double percent)
+    {
+        percent = Math.Clamp(percent, 0, 1);
+        var r = (int)(color.R * (1 - percent));
+        var g = (int)(color.G * (1 - percent));
+        var b = (int)(color.B * (1 - percent));
+        return Color.FromArgb(color.A, r, g, b);
+    }
+
+    private static Color MaybeDimIfDisabled(Control control, Color color)
+    {
+        return !control.Enabled ? DimColor(color, 0.25) : color;
+    }
+
+    private static void AttachEnabledChangedHandler(Control control)
+    {
+        control.EnabledChanged -= Control_EnabledChanged_ThemeRefresh;
+        control.EnabledChanged += Control_EnabledChanged_ThemeRefresh;
+    }
+
+    private static void Control_EnabledChanged_ThemeRefresh(object? sender, EventArgs e)
+    {
+        if (sender is Control ctrl)
+        {
+            var theme = Core_AppThemes.GetCurrentTheme();
+            ApplyBaseThemeColors(ctrl, theme);
+            ApplyControlSpecificTheme(ctrl);
+        }
+    }
+
     private static void ApplyThemeToControls(Control.ControlCollection controls)
     {
         var theme = Core_AppThemes.GetCurrentTheme();
         foreach (Control ctrl in controls)
             try
             {
+                AttachEnabledChangedHandler(ctrl);
                 if (ctrl is DataGridView dgv)
                 {
                     ApplyThemeToDataGridView(dgv);
@@ -166,6 +203,9 @@ public static class Core_Themes
     {
         var backColor = theme.Colors.FormBackColor ?? Color.White;
         var foreColor = theme.Colors.FormForeColor ?? Color.Black;
+        // Dim if disabled
+        backColor = MaybeDimIfDisabled(control, backColor);
+        foreColor = MaybeDimIfDisabled(control, foreColor);
         if (control.BackColor != backColor)
             control.BackColor = backColor;
         if (control.ForeColor != foreColor)
@@ -210,6 +250,10 @@ public static class Core_Themes
             ThemeAppliersInternal.ApplyCustomControlTheme(control, colors);
         }
     }
+
+    #endregion
+
+    #region Internal Classes
 
     private static class ThemeAppliersInternal
     {
@@ -288,30 +332,79 @@ public static class Core_Themes
             if (colors.CustomControlForeColor.HasValue) control.ForeColor = colors.CustomControlForeColor.Value;
         }
 
-        // NEW: Owner-draw theme appliers for border, hover, selected, pressed, and other states
-        // These route to OwnerDrawThemeHelper
-        public static void ApplyOwnerDrawThemes(Control control, Model_UserUiColors colors)
+
+        private static void ApplyOwnerDrawThemes(Control control, Model_UserUiColors colors)
         {
             OwnerDrawThemeHelper.ApplyOwnerDrawTheme(control, colors);
         }
-
-        // Each of the following Apply*Theme methods should call OwnerDrawThemeHelper where needed.
 
         public static void ApplyButtonTheme(Control control, Model_UserUiColors colors)
         {
             if (control is Button btn)
             {
                 btn.Margin = new Padding(1);
+                btn.Paint -= AutoShrinkText_Paint;
+                btn.Paint += AutoShrinkText_Paint;
                 var backColor = colors.ButtonBackColor ?? SystemColors.Control;
                 var foreColor = colors.ButtonForeColor ?? SystemColors.ControlText;
                 btn.BackColor = backColor;
                 btn.ForeColor = foreColor;
-                btn.FlatStyle = FlatStyle.System;
-                btn.Paint -= AutoShrinkText_Paint;
-                btn.Paint += AutoShrinkText_Paint;
+                btn.FlatStyle = FlatStyle.Flat;
+                btn.FlatAppearance.BorderSize = 2; // Always show border
+                btn.FlatAppearance.BorderColor = colors.ButtonBorderColor ?? SystemColors.ControlDark;
+                btn.FlatAppearance.MouseDownBackColor = colors.ButtonPressedBackColor ?? SystemColors.ControlDark;
+                btn.FlatAppearance.MouseOverBackColor = colors.ButtonHoverBackColor ?? SystemColors.ControlLight;
 
-                // Button border, hover, pressed states
-                ApplyOwnerDrawThemes(btn, colors);
+                // Use named handlers to allow safe attach/detach
+                btn.MouseEnter -= Button_MouseEnter;
+                btn.MouseLeave -= Button_MouseLeave;
+                btn.MouseDown -= Button_MouseDown;
+                btn.MouseUp -= Button_MouseUp;
+
+                btn.MouseEnter += Button_MouseEnter;
+                btn.MouseLeave += Button_MouseLeave;
+                btn.MouseDown += Button_MouseDown;
+                btn.MouseUp += Button_MouseUp;
+
+                void Button_MouseEnter(object? sender, EventArgs e)
+                {
+                    if (sender is Button b)
+                    {
+                        if (colors.ButtonHoverBackColor.HasValue)
+                            b.BackColor = colors.ButtonHoverBackColor.Value;
+                        if (colors.ButtonHoverForeColor.HasValue)
+                            b.ForeColor = colors.ButtonHoverForeColor.Value;
+                    }
+                }
+
+                void Button_MouseLeave(object? sender, EventArgs e)
+                {
+                    if (sender is Button b)
+                    {
+                        b.BackColor = colors.ButtonBackColor ?? SystemColors.Control;
+                        b.ForeColor = colors.ButtonForeColor ?? SystemColors.ControlText;
+                    }
+                }
+
+                void Button_MouseDown(object? sender, MouseEventArgs e)
+                {
+                    if (sender is Button b)
+                    {
+                        if (colors.ButtonPressedBackColor.HasValue)
+                            b.BackColor = colors.ButtonPressedBackColor.Value;
+                        if (colors.ButtonPressedForeColor.HasValue)
+                            b.ForeColor = colors.ButtonPressedForeColor.Value;
+                    }
+                }
+
+                void Button_MouseUp(object? sender, MouseEventArgs e)
+                {
+                    if (sender is Button b)
+                    {
+                        b.BackColor = colors.ButtonBackColor ?? SystemColors.Control;
+                        b.ForeColor = colors.ButtonForeColor ?? SystemColors.ControlText;
+                    }
+                }
             }
         }
 
@@ -484,7 +577,9 @@ public static class Core_Themes
         {
             if (control is StatusStrip ss)
             {
-                if (colors.StatusStripBackColor.HasValue) ss.BackColor = colors.StatusStripBackColor.Value;
+                // Always use the form background color for StatusStrip
+                var formBackColor = Core_AppThemes.GetCurrentTheme().Colors.FormBackColor ?? Color.White;
+                ss.BackColor = formBackColor;
                 if (colors.StatusStripForeColor.HasValue) ss.ForeColor = colors.StatusStripForeColor.Value;
 
                 ApplyOwnerDrawThemes(ss, colors);
@@ -701,9 +796,10 @@ public static class Core_Themes
         {
             if (control is UserControl uc)
             {
-                if (colors.UserControlBackColor.HasValue) uc.BackColor = colors.UserControlBackColor.Value;
+                // Always use the form background color for UserControl
+                var formBackColor = Core_AppThemes.GetCurrentTheme().Colors.FormBackColor ?? Color.White;
+                uc.BackColor = formBackColor;
                 if (colors.UserControlForeColor.HasValue) uc.ForeColor = colors.UserControlForeColor.Value;
-
                 ApplyOwnerDrawThemes(uc, colors);
             }
         }
@@ -810,7 +906,11 @@ public static class Core_Themes
         {
             if (sender is not Control control) return;
 
-            e.Graphics.Clear(control.BackColor);
+            // Use dimmed colors if disabled
+            var backColor = MaybeDimIfDisabled(control, control.BackColor);
+            var foreColor = MaybeDimIfDisabled(control, control.ForeColor);
+
+            e.Graphics.Clear(backColor);
 
             var text = control.Text;
             var font = control.Font;
@@ -822,7 +922,6 @@ public static class Core_Themes
                 Trimming = StringTrimming.EllipsisCharacter
             };
 
-            // Sequence through each type of control that could have text
             if (control is Label label)
             {
                 var align = label.TextAlign;
@@ -967,7 +1066,6 @@ public static class Core_Themes
                 format.LineAlignment = StringAlignment.Center;
             }
 
-            var originalForeColor = control.ForeColor;
             var textSize = e.Graphics.MeasureString(text, font, clientRectangle.Size, format);
             var shrinkFont = font;
 
@@ -978,61 +1076,87 @@ public static class Core_Themes
                 textSize = e.Graphics.MeasureString(text, shrinkFont, clientRectangle.Size, format);
             }
 
-            using var brush = new SolidBrush(originalForeColor);
+            using var brush = new SolidBrush(foreColor);
             e.Graphics.DrawString(text, shrinkFont, brush, clientRectangle, format);
+
+            // Draw border for Button controls
+            if (control is Button btnBorder)
+            {
+                var borderColor = btnBorder.FlatAppearance != null &&
+                                  btnBorder.FlatAppearance.BorderColor != Color.Empty
+                    ? btnBorder.FlatAppearance.BorderColor
+                    : btnBorder.Parent != null
+                        ? btnBorder.Parent.BackColor
+                        : SystemColors.ControlDark;
+                borderColor = MaybeDimIfDisabled(control, borderColor);
+                var borderWidth = btnBorder.FlatAppearance?.BorderSize ?? 1;
+                ControlPaint.DrawBorder(e.Graphics, clientRectangle, borderColor, borderWidth, ButtonBorderStyle.Solid,
+                    borderColor, borderWidth, ButtonBorderStyle.Solid,
+                    borderColor, borderWidth, ButtonBorderStyle.Solid,
+                    borderColor, borderWidth, ButtonBorderStyle.Solid);
+            }
         }
     }
 
-    // Owner draw theme helper for borders, hover, pressed, selected, etc.
     private static class OwnerDrawThemeHelper
     {
         public static void ApplyOwnerDrawTheme(Control control, Model_UserUiColors colors)
         {
-            // This is a stub for all owner-draw logic.
-            // For brevity, only examples for Button and TabControl are shown.
-            // Extend for other controls and states as needed.
-
-            // Button example
             if (control is Button btn)
             {
                 btn.FlatStyle = FlatStyle.Flat;
-                if (colors.ButtonBorderColor.HasValue)
-                    btn.FlatAppearance.BorderColor = colors.ButtonBorderColor.Value;
-                if (colors.ButtonHoverBackColor.HasValue || colors.ButtonPressedBackColor.HasValue)
+                btn.FlatAppearance.BorderSize = 1;
+                btn.FlatAppearance.BorderColor = colors.ButtonBorderColor ?? SystemColors.ControlDark;
+                btn.FlatAppearance.MouseDownBackColor = colors.ButtonPressedBackColor ?? SystemColors.ControlDark;
+                btn.FlatAppearance.MouseOverBackColor = colors.ButtonHoverBackColor ?? SystemColors.ControlLight;
+            }
+            else if (control is GroupBox groupBox)
+            {
+                groupBox.Paint -= GroupBox_OwnerDrawBorder;
+                groupBox.Paint += GroupBox_OwnerDrawBorder;
+
+                void GroupBox_OwnerDrawBorder(object? sender, PaintEventArgs e)
                 {
-                    btn.MouseEnter -= (s, e) => { };
-                    btn.MouseLeave -= (s, e) => { };
-                    btn.MouseDown -= (s, e) => { };
-                    btn.MouseUp -= (s, e) => { };
-                    btn.MouseEnter += (s, e) =>
+                    var borderColor = colors.GroupBoxBorderColor ?? Color.Gray;
+                    var textColor = colors.GroupBoxForeColor ?? groupBox.ForeColor;
+                    var backColor = colors.GroupBoxBackColor ?? groupBox.BackColor;
+                    var rect = groupBox.ClientRectangle;
+                    rect.Width -= 1;
+                    rect.Height -= 1;
+                    using (var b = new SolidBrush(backColor))
                     {
-                        if (colors.ButtonHoverBackColor.HasValue)
-                            btn.BackColor = colors.ButtonHoverBackColor.Value;
-                        if (colors.ButtonHoverForeColor.HasValue)
-                            btn.ForeColor = colors.ButtonHoverForeColor.Value;
-                    };
-                    btn.MouseLeave += (s, e) =>
+                        e.Graphics.FillRectangle(b, rect);
+                    }
+
+                    var text = groupBox.Text;
+                    var font = groupBox.Font;
+                    var textSize = e.Graphics.MeasureString(text, font);
+                    var textPadding = 8;
+                    var textRect = new Rectangle(textPadding, 0, (int)textSize.Width + 2, (int)textSize.Height);
+                    using (var p = new Pen(borderColor, 1))
                     {
-                        btn.BackColor = colors.ButtonBackColor ?? SystemColors.Control;
-                        btn.ForeColor = colors.ButtonForeColor ?? SystemColors.ControlText;
-                    };
-                    btn.MouseDown += (s, e) =>
+                        e.Graphics.DrawLine(p, rect.Left, rect.Top + textRect.Height / 2, textRect.Left - 2,
+                            rect.Top + textRect.Height / 2);
+                        e.Graphics.DrawLine(p, textRect.Right + 2, rect.Top + textRect.Height / 2, rect.Right,
+                            rect.Top + textRect.Height / 2);
+                        e.Graphics.DrawLine(p, rect.Left, rect.Top + textRect.Height / 2, rect.Left, rect.Bottom);
+                        e.Graphics.DrawLine(p, rect.Left, rect.Bottom, rect.Right, rect.Bottom);
+                        e.Graphics.DrawLine(p, rect.Right, rect.Top + textRect.Height / 2, rect.Right, rect.Bottom);
+                    }
+
+                    using (var b = new SolidBrush(backColor))
                     {
-                        if (colors.ButtonPressedBackColor.HasValue)
-                            btn.BackColor = colors.ButtonPressedBackColor.Value;
-                        if (colors.ButtonPressedForeColor.HasValue)
-                            btn.ForeColor = colors.ButtonPressedForeColor.Value;
-                    };
-                    btn.MouseUp += (s, e) =>
+                        e.Graphics.FillRectangle(b, textRect);
+                    }
+
+                    using (var b = new SolidBrush(textColor))
                     {
-                        btn.BackColor = colors.ButtonBackColor ?? SystemColors.Control;
-                        btn.ForeColor = colors.ButtonForeColor ?? SystemColors.ControlText;
-                    };
+                        e.Graphics.DrawString(text, font, b, textRect.Left, 0);
+                    }
                 }
             }
         }
 
-        // Attach link label hover color
         public static void AttachLinkLabelHoverColor(LinkLabel ll, Color hoverColor)
         {
             ll.MouseEnter -= LinkLabel_MouseEnter;
@@ -1047,12 +1171,10 @@ public static class Core_Themes
 
             void LinkLabel_MouseLeave(object? sender, EventArgs e)
             {
-                // revert to normal color
                 ll.LinkColor = ll.VisitedLinkColor;
             }
         }
 
-        // DataGridView border color
         public static void ApplyDataGridViewBorderColor(DataGridView dgv, Color borderColor)
         {
             dgv.GridColor = borderColor;
@@ -1191,6 +1313,8 @@ public static class Core_Themes
             };
         }
     }
+
+    #endregion
 
     #region Core_AppThemes
 
@@ -1334,29 +1458,6 @@ public static class Core_Themes
                 if (!Themes.ContainsKey(themeName)) themeName = "Default";
                 Debug.Assert(Themes != null, "Themes dictionary is not initialized.");
                 return themeName;
-            }
-            catch (Exception ex)
-            {
-                LoggingUtility.LogApplicationError(ex);
-                throw;
-            }
-        }
-
-        public static Color GetThemeColor(string propertyName)
-        {
-            try
-            {
-                var theme = GetCurrentTheme();
-                var colors = theme.Colors;
-                var property = typeof(Model_UserUiColors).GetProperty(propertyName)
-                               ?? throw new InvalidOperationException(
-                                   $"Property '{propertyName}' not found on Model_UserUiColors.");
-                var value = property.GetValue(colors);
-                if (value is Color color)
-                    return color;
-                if (value is Color nullableColor)
-                    return nullableColor;
-                throw new InvalidOperationException($"Property '{propertyName}' is not a Color or is null.");
             }
             catch (Exception ex)
             {

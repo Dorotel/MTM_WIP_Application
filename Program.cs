@@ -7,10 +7,7 @@ using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Services;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Data;
-using MySql.Data.MySqlClient;
 using System.Diagnostics;
-using System;
-using System.Threading.Tasks;
 
 namespace MTM_Inventory_Application;
 

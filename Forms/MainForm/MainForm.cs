@@ -455,7 +455,7 @@ public partial class MainForm : Form
         var isAdmin = Model_AppVariables.UserTypeAdmin;
 
         var transactionsForm =
-            new MTM_Inventory_Application.Forms.Transactions.Transactions(connectionString, currentUser, isAdmin);
+            new Transactions.Transactions(connectionString, currentUser, isAdmin);
         transactionsForm.ShowDialog(this); // Show as modal dialog
     }
 }

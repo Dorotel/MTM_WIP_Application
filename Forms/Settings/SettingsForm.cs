@@ -355,15 +355,12 @@ public partial class SettingsForm : Form
             if (!string.IsNullOrEmpty(themeName) && themeComboBox.Items.Contains(themeName))
                 themeComboBox.SelectedItem = themeName;
             else if (themeComboBox.Items.Count > 0) themeComboBox.SelectedIndex = 0; // Default to first theme
-
-            fontSizeNumericUpDown.Value = Math.Max(8, Math.Min(20, fontSize));
         }
         catch (Exception ex)
         {
             UpdateStatus($"Error loading theme settings: {ex.Message}");
             if (themeComboBox.Items.Count > 0)
                 themeComboBox.SelectedIndex = 0;
-            fontSizeNumericUpDown.Value = 9;
         }
     }
 
@@ -861,12 +858,11 @@ public partial class SettingsForm : Form
         {
             var user = Model_AppVariables.User;
             var themeName = themeComboBox.SelectedItem?.ToString();
-            var fontSize = (int)fontSizeNumericUpDown.Value;
 
             var themeObj = new
             {
                 Theme_Name = themeName,
-                Theme_FontSize = fontSize
+                Theme_FontSize = 9
             };
 
             var themeJson = JsonSerializer.Serialize(themeObj);
@@ -944,7 +940,6 @@ public partial class SettingsForm : Form
             var defaultTheme = Core_Themes.Core_AppThemes.GetThemeNames().FirstOrDefault() ?? "";
             if (!string.IsNullOrEmpty(defaultTheme))
                 themeComboBox.SelectedItem = defaultTheme;
-            fontSizeNumericUpDown.Value = 9;
 
             // Reset shortcuts to defaults
             var shortcutDict = Helper_UI_Shortcuts.GetShortcutDictionary();
