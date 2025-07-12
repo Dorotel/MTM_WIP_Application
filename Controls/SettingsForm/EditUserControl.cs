@@ -1,6 +1,7 @@
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
+using MTM_Inventory_Application.Helpers;
 using System;
 using System.Data;
 using System.Drawing;
@@ -17,6 +18,25 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         public EditUserControl()
         {
             InitializeComponent();
+            
+            // Check privilege enforcement - only Admin users can access user editing
+            if (!Helper_Privilege_Validation.HasAdminAccess())
+            {
+                // Disable all controls for non-admin users
+                this.Enabled = false;
+                
+                // Show a message to indicate access restriction
+                var accessLabel = new Label
+                {
+                    Text = "Administrative access required to edit users.",
+                    Dock = DockStyle.Fill,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    ForeColor = Color.Red
+                };
+                this.Controls.Add(accessLabel);
+                accessLabel.BringToFront();
+                return;
+            }
 
             // Prevent spaces in all textboxes
             EditUserControl_TextBox_FirstName.KeyPress += TextBox_NoSpaces_KeyPress;
@@ -125,6 +145,17 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         private async void EditUserControl_Button_Save_Click(object? sender, EventArgs e)
         {
+            // Additional privilege check at runtime
+            try
+            {
+                Helper_Privilege_Validation.ValidateUserManagementAccess();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show(ex.Message, @"Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 if (EditUserControl_ComboBox_Users.SelectedItem is not string userName)
