@@ -21,6 +21,7 @@ internal static class Program
     {
         try
         {
+            ThemeMappingChecker.RunCheck();
             Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             ApplicationConfiguration.Initialize();
             Application.EnableVisualStyles();
@@ -159,7 +160,7 @@ public class StartupSplashApplicationContext : ApplicationContext
             // Step 9: Initializing theme system
             progress = 65;
             _splashScreen?.UpdateProgress(progress, "Initializing theme system...");
-            await Core_Themes.Core_AppThemes.InitializeThemeSystemAsync(Model_AppVariables.User);
+            //await Core_Themes.Core_AppThemes.InitializeThemeSystemAsync(Model_AppVariables.User);
             progress = 70;
             _splashScreen?.UpdateProgress(progress, "Theme system initialized.");
             await Task.Delay(50);
@@ -172,9 +173,9 @@ public class StartupSplashApplicationContext : ApplicationContext
             // Step 11: Loading theme settings
             progress = 75;
             _splashScreen?.UpdateProgress(progress, "Loading theme settings...");
-            var fontSize = await Dao_User.GetThemeFontSizeAsync(Model_AppVariables.User);
-            Model_AppVariables.ThemeFontSize = fontSize ?? 9;
-            Model_AppVariables.UserUiColors = await Core_Themes.GetUserThemeColorsAsync(Model_AppVariables.User);
+            //var fontSize = await Dao_User.GetThemeFontSizeAsync(Model_AppVariables.User);
+            //Model_AppVariables.ThemeFontSize = fontSize ?? 9;
+            //Model_AppVariables.UserUiColors = await Core_Themes.GetUserThemeColorsAsync(Model_AppVariables.User);
             progress = 80;
             _splashScreen?.UpdateProgress(progress, "Theme settings loaded.");
             await Task.Delay(50);

@@ -87,14 +87,14 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_MenuStrip.Location = new Point(0, 0);
             MainForm_MenuStrip.Name = "MainForm_MenuStrip";
             MainForm_MenuStrip.Padding = new Padding(0);
-            MainForm_MenuStrip.Size = new Size(984, 26);
+            MainForm_MenuStrip.Size = new Size(984, 24);
             MainForm_MenuStrip.TabIndex = 1;
             // 
             // MainForm_MenuStrip_File
             // 
             MainForm_MenuStrip_File.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_File_Settings, MainForm_MenuStrip_Exit });
             MainForm_MenuStrip_File.Name = "MainForm_MenuStrip_File";
-            MainForm_MenuStrip_File.Size = new Size(37, 26);
+            MainForm_MenuStrip_File.Size = new Size(37, 24);
             MainForm_MenuStrip_File.Text = "File";
             // 
             // MainForm_MenuStrip_File_Settings
@@ -117,26 +117,26 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             MainForm_MenuStrip_View.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_View_PersonalHistory, MainForm_MenuStrip_View_Separator2, MainForm_MenuStrip_View_ViewChangelog });
             MainForm_MenuStrip_View.Name = "MainForm_MenuStrip_View";
-            MainForm_MenuStrip_View.Size = new Size(44, 26);
+            MainForm_MenuStrip_View.Size = new Size(44, 24);
             MainForm_MenuStrip_View.Text = "View";
             // 
             // MainForm_MenuStrip_View_PersonalHistory
             // 
             MainForm_MenuStrip_View_PersonalHistory.Name = "MainForm_MenuStrip_View_PersonalHistory";
             MainForm_MenuStrip_View_PersonalHistory.ShortcutKeys = Keys.Control | Keys.H;
-            MainForm_MenuStrip_View_PersonalHistory.Size = new Size(218, 22);
+            MainForm_MenuStrip_View_PersonalHistory.Size = new Size(219, 22);
             MainForm_MenuStrip_View_PersonalHistory.Text = "Transaction History";
             MainForm_MenuStrip_View_PersonalHistory.Click += MainForm_MenuStrip_View_PersonalHistory_Click;
             // 
             // MainForm_MenuStrip_View_Separator2
             // 
             MainForm_MenuStrip_View_Separator2.Name = "MainForm_MenuStrip_View_Separator2";
-            MainForm_MenuStrip_View_Separator2.Size = new Size(200, 6);
+            MainForm_MenuStrip_View_Separator2.Size = new Size(216, 6);
             // 
             // MainForm_MenuStrip_View_ViewChangelog
             // 
             MainForm_MenuStrip_View_ViewChangelog.Name = "MainForm_MenuStrip_View_ViewChangelog";
-            MainForm_MenuStrip_View_ViewChangelog.Size = new Size(203, 22);
+            MainForm_MenuStrip_View_ViewChangelog.Size = new Size(219, 22);
             MainForm_MenuStrip_View_ViewChangelog.Text = "View Changelog";
             // 
             // MainForm_StatusStrip
@@ -205,17 +205,16 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_TableLayout.Margin = new Padding(0);
             MainForm_TableLayout.Name = "MainForm_TableLayout";
             MainForm_TableLayout.RowCount = 3;
-            MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+            MainForm_TableLayout.RowStyles.Add(new RowStyle());
             MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 31F));
-            MainForm_TableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            MainForm_TableLayout.RowStyles.Add(new RowStyle());
             MainForm_TableLayout.Size = new Size(984, 481);
             MainForm_TableLayout.TabIndex = 94;
             // 
             // MainForm_SplitContainer_Middle
             // 
             MainForm_SplitContainer_Middle.Dock = DockStyle.Fill;
-            MainForm_SplitContainer_Middle.Location = new Point(0, 26);
+            MainForm_SplitContainer_Middle.Location = new Point(0, 24);
             MainForm_SplitContainer_Middle.Margin = new Padding(0);
             MainForm_SplitContainer_Middle.Name = "MainForm_SplitContainer_Middle";
             // 
@@ -226,7 +225,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // MainForm_SplitContainer_Middle.Panel2
             // 
             MainForm_SplitContainer_Middle.Panel2.Controls.Add(control_QuickButtons1);
-            MainForm_SplitContainer_Middle.Size = new Size(984, 424);
+            MainForm_SplitContainer_Middle.Size = new Size(984, 426);
             MainForm_SplitContainer_Middle.SplitterDistance = 825;
             MainForm_SplitContainer_Middle.TabIndex = 93;
             // 
@@ -243,7 +242,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_TabControl.Name = "MainForm_TabControl";
             MainForm_TabControl.SelectedIndex = 0;
             MainForm_TabControl.ShowToolTips = true;
-            MainForm_TabControl.Size = new Size(825, 424);
+            MainForm_TabControl.Size = new Size(825, 426);
             MainForm_TabControl.TabIndex = 91;
             MainForm_TabControl.TabStop = false;
             // 
@@ -254,7 +253,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_TabPage_Inventory.Location = new Point(4, 24);
             MainForm_TabPage_Inventory.Margin = new Padding(0);
             MainForm_TabPage_Inventory.Name = "MainForm_TabPage_Inventory";
-            MainForm_TabPage_Inventory.Size = new Size(817, 396);
+            MainForm_TabPage_Inventory.Size = new Size(817, 398);
             MainForm_TabPage_Inventory.TabIndex = 0;
             MainForm_TabPage_Inventory.Text = "New Transaction (Ctrl+1)";
             MainForm_TabPage_Inventory.ToolTipText = "Shortcut: Ctrl+1";
@@ -268,7 +267,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_Control_InventoryTab.Location = new Point(0, 0);
             MainForm_Control_InventoryTab.Margin = new Padding(0);
             MainForm_Control_InventoryTab.Name = "MainForm_Control_InventoryTab";
-            MainForm_Control_InventoryTab.Size = new Size(817, 396);
+            MainForm_Control_InventoryTab.Size = new Size(817, 398);
             MainForm_Control_InventoryTab.TabIndex = 0;
             // 
             // MainForm_AdvancedInventory
@@ -276,7 +275,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_AdvancedInventory.Dock = DockStyle.Fill;
             MainForm_AdvancedInventory.Location = new Point(0, 0);
             MainForm_AdvancedInventory.Name = "MainForm_AdvancedInventory";
-            MainForm_AdvancedInventory.Size = new Size(817, 396);
+            MainForm_AdvancedInventory.Size = new Size(817, 398);
             MainForm_AdvancedInventory.TabIndex = 1;
             MainForm_AdvancedInventory.Visible = false;
             // 
@@ -339,7 +338,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             control_QuickButtons1.Location = new Point(0, 0);
             control_QuickButtons1.Margin = new Padding(0);
             control_QuickButtons1.Name = "control_QuickButtons1";
-            control_QuickButtons1.Size = new Size(155, 424);
+            control_QuickButtons1.Size = new Size(155, 426);
             control_QuickButtons1.TabIndex = 0;
             // 
             // flowLayoutPanel1

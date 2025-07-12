@@ -246,7 +246,7 @@
             // Control_InventoryTab_TextBox_Quantity
             // 
             Control_InventoryTab_TextBox_Quantity.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            Control_InventoryTab_TextBox_Quantity.Location = new Point(100, 66);
+            Control_InventoryTab_TextBox_Quantity.Location = new Point(100, 68);
             Control_InventoryTab_TextBox_Quantity.Name = "Control_InventoryTab_TextBox_Quantity";
             Control_InventoryTab_TextBox_Quantity.Size = new Size(697, 23);
             Control_InventoryTab_TextBox_Quantity.TabIndex = 3;

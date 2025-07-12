@@ -190,12 +190,12 @@
             // 
             // Control_TransferTab_Label_Part
             // 
-            Control_TransferTab_Label_Part.AutoSize = true;
-            Control_TransferTab_Label_Part.Location = new Point(10, 12);
+            Control_TransferTab_Label_Part.Location = new Point(3, 8);
             Control_TransferTab_Label_Part.Name = "Control_TransferTab_Label_Part";
-            Control_TransferTab_Label_Part.Size = new Size(78, 15);
+            Control_TransferTab_Label_Part.Size = new Size(85, 23);
             Control_TransferTab_Label_Part.TabIndex = 4;
             Control_TransferTab_Label_Part.Text = "Part Number:";
+            Control_TransferTab_Label_Part.TextAlign = ContentAlignment.MiddleRight;
             // 
             // Control_TransferTab_Button_Transfer
             // 
@@ -210,12 +210,12 @@
             // 
             // Control_TransferTab_Label_Operation
             // 
-            Control_TransferTab_Label_Operation.AutoSize = true;
-            Control_TransferTab_Label_Operation.Location = new Point(25, 41);
+            Control_TransferTab_Label_Operation.Location = new Point(3, 37);
             Control_TransferTab_Label_Operation.Name = "Control_TransferTab_Label_Operation";
-            Control_TransferTab_Label_Operation.Size = new Size(63, 15);
+            Control_TransferTab_Label_Operation.Size = new Size(85, 23);
             Control_TransferTab_Label_Operation.TabIndex = 5;
             Control_TransferTab_Label_Operation.Text = "Operation:";
+            Control_TransferTab_Label_Operation.TextAlign = ContentAlignment.MiddleRight;
             // 
             // Control_TransferTab_Button_Search
             // 
@@ -231,12 +231,12 @@
             // 
             // Control_TransferTab_Label_ToLocation
             // 
-            Control_TransferTab_Label_ToLocation.AutoSize = true;
-            Control_TransferTab_Label_ToLocation.Location = new Point(285, 12);
+            Control_TransferTab_Label_ToLocation.Location = new Point(271, 7);
             Control_TransferTab_Label_ToLocation.Name = "Control_TransferTab_Label_ToLocation";
-            Control_TransferTab_Label_ToLocation.Size = new Size(72, 15);
+            Control_TransferTab_Label_ToLocation.Size = new Size(86, 23);
             Control_TransferTab_Label_ToLocation.TabIndex = 8;
             Control_TransferTab_Label_ToLocation.Text = "To Location:";
+            Control_TransferTab_Label_ToLocation.TextAlign = ContentAlignment.MiddleRight;
             // 
             // Control_TransferTab_ComboBox_ToLocation
             // 
@@ -253,12 +253,12 @@
             // 
             // Control_TransferTab_Label_Quantity
             // 
-            Control_TransferTab_Label_Quantity.AutoSize = true;
-            Control_TransferTab_Label_Quantity.Location = new Point(301, 41);
+            Control_TransferTab_Label_Quantity.Location = new Point(271, 37);
             Control_TransferTab_Label_Quantity.Name = "Control_TransferTab_Label_Quantity";
-            Control_TransferTab_Label_Quantity.Size = new Size(56, 15);
+            Control_TransferTab_Label_Quantity.Size = new Size(86, 23);
             Control_TransferTab_Label_Quantity.TabIndex = 10;
             Control_TransferTab_Label_Quantity.Text = "Quantity:";
+            Control_TransferTab_Label_Quantity.TextAlign = ContentAlignment.MiddleRight;
             // 
             // Control_TransferTab_NumericUpDown_Quantity
             // 
@@ -298,7 +298,6 @@
             ((System.ComponentModel.ISupportInitialize)Control_TransferTab_Image_NothingFound).EndInit();
             ((System.ComponentModel.ISupportInitialize)Control_TransferTab_DataGridView_Main).EndInit();
             Control_TransferTab_Panel_Header.ResumeLayout(false);
-            Control_TransferTab_Panel_Header.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)Control_TransferTab_NumericUpDown_Quantity).EndInit();
             Control_TransferTab_GroupBox_MainControl.ResumeLayout(false);
             ResumeLayout(false);

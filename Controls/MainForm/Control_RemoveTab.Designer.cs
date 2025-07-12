@@ -234,28 +234,28 @@
             Control_RemoveTab_ComboBox_Part.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             Control_RemoveTab_ComboBox_Part.AutoCompleteSource = AutoCompleteSource.ListItems;
             Control_RemoveTab_ComboBox_Part.FormattingEnabled = true;
-            Control_RemoveTab_ComboBox_Part.Location = new Point(86, 7);
+            Control_RemoveTab_ComboBox_Part.Location = new Point(101, 7);
             Control_RemoveTab_ComboBox_Part.Name = "Control_RemoveTab_ComboBox_Part";
-            Control_RemoveTab_ComboBox_Part.Size = new Size(391, 23);
+            Control_RemoveTab_ComboBox_Part.Size = new Size(376, 23);
             Control_RemoveTab_ComboBox_Part.TabIndex = 1;
             // 
             // Control_RemoveTab_Label_Part
             // 
-            Control_RemoveTab_Label_Part.AutoSize = true;
-            Control_RemoveTab_Label_Part.Location = new Point(3, 11);
+            Control_RemoveTab_Label_Part.Location = new Point(3, 7);
             Control_RemoveTab_Label_Part.Name = "Control_RemoveTab_Label_Part";
-            Control_RemoveTab_Label_Part.Size = new Size(78, 15);
+            Control_RemoveTab_Label_Part.Size = new Size(92, 23);
             Control_RemoveTab_Label_Part.TabIndex = 4;
             Control_RemoveTab_Label_Part.Text = "Part Number:";
+            Control_RemoveTab_Label_Part.TextAlign = ContentAlignment.MiddleRight;
             // 
             // Control_RemoveTab_Label_Operation
             // 
-            Control_RemoveTab_Label_Operation.AutoSize = true;
-            Control_RemoveTab_Label_Operation.Location = new Point(510, 11);
+            Control_RemoveTab_Label_Operation.Location = new Point(483, 7);
             Control_RemoveTab_Label_Operation.Name = "Control_RemoveTab_Label_Operation";
-            Control_RemoveTab_Label_Operation.Size = new Size(63, 15);
+            Control_RemoveTab_Label_Operation.Size = new Size(90, 23);
             Control_RemoveTab_Label_Operation.TabIndex = 5;
             Control_RemoveTab_Label_Operation.Text = "Operation:";
+            Control_RemoveTab_Label_Operation.TextAlign = ContentAlignment.MiddleRight;
             // 
             // Control_RemoveTab_ComboBox_Operation
             // 
@@ -283,7 +283,6 @@
             ((System.ComponentModel.ISupportInitialize)Control_RemoveTab_DataGridView_Main).EndInit();
             Control_RemoveTab_Panel_Footer.ResumeLayout(false);
             Control_RemoveTab_Panel_Header.ResumeLayout(false);
-            Control_RemoveTab_Panel_Header.PerformLayout();
             ResumeLayout(false);
         }
 

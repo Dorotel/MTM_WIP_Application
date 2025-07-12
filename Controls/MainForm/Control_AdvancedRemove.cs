@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Diagnostics;
 using System.Text;
 using MTM_Inventory_Application.Core;
@@ -8,6 +8,7 @@ using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using MySql.Data.MySqlClient;
+using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Controls.MainForm;
 
@@ -519,7 +520,8 @@ public partial class Control_AdvancedRemove : UserControl
                 var quantity = row.Cells["Quantity"].Value?.ToString() ?? "";
                 sb.AppendLine($"PartID: {partId}, Location: {location}, Operation: {operation}, Quantity: {quantity}");
             }
-            string summary = sb.ToString();
+
+            var summary = sb.ToString();
 
             var confirmResult = MessageBox.Show(
                 $@"The following items will be deleted:
@@ -536,7 +538,7 @@ public partial class Control_AdvancedRemove : UserControl
             }
 
             // Call DAO to remove items
-            int removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
+            var removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
 
             // Optionally update undo and status logic here...
 
@@ -549,6 +551,7 @@ public partial class Control_AdvancedRemove : UserControl
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true);
         }
     }
+
     private async Task Control_AdvancedRemove_HardReset()
     {
         var resetBtn = Controls.Find("Control_AdvancedRemove_Button_Reset", true);
@@ -840,6 +843,25 @@ public partial class Control_AdvancedRemove : UserControl
         else
         {
             Control_AdvancedRemove_TextBox_Like.Focus();
+        }
+    }
+
+
+    private void Control_AdvancedRemove_Button_SidePanel_Click(object sender, EventArgs e)
+    {
+        // Toggle the visibility of Panel2 (right panel) in the split container
+        var splitContainer = Control_AdvancedRemove_SplitContainer_Main;
+        var button = sender as Button ?? Control_AdvancedRemove_Button_SidePanel;
+
+        if (splitContainer.Panel1Collapsed)
+        {
+            splitContainer.Panel1Collapsed = false;
+            button.Text = "Collapse ◀";
+        }
+        else
+        {
+            splitContainer.Panel1Collapsed = true;
+            button.Text = "Expand ▶";
         }
     }
 }

@@ -201,7 +201,8 @@ public partial class ControlRemoveTab : UserControl
                 var quantity = row.Cells["Quantity"].Value?.ToString() ?? "";
                 sb.AppendLine($"PartID: {partId}, Location: {location}, Operation: {operation}, Quantity: {quantity}");
             }
-            string summary = sb.ToString();
+
+            var summary = sb.ToString();
 
             var confirmResult = MessageBox.Show(
                 $@"The following items will be deleted:
@@ -218,7 +219,7 @@ public partial class ControlRemoveTab : UserControl
             }
 
             // Call DAO to remove items
-            int removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
+            var removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
 
             // Optionally update undo and status logic here...
 

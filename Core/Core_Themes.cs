@@ -71,6 +71,31 @@ public static class Core_Themes
         form.SuspendLayout();
         SetFormTheme(form, theme, themeName);
         ApplyThemeToControls(form.Controls);
+
+        // Apply ToolTip theming for all ToolTip components in the form
+        foreach (var field in form.GetType().GetFields(System.Reflection.BindingFlags.NonPublic |
+                                                       System.Reflection.BindingFlags.Instance |
+                                                       System.Reflection.BindingFlags.Public))
+            if (field.FieldType == typeof(ToolTip) && field.GetValue(form) is ToolTip toolTip)
+                Core_AppThemes.ApplyToolTipTheme(toolTip);
+
+        // Apply semantic color to statusLabel if present
+        var statusLabelField = form.GetType().GetField("statusLabel",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.Public);
+        if (statusLabelField?.GetValue(form) is Label statusLabel)
+        {
+            var text = statusLabel.Text ?? string.Empty;
+            if (text.StartsWith("Error"))
+                statusLabel.ForeColor = Core_AppThemes.ErrorColor;
+            else if (text.StartsWith("Warning"))
+                statusLabel.ForeColor = Core_AppThemes.WarningColor;
+            else if (text.StartsWith("Success"))
+                statusLabel.ForeColor = Core_AppThemes.SuccessColor;
+            else
+                statusLabel.ForeColor = Core_AppThemes.InfoColor;
+        }
+
         form.ResumeLayout();
         LoggingUtility.Log($"Global theme '{themeName}' applied to form '{form.Name}'.");
     }
@@ -119,7 +144,8 @@ public static class Core_Themes
             var idx = form.Text.LastIndexOf('[');
             if (idx > 0)
                 form.Text = form.Text[..idx].TrimEnd();
-            var themeDisplay = $"[Privlage Type: {Model_AppVariables.User} {Model_AppVariables.UserTypeAdmin}] | Change (Shift + Alt + S)";
+            var themeDisplay =
+                $"[Privlage Type: {Model_AppVariables.User} {Model_AppVariables.UserTypeAdmin}] | Change (Shift + Alt + S)";
             if (!form.Text.Contains(themeDisplay))
                 form.Text = @$"{form.Text} {themeDisplay}";
         }
@@ -370,6 +396,8 @@ public static class Core_Themes
             {
                 if (colors.TabPageBackColor.HasValue) tabPage.BackColor = colors.TabPageBackColor.Value;
                 if (colors.TabPageForeColor.HasValue) tabPage.ForeColor = colors.TabPageForeColor.Value;
+                tabPage.Paint -= AutoShrinkText_Paint;
+                tabPage.Paint += AutoShrinkText_Paint;
 
                 // OwnerDraw for border, selected/unselected states
                 ApplyOwnerDrawThemes(tabPage, colors);
@@ -463,7 +491,8 @@ public static class Core_Themes
             {
                 if (colors.ListBoxBackColor.HasValue) lb.BackColor = colors.ListBoxBackColor.Value;
                 if (colors.ListBoxForeColor.HasValue) lb.ForeColor = colors.ListBoxForeColor.Value;
-
+                lb.Paint -= AutoShrinkText_Paint;
+                lb.Paint += AutoShrinkText_Paint;
                 ApplyOwnerDrawThemes(lb, colors);
             }
         }
@@ -474,7 +503,8 @@ public static class Core_Themes
             {
                 if (colors.CheckedListBoxBackColor.HasValue) clb.BackColor = colors.CheckedListBoxBackColor.Value;
                 if (colors.CheckedListBoxForeColor.HasValue) clb.ForeColor = colors.CheckedListBoxForeColor.Value;
-
+                clb.Paint -= AutoShrinkText_Paint;
+                clb.Paint += AutoShrinkText_Paint;
                 ApplyOwnerDrawThemes(clb, colors);
             }
         }
@@ -485,6 +515,8 @@ public static class Core_Themes
             {
                 if (colors.LabelBackColor.HasValue) lbl.BackColor = colors.LabelBackColor.Value;
                 if (colors.LabelForeColor.HasValue) lbl.ForeColor = colors.LabelForeColor.Value;
+                lbl.Paint -= AutoShrinkText_Paint;
+                lbl.Paint += AutoShrinkText_Paint;
             }
         }
 
@@ -574,6 +606,9 @@ public static class Core_Themes
                 if (colors.ToolStripBackColor.HasValue) ts.BackColor = colors.ToolStripBackColor.Value;
                 if (colors.ToolStripForeColor.HasValue) ts.ForeColor = colors.ToolStripForeColor.Value;
 
+                // Use a custom renderer for advanced theming
+                ts.Renderer = new ThemedToolStripRenderer(colors);
+
                 ApplyOwnerDrawThemes(ts, colors);
             }
         }
@@ -584,7 +619,8 @@ public static class Core_Themes
             {
                 if (colors.GroupBoxBackColor.HasValue) gb.BackColor = colors.GroupBoxBackColor.Value;
                 if (colors.GroupBoxForeColor.HasValue) gb.ForeColor = colors.GroupBoxForeColor.Value;
-
+                gb.Paint -= AutoShrinkText_Paint;
+                gb.Paint += AutoShrinkText_Paint;
                 ApplyOwnerDrawThemes(gb, colors);
             }
         }
@@ -950,6 +986,122 @@ public static class Core_Themes
 
         private static void Button_AutoShrinkText_Paint(object? sender, PaintEventArgs e)
         {
+            if (sender is not Button button) return;
+
+            // Clear the button's background to remove any previously drawn text
+            e.Graphics.Clear(button.BackColor);
+
+            var text = button.Text;
+            var font = button.Font;
+            var rect = button.ClientRectangle;
+
+            using var format = new StringFormat
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center,
+                Trimming = StringTrimming.EllipsisCharacter
+            };
+
+            // Measure text size
+            var textSize = e.Graphics.MeasureString(text, font);
+
+            // Adjust font size if text exceeds button bounds
+            while (textSize.Width > rect.Width || textSize.Height > rect.Height)
+            {
+                font = new Font(font.FontFamily, font.Size - 0.5f, font.Style);
+                textSize = e.Graphics.MeasureString(text, font);
+
+                if (font.Size <= 1) // Prevent font size from becoming too small
+                    break;
+            }
+
+            // Draw the text
+            using var brush = new SolidBrush(button.ForeColor);
+            e.Graphics.DrawString(text, font, brush, rect, format);
+        }
+
+        private static void AutoShrinkText_Paint(object? sender, PaintEventArgs e)
+        {
+            if (sender is not Control control) return;
+            if (string.IsNullOrEmpty(control.Text)) return;
+
+            // Clear the background
+            e.Graphics.Clear(control.BackColor);
+
+            var text = control.Text;
+            var font = control.Font;
+            var rect = control.ClientRectangle;
+
+            // Use control's TextAlign if available, otherwise default to Center
+            var hAlign = StringAlignment.Center;
+            var vAlign = StringAlignment.Center;
+
+            // Check for common controls with TextAlign property
+            var textAlignProp = control.GetType().GetProperty("TextAlign");
+            if (textAlignProp != null)
+            {
+                var alignValue = textAlignProp.GetValue(control);
+                if (alignValue != null)
+                    // Handle Label, Button, etc.
+                    if (alignValue is ContentAlignment ca)
+                        switch (ca)
+                        {
+                            case ContentAlignment.TopLeft:
+                                hAlign = StringAlignment.Near;
+                                vAlign = StringAlignment.Near;
+                                break;
+                            case ContentAlignment.TopCenter:
+                                hAlign = StringAlignment.Center;
+                                vAlign = StringAlignment.Near;
+                                break;
+                            case ContentAlignment.TopRight:
+                                hAlign = StringAlignment.Far;
+                                vAlign = StringAlignment.Near;
+                                break;
+                            case ContentAlignment.MiddleLeft:
+                                hAlign = StringAlignment.Near;
+                                vAlign = StringAlignment.Center;
+                                break;
+                            case ContentAlignment.MiddleCenter:
+                                hAlign = StringAlignment.Center;
+                                vAlign = StringAlignment.Center;
+                                break;
+                            case ContentAlignment.MiddleRight:
+                                hAlign = StringAlignment.Far;
+                                vAlign = StringAlignment.Center;
+                                break;
+                            case ContentAlignment.BottomLeft:
+                                hAlign = StringAlignment.Near;
+                                vAlign = StringAlignment.Far;
+                                break;
+                            case ContentAlignment.BottomCenter:
+                                hAlign = StringAlignment.Center;
+                                vAlign = StringAlignment.Far;
+                                break;
+                            case ContentAlignment.BottomRight:
+                                hAlign = StringAlignment.Far;
+                                vAlign = StringAlignment.Far;
+                                break;
+                        }
+            }
+
+            using var format = new StringFormat
+            {
+                Alignment = hAlign,
+                LineAlignment = vAlign,
+                Trimming = StringTrimming.EllipsisCharacter
+            };
+
+            var textSize = e.Graphics.MeasureString(text, font);
+            while ((textSize.Width > rect.Width || textSize.Height > rect.Height) && font.Size > 1)
+            {
+                font = new Font(font.FontFamily, font.Size - 0.5f, font.Style);
+                textSize = e.Graphics.MeasureString(text, font);
+                if (font.Size <= 1) break;
+            }
+
+            using var brush = new SolidBrush(control.ForeColor);
+            e.Graphics.DrawString(text, font, brush, rect, format);
         }
     }
 
@@ -1064,7 +1216,7 @@ public static class Core_Themes
                 void ListBox_DrawItem(object? sender, DrawItemEventArgs e)
                 {
                     if (e.Index < 0) return;
-                    
+
                     var item = listBox.Items[e.Index];
                     var selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
                     var focused = (e.State & DrawItemState.Focus) == DrawItemState.Focus;
@@ -1083,26 +1235,20 @@ public static class Core_Themes
 
                     // Draw border for the entire ListBox
                     if (colors.ListBoxBorderColor.HasValue)
-                    {
                         using (var borderPen = new Pen(colors.ListBoxBorderColor.Value, 1))
                         {
-                            var borderRect = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width - 1, e.Bounds.Height - 1);
+                            var borderRect = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width - 1,
+                                e.Bounds.Height - 1);
                             e.Graphics.DrawRectangle(borderPen, borderRect);
                         }
-                    }
 
                     // Draw text
                     if (item != null)
-                    {
                         TextRenderer.DrawText(e.Graphics, item.ToString(), listBox.Font, e.Bounds, foreColor,
                             TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
-                    }
 
                     // Draw focus rectangle if focused
-                    if (focused)
-                    {
-                        ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
-                    }
+                    if (focused) ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
                 }
             }
 
@@ -1118,17 +1264,19 @@ public static class Core_Themes
                 void ComboBox_DrawItem(object? sender, DrawItemEventArgs e)
                 {
                     if (e.Index < 0) return;
-                    
+
                     var item = comboBox.Items[e.Index];
                     var selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
                     var focused = (e.State & DrawItemState.Focus) == DrawItemState.Focus;
 
                     var backColor = selected
                         ? colors.ComboBoxSelectionBackColor ?? colors.AccentColor ?? Color.Blue
-                        : colors.ComboBoxDropDownBackColor ?? colors.ComboBoxBackColor ?? colors.ControlBackColor ?? Color.White;
+                        : colors.ComboBoxDropDownBackColor ??
+                          colors.ComboBoxBackColor ?? colors.ControlBackColor ?? Color.White;
                     var foreColor = selected
                         ? colors.ComboBoxSelectionForeColor ?? Color.White
-                        : colors.ComboBoxDropDownForeColor ?? colors.ComboBoxForeColor ?? colors.ControlForeColor ?? Color.Black;
+                        : colors.ComboBoxDropDownForeColor ??
+                          colors.ComboBoxForeColor ?? colors.ControlForeColor ?? Color.Black;
 
                     using (var backBrush = new SolidBrush(backColor))
                     {
@@ -1137,26 +1285,20 @@ public static class Core_Themes
 
                     // Draw border for dropdown items
                     if (colors.ComboBoxBorderColor.HasValue)
-                    {
                         using (var borderPen = new Pen(colors.ComboBoxBorderColor.Value, 1))
                         {
-                            var borderRect = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width - 1, e.Bounds.Height - 1);
+                            var borderRect = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width - 1,
+                                e.Bounds.Height - 1);
                             e.Graphics.DrawRectangle(borderPen, borderRect);
                         }
-                    }
 
                     // Draw text
                     if (item != null)
-                    {
                         TextRenderer.DrawText(e.Graphics, item.ToString(), comboBox.Font, e.Bounds, foreColor,
                             TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
-                    }
 
                     // Draw focus rectangle if focused
-                    if (focused)
-                    {
-                        ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
-                    }
+                    if (focused) ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
                 }
             }
 
@@ -1172,7 +1314,7 @@ public static class Core_Themes
                 void CheckedListBox_DrawItem(object? sender, DrawItemEventArgs e)
                 {
                     if (e.Index < 0) return;
-                    
+
                     var item = checkedListBox.Items[e.Index];
                     var selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
                     var focused = (e.State & DrawItemState.Focus) == DrawItemState.Focus;
@@ -1192,20 +1334,20 @@ public static class Core_Themes
 
                     // Draw border
                     if (colors.CheckedListBoxBorderColor.HasValue)
-                    {
                         using (var borderPen = new Pen(colors.CheckedListBoxBorderColor.Value, 1))
                         {
-                            var borderRect = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width - 1, e.Bounds.Height - 1);
+                            var borderRect = new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width - 1,
+                                e.Bounds.Height - 1);
                             e.Graphics.DrawRectangle(borderPen, borderRect);
                         }
-                    }
 
                     // Draw checkbox
                     var checkBoxRect = new Rectangle(e.Bounds.X + 2, e.Bounds.Y + 2, 13, 13);
-                    var checkBoxBackColor = colors.CheckedListBoxCheckBackColor ?? colors.ControlBackColor ?? Color.White;
+                    var checkBoxBackColor =
+                        colors.CheckedListBoxCheckBackColor ?? colors.ControlBackColor ?? Color.White;
                     var checkBoxForeColor = colors.CheckedListBoxCheckForeColor ?? colors.AccentColor ?? Color.Blue;
-                    
-                    ControlPaint.DrawCheckBox(e.Graphics, checkBoxRect, 
+
+                    ControlPaint.DrawCheckBox(e.Graphics, checkBoxRect,
                         isChecked ? ButtonState.Checked : ButtonState.Normal);
 
                     // Draw text
@@ -1217,43 +1359,36 @@ public static class Core_Themes
                     }
 
                     // Draw focus rectangle if focused
-                    if (focused)
-                    {
-                        ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
-                    }
+                    if (focused) ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
                 }
             }
+
+            // ToolStrip owner-draw implementation
+            if (control is ToolStrip toolStrip)
+                // Custom renderer is set in ApplyToolStripTheme
+                // Apply hover colors to tool strip items
+                foreach (ToolStripItem item in toolStrip.Items)
+                    ApplyToolStripItemHoverColors(item, colors,
+                        colors.ToolStripItemHoverBackColor, colors.ToolStripItemHoverForeColor,
+                        null, null);
 
             // Border color support for other controls
             ApplyBorderColorToControl(control, colors);
 
             // TreeView and ListView selection highlighting
             if (control is TreeView treeView)
-            {
                 ApplyTreeViewSelectionTheming(treeView, colors);
-            }
-            else if (control is ListView listView)
-            {
-                ApplyListViewSelectionTheming(listView, colors);
-            }
+            else if (control is ListView listView) ApplyListViewSelectionTheming(listView, colors);
 
             // MenuStrip, StatusStrip, ToolStrip special handling
             if (control is MenuStrip menuStrip)
-            {
                 ApplyMenuStripTheming(menuStrip, colors);
-            }
             else if (control is StatusStrip statusStrip)
-            {
                 ApplyStatusStripTheming(statusStrip, colors);
-            }
-            else if (control is ToolStrip toolStrip)
-            {
-                ApplyToolStripTheming(toolStrip, colors);
-            }
+            else if (control is ToolStrip toolStripControl)
+                ApplyToolStripTheming(toolStripControl, colors);
             else if (control is ContextMenuStrip contextMenuStrip)
-            {
                 ApplyContextMenuStripTheming(contextMenuStrip, colors);
-            }
         }
 
         // Attach link label hover color
@@ -1362,6 +1497,16 @@ public static class Core_Themes
         // Apply custom border painting using Paint event
         private static void ApplyCustomBorderPaint(Control control, Color borderColor)
         {
+            // Only apply border if the control has a border by default or is not explicitly set to None
+            var borderStyleProp = control.GetType().GetProperty("BorderStyle");
+            if (borderStyleProp != null)
+            {
+                var borderStyleValue = borderStyleProp.GetValue(control);
+                // For controls with BorderStyle.None, do not draw a border
+                if (borderStyleValue != null && borderStyleValue.ToString().Contains("None"))
+                    return;
+            }
+
             // Remove existing paint handler to avoid duplicates
             control.Paint -= (sender, e) => DrawControlBorder(sender, e, borderColor);
             control.Paint += (sender, e) => DrawControlBorder(sender, e, borderColor);
@@ -1371,70 +1516,55 @@ public static class Core_Themes
         private static void DrawControlBorder(object? sender, PaintEventArgs e, Color borderColor)
         {
             if (sender is Control control)
-            {
                 using (var pen = new Pen(borderColor, 1))
                 {
                     var rect = new Rectangle(0, 0, control.Width - 1, control.Height - 1);
                     e.Graphics.DrawRectangle(pen, rect);
                 }
-            }
         }
 
         // MenuStrip theming with hover states
         private static void ApplyMenuStripTheming(MenuStrip menuStrip, Model_UserUiColors colors)
         {
             if (colors.MenuStripBorderColor.HasValue)
-            {
                 ApplyCustomBorderPaint(menuStrip, colors.MenuStripBorderColor.Value);
-            }
 
             // Apply hover colors to menu items
             foreach (ToolStripItem item in menuStrip.Items)
-            {
-                ApplyToolStripItemHoverColors(item, colors, 
+                ApplyToolStripItemHoverColors(item, colors,
                     colors.MenuStripItemHoverBackColor, colors.MenuStripItemHoverForeColor,
                     colors.MenuStripItemSelectedBackColor, colors.MenuStripItemSelectedForeColor);
-            }
         }
 
         // StatusStrip theming
         private static void ApplyStatusStripTheming(StatusStrip statusStrip, Model_UserUiColors colors)
         {
             if (colors.StatusStripBorderColor.HasValue)
-            {
                 ApplyCustomBorderPaint(statusStrip, colors.StatusStripBorderColor.Value);
-            }
         }
 
         // ToolStrip theming with hover states
         private static void ApplyToolStripTheming(ToolStrip toolStrip, Model_UserUiColors colors)
         {
             if (colors.ToolStripBorderColor.HasValue)
-            {
                 ApplyCustomBorderPaint(toolStrip, colors.ToolStripBorderColor.Value);
-            }
 
             // Apply hover colors to tool strip items
             foreach (ToolStripItem item in toolStrip.Items)
-            {
-                ApplyToolStripItemHoverColors(item, colors, 
+                ApplyToolStripItemHoverColors(item, colors,
                     colors.ToolStripItemHoverBackColor, colors.ToolStripItemHoverForeColor,
-                    colors.ToolStripItemHoverBackColor, colors.ToolStripItemHoverForeColor);
-            }
+                    null, null);
         }
 
         // ContextMenuStrip theming
         private static void ApplyContextMenuStripTheming(ContextMenuStrip contextMenuStrip, Model_UserUiColors colors)
         {
             if (colors.ContextMenuBorderColor.HasValue)
-            {
                 ApplyCustomBorderPaint(contextMenuStrip, colors.ContextMenuBorderColor.Value);
-            }
 
             // Apply hover colors to context menu items
             foreach (ToolStripItem item in contextMenuStrip.Items)
-            {
-                ApplyToolStripItemHoverColors(item, colors, 
+                ApplyToolStripItemHoverColors(item, colors,
                     colors.ContextMenuItemHoverBackColor, colors.ContextMenuItemHoverForeColor,
                     colors.ContextMenuItemHoverBackColor, colors.ContextMenuItemHoverForeColor);
                 
@@ -1511,10 +1641,7 @@ public static class Core_Themes
                     TextRenderer.DrawText(e.Graphics, e.Node.Text, treeView.Font, e.Bounds, foreColor,
                         TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 
-                    if (focused)
-                    {
-                        ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
-                    }
+                    if (focused) ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
                 }
             }
         }
@@ -1550,10 +1677,7 @@ public static class Core_Themes
                     TextRenderer.DrawText(e.Graphics, e.Item.Text, listView.Font, e.Bounds, foreColor,
                         TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 
-                    if (focused)
-                    {
-                        ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
-                    }
+                    if (focused) ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds);
                 }
 
                 // Also handle column headers if in Details view
@@ -2085,6 +2209,75 @@ public static class Core_Themes
                 throw;
             }
         }
+
+        #endregion
+
+        #region ToolTip and Window Chrome Theme
+
+        /// <summary>
+        /// Applies theme colors to a ToolTip control.
+        /// </summary>
+        public static void ApplyToolTipTheme(ToolTip toolTip)
+        {
+            var colors = GetCurrentTheme().Colors;
+            if (toolTip == null) return;
+            // OwnerDraw must be true to set custom colors
+            toolTip.OwnerDraw = true;
+            toolTip.Draw -= ToolTip_Draw;
+            toolTip.Draw += ToolTip_Draw;
+            toolTip.Popup -= ToolTip_Popup;
+            toolTip.Popup += ToolTip_Popup;
+
+            void ToolTip_Draw(object? sender, DrawToolTipEventArgs e)
+            {
+                var backColor = colors.ToolTipBackColor ?? Color.FromArgb(37, 37, 38);
+                var foreColor = colors.ToolTipForeColor ?? Color.White;
+                var borderColor = colors.ToolTipBorderColor ?? Color.FromArgb(60, 60, 60);
+                using (var b = new SolidBrush(backColor))
+                {
+                    e.Graphics.FillRectangle(b, e.Bounds);
+                }
+
+                using (var p = new Pen(borderColor, 1))
+                {
+                    e.Graphics.DrawRectangle(p, new Rectangle(0, 0, e.Bounds.Width - 1, e.Bounds.Height - 1));
+                }
+
+                TextRenderer.DrawText(e.Graphics, e.ToolTipText, e.Font, e.Bounds, foreColor);
+            }
+
+            void ToolTip_Popup(object? sender, PopupEventArgs e)
+            {
+                // Optionally adjust size if needed
+            }
+        }
+
+        /// <summary>
+        /// Applies window chrome theme colors to a Form (if custom chrome is used).
+        /// </summary>
+        public static void ApplyWindowChromeTheme(Form form)
+        {
+            var colors = GetCurrentTheme().Colors;
+            // Only applies if custom chrome is implemented
+            // Example: set border color, title bar color, etc.
+            // This is a stub for integration with custom-drawn forms
+            // Example usage in a custom Form's OnPaint event:
+            //   Core_Themes.ApplyWindowChromeTheme(this);
+            //   Use colors.WindowTitleBarBackColor, colors.WindowTitleBarForeColor, etc.
+        }
+
+        #endregion
+
+        #region Exposed General/Semantic Colors
+
+        public static Color InfoColor => GetCurrentTheme().Colors.InfoColor ?? Color.FromArgb(51, 153, 255);
+        public static Color ErrorColor => GetCurrentTheme().Colors.ErrorColor ?? Color.FromArgb(229, 115, 115);
+        public static Color AccentColor => GetCurrentTheme().Colors.AccentColor ?? Color.FromArgb(0, 122, 204);
+        public static Color SuccessColor => GetCurrentTheme().Colors.SuccessColor ?? Color.FromArgb(102, 187, 106);
+        public static Color WarningColor => GetCurrentTheme().Colors.WarningColor ?? Color.FromArgb(255, 167, 38);
+
+        public static Color SecondaryAccentColor =>
+            GetCurrentTheme().Colors.SecondaryAccentColor ?? Color.FromArgb(102, 204, 255);
 
         #endregion
     }

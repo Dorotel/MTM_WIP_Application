@@ -35,6 +35,7 @@ public partial class MainForm : Form
         {
             // Before InitializeComponent
             InitializeComponent();
+            AutoScaleMode = AutoScaleMode.Dpi;
             System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] InitializeComponent complete.");
 
             // Initialize progress control
@@ -443,20 +444,18 @@ public partial class MainForm : Form
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Question);
 
-        if (result == DialogResult.Yes)
-        {
-            Application.Exit();
-        }
+        if (result == DialogResult.Yes) Application.Exit();
     }
 
     private void MainForm_MenuStrip_View_PersonalHistory_Click(object sender, EventArgs e)
     {
         // Use global application variables for the user and connection info
-        string connectionString = Model_AppVariables.ConnectionString;
-        string currentUser = Model_AppVariables.User;
-        bool isAdmin = Model_AppVariables.UserTypeAdmin;
+        var connectionString = Model_AppVariables.ConnectionString;
+        var currentUser = Model_AppVariables.User;
+        var isAdmin = Model_AppVariables.UserTypeAdmin;
 
-        var transactionsForm = new MTM_Inventory_Application.Forms.Transactions.Transactions(connectionString, currentUser, isAdmin);
+        var transactionsForm =
+            new MTM_Inventory_Application.Forms.Transactions.Transactions(connectionString, currentUser, isAdmin);
         transactionsForm.ShowDialog(this); // Show as modal dialog
     }
 }
