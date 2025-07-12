@@ -120,55 +120,37 @@ public partial class SettingsForm : Form
         var addUserPanel = _settingsPanels["Add User"];
         var addUserControl = new AddUserControl();
         addUserControl.Dock = DockStyle.Fill;
-        addUserControl.UserAdded += (s, e) =>
-        {
-            UpdateStatus("User added successfully.");
-        };
+        addUserControl.UserAdded += (s, e) => { UpdateStatus("User added successfully."); };
         addUserPanel.Controls.Add(addUserControl);
 
         // --- Edit User Control ---
         var editUserPanel = _settingsPanels["Edit User"];
         var editUserControl = new EditUserControl();
         editUserControl.Dock = DockStyle.Fill;
-        editUserControl.UserEdited += (s, e) =>
-        {
-            UpdateStatus("User updated successfully.");
-        };
+        editUserControl.UserEdited += (s, e) => { UpdateStatus("User updated successfully."); };
         editUserPanel.Controls.Add(editUserControl);
 
         // --- Remove User Control ---
         var deleteUserPanel = _settingsPanels["Delete User"];
         var removeUserControl = new RemoveUserControl();
         removeUserControl.Dock = DockStyle.Fill;
-        removeUserControl.UserRemoved += (s, e) =>
-        {
-            UpdateStatus("User removed successfully.");
-        };
+        removeUserControl.UserRemoved += (s, e) => { UpdateStatus("User removed successfully."); };
         deleteUserPanel.Controls.Add(removeUserControl);
 
         // --- Existing controls initialization ---
         var addPartControl = new AddPartControl();
         addPartControl.Dock = DockStyle.Fill;
-        addPartControl.PartAdded += (s, e) =>
-        {
-            UpdateStatus("Part added successfully - lists refreshed");
-        };
+        addPartControl.PartAdded += (s, e) => { UpdateStatus("Part added successfully - lists refreshed"); };
         addPartPanel.Controls.Add(addPartControl);
 
         var editPartControl = new EditPartControl();
         editPartControl.Dock = DockStyle.Fill;
-        editPartControl.PartUpdated += (s, e) =>
-        {
-            UpdateStatus("Part updated successfully - lists refreshed");
-        };
+        editPartControl.PartUpdated += (s, e) => { UpdateStatus("Part updated successfully - lists refreshed"); };
         editPartPanel.Controls.Add(editPartControl);
 
         var removePartControl = new RemovePartControl();
         removePartControl.Dock = DockStyle.Fill;
-        removePartControl.PartRemoved += (s, e) =>
-        {
-            UpdateStatus("Part removed successfully - lists refreshed");
-        };
+        removePartControl.PartRemoved += (s, e) => { UpdateStatus("Part removed successfully - lists refreshed"); };
         removePartPanel.Controls.Add(removePartControl);
 
         var addOperationControl = new AddOperationControl();

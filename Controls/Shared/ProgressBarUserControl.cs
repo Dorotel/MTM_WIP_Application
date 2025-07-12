@@ -37,7 +37,10 @@ public partial class ProgressBarUserControl : UserControl
     public string StatusText
     {
         get => _statusLabel?.Text ?? string.Empty;
-        set { if (_statusLabel != null) _statusLabel.Text = value; }
+        set
+        {
+            if (_statusLabel != null) _statusLabel.Text = value;
+        }
     }
 
     /// <summary>
@@ -47,7 +50,10 @@ public partial class ProgressBarUserControl : UserControl
     public bool ShowLoadingImage
     {
         get => _loadingImage?.Visible ?? false;
-        set { if (_loadingImage != null) _loadingImage.Visible = value; }
+        set
+        {
+            if (_loadingImage != null) _loadingImage.Visible = value;
+        }
     }
 
     public ProgressBarUserControl()
@@ -104,8 +110,8 @@ public partial class ProgressBarUserControl : UserControl
 
     private void LayoutControls()
     {
-        int spacing = 8;
-        int currentY = spacing;
+        var spacing = 8;
+        var currentY = spacing;
 
         if (_loadingImage != null)
         {
@@ -118,7 +124,7 @@ public partial class ProgressBarUserControl : UserControl
         {
             // Position progress bar below image
             _progressBar.Location = new Point(spacing, currentY);
-            _progressBar.Width = Width - (spacing * 2);
+            _progressBar.Width = Width - spacing * 2;
             currentY += _progressBar.Height + spacing;
         }
 
@@ -126,7 +132,7 @@ public partial class ProgressBarUserControl : UserControl
         {
             // Position status label below progress bar
             _statusLabel.Location = new Point(spacing, currentY);
-            _statusLabel.Width = Width - (spacing * 2);
+            _statusLabel.Width = Width - spacing * 2;
         }
 
         // Set total height
@@ -146,7 +152,7 @@ public partial class ProgressBarUserControl : UserControl
         using var pen = new Pen(Model_AppVariables.UserUiColors?.ProgressBarForeColor ?? Color.Blue, 3);
 
         // Draw spinning arc
-        var startAngle = (Environment.TickCount / 10) % 360;
+        var startAngle = Environment.TickCount / 10 % 360;
         g.DrawArc(pen, center.X - radius, center.Y - radius, radius * 2, radius * 2, startAngle, 270);
     }
 
@@ -243,9 +249,11 @@ public partial class ProgressBarUserControl : UserControl
     {
         try
         {
-            var colors = Core_Themes.Core_AppThemes.GetCurrentTheme().Colors;
-            if (colors.UserControlBackColor.HasValue) this.BackColor = colors.UserControlBackColor.Value;
-            if (colors.UserControlForeColor.HasValue) this.ForeColor = colors.UserControlForeColor.Value;
+            // Use the correct class and namespace for GetCurrentTheme
+            var theme = Core_Themes.Core_AppThemes.GetCurrentTheme();
+            var colors = theme.Colors;
+            if (colors.UserControlBackColor.HasValue) BackColor = colors.UserControlBackColor.Value;
+            if (colors.UserControlForeColor.HasValue) ForeColor = colors.UserControlForeColor.Value;
         }
         catch
         {
@@ -256,9 +264,6 @@ public partial class ProgressBarUserControl : UserControl
     protected override void OnResize(EventArgs e)
     {
         base.OnResize(e);
-        if (_loadingImage != null && _progressBar != null && _statusLabel != null)
-        {
-            LayoutControls();
-        }
+        if (_loadingImage != null && _progressBar != null && _statusLabel != null) LayoutControls();
     }
 }
