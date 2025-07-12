@@ -64,6 +64,83 @@ public static class Core_Themes
         [typeof(ControlTransferTab)] = ThemeAppliersInternal.ApplyTransferTabTheme
     };
 
+    // Cache for font calculations to improve performance
+    private static readonly ConcurrentDictionary<string, Font> FontCache = new();
+    
+    /// <summary>
+    /// Clears the font cache to prevent memory leaks
+    /// </summary>
+    public static void ClearFontCache()
+    {
+        foreach (var font in FontCache.Values)
+        {
+            font?.Dispose();
+        }
+        FontCache.Clear();
+    }
+
+    /// <summary>
+    /// Handles DPI changes and form resize events to reapply text auto-sizing
+    /// This method should be called when the DPI changes or when a form is resized
+    /// </summary>
+    /// <param name="form">The form to update</param>
+    public static void HandleDpiOrResizeChanged(Form form)
+    {
+        if (form == null) return;
+
+        try
+        {
+            // Clear the font cache since DPI change invalidates cached fonts
+            ClearFontCache();
+            
+            // Reapply comprehensive text auto-sizing
+            ApplyComprehensiveTextAutoSizing(form);
+            
+            LoggingUtility.Log($"Handled DPI/resize change for form '{form.Name}' - text auto-sizing reapplied.");
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Attaches DPI change and resize event handlers to a form
+    /// This ensures text auto-sizing is reapplied when needed
+    /// </summary>
+    /// <param name="form">The form to attach handlers to</param>
+    public static void AttachDpiAndResizeHandlers(Form form)
+    {
+        if (form == null) return;
+
+        // Handle DPI changes
+        form.DpiChanged += (sender, e) =>
+        {
+            if (sender is Form f)
+            {
+                HandleDpiOrResizeChanged(f);
+            }
+        };
+
+        // Handle form resize events
+        form.ResizeEnd += (sender, e) =>
+        {
+            if (sender is Form f)
+            {
+                HandleDpiOrResizeChanged(f);
+            }
+        };
+
+        // Handle layout changes
+        form.Layout += (sender, e) =>
+        {
+            if (sender is Form f && e.AffectedControl == f)
+            {
+                HandleDpiOrResizeChanged(f);
+            }
+        };
+    }
+
     public static void ApplyTheme(Form form)
     {
         var theme = Core_AppThemes.GetCurrentTheme();
@@ -71,8 +148,15 @@ public static class Core_Themes
         form.SuspendLayout();
         SetFormTheme(form, theme, themeName);
         ApplyThemeToControls(form.Controls);
+        
+        // Apply comprehensive text auto-sizing to prevent clipping due to DPI changes
+        ApplyComprehensiveTextAutoSizing(form);
+        
+        // Attach DPI and resize handlers to handle future changes
+        AttachDpiAndResizeHandlers(form);
+        
         form.ResumeLayout();
-        LoggingUtility.Log($"Global theme '{themeName}' applied to form '{form.Name}'.");
+        LoggingUtility.Log($"Global theme '{themeName}' applied to form '{form.Name}' with text auto-sizing and DPI handlers.");
     }
 
     public static async Task<Model_UserUiColors> GetUserThemeColorsAsync(string userId)
@@ -98,6 +182,94 @@ public static class Core_Themes
     {
         var theme = Core_AppThemes.GetCurrentTheme();
         FocusUtils.ApplyFocusEventHandlingToControls(parentControl.Controls, theme.Colors);
+    }
+
+    /// <summary>
+    /// Applies comprehensive text auto-sizing to all controls in a form hierarchy
+    /// This method should be called when DPI changes or when the application starts
+    /// </summary>
+    /// <param name="form">The form to apply auto-sizing to</param>
+    public static void ApplyComprehensiveTextAutoSizing(Form form)
+    {
+        if (form == null) return;
+
+        try
+        {
+            form.SuspendLayout();
+            ApplyTextAutoSizingToControlHierarchy(form.Controls);
+            form.ResumeLayout();
+            LoggingUtility.Log($"Applied comprehensive text auto-sizing to form '{form.Name}'.");
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Recursively applies text auto-sizing to all controls in a control hierarchy
+    /// </summary>
+    /// <param name="controls">The control collection to process</param>
+    private static void ApplyTextAutoSizingToControlHierarchy(Control.ControlCollection controls)
+    {
+        foreach (Control ctrl in controls)
+        {
+            try
+            {
+                // Apply auto-sizing to the current control
+                if (!string.IsNullOrEmpty(ctrl.Text) || IsTextDisplayControl(ctrl))
+                {
+                    ThemeAppliersInternal.ApplyAutoSizingToTextControls(ctrl);
+                }
+
+                // Special handling for DataGridView
+                if (ctrl is DataGridView dgv)
+                {
+                    ThemeAppliersInternal.ApplyDataGridViewAutoSizing(dgv);
+                }
+
+                // Recursively process child controls
+                if (ctrl.HasChildren && ctrl.Controls.Count < 10000)
+                {
+                    ApplyTextAutoSizingToControlHierarchy(ctrl.Controls);
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Determines if a control is a text display control that should have auto-sizing applied
+    /// </summary>
+    /// <param name="control">The control to check</param>
+    /// <returns>True if the control should have text auto-sizing applied</returns>
+    private static bool IsTextDisplayControl(Control control)
+    {
+        return control switch
+        {
+            Label => true,
+            Button => true,
+            GroupBox => true,
+            RadioButton => true,
+            CheckBox => true,
+            LinkLabel => true,
+            TextBox => true,
+            MaskedTextBox => true,
+            RichTextBox => true,
+            ComboBox => true,
+            ListBox => true,
+            CheckedListBox => true,
+            TreeView => true,
+            ListView => true,
+            TabControl => true,
+            NumericUpDown => true,
+            DateTimePicker => true,
+            DomainUpDown => true,
+            _ => false
+        };
     }
 
     private static void SetFormTheme(Form form, Core_AppThemes.AppTheme theme, string themeName)
@@ -151,6 +323,9 @@ public static class Core_Themes
                     ApplyBaseThemeColors(ctrl, theme);
                     ApplyControlSpecificTheme(ctrl);
                     FocusUtils.ApplyFocusEventHandling(ctrl, theme.Colors);
+                    
+                    // Apply auto-sizing to all text-containing controls to prevent clipping
+                    ApplyAutoSizingToTextControlsIfNeeded(ctrl);
                 }
 
                 if (ctrl.HasChildren && ctrl.Controls.Count < 10000)
@@ -160,6 +335,75 @@ public static class Core_Themes
             {
                 LoggingUtility.LogApplicationError(ex);
             }
+    }
+
+    /// <summary>
+    /// Applies auto-sizing to text-containing controls that aren't already handled by owner-draw methods
+    /// </summary>
+    /// <param name="control">The control to check and apply auto-sizing to</param>
+    private static void ApplyAutoSizingToTextControlsIfNeeded(Control control)
+    {
+        // Only apply auto-sizing to controls that don't already have owner-draw text handling
+        // and that contain text that could be clipped
+        switch (control)
+        {
+            case Label:
+            case GroupBox:
+            case RadioButton:
+            case CheckBox:
+            case Button:
+                // These controls already get auto-sizing in their theme appliers
+                break;
+            case TextBox:
+            case MaskedTextBox:
+            case RichTextBox:
+                // Text input controls - apply auto-sizing if they contain text
+                if (!string.IsNullOrEmpty(control.Text))
+                {
+                    ThemeAppliersInternal.ApplyAutoSizingToTextControls(control);
+                }
+                break;
+            case NumericUpDown:
+            case DateTimePicker:
+            case DomainUpDown:
+                // These controls may have display text that could be clipped
+                ThemeAppliersInternal.ApplyAutoSizingToTextControls(control);
+                break;
+            case LinkLabel:
+                // LinkLabel can have text that gets clipped
+                if (!string.IsNullOrEmpty(control.Text))
+                {
+                    ThemeAppliersInternal.ApplyAutoSizingToTextControls(control);
+                }
+                break;
+            default:
+                // For other controls, only apply if they have text and aren't owner-drawn
+                if (!string.IsNullOrEmpty(control.Text) && !IsOwnerDrawnControl(control))
+                {
+                    ThemeAppliersInternal.ApplyAutoSizingToTextControls(control);
+                }
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Checks if a control uses owner-draw rendering (which already handles text auto-sizing)
+    /// </summary>
+    /// <param name="control">The control to check</param>
+    /// <returns>True if the control uses owner-draw rendering</returns>
+    private static bool IsOwnerDrawnControl(Control control)
+    {
+        return control switch
+        {
+            ListBox lb => lb.DrawMode != DrawMode.Normal,
+            ComboBox cb => cb.DrawMode != DrawMode.Normal,
+            CheckedListBox clb => clb.DrawMode != DrawMode.Normal,
+            TreeView tv => tv.DrawMode != TreeViewDrawMode.Normal,
+            ListView lv => lv.OwnerDraw,
+            TabControl tc => tc.DrawMode != TabDrawMode.Normal,
+            MenuStrip or StatusStrip or ToolStrip or ContextMenuStrip => true,
+            _ => false
+        };
     }
 
     private static void ApplyBaseThemeColors(Control control, Core_AppThemes.AppTheme theme)
@@ -310,6 +554,9 @@ public static class Core_Themes
                 btn.Paint -= Button_AutoShrinkText_Paint;
                 btn.Paint += Button_AutoShrinkText_Paint;
 
+                // Apply immediate auto-sizing to prevent text clipping
+                ApplyAutoSizingToTextControls(btn);
+
                 // Button border, hover, pressed states
                 ApplyOwnerDrawThemes(btn, colors);
             }
@@ -414,6 +661,9 @@ public static class Core_Themes
             {
                 if (colors.LabelBackColor.HasValue) lbl.BackColor = colors.LabelBackColor.Value;
                 if (colors.LabelForeColor.HasValue) lbl.ForeColor = colors.LabelForeColor.Value;
+                
+                // Apply auto-sizing to prevent text clipping
+                ApplyAutoSizingToTextControls(lbl);
             }
         }
 
@@ -423,6 +673,9 @@ public static class Core_Themes
             {
                 if (colors.RadioButtonBackColor.HasValue) rb.BackColor = colors.RadioButtonBackColor.Value;
                 if (colors.RadioButtonForeColor.HasValue) rb.ForeColor = colors.RadioButtonForeColor.Value;
+
+                // Apply auto-sizing to prevent text clipping
+                ApplyAutoSizingToTextControls(rb);
 
                 ApplyOwnerDrawThemes(rb, colors);
             }
@@ -434,6 +687,9 @@ public static class Core_Themes
             {
                 if (colors.CheckBoxBackColor.HasValue) cbx.BackColor = colors.CheckBoxBackColor.Value;
                 if (colors.CheckBoxForeColor.HasValue) cbx.ForeColor = colors.CheckBoxForeColor.Value;
+
+                // Apply auto-sizing to prevent text clipping
+                ApplyAutoSizingToTextControls(cbx);
 
                 ApplyOwnerDrawThemes(cbx, colors);
             }
@@ -501,6 +757,9 @@ public static class Core_Themes
             {
                 if (colors.GroupBoxBackColor.HasValue) gb.BackColor = colors.GroupBoxBackColor.Value;
                 if (colors.GroupBoxForeColor.HasValue) gb.ForeColor = colors.GroupBoxForeColor.Value;
+
+                // Apply auto-sizing to prevent text clipping in GroupBox header
+                ApplyAutoSizingToTextControls(gb);
 
                 ApplyOwnerDrawThemes(gb, colors);
             }
@@ -712,6 +971,9 @@ public static class Core_Themes
                 if (colors.LinkLabelForeColor.HasValue) ll.ForeColor = colors.LinkLabelForeColor.Value;
                 if (colors.LinkLabelHoverColor.HasValue)
                     OwnerDrawThemeHelper.AttachLinkLabelHoverColor(ll, colors.LinkLabelHoverColor.Value);
+                
+                // Apply auto-sizing to prevent text clipping
+                ApplyAutoSizingToTextControls(ll);
             }
         }
 
@@ -768,6 +1030,53 @@ public static class Core_Themes
                 dataGridView.DefaultCellStyle.SelectionForeColor = colors.DataGridSelectionForeColor.Value;
             if (colors.DataGridBorderColor.HasValue)
                 OwnerDrawThemeHelper.ApplyDataGridViewBorderColor(dataGridView, colors.DataGridBorderColor.Value);
+
+            // Apply auto-sizing to prevent text clipping in DataGridView
+            ApplyDataGridViewAutoSizing(dataGridView);
+        }
+
+        /// <summary>
+        /// Applies auto-sizing to DataGridView to prevent text clipping
+        /// </summary>
+        /// <param name="dataGridView">The DataGridView to apply auto-sizing to</param>
+        private static void ApplyDataGridViewAutoSizing(DataGridView dataGridView)
+        {
+            if (dataGridView == null) return;
+
+            try
+            {
+                // Enable auto-sizing for columns and rows to prevent text clipping
+                dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+                dataGridView.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCells;
+                
+                // Enable column header auto-sizing
+                if (dataGridView.ColumnHeadersVisible)
+                {
+                    dataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+                }
+
+                // Enable row header auto-sizing
+                if (dataGridView.RowHeadersVisible)
+                {
+                    dataGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+                }
+
+                // Set word wrap for cells to handle long text
+                dataGridView.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+                
+                // Set minimum column width to ensure readability
+                foreach (DataGridViewColumn column in dataGridView.Columns)
+                {
+                    if (column.MinimumWidth < 50)
+                    {
+                        column.MinimumWidth = 50;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
         }
 
         public static void SizeDataGrid(DataGridView dataGridView)
@@ -798,6 +1107,188 @@ public static class Core_Themes
 
         private static void Button_AutoShrinkText_Paint(object? sender, PaintEventArgs e)
         {
+            if (sender is Button btn)
+            {
+                AutoSizeTextToFitControl(btn, e.Graphics);
+            }
+        }
+
+        /// <summary>
+        /// Automatically resizes text to fit within the control bounds
+        /// </summary>
+        /// <param name="control">The control containing the text</param>
+        /// <param name="graphics">Graphics context for measuring text</param>
+        private static void AutoSizeTextToFitControl(Control control, Graphics graphics)
+        {
+            if (string.IsNullOrEmpty(control.Text) || control.Width <= 0 || control.Height <= 0)
+                return;
+
+            // Get the available area for text (considering padding and margins)
+            var availableSize = GetAvailableTextArea(control);
+            if (availableSize.Width <= 0 || availableSize.Height <= 0)
+                return;
+
+            // Find the optimal font size
+            var optimalFont = FindOptimalFontSize(control.Text, control.Font, availableSize, graphics);
+            if (optimalFont != null && Math.Abs(optimalFont.Size - control.Font.Size) > 0.1f)
+            {
+                control.Font = optimalFont;
+            }
+        }
+
+        /// <summary>
+        /// Gets the available area for text within a control, accounting for padding and margins
+        /// </summary>
+        /// <param name="control">The control to analyze</param>
+        /// <returns>Available size for text</returns>
+        private static Size GetAvailableTextArea(Control control)
+        {
+            var width = control.Width;
+            var height = control.Height;
+
+            // Account for padding
+            if (control.Padding != Padding.Empty)
+            {
+                width -= control.Padding.Left + control.Padding.Right;
+                height -= control.Padding.Top + control.Padding.Bottom;
+            }
+
+            // Account for margins
+            if (control.Margin != Padding.Empty)
+            {
+                width -= control.Margin.Left + control.Margin.Right;
+                height -= control.Margin.Top + control.Margin.Bottom;
+            }
+
+            // Special handling for different control types
+            switch (control)
+            {
+                case Button btn:
+                    // Account for button border and flat appearance
+                    if (btn.FlatStyle == FlatStyle.Flat)
+                    {
+                        width -= btn.FlatAppearance.BorderSize * 2;
+                        height -= btn.FlatAppearance.BorderSize * 2;
+                    }
+                    else
+                    {
+                        // Standard button border
+                        width -= 6;
+                        height -= 6;
+                    }
+                    break;
+
+                case GroupBox gb:
+                    // Account for GroupBox header and border
+                    height -= 20; // Approximate header height
+                    width -= 6;   // Border padding
+                    break;
+
+                case Label lbl:
+                    // Labels typically don't need much adjustment
+                    break;
+
+                default:
+                    // General border adjustment for other controls
+                    width -= 4;
+                    height -= 4;
+                    break;
+            }
+
+            return new Size(Math.Max(1, width), Math.Max(1, height));
+        }
+
+        /// <summary>
+        /// Finds the optimal font size that fits within the available area
+        /// </summary>
+        /// <param name="text">The text to fit</param>
+        /// <param name="baseFont">The base font to scale</param>
+        /// <param name="availableSize">The available area</param>
+        /// <param name="graphics">Graphics context for measuring</param>
+        /// <returns>Optimal font, or null if no adjustment needed</returns>
+        private static Font? FindOptimalFontSize(string text, Font baseFont, Size availableSize, Graphics graphics)
+        {
+            // Set minimum and maximum font sizes to maintain readability
+            const float minFontSize = 6f;
+            const float maxFontSize = 72f;
+            
+            var currentSize = baseFont.Size;
+            var bestSize = currentSize;
+            
+            // Create a cache key for this combination
+            var cacheKey = $"{text.Length}_{baseFont.Name}_{baseFont.Style}_{availableSize.Width}x{availableSize.Height}";
+            
+            // Check cache first
+            if (FontCache.TryGetValue(cacheKey, out var cachedFont))
+            {
+                return cachedFont;
+            }
+            
+            // First, check if current size fits
+            var currentMeasure = TextRenderer.MeasureText(graphics, text, baseFont, availableSize, TextFormatFlags.WordBreak);
+            if (currentMeasure.Width <= availableSize.Width && currentMeasure.Height <= availableSize.Height)
+            {
+                // Current size fits, try to find a larger size that still fits
+                for (var testSize = currentSize + 0.5f; testSize <= maxFontSize; testSize += 0.5f)
+                {
+                    using var testFont = new Font(baseFont.FontFamily, testSize, baseFont.Style);
+                    var testMeasure = TextRenderer.MeasureText(graphics, text, testFont, availableSize, TextFormatFlags.WordBreak);
+                    
+                    if (testMeasure.Width <= availableSize.Width && testMeasure.Height <= availableSize.Height)
+                    {
+                        bestSize = testSize;
+                    }
+                    else
+                    {
+                        break; // Font too large, stop searching
+                    }
+                }
+            }
+            else
+            {
+                // Current size doesn't fit, find a smaller size that fits
+                for (var testSize = currentSize - 0.5f; testSize >= minFontSize; testSize -= 0.5f)
+                {
+                    using var testFont = new Font(baseFont.FontFamily, testSize, baseFont.Style);
+                    var testMeasure = TextRenderer.MeasureText(graphics, text, testFont, availableSize, TextFormatFlags.WordBreak);
+                    
+                    if (testMeasure.Width <= availableSize.Width && testMeasure.Height <= availableSize.Height)
+                    {
+                        bestSize = testSize;
+                        break; // Found a size that fits
+                    }
+                }
+            }
+
+            // Return new font only if size changed significantly
+            if (Math.Abs(bestSize - currentSize) > 0.1f)
+            {
+                var newFont = new Font(baseFont.FontFamily, bestSize, baseFont.Style);
+                
+                // Cache the result (with a reasonable cache size limit)
+                if (FontCache.Count < 1000)
+                {
+                    FontCache.TryAdd(cacheKey, newFont);
+                }
+                
+                return newFont;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Applies auto-sizing to text-containing controls during theme application
+        /// </summary>
+        /// <param name="control">The control to auto-size</param>
+        public static void ApplyAutoSizingToTextControls(Control control)
+        {
+            if (control == null || string.IsNullOrEmpty(control.Text))
+                return;
+
+            // Use a temporary graphics context to measure text
+            using var graphics = control.CreateGraphics();
+            AutoSizeTextToFitControl(control, graphics);
         }
     }
 
@@ -880,9 +1371,17 @@ public static class Core_Themes
                         e.Graphics.FillRectangle(b, rect);
                     }
 
-
-                    TextRenderer.DrawText(e.Graphics, tabPage.Text, e.Font, rect, foreColor,
-                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    // Auto-size tab text to fit within tab bounds
+                    var tabText = tabPage.Text;
+                    if (!string.IsNullOrEmpty(tabText))
+                    {
+                        var availableSize = new Size(rect.Width - 8, rect.Height - 4); // Account for padding
+                        var optimalFont = FindOptimalFontSize(tabText, e.Font ?? tab.Font, availableSize, e.Graphics);
+                        var drawFont = optimalFont ?? e.Font ?? tab.Font;
+                        
+                        TextRenderer.DrawText(e.Graphics, tabText, drawFont, rect, foreColor,
+                            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    }
                 }
             }
 
@@ -925,11 +1424,19 @@ public static class Core_Themes
                         }
                     }
 
-                    // Draw text
+                    // Draw text with auto-sizing
                     if (item != null)
                     {
-                        TextRenderer.DrawText(e.Graphics, item.ToString(), listBox.Font, e.Bounds, foreColor,
-                            TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                        var itemText = item.ToString();
+                        if (!string.IsNullOrEmpty(itemText))
+                        {
+                            var availableSize = new Size(e.Bounds.Width - 4, e.Bounds.Height - 2);
+                            var optimalFont = FindOptimalFontSize(itemText, listBox.Font, availableSize, e.Graphics);
+                            var drawFont = optimalFont ?? listBox.Font;
+
+                            TextRenderer.DrawText(e.Graphics, itemText, drawFont, e.Bounds, foreColor,
+                                TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                        }
                     }
 
                     // Draw focus rectangle if focused
@@ -979,11 +1486,19 @@ public static class Core_Themes
                         }
                     }
 
-                    // Draw text
+                    // Draw text with auto-sizing
                     if (item != null)
                     {
-                        TextRenderer.DrawText(e.Graphics, item.ToString(), comboBox.Font, e.Bounds, foreColor,
-                            TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                        var itemText = item.ToString();
+                        if (!string.IsNullOrEmpty(itemText))
+                        {
+                            var availableSize = new Size(e.Bounds.Width - 4, e.Bounds.Height - 2);
+                            var optimalFont = FindOptimalFontSize(itemText, comboBox.Font, availableSize, e.Graphics);
+                            var drawFont = optimalFont ?? comboBox.Font;
+
+                            TextRenderer.DrawText(e.Graphics, itemText, drawFont, e.Bounds, foreColor,
+                                TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                        }
                     }
 
                     // Draw focus rectangle if focused
@@ -1042,12 +1557,20 @@ public static class Core_Themes
                     ControlPaint.DrawCheckBox(e.Graphics, checkBoxRect, 
                         isChecked ? ButtonState.Checked : ButtonState.Normal);
 
-                    // Draw text
+                    // Draw text with auto-sizing
                     if (item != null)
                     {
-                        var textRect = new Rectangle(e.Bounds.X + 20, e.Bounds.Y, e.Bounds.Width - 20, e.Bounds.Height);
-                        TextRenderer.DrawText(e.Graphics, item.ToString(), checkedListBox.Font, textRect, foreColor,
-                            TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                        var itemText = item.ToString();
+                        if (!string.IsNullOrEmpty(itemText))
+                        {
+                            var textRect = new Rectangle(e.Bounds.X + 20, e.Bounds.Y, e.Bounds.Width - 20, e.Bounds.Height);
+                            var availableSize = new Size(textRect.Width - 4, textRect.Height - 2);
+                            var optimalFont = FindOptimalFontSize(itemText, checkedListBox.Font, availableSize, e.Graphics);
+                            var drawFont = optimalFont ?? checkedListBox.Font;
+
+                            TextRenderer.DrawText(e.Graphics, itemText, drawFont, textRect, foreColor,
+                                TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                        }
                     }
 
                     // Draw focus rectangle if focused
@@ -1314,8 +1837,17 @@ public static class Core_Themes
                         e.Graphics.FillRectangle(backBrush, e.Bounds);
                     }
 
-                    TextRenderer.DrawText(e.Graphics, e.Node.Text, treeView.Font, e.Bounds, foreColor,
-                        TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                    // Draw text with auto-sizing
+                    var nodeText = e.Node.Text;
+                    if (!string.IsNullOrEmpty(nodeText))
+                    {
+                        var availableSize = new Size(e.Bounds.Width - 4, e.Bounds.Height - 2);
+                        var optimalFont = FindOptimalFontSize(nodeText, treeView.Font, availableSize, e.Graphics);
+                        var drawFont = optimalFont ?? treeView.Font;
+
+                        TextRenderer.DrawText(e.Graphics, nodeText, drawFont, e.Bounds, foreColor,
+                            TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                    }
 
                     if (focused)
                     {
@@ -1353,8 +1885,17 @@ public static class Core_Themes
                         e.Graphics.FillRectangle(backBrush, e.Bounds);
                     }
 
-                    TextRenderer.DrawText(e.Graphics, e.Item.Text, listView.Font, e.Bounds, foreColor,
-                        TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                    // Draw text with auto-sizing
+                    var itemText = e.Item.Text;
+                    if (!string.IsNullOrEmpty(itemText))
+                    {
+                        var availableSize = new Size(e.Bounds.Width - 4, e.Bounds.Height - 2);
+                        var optimalFont = FindOptimalFontSize(itemText, listView.Font, availableSize, e.Graphics);
+                        var drawFont = optimalFont ?? listView.Font;
+
+                        TextRenderer.DrawText(e.Graphics, itemText, drawFont, e.Bounds, foreColor,
+                            TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                    }
 
                     if (focused)
                     {
@@ -1378,8 +1919,17 @@ public static class Core_Themes
                             e.Graphics.FillRectangle(backBrush, e.Bounds);
                         }
 
-                        TextRenderer.DrawText(e.Graphics, e.Header.Text, listView.Font, e.Bounds, foreColor,
-                            TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                        // Draw header text with auto-sizing
+                        var headerText = e.Header.Text;
+                        if (!string.IsNullOrEmpty(headerText))
+                        {
+                            var availableSize = new Size(e.Bounds.Width - 8, e.Bounds.Height - 4);
+                            var optimalFont = FindOptimalFontSize(headerText, listView.Font, availableSize, e.Graphics);
+                            var drawFont = optimalFont ?? listView.Font;
+
+                            TextRenderer.DrawText(e.Graphics, headerText, drawFont, e.Bounds, foreColor,
+                                TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                        }
                     }
                 }
             }
