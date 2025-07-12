@@ -88,7 +88,9 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             var users = await Dao_User.GetAllUsersAsync();
             foreach (DataRow row in users.Rows)
             {
-                EditUserControl_ComboBox_Users.Items.Add(row["User"].ToString());
+                var user = row["User"]?.ToString() ?? string.Empty;
+                if (!string.IsNullOrEmpty(user))
+                    EditUserControl_ComboBox_Users.Items.Add(user);
             }
             if (EditUserControl_ComboBox_Users.Items.Count > 0)
                 EditUserControl_ComboBox_Users.SelectedIndex = 0;
@@ -198,7 +200,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         private void EditUserControl_Button_Clear_Click(object? sender, EventArgs e)
         {
             // Reload selected user
-            EditUserControl_ComboBox_Users_SelectedIndexChanged(null, null);
+            EditUserControl_ComboBox_Users_SelectedIndexChanged(this, EventArgs.Empty);
         }
     }
 }

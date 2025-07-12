@@ -22,9 +22,19 @@ public partial class Control_QuickButtons : UserControl
             Control_QuickButtons_Button_Button8, Control_QuickButtons_Button_Button9,
             Control_QuickButtons_Button_Button10
         ];
+
+        // Ensure all buttons are the same size after initialization
+        if (quickButtons != null && quickButtons.Count > 0)
+        {
+            var maxWidth = quickButtons.Max(b => b.Width);
+            var maxHeight = quickButtons.Max(b => b.Height);
+            foreach (var btn in quickButtons) btn.Size = new Size(maxWidth, maxHeight);
+        }
+
         LoadLast10Transactions(Model_AppVariables.User);
-        foreach (var btn in quickButtons)
-            btn.Click += QuickButton_Click;
+        if (quickButtons != null)
+            foreach (var btn in quickButtons)
+                btn.Click += QuickButton_Click;
         LoadLast10Transactions(Model_AppVariables.User);
     }
 

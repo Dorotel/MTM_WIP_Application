@@ -14,6 +14,11 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DefineConstants>$(DefineConstants);GENERATE_PLANTUML</DefineConstants>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="Forms\Login\**" />
+	  <EmbeddedResource Remove="Forms\Login\**" />
+	  <None Remove="Forms\Login\**" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<CompilerVisibleProperty Include="C:\Users\jkoll\source\repos\MTM_WIP_Application\PlantUMLFiles" />
@@ -72,10 +77,6 @@
 			<Generator>ResXFileCodeGenerator</Generator>
 			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Forms\Login\" />
 	</ItemGroup>
 
 </Project>

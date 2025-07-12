@@ -23,7 +23,9 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             var users = await Dao_User.GetAllUsersAsync();
             foreach (DataRow row in users.Rows)
             {
-                RemoveUserControl_ComboBox_Users.Items.Add(row["User"].ToString());
+                var user = row["User"]?.ToString() ?? string.Empty;
+                if (!string.IsNullOrEmpty(user))
+                    RemoveUserControl_ComboBox_Users.Items.Add(user);
             }
             if (RemoveUserControl_ComboBox_Users.Items.Count > 0)
                 RemoveUserControl_ComboBox_Users.SelectedIndex = 0;

@@ -184,12 +184,12 @@
             // Control_InventoryTab_Label_Part
             // 
             Control_InventoryTab_Label_Part.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            Control_InventoryTab_Label_Part.AutoSize = true;
-            Control_InventoryTab_Label_Part.Location = new Point(16, 12);
+            Control_InventoryTab_Label_Part.Location = new Point(4, 8);
             Control_InventoryTab_Label_Part.Name = "Control_InventoryTab_Label_Part";
-            Control_InventoryTab_Label_Part.Size = new Size(78, 15);
+            Control_InventoryTab_Label_Part.Size = new Size(90, 23);
             Control_InventoryTab_Label_Part.TabIndex = 0;
             Control_InventoryTab_Label_Part.Text = "Part Number:";
+            Control_InventoryTab_Label_Part.TextAlign = ContentAlignment.MiddleRight;
             // 
             // Control_InventoryTab_ComboBox_Operation
             // 
@@ -205,12 +205,12 @@
             // Control_InventoryTab_Label_Op
             // 
             Control_InventoryTab_Label_Op.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            Control_InventoryTab_Label_Op.AutoSize = true;
-            Control_InventoryTab_Label_Op.Location = new Point(31, 41);
+            Control_InventoryTab_Label_Op.Location = new Point(4, 37);
             Control_InventoryTab_Label_Op.Name = "Control_InventoryTab_Label_Op";
-            Control_InventoryTab_Label_Op.Size = new Size(63, 15);
+            Control_InventoryTab_Label_Op.Size = new Size(90, 23);
             Control_InventoryTab_Label_Op.TabIndex = 2;
             Control_InventoryTab_Label_Op.Text = "Operation:";
+            Control_InventoryTab_Label_Op.TextAlign = ContentAlignment.MiddleRight;
             // 
             // Control_InventoryTab_ComboBox_Location
             // 
@@ -226,22 +226,22 @@
             // Control_InventoryTab_Label_Loc
             // 
             Control_InventoryTab_Label_Loc.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            Control_InventoryTab_Label_Loc.AutoSize = true;
-            Control_InventoryTab_Label_Loc.Location = new Point(38, 99);
+            Control_InventoryTab_Label_Loc.Location = new Point(4, 95);
             Control_InventoryTab_Label_Loc.Name = "Control_InventoryTab_Label_Loc";
-            Control_InventoryTab_Label_Loc.Size = new Size(56, 15);
+            Control_InventoryTab_Label_Loc.Size = new Size(90, 23);
             Control_InventoryTab_Label_Loc.TabIndex = 6;
             Control_InventoryTab_Label_Loc.Text = "Location:";
+            Control_InventoryTab_Label_Loc.TextAlign = ContentAlignment.MiddleRight;
             // 
             // Control_InventoryTab_Label_Qty
             // 
             Control_InventoryTab_Label_Qty.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            Control_InventoryTab_Label_Qty.AutoSize = true;
-            Control_InventoryTab_Label_Qty.Location = new Point(38, 70);
+            Control_InventoryTab_Label_Qty.Location = new Point(4, 68);
             Control_InventoryTab_Label_Qty.Name = "Control_InventoryTab_Label_Qty";
-            Control_InventoryTab_Label_Qty.Size = new Size(56, 15);
+            Control_InventoryTab_Label_Qty.Size = new Size(90, 23);
             Control_InventoryTab_Label_Qty.TabIndex = 4;
             Control_InventoryTab_Label_Qty.Text = "Quantity:";
+            Control_InventoryTab_Label_Qty.TextAlign = ContentAlignment.MiddleRight;
             // 
             // Control_InventoryTab_TextBox_Quantity
             // 

@@ -61,27 +61,27 @@
             Control_QuickButtons_TableLayoutPanel_Main.Dock = DockStyle.Fill;
             Control_QuickButtons_TableLayoutPanel_Main.Location = new Point(0, 0);
             Control_QuickButtons_TableLayoutPanel_Main.Name = "Control_QuickButtons_TableLayoutPanel_Main";
-            Control_QuickButtons_TableLayoutPanel_Main.RowCount = 10;
-            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 10F));
-            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 10F));
-            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 10F));
-            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 10F));
-            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 10F));
-            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 10F));
-            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 10F));
-            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 10F));
-            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 10F));
-            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 10F));
+            Control_QuickButtons_TableLayoutPanel_Main.RowCount = 11;
+            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
+            Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 42F));
             Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            Control_QuickButtons_TableLayoutPanel_Main.Size = new Size(126, 414);
+            Control_QuickButtons_TableLayoutPanel_Main.Size = new Size(236, 466);
             Control_QuickButtons_TableLayoutPanel_Main.TabIndex = 0;
             // 
             // Control_QuickButtons_Button_Button10
             // 
             Control_QuickButtons_Button_Button10.Dock = DockStyle.Fill;
-            Control_QuickButtons_Button_Button10.Location = new Point(3, 372);
+            Control_QuickButtons_Button_Button10.Location = new Point(3, 381);
             Control_QuickButtons_Button_Button10.Name = "Control_QuickButtons_Button_Button10";
-            Control_QuickButtons_Button_Button10.Size = new Size(120, 39);
+            Control_QuickButtons_Button_Button10.Size = new Size(230, 36);
             Control_QuickButtons_Button_Button10.TabIndex = 10;
             Control_QuickButtons_Button_Button10.Text = "Control_QuickButtons_Button_Button10";
             Control_QuickButtons_Button_Button10.UseVisualStyleBackColor = true;
@@ -89,9 +89,9 @@
             // Control_QuickButtons_Button_Button9
             // 
             Control_QuickButtons_Button_Button9.Dock = DockStyle.Fill;
-            Control_QuickButtons_Button_Button9.Location = new Point(3, 331);
+            Control_QuickButtons_Button_Button9.Location = new Point(3, 339);
             Control_QuickButtons_Button_Button9.Name = "Control_QuickButtons_Button_Button9";
-            Control_QuickButtons_Button_Button9.Size = new Size(120, 35);
+            Control_QuickButtons_Button_Button9.Size = new Size(230, 36);
             Control_QuickButtons_Button_Button9.TabIndex = 9;
             Control_QuickButtons_Button_Button9.Text = "Control_QuickButtons_Button_Button9";
             Control_QuickButtons_Button_Button9.UseVisualStyleBackColor = true;
@@ -99,9 +99,9 @@
             // Control_QuickButtons_Button_Button8
             // 
             Control_QuickButtons_Button_Button8.Dock = DockStyle.Fill;
-            Control_QuickButtons_Button_Button8.Location = new Point(3, 290);
+            Control_QuickButtons_Button_Button8.Location = new Point(3, 297);
             Control_QuickButtons_Button_Button8.Name = "Control_QuickButtons_Button_Button8";
-            Control_QuickButtons_Button_Button8.Size = new Size(120, 35);
+            Control_QuickButtons_Button_Button8.Size = new Size(230, 36);
             Control_QuickButtons_Button_Button8.TabIndex = 8;
             Control_QuickButtons_Button_Button8.Text = "Control_QuickButtons_Button_Button8";
             Control_QuickButtons_Button_Button8.UseVisualStyleBackColor = true;
@@ -109,9 +109,9 @@
             // Control_QuickButtons_Button_Button7
             // 
             Control_QuickButtons_Button_Button7.Dock = DockStyle.Fill;
-            Control_QuickButtons_Button_Button7.Location = new Point(3, 249);
+            Control_QuickButtons_Button_Button7.Location = new Point(3, 255);
             Control_QuickButtons_Button_Button7.Name = "Control_QuickButtons_Button_Button7";
-            Control_QuickButtons_Button_Button7.Size = new Size(120, 35);
+            Control_QuickButtons_Button_Button7.Size = new Size(230, 36);
             Control_QuickButtons_Button_Button7.TabIndex = 7;
             Control_QuickButtons_Button_Button7.Text = "Control_QuickButtons_Button_Button7";
             Control_QuickButtons_Button_Button7.UseVisualStyleBackColor = true;
@@ -119,9 +119,9 @@
             // Control_QuickButtons_Button_Button6
             // 
             Control_QuickButtons_Button_Button6.Dock = DockStyle.Fill;
-            Control_QuickButtons_Button_Button6.Location = new Point(3, 208);
+            Control_QuickButtons_Button_Button6.Location = new Point(3, 213);
             Control_QuickButtons_Button_Button6.Name = "Control_QuickButtons_Button_Button6";
-            Control_QuickButtons_Button_Button6.Size = new Size(120, 35);
+            Control_QuickButtons_Button_Button6.Size = new Size(230, 36);
             Control_QuickButtons_Button_Button6.TabIndex = 6;
             Control_QuickButtons_Button_Button6.Text = "Control_QuickButtons_Button_Button6";
             Control_QuickButtons_Button_Button6.UseVisualStyleBackColor = true;
@@ -129,9 +129,9 @@
             // Control_QuickButtons_Button_Button5
             // 
             Control_QuickButtons_Button_Button5.Dock = DockStyle.Fill;
-            Control_QuickButtons_Button_Button5.Location = new Point(3, 167);
+            Control_QuickButtons_Button_Button5.Location = new Point(3, 171);
             Control_QuickButtons_Button_Button5.Name = "Control_QuickButtons_Button_Button5";
-            Control_QuickButtons_Button_Button5.Size = new Size(120, 35);
+            Control_QuickButtons_Button_Button5.Size = new Size(230, 36);
             Control_QuickButtons_Button_Button5.TabIndex = 5;
             Control_QuickButtons_Button_Button5.Text = "Control_QuickButtons_Button_Button5";
             Control_QuickButtons_Button_Button5.UseVisualStyleBackColor = true;
@@ -139,9 +139,9 @@
             // Control_QuickButtons_Button_Button4
             // 
             Control_QuickButtons_Button_Button4.Dock = DockStyle.Fill;
-            Control_QuickButtons_Button_Button4.Location = new Point(3, 126);
+            Control_QuickButtons_Button_Button4.Location = new Point(3, 129);
             Control_QuickButtons_Button_Button4.Name = "Control_QuickButtons_Button_Button4";
-            Control_QuickButtons_Button_Button4.Size = new Size(120, 35);
+            Control_QuickButtons_Button_Button4.Size = new Size(230, 36);
             Control_QuickButtons_Button_Button4.TabIndex = 4;
             Control_QuickButtons_Button_Button4.Text = "Control_QuickButtons_Button_Button4";
             Control_QuickButtons_Button_Button4.UseVisualStyleBackColor = true;
@@ -149,9 +149,9 @@
             // Control_QuickButtons_Button_Button3
             // 
             Control_QuickButtons_Button_Button3.Dock = DockStyle.Fill;
-            Control_QuickButtons_Button_Button3.Location = new Point(3, 85);
+            Control_QuickButtons_Button_Button3.Location = new Point(3, 87);
             Control_QuickButtons_Button_Button3.Name = "Control_QuickButtons_Button_Button3";
-            Control_QuickButtons_Button_Button3.Size = new Size(120, 35);
+            Control_QuickButtons_Button_Button3.Size = new Size(230, 36);
             Control_QuickButtons_Button_Button3.TabIndex = 3;
             Control_QuickButtons_Button_Button3.Text = "Control_QuickButtons_Button_Button3";
             Control_QuickButtons_Button_Button3.UseVisualStyleBackColor = true;
@@ -159,9 +159,9 @@
             // Control_QuickButtons_Button_Button2
             // 
             Control_QuickButtons_Button_Button2.Dock = DockStyle.Fill;
-            Control_QuickButtons_Button_Button2.Location = new Point(3, 44);
+            Control_QuickButtons_Button_Button2.Location = new Point(3, 45);
             Control_QuickButtons_Button_Button2.Name = "Control_QuickButtons_Button_Button2";
-            Control_QuickButtons_Button_Button2.Size = new Size(120, 35);
+            Control_QuickButtons_Button_Button2.Size = new Size(230, 36);
             Control_QuickButtons_Button_Button2.TabIndex = 2;
             Control_QuickButtons_Button_Button2.Text = "Control_QuickButtons_Button_Button2";
             Control_QuickButtons_Button_Button2.UseVisualStyleBackColor = true;
@@ -171,7 +171,7 @@
             Control_QuickButtons_Button_Button1.Dock = DockStyle.Fill;
             Control_QuickButtons_Button_Button1.Location = new Point(3, 3);
             Control_QuickButtons_Button_Button1.Name = "Control_QuickButtons_Button_Button1";
-            Control_QuickButtons_Button_Button1.Size = new Size(120, 35);
+            Control_QuickButtons_Button_Button1.Size = new Size(230, 36);
             Control_QuickButtons_Button_Button1.TabIndex = 1;
             Control_QuickButtons_Button_Button1.Text = "Control_QuickButtons_Button_Button1";
             Control_QuickButtons_Button_Button1.UseVisualStyleBackColor = true;
@@ -182,7 +182,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(Control_QuickButtons_TableLayoutPanel_Main);
             Name = "Control_QuickButtons";
-            Size = new Size(126, 414);
+            Size = new Size(236, 466);
             Control_QuickButtons_TableLayoutPanel_Main.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -200,6 +200,6 @@
         public Button Control_QuickButtons_Button_Button3;
         public Button Control_QuickButtons_Button_Button2;
         public Button Control_QuickButtons_Button_Button1;
-        private static ToolTip Control_QuickButtons_Tooltip;
+        private ToolTip Control_QuickButtons_Tooltip;
     }
 }
