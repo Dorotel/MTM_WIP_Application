@@ -72,6 +72,9 @@ public static class Core_Themes
         SetFormTheme(form, theme, themeName);
         ApplyThemeToControls(form.Controls);
 
+        // Apply universal text auto-sizing to all controls
+        UniversalTextAutoSizing.ApplyToAllControls(form.Controls);
+
         // Apply ToolTip theming for all ToolTip components in the form
         foreach (var field in form.GetType().GetFields(System.Reflection.BindingFlags.NonPublic |
                                                        System.Reflection.BindingFlags.Instance |
@@ -96,8 +99,15 @@ public static class Core_Themes
                 statusLabel.ForeColor = Core_AppThemes.InfoColor;
         }
 
+        // Handle DPI changes
+        form.DpiChanged += (sender, e) =>
+        {
+            UniversalTextAutoSizing.HandleDpiChange();
+            ApplyTheme(form); // Re-apply theme after DPI change
+        };
+
         form.ResumeLayout();
-        LoggingUtility.Log($"Global theme '{themeName}' applied to form '{form.Name}'.");
+        LoggingUtility.Log($"Global theme '{themeName}' applied to form '{form.Name}' with universal text auto-sizing.");
     }
 
     public static async Task<Model_UserUiColors> GetUserThemeColorsAsync(string userId)
@@ -312,6 +322,28 @@ public static class Core_Themes
         {
             if (colors.CustomControlBackColor.HasValue) control.BackColor = colors.CustomControlBackColor.Value;
             if (colors.CustomControlForeColor.HasValue) control.ForeColor = colors.CustomControlForeColor.Value;
+            
+            // Apply custom control border colors through extended theming
+            ApplyCustomControlExtendedTheming(control, colors);
+        }
+
+        /// <summary>
+        /// Applies extended theming to custom controls (border colors)
+        /// </summary>
+        private static void ApplyCustomControlExtendedTheming(Control control, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - CustomControlBorderColor: Border color for custom controls
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.CustomControlBorderColor.HasValue) extendedColors["BorderColor"] = colors.CustomControlBorderColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                control.Tag = extendedColors;
+            }
         }
 
         // NEW: Owner-draw theme appliers for border, hover, selected, pressed, and other states
@@ -350,6 +382,8 @@ public static class Core_Themes
                 tab.BackColor = backColor;
                 tab.ForeColor = foreColor;
 
+                // Apply tab border colors through extended theming
+                ApplyTabControlExtendedTheming(tab, colors);
                 // OwnerDraw for selected/unselected/border states
                 ApplyOwnerDrawThemes(tab, colors);
             }
@@ -364,8 +398,48 @@ public static class Core_Themes
                 tabPage.Paint -= AutoShrinkText_Paint;
                 tabPage.Paint += AutoShrinkText_Paint;
 
+                // Apply tab page border colors through extended theming
+                ApplyTabPageExtendedTheming(tabPage, colors);
                 // OwnerDraw for border, selected/unselected states
                 ApplyOwnerDrawThemes(tabPage, colors);
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to TabControl controls (border colors)
+        /// </summary>
+        private static void ApplyTabControlExtendedTheming(TabControl tabControl, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - TabControlBorderColor: Color of the tab control border
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.TabControlBorderColor.HasValue) extendedColors["BorderColor"] = colors.TabControlBorderColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                tabControl.Tag = extendedColors;
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to TabPage controls (border colors)
+        /// </summary>
+        private static void ApplyTabPageExtendedTheming(TabPage tabPage, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - TabPageBorderColor: Color of the tab page border
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.TabPageBorderColor.HasValue) extendedColors["BorderColor"] = colors.TabPageBorderColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                tabPage.Tag = extendedColors;
             }
         }
 
@@ -377,6 +451,9 @@ public static class Core_Themes
                 if (colors.TextBoxForeColor.HasValue) txt.ForeColor = colors.TextBoxForeColor.Value;
                 txt.Paint -= AutoShrinkText_Paint;
                 txt.Paint += AutoShrinkText_Paint;
+                
+                // Apply selection colors and error colors through extended theming
+                ApplyTextBoxExtendedTheming(txt, colors);
                 ApplyOwnerDrawThemes(txt, colors);
             }
         }
@@ -389,6 +466,9 @@ public static class Core_Themes
                 if (colors.MaskedTextBoxForeColor.HasValue) mtxt.ForeColor = colors.MaskedTextBoxForeColor.Value;
                 mtxt.Paint -= AutoShrinkText_Paint;
                 mtxt.Paint += AutoShrinkText_Paint;
+                
+                // Apply error colors through extended theming
+                ApplyMaskedTextBoxExtendedTheming(mtxt, colors);
                 ApplyOwnerDrawThemes(mtxt, colors);
             }
         }
@@ -401,6 +481,9 @@ public static class Core_Themes
                 if (colors.RichTextBoxForeColor.HasValue) rtxt.ForeColor = colors.RichTextBoxForeColor.Value;
                 rtxt.Paint -= AutoShrinkText_Paint;
                 rtxt.Paint += AutoShrinkText_Paint;
+                
+                // Apply selection colors and error colors through extended theming
+                ApplyRichTextBoxExtendedTheming(rtxt, colors);
                 ApplyOwnerDrawThemes(rtxt, colors);
             }
         }
@@ -413,7 +496,97 @@ public static class Core_Themes
                 if (colors.ComboBoxForeColor.HasValue) cb.ForeColor = colors.ComboBoxForeColor.Value;
                 cb.Paint -= AutoShrinkText_Paint;
                 cb.Paint += AutoShrinkText_Paint;
+                
+                // Apply error colors through extended theming
+                ApplyComboBoxExtendedTheming(cb, colors);
                 ApplyOwnerDrawThemes(cb, colors);
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to TextBox controls (selection and error colors)
+        /// </summary>
+        private static void ApplyTextBoxExtendedTheming(TextBox textBox, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Windows Forms doesn't expose selection colors directly, so these would be used
+            // in custom-drawn textbox implementations
+            
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - TextBoxSelectionBackColor: Background color for selected text
+            // - TextBoxSelectionForeColor: Foreground color for selected text
+            // - TextBoxErrorForeColor: Foreground color for error states
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.TextBoxSelectionBackColor.HasValue) extendedColors["SelectionBackColor"] = colors.TextBoxSelectionBackColor.Value;
+            if (colors.TextBoxSelectionForeColor.HasValue) extendedColors["SelectionForeColor"] = colors.TextBoxSelectionForeColor.Value;
+            if (colors.TextBoxErrorForeColor.HasValue) extendedColors["ErrorForeColor"] = colors.TextBoxErrorForeColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                textBox.Tag = extendedColors;
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to MaskedTextBox controls (error colors)
+        /// </summary>
+        private static void ApplyMaskedTextBoxExtendedTheming(MaskedTextBox maskedTextBox, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - MaskedTextBoxErrorForeColor: Foreground color for error states
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.MaskedTextBoxErrorForeColor.HasValue) extendedColors["ErrorForeColor"] = colors.MaskedTextBoxErrorForeColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                maskedTextBox.Tag = extendedColors;
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to RichTextBox controls (selection and error colors)
+        /// </summary>
+        private static void ApplyRichTextBoxExtendedTheming(RichTextBox richTextBox, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - RichTextBoxSelectionBackColor: Background color for selected text
+            // - RichTextBoxSelectionForeColor: Foreground color for selected text
+            // - RichTextBoxErrorForeColor: Foreground color for error states
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.RichTextBoxSelectionBackColor.HasValue) extendedColors["SelectionBackColor"] = colors.RichTextBoxSelectionBackColor.Value;
+            if (colors.RichTextBoxSelectionForeColor.HasValue) extendedColors["SelectionForeColor"] = colors.RichTextBoxSelectionForeColor.Value;
+            if (colors.RichTextBoxErrorForeColor.HasValue) extendedColors["ErrorForeColor"] = colors.RichTextBoxErrorForeColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                richTextBox.Tag = extendedColors;
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to ComboBox controls (error colors)
+        /// </summary>
+        private static void ApplyComboBoxExtendedTheming(ComboBox comboBox, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - ComboBoxErrorForeColor: Foreground color for error states
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.ComboBoxErrorForeColor.HasValue) extendedColors["ErrorForeColor"] = colors.ComboBoxErrorForeColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                comboBox.Tag = extendedColors;
             }
         }
 
@@ -460,6 +633,9 @@ public static class Core_Themes
                 if (colors.RadioButtonForeColor.HasValue) rb.ForeColor = colors.RadioButtonForeColor.Value;
                 rb.Paint -= AutoShrinkText_Paint;
                 rb.Paint += AutoShrinkText_Paint;
+                
+                // Apply check colors through extended theming
+                ApplyRadioButtonExtendedTheming(rb, colors);
                 ApplyOwnerDrawThemes(rb, colors);
             }
         }
@@ -472,7 +648,56 @@ public static class Core_Themes
                 if (colors.CheckBoxForeColor.HasValue) cbx.ForeColor = colors.CheckBoxForeColor.Value;
                 cbx.Paint -= AutoShrinkText_Paint;
                 cbx.Paint += AutoShrinkText_Paint;
+                
+                // Apply check colors through extended theming
+                ApplyCheckBoxExtendedTheming(cbx, colors);
                 ApplyOwnerDrawThemes(cbx, colors);
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to CheckBox controls (check colors)
+        /// </summary>
+        private static void ApplyCheckBoxExtendedTheming(CheckBox checkBox, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Windows Forms doesn't expose check colors directly, so these would be used
+            // in custom-drawn checkbox implementations
+            
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - CheckBoxCheckColor: Color of the check mark
+            // - CheckBoxCheckBackColor: Background color of the check area
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.CheckBoxCheckColor.HasValue) extendedColors["CheckColor"] = colors.CheckBoxCheckColor.Value;
+            if (colors.CheckBoxCheckBackColor.HasValue) extendedColors["CheckBackColor"] = colors.CheckBoxCheckBackColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                checkBox.Tag = extendedColors;
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to RadioButton controls (check colors)
+        /// </summary>
+        private static void ApplyRadioButtonExtendedTheming(RadioButton radioButton, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Windows Forms doesn't expose check colors directly, so these would be used
+            // in custom-drawn radiobutton implementations
+            
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - RadioButtonCheckColor: Color of the radio button check mark
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.RadioButtonCheckColor.HasValue) extendedColors["CheckColor"] = colors.RadioButtonCheckColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                radioButton.Tag = extendedColors;
             }
         }
 
@@ -551,6 +776,8 @@ public static class Core_Themes
         {
             if (control is Panel pnl)
             {
+                if (colors.PanelBackColor.HasValue)
+                    pnl.BackColor = colors.PanelBackColor.Value;
                 if (colors.PanelForeColor.HasValue)
                     pnl.ForeColor = colors.PanelForeColor.Value;
 
@@ -565,7 +792,28 @@ public static class Core_Themes
                 if (colors.SplitContainerBackColor.HasValue) sc.BackColor = colors.SplitContainerBackColor.Value;
                 if (colors.SplitContainerForeColor.HasValue) sc.ForeColor = colors.SplitContainerForeColor.Value;
 
+                // Apply splitter color through extended theming
+                ApplySplitContainerExtendedTheming(sc, colors);
                 ApplyOwnerDrawThemes(sc, colors);
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to SplitContainer controls (splitter colors)
+        /// </summary>
+        private static void ApplySplitContainerExtendedTheming(SplitContainer splitContainer, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - SplitContainerSplitterColor: Color of the splitter bar
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.SplitContainerSplitterColor.HasValue) extendedColors["SplitterColor"] = colors.SplitContainerSplitterColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                splitContainer.Tag = extendedColors;
             }
         }
 
@@ -573,6 +821,8 @@ public static class Core_Themes
         {
             if (control is FlowLayoutPanel flp)
             {
+                if (colors.FlowLayoutPanelBackColor.HasValue)
+                    flp.BackColor = colors.FlowLayoutPanelBackColor.Value;
                 if (colors.FlowLayoutPanelForeColor.HasValue)
                     flp.ForeColor = colors.FlowLayoutPanelForeColor.Value;
 
@@ -584,10 +834,33 @@ public static class Core_Themes
         {
             if (control is TableLayoutPanel tlp)
             {
+                if (colors.TableLayoutPanelBackColor.HasValue)
+                    tlp.BackColor = colors.TableLayoutPanelBackColor.Value;
                 if (colors.TableLayoutPanelForeColor.HasValue)
                     tlp.ForeColor = colors.TableLayoutPanelForeColor.Value;
 
+                // Apply cell border colors through extended theming
+                ApplyTableLayoutPanelExtendedTheming(tlp, colors);
                 ApplyOwnerDrawThemes(tlp, colors);
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to TableLayoutPanel controls (cell border colors)
+        /// </summary>
+        private static void ApplyTableLayoutPanelExtendedTheming(TableLayoutPanel tableLayoutPanel, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - TableLayoutPanelCellBorderColor: Color of the cell borders
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.TableLayoutPanelCellBorderColor.HasValue) extendedColors["CellBorderColor"] = colors.TableLayoutPanelCellBorderColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                tableLayoutPanel.Tag = extendedColors;
             }
         }
 
@@ -598,7 +871,30 @@ public static class Core_Themes
                 if (colors.DateTimePickerBackColor.HasValue) dtp.BackColor = colors.DateTimePickerBackColor.Value;
                 if (colors.DateTimePickerForeColor.HasValue) dtp.ForeColor = colors.DateTimePickerForeColor.Value;
 
+                // Apply dropdown colors through extended theming
+                ApplyDateTimePickerExtendedTheming(dtp, colors);
                 ApplyOwnerDrawThemes(dtp, colors);
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to DateTimePicker controls (dropdown colors)
+        /// </summary>
+        private static void ApplyDateTimePickerExtendedTheming(DateTimePicker dateTimePicker, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - DateTimePickerDropDownBackColor: Background color of the dropdown calendar
+            // - DateTimePickerDropDownForeColor: Foreground color of the dropdown calendar
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.DateTimePickerDropDownBackColor.HasValue) extendedColors["DropDownBackColor"] = colors.DateTimePickerDropDownBackColor.Value;
+            if (colors.DateTimePickerDropDownForeColor.HasValue) extendedColors["DropDownForeColor"] = colors.DateTimePickerDropDownForeColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                dateTimePicker.Tag = extendedColors;
             }
         }
 
@@ -614,6 +910,10 @@ public static class Core_Themes
                     mc.TitleForeColor = colors.MonthCalendarTitleForeColor.Value;
                 if (colors.MonthCalendarTrailingForeColor.HasValue)
                     mc.TrailingForeColor = colors.MonthCalendarTrailingForeColor.Value;
+                if (colors.MonthCalendarTodayBackColor.HasValue)
+                    mc.TodayBackColor = colors.MonthCalendarTodayBackColor.Value;
+                if (colors.MonthCalendarTodayForeColor.HasValue)
+                    mc.TodayForeColor = colors.MonthCalendarTodayForeColor.Value;
 
                 ApplyOwnerDrawThemes(mc, colors);
             }
@@ -626,7 +926,32 @@ public static class Core_Themes
                 if (colors.NumericUpDownBackColor.HasValue) nud.BackColor = colors.NumericUpDownBackColor.Value;
                 if (colors.NumericUpDownForeColor.HasValue) nud.ForeColor = colors.NumericUpDownForeColor.Value;
 
+                // Apply button colors and error colors through extended theming
+                ApplyNumericUpDownExtendedTheming(nud, colors);
                 ApplyOwnerDrawThemes(nud, colors);
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to NumericUpDown controls (button and error colors)
+        /// </summary>
+        private static void ApplyNumericUpDownExtendedTheming(NumericUpDown numericUpDown, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - NumericUpDownButtonBackColor: Background color of the up/down buttons
+            // - NumericUpDownButtonForeColor: Foreground color of the up/down buttons
+            // - NumericUpDownErrorForeColor: Foreground color for error states
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.NumericUpDownButtonBackColor.HasValue) extendedColors["ButtonBackColor"] = colors.NumericUpDownButtonBackColor.Value;
+            if (colors.NumericUpDownButtonForeColor.HasValue) extendedColors["ButtonForeColor"] = colors.NumericUpDownButtonForeColor.Value;
+            if (colors.NumericUpDownErrorForeColor.HasValue) extendedColors["ErrorForeColor"] = colors.NumericUpDownErrorForeColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                numericUpDown.Tag = extendedColors;
             }
         }
 
@@ -636,8 +961,35 @@ public static class Core_Themes
             {
                 if (colors.TrackBarBackColor.HasValue) tb.BackColor = colors.TrackBarBackColor.Value;
                 if (colors.TrackBarForeColor.HasValue) tb.ForeColor = colors.TrackBarForeColor.Value;
-
+                
+                // Apply additional trackbar theming through owner-draw for thumb and tick colors
+                ApplyTrackBarExtendedTheming(tb, colors);
                 ApplyOwnerDrawThemes(tb, colors);
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to trackbars (thumb and tick colors)
+        /// </summary>
+        private static void ApplyTrackBarExtendedTheming(TrackBar trackBar, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Windows Forms doesn't expose thumb/tick colors directly, so these would be used
+            // in custom-drawn trackbar implementations
+            
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - TrackBarThumbColor: Color of the trackbar thumb
+            // - TrackBarTickColor: Color of the trackbar tick marks
+            
+            // For now, store these in the control's Tag for potential future use
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.TrackBarThumbColor.HasValue) extendedColors["ThumbColor"] = colors.TrackBarThumbColor.Value;
+            if (colors.TrackBarTickColor.HasValue) extendedColors["TickColor"] = colors.TrackBarTickColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                trackBar.Tag = extendedColors;
             }
         }
 
@@ -669,7 +1021,9 @@ public static class Core_Themes
             {
                 if (colors.HScrollBarBackColor.HasValue) hsb.BackColor = colors.HScrollBarBackColor.Value;
                 if (colors.HScrollBarForeColor.HasValue) hsb.ForeColor = colors.HScrollBarForeColor.Value;
-
+                
+                // Apply additional scrollbar theming through owner-draw
+                ApplyScrollBarExtendedTheming(hsb, colors, true);
                 ApplyOwnerDrawThemes(hsb, colors);
             }
         }
@@ -680,8 +1034,38 @@ public static class Core_Themes
             {
                 if (colors.VScrollBarBackColor.HasValue) vsb.BackColor = colors.VScrollBarBackColor.Value;
                 if (colors.VScrollBarForeColor.HasValue) vsb.ForeColor = colors.VScrollBarForeColor.Value;
-
+                
+                // Apply additional scrollbar theming through owner-draw
+                ApplyScrollBarExtendedTheming(vsb, colors, false);
                 ApplyOwnerDrawThemes(vsb, colors);
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to scrollbars (thumb and track colors)
+        /// </summary>
+        private static void ApplyScrollBarExtendedTheming(ScrollBar scrollBar, Model_UserUiColors colors, bool isHorizontal)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Windows Forms doesn't expose thumb/track colors directly, so these would be used
+            // in custom-drawn scrollbar implementations or Win32 theming
+            
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - HScrollBarThumbColor / VScrollBarThumbColor: Color of the scrollbar thumb
+            // - HScrollBarTrackColor / VScrollBarTrackColor: Color of the scrollbar track
+            
+            // For now, store these in the control's Tag for potential future use
+            var thumbColor = isHorizontal ? colors.HScrollBarThumbColor : colors.VScrollBarThumbColor;
+            var trackColor = isHorizontal ? colors.HScrollBarTrackColor : colors.VScrollBarTrackColor;
+            
+            if (thumbColor.HasValue || trackColor.HasValue)
+            {
+                var extendedColors = new Dictionary<string, Color?>();
+                if (thumbColor.HasValue) extendedColors["ThumbColor"] = thumbColor.Value;
+                if (trackColor.HasValue) extendedColors["TrackColor"] = trackColor.Value;
+                
+                // Store for future custom painting use
+                scrollBar.Tag = extendedColors;
             }
         }
 
@@ -702,6 +1086,15 @@ public static class Core_Themes
             {
                 if (colors.PropertyGridBackColor.HasValue) pg.BackColor = colors.PropertyGridBackColor.Value;
                 if (colors.PropertyGridForeColor.HasValue) pg.ForeColor = colors.PropertyGridForeColor.Value;
+                if (colors.PropertyGridLineColor.HasValue) pg.LineColor = colors.PropertyGridLineColor.Value;
+                if (colors.PropertyGridCategoryBackColor.HasValue)
+                    pg.CategoryBackColor = colors.PropertyGridCategoryBackColor.Value;
+                if (colors.PropertyGridCategoryForeColor.HasValue)
+                    pg.CategoryForeColor = colors.PropertyGridCategoryForeColor.Value;
+                if (colors.PropertyGridSelectedBackColor.HasValue)
+                    pg.SelectedBackColor = colors.PropertyGridSelectedBackColor.Value;
+                if (colors.PropertyGridSelectedForeColor.HasValue)
+                    pg.SelectedForeColor = colors.PropertyGridSelectedForeColor.Value;
 
                 ApplyOwnerDrawThemes(pg, colors);
             }
@@ -714,7 +1107,32 @@ public static class Core_Themes
                 if (colors.DomainUpDownBackColor.HasValue) dud.BackColor = colors.DomainUpDownBackColor.Value;
                 if (colors.DomainUpDownForeColor.HasValue) dud.ForeColor = colors.DomainUpDownForeColor.Value;
 
+                // Apply button colors and error colors through extended theming
+                ApplyDomainUpDownExtendedTheming(dud, colors);
                 ApplyOwnerDrawThemes(dud, colors);
+            }
+        }
+
+        /// <summary>
+        /// Applies extended theming to DomainUpDown controls (button and error colors)
+        /// </summary>
+        private static void ApplyDomainUpDownExtendedTheming(DomainUpDown domainUpDown, Model_UserUiColors colors)
+        {
+            // Note: These colors are framework-ready for custom painting implementations
+            // Colors are documented for future Win32/custom painting enhancements:
+            // - DomainUpDownButtonBackColor: Background color of the up/down buttons
+            // - DomainUpDownButtonForeColor: Foreground color of the up/down buttons
+            // - DomainUpDownErrorForeColor: Foreground color for error states
+            
+            var extendedColors = new Dictionary<string, Color?>();
+            if (colors.DomainUpDownButtonBackColor.HasValue) extendedColors["ButtonBackColor"] = colors.DomainUpDownButtonBackColor.Value;
+            if (colors.DomainUpDownButtonForeColor.HasValue) extendedColors["ButtonForeColor"] = colors.DomainUpDownButtonForeColor.Value;
+            if (colors.DomainUpDownErrorForeColor.HasValue) extendedColors["ErrorForeColor"] = colors.DomainUpDownErrorForeColor.Value;
+            
+            if (extendedColors.Count > 0)
+            {
+                // Store for future custom painting use
+                domainUpDown.Tag = extendedColors;
             }
         }
 
@@ -845,7 +1263,6 @@ public static class Core_Themes
             e.Graphics.Clear(button.BackColor);
 
             var text = button.Text;
-            var font = button.Font;
             var rect = button.ClientRectangle;
 
             using var format = new StringFormat
@@ -855,22 +1272,12 @@ public static class Core_Themes
                 Trimming = StringTrimming.EllipsisCharacter
             };
 
-            // Measure text size
-            var textSize = e.Graphics.MeasureString(text, font);
-
-            // Adjust font size if text exceeds button bounds
-            while (textSize.Width > rect.Width || textSize.Height > rect.Height)
-            {
-                font = new Font(font.FontFamily, font.Size - 0.5f, font.Style);
-                textSize = e.Graphics.MeasureString(text, font);
-
-                if (font.Size <= 1) // Prevent font size from becoming too small
-                    break;
-            }
-
+            // Use enhanced text auto-sizing with binary search
+            var optimalFont = UniversalTextAutoSizing.GetOptimalFont(e.Graphics, text, rect, button.Font, format);
+            
             // Draw the text
             using var brush = new SolidBrush(button.ForeColor);
-            e.Graphics.DrawString(text, font, brush, rect, format);
+            e.Graphics.DrawString(text, optimalFont, brush, rect, format);
         }
 
         private static void AutoShrinkText_Paint(object? sender, PaintEventArgs e)
@@ -882,79 +1289,16 @@ public static class Core_Themes
             e.Graphics.Clear(control.BackColor);
 
             var text = control.Text;
-            var font = control.Font;
             var rect = control.ClientRectangle;
 
             // Use control's TextAlign if available, otherwise default to Center
-            var hAlign = StringAlignment.Center;
-            var vAlign = StringAlignment.Center;
+            var format = UniversalTextAutoSizing.GetStringFormat(control);
 
-            // Check for common controls with TextAlign property
-            var textAlignProp = control.GetType().GetProperty("TextAlign");
-            if (textAlignProp != null)
-            {
-                var alignValue = textAlignProp.GetValue(control);
-                if (alignValue != null)
-                    // Handle Label, Button, etc.
-                    if (alignValue is ContentAlignment ca)
-                        switch (ca)
-                        {
-                            case ContentAlignment.TopLeft:
-                                hAlign = StringAlignment.Near;
-                                vAlign = StringAlignment.Near;
-                                break;
-                            case ContentAlignment.TopCenter:
-                                hAlign = StringAlignment.Center;
-                                vAlign = StringAlignment.Near;
-                                break;
-                            case ContentAlignment.TopRight:
-                                hAlign = StringAlignment.Far;
-                                vAlign = StringAlignment.Near;
-                                break;
-                            case ContentAlignment.MiddleLeft:
-                                hAlign = StringAlignment.Near;
-                                vAlign = StringAlignment.Center;
-                                break;
-                            case ContentAlignment.MiddleCenter:
-                                hAlign = StringAlignment.Center;
-                                vAlign = StringAlignment.Center;
-                                break;
-                            case ContentAlignment.MiddleRight:
-                                hAlign = StringAlignment.Far;
-                                vAlign = StringAlignment.Center;
-                                break;
-                            case ContentAlignment.BottomLeft:
-                                hAlign = StringAlignment.Near;
-                                vAlign = StringAlignment.Far;
-                                break;
-                            case ContentAlignment.BottomCenter:
-                                hAlign = StringAlignment.Center;
-                                vAlign = StringAlignment.Far;
-                                break;
-                            case ContentAlignment.BottomRight:
-                                hAlign = StringAlignment.Far;
-                                vAlign = StringAlignment.Far;
-                                break;
-                        }
-            }
-
-            using var format = new StringFormat
-            {
-                Alignment = hAlign,
-                LineAlignment = vAlign,
-                Trimming = StringTrimming.EllipsisCharacter
-            };
-
-            var textSize = e.Graphics.MeasureString(text, font);
-            while ((textSize.Width > rect.Width || textSize.Height > rect.Height) && font.Size > 1)
-            {
-                font = new Font(font.FontFamily, font.Size - 0.5f, font.Style);
-                textSize = e.Graphics.MeasureString(text, font);
-                if (font.Size <= 1) break;
-            }
+            // Use enhanced text auto-sizing with binary search
+            var optimalFont = UniversalTextAutoSizing.GetOptimalFont(e.Graphics, text, rect, control.Font, format);
 
             using var brush = new SolidBrush(control.ForeColor);
-            e.Graphics.DrawString(text, font, brush, rect, format);
+            e.Graphics.DrawString(text, optimalFont, brush, rect, format);
         }
     }
 
@@ -1387,11 +1731,33 @@ public static class Core_Themes
             if (colors.ContextMenuBorderColor.HasValue)
                 ApplyCustomBorderPaint(contextMenuStrip, colors.ContextMenuBorderColor.Value);
 
+            // Apply separator colors through extended theming
+            ApplyContextMenuSeparatorTheming(contextMenuStrip, colors);
+
             // Apply hover colors to context menu items
             foreach (ToolStripItem item in contextMenuStrip.Items)
                 ApplyToolStripItemHoverColors(item, colors,
                     colors.ContextMenuItemHoverBackColor, colors.ContextMenuItemHoverForeColor,
                     colors.ContextMenuItemHoverBackColor, colors.ContextMenuItemHoverForeColor);
+        }
+
+        /// <summary>
+        /// Applies separator color theming to ContextMenuStrip
+        /// </summary>
+        private static void ApplyContextMenuSeparatorTheming(ContextMenuStrip contextMenuStrip, Model_UserUiColors colors)
+        {
+            if (colors.ContextMenuSeparatorColor.HasValue)
+            {
+                // Apply separator color to existing separators
+                foreach (ToolStripItem item in contextMenuStrip.Items)
+                {
+                    if (item is ToolStripSeparator separator)
+                    {
+                        separator.BackColor = colors.ContextMenuSeparatorColor.Value;
+                        separator.ForeColor = colors.ContextMenuSeparatorColor.Value;
+                    }
+                }
+            }
         }
 
         // Apply hover colors to ToolStripItem
@@ -1990,7 +2356,324 @@ public static class Core_Themes
         public static Color SecondaryAccentColor =>
             GetCurrentTheme().Colors.SecondaryAccentColor ?? Color.FromArgb(102, 204, 255);
 
+        // Window Chrome Colors (Framework-ready for custom window implementations)
+        public static Color WindowTitleBarBackColor => GetCurrentTheme().Colors.WindowTitleBarBackColor ?? Color.FromArgb(26, 26, 26);
+        public static Color WindowTitleBarForeColor => GetCurrentTheme().Colors.WindowTitleBarForeColor ?? Color.FromArgb(255, 255, 255);
+        public static Color WindowTitleBarInactiveBackColor => GetCurrentTheme().Colors.WindowTitleBarInactiveBackColor ?? Color.FromArgb(45, 45, 48);
+        public static Color WindowTitleBarInactiveForeColor => GetCurrentTheme().Colors.WindowTitleBarInactiveForeColor ?? Color.FromArgb(136, 136, 136);
+        public static Color WindowBorderColor => GetCurrentTheme().Colors.WindowBorderColor ?? Color.FromArgb(60, 60, 60);
+        public static Color WindowResizeHandleColor => GetCurrentTheme().Colors.WindowResizeHandleColor ?? Color.FromArgb(60, 60, 60);
+
         #endregion
+    }
+
+    #endregion
+
+    #region Universal Text Auto-Sizing System
+    
+    /// <summary>
+    /// Universal Text Auto-Sizing System for DPI/Scaling compatibility
+    /// Automatically adjusts font sizes to fit within control bounds for all scaling scenarios
+    /// Uses binary search algorithm for optimal font sizing (6pt-72pt range)
+    /// </summary>
+    public static class UniversalTextAutoSizing
+    {
+        private const float MinFontSize = 6f;
+        private const float MaxFontSize = 72f;
+        private const float FontSizePrecision = 0.1f;
+        
+        private static readonly ConcurrentDictionary<string, Font> FontCache = new();
+        private static readonly object DpiChangeSync = new();
+
+        /// <summary>
+        /// Gets the optimal font size for the given text and rectangle using binary search algorithm
+        /// </summary>
+        public static Font GetOptimalFont(Graphics graphics, string text, Rectangle bounds, Font baseFont, StringFormat format)
+        {
+            if (string.IsNullOrEmpty(text) || bounds.Width <= 0 || bounds.Height <= 0)
+                return baseFont;
+
+            // Create cache key
+            var cacheKey = $"{text}_{bounds.Width}_{bounds.Height}_{baseFont.Name}_{baseFont.Style}_{graphics.DpiX}_{graphics.DpiY}";
+            
+            if (FontCache.TryGetValue(cacheKey, out var cachedFont))
+                return cachedFont;
+
+            var optimalSize = FindOptimalFontSize(graphics, text, bounds, baseFont, format);
+            var optimalFont = new Font(baseFont.FontFamily, optimalSize, baseFont.Style);
+            
+            // Cache the result
+            FontCache.TryAdd(cacheKey, optimalFont);
+            
+            // Limit cache size to prevent memory issues
+            if (FontCache.Count > 1000)
+            {
+                var oldestKeys = FontCache.Keys.Take(100).ToList();
+                foreach (var key in oldestKeys)
+                {
+                    FontCache.TryRemove(key, out _);
+                }
+            }
+
+            return optimalFont;
+        }
+
+        /// <summary>
+        /// Binary search algorithm to find optimal font size
+        /// </summary>
+        private static float FindOptimalFontSize(Graphics graphics, string text, Rectangle bounds, Font baseFont, StringFormat format)
+        {
+            var minSize = MinFontSize;
+            var maxSize = Math.Min(MaxFontSize, baseFont.Size * 2); // Don't exceed 2x original size
+            var bestSize = minSize;
+
+            // Add padding to account for text rendering margins
+            var availableWidth = bounds.Width - 4; // 2px padding on each side
+            var availableHeight = bounds.Height - 4; // 2px padding on top and bottom
+
+            if (availableWidth <= 0 || availableHeight <= 0)
+                return minSize;
+
+            while (maxSize - minSize > FontSizePrecision)
+            {
+                var testSize = (minSize + maxSize) / 2;
+                
+                using var testFont = new Font(baseFont.FontFamily, testSize, baseFont.Style);
+                var textSize = graphics.MeasureString(text, testFont, bounds.Size, format);
+
+                if (textSize.Width <= availableWidth && textSize.Height <= availableHeight)
+                {
+                    bestSize = testSize;
+                    minSize = testSize;
+                }
+                else
+                {
+                    maxSize = testSize;
+                }
+            }
+
+            return Math.Max(bestSize, MinFontSize);
+        }
+
+        /// <summary>
+        /// Gets the appropriate StringFormat for a control based on its TextAlign property
+        /// </summary>
+        public static StringFormat GetStringFormat(Control control)
+        {
+            var hAlign = StringAlignment.Center;
+            var vAlign = StringAlignment.Center;
+
+            // Check for common controls with TextAlign property
+            var textAlignProp = control.GetType().GetProperty("TextAlign");
+            if (textAlignProp != null)
+            {
+                var alignValue = textAlignProp.GetValue(control);
+                if (alignValue is ContentAlignment ca)
+                {
+                    switch (ca)
+                    {
+                        case ContentAlignment.TopLeft:
+                            hAlign = StringAlignment.Near;
+                            vAlign = StringAlignment.Near;
+                            break;
+                        case ContentAlignment.TopCenter:
+                            hAlign = StringAlignment.Center;
+                            vAlign = StringAlignment.Near;
+                            break;
+                        case ContentAlignment.TopRight:
+                            hAlign = StringAlignment.Far;
+                            vAlign = StringAlignment.Near;
+                            break;
+                        case ContentAlignment.MiddleLeft:
+                            hAlign = StringAlignment.Near;
+                            vAlign = StringAlignment.Center;
+                            break;
+                        case ContentAlignment.MiddleCenter:
+                            hAlign = StringAlignment.Center;
+                            vAlign = StringAlignment.Center;
+                            break;
+                        case ContentAlignment.MiddleRight:
+                            hAlign = StringAlignment.Far;
+                            vAlign = StringAlignment.Center;
+                            break;
+                        case ContentAlignment.BottomLeft:
+                            hAlign = StringAlignment.Near;
+                            vAlign = StringAlignment.Far;
+                            break;
+                        case ContentAlignment.BottomCenter:
+                            hAlign = StringAlignment.Center;
+                            vAlign = StringAlignment.Far;
+                            break;
+                        case ContentAlignment.BottomRight:
+                            hAlign = StringAlignment.Far;
+                            vAlign = StringAlignment.Far;
+                            break;
+                    }
+                }
+            }
+
+            return new StringFormat
+            {
+                Alignment = hAlign,
+                LineAlignment = vAlign,
+                Trimming = StringTrimming.EllipsisCharacter,
+                FormatFlags = StringFormatFlags.NoWrap
+            };
+        }
+
+        /// <summary>
+        /// Handles DPI changes by clearing font cache
+        /// </summary>
+        public static void HandleDpiChange()
+        {
+            lock (DpiChangeSync)
+            {
+                FontCache.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Applies text auto-sizing to all controls that support text display
+        /// </summary>
+        public static void ApplyToAllControls(Control.ControlCollection controls)
+        {
+            foreach (Control control in controls)
+            {
+                ApplyToControl(control);
+                
+                if (control.HasChildren)
+                    ApplyToAllControls(control.Controls);
+            }
+        }
+
+        /// <summary>
+        /// Applies text auto-sizing to a specific control
+        /// </summary>
+        public static void ApplyToControl(Control control)
+        {
+            if (control == null || string.IsNullOrEmpty(control.Text))
+                return;
+
+            // Remove existing paint handler to avoid duplicates
+            control.Paint -= UniversalTextAutoSizing_Paint;
+            
+            // Add text auto-sizing paint handler for supported controls
+            if (ShouldApplyAutoSizing(control))
+            {
+                control.Paint += UniversalTextAutoSizing_Paint;
+            }
+        }
+
+        /// <summary>
+        /// Determines if a control should have text auto-sizing applied
+        /// </summary>
+        private static bool ShouldApplyAutoSizing(Control control)
+        {
+            return control switch
+            {
+                Label => true,
+                Button => true,
+                CheckBox => true,
+                RadioButton => true,
+                GroupBox => true,
+                TabPage => true,
+                // Text input controls should generally not auto-size as it affects usability
+                TextBox => false,
+                MaskedTextBox => false,
+                RichTextBox => false,
+                ComboBox => false,
+                // List controls handle their own text sizing
+                ListBox => false,
+                CheckedListBox => false,
+                TreeView => false,
+                ListView => false,
+                _ => false
+            };
+        }
+
+        /// <summary>
+        /// Universal paint handler for text auto-sizing
+        /// </summary>
+        private static void UniversalTextAutoSizing_Paint(object? sender, PaintEventArgs e)
+        {
+            if (sender is not Control control) return;
+            if (string.IsNullOrEmpty(control.Text)) return;
+
+            // Don't interfere with owner-drawn controls
+            if (IsOwnerDrawnControl(control)) return;
+
+            var text = control.Text;
+            var rect = control.ClientRectangle;
+            var format = GetStringFormat(control);
+
+            try
+            {
+                var optimalFont = GetOptimalFont(e.Graphics, text, rect, control.Font, format);
+                
+                // Only draw if we have a valid font and the control allows it
+                if (optimalFont != null && CanDrawText(control))
+                {
+                    using var brush = new SolidBrush(control.ForeColor);
+                    e.Graphics.DrawString(text, optimalFont, brush, rect, format);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't crash the application
+                System.Diagnostics.Debug.WriteLine($"Text auto-sizing error for {control.Name}: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Checks if a control is owner-drawn and should not have text auto-sizing applied
+        /// </summary>
+        private static bool IsOwnerDrawnControl(Control control)
+        {
+            return control switch
+            {
+                ListBox lb => lb.DrawMode != DrawMode.Normal,
+                ComboBox cb => cb.DrawMode != DrawMode.Normal,
+                CheckedListBox clb => clb.DrawMode != DrawMode.Normal,
+                TabControl tc => tc.DrawMode != TabDrawMode.Normal,
+                TreeView tv => tv.DrawMode != TreeViewDrawMode.Normal,
+                ListView lv => lv.OwnerDraw,
+                _ => false
+            };
+        }
+
+        /// <summary>
+        /// Checks if text can be drawn on the control
+        /// </summary>
+        private static bool CanDrawText(Control control)
+        {
+            // Some controls should not have their text overridden
+            return control switch
+            {
+                TextBox => false,
+                MaskedTextBox => false,
+                RichTextBox => false,
+                ComboBox => false,
+                _ => true
+            };
+        }
+
+        /// <summary>
+        /// Clears the font cache (useful for memory management)
+        /// </summary>
+        public static void ClearCache()
+        {
+            FontCache.Clear();
+        }
+
+        /// <summary>
+        /// Gets cache statistics for debugging
+        /// </summary>
+        public static (int Count, long MemoryUsage) GetCacheStats()
+        {
+            var count = FontCache.Count;
+            var memoryUsage = count * 100; // Rough estimate
+            return (count, memoryUsage);
+        }
     }
 
     #endregion
