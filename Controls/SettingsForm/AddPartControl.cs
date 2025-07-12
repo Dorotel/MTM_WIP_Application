@@ -1,140 +1,126 @@
+using System;
+using System.Data;
+using System.Windows.Forms;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
-using System.Data;
 
-namespace MTM_Inventory_Application.Controls.SettingsForm;
-
-public partial class AddPartControl : UserControl
+namespace MTM_Inventory_Application.Controls.SettingsForm
 {
-    public event EventHandler? PartAdded;
-
-    public AddPartControl()
+    public partial class AddPartControl : UserControl
     {
-        InitializeComponent();
-        LoadPartTypes();
-    }
+        #region Events
+        public event EventHandler? PartAdded;
+        #endregion
 
-    private async void LoadPartTypes()
-    {
-        try
+        #region Constructors
+        public AddPartControl()
         {
-            // Load part types from md_item_types table
-            var partTypes = await GetPartTypesAsync();
-            typeComboBox.Items.Clear();
-            typeComboBox.Items.Add("Select Type");
-
-            foreach (DataRow row in partTypes.Rows)
-                typeComboBox.Items.Add(row["Type"]?.ToString() ?? string.Empty);
-
-            typeComboBox.SelectedIndex = 0;
+            InitializeComponent();
+            LoadPartTypes();
         }
-        catch (Exception ex)
+        #endregion
+
+        #region Initialization
+        private async void LoadPartTypes()
         {
-            MessageBox.Show($@"Error loading part types: {ex.Message}", @"Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            try
+            {
+                var partTypes = await GetPartTypesAsync();
+                typeComboBox.Items.Clear();
+                typeComboBox.Items.Add("Select Type");
+                foreach (DataRow row in partTypes.Rows)
+                    typeComboBox.Items.Add(row["Type"]?.ToString() ?? string.Empty);
+                typeComboBox.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading part types: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
-    }
 
-    private static async Task<DataTable> GetPartTypesAsync()
-    {
-        return await Dao_Part.GetPartTypes();
-    }
-
-    protected override void OnLoad(EventArgs e)
-    {
-        base.OnLoad(e);
-        // Set the current user when the control loads
-        if (issuedByValueLabel != null) issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
-    }
-
-    private async void SaveButton_Click(object sender, EventArgs e)
-    {
-        try
+        private static async Task<DataTable> GetPartTypesAsync()
         {
-            // Validate inputs
-            if (string.IsNullOrWhiteSpace(itemNumberTextBox.Text))
+            return await Dao_Part.GetPartTypes();
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (issuedByValueLabel != null)
+                issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
+        }
+        #endregion
+
+        #region Event Handlers
+        private async void SaveButton_Click(object sender, EventArgs e)
+        {
+            try
             {
-                MessageBox.Show(@"Item Number is required.", @"Validation Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                itemNumberTextBox.Focus();
-                return;
+                if (string.IsNullOrWhiteSpace(itemNumberTextBox.Text))
+                {
+                    MessageBox.Show("Item Number is required.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    itemNumberTextBox.Focus();
+                    return;
+                }
+                if (string.IsNullOrWhiteSpace(customerTextBox.Text))
+                {
+                    customerTextBox.Text = "[ No Customer ]";
+                    return;
+                }
+                if (string.IsNullOrWhiteSpace(descriptionTextBox.Text))
+                {
+                    MessageBox.Show("Description is required.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    descriptionTextBox.Focus();
+                    return;
+                }
+                if (typeComboBox.SelectedIndex <= 0)
+                {
+                    MessageBox.Show("Please select a part type.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    typeComboBox.Focus();
+                    return;
+                }
+                if (await Dao_Part.PartExists(itemNumberTextBox.Text.Trim()))
+                {
+                    MessageBox.Show($"Part number '{itemNumberTextBox.Text.Trim()}' already exists.", "Duplicate Part Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    itemNumberTextBox.Focus();
+                    return;
+                }
+                await AddPartAsync();
+                MessageBox.Show("Part added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ClearForm();
+                PartAdded?.Invoke(this, EventArgs.Empty);
             }
-
-
-            if (string.IsNullOrWhiteSpace(customerTextBox.Text))
+            catch (Exception ex)
             {
-                customerTextBox.Text = "[ No Customer ]"; // Default value
-                return;
+                MessageBox.Show($"Error adding part: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
 
-            if (string.IsNullOrWhiteSpace(descriptionTextBox.Text))
-            {
-                MessageBox.Show(@"Description is required.", @"Validation Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                descriptionTextBox.Focus();
-                return;
-            }
+        private async Task AddPartAsync()
+        {
+            var itemNumber = itemNumberTextBox.Text.Trim();
+            var customer = customerTextBox.Text.Trim();
+            var description = descriptionTextBox.Text.Trim();
+            var issuedBy = Model_AppVariables.User;
+            var type = typeComboBox.SelectedItem?.ToString() ?? string.Empty;
+            await Dao_Part.AddPartWithStoredProcedure(itemNumber, customer, description, issuedBy, type);
+        }
 
-            if (typeComboBox.SelectedIndex <= 0)
-            {
-                MessageBox.Show(@"Please select a part type.", @"Validation Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                typeComboBox.Focus();
-                return;
-            }
-
-            // Check for duplicate part number
-            if (await Dao_Part.PartExists(itemNumberTextBox.Text.Trim()))
-            {
-                MessageBox.Show($@"Part number '{itemNumberTextBox.Text.Trim()}' already exists.",
-                    @"Duplicate Part Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                itemNumberTextBox.Focus();
-                return;
-            }
-
-            // Add the part using stored procedure
-            await AddPartAsync();
-
-            MessageBox.Show(@"Part added successfully!", @"Success",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            // Clear the form
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
             ClearForm();
-
-            // Notify parent that part was added
-            PartAdded?.Invoke(this, EventArgs.Empty);
         }
-        catch (Exception ex)
+        #endregion
+
+        #region Methods
+        private void ClearForm()
         {
-            MessageBox.Show($@"Error adding part: {ex.Message}", @"Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            itemNumberTextBox.Clear();
+            customerTextBox.Clear();
+            descriptionTextBox.Clear();
+            typeComboBox.SelectedIndex = 0;
+            itemNumberTextBox.Focus();
         }
-    }
-
-    private async Task AddPartAsync()
-    {
-        var itemNumber = itemNumberTextBox.Text.Trim();
-        var customer = customerTextBox.Text.Trim();
-        var description = descriptionTextBox.Text.Trim();
-        var issuedBy = Model_AppVariables.User;
-        var type = typeComboBox.SelectedItem?.ToString() ?? string.Empty; // Ensure type is not null
-
-        // This will need to be implemented in Dao_Part to use the stored procedure
-        // md_part_ids_Add_Part
-        await Dao_Part.AddPartWithStoredProcedure(itemNumber, customer, description, issuedBy, type);
-    }
-
-    private void ClearForm()
-    {
-        itemNumberTextBox.Clear();
-        customerTextBox.Clear();
-        descriptionTextBox.Clear();
-        typeComboBox.SelectedIndex = 0;
-        itemNumberTextBox.Focus();
-    }
-
-    private void CancelButton_Click(object sender, EventArgs e)
-    {
-        ClearForm();
+        #endregion
     }
 }

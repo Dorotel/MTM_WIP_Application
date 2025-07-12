@@ -1,170 +1,157 @@
+using System;
+using System.Data;
+using System.Windows.Forms;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
-using System.Data;
 
-namespace MTM_Inventory_Application.Controls.SettingsForm;
-
-public partial class RemovePartControl : UserControl
+namespace MTM_Inventory_Application.Controls.SettingsForm
 {
-    public event EventHandler? PartRemoved;
-    private DataRow? _currentPart;
-
-    public RemovePartControl()
+    public partial class RemovePartControl : UserControl
     {
-        InitializeComponent();
-    }
+        #region Events
+        public event EventHandler? PartRemoved;
+        #endregion
 
-    protected override async void OnLoad(EventArgs e)
-    {
-        try
+        #region Fields
+        private DataRow? _currentPart;
+        #endregion
+
+        #region Constructors
+        public RemovePartControl()
         {
-            base.OnLoad(e);
-            if (issuedByValueLabel != null) issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
-            await LoadParts(); // Properly awaited here
+            InitializeComponent();
         }
-        catch (Exception ex)
-        {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
-                "SettingsForm / " + "RemovePartControl_OnLoadOverRide");
-        }
-    }
+        #endregion
 
-    private async Task LoadParts()
-    {
-        try
+        #region Initialization
+        protected override async void OnLoad(EventArgs e)
         {
-            var parts = await Dao_Part.GetAllParts();
-            partsComboBox.Items.Clear();
-            partsComboBox.Items.Add("Select Part to Remove");
-
-            foreach (DataRow row in parts.Rows)
+            try
             {
-                var itemNumber = row["Item Number"]?.ToString();
-                var customer = row["Customer"]?.ToString();
-                if (string.IsNullOrWhiteSpace(customer))
-                    customer = "[ No Customer ]";
-                partsComboBox.Items.Add($"{itemNumber} - {customer}");
+                base.OnLoad(e);
+                if (issuedByValueLabel != null)
+                    issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
+                await LoadParts();
             }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "SettingsForm / RemovePartControl_OnLoadOverRide");
+            }
+        }
 
+        private async Task LoadParts()
+        {
+            try
+            {
+                var parts = await Dao_Part.GetAllParts();
+                partsComboBox.Items.Clear();
+                partsComboBox.Items.Add("Select Part to Remove");
+                foreach (DataRow row in parts.Rows)
+                {
+                    var itemNumber = row["Item Number"]?.ToString();
+                    var customer = row["Customer"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(customer))
+                        customer = "[ No Customer ]";
+                    partsComboBox.Items.Add($"{itemNumber} - {customer}");
+                }
+                partsComboBox.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading parts: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        #endregion
+
+        #region Event Handlers
+        private async void PartsComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (partsComboBox.SelectedIndex <= 0)
+            {
+                ClearForm();
+                SetFormEnabled(false);
+                return;
+            }
+            try
+            {
+                var selectedText = partsComboBox.SelectedItem?.ToString() ?? string.Empty;
+                var itemNumber = selectedText.Split(" - ")[0];
+                _currentPart = await Dao_Part.GetPartByNumber(itemNumber);
+                if (_currentPart != null)
+                {
+                    LoadPartData();
+                    SetFormEnabled(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading part data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void RemoveButton_Click(object sender, EventArgs e)
+        {
+            if (_currentPart == null) return;
+            var itemNumber = _currentPart["Item Number"]?.ToString();
+            var customer = _currentPart["Customer"]?.ToString();
+            if (string.IsNullOrEmpty(itemNumber))
+            {
+                MessageBox.Show("Item number is missing. Cannot remove part.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            var result = MessageBox.Show($"Are you sure you want to remove part '{itemNumber}' for customer '{customer}'?\n\nThis action cannot be undone.", "Confirm Part Removal", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result != DialogResult.Yes) return;
+            try
+            {
+                await Dao_Part.DeletePartByItemNumber(itemNumber);
+                MessageBox.Show("Part removed successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                await LoadParts();
+                ClearForm();
+                SetFormEnabled(false);
+                PartRemoved?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error removing part: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
             partsComboBox.SelectedIndex = 0;
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($@"Error loading parts: {ex.Message}", @"Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-
-    private async void PartsComboBox_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        if (partsComboBox.SelectedIndex <= 0)
-        {
             ClearForm();
             SetFormEnabled(false);
-            return;
         }
+        #endregion
 
-        try
+        #region Methods
+        private void LoadPartData()
         {
-            var selectedText = partsComboBox.SelectedItem?.ToString() ?? string.Empty;
-            var itemNumber = selectedText.Split(" - ")[0];
-
-            _currentPart = await Dao_Part.GetPartByNumber(itemNumber);
-            if (_currentPart != null)
-            {
-                LoadPartData();
-                SetFormEnabled(true);
-            }
+            if (_currentPart == null) return;
+            itemNumberValueLabel.Text = _currentPart["Item Number"].ToString();
+            customerValueLabel.Text = _currentPart["Customer"].ToString();
+            descriptionValueLabel.Text = _currentPart["Description"].ToString();
+            typeValueLabel.Text = _currentPart["Type"].ToString();
+            issuedByValueLabel.Text = _currentPart["Issued By"].ToString();
         }
-        catch (Exception ex)
+
+        private void SetFormEnabled(bool enabled)
         {
-            MessageBox.Show($@"Error loading part data: {ex.Message}", @"Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            removeButton.Enabled = enabled;
+            detailsGroupBox.Visible = enabled;
         }
-    }
 
-    private void LoadPartData()
-    {
-        if (_currentPart == null) return;
-
-        itemNumberValueLabel.Text = _currentPart["Item Number"].ToString();
-        customerValueLabel.Text = _currentPart["Customer"].ToString();
-        descriptionValueLabel.Text = _currentPart["Description"].ToString();
-        typeValueLabel.Text = _currentPart["Type"].ToString();
-        issuedByValueLabel.Text = _currentPart["Issued By"].ToString();
-    }
-
-    private void SetFormEnabled(bool enabled)
-    {
-        removeButton.Enabled = enabled;
-        detailsGroupBox.Visible = enabled;
-    }
-
-    private async void RemoveButton_Click(object sender, EventArgs e)
-    {
-        if (_currentPart == null) return;
-
-        var itemNumber = _currentPart["Item Number"]?.ToString();
-        var customer = _currentPart["Customer"]?.ToString();
-
-        if (string.IsNullOrEmpty(itemNumber))
+        private void ClearForm()
         {
-            MessageBox.Show(@"Item number is missing. Cannot remove part.", @"Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return;
+            itemNumberValueLabel.Text = "";
+            customerValueLabel.Text = "";
+            descriptionValueLabel.Text = "";
+            typeValueLabel.Text = "";
+            issuedByValueLabel.Text = "";
+            _currentPart = null;
         }
-
-        var result = MessageBox.Show(
-            $@"Are you sure you want to remove part '{itemNumber}' for customer '{customer}'?
-
-This action cannot be undone.",
-            @"Confirm Part Removal",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Warning);
-
-        if (result != DialogResult.Yes) return;
-
-        try
-        {
-            // Remove the part using stored procedure
-            await Dao_Part.DeletePartByItemNumber(itemNumber);
-
-            MessageBox.Show(@"Part removed successfully!", @"Success",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            // Reload parts list
-            await LoadParts();
-
-            // Clear the form
-            ClearForm();
-            SetFormEnabled(false);
-
-            // Notify parent that part was removed
-            PartRemoved?.Invoke(this, EventArgs.Empty);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($@"Error removing part: {ex.Message}", @"Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-
-    private void ClearForm()
-    {
-        itemNumberValueLabel.Text = "";
-        customerValueLabel.Text = "";
-        descriptionValueLabel.Text = "";
-        typeValueLabel.Text = "";
-        issuedByValueLabel.Text = "";
-        _currentPart = null;
-    }
-
-    private void CancelButton_Click(object sender, EventArgs e)
-    {
-        partsComboBox.SelectedIndex = 0;
-        ClearForm();
-        SetFormEnabled(false);
+        #endregion
     }
 }

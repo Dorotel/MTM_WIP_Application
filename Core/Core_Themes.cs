@@ -1403,20 +1403,6 @@ public static class Core_Themes
             }
         }
 
-        public static bool ThemeExists(string themeName)
-        {
-            try
-            {
-                Debug.Assert(Themes != null, "Themes dictionary is not initialized.");
-                return Themes.ContainsKey(themeName);
-            }
-            catch (Exception ex)
-            {
-                LoggingUtility.LogApplicationError(ex);
-                throw;
-            }
-        }
-
         public static AppTheme GetCurrentTheme()
         {
             try

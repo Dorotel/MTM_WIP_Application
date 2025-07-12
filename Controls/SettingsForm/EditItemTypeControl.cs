@@ -1,19 +1,36 @@
+using System;
+using System.Data;
+using System.Windows.Forms;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
-using System.Data;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm;
 
 public partial class EditItemTypeControl : UserControl
 {
+    #region Events
+
     public event EventHandler? ItemTypeUpdated;
+
+    #endregion
+
+    #region Fields
+
     private DataRow? _currentItemType;
+
+    #endregion
+
+    #region Constructors
 
     public EditItemTypeControl()
     {
         InitializeComponent();
     }
+
+    #endregion
+
+    #region Initialization
 
     private async Task LoadItemTypes()
     {
@@ -22,7 +39,6 @@ public partial class EditItemTypeControl : UserControl
             var itemTypes = await Dao_ItemType.GetAllItemTypes();
             itemTypesComboBox.Items.Clear();
             itemTypesComboBox.Items.Add("Select Item Type to Edit");
-
             foreach (DataRow row in itemTypes.Rows)
             {
                 var itemType = row["Type"]?.ToString();
@@ -34,14 +50,9 @@ public partial class EditItemTypeControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($@"Error loading item types: {ex.Message}", @"Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Error loading item types: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
         }
-    }
-
-    public async Task ReloadComboBoxDataAsync()
-    {
-        await LoadItemTypes();
     }
 
     protected override async void OnLoad(EventArgs e)
@@ -49,16 +60,21 @@ public partial class EditItemTypeControl : UserControl
         try
         {
             base.OnLoad(e);
-            if (issuedByValueLabel != null) issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
+            if (issuedByValueLabel != null)
+                issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
             await LoadItemTypes();
         }
         catch (Exception ex)
         {
             LoggingUtility.LogApplicationError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
-                "SettingsForm / " + "EditItemTypeControl_OnLoadOverRide");
+                "SettingsForm / EditItemTypeControl_OnLoadOverRide");
         }
     }
+
+    #endregion
+
+    #region Event Handlers
 
     private async void ItemTypesComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
@@ -74,7 +90,7 @@ public partial class EditItemTypeControl : UserControl
             var selectedType = itemTypesComboBox.SelectedItem?.ToString();
             if (string.IsNullOrEmpty(selectedType))
             {
-                MessageBox.Show(@"Invalid selection.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Invalid selection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -87,15 +103,70 @@ public partial class EditItemTypeControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($@"Error loading item type data: {ex.Message}", @"Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Error loading item type data: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
         }
     }
+
+    private async void SaveButton_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (_currentItemType == null)
+            {
+                MessageBox.Show("No item type selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(itemTypeTextBox.Text))
+            {
+                MessageBox.Show("Item type is required.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                itemTypeTextBox.Focus();
+                return;
+            }
+
+            var newItemType = itemTypeTextBox.Text.Trim();
+            var currentItemType = _currentItemType["Type"]?.ToString();
+            if (!string.Equals(newItemType, currentItemType, StringComparison.OrdinalIgnoreCase))
+                if (await Dao_ItemType.ItemTypeExists(newItemType))
+                {
+                    MessageBox.Show($"Item type '{newItemType}' already exists.", "Duplicate Item Type",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    itemTypeTextBox.Focus();
+                    return;
+                }
+
+            var itemTypeId = Convert.ToInt32(_currentItemType["ID"]);
+            await Dao_ItemType.UpdateItemType(itemTypeId, newItemType, Model_AppVariables.User ?? "Current User");
+            await LoadItemTypes();
+            ClearForm();
+            SetFormEnabled(false);
+            ItemTypeUpdated?.Invoke(this, EventArgs.Empty);
+            MessageBox.Show("Item type updated successfully.", "Success", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error updating item type: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
+    }
+
+    private void CancelButton_Click(object sender, EventArgs e)
+    {
+        ClearForm();
+        SetFormEnabled(false);
+        itemTypesComboBox.SelectedIndex = 0;
+    }
+
+    #endregion
+
+    #region Methods
 
     private void LoadItemTypeData()
     {
         if (_currentItemType == null) return;
-
         itemTypeTextBox.Text = _currentItemType["Type"]?.ToString() ?? string.Empty;
         originalIssuedByValueLabel.Text = _currentItemType["Issued By"]?.ToString() ?? string.Empty;
     }
@@ -112,68 +183,5 @@ public partial class EditItemTypeControl : UserControl
         originalIssuedByValueLabel.Text = string.Empty;
     }
 
-    private async void SaveButton_Click(object sender, EventArgs e)
-    {
-        try
-        {
-            if (_currentItemType == null)
-            {
-                MessageBox.Show(@"No item type selected.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // Validate input
-            if (string.IsNullOrWhiteSpace(itemTypeTextBox.Text))
-            {
-                MessageBox.Show(@"Item type is required.", @"Validation Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                itemTypeTextBox.Focus();
-                return;
-            }
-
-            var newItemType = itemTypeTextBox.Text.Trim();
-            var currentItemType = _currentItemType["Type"]?.ToString();
-
-            // Check if the new item type already exists (unless it's the same as current)
-            if (!string.Equals(newItemType, currentItemType, StringComparison.OrdinalIgnoreCase))
-            {
-                if (await Dao_ItemType.ItemTypeExists(newItemType))
-                {
-                    MessageBox.Show($@"Item type '{newItemType}' already exists.", @"Duplicate Item Type",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    itemTypeTextBox.Focus();
-                    return;
-                }
-            }
-
-            // Update the item type
-            var itemTypeId = Convert.ToInt32(_currentItemType["ID"]);
-            await Dao_ItemType.UpdateItemType(itemTypeId, newItemType, Model_AppVariables.User ?? "Current User");
-
-            // Refresh the combo box
-            await LoadItemTypes();
-
-            // Clear the form
-            ClearForm();
-            SetFormEnabled(false);
-
-            // Notify that item type was updated
-            ItemTypeUpdated?.Invoke(this, EventArgs.Empty);
-
-            MessageBox.Show(@"Item type updated successfully.", @"Success",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($@"Error updating item type: {ex.Message}", @"Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-
-    private void CancelButton_Click(object sender, EventArgs e)
-    {
-        ClearForm();
-        SetFormEnabled(false);
-        itemTypesComboBox.SelectedIndex = 0;
-    }
+    #endregion
 }

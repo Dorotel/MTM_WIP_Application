@@ -1,75 +1,76 @@
+using System;
+using System.Windows.Forms;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
 
-namespace MTM_Inventory_Application.Controls.SettingsForm;
-
-public partial class AddItemTypeControl : UserControl
+namespace MTM_Inventory_Application.Controls.SettingsForm
 {
-    public event EventHandler? ItemTypeAdded;
-
-    public AddItemTypeControl()
+    public partial class AddItemTypeControl : UserControl
     {
-        InitializeComponent();
-    }
+        #region Events
+        public event EventHandler? ItemTypeAdded;
+        #endregion
 
-    protected override void OnLoad(EventArgs e)
-    {
-        base.OnLoad(e);
-        // Set the current user when the control loads
-        if (issuedByValueLabel != null) issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
-    }
-
-    private async void SaveButton_Click(object sender, EventArgs e)
-    {
-        try
+        #region Constructors
+        public AddItemTypeControl()
         {
-            // Validate input
-            if (string.IsNullOrWhiteSpace(itemTypeTextBox.Text))
+            InitializeComponent();
+        }
+        #endregion
+
+        #region Initialization
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (issuedByValueLabel != null)
+                issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
+        }
+        #endregion
+
+        #region Event Handlers
+        private async void SaveButton_Click(object sender, EventArgs e)
+        {
+            try
             {
-                MessageBox.Show(@"Item type is required.", @"Validation Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                itemTypeTextBox.Focus();
-                return;
+                if (string.IsNullOrWhiteSpace(itemTypeTextBox.Text))
+                {
+                    MessageBox.Show("Item type is required.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    itemTypeTextBox.Focus();
+                    return;
+                }
+
+                var itemType = itemTypeTextBox.Text.Trim();
+
+                if (await Dao_ItemType.ItemTypeExists(itemType))
+                {
+                    MessageBox.Show($"Item type '{itemType}' already exists.", "Duplicate Item Type", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    itemTypeTextBox.Focus();
+                    return;
+                }
+
+                await Dao_ItemType.InsertItemType(itemType, Model_AppVariables.User ?? "Current User");
+                ClearForm();
+                ItemTypeAdded?.Invoke(this, EventArgs.Empty);
+                MessageBox.Show("Item type added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-
-            var itemType = itemTypeTextBox.Text.Trim();
-
-            // Check if item type already exists
-            if (await Dao_ItemType.ItemTypeExists(itemType))
+            catch (Exception ex)
             {
-                MessageBox.Show($@"Item type '{itemType}' already exists.", @"Duplicate Item Type",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                itemTypeTextBox.Focus();
-                return;
+                MessageBox.Show($"Error adding item type: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
 
-            // Insert the item type
-            await Dao_ItemType.InsertItemType(itemType, Model_AppVariables.User ?? "Current User");
-
-            // Clear the form
+        private void ClearButton_Click(object sender, EventArgs e)
+        {
             ClearForm();
-
-            // Notify parent
-            ItemTypeAdded?.Invoke(this, EventArgs.Empty);
-
-            MessageBox.Show(@"Item type added successfully!", @"Success",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        catch (Exception ex)
+        #endregion
+
+        #region Methods
+        private void ClearForm()
         {
-            MessageBox.Show($@"Error adding item type: {ex.Message}", @"Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            itemTypeTextBox.Clear();
+            itemTypeTextBox.Focus();
         }
-    }
-
-    private void ClearButton_Click(object sender, EventArgs e)
-    {
-        ClearForm();
-    }
-
-    private void ClearForm()
-    {
-        itemTypeTextBox.Clear();
-        itemTypeTextBox.Focus();
+        #endregion
     }
 }

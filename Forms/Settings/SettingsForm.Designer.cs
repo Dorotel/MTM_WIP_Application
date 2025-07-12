@@ -50,8 +50,6 @@
             serverTextBox = new TextBox();
             serverLabel = new Label();
             themePanel = new Panel();
-            groupBox2 = new GroupBox();
-            themeGeneratorForm1 = new MTM_Inventory_Application.Controls.SettingsForm.ThemeGeneratorForm();
             groupBox1 = new GroupBox();
             themeComboBox = new ComboBox();
             shortcutsPanel = new Panel();
@@ -84,7 +82,6 @@
             connectionTabPage.SuspendLayout();
             connectionGroupBox.SuspendLayout();
             themePanel.SuspendLayout();
-            groupBox2.SuspendLayout();
             groupBox1.SuspendLayout();
             shortcutsPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)shortcutsDataGridView).BeginInit();
@@ -316,7 +313,6 @@
             // 
             // themePanel
             // 
-            themePanel.Controls.Add(groupBox2);
             themePanel.Controls.Add(groupBox1);
             themePanel.Dock = DockStyle.Fill;
             themePanel.Location = new Point(0, 0);
@@ -324,25 +320,6 @@
             themePanel.Size = new Size(838, 492);
             themePanel.TabIndex = 3;
             themePanel.Visible = false;
-            // 
-            // groupBox2
-            // 
-            groupBox2.Controls.Add(themeGeneratorForm1);
-            groupBox2.Location = new Point(6, 71);
-            groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(296, 363);
-            groupBox2.TabIndex = 3;
-            groupBox2.TabStop = false;
-            groupBox2.Text = "Generate a Theme";
-            // 
-            // themeGeneratorForm1
-            // 
-            themeGeneratorForm1.Dock = DockStyle.Fill;
-            themeGeneratorForm1.Location = new Point(3, 19);
-            themeGeneratorForm1.Margin = new Padding(3, 2, 3, 2);
-            themeGeneratorForm1.Name = "themeGeneratorForm1";
-            themeGeneratorForm1.Size = new Size(290, 341);
-            themeGeneratorForm1.TabIndex = 0;
             // 
             // groupBox1
             // 
@@ -590,7 +567,6 @@
             connectionGroupBox.ResumeLayout(false);
             connectionGroupBox.PerformLayout();
             themePanel.ResumeLayout(false);
-            groupBox2.ResumeLayout(false);
             groupBox1.ResumeLayout(false);
             shortcutsPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)shortcutsDataGridView).EndInit();
@@ -647,8 +623,6 @@
         private System.Windows.Forms.Panel addUserPanel;
         private System.Windows.Forms.Panel editUserPanel;
         private System.Windows.Forms.Panel deleteUserPanel;
-        private GroupBox groupBox2;
-        private Controls.SettingsForm.ThemeGeneratorForm themeGeneratorForm1;
         private GroupBox groupBox1;
     }
 }

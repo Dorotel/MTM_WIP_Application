@@ -1,75 +1,76 @@
+using System;
+using System.Windows.Forms;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
 
-namespace MTM_Inventory_Application.Controls.SettingsForm;
-
-public partial class AddOperationControl : UserControl
+namespace MTM_Inventory_Application.Controls.SettingsForm
 {
-    public event EventHandler? OperationAdded;
-
-    public AddOperationControl()
+    public partial class AddOperationControl : UserControl
     {
-        InitializeComponent();
-    }
+        #region Events
+        public event EventHandler? OperationAdded;
+        #endregion
 
-    protected override void OnLoad(EventArgs e)
-    {
-        base.OnLoad(e);
-        // Set the current user when the control loads
-        if (issuedByValueLabel != null) issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
-    }
-
-    private async void SaveButton_Click(object sender, EventArgs e)
-    {
-        try
+        #region Constructors
+        public AddOperationControl()
         {
-            // Validate input
-            if (string.IsNullOrWhiteSpace(operationTextBox.Text))
+            InitializeComponent();
+        }
+        #endregion
+
+        #region Initialization
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (issuedByValueLabel != null)
+                issuedByValueLabel.Text = Model_AppVariables.User ?? "Current User";
+        }
+        #endregion
+
+        #region Event Handlers
+        private async void SaveButton_Click(object sender, EventArgs e)
+        {
+            try
             {
-                MessageBox.Show(@"Operation number is required.", @"Validation Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                operationTextBox.Focus();
-                return;
+                if (string.IsNullOrWhiteSpace(operationTextBox.Text))
+                {
+                    MessageBox.Show("Operation number is required.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    operationTextBox.Focus();
+                    return;
+                }
+
+                var operationNumber = operationTextBox.Text.Trim();
+
+                if (await Dao_Operation.OperationExists(operationNumber))
+                {
+                    MessageBox.Show($"Operation number '{operationNumber}' already exists.", "Duplicate Operation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    operationTextBox.Focus();
+                    return;
+                }
+
+                await Dao_Operation.InsertOperation(operationNumber, Model_AppVariables.User ?? "Current User");
+                ClearForm();
+                OperationAdded?.Invoke(this, EventArgs.Empty);
+                MessageBox.Show("Operation added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-
-            var operationNumber = operationTextBox.Text.Trim();
-
-            // Check if operation number already exists
-            if (await Dao_Operation.OperationExists(operationNumber))
+            catch (Exception ex)
             {
-                MessageBox.Show($@"Operation number '{operationNumber}' already exists.", @"Duplicate Operation",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                operationTextBox.Focus();
-                return;
+                MessageBox.Show($"Error adding operation: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
 
-            // Insert the operation
-            await Dao_Operation.InsertOperation(operationNumber, Model_AppVariables.User ?? "Current User");
-
-            // Clear the form
+        private void ClearButton_Click(object sender, EventArgs e)
+        {
             ClearForm();
-
-            // Notify parent
-            OperationAdded?.Invoke(this, EventArgs.Empty);
-
-            MessageBox.Show(@"Operation added successfully!", @"Success",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        catch (Exception ex)
+        #endregion
+
+        #region Methods
+        private void ClearForm()
         {
-            MessageBox.Show($@"Error adding operation: {ex.Message}", @"Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            operationTextBox.Clear();
+            operationTextBox.Focus();
         }
-    }
-
-    private void ClearButton_Click(object sender, EventArgs e)
-    {
-        ClearForm();
-    }
-
-    private void ClearForm()
-    {
-        operationTextBox.Clear();
-        operationTextBox.Focus();
+        #endregion
     }
 }

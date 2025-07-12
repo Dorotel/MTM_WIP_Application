@@ -1,52 +1,65 @@
+using System;
+using System.Data;
+using System.Linq;
+using System.Windows.Forms;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
-using System;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Reflection;
-using System.Windows.Forms;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
     public partial class EditUserControl : UserControl
     {
+        #region Events
         public event EventHandler? UserEdited;
+        #endregion
 
+        #region Constructors
         public EditUserControl()
         {
             InitializeComponent();
-
-            // Prevent spaces in all textboxes
             EditUserControl_TextBox_FirstName.KeyPress += TextBox_NoSpaces_KeyPress;
             EditUserControl_TextBox_LastName.KeyPress += TextBox_NoSpaces_KeyPress;
             EditUserControl_TextBox_Pin.KeyPress += TextBox_NoSpaces_KeyPress;
             EditUserControl_TextBox_VisualUserName.KeyPress += TextBox_NoSpaces_KeyPress;
             EditUserControl_TextBox_VisualPassword.KeyPress += TextBox_NoSpaces_KeyPress;
-
-            // PIN and Visual password textboxes as password fields
             EditUserControl_TextBox_Pin.UseSystemPasswordChar = true;
             EditUserControl_TextBox_VisualPassword.UseSystemPasswordChar = true;
-
-            // Visual credentials start disabled
             EditUserControl_TextBox_VisualUserName.Enabled = false;
             EditUserControl_TextBox_VisualPassword.Enabled = false;
-
-            // Visual access checkbox event
             EditUserControl_CheckBox_VisualAccess.CheckedChanged += EditUserControl_CheckBox_VisualAccess_CheckedChanged;
-
-            // Show/hide both password fields with one checkbox
             EditUserControl_CheckBox_ViewHidePasswords.CheckedChanged += EditUserControl_CheckBox_ViewHidePasswords_CheckedChanged;
-
-            // User selection event
             EditUserControl_ComboBox_Users.SelectedIndexChanged += EditUserControl_ComboBox_Users_SelectedIndexChanged;
-
-            // Button events
             EditUserControl_Button_Save.Click += EditUserControl_Button_Save_Click;
             EditUserControl_Button_Clear.Click += EditUserControl_Button_Clear_Click;
         }
+        #endregion
 
+        #region Initialization
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            EditUserControl_ComboBox_Shift.Items.Clear();
+            EditUserControl_ComboBox_Shift.Items.AddRange(new object[] { "First", "Second", "Third", "Weekend" });
+            LoadUsersAsync();
+        }
+
+        private async void LoadUsersAsync()
+        {
+            EditUserControl_ComboBox_Users.Items.Clear();
+            var users = await Dao_User.GetAllUsersAsync();
+            foreach (DataRow row in users.Rows)
+            {
+                var user = row["User"]?.ToString() ?? string.Empty;
+                if (!string.IsNullOrEmpty(user))
+                    EditUserControl_ComboBox_Users.Items.Add(user);
+            }
+            if (EditUserControl_ComboBox_Users.Items.Count > 0)
+                EditUserControl_ComboBox_Users.SelectedIndex = 0;
+        }
+        #endregion
+
+        #region Event Handlers
         private void TextBox_NoSpaces_KeyPress(object? sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == ' ')
@@ -72,30 +85,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
         }
 
-        protected override void OnLoad(EventArgs e)
-        {
-            base.OnLoad(e);
-            EditUserControl_ComboBox_Shift.Items.Clear();
-            EditUserControl_ComboBox_Shift.Items.AddRange(new object[] { "First", "Second", "Third", "Weekend" });
-
-            // Load users into ComboBox
-            LoadUsersAsync();
-        }
-
-        private async void LoadUsersAsync()
-        {
-            EditUserControl_ComboBox_Users.Items.Clear();
-            var users = await Dao_User.GetAllUsersAsync();
-            foreach (DataRow row in users.Rows)
-            {
-                var user = row["User"]?.ToString() ?? string.Empty;
-                if (!string.IsNullOrEmpty(user))
-                    EditUserControl_ComboBox_Users.Items.Add(user);
-            }
-            if (EditUserControl_ComboBox_Users.Items.Count > 0)
-                EditUserControl_ComboBox_Users.SelectedIndex = 0;
-        }
-
         private async void EditUserControl_ComboBox_Users_SelectedIndexChanged(object? sender, EventArgs e)
         {
             if (EditUserControl_ComboBox_Users.SelectedItem is string userName)
@@ -112,8 +101,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                     EditUserControl_CheckBox_VisualAccess.Checked = !string.IsNullOrWhiteSpace(userRow["VisualUserName"]?.ToString());
                     EditUserControl_TextBox_VisualUserName.Text = userRow["VisualUserName"]?.ToString() ?? "";
                     EditUserControl_TextBox_VisualPassword.Text = userRow["VisualPassword"]?.ToString() ?? "";
-
-                    // Set role radio button
                     int userId = Convert.ToInt32(userRow["ID"]);
                     int roleId = await Dao_User.GetUserRoleIdAsync(userId);
                     EditUserControl_RadioButton_NormalUser.Checked = roleId == 3;
@@ -129,38 +116,30 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             {
                 if (EditUserControl_ComboBox_Users.SelectedItem is not string userName)
                     return;
-
-                // Validate input (same as AddUserControl)
                 if (string.IsNullOrWhiteSpace(EditUserControl_TextBox_FirstName.Text))
                 {
-                    MessageBox.Show(@"First name is required.", @"Validation Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("First name is required.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     EditUserControl_TextBox_FirstName.Focus();
                     return;
                 }
                 if (string.IsNullOrWhiteSpace(EditUserControl_TextBox_LastName.Text))
                 {
-                    MessageBox.Show(@"Last name is required.", @"Validation Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Last name is required.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     EditUserControl_TextBox_LastName.Focus();
                     return;
                 }
                 if (EditUserControl_ComboBox_Shift.SelectedIndex <= -1)
                 {
-                    MessageBox.Show(@"Please select a shift.", @"Validation Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Please select a shift.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     EditUserControl_ComboBox_Shift.Focus();
                     return;
                 }
                 if (string.IsNullOrWhiteSpace(EditUserControl_TextBox_Pin.Text))
                 {
-                    MessageBox.Show(@"Pin is required.", @"Validation Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Pin is required.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     EditUserControl_TextBox_Pin.Focus();
                     return;
                 }
-
-                // Update user
                 await Dao_User.UpdateUserAsync(
                     userName,
                     EditUserControl_TextBox_FirstName.Text + " " + EditUserControl_TextBox_LastName.Text,
@@ -168,9 +147,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                     EditUserControl_TextBox_Pin.Text,
                     EditUserControl_TextBox_VisualUserName.Text,
                     EditUserControl_TextBox_VisualPassword.Text
-                    );
-
-                // Update user role
+                );
                 var userRow = await Dao_User.GetUserByUsernameAsync(userName, true);
                 if (userRow != null && userRow.Table.Columns.Contains("ID"))
                 {
@@ -180,27 +157,21 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                         newRoleId = 1;
                     else if (EditUserControl_RadioButton_ReadOnly.Checked)
                         newRoleId = 2;
-
-                    // Remove all roles, then add the new one
                     await Dao_User.SetUserRoleAsync(userId, newRoleId, Environment.UserName, true);
                 }
-
                 UserEdited?.Invoke(this, EventArgs.Empty);
-
-                MessageBox.Show(@"User updated successfully!", @"Success",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("User updated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($@"Error updating user: {ex.Message}", @"Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error updating user: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void EditUserControl_Button_Clear_Click(object? sender, EventArgs e)
         {
-            // Reload selected user
             EditUserControl_ComboBox_Users_SelectedIndexChanged(this, EventArgs.Empty);
         }
+        #endregion
     }
 }
