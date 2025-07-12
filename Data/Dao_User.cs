@@ -359,6 +359,10 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
     {
         Debug.WriteLine(
             $"[Dao_User] Entering InsertUserAsync(user={user}, fullName={fullName}, shift={shift}, vitsUser={vitsUser}, pin={pin}, lastShownVersion={lastShownVersion}, hideChangeLog={hideChangeLog}, themeName={themeName}, themeFontSize={themeFontSize}, visualUserName={visualUserName}, visualPassword={visualPassword}, wipServerAddress={wipServerAddress}, database = {database},wipServerPort={wipServerPort}, useAsync={useAsync})");
+        
+        // Privilege check: Only Admin users can insert new users
+        Helper_Privilege_Validation.ValidateUserManagementAccess();
+        
         try
         {
             var parameters = new Dictionary<string, object>
@@ -401,6 +405,10 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
     {
         Debug.WriteLine(
             $"[Dao_User] Entering UpdateUserAsync(user={user}, fullName={fullName}, shift={shift}, pin={pin}, visualUserName={visualUserName}, visualPassword={visualPassword}, useAsync={useAsync})");
+        
+        // Privilege check: Only Admin users can update users
+        Helper_Privilege_Validation.ValidateUserManagementAccess();
+        
         try
         {
             var parameters = new Dictionary<string, object>
@@ -427,6 +435,10 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
     internal static async Task DeleteUserAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering DeleteUserAsync(user={user}, useAsync={useAsync})");
+        
+        // Privilege check: Only Admin users can delete users
+        Helper_Privilege_Validation.ValidateUserManagementAccess();
+        
         try
         {
             var parameters = new Dictionary<string, object>
@@ -609,6 +621,10 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
     internal static async Task AddUserRoleAsync(int userId, int roleId, string assignedBy, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering AddUserRoleAsync(userId={userId}, roleId={roleId}, assignedBy={assignedBy}, useAsync={useAsync})");
+        
+        // Privilege check: Only Admin users can assign roles
+        Helper_Privilege_Validation.ValidateRoleAssignmentAccess();
+        
         try
         {
             var parameters = new Dictionary<string, object>
@@ -673,6 +689,10 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
     internal static async Task SetUserRoleAsync(int userId, int newRoleId, string assignedBy, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering SetUserRoleAsync(userId={userId}, newRoleId={newRoleId}, assignedBy={assignedBy}, useAsync={useAsync})");
+        
+        // Privilege check: Only Admin users can set roles
+        Helper_Privilege_Validation.ValidateRoleAssignmentAccess();
+        
         try
         {
             var parameters = new Dictionary<string, object>
@@ -725,6 +745,10 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
     internal static async Task RemoveUserRoleAsync(int userId, int roleId, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering RemoveUserRoleAsync(userId={userId}, roleId={roleId}, useAsync={useAsync})");
+        
+        // Privilege check: Only Admin users can remove roles
+        Helper_Privilege_Validation.ValidateRoleAssignmentAccess();
+        
         try
         {
             var parameters = new Dictionary<string, object>

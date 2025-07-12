@@ -56,6 +56,9 @@ public static class Dao_Inventory
         string notes,
         bool useAsync = false)
     {
+        // Privilege check: Validate inventory write access
+        Helper_Privilege_Validation.ValidateInventoryWriteAccess();
+        
         // If itemType is null or empty, retrieve it from md_part_ids
         if (string.IsNullOrWhiteSpace(itemType))
         {
