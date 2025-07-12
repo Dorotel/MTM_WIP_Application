@@ -72,11 +72,36 @@ public static class Core_Themes
     /// </summary>
     public static void ClearFontCache()
     {
-        foreach (var font in FontCache.Values)
+        try
         {
-            font?.Dispose();
+            foreach (var font in FontCache.Values)
+            {
+                font?.Dispose();
+            }
+            FontCache.Clear();
+            LoggingUtility.Log("Font cache cleared successfully.");
         }
-        FontCache.Clear();
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Performs cleanup of theme resources
+    /// Should be called when the application is shutting down
+    /// </summary>
+    public static void Cleanup()
+    {
+        try
+        {
+            ClearFontCache();
+            LoggingUtility.Log("Theme system cleanup completed.");
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+        }
     }
 
     /// <summary>
@@ -1120,19 +1145,34 @@ public static class Core_Themes
         /// <param name="graphics">Graphics context for measuring text</param>
         private static void AutoSizeTextToFitControl(Control control, Graphics graphics)
         {
-            if (string.IsNullOrEmpty(control.Text) || control.Width <= 0 || control.Height <= 0)
+            if (control == null || graphics == null || string.IsNullOrEmpty(control.Text) || 
+                control.Width <= 0 || control.Height <= 0)
                 return;
 
-            // Get the available area for text (considering padding and margins)
-            var availableSize = GetAvailableTextArea(control);
-            if (availableSize.Width <= 0 || availableSize.Height <= 0)
-                return;
-
-            // Find the optimal font size
-            var optimalFont = FindOptimalFontSize(control.Text, control.Font, availableSize, graphics);
-            if (optimalFont != null && Math.Abs(optimalFont.Size - control.Font.Size) > 0.1f)
+            try
             {
-                control.Font = optimalFont;
+                // Get the available area for text (considering padding and margins)
+                var availableSize = GetAvailableTextArea(control);
+                if (availableSize.Width <= 0 || availableSize.Height <= 0)
+                    return;
+
+                // Find the optimal font size
+                var optimalFont = FindOptimalFontSize(control.Text, control.Font, availableSize, graphics, control);
+                if (optimalFont != null && Math.Abs(optimalFont.Size - control.Font.Size) > 0.1f)
+                {
+                    var oldFont = control.Font;
+                    control.Font = optimalFont;
+                    
+                    // Dispose the old font if it was created by auto-sizing (not the default font)
+                    if (oldFont != SystemFonts.DefaultFont && oldFont != control.DefaultFont)
+                    {
+                        oldFont?.Dispose();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
             }
         }
 
@@ -1143,6 +1183,9 @@ public static class Core_Themes
         /// <returns>Available size for text</returns>
         private static Size GetAvailableTextArea(Control control)
         {
+            if (control == null)
+                return Size.Empty;
+
             var width = control.Width;
             var height = control.Height;
 
@@ -1173,7 +1216,7 @@ public static class Core_Themes
                     else
                     {
                         // Standard button border
-                        width -= 6;
+                        width -= 8;
                         height -= 6;
                     }
                     break;
@@ -1181,21 +1224,64 @@ public static class Core_Themes
                 case GroupBox gb:
                     // Account for GroupBox header and border
                     height -= 20; // Approximate header height
-                    width -= 6;   // Border padding
+                    width -= 10;  // Border padding
                     break;
 
                 case Label lbl:
-                    // Labels typically don't need much adjustment
+                    // Labels may have AutoSize enabled, account for that
+                    if (lbl.AutoSize)
+                    {
+                        // For auto-sized labels, use the preferred size
+                        var preferredSize = lbl.GetPreferredSize(new Size(width, height));
+                        width = Math.Min(width, preferredSize.Width);
+                        height = Math.Min(height, preferredSize.Height);
+                    }
+                    break;
+
+                case CheckBox cb:
+                    // Account for checkbox icon
+                    width -= 20;
+                    break;
+
+                case RadioButton rb:
+                    // Account for radio button icon
+                    width -= 20;
+                    break;
+
+                case TextBox:
+                case MaskedTextBox:
+                case RichTextBox:
+                    // Account for text box borders and padding
+                    width -= 6;
+                    height -= 4;
+                    break;
+
+                case ComboBox:
+                    // Account for dropdown arrow
+                    width -= 20;
+                    height -= 4;
+                    break;
+
+                case NumericUpDown:
+                    // Account for up/down arrows
+                    width -= 20;
+                    height -= 4;
+                    break;
+
+                case DateTimePicker:
+                    // Account for dropdown arrow
+                    width -= 20;
+                    height -= 4;
                     break;
 
                 default:
                     // General border adjustment for other controls
-                    width -= 4;
+                    width -= 6;
                     height -= 4;
                     break;
             }
 
-            return new Size(Math.Max(1, width), Math.Max(1, height));
+            return new Size(Math.Max(10, width), Math.Max(10, height));
         }
 
         /// <summary>
@@ -1205,76 +1291,108 @@ public static class Core_Themes
         /// <param name="baseFont">The base font to scale</param>
         /// <param name="availableSize">The available area</param>
         /// <param name="graphics">Graphics context for measuring</param>
+        /// <param name="control">The control containing the text (for format flags)</param>
         /// <returns>Optimal font, or null if no adjustment needed</returns>
-        private static Font? FindOptimalFontSize(string text, Font baseFont, Size availableSize, Graphics graphics)
+        private static Font? FindOptimalFontSize(string text, Font baseFont, Size availableSize, Graphics graphics, Control? control = null)
         {
-            // Set minimum and maximum font sizes to maintain readability
-            const float minFontSize = 6f;
-            const float maxFontSize = 72f;
-            
-            var currentSize = baseFont.Size;
-            var bestSize = currentSize;
-            
-            // Create a cache key for this combination
-            var cacheKey = $"{text.Length}_{baseFont.Name}_{baseFont.Style}_{availableSize.Width}x{availableSize.Height}";
-            
-            // Check cache first
-            if (FontCache.TryGetValue(cacheKey, out var cachedFont))
-            {
-                return cachedFont;
-            }
-            
-            // First, check if current size fits
-            var currentMeasure = TextRenderer.MeasureText(graphics, text, baseFont, availableSize, TextFormatFlags.WordBreak);
-            if (currentMeasure.Width <= availableSize.Width && currentMeasure.Height <= availableSize.Height)
-            {
-                // Current size fits, try to find a larger size that still fits
-                for (var testSize = currentSize + 0.5f; testSize <= maxFontSize; testSize += 0.5f)
-                {
-                    using var testFont = new Font(baseFont.FontFamily, testSize, baseFont.Style);
-                    var testMeasure = TextRenderer.MeasureText(graphics, text, testFont, availableSize, TextFormatFlags.WordBreak);
-                    
-                    if (testMeasure.Width <= availableSize.Width && testMeasure.Height <= availableSize.Height)
-                    {
-                        bestSize = testSize;
-                    }
-                    else
-                    {
-                        break; // Font too large, stop searching
-                    }
-                }
-            }
-            else
-            {
-                // Current size doesn't fit, find a smaller size that fits
-                for (var testSize = currentSize - 0.5f; testSize >= minFontSize; testSize -= 0.5f)
-                {
-                    using var testFont = new Font(baseFont.FontFamily, testSize, baseFont.Style);
-                    var testMeasure = TextRenderer.MeasureText(graphics, text, testFont, availableSize, TextFormatFlags.WordBreak);
-                    
-                    if (testMeasure.Width <= availableSize.Width && testMeasure.Height <= availableSize.Height)
-                    {
-                        bestSize = testSize;
-                        break; // Found a size that fits
-                    }
-                }
-            }
+            if (string.IsNullOrEmpty(text) || baseFont == null || graphics == null ||
+                availableSize.Width <= 0 || availableSize.Height <= 0)
+                return null;
 
-            // Return new font only if size changed significantly
-            if (Math.Abs(bestSize - currentSize) > 0.1f)
+            try
             {
-                var newFont = new Font(baseFont.FontFamily, bestSize, baseFont.Style);
+                // Set minimum and maximum font sizes to maintain readability
+                const float minFontSize = 6f;
+                const float maxFontSize = 72f;
                 
-                // Cache the result (with a reasonable cache size limit)
-                if (FontCache.Count < 1000)
+                var currentSize = Math.Max(minFontSize, Math.Min(maxFontSize, baseFont.Size));
+                var bestSize = currentSize;
+                
+                // Get appropriate text format flags
+                var formatFlags = control != null ? GetTextFormatFlags(control) : TextFormatFlags.WordBreak;
+                
+                // Create a cache key for this combination
+                var cacheKey = $"{text.Length}_{baseFont.Name}_{baseFont.Style}_{availableSize.Width}x{availableSize.Height}_{currentSize}_{formatFlags}";
+                
+                // Check cache first
+                if (FontCache.TryGetValue(cacheKey, out var cachedFont))
                 {
-                    FontCache.TryAdd(cacheKey, newFont);
+                    return cachedFont;
                 }
                 
-                return newFont;
-            }
+                // First, check if current size fits
+                var currentMeasure = TextRenderer.MeasureText(graphics, text, baseFont, availableSize, formatFlags);
+                if (currentMeasure.Width <= availableSize.Width && currentMeasure.Height <= availableSize.Height)
+                {
+                    // Current size fits, try to find a larger size that still fits
+                    for (var testSize = currentSize + 0.5f; testSize <= maxFontSize; testSize += 0.5f)
+                    {
+                        try
+                        {
+                            using var testFont = new Font(baseFont.FontFamily, testSize, baseFont.Style);
+                            var testMeasure = TextRenderer.MeasureText(graphics, text, testFont, availableSize, formatFlags);
+                            
+                            if (testMeasure.Width <= availableSize.Width && testMeasure.Height <= availableSize.Height)
+                            {
+                                bestSize = testSize;
+                            }
+                            else
+                            {
+                                break; // Font too large, stop searching
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LoggingUtility.LogApplicationError(ex);
+                            break; // Stop trying larger sizes if we encounter an error
+                        }
+                    }
+                }
+                else
+                {
+                    // Current size doesn't fit, find a smaller size that fits
+                    for (var testSize = currentSize - 0.5f; testSize >= minFontSize; testSize -= 0.5f)
+                    {
+                        try
+                        {
+                            using var testFont = new Font(baseFont.FontFamily, testSize, baseFont.Style);
+                            var testMeasure = TextRenderer.MeasureText(graphics, text, testFont, availableSize, formatFlags);
+                            
+                            if (testMeasure.Width <= availableSize.Width && testMeasure.Height <= availableSize.Height)
+                            {
+                                bestSize = testSize;
+                                break; // Found a size that fits
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LoggingUtility.LogApplicationError(ex);
+                            break; // Stop trying smaller sizes if we encounter an error
+                        }
+                    }
+                }
 
-            return null;
+                // Return new font only if size changed significantly
+                if (Math.Abs(bestSize - currentSize) > 0.1f)
+                {
+                    var newFont = new Font(baseFont.FontFamily, bestSize, baseFont.Style);
+                    
+                    // Cache the result (with a reasonable cache size limit)
+                    if (FontCache.Count < 1000)
+                    {
+                        FontCache.TryAdd(cacheKey, newFont);
+                    }
+                    
+                    return newFont;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                return null;
+            }
         }
 
         /// <summary>
@@ -1286,9 +1404,66 @@ public static class Core_Themes
             if (control == null || string.IsNullOrEmpty(control.Text))
                 return;
 
-            // Use a temporary graphics context to measure text
-            using var graphics = control.CreateGraphics();
-            AutoSizeTextToFitControl(control, graphics);
+            try
+            {
+                // Use a temporary graphics context to measure text
+                using var graphics = control.CreateGraphics();
+                AutoSizeTextToFitControl(control, graphics);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets the appropriate TextFormatFlags for text measurement based on control type
+        /// </summary>
+        /// <param name="control">The control to get flags for</param>
+        /// <returns>TextFormatFlags appropriate for the control</returns>
+        private static TextFormatFlags GetTextFormatFlags(Control control)
+        {
+            var flags = TextFormatFlags.Default;
+
+            switch (control)
+            {
+                case Label lbl:
+                    flags = TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl;
+                    if (lbl.AutoSize)
+                        flags |= TextFormatFlags.SingleLine;
+                    break;
+                
+                case Button:
+                    flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
+                    break;
+                
+                case GroupBox:
+                    flags = TextFormatFlags.SingleLine | TextFormatFlags.Left | TextFormatFlags.Top;
+                    break;
+                
+                case CheckBox:
+                case RadioButton:
+                    flags = TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak;
+                    break;
+                
+                case TextBox:
+                case MaskedTextBox:
+                case RichTextBox:
+                    flags = TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl;
+                    break;
+                
+                case ComboBox:
+                case NumericUpDown:
+                case DateTimePicker:
+                    flags = TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine;
+                    break;
+                
+                default:
+                    flags = TextFormatFlags.WordBreak | TextFormatFlags.Left | TextFormatFlags.Top;
+                    break;
+            }
+
+            return flags;
         }
     }
 
@@ -1376,7 +1551,7 @@ public static class Core_Themes
                     if (!string.IsNullOrEmpty(tabText))
                     {
                         var availableSize = new Size(rect.Width - 8, rect.Height - 4); // Account for padding
-                        var optimalFont = FindOptimalFontSize(tabText, e.Font ?? tab.Font, availableSize, e.Graphics);
+                        var optimalFont = FindOptimalFontSize(tabText, e.Font ?? tab.Font, availableSize, e.Graphics, tab);
                         var drawFont = optimalFont ?? e.Font ?? tab.Font;
                         
                         TextRenderer.DrawText(e.Graphics, tabText, drawFont, rect, foreColor,
@@ -1431,7 +1606,7 @@ public static class Core_Themes
                         if (!string.IsNullOrEmpty(itemText))
                         {
                             var availableSize = new Size(e.Bounds.Width - 4, e.Bounds.Height - 2);
-                            var optimalFont = FindOptimalFontSize(itemText, listBox.Font, availableSize, e.Graphics);
+                            var optimalFont = FindOptimalFontSize(itemText, listBox.Font, availableSize, e.Graphics, listBox);
                             var drawFont = optimalFont ?? listBox.Font;
 
                             TextRenderer.DrawText(e.Graphics, itemText, drawFont, e.Bounds, foreColor,
@@ -1493,7 +1668,7 @@ public static class Core_Themes
                         if (!string.IsNullOrEmpty(itemText))
                         {
                             var availableSize = new Size(e.Bounds.Width - 4, e.Bounds.Height - 2);
-                            var optimalFont = FindOptimalFontSize(itemText, comboBox.Font, availableSize, e.Graphics);
+                            var optimalFont = FindOptimalFontSize(itemText, comboBox.Font, availableSize, e.Graphics, comboBox);
                             var drawFont = optimalFont ?? comboBox.Font;
 
                             TextRenderer.DrawText(e.Graphics, itemText, drawFont, e.Bounds, foreColor,
@@ -1565,7 +1740,7 @@ public static class Core_Themes
                         {
                             var textRect = new Rectangle(e.Bounds.X + 20, e.Bounds.Y, e.Bounds.Width - 20, e.Bounds.Height);
                             var availableSize = new Size(textRect.Width - 4, textRect.Height - 2);
-                            var optimalFont = FindOptimalFontSize(itemText, checkedListBox.Font, availableSize, e.Graphics);
+                            var optimalFont = FindOptimalFontSize(itemText, checkedListBox.Font, availableSize, e.Graphics, checkedListBox);
                             var drawFont = optimalFont ?? checkedListBox.Font;
 
                             TextRenderer.DrawText(e.Graphics, itemText, drawFont, textRect, foreColor,
@@ -1842,7 +2017,7 @@ public static class Core_Themes
                     if (!string.IsNullOrEmpty(nodeText))
                     {
                         var availableSize = new Size(e.Bounds.Width - 4, e.Bounds.Height - 2);
-                        var optimalFont = FindOptimalFontSize(nodeText, treeView.Font, availableSize, e.Graphics);
+                        var optimalFont = FindOptimalFontSize(nodeText, treeView.Font, availableSize, e.Graphics, treeView);
                         var drawFont = optimalFont ?? treeView.Font;
 
                         TextRenderer.DrawText(e.Graphics, nodeText, drawFont, e.Bounds, foreColor,
@@ -1890,7 +2065,7 @@ public static class Core_Themes
                     if (!string.IsNullOrEmpty(itemText))
                     {
                         var availableSize = new Size(e.Bounds.Width - 4, e.Bounds.Height - 2);
-                        var optimalFont = FindOptimalFontSize(itemText, listView.Font, availableSize, e.Graphics);
+                        var optimalFont = FindOptimalFontSize(itemText, listView.Font, availableSize, e.Graphics, listView);
                         var drawFont = optimalFont ?? listView.Font;
 
                         TextRenderer.DrawText(e.Graphics, itemText, drawFont, e.Bounds, foreColor,
@@ -1924,7 +2099,7 @@ public static class Core_Themes
                         if (!string.IsNullOrEmpty(headerText))
                         {
                             var availableSize = new Size(e.Bounds.Width - 8, e.Bounds.Height - 4);
-                            var optimalFont = FindOptimalFontSize(headerText, listView.Font, availableSize, e.Graphics);
+                            var optimalFont = FindOptimalFontSize(headerText, listView.Font, availableSize, e.Graphics, listView);
                             var drawFont = optimalFont ?? listView.Font;
 
                             TextRenderer.DrawText(e.Graphics, headerText, drawFont, e.Bounds, foreColor,
