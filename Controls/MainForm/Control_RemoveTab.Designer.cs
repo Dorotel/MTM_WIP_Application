@@ -31,7 +31,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
         private TableLayoutPanel Control_RemoveTab_Panel_Main;
         private Button Control_RemoveTab_Button_Undo;
         
-        #endregion
+
         
         #region Methods
 
@@ -44,7 +44,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
             base.Dispose(disposing);
         }
-
+        #endregion
         #region Component Designer generated code
 
         private void InitializeComponent()

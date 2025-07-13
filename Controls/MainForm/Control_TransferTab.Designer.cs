@@ -31,9 +31,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
         private NumericUpDown Control_TransferTab_NumericUpDown_Quantity;
         private Label Control_TransferTab_Label_Quantity;
         private GroupBox Control_TransferTab_GroupBox_MainControl;
-        
-        #endregion
-        
+
+
+
         #region Methods
 
 
@@ -45,7 +45,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
             base.Dispose(disposing);
         }
-
+        #endregion
         #region Component Designer generated code
 
         private void InitializeComponent()

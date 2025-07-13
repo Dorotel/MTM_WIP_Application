@@ -26,7 +26,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
         public Button Control_QuickButtons_Button_Button1;
         private ToolTip Control_QuickButtons_Tooltip;
         
-        #endregion
+
         
         #region Methods
 
@@ -39,7 +39,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
             base.Dispose(disposing);
         }
-
+        #endregion
         #region Component Designer generated code
 
         private void InitializeComponent()

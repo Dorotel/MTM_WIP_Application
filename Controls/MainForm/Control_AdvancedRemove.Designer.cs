@@ -64,7 +64,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
         private Panel panel3;
         private Button Control_AdvancedRemove_Button_SidePanel;
         
-        #endregion
         
         #region Methods
 
@@ -77,6 +76,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
             base.Dispose(disposing);
         }
+
+#endregion
 
         #region Component Designer generated code
 

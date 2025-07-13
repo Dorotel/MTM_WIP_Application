@@ -49,7 +49,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
         private FlowLayoutPanel flowLayoutPanel1;
         private ToolStripMenuItem themeGeneratorToolStripMenuItem;
         
-        #endregion
+
         
         #region Methods
 
@@ -65,7 +65,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             }
             base.Dispose(disposing);
         }
-
+        #endregion
         #region Windows Form Designer generated code
 
         private void InitializeComponent()

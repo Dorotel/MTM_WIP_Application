@@ -34,7 +34,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
         public ComboBox Control_InventoryTab_ComboBox_Part;
         private ToolTip Control_InventoryTab_Tooltip;
         
-        #endregion
+
         
         #region Methods
 
@@ -47,7 +47,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
             base.Dispose(disposing);
         }
-
+        #endregion
         #region Component Designer generated code
 
         private void InitializeComponent()

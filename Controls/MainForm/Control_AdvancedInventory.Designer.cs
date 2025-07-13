@@ -66,9 +66,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
         private TableLayoutPanel AdvancedInventory_TableLayout_Single;
         private TableLayoutPanel AdvancedInventory_TableLayoutPanel_Multi;
         
-        #endregion
-        
-        #region Methods
 
 
         protected override void Dispose(bool disposing)

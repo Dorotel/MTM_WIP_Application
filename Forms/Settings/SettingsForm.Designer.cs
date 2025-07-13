@@ -56,7 +56,7 @@
         private System.Windows.Forms.Panel SettingsForm_Panel_DeleteUser;
         private GroupBox groupBox1;
         
-        #endregion
+
         
         #region Methods
 
@@ -69,7 +69,7 @@
             }
             base.Dispose(disposing);
         }
-
+        #endregion
         #region Windows Form Designer generated code
 
         private void InitializeComponent()

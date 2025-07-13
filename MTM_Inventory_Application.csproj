@@ -55,7 +55,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="Controls\SettingsForm\RemoveUserControl.cs" />
+	  <None Include="Controls\SettingsForm\Control_Remove_User.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

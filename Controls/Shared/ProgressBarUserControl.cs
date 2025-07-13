@@ -8,18 +8,14 @@ namespace MTM_Inventory_Application.Controls.Shared;
 public partial class ProgressBarUserControl : UserControl
 {
     #region Fields
-    
 
     private PictureBox? _loadingImage;
     private ProgressBar? _progressBar;
     private Label? _statusLabel;
 
-    public void UpdateProgress(int value, string? status = null)
-    
     #endregion
-    
+
     #region Constructors
-    
 
     [DefaultValue(0)]
     public int ProgressValue
@@ -67,11 +63,10 @@ public partial class ProgressBarUserControl : UserControl
         InitializeControls();
         ApplyTheme();
     }
-    
+
     #endregion
-    
+
     #region Methods
-    
 
     private void InitializeControls()
     {
@@ -216,6 +211,8 @@ public partial class ProgressBarUserControl : UserControl
 
         Visible = false;
     }
+
+    public void UpdateProgress(int value, string? status = null)
     {
         if (InvokeRequired)
         {
@@ -267,6 +264,5 @@ public partial class ProgressBarUserControl : UserControl
         }
     }
 
-    
     #endregion
 }
