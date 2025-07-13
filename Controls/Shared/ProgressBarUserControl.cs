@@ -1,6 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
 using System.ComponentModel;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Models;
@@ -8,18 +5,22 @@ using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Controls.Shared;
 
-/// <summary>
-/// A reusable progress bar user control with loading image for application-wide use
-/// </summary>
 public partial class ProgressBarUserControl : UserControl
 {
+    #region Fields
+    
+
     private PictureBox? _loadingImage;
     private ProgressBar? _progressBar;
     private Label? _statusLabel;
 
-    /// <summary>
-    /// Gets or sets the current progress value (0-100)
-    /// </summary>
+    public void UpdateProgress(int value, string? status = null)
+    
+    #endregion
+    
+    #region Constructors
+    
+
     [DefaultValue(0)]
     public int ProgressValue
     {
@@ -34,9 +35,6 @@ public partial class ProgressBarUserControl : UserControl
         }
     }
 
-    /// <summary>
-    /// Gets or sets the status text displayed below the progress bar
-    /// </summary>
     [DefaultValue("Loading...")]
     public string StatusText
     {
@@ -50,9 +48,6 @@ public partial class ProgressBarUserControl : UserControl
         }
     }
 
-    /// <summary>
-    /// Gets or sets whether the loading image is visible
-    /// </summary>
     [DefaultValue(true)]
     public bool ShowLoadingImage
     {
@@ -72,10 +67,14 @@ public partial class ProgressBarUserControl : UserControl
         InitializeControls();
         ApplyTheme();
     }
+    
+    #endregion
+    
+    #region Methods
+    
 
     private void InitializeControls()
     {
-        // Create loading image
         _loadingImage = new PictureBox
         {
             Size = new Size(48, 48),
@@ -84,11 +83,8 @@ public partial class ProgressBarUserControl : UserControl
             BackColor = Color.Transparent
         };
 
-        // Create a simple loading animation using text for now
-        // In a real implementation, you might use an animated GIF or custom drawing
         _loadingImage.Paint += LoadingImage_Paint;
 
-        // Create progress bar
         _progressBar = new ProgressBar
         {
             Style = ProgressBarStyle.Continuous,
@@ -99,7 +95,6 @@ public partial class ProgressBarUserControl : UserControl
             Value = 0
         };
 
-        // Create status label
         _statusLabel = new Label
         {
             Text = "Loading...",
@@ -109,10 +104,8 @@ public partial class ProgressBarUserControl : UserControl
             AutoSize = false
         };
 
-        // Layout controls
         LayoutControls();
 
-        // Add controls to the user control
         Controls.Add(_loadingImage);
         Controls.Add(_progressBar);
         Controls.Add(_statusLabel);
@@ -125,14 +118,12 @@ public partial class ProgressBarUserControl : UserControl
 
         if (_loadingImage != null)
         {
-            // Position loading image at top center
             _loadingImage.Location = new Point((Width - _loadingImage.Width) / 2, currentY);
             currentY += _loadingImage.Height + spacing;
         }
 
         if (_progressBar != null)
         {
-            // Position progress bar below image
             _progressBar.Location = new Point(spacing, currentY);
             _progressBar.Width = Width - spacing * 2;
             currentY += _progressBar.Height + spacing;
@@ -140,12 +131,10 @@ public partial class ProgressBarUserControl : UserControl
 
         if (_statusLabel != null)
         {
-            // Position status label below progress bar
             _statusLabel.Location = new Point(spacing, currentY);
             _statusLabel.Width = Width - spacing * 2;
         }
 
-        // Set total height
         Height = currentY + (_statusLabel?.Height ?? 0) + spacing;
     }
 
@@ -156,7 +145,6 @@ public partial class ProgressBarUserControl : UserControl
             return;
         }
 
-        // Simple loading indicator - draw a rotating circle or spinner
         Graphics g = e.Graphics;
         Rectangle rect = _loadingImage.ClientRectangle;
         Point center = new(rect.Width / 2, rect.Height / 2);
@@ -164,7 +152,6 @@ public partial class ProgressBarUserControl : UserControl
 
         using Pen pen = new(Model_AppVariables.UserUiColors?.ProgressBarForeColor ?? Color.Blue, 3);
 
-        // Draw spinning arc
         int startAngle = Environment.TickCount / 10 % 360;
         g.DrawArc(pen, center.X - radius, center.Y - radius, radius * 2, radius * 2, startAngle, 270);
     }
@@ -190,9 +177,6 @@ public partial class ProgressBarUserControl : UserControl
         }
     }
 
-    /// <summary>
-    /// Shows the progress control and starts the loading animation
-    /// </summary>
     public void ShowProgress()
     {
         if (InvokeRequired)
@@ -205,21 +189,16 @@ public partial class ProgressBarUserControl : UserControl
         ProgressValue = 0;
         StatusText = "Loading...";
 
-        // Start animation timer for loading image
         if (_loadingImage != null)
         {
             Timer timer = new() { Interval = 50 };
             timer.Tick += (s, e) => _loadingImage.Invalidate();
             timer.Start();
 
-            // Store timer reference to stop it later
             Tag = timer;
         }
     }
 
-    /// <summary>
-    /// Hides the progress control and stops the loading animation
-    /// </summary>
     public void HideProgress()
     {
         if (InvokeRequired)
@@ -228,7 +207,6 @@ public partial class ProgressBarUserControl : UserControl
             return;
         }
 
-        // Stop animation timer
         if (Tag is Timer timer)
         {
             timer.Stop();
@@ -238,13 +216,6 @@ public partial class ProgressBarUserControl : UserControl
 
         Visible = false;
     }
-
-    /// <summary>
-    /// Updates the progress value and status text
-    /// </summary>
-    /// <param name="value">Progress value (0-100)</param>
-    /// <param name="status">Optional status text</param>
-    public void UpdateProgress(int value, string? status = null)
     {
         if (InvokeRequired)
         {
@@ -259,13 +230,10 @@ public partial class ProgressBarUserControl : UserControl
         }
     }
 
-    /// <summary>
-    /// Completes the progress and hides the control after a brief delay
-    /// </summary>
     public async Task CompleteProgressAsync()
     {
         UpdateProgress(100, "Complete");
-        await Task.Delay(500); // Brief delay to show completion
+        await Task.Delay(500);
         HideProgress();
     }
 
@@ -273,7 +241,6 @@ public partial class ProgressBarUserControl : UserControl
     {
         try
         {
-            // Use the correct class and namespace for GetCurrentTheme
             Core_Themes.Core_AppThemes.AppTheme theme = Core_Themes.Core_AppThemes.GetCurrentTheme();
             Model_UserUiColors colors = theme.Colors;
             if (colors.UserControlBackColor.HasValue)
@@ -288,7 +255,6 @@ public partial class ProgressBarUserControl : UserControl
         }
         catch
         {
-            // Ignore theme errors during design time
         }
     }
 
@@ -300,4 +266,7 @@ public partial class ProgressBarUserControl : UserControl
             LayoutControls();
         }
     }
+
+    
+    #endregion
 }

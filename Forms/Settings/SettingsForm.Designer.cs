@@ -2,15 +2,65 @@
 {
     partial class SettingsForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
+        #region Fields
+        
+
+
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed.</param>
+        #endregion
+
+        private System.Windows.Forms.SplitContainer SettingsForm_SplitContainer_Main;
+        private System.Windows.Forms.TreeView SettingsForm_TreeView_Category;
+        private System.Windows.Forms.Panel SettingsForm_Panel_Settings;
+        private System.Windows.Forms.Panel SettingsForm_Panel_Bottom;
+        private System.Windows.Forms.Label SettingsForm_Label_Status;
+        private System.Windows.Forms.Button SettingsForm_Button_Cancel;
+        private System.Windows.Forms.Button SettingsForm_Button_Save;
+        private System.Windows.Forms.Button SettingsForm_Button_ResetDefaults;
+        private System.Windows.Forms.Panel SettingsForm_Panel_Database;
+        private System.Windows.Forms.TabControl SettingsForm_TabControl_Database;
+        private System.Windows.Forms.TabPage SettingsForm_TabPage_Connection;
+        private System.Windows.Forms.GroupBox SettingsForm_GroupBox_Connection;
+        private System.Windows.Forms.TextBox SettingsForm_TextBox_Password;
+        private System.Windows.Forms.Label SettingsForm_Label_Password;
+        private System.Windows.Forms.TextBox SettingsForm_TextBox_Username;
+        private System.Windows.Forms.Label SettingsForm_Label_Username;
+        private System.Windows.Forms.TextBox SettingsForm_TextBox_Database;
+        private System.Windows.Forms.Label SettingsForm_Label_Database;
+        private System.Windows.Forms.TextBox SettingsForm_TextBox_Port;
+        private System.Windows.Forms.Label SettingsForm_Label_Port;
+        private System.Windows.Forms.TextBox SettingsForm_TextBox_Server;
+        private System.Windows.Forms.Label SettingsForm_Label_Server;
+        private System.Windows.Forms.Panel SettingsForm_Panel_Theme;
+        private System.Windows.Forms.ComboBox SettingsForm_ComboBox_Theme;
+        private System.Windows.Forms.Panel SettingsForm_Panel_Shortcuts;
+        private System.Windows.Forms.DataGridView SettingsForm_DataGridView_Shortcuts;
+        private System.Windows.Forms.Panel SettingsForm_Panel_About;
+        private System.Windows.Forms.Label SettingsForm_Label_Version;
+        private System.Windows.Forms.Label appNameLabel;
+        private System.Windows.Forms.Panel SettingsForm_Panel_AddPart;
+        private System.Windows.Forms.Panel SettingsForm_Panel_EditPart;
+        private System.Windows.Forms.Panel SettingsForm_Panel_RemovePart;
+        private System.Windows.Forms.Panel SettingsForm_Panel_AddOperation;
+        private System.Windows.Forms.Panel SettingsForm_Panel_EditOperation;
+        private System.Windows.Forms.Panel SettingsForm_Panel_RemoveOperation;
+        private System.Windows.Forms.Panel SettingsForm_Panel_AddLocation;
+        private System.Windows.Forms.Panel SettingsForm_Panel_EditLocation;
+        private System.Windows.Forms.Panel SettingsForm_Panel_RemoveLocation;
+        private System.Windows.Forms.Panel SettingsForm_Panel_AddItemType;
+        private System.Windows.Forms.Panel SettingsForm_Panel_EditItemType;
+        private System.Windows.Forms.Panel SettingsForm_Panel_RemoveItemType;
+        private System.Windows.Forms.Panel SettingsForm_Panel_AddUser;
+        private System.Windows.Forms.Panel SettingsForm_Panel_EditUser;
+        private System.Windows.Forms.Panel SettingsForm_Panel_DeleteUser;
+        private GroupBox groupBox1;
+        
+        #endregion
+        
+        #region Methods
+
+
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,365 +72,266 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            splitContainer1 = new SplitContainer();
-            categoryTreeView = new TreeView();
-            settingsPanel = new Panel();
-            bottomPanel = new Panel();
-            statusLabel = new Label();
-            cancelButton = new Button();
-            saveButton = new Button();
-            resetDefaultsButton = new Button();
-            databasePanel = new Panel();
-            databaseTabControl = new TabControl();
-            connectionTabPage = new TabPage();
-            connectionGroupBox = new GroupBox();
-            passwordTextBox = new TextBox();
-            passwordLabel = new Label();
-            usernameTextBox = new TextBox();
-            usernameLabel = new Label();
-            databaseTextBox = new TextBox();
-            databaseLabel = new Label();
-            portTextBox = new TextBox();
-            portLabel = new Label();
-            serverTextBox = new TextBox();
-            serverLabel = new Label();
-            themePanel = new Panel();
+            SettingsForm_SplitContainer_Main = new SplitContainer();
+            SettingsForm_TreeView_Category = new TreeView();
+            SettingsForm_Panel_Settings = new Panel();
+            SettingsForm_Panel_Bottom = new Panel();
+            SettingsForm_Label_Status = new Label();
+            SettingsForm_Button_Cancel = new Button();
+            SettingsForm_Button_Save = new Button();
+            SettingsForm_Button_ResetDefaults = new Button();
+            SettingsForm_Panel_Database = new Panel();
+            SettingsForm_TabControl_Database = new TabControl();
+            SettingsForm_TabPage_Connection = new TabPage();
+            SettingsForm_GroupBox_Connection = new GroupBox();
+            SettingsForm_TextBox_Password = new TextBox();
+            SettingsForm_Label_Password = new Label();
+            SettingsForm_TextBox_Username = new TextBox();
+            SettingsForm_Label_Username = new Label();
+            SettingsForm_TextBox_Database = new TextBox();
+            SettingsForm_Label_Database = new Label();
+            SettingsForm_TextBox_Port = new TextBox();
+            SettingsForm_Label_Port = new Label();
+            SettingsForm_TextBox_Server = new TextBox();
+            SettingsForm_Label_Server = new Label();
+            SettingsForm_Panel_Theme = new Panel();
             groupBox1 = new GroupBox();
-            themeComboBox = new ComboBox();
-            shortcutsPanel = new Panel();
-            shortcutsDataGridView = new DataGridView();
-            aboutPanel = new Panel();
-            versionLabel = new Label();
+            SettingsForm_ComboBox_Theme = new ComboBox();
+            SettingsForm_Panel_Shortcuts = new Panel();
+            SettingsForm_DataGridView_Shortcuts = new DataGridView();
+            SettingsForm_Panel_About = new Panel();
+            SettingsForm_Label_Version = new Label();
             appNameLabel = new Label();
-            addPartPanel = new Panel();
-            editPartPanel = new Panel();
-            removePartPanel = new Panel();
-            addOperationPanel = new Panel();
-            editOperationPanel = new Panel();
-            removeOperationPanel = new Panel();
-            addLocationPanel = new Panel();
-            editLocationPanel = new Panel();
-            removeLocationPanel = new Panel();
-            addItemTypePanel = new Panel();
-            editItemTypePanel = new Panel();
-            removeItemTypePanel = new Panel();
-            addUserPanel = new Panel();
-            editUserPanel = new Panel();
-            deleteUserPanel = new Panel();
-            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
-            splitContainer1.Panel1.SuspendLayout();
-            splitContainer1.Panel2.SuspendLayout();
-            splitContainer1.SuspendLayout();
-            bottomPanel.SuspendLayout();
-            databasePanel.SuspendLayout();
-            databaseTabControl.SuspendLayout();
-            connectionTabPage.SuspendLayout();
-            connectionGroupBox.SuspendLayout();
-            themePanel.SuspendLayout();
+            SettingsForm_Panel_AddPart = new Panel();
+            SettingsForm_Panel_EditPart = new Panel();
+            SettingsForm_Panel_RemovePart = new Panel();
+            SettingsForm_Panel_AddOperation = new Panel();
+            SettingsForm_Panel_EditOperation = new Panel();
+            SettingsForm_Panel_RemoveOperation = new Panel();
+            SettingsForm_Panel_AddLocation = new Panel();
+            SettingsForm_Panel_EditLocation = new Panel();
+            SettingsForm_Panel_RemoveLocation = new Panel();
+            SettingsForm_Panel_AddItemType = new Panel();
+            SettingsForm_Panel_EditItemType = new Panel();
+            SettingsForm_Panel_RemoveItemType = new Panel();
+            SettingsForm_Panel_AddUser = new Panel();
+            SettingsForm_Panel_EditUser = new Panel();
+            SettingsForm_Panel_DeleteUser = new Panel();
+            ((System.ComponentModel.ISupportInitialize)SettingsForm_SplitContainer_Main).BeginInit();
+            SettingsForm_SplitContainer_Main.Panel1.SuspendLayout();
+            SettingsForm_SplitContainer_Main.Panel2.SuspendLayout();
+            SettingsForm_SplitContainer_Main.SuspendLayout();
+            SettingsForm_Panel_Bottom.SuspendLayout();
+            SettingsForm_Panel_Database.SuspendLayout();
+            SettingsForm_TabControl_Database.SuspendLayout();
+            SettingsForm_TabPage_Connection.SuspendLayout();
+            SettingsForm_GroupBox_Connection.SuspendLayout();
+            SettingsForm_Panel_Theme.SuspendLayout();
             groupBox1.SuspendLayout();
-            shortcutsPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)shortcutsDataGridView).BeginInit();
-            aboutPanel.SuspendLayout();
-            deleteUserPanel.SuspendLayout();
+            SettingsForm_Panel_Shortcuts.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)SettingsForm_DataGridView_Shortcuts).BeginInit();
+            SettingsForm_Panel_About.SuspendLayout();
+            SettingsForm_Panel_DeleteUser.SuspendLayout();
             SuspendLayout();
-            // 
-            // splitContainer1
-            // 
-            splitContainer1.Dock = DockStyle.Fill;
-            splitContainer1.FixedPanel = FixedPanel.Panel1;
-            splitContainer1.Location = new Point(0, 0);
-            splitContainer1.Name = "splitContainer1";
-            // 
-            // splitContainer1.Panel1
-            // 
-            splitContainer1.Panel1.Controls.Add(categoryTreeView);
-            splitContainer1.Panel1MinSize = 200;
-            // 
-            // splitContainer1.Panel2
-            // 
-            splitContainer1.Panel2.Controls.Add(settingsPanel);
-            splitContainer1.Panel2.Controls.Add(bottomPanel);
-            splitContainer1.Size = new Size(838, 492);
-            splitContainer1.SplitterDistance = 200;
-            splitContainer1.TabIndex = 0;
-            // 
-            // categoryTreeView
-            // 
-            categoryTreeView.Dock = DockStyle.Fill;
-            categoryTreeView.Location = new Point(0, 0);
-            categoryTreeView.Name = "categoryTreeView";
-            categoryTreeView.Size = new Size(200, 492);
-            categoryTreeView.TabIndex = 0;
-            categoryTreeView.AfterSelect += CategoryTreeView_AfterSelect;
-            // 
-            // settingsPanel
-            // 
-            settingsPanel.Dock = DockStyle.Fill;
-            settingsPanel.Location = new Point(0, 0);
-            settingsPanel.Name = "settingsPanel";
-            settingsPanel.Size = new Size(634, 452);
-            settingsPanel.TabIndex = 1;
-            // 
-            // bottomPanel
-            // 
-            bottomPanel.Controls.Add(statusLabel);
-            bottomPanel.Controls.Add(cancelButton);
-            bottomPanel.Controls.Add(saveButton);
-            bottomPanel.Controls.Add(resetDefaultsButton);
-            bottomPanel.Dock = DockStyle.Bottom;
-            bottomPanel.Location = new Point(0, 452);
-            bottomPanel.Name = "bottomPanel";
-            bottomPanel.Size = new Size(634, 40);
-            bottomPanel.TabIndex = 0;
-            // 
-            // statusLabel
-            // 
-            statusLabel.AutoSize = true;
-            statusLabel.Location = new Point(12, 13);
-            statusLabel.Name = "statusLabel";
-            statusLabel.Size = new Size(39, 15);
-            statusLabel.TabIndex = 2;
-            statusLabel.Text = "Ready";
-            // 
-            // cancelButton
-            // 
-            cancelButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            cancelButton.Location = new Point(471, 9);
-            cancelButton.Name = "cancelButton";
-            cancelButton.Size = new Size(75, 23);
-            cancelButton.TabIndex = 1;
-            cancelButton.Text = "Cancel";
-            cancelButton.UseVisualStyleBackColor = true;
-            cancelButton.Click += cancelButton_Click;
-            // 
-            // saveButton
-            // 
-            saveButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            saveButton.Location = new Point(552, 9);
-            saveButton.Name = "saveButton";
-            saveButton.Size = new Size(75, 23);
-            saveButton.TabIndex = 0;
-            saveButton.Text = "Save";
-            saveButton.UseVisualStyleBackColor = true;
-            saveButton.Click += saveButton_Click;
-            // 
-            // resetDefaultsButton
-            // 
-            resetDefaultsButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            resetDefaultsButton.Location = new Point(390, 9);
-            resetDefaultsButton.Name = "resetDefaultsButton";
-            resetDefaultsButton.Size = new Size(75, 23);
-            resetDefaultsButton.TabIndex = 3;
-            resetDefaultsButton.Text = "Reset";
-            resetDefaultsButton.UseVisualStyleBackColor = true;
-            resetDefaultsButton.Click += resetDefaultsButton_Click;
-            // 
-            // databasePanel
-            // 
-            databasePanel.Controls.Add(databaseTabControl);
-            databasePanel.Dock = DockStyle.Fill;
-            databasePanel.Location = new Point(0, 0);
-            databasePanel.Name = "databasePanel";
-            databasePanel.Size = new Size(838, 492);
-            databasePanel.TabIndex = 2;
-            databasePanel.Visible = false;
-            // 
-            // databaseTabControl
-            // 
-            databaseTabControl.Controls.Add(connectionTabPage);
-            databaseTabControl.Dock = DockStyle.Fill;
-            databaseTabControl.Location = new Point(0, 0);
-            databaseTabControl.Name = "databaseTabControl";
-            databaseTabControl.SelectedIndex = 0;
-            databaseTabControl.Size = new Size(838, 492);
-            databaseTabControl.TabIndex = 0;
-            // 
-            // connectionTabPage
-            // 
-            connectionTabPage.Controls.Add(connectionGroupBox);
-            connectionTabPage.Location = new Point(4, 24);
-            connectionTabPage.Name = "connectionTabPage";
-            connectionTabPage.Padding = new Padding(3);
-            connectionTabPage.Size = new Size(830, 464);
-            connectionTabPage.TabIndex = 0;
-            connectionTabPage.Text = "Connection Settings";
-            connectionTabPage.UseVisualStyleBackColor = true;
-            // 
-            // connectionGroupBox
-            // 
-            connectionGroupBox.Controls.Add(passwordTextBox);
-            connectionGroupBox.Controls.Add(passwordLabel);
-            connectionGroupBox.Controls.Add(usernameTextBox);
-            connectionGroupBox.Controls.Add(usernameLabel);
-            connectionGroupBox.Controls.Add(databaseTextBox);
-            connectionGroupBox.Controls.Add(databaseLabel);
-            connectionGroupBox.Controls.Add(portTextBox);
-            connectionGroupBox.Controls.Add(portLabel);
-            connectionGroupBox.Controls.Add(serverTextBox);
-            connectionGroupBox.Controls.Add(serverLabel);
-            connectionGroupBox.Location = new Point(6, 6);
-            connectionGroupBox.Name = "connectionGroupBox";
-            connectionGroupBox.Size = new Size(576, 200);
-            connectionGroupBox.TabIndex = 0;
-            connectionGroupBox.TabStop = false;
-            connectionGroupBox.Text = "Database Configuration";
-            // 
-            // passwordTextBox
-            // 
-            passwordTextBox.Location = new Point(150, 111);
-            passwordTextBox.Name = "passwordTextBox";
-            passwordTextBox.PasswordChar = '*';
-            passwordTextBox.Size = new Size(200, 23);
-            passwordTextBox.TabIndex = 9;
-            // 
-            // passwordLabel
-            // 
-            passwordLabel.AutoSize = true;
-            passwordLabel.Location = new Point(15, 114);
-            passwordLabel.Name = "passwordLabel";
-            passwordLabel.Size = new Size(60, 15);
-            passwordLabel.TabIndex = 8;
-            passwordLabel.Text = "Password:";
-            // 
-            // usernameTextBox
-            // 
-            usernameTextBox.Location = new Point(150, 82);
-            usernameTextBox.Name = "usernameTextBox";
-            usernameTextBox.Size = new Size(200, 23);
-            usernameTextBox.TabIndex = 7;
-            // 
-            // usernameLabel
-            // 
-            usernameLabel.AutoSize = true;
-            usernameLabel.Location = new Point(15, 85);
-            usernameLabel.Name = "usernameLabel";
-            usernameLabel.Size = new Size(63, 15);
-            usernameLabel.TabIndex = 6;
-            usernameLabel.Text = "Username:";
-            // 
-            // databaseTextBox
-            // 
-            databaseTextBox.Location = new Point(150, 53);
-            databaseTextBox.Name = "databaseTextBox";
-            databaseTextBox.Size = new Size(200, 23);
-            databaseTextBox.TabIndex = 5;
-            // 
-            // databaseLabel
-            // 
-            databaseLabel.AutoSize = true;
-            databaseLabel.Location = new Point(15, 56);
-            databaseLabel.Name = "databaseLabel";
-            databaseLabel.Size = new Size(93, 15);
-            databaseLabel.TabIndex = 4;
-            databaseLabel.Text = "Database Name:";
-            // 
-            // portTextBox
-            // 
-            portTextBox.Location = new Point(410, 24);
-            portTextBox.Name = "portTextBox";
-            portTextBox.Size = new Size(100, 23);
-            portTextBox.TabIndex = 3;
-            // 
-            // portLabel
-            // 
-            portLabel.AutoSize = true;
-            portLabel.Location = new Point(375, 27);
-            portLabel.Name = "portLabel";
-            portLabel.Size = new Size(32, 15);
-            portLabel.TabIndex = 2;
-            portLabel.Text = "Port:";
-            // 
-            // serverTextBox
-            // 
-            serverTextBox.Location = new Point(150, 24);
-            serverTextBox.Name = "serverTextBox";
-            serverTextBox.Size = new Size(200, 23);
-            serverTextBox.TabIndex = 1;
-            // 
-            // serverLabel
-            // 
-            serverLabel.AutoSize = true;
-            serverLabel.Location = new Point(15, 27);
-            serverLabel.Name = "serverLabel";
-            serverLabel.Size = new Size(87, 15);
-            serverLabel.TabIndex = 0;
-            serverLabel.Text = "Server Address:";
-            // 
-            // themePanel
-            // 
-            themePanel.Controls.Add(groupBox1);
-            themePanel.Dock = DockStyle.Fill;
-            themePanel.Location = new Point(0, 0);
-            themePanel.Name = "themePanel";
-            themePanel.Size = new Size(838, 492);
-            themePanel.TabIndex = 3;
-            themePanel.Visible = false;
-            // 
-            // groupBox1
-            // 
-            groupBox1.Controls.Add(themeComboBox);
+            SettingsForm_SplitContainer_Main.Dock = DockStyle.Fill;
+            SettingsForm_SplitContainer_Main.FixedPanel = FixedPanel.Panel1;
+            SettingsForm_SplitContainer_Main.Location = new Point(0, 0);
+            SettingsForm_SplitContainer_Main.Name = "SettingsForm_SplitContainer_Main";
+            SettingsForm_SplitContainer_Main.Panel1.Controls.Add(SettingsForm_TreeView_Category);
+            SettingsForm_SplitContainer_Main.Panel1MinSize = 200;
+            SettingsForm_SplitContainer_Main.Panel2.Controls.Add(SettingsForm_Panel_Settings);
+            SettingsForm_SplitContainer_Main.Panel2.Controls.Add(SettingsForm_Panel_Bottom);
+            SettingsForm_SplitContainer_Main.Size = new Size(838, 492);
+            SettingsForm_SplitContainer_Main.SplitterDistance = 200;
+            SettingsForm_SplitContainer_Main.TabIndex = 0;
+            SettingsForm_TreeView_Category.Dock = DockStyle.Fill;
+            SettingsForm_TreeView_Category.Location = new Point(0, 0);
+            SettingsForm_TreeView_Category.Name = "SettingsForm_TreeView_Category";
+            SettingsForm_TreeView_Category.Size = new Size(200, 492);
+            SettingsForm_TreeView_Category.TabIndex = 0;
+            SettingsForm_TreeView_Category.AfterSelect += CategoryTreeView_AfterSelect;
+            SettingsForm_Panel_Settings.Dock = DockStyle.Fill;
+            SettingsForm_Panel_Settings.Location = new Point(0, 0);
+            SettingsForm_Panel_Settings.Name = "SettingsForm_Panel_Settings";
+            SettingsForm_Panel_Settings.Size = new Size(634, 452);
+            SettingsForm_Panel_Settings.TabIndex = 1;
+            SettingsForm_Panel_Bottom.Controls.Add(SettingsForm_Label_Status);
+            SettingsForm_Panel_Bottom.Controls.Add(SettingsForm_Button_Cancel);
+            SettingsForm_Panel_Bottom.Controls.Add(SettingsForm_Button_Save);
+            SettingsForm_Panel_Bottom.Controls.Add(SettingsForm_Button_ResetDefaults);
+            SettingsForm_Panel_Bottom.Dock = DockStyle.Bottom;
+            SettingsForm_Panel_Bottom.Location = new Point(0, 452);
+            SettingsForm_Panel_Bottom.Name = "SettingsForm_Panel_Bottom";
+            SettingsForm_Panel_Bottom.Size = new Size(634, 40);
+            SettingsForm_Panel_Bottom.TabIndex = 0;
+            SettingsForm_Label_Status.AutoSize = true;
+            SettingsForm_Label_Status.Location = new Point(12, 13);
+            SettingsForm_Label_Status.Name = "SettingsForm_Label_Status";
+            SettingsForm_Label_Status.Size = new Size(39, 15);
+            SettingsForm_Label_Status.TabIndex = 2;
+            SettingsForm_Label_Status.Text = "Ready";
+            SettingsForm_Button_Cancel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            SettingsForm_Button_Cancel.Location = new Point(471, 9);
+            SettingsForm_Button_Cancel.Name = "SettingsForm_Button_Cancel";
+            SettingsForm_Button_Cancel.Size = new Size(75, 23);
+            SettingsForm_Button_Cancel.TabIndex = 1;
+            SettingsForm_Button_Cancel.Text = "Cancel";
+            SettingsForm_Button_Cancel.UseVisualStyleBackColor = true;
+            SettingsForm_Button_Cancel.Click += cancelButton_Click;
+            SettingsForm_Button_Save.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            SettingsForm_Button_Save.Location = new Point(552, 9);
+            SettingsForm_Button_Save.Name = "SettingsForm_Button_Save";
+            SettingsForm_Button_Save.Size = new Size(75, 23);
+            SettingsForm_Button_Save.TabIndex = 0;
+            SettingsForm_Button_Save.Text = "Save";
+            SettingsForm_Button_Save.UseVisualStyleBackColor = true;
+            SettingsForm_Button_Save.Click += saveButton_Click;
+            SettingsForm_Button_ResetDefaults.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            SettingsForm_Button_ResetDefaults.Location = new Point(390, 9);
+            SettingsForm_Button_ResetDefaults.Name = "SettingsForm_Button_ResetDefaults";
+            SettingsForm_Button_ResetDefaults.Size = new Size(75, 23);
+            SettingsForm_Button_ResetDefaults.TabIndex = 3;
+            SettingsForm_Button_ResetDefaults.Text = "Reset";
+            SettingsForm_Button_ResetDefaults.UseVisualStyleBackColor = true;
+            SettingsForm_Button_ResetDefaults.Click += resetDefaultsButton_Click;
+            SettingsForm_Panel_Database.Controls.Add(SettingsForm_TabControl_Database);
+            SettingsForm_Panel_Database.Dock = DockStyle.Fill;
+            SettingsForm_Panel_Database.Location = new Point(0, 0);
+            SettingsForm_Panel_Database.Name = "SettingsForm_Panel_Database";
+            SettingsForm_Panel_Database.Size = new Size(838, 492);
+            SettingsForm_Panel_Database.TabIndex = 2;
+            SettingsForm_Panel_Database.Visible = false;
+            SettingsForm_TabControl_Database.Controls.Add(SettingsForm_TabPage_Connection);
+            SettingsForm_TabControl_Database.Dock = DockStyle.Fill;
+            SettingsForm_TabControl_Database.Location = new Point(0, 0);
+            SettingsForm_TabControl_Database.Name = "SettingsForm_TabControl_Database";
+            SettingsForm_TabControl_Database.SelectedIndex = 0;
+            SettingsForm_TabControl_Database.Size = new Size(838, 492);
+            SettingsForm_TabControl_Database.TabIndex = 0;
+            SettingsForm_TabPage_Connection.Controls.Add(SettingsForm_GroupBox_Connection);
+            SettingsForm_TabPage_Connection.Location = new Point(4, 24);
+            SettingsForm_TabPage_Connection.Name = "SettingsForm_TabPage_Connection";
+            SettingsForm_TabPage_Connection.Padding = new Padding(3);
+            SettingsForm_TabPage_Connection.Size = new Size(830, 464);
+            SettingsForm_TabPage_Connection.TabIndex = 0;
+            SettingsForm_TabPage_Connection.Text = "Connection Settings";
+            SettingsForm_TabPage_Connection.UseVisualStyleBackColor = true;
+            SettingsForm_GroupBox_Connection.Controls.Add(SettingsForm_TextBox_Password);
+            SettingsForm_GroupBox_Connection.Controls.Add(SettingsForm_Label_Password);
+            SettingsForm_GroupBox_Connection.Controls.Add(SettingsForm_TextBox_Username);
+            SettingsForm_GroupBox_Connection.Controls.Add(SettingsForm_Label_Username);
+            SettingsForm_GroupBox_Connection.Controls.Add(SettingsForm_TextBox_Database);
+            SettingsForm_GroupBox_Connection.Controls.Add(SettingsForm_Label_Database);
+            SettingsForm_GroupBox_Connection.Controls.Add(SettingsForm_TextBox_Port);
+            SettingsForm_GroupBox_Connection.Controls.Add(SettingsForm_Label_Port);
+            SettingsForm_GroupBox_Connection.Controls.Add(SettingsForm_TextBox_Server);
+            SettingsForm_GroupBox_Connection.Controls.Add(SettingsForm_Label_Server);
+            SettingsForm_GroupBox_Connection.Location = new Point(6, 6);
+            SettingsForm_GroupBox_Connection.Name = "SettingsForm_GroupBox_Connection";
+            SettingsForm_GroupBox_Connection.Size = new Size(576, 200);
+            SettingsForm_GroupBox_Connection.TabIndex = 0;
+            SettingsForm_GroupBox_Connection.TabStop = false;
+            SettingsForm_GroupBox_Connection.Text = "Database Configuration";
+            SettingsForm_TextBox_Password.Location = new Point(150, 111);
+            SettingsForm_TextBox_Password.Name = "SettingsForm_TextBox_Password";
+            SettingsForm_TextBox_Password.PasswordChar = '*';
+            SettingsForm_TextBox_Password.Size = new Size(200, 23);
+            SettingsForm_TextBox_Password.TabIndex = 9;
+            SettingsForm_Label_Password.AutoSize = true;
+            SettingsForm_Label_Password.Location = new Point(15, 114);
+            SettingsForm_Label_Password.Name = "SettingsForm_Label_Password";
+            SettingsForm_Label_Password.Size = new Size(60, 15);
+            SettingsForm_Label_Password.TabIndex = 8;
+            SettingsForm_Label_Password.Text = "Password:";
+            SettingsForm_TextBox_Username.Location = new Point(150, 82);
+            SettingsForm_TextBox_Username.Name = "SettingsForm_TextBox_Username";
+            SettingsForm_TextBox_Username.Size = new Size(200, 23);
+            SettingsForm_TextBox_Username.TabIndex = 7;
+            SettingsForm_Label_Username.AutoSize = true;
+            SettingsForm_Label_Username.Location = new Point(15, 85);
+            SettingsForm_Label_Username.Name = "SettingsForm_Label_Username";
+            SettingsForm_Label_Username.Size = new Size(63, 15);
+            SettingsForm_Label_Username.TabIndex = 6;
+            SettingsForm_Label_Username.Text = "Username:";
+            SettingsForm_TextBox_Database.Location = new Point(150, 53);
+            SettingsForm_TextBox_Database.Name = "SettingsForm_TextBox_Database";
+            SettingsForm_TextBox_Database.Size = new Size(200, 23);
+            SettingsForm_TextBox_Database.TabIndex = 5;
+            SettingsForm_Label_Database.AutoSize = true;
+            SettingsForm_Label_Database.Location = new Point(15, 56);
+            SettingsForm_Label_Database.Name = "SettingsForm_Label_Database";
+            SettingsForm_Label_Database.Size = new Size(93, 15);
+            SettingsForm_Label_Database.TabIndex = 4;
+            SettingsForm_Label_Database.Text = "Database Name:";
+            SettingsForm_TextBox_Port.Location = new Point(410, 24);
+            SettingsForm_TextBox_Port.Name = "SettingsForm_TextBox_Port";
+            SettingsForm_TextBox_Port.Size = new Size(100, 23);
+            SettingsForm_TextBox_Port.TabIndex = 3;
+            SettingsForm_Label_Port.AutoSize = true;
+            SettingsForm_Label_Port.Location = new Point(375, 27);
+            SettingsForm_Label_Port.Name = "SettingsForm_Label_Port";
+            SettingsForm_Label_Port.Size = new Size(32, 15);
+            SettingsForm_Label_Port.TabIndex = 2;
+            SettingsForm_Label_Port.Text = "Port:";
+            SettingsForm_TextBox_Server.Location = new Point(150, 24);
+            SettingsForm_TextBox_Server.Name = "SettingsForm_TextBox_Server";
+            SettingsForm_TextBox_Server.Size = new Size(200, 23);
+            SettingsForm_TextBox_Server.TabIndex = 1;
+            SettingsForm_Label_Server.AutoSize = true;
+            SettingsForm_Label_Server.Location = new Point(15, 27);
+            SettingsForm_Label_Server.Name = "SettingsForm_Label_Server";
+            SettingsForm_Label_Server.Size = new Size(87, 15);
+            SettingsForm_Label_Server.TabIndex = 0;
+            SettingsForm_Label_Server.Text = "Server Address:";
+            SettingsForm_Panel_Theme.Controls.Add(groupBox1);
+            SettingsForm_Panel_Theme.Dock = DockStyle.Fill;
+            SettingsForm_Panel_Theme.Location = new Point(0, 0);
+            SettingsForm_Panel_Theme.Name = "SettingsForm_Panel_Theme";
+            SettingsForm_Panel_Theme.Size = new Size(838, 492);
+            SettingsForm_Panel_Theme.TabIndex = 3;
+            SettingsForm_Panel_Theme.Visible = false;
+            groupBox1.Controls.Add(SettingsForm_ComboBox_Theme);
             groupBox1.Location = new Point(6, 8);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(296, 57);
             groupBox1.TabIndex = 2;
             groupBox1.TabStop = false;
             groupBox1.Text = "Select A Theme";
-            // 
-            // themeComboBox
-            // 
-            themeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            themeComboBox.FormattingEnabled = true;
-            themeComboBox.Location = new Point(6, 22);
-            themeComboBox.Name = "themeComboBox";
-            themeComboBox.Size = new Size(284, 23);
-            themeComboBox.TabIndex = 1;
-            // 
-            // shortcutsPanel
-            // 
-            shortcutsPanel.Controls.Add(shortcutsDataGridView);
-            shortcutsPanel.Dock = DockStyle.Fill;
-            shortcutsPanel.Location = new Point(0, 0);
-            shortcutsPanel.Name = "shortcutsPanel";
-            shortcutsPanel.Size = new Size(838, 492);
-            shortcutsPanel.TabIndex = 4;
-            shortcutsPanel.Visible = false;
-            // 
-            // shortcutsDataGridView
-            // 
-            shortcutsDataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            shortcutsDataGridView.Dock = DockStyle.Fill;
-            shortcutsDataGridView.Location = new Point(0, 0);
-            shortcutsDataGridView.Name = "shortcutsDataGridView";
-            shortcutsDataGridView.Size = new Size(838, 492);
-            shortcutsDataGridView.TabIndex = 0;
-            // 
-            // aboutPanel
-            // 
-            aboutPanel.Controls.Add(versionLabel);
-            aboutPanel.Controls.Add(appNameLabel);
-            aboutPanel.Dock = DockStyle.Fill;
-            aboutPanel.Location = new Point(0, 0);
-            aboutPanel.Name = "aboutPanel";
-            aboutPanel.Size = new Size(838, 492);
-            aboutPanel.TabIndex = 5;
-            aboutPanel.Visible = false;
-            // 
-            // versionLabel
-            // 
-            versionLabel.AutoSize = true;
-            versionLabel.Location = new Point(30, 50);
-            versionLabel.Name = "versionLabel";
-            versionLabel.Size = new Size(48, 15);
-            versionLabel.TabIndex = 1;
-            versionLabel.Text = "Version:";
-            // 
-            // appNameLabel
-            // 
+            SettingsForm_ComboBox_Theme.DropDownStyle = ComboBoxStyle.DropDownList;
+            SettingsForm_ComboBox_Theme.FormattingEnabled = true;
+            SettingsForm_ComboBox_Theme.Location = new Point(6, 22);
+            SettingsForm_ComboBox_Theme.Name = "SettingsForm_ComboBox_Theme";
+            SettingsForm_ComboBox_Theme.Size = new Size(284, 23);
+            SettingsForm_ComboBox_Theme.TabIndex = 1;
+            SettingsForm_Panel_Shortcuts.Controls.Add(SettingsForm_DataGridView_Shortcuts);
+            SettingsForm_Panel_Shortcuts.Dock = DockStyle.Fill;
+            SettingsForm_Panel_Shortcuts.Location = new Point(0, 0);
+            SettingsForm_Panel_Shortcuts.Name = "SettingsForm_Panel_Shortcuts";
+            SettingsForm_Panel_Shortcuts.Size = new Size(838, 492);
+            SettingsForm_Panel_Shortcuts.TabIndex = 4;
+            SettingsForm_Panel_Shortcuts.Visible = false;
+            SettingsForm_DataGridView_Shortcuts.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            SettingsForm_DataGridView_Shortcuts.Dock = DockStyle.Fill;
+            SettingsForm_DataGridView_Shortcuts.Location = new Point(0, 0);
+            SettingsForm_DataGridView_Shortcuts.Name = "SettingsForm_DataGridView_Shortcuts";
+            SettingsForm_DataGridView_Shortcuts.Size = new Size(838, 492);
+            SettingsForm_DataGridView_Shortcuts.TabIndex = 0;
+            SettingsForm_Panel_About.Controls.Add(SettingsForm_Label_Version);
+            SettingsForm_Panel_About.Controls.Add(appNameLabel);
+            SettingsForm_Panel_About.Dock = DockStyle.Fill;
+            SettingsForm_Panel_About.Location = new Point(0, 0);
+            SettingsForm_Panel_About.Name = "SettingsForm_Panel_About";
+            SettingsForm_Panel_About.Size = new Size(838, 492);
+            SettingsForm_Panel_About.TabIndex = 5;
+            SettingsForm_Panel_About.Visible = false;
+            SettingsForm_Label_Version.AutoSize = true;
+            SettingsForm_Label_Version.Location = new Point(30, 50);
+            SettingsForm_Label_Version.Name = "SettingsForm_Label_Version";
+            SettingsForm_Label_Version.Size = new Size(48, 15);
+            SettingsForm_Label_Version.TabIndex = 1;
+            SettingsForm_Label_Version.Text = "Version:";
             appNameLabel.AutoSize = true;
             appNameLabel.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             appNameLabel.Location = new Point(30, 20);
@@ -388,241 +339,148 @@
             appNameLabel.Size = new Size(177, 21);
             appNameLabel.TabIndex = 0;
             appNameLabel.Text = "MTM WIP Application";
-            // 
-            // addPartPanel
-            // 
-            addPartPanel.Dock = DockStyle.Fill;
-            addPartPanel.Location = new Point(0, 0);
-            addPartPanel.Name = "addPartPanel";
-            addPartPanel.Size = new Size(838, 492);
-            addPartPanel.TabIndex = 6;
-            addPartPanel.Visible = false;
-            // 
-            // editPartPanel
-            // 
-            editPartPanel.Dock = DockStyle.Fill;
-            editPartPanel.Location = new Point(0, 0);
-            editPartPanel.Name = "editPartPanel";
-            editPartPanel.Size = new Size(838, 492);
-            editPartPanel.TabIndex = 7;
-            editPartPanel.Visible = false;
-            // 
-            // removePartPanel
-            // 
-            removePartPanel.Dock = DockStyle.Fill;
-            removePartPanel.Location = new Point(0, 0);
-            removePartPanel.Name = "removePartPanel";
-            removePartPanel.Size = new Size(838, 492);
-            removePartPanel.TabIndex = 8;
-            removePartPanel.Visible = false;
-            // 
-            // addOperationPanel
-            // 
-            addOperationPanel.Dock = DockStyle.Fill;
-            addOperationPanel.Location = new Point(0, 0);
-            addOperationPanel.Name = "addOperationPanel";
-            addOperationPanel.Size = new Size(838, 492);
-            addOperationPanel.TabIndex = 9;
-            addOperationPanel.Visible = false;
-            // 
-            // editOperationPanel
-            // 
-            editOperationPanel.Dock = DockStyle.Fill;
-            editOperationPanel.Location = new Point(0, 0);
-            editOperationPanel.Name = "editOperationPanel";
-            editOperationPanel.Size = new Size(838, 492);
-            editOperationPanel.TabIndex = 10;
-            editOperationPanel.Visible = false;
-            // 
-            // removeOperationPanel
-            // 
-            removeOperationPanel.Dock = DockStyle.Fill;
-            removeOperationPanel.Location = new Point(0, 0);
-            removeOperationPanel.Name = "removeOperationPanel";
-            removeOperationPanel.Size = new Size(838, 492);
-            removeOperationPanel.TabIndex = 11;
-            removeOperationPanel.Visible = false;
-            // 
-            // addLocationPanel
-            // 
-            addLocationPanel.Dock = DockStyle.Fill;
-            addLocationPanel.Location = new Point(0, 0);
-            addLocationPanel.Name = "addLocationPanel";
-            addLocationPanel.Size = new Size(838, 492);
-            addLocationPanel.TabIndex = 12;
-            addLocationPanel.Visible = false;
-            // 
-            // editLocationPanel
-            // 
-            editLocationPanel.Dock = DockStyle.Fill;
-            editLocationPanel.Location = new Point(0, 0);
-            editLocationPanel.Name = "editLocationPanel";
-            editLocationPanel.Size = new Size(838, 492);
-            editLocationPanel.TabIndex = 13;
-            editLocationPanel.Visible = false;
-            // 
-            // removeLocationPanel
-            // 
-            removeLocationPanel.Dock = DockStyle.Fill;
-            removeLocationPanel.Location = new Point(0, 0);
-            removeLocationPanel.Name = "removeLocationPanel";
-            removeLocationPanel.Size = new Size(838, 492);
-            removeLocationPanel.TabIndex = 14;
-            removeLocationPanel.Visible = false;
-            // 
-            // addItemTypePanel
-            // 
-            addItemTypePanel.Dock = DockStyle.Fill;
-            addItemTypePanel.Location = new Point(0, 0);
-            addItemTypePanel.Name = "addItemTypePanel";
-            addItemTypePanel.Size = new Size(838, 492);
-            addItemTypePanel.TabIndex = 15;
-            addItemTypePanel.Visible = false;
-            // 
-            // editItemTypePanel
-            // 
-            editItemTypePanel.Dock = DockStyle.Fill;
-            editItemTypePanel.Location = new Point(0, 0);
-            editItemTypePanel.Name = "editItemTypePanel";
-            editItemTypePanel.Size = new Size(838, 492);
-            editItemTypePanel.TabIndex = 16;
-            editItemTypePanel.Visible = false;
-            // 
-            // removeItemTypePanel
-            // 
-            removeItemTypePanel.Dock = DockStyle.Fill;
-            removeItemTypePanel.Location = new Point(0, 0);
-            removeItemTypePanel.Name = "removeItemTypePanel";
-            removeItemTypePanel.Size = new Size(838, 492);
-            removeItemTypePanel.TabIndex = 17;
-            removeItemTypePanel.Visible = false;
-            // 
-            // addUserPanel
-            // 
-            addUserPanel.Dock = DockStyle.Fill;
-            addUserPanel.Location = new Point(0, 0);
-            addUserPanel.Name = "addUserPanel";
-            addUserPanel.Size = new Size(838, 492);
-            addUserPanel.TabIndex = 18;
-            addUserPanel.Visible = false;
-            // 
-            // editUserPanel
-            // 
-            editUserPanel.Dock = DockStyle.Fill;
-            editUserPanel.Location = new Point(0, 0);
-            editUserPanel.Name = "editUserPanel";
-            editUserPanel.Size = new Size(838, 492);
-            editUserPanel.TabIndex = 19;
-            editUserPanel.Visible = false;
-            // 
-            // deleteUserPanel
-            // 
-            deleteUserPanel.Controls.Add(themePanel);
-            deleteUserPanel.Dock = DockStyle.Fill;
-            deleteUserPanel.Location = new Point(0, 0);
-            deleteUserPanel.Name = "deleteUserPanel";
-            deleteUserPanel.Size = new Size(838, 492);
-            deleteUserPanel.TabIndex = 20;
-            deleteUserPanel.Visible = false;
-            // 
-            // SettingsForm
-            // 
+            SettingsForm_Panel_AddPart.Dock = DockStyle.Fill;
+            SettingsForm_Panel_AddPart.Location = new Point(0, 0);
+            SettingsForm_Panel_AddPart.Name = "SettingsForm_Panel_AddPart";
+            SettingsForm_Panel_AddPart.Size = new Size(838, 492);
+            SettingsForm_Panel_AddPart.TabIndex = 6;
+            SettingsForm_Panel_AddPart.Visible = false;
+            SettingsForm_Panel_EditPart.Dock = DockStyle.Fill;
+            SettingsForm_Panel_EditPart.Location = new Point(0, 0);
+            SettingsForm_Panel_EditPart.Name = "SettingsForm_Panel_EditPart";
+            SettingsForm_Panel_EditPart.Size = new Size(838, 492);
+            SettingsForm_Panel_EditPart.TabIndex = 7;
+            SettingsForm_Panel_EditPart.Visible = false;
+            SettingsForm_Panel_RemovePart.Dock = DockStyle.Fill;
+            SettingsForm_Panel_RemovePart.Location = new Point(0, 0);
+            SettingsForm_Panel_RemovePart.Name = "SettingsForm_Panel_RemovePart";
+            SettingsForm_Panel_RemovePart.Size = new Size(838, 492);
+            SettingsForm_Panel_RemovePart.TabIndex = 8;
+            SettingsForm_Panel_RemovePart.Visible = false;
+            SettingsForm_Panel_AddOperation.Dock = DockStyle.Fill;
+            SettingsForm_Panel_AddOperation.Location = new Point(0, 0);
+            SettingsForm_Panel_AddOperation.Name = "SettingsForm_Panel_AddOperation";
+            SettingsForm_Panel_AddOperation.Size = new Size(838, 492);
+            SettingsForm_Panel_AddOperation.TabIndex = 9;
+            SettingsForm_Panel_AddOperation.Visible = false;
+            SettingsForm_Panel_EditOperation.Dock = DockStyle.Fill;
+            SettingsForm_Panel_EditOperation.Location = new Point(0, 0);
+            SettingsForm_Panel_EditOperation.Name = "SettingsForm_Panel_EditOperation";
+            SettingsForm_Panel_EditOperation.Size = new Size(838, 492);
+            SettingsForm_Panel_EditOperation.TabIndex = 10;
+            SettingsForm_Panel_EditOperation.Visible = false;
+            SettingsForm_Panel_RemoveOperation.Dock = DockStyle.Fill;
+            SettingsForm_Panel_RemoveOperation.Location = new Point(0, 0);
+            SettingsForm_Panel_RemoveOperation.Name = "SettingsForm_Panel_RemoveOperation";
+            SettingsForm_Panel_RemoveOperation.Size = new Size(838, 492);
+            SettingsForm_Panel_RemoveOperation.TabIndex = 11;
+            SettingsForm_Panel_RemoveOperation.Visible = false;
+            SettingsForm_Panel_AddLocation.Dock = DockStyle.Fill;
+            SettingsForm_Panel_AddLocation.Location = new Point(0, 0);
+            SettingsForm_Panel_AddLocation.Name = "SettingsForm_Panel_AddLocation";
+            SettingsForm_Panel_AddLocation.Size = new Size(838, 492);
+            SettingsForm_Panel_AddLocation.TabIndex = 12;
+            SettingsForm_Panel_AddLocation.Visible = false;
+            SettingsForm_Panel_EditLocation.Dock = DockStyle.Fill;
+            SettingsForm_Panel_EditLocation.Location = new Point(0, 0);
+            SettingsForm_Panel_EditLocation.Name = "SettingsForm_Panel_EditLocation";
+            SettingsForm_Panel_EditLocation.Size = new Size(838, 492);
+            SettingsForm_Panel_EditLocation.TabIndex = 13;
+            SettingsForm_Panel_EditLocation.Visible = false;
+            SettingsForm_Panel_RemoveLocation.Dock = DockStyle.Fill;
+            SettingsForm_Panel_RemoveLocation.Location = new Point(0, 0);
+            SettingsForm_Panel_RemoveLocation.Name = "SettingsForm_Panel_RemoveLocation";
+            SettingsForm_Panel_RemoveLocation.Size = new Size(838, 492);
+            SettingsForm_Panel_RemoveLocation.TabIndex = 14;
+            SettingsForm_Panel_RemoveLocation.Visible = false;
+            SettingsForm_Panel_AddItemType.Dock = DockStyle.Fill;
+            SettingsForm_Panel_AddItemType.Location = new Point(0, 0);
+            SettingsForm_Panel_AddItemType.Name = "SettingsForm_Panel_AddItemType";
+            SettingsForm_Panel_AddItemType.Size = new Size(838, 492);
+            SettingsForm_Panel_AddItemType.TabIndex = 15;
+            SettingsForm_Panel_AddItemType.Visible = false;
+            SettingsForm_Panel_EditItemType.Dock = DockStyle.Fill;
+            SettingsForm_Panel_EditItemType.Location = new Point(0, 0);
+            SettingsForm_Panel_EditItemType.Name = "SettingsForm_Panel_EditItemType";
+            SettingsForm_Panel_EditItemType.Size = new Size(838, 492);
+            SettingsForm_Panel_EditItemType.TabIndex = 16;
+            SettingsForm_Panel_EditItemType.Visible = false;
+            SettingsForm_Panel_RemoveItemType.Dock = DockStyle.Fill;
+            SettingsForm_Panel_RemoveItemType.Location = new Point(0, 0);
+            SettingsForm_Panel_RemoveItemType.Name = "SettingsForm_Panel_RemoveItemType";
+            SettingsForm_Panel_RemoveItemType.Size = new Size(838, 492);
+            SettingsForm_Panel_RemoveItemType.TabIndex = 17;
+            SettingsForm_Panel_RemoveItemType.Visible = false;
+            SettingsForm_Panel_AddUser.Dock = DockStyle.Fill;
+            SettingsForm_Panel_AddUser.Location = new Point(0, 0);
+            SettingsForm_Panel_AddUser.Name = "SettingsForm_Panel_AddUser";
+            SettingsForm_Panel_AddUser.Size = new Size(838, 492);
+            SettingsForm_Panel_AddUser.TabIndex = 18;
+            SettingsForm_Panel_AddUser.Visible = false;
+            SettingsForm_Panel_EditUser.Dock = DockStyle.Fill;
+            SettingsForm_Panel_EditUser.Location = new Point(0, 0);
+            SettingsForm_Panel_EditUser.Name = "SettingsForm_Panel_EditUser";
+            SettingsForm_Panel_EditUser.Size = new Size(838, 492);
+            SettingsForm_Panel_EditUser.TabIndex = 19;
+            SettingsForm_Panel_EditUser.Visible = false;
+            SettingsForm_Panel_DeleteUser.Controls.Add(SettingsForm_Panel_Theme);
+            SettingsForm_Panel_DeleteUser.Dock = DockStyle.Fill;
+            SettingsForm_Panel_DeleteUser.Location = new Point(0, 0);
+            SettingsForm_Panel_DeleteUser.Name = "SettingsForm_Panel_DeleteUser";
+            SettingsForm_Panel_DeleteUser.Size = new Size(838, 492);
+            SettingsForm_Panel_DeleteUser.TabIndex = 20;
+            SettingsForm_Panel_DeleteUser.Visible = false;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(838, 492);
-            Controls.Add(deleteUserPanel);
-            Controls.Add(editUserPanel);
-            Controls.Add(addUserPanel);
-            Controls.Add(removeItemTypePanel);
-            Controls.Add(editItemTypePanel);
-            Controls.Add(addItemTypePanel);
-            Controls.Add(removeLocationPanel);
-            Controls.Add(editLocationPanel);
-            Controls.Add(addLocationPanel);
-            Controls.Add(removeOperationPanel);
-            Controls.Add(editOperationPanel);
-            Controls.Add(addOperationPanel);
-            Controls.Add(removePartPanel);
-            Controls.Add(editPartPanel);
-            Controls.Add(addPartPanel);
-            Controls.Add(aboutPanel);
-            Controls.Add(shortcutsPanel);
-            Controls.Add(databasePanel);
-            Controls.Add(splitContainer1);
+            Controls.Add(SettingsForm_Panel_DeleteUser);
+            Controls.Add(SettingsForm_Panel_EditUser);
+            Controls.Add(SettingsForm_Panel_AddUser);
+            Controls.Add(SettingsForm_Panel_RemoveItemType);
+            Controls.Add(SettingsForm_Panel_EditItemType);
+            Controls.Add(SettingsForm_Panel_AddItemType);
+            Controls.Add(SettingsForm_Panel_RemoveLocation);
+            Controls.Add(SettingsForm_Panel_EditLocation);
+            Controls.Add(SettingsForm_Panel_AddLocation);
+            Controls.Add(SettingsForm_Panel_RemoveOperation);
+            Controls.Add(SettingsForm_Panel_EditOperation);
+            Controls.Add(SettingsForm_Panel_AddOperation);
+            Controls.Add(SettingsForm_Panel_RemovePart);
+            Controls.Add(SettingsForm_Panel_EditPart);
+            Controls.Add(SettingsForm_Panel_AddPart);
+            Controls.Add(SettingsForm_Panel_About);
+            Controls.Add(SettingsForm_Panel_Shortcuts);
+            Controls.Add(SettingsForm_Panel_Database);
+            Controls.Add(SettingsForm_SplitContainer_Main);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "SettingsForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Settings - MTM WIP Application";
-            splitContainer1.Panel1.ResumeLayout(false);
-            splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
-            splitContainer1.ResumeLayout(false);
-            bottomPanel.ResumeLayout(false);
-            bottomPanel.PerformLayout();
-            databasePanel.ResumeLayout(false);
-            databaseTabControl.ResumeLayout(false);
-            connectionTabPage.ResumeLayout(false);
-            connectionGroupBox.ResumeLayout(false);
-            connectionGroupBox.PerformLayout();
-            themePanel.ResumeLayout(false);
+            SettingsForm_SplitContainer_Main.Panel1.ResumeLayout(false);
+            SettingsForm_SplitContainer_Main.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)SettingsForm_SplitContainer_Main).EndInit();
+            SettingsForm_SplitContainer_Main.ResumeLayout(false);
+            SettingsForm_Panel_Bottom.ResumeLayout(false);
+            SettingsForm_Panel_Bottom.PerformLayout();
+            SettingsForm_Panel_Database.ResumeLayout(false);
+            SettingsForm_TabControl_Database.ResumeLayout(false);
+            SettingsForm_TabPage_Connection.ResumeLayout(false);
+            SettingsForm_GroupBox_Connection.ResumeLayout(false);
+            SettingsForm_GroupBox_Connection.PerformLayout();
+            SettingsForm_Panel_Theme.ResumeLayout(false);
             groupBox1.ResumeLayout(false);
-            shortcutsPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)shortcutsDataGridView).EndInit();
-            aboutPanel.ResumeLayout(false);
-            aboutPanel.PerformLayout();
-            deleteUserPanel.ResumeLayout(false);
+            SettingsForm_Panel_Shortcuts.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)SettingsForm_DataGridView_Shortcuts).EndInit();
+            SettingsForm_Panel_About.ResumeLayout(false);
+            SettingsForm_Panel_About.PerformLayout();
+            SettingsForm_Panel_DeleteUser.ResumeLayout(false);
             ResumeLayout(false);
 
         }
-
-        #endregion
-
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.TreeView categoryTreeView;
-        private System.Windows.Forms.Panel settingsPanel;
-        private System.Windows.Forms.Panel bottomPanel;
-        private System.Windows.Forms.Label statusLabel;
-        private System.Windows.Forms.Button cancelButton;
-        private System.Windows.Forms.Button saveButton;
-        private System.Windows.Forms.Button resetDefaultsButton;
-        private System.Windows.Forms.Panel databasePanel;
-        private System.Windows.Forms.TabControl databaseTabControl;
-        private System.Windows.Forms.TabPage connectionTabPage;
-        private System.Windows.Forms.GroupBox connectionGroupBox;
-        private System.Windows.Forms.TextBox passwordTextBox;
-        private System.Windows.Forms.Label passwordLabel;
-        private System.Windows.Forms.TextBox usernameTextBox;
-        private System.Windows.Forms.Label usernameLabel;
-        private System.Windows.Forms.TextBox databaseTextBox;
-        private System.Windows.Forms.Label databaseLabel;
-        private System.Windows.Forms.TextBox portTextBox;
-        private System.Windows.Forms.Label portLabel;
-        private System.Windows.Forms.TextBox serverTextBox;
-        private System.Windows.Forms.Label serverLabel;
-        private System.Windows.Forms.Panel themePanel;
-        private System.Windows.Forms.ComboBox themeComboBox;
-        private System.Windows.Forms.Panel shortcutsPanel;
-        private System.Windows.Forms.DataGridView shortcutsDataGridView;
-        private System.Windows.Forms.Panel aboutPanel;
-        private System.Windows.Forms.Label versionLabel;
-        private System.Windows.Forms.Label appNameLabel;
-        private System.Windows.Forms.Panel addPartPanel;
-        private System.Windows.Forms.Panel editPartPanel;
-        private System.Windows.Forms.Panel removePartPanel;
-        private System.Windows.Forms.Panel addOperationPanel;
-        private System.Windows.Forms.Panel editOperationPanel;
-        private System.Windows.Forms.Panel removeOperationPanel;
-        private System.Windows.Forms.Panel addLocationPanel;
-        private System.Windows.Forms.Panel editLocationPanel;
-        private System.Windows.Forms.Panel removeLocationPanel;
-        private System.Windows.Forms.Panel addItemTypePanel;
-        private System.Windows.Forms.Panel editItemTypePanel;
-        private System.Windows.Forms.Panel removeItemTypePanel;
-        private System.Windows.Forms.Panel addUserPanel;
-        private System.Windows.Forms.Panel editUserPanel;
-        private System.Windows.Forms.Panel deleteUserPanel;
-        private GroupBox groupBox1;
     }
-}
+
+        
+        #endregion
+    }

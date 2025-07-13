@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.Diagnostics;
 using MTM_Inventory_Application.Logging;
@@ -17,7 +16,7 @@ public static class Helper_Database_Variables
     {
         try
         {
-            server ??= Model_AppVariables.WipServerAddress ?? "localhost"; // "172.16.1.104"
+            server ??= Model_AppVariables.WipServerAddress ?? "localhost";
             database ??= Model_Users.Database;
             uid ??= Model_AppVariables.User.ToUpper();
             return $"SERVER={server};DATABASE={database};UID={uid};Allow User Variables=True ;";
@@ -43,7 +42,6 @@ public static class Helper_Database_Variables
 
             var userDirectory = Path.Combine(logDirectory, userName);
 
-            // Add timeout for directory creation to prevent hanging on network shares
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             var directoryTask = Task.Run(() =>
             {
@@ -65,9 +63,8 @@ public static class Helper_Database_Variables
         }
         catch (Exception ex)
         {
-            // Don't use LoggingUtility here to avoid recursion during initialization
             Debug.WriteLine($"[DEBUG] Error in GetLogFilePath: {ex.Message}");
-            throw; // Re-throw to let caller handle the fallback
+            throw;
         }
     }
 

@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.Text;
 using MTM_Inventory_Application.Models;
@@ -13,10 +12,6 @@ internal class Dao_Transactions
 
     public Dao_Transactions(string connectionString) => _connectionString = connectionString;
 
-    /// <summary>
-    /// Retrieves transactions using any combination of provided search fields, with sorting and paging.
-    /// Non-administrators will only see their own transactions.
-    /// </summary>
     public List<Model_Transactions> SearchTransactions(
         string userName,
         bool isAdmin,
@@ -31,17 +26,16 @@ internal class Dao_Transactions
         string itemType = "",
         DateTime? fromDate = null,
         DateTime? toDate = null,
-        string sortColumn = "ReceiveDate", // Default sort column
-        bool sortDescending = true, // Default sort direction
-        int page = 1, // Page number (1-based)
-        int pageSize = 20 // Number of records per page
+        string sortColumn = "ReceiveDate",
+        bool sortDescending = true,
+        int page = 1,
+        int pageSize = 20
     )
     {
         List<Model_Transactions> transactions = new();
         StringBuilder query = new("SELECT * FROM inv_transaction WHERE 1=1");
         List<MySqlParameter> parameters = new();
 
-        // Security: restrict non-admins to their own transactions
         if (!isAdmin && !string.IsNullOrEmpty(userName))
         {
             query.Append(" AND User = @User");
@@ -119,7 +113,6 @@ internal class Dao_Transactions
             parameters.Add(new MySqlParameter("@ToDate", toDate.Value));
         }
 
-        // Sorting
         HashSet<string> validColumns = new()
         {
             "ID",
@@ -137,12 +130,11 @@ internal class Dao_Transactions
         };
         if (!validColumns.Contains(sortColumn))
         {
-            sortColumn = "ReceiveDate"; // fallback to safe default
+            sortColumn = "ReceiveDate";
         }
 
         query.Append($" ORDER BY `{sortColumn}` {(sortDescending ? "DESC" : "ASC")}");
 
-        // Paging
         int offset = (page - 1) * pageSize;
         query.Append(" LIMIT @PageSize OFFSET @Offset");
         parameters.Add(new MySqlParameter("@PageSize", pageSize));
@@ -167,7 +159,6 @@ internal class Dao_Transactions
         return transactions;
     }
 
-    // Helper: Map DB row to Model_Transactions
     private Model_Transactions MapTransaction(MySqlDataReader reader) =>
         new()
         {

@@ -1,13 +1,12 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 namespace MTM_Inventory_Application.Forms.MainForm.Classes;
 
-/// <summary>
-///     Provides helper methods for resetting the controls on each MainForm tab.
-/// </summary>
 public static class MainFormTabResetHelper
 {
+    #region Methods
+    
+
     public static void ResetRemoveTab(
         ComboBox comboBoxPart,
         ComboBox comboBoxOp,
@@ -31,4 +30,7 @@ public static class MainFormTabResetHelper
         if (comboBoxPart.FindForm() is { } form)
             MainFormControlHelper.SetActiveControl(form, comboBoxPart);
     }
+
+    
+    #endregion
 }

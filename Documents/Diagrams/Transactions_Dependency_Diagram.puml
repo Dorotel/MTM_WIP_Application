@@ -1,0 +1,102 @@
+@startuml
+!define FORM_STEREOTYPE <<Form>>
+!define MODEL_STEREOTYPE <<Model>>
+!define DAO_STEREOTYPE <<DAO>>
+!define HELPER_STEREOTYPE <<Helper>>
+!define CORE_STEREOTYPE <<Core>>
+
+package "Forms.Transactions" {
+    class "Transactions" FORM_STEREOTYPE {
+        - _dao : Dao_Transactions
+        - _displayedTransactions : BindingList<Model_Transactions>
+        - _currentPage : int
+        - _pageSize : int
+        - _sortDescending : bool
+        - _currentUser : string
+        - _isAdmin : bool
+        --
+        + Transactions(connectionString: string, currentUser: string, isAdmin: bool)
+        - OnFormLoadAsync() : Task
+        - LoadUserCombosAsync() : Task
+        - SetupSortCombo()
+        - SetupTabs()
+        - SetupDataGrid()
+        - ResetFilters()
+        - LoadTransactionsAsync() : Task
+    }
+}
+
+package "Models" {
+    class "Model_Transactions" MODEL_STEREOTYPE {
+        + FromLocation : string
+        + PartID : string
+        + Quantity : int
+        + ReceiveDate : DateTime
+        + User : string
+        + TransactionType : string
+    }
+}
+
+package "Data" {
+    class "Dao_Transactions" DAO_STEREOTYPE {
+        + Dao_Transactions(connectionString: string)
+        + SearchTransactions(...) : List<Model_Transactions>
+    }
+}
+
+package "Helpers" {
+    class "Helper_UI_ComboBoxes" HELPER_STEREOTYPE {
+        + {static} FillUserComboBoxesAsync(comboBox: ComboBox) : Task
+    }
+}
+
+package "Core" {
+    class "Core_Themes" CORE_STEREOTYPE {
+        + {static} ApplyTheme(form: Form)
+    }
+}
+
+package "System.ComponentModel" {
+    class "BindingList<T>" {
+        + BindingList(list: IList<T>)
+    }
+}
+
+package "System.Windows.Forms" {
+    class "Form" {
+        + Load : EventHandler
+        + Controls : ControlCollection
+    }
+    
+    class "DataGridView" {
+        + DataSource : object
+        + Columns : DataGridViewColumnCollection
+    }
+    
+    class "ComboBox" {
+        + Items : ComboBox.ObjectCollection
+        + SelectedItem : object
+        + SelectedIndex : int
+    }
+}
+
+' Dependencies
+"Transactions" --> "Dao_Transactions" : uses
+"Transactions" --> "Model_Transactions" : uses
+"Transactions" --> "Helper_UI_ComboBoxes" : uses
+"Transactions" --> "Core_Themes" : uses
+"Transactions" --> "BindingList<T>" : uses
+"Transactions" --|> "Form" : extends
+
+"Dao_Transactions" --> "Model_Transactions" : returns
+"BindingList<T>" --> "Model_Transactions" : contains
+"Helper_UI_ComboBoxes" --> "ComboBox" : operates on
+"Core_Themes" --> "Form" : operates on
+
+' Data flow
+"Transactions" ..> "Dao_Transactions" : queries data
+"Dao_Transactions" ..> "Model_Transactions" : returns collection
+"Transactions" ..> "BindingList<T>" : binds to DataGridView
+"Transactions" ..> "DataGridView" : displays data
+
+@enduml

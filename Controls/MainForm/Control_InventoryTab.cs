@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.ComponentModel;
 using System.Diagnostics;
@@ -19,15 +18,22 @@ namespace MTM_Inventory_Application.Controls.MainForm;
 
 public partial class ControlInventoryTab : UserControl
 {
+    #region Fields
+    
+
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
+    
+    #endregion
+    
+    #region Constructors
+    
 
     #region Initialization
 
     public ControlInventoryTab()
     {
         InitializeComponent();
-        // Set tooltips for main buttons using shortcut constants
         Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Save,
             $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Save)}");
         Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_AdvancedEntry,
@@ -50,6 +56,11 @@ public partial class ControlInventoryTab : UserControl
             Control_InventoryTab_ComboBox_Location.ForeColor =
                 Model_AppVariables.UserUiColors.ComboBoxForeColor ?? Color.Red;
     }
+    
+    #endregion
+    
+    #region Methods
+    
 
     #endregion
 
@@ -63,7 +74,7 @@ public partial class ControlInventoryTab : UserControl
             await Helper_UI_ComboBoxes.FillOperationComboBoxesAsync(Control_InventoryTab_ComboBox_Operation);
             await Helper_UI_ComboBoxes.FillLocationComboBoxesAsync(Control_InventoryTab_ComboBox_Location);
 
-            await Task.Delay(100); // Small delay to ensure controls are ready
+            await Task.Delay(100);
             LoggingUtility.Log("Inventory tab ComboBoxes loaded.");
         }
         catch (Exception ex)
@@ -82,10 +93,8 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
-            // Shortcuts only if this control is visible
             if (Visible)
             {
-                // CTRL+S: Save
                 if (keyData == Core_WipAppVariables.Shortcut_Inventory_Save)
                 {
                     if (Control_InventoryTab_Button_Save.Visible && Control_InventoryTab_Button_Save.Enabled)
@@ -95,7 +104,6 @@ public partial class ControlInventoryTab : UserControl
                     }
                 }
 
-                // CTRL+SHIFT+A: Advanced
                 if (keyData == Core_WipAppVariables.Shortcut_Inventory_Advanced)
                 {
                     if (Control_InventoryTab_Button_AdvancedEntry.Visible &&
@@ -106,7 +114,6 @@ public partial class ControlInventoryTab : UserControl
                     }
                 }
 
-                // CTRL+R: Reset
                 if (keyData == Core_WipAppVariables.Shortcut_Inventory_Reset)
                 {
                     if (Control_InventoryTab_Button_Reset.Visible && Control_InventoryTab_Button_Reset.Enabled)
@@ -253,7 +260,6 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
-            // Check if Shift key is held down
             if ((ModifierKeys & Keys.Shift) == Keys.Shift)
             {
                 Control_InventoryTab_HardReset();
@@ -278,7 +284,6 @@ public partial class ControlInventoryTab : UserControl
             MainFormInstance?.TabLoadingProgress?.ShowProgress();
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(10, "Resetting Inventory tab...");
             Debug.WriteLine("[DEBUG] InventoryTab Reset button clicked - start");
-            // 3) Unbind DataSource before DataTable reset & Update status strip to show reset is in progress
             if (MainFormInstance != null)
             {
                 Debug.WriteLine("[DEBUG] Updating status strip for reset");
@@ -288,19 +293,16 @@ public partial class ControlInventoryTab : UserControl
             }
 
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(30, "Resetting data tables...");
-            // 1) Hide controls during reset
             Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
             Control_InventoryTab_ComboBox_Part.Visible = false;
             Control_InventoryTab_ComboBox_Operation.Visible = false;
             Control_InventoryTab_ComboBox_Location.Visible = false;
 
-            // 4) Reset the DataTables and reinitialize them
             Debug.WriteLine("[DEBUG] Resetting and refreshing all ComboBox DataTables");
             await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
             Debug.WriteLine("[DEBUG] DataTables reset complete");
 
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(60, "Refilling combo boxes...");
-            // 5) Refill each combobox with proper data
             Debug.WriteLine("[DEBUG] Refilling Part ComboBox");
             await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(Control_InventoryTab_ComboBox_Part);
             Debug.WriteLine("[DEBUG] Refilling Operation ComboBox");
@@ -308,7 +310,6 @@ public partial class ControlInventoryTab : UserControl
             Debug.WriteLine("[DEBUG] Refilling Location ComboBox");
             await Helper_UI_ComboBoxes.FillLocationComboBoxesAsync(Control_InventoryTab_ComboBox_Location);
 
-            // 6) Reset UI fields
             Debug.WriteLine("[DEBUG] Resetting UI fields");
             MainFormControlHelper.ResetComboBox(Control_InventoryTab_ComboBox_Part,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
@@ -321,17 +322,13 @@ public partial class ControlInventoryTab : UserControl
             MainFormControlHelper.ResetRichTextBox(Control_InventoryTab_RichTextBox_Notes,
                 Model_AppVariables.UserUiColors.RichTextBoxErrorForeColor ?? Color.Red, "");
 
-            // 7) Restore controls and focus
             Debug.WriteLine("[DEBUG] Restoring ComboBox visibility and focus");
             Control_InventoryTab_ComboBox_Part.Visible = true;
             Control_InventoryTab_ComboBox_Operation.Visible = true;
             Control_InventoryTab_ComboBox_Location.Visible = true;
             Control_InventoryTab_ComboBox_Part.Focus();
 
-            // 8) Update Save button state
             Control_InventoryTab_Update_SaveButtonState();
-
-            // 9) Restore status strip
 
             Debug.WriteLine("[DEBUG] InventoryTab Reset button clicked - end");
         }
@@ -371,7 +368,6 @@ public partial class ControlInventoryTab : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
             }
 
-            // 6) Reset UI fields
             Debug.WriteLine("[DEBUG] Resetting UI fields");
             MainFormControlHelper.ResetComboBox(Control_InventoryTab_ComboBox_Part,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
@@ -469,7 +465,6 @@ public partial class ControlInventoryTab : UserControl
                 notes,
                 true);
 
-            // --- NEW LOGIC: Add to sys_last_10_transactions if not duplicate ---
             await AddToLast10TransactionsIfUniqueAsync(Model_AppVariables.User, partId, op, qty);
 
             MessageBox.Show(@"Inventory transaction saved successfully.", @"Success", MessageBoxButtons.OK,
@@ -494,7 +489,6 @@ public partial class ControlInventoryTab : UserControl
         }
     }
 
-    // Helper method to add to sys_last_10_transactions if not duplicate
     private static async Task AddToLast10TransactionsIfUniqueAsync(string user, string partId, string operation,
         int quantity)
     {
@@ -502,7 +496,6 @@ public partial class ControlInventoryTab : UserControl
         using MySqlConnection conn = new(connectionString);
         await conn.OpenAsync();
 
-        // 1. Check for duplicate in last 10
         MySqlCommand checkCmd = new(@"
         SELECT COUNT(*) FROM (
             SELECT PartID, Operation, Quantity
@@ -525,7 +518,6 @@ public partial class ControlInventoryTab : UserControl
             return;
         }
 
-        // 2. Insert new transaction
         MySqlCommand insertCmd = new(@"
         INSERT INTO sys_last_10_transactions (User, PartID, Operation, Quantity)
         VALUES (@User, @PartID, @Operation, @Quantity)
@@ -809,6 +801,9 @@ public partial class ControlInventoryTab : UserControl
             : Model_AppVariables.UserUiColors.LabelForeColor ?? SystemColors.ControlText;
     }
 
+    #endregion
+
+    
     #endregion
 }
 

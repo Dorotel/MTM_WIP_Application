@@ -1,6 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
 using System.Media;
 using MTM_Inventory_Application.Controls.Addons;
 using MTM_Inventory_Application.Core;
@@ -18,7 +15,6 @@ public class Service_ConnectionRecoveryManager
 
     public bool IsDisconnectTimerActive => _reconnectTimer.Enabled;
 
-
     public Service_ConnectionRecoveryManager(MainForm mainForm)
     {
         _mainForm = mainForm ?? throw new ArgumentNullException(nameof(mainForm));
@@ -34,14 +30,10 @@ public class Service_ConnectionRecoveryManager
             return;
         }
 
-        // Play a system exclamation sound
         SystemSounds.Exclamation.Play();
 
-        // 1. Show disconnected status
         _mainForm.MainForm_StatusStrip_Disconnected.Visible = true;
-        // 2. Disable main tab control
         _mainForm.MainForm_TabControl.Enabled = false;
-        // 3. Start reconnect timer
         _reconnectTimer.Start();
     }
 
@@ -53,13 +45,9 @@ public class Service_ConnectionRecoveryManager
             return;
         }
 
-        // Play a system exclamation sound
         SystemSounds.Question.Play();
-        // 1. Hide disconnected status
         _mainForm.MainForm_StatusStrip_Disconnected.Visible = false;
-        // 2. Enable main tab control
         _mainForm.MainForm_TabControl.Enabled = true;
-        // 3. Stop reconnect timer
         _reconnectTimer.Stop();
     }
 
@@ -73,13 +61,11 @@ public class Service_ConnectionRecoveryManager
         }
         catch
         {
-            // Still disconnected, do nothing
         }
     }
 
     public async Task UpdateConnectionStrengthAsync()
     {
-        // Use the MainForm's control references via _mainForm
         ConnectionStrengthControl? signalStrength = _mainForm.MainForm_Control_SignalStrength;
         ToolStripStatusLabel? statusStripDisconnected = _mainForm.MainForm_StatusStrip_Disconnected;
 
@@ -89,10 +75,8 @@ public class Service_ConnectionRecoveryManager
             return;
         }
 
-        // Access the connection checker via _mainForm (make it internal or provide a getter)
         (int strength, int pingMs) = await Helper_Control_MySqlSignal.GetStrengthAsync();
 
-        // Use the instance's IsDisconnectTimerActive property
         if (IsDisconnectTimerActive)
         {
             strength = 0;
@@ -103,7 +87,6 @@ public class Service_ConnectionRecoveryManager
 
         statusStripDisconnected.Visible = strength == 0;
 
-        // Use the instance method for connection lost
         if (strength == 0 && !IsDisconnectTimerActive)
         {
             HandleConnectionLost();

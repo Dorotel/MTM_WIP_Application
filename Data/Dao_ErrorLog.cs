@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.Data;
 using System.Diagnostics;
@@ -115,7 +114,6 @@ internal static class Dao_ErrorLog
         }
         catch (Exception ex)
         {
-            // Use database error log for SQL exceptions, application error log otherwise
             if (ex is MySqlException)
             {
                 LoggingUtility.LogDatabaseError(ex);
@@ -133,7 +131,6 @@ internal static class Dao_ErrorLog
 
     #region Error Handling Methods
 
-    // Prevents error message spam by tracking the last shown error and time
     private static string? _lastErrorMessage;
     private static DateTime _lastErrorTime = DateTime.MinValue;
     private static readonly TimeSpan ErrorMessageCooldown = TimeSpan.FromSeconds(5);

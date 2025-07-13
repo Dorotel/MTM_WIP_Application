@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using MTM_Inventory_Application.Core;
 
@@ -16,11 +15,9 @@ internal class Helper_UI_Shortcuts
         if (keys.HasFlag(Keys.Control)) parts.Add("CTRL");
         if (keys.HasFlag(Keys.Shift)) parts.Add("SHIFT");
         if (keys.HasFlag(Keys.Alt)) parts.Add("ALT");
-        // Remove modifier flags to get the main key
         var keyOnly = keys & ~Keys.Control & ~Keys.Shift & ~Keys.Alt;
         if (keyOnly != Keys.None)
         {
-            // Special case for arrow keys
             if (keyOnly == Keys.Left) parts.Add("LEFT");
             else if (keyOnly == Keys.Right) parts.Add("RIGHT");
             else if (keyOnly == Keys.Up) parts.Add("UP");
@@ -73,7 +70,6 @@ internal class Helper_UI_Shortcuts
                     keys |= Keys.Delete;
                     break;
                 default:
-                    // Try to parse as a standard key
                     if (Enum.TryParse<Keys>(part, true, out var key)) keys |= key;
                     break;
             }

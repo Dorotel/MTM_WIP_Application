@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.Text.Json;
 using MTM_Inventory_Application.Controls.SettingsForm;
@@ -13,147 +12,140 @@ namespace MTM_Inventory_Application.Forms.Settings;
 
 public partial class SettingsForm : Form
 {
+    #region Fields
+    
+
     private bool _hasChanges = false;
     private readonly Dictionary<string, Panel> _settingsPanels;
     private string? _originalThemeName;
     private ProgressBarUserControl _loadingProgress = null!;
 
+    private void ShowLoadingProgress(string status = "Loading...")
+    
+    #endregion
+    
+    #region Constructors
+    
+
     public SettingsForm()
     {
         InitializeComponent();
 
-        // Initialize settings panels dictionary
         _settingsPanels = new Dictionary<string, Panel>
         {
-            ["Database"] = databasePanel,
-            // --- User panels ---
-            ["Add User"] = addUserPanel,
-            ["Edit User"] = editUserPanel,
-            ["Delete User"] = deleteUserPanel,
-            // --- Existing panels ---
-            ["Add Part Number"] = addPartPanel,
-            ["Edit Part Number"] = editPartPanel,
-            ["Remove Part Number"] = removePartPanel,
-            ["Add Operation"] = addOperationPanel,
-            ["Edit Operation"] = editOperationPanel,
-            ["Remove Operation"] = removeOperationPanel,
-            ["Add Location"] = addLocationPanel,
-            ["Edit Location"] = editLocationPanel,
-            ["Remove Location"] = removeLocationPanel,
-            ["Add ItemType"] = addItemTypePanel,
-            ["Edit ItemType"] = editItemTypePanel,
-            ["Remove ItemType"] = removeItemTypePanel,
-            ["Theme"] = themePanel,
-            ["Shortcuts"] = shortcutsPanel,
-            ["About"] = aboutPanel
+            ["Database"] = SettingsForm_Panel_Database,
+            ["Add User"] = SettingsForm_Panel_AddUser,
+            ["Edit User"] = SettingsForm_Panel_EditUser,
+            ["Delete User"] = SettingsForm_Panel_DeleteUser,
+            ["Add Part Number"] = SettingsForm_Panel_AddPart,
+            ["Edit Part Number"] = SettingsForm_Panel_EditPart,
+            ["Remove Part Number"] = SettingsForm_Panel_RemovePart,
+            ["Add Operation"] = SettingsForm_Panel_AddOperation,
+            ["Edit Operation"] = SettingsForm_Panel_EditOperation,
+            ["Remove Operation"] = SettingsForm_Panel_RemoveOperation,
+            ["Add Location"] = SettingsForm_Panel_AddLocation,
+            ["Edit Location"] = SettingsForm_Panel_EditLocation,
+            ["Remove Location"] = SettingsForm_Panel_RemoveLocation,
+            ["Add ItemType"] = SettingsForm_Panel_AddItemType,
+            ["Edit ItemType"] = SettingsForm_Panel_EditItemType,
+            ["Remove ItemType"] = SettingsForm_Panel_RemoveItemType,
+            ["Theme"] = SettingsForm_Panel_Theme,
+            ["Shortcuts"] = SettingsForm_Panel_Shortcuts,
+            ["About"] = SettingsForm_Panel_About
         };
 
-        // Store the original theme name for later comparison
         _originalThemeName = Model_AppVariables.ThemeName;
 
-        // Initialize progress control
         InitializeProgressControl();
 
-        // Wire up themeComboBox event
-        themeComboBox.SelectedIndexChanged += ThemeComboBox_SelectedIndexChanged;
+        SettingsForm_ComboBox_Theme.SelectedIndexChanged += ThemeComboBox_SelectedIndexChanged;
 
-        // Wire up shortcutsDataGridView event
-        shortcutsDataGridView.CellBeginEdit += ShortcutsDataGridView_CellBeginEdit;
+        SettingsForm_DataGridView_Shortcuts.CellBeginEdit += ShortcutsDataGridView_CellBeginEdit;
 
-        // Initialize user controls
         InitializeUserControls();
 
-        // Initialize the form
         InitializeForm();
     }
+    
+    #endregion
+    
+    #region Methods
+    
 
     private void InitializeCategoryTreeView()
     {
-        categoryTreeView.Nodes.Clear();
+        SettingsForm_TreeView_Category.Nodes.Clear();
 
-        // Add root nodes
-        var databaseNode = categoryTreeView.Nodes.Add("Database", "Database");
+        var databaseNode = SettingsForm_TreeView_Category.Nodes.Add("Database", "Database");
 
-        // Add Users category before Part Numbers
-        var usersNode = categoryTreeView.Nodes.Add("Users", "Users");
+        var usersNode = SettingsForm_TreeView_Category.Nodes.Add("Users", "Users");
         usersNode.Nodes.Add("Add User", "Add User");
         usersNode.Nodes.Add("Edit User", "Edit User");
         usersNode.Nodes.Add("Delete User", "Delete User");
 
-        // Add Part Numbers category
-        var partNumbersNode = categoryTreeView.Nodes.Add("Part Numbers", "Part Numbers");
+        var partNumbersNode = SettingsForm_TreeView_Category.Nodes.Add("Part Numbers", "Part Numbers");
         partNumbersNode.Nodes.Add("Add Part Number", "Add Part Number");
         partNumbersNode.Nodes.Add("Edit Part Number", "Edit Part Number");
         partNumbersNode.Nodes.Add("Remove Part Number", "Remove Part Number");
 
-        // Add Operations category
-        var operationsNode = categoryTreeView.Nodes.Add("Operations", "Operations");
+        var operationsNode = SettingsForm_TreeView_Category.Nodes.Add("Operations", "Operations");
         operationsNode.Nodes.Add("Add Operation", "Add Operation");
         operationsNode.Nodes.Add("Edit Operation", "Edit Operation");
         operationsNode.Nodes.Add("Remove Operation", "Remove Operation");
 
-        // Add Locations category
-        var locationsNode = categoryTreeView.Nodes.Add("Locations", "Locations");
+        var locationsNode = SettingsForm_TreeView_Category.Nodes.Add("Locations", "Locations");
         locationsNode.Nodes.Add("Add Location", "Add Location");
         locationsNode.Nodes.Add("Edit Location", "Edit Location");
         locationsNode.Nodes.Add("Remove Location", "Remove Location");
 
-        // Add ItemTypes category
-        var itemTypesNode = categoryTreeView.Nodes.Add("ItemTypes", "ItemTypes");
+        var itemTypesNode = SettingsForm_TreeView_Category.Nodes.Add("ItemTypes", "ItemTypes");
         itemTypesNode.Nodes.Add("Add ItemType", "Add ItemType");
         itemTypesNode.Nodes.Add("Edit ItemType", "Edit ItemType");
         itemTypesNode.Nodes.Add("Remove ItemType", "Remove ItemType");
 
-        // Add other root nodes
-        var themeNode = categoryTreeView.Nodes.Add("Theme", "Theme");
-        var shortcutsNode = categoryTreeView.Nodes.Add("Shortcuts", "Shortcuts");
-        var aboutNode = categoryTreeView.Nodes.Add("About", "About");
+        var themeNode = SettingsForm_TreeView_Category.Nodes.Add("Theme", "Theme");
+        var shortcutsNode = SettingsForm_TreeView_Category.Nodes.Add("Shortcuts", "Shortcuts");
+        var aboutNode = SettingsForm_TreeView_Category.Nodes.Add("About", "About");
 
-        // Collapse all nodes by default
-        categoryTreeView.CollapseAll();
+        SettingsForm_TreeView_Category.CollapseAll();
 
-        // Select Database node by default
-        categoryTreeView.SelectedNode = databaseNode;
+        SettingsForm_TreeView_Category.SelectedNode = databaseNode;
     }
 
     private void InitializeUserControls()
     {
-        // --- Add User Control ---
-        var addUserPanel = _settingsPanels["Add User"];
+        var SettingsForm_Panel_AddUser = _settingsPanels["Add User"];
         var addUserControl = new AddUserControl();
         addUserControl.Dock = DockStyle.Fill;
         addUserControl.UserAdded += (s, e) => { UpdateStatus("User added successfully."); };
-        addUserPanel.Controls.Add(addUserControl);
+        SettingsForm_Panel_AddUser.Controls.Add(addUserControl);
 
-        // --- Edit User Control ---
-        var editUserPanel = _settingsPanels["Edit User"];
+        var SettingsForm_Panel_EditUser = _settingsPanels["Edit User"];
         var editUserControl = new EditUserControl();
         editUserControl.Dock = DockStyle.Fill;
         editUserControl.UserEdited += (s, e) => { UpdateStatus("User updated successfully."); };
-        editUserPanel.Controls.Add(editUserControl);
+        SettingsForm_Panel_EditUser.Controls.Add(editUserControl);
 
-        // --- Remove User Control ---
-        var deleteUserPanel = _settingsPanels["Delete User"];
+        var SettingsForm_Panel_DeleteUser = _settingsPanels["Delete User"];
         var removeUserControl = new RemoveUserControl();
         removeUserControl.Dock = DockStyle.Fill;
         removeUserControl.UserRemoved += (s, e) => { UpdateStatus("User removed successfully."); };
-        deleteUserPanel.Controls.Add(removeUserControl);
+        SettingsForm_Panel_DeleteUser.Controls.Add(removeUserControl);
 
-        // --- Existing controls initialization ---
         var addPartControl = new AddPartControl();
         addPartControl.Dock = DockStyle.Fill;
         addPartControl.PartAdded += (s, e) => { UpdateStatus("Part added successfully - lists refreshed"); };
-        addPartPanel.Controls.Add(addPartControl);
+        SettingsForm_Panel_AddPart.Controls.Add(addPartControl);
 
         var editPartControl = new EditPartControl();
         editPartControl.Dock = DockStyle.Fill;
         editPartControl.PartUpdated += (s, e) => { UpdateStatus("Part updated successfully - lists refreshed"); };
-        editPartPanel.Controls.Add(editPartControl);
+        SettingsForm_Panel_EditPart.Controls.Add(editPartControl);
 
         var removePartControl = new RemovePartControl();
         removePartControl.Dock = DockStyle.Fill;
         removePartControl.PartRemoved += (s, e) => { UpdateStatus("Part removed successfully - lists refreshed"); };
-        removePartPanel.Controls.Add(removePartControl);
+        SettingsForm_Panel_RemovePart.Controls.Add(removePartControl);
 
         var addOperationControl = new AddOperationControl();
         addOperationControl.Dock = DockStyle.Fill;
@@ -161,7 +153,7 @@ public partial class SettingsForm : Form
         {
             UpdateStatus("Operation added successfully - lists refreshed");
         };
-        addOperationPanel.Controls.Add(addOperationControl);
+        SettingsForm_Panel_AddOperation.Controls.Add(addOperationControl);
 
         var editOperationControl = new EditOperationControl();
         editOperationControl.Dock = DockStyle.Fill;
@@ -169,7 +161,7 @@ public partial class SettingsForm : Form
         {
             UpdateStatus("Operation updated successfully - lists refreshed");
         };
-        editOperationPanel.Controls.Add(editOperationControl);
+        SettingsForm_Panel_EditOperation.Controls.Add(editOperationControl);
 
         var removeOperationControl = new RemoveOperationControl();
         removeOperationControl.Dock = DockStyle.Fill;
@@ -177,7 +169,7 @@ public partial class SettingsForm : Form
         {
             UpdateStatus("Operation removed successfully - lists refreshed");
         };
-        removeOperationPanel.Controls.Add(removeOperationControl);
+        SettingsForm_Panel_RemoveOperation.Controls.Add(removeOperationControl);
 
         var addLocationControl = new AddLocationControl();
         addLocationControl.Dock = DockStyle.Fill;
@@ -185,7 +177,7 @@ public partial class SettingsForm : Form
         {
             UpdateStatus("Location added successfully - lists refreshed");
         };
-        addLocationPanel.Controls.Add(addLocationControl);
+        SettingsForm_Panel_AddLocation.Controls.Add(addLocationControl);
 
         var editLocationControl = new EditLocationControl();
         editLocationControl.Dock = DockStyle.Fill;
@@ -193,7 +185,7 @@ public partial class SettingsForm : Form
         {
             UpdateStatus("Location updated successfully - lists refreshed");
         };
-        editLocationPanel.Controls.Add(editLocationControl);
+        SettingsForm_Panel_EditLocation.Controls.Add(editLocationControl);
 
         var removeLocationControl = new RemoveLocationControl();
         removeLocationControl.Dock = DockStyle.Fill;
@@ -201,7 +193,7 @@ public partial class SettingsForm : Form
         {
             UpdateStatus("Location removed successfully - lists refreshed");
         };
-        removeLocationPanel.Controls.Add(removeLocationControl);
+        SettingsForm_Panel_RemoveLocation.Controls.Add(removeLocationControl);
 
         var addItemTypeControl = new AddItemTypeControl();
         addItemTypeControl.Dock = DockStyle.Fill;
@@ -209,7 +201,7 @@ public partial class SettingsForm : Form
         {
             UpdateStatus("ItemType added successfully - lists refreshed");
         };
-        addItemTypePanel.Controls.Add(addItemTypeControl);
+        SettingsForm_Panel_AddItemType.Controls.Add(addItemTypeControl);
 
         var editItemTypeControl = new EditItemTypeControl();
         editItemTypeControl.Dock = DockStyle.Fill;
@@ -217,7 +209,7 @@ public partial class SettingsForm : Form
         {
             UpdateStatus("ItemType updated successfully - lists refreshed");
         };
-        editItemTypePanel.Controls.Add(editItemTypeControl);
+        SettingsForm_Panel_EditItemType.Controls.Add(editItemTypeControl);
 
         var removeItemTypeControl = new RemoveItemTypeControl();
         removeItemTypeControl.Dock = DockStyle.Fill;
@@ -225,16 +217,14 @@ public partial class SettingsForm : Form
         {
             UpdateStatus("ItemType removed successfully - lists refreshed");
         };
-        removeItemTypePanel.Controls.Add(removeItemTypeControl);
+        SettingsForm_Panel_RemoveItemType.Controls.Add(removeItemTypeControl);
     }
 
     private void ThemeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
     {
-        if (themeComboBox.SelectedItem is string themeName && !string.IsNullOrWhiteSpace(themeName))
+        if (SettingsForm_ComboBox_Theme.SelectedItem is string themeName && !string.IsNullOrWhiteSpace(themeName))
         {
-            // Temporarily apply the selected theme to the settings window only
             var theme = Core_Themes.Core_AppThemes.GetTheme(themeName);
-            // Temporarily set the theme for preview
             var originalThemeName = Model_AppVariables.ThemeName;
             Model_AppVariables.ThemeName = themeName;
             Core_Themes.ApplyTheme(this);
@@ -244,28 +234,23 @@ public partial class SettingsForm : Form
 
     private void InitializeForm()
     {
-        // Set form properties
         Text = "Settings - MTM WIP Application";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterParent;
 
-        // Add all panels to the settings panel container
         foreach (var panel in _settingsPanels.Values)
         {
-            settingsPanel.Controls.Add(panel);
+            SettingsForm_Panel_Settings.Controls.Add(panel);
             panel.Visible = false;
         }
 
-        // Set default selection
         InitializeCategoryTreeView();
         ShowPanel("Database");
 
-        // Load current settings
         LoadSettings();
 
-        // Apply theme to this form
         ApplyTheme();
     }
 
@@ -274,12 +259,11 @@ public partial class SettingsForm : Form
         try
         {
             Core_Themes.ApplyTheme(this);
-            Core_Themes.ApplyThemeToDataGridView(shortcutsDataGridView);
-            Core_Themes.SizeDataGrid(shortcutsDataGridView);
+            Core_Themes.ApplyThemeToDataGridView(SettingsForm_DataGridView_Shortcuts);
+            Core_Themes.SizeDataGrid(SettingsForm_DataGridView_Shortcuts);
         }
         catch (Exception ex)
         {
-            // If theme application fails, continue without theming
             UpdateStatus($"Warning: Could not apply theme - {ex.Message}");
         }
     }
@@ -291,19 +275,15 @@ public partial class SettingsForm : Form
             ShowLoadingProgress("Loading settings...");
             UpdateLoadingProgress(10, "Loading settings...");
 
-            // Load database connection settings
             UpdateLoadingProgress(25, "Loading database settings...");
             await LoadDatabaseSettings();
 
-            // Load theme settings
             UpdateLoadingProgress(50, "Loading theme settings...");
             await LoadThemeSettings();
 
-            // Load shortcuts
             UpdateLoadingProgress(75, "Loading shortcuts...");
             await LoadShortcuts();
 
-            // Load about information
             UpdateLoadingProgress(90, "Loading about information...");
             LoadAboutInfo();
 
@@ -311,7 +291,6 @@ public partial class SettingsForm : Form
             UpdateStatus("Settings loaded successfully");
             _hasChanges = false;
 
-            // Hide progress after a brief delay
             await Task.Delay(500);
             HideLoadingProgress();
         }
@@ -328,11 +307,11 @@ public partial class SettingsForm : Form
         {
             var user = Model_AppVariables.User;
 
-            serverTextBox.Text = await Dao_User.GetWipServerAddressAsync(user) ?? "172.16.1.104";
-            portTextBox.Text = await Dao_User.GetWipServerPortAsync(user) ?? "3306";
-            databaseTextBox.Text = await Dao_User.GetDatabaseAsync(user) ?? "mtm_wip_application";
-            usernameTextBox.Text = await Dao_User.GetVisualUserNameAsync(user) ?? "";
-            passwordTextBox.Text = await Dao_User.GetVisualPasswordAsync(user) ?? "";
+            SettingsForm_TextBox_Server.Text = await Dao_User.GetWipServerAddressAsync(user) ?? "172.16.1.104";
+            SettingsForm_TextBox_Port.Text = await Dao_User.GetWipServerPortAsync(user) ?? "3306";
+            SettingsForm_TextBox_Database.Text = await Dao_User.GetDatabaseAsync(user) ?? "mtm_wip_application";
+            SettingsForm_TextBox_Username.Text = await Dao_User.GetVisualUserNameAsync(user) ?? "";
+            SettingsForm_TextBox_Password.Text = await Dao_User.GetVisualPasswordAsync(user) ?? "";
         }
         catch (Exception ex)
         {
@@ -344,25 +323,23 @@ public partial class SettingsForm : Form
     {
         try
         {
-            // Load available themes from Core_Themes.Core_AppThemes
-            themeComboBox.Items.Clear();
+            SettingsForm_ComboBox_Theme.Items.Clear();
             var themeNames = Core_Themes.Core_AppThemes.GetThemeNames().ToArray();
-            themeComboBox.Items.AddRange(themeNames);
+            SettingsForm_ComboBox_Theme.Items.AddRange(themeNames);
 
             var user = Model_AppVariables.User;
             var themeName = await Dao_User.GetThemeNameAsync(user);
             var fontSize = await Dao_User.GetThemeFontSizeAsync(user) ?? 9;
 
-            // Set current theme
-            if (!string.IsNullOrEmpty(themeName) && themeComboBox.Items.Contains(themeName))
-                themeComboBox.SelectedItem = themeName;
-            else if (themeComboBox.Items.Count > 0) themeComboBox.SelectedIndex = 0; // Default to first theme
+            if (!string.IsNullOrEmpty(themeName) && SettingsForm_ComboBox_Theme.Items.Contains(themeName))
+                SettingsForm_ComboBox_Theme.SelectedItem = themeName;
+            else if (SettingsForm_ComboBox_Theme.Items.Count > 0) SettingsForm_ComboBox_Theme.SelectedIndex = 0;
         }
         catch (Exception ex)
         {
             UpdateStatus($"Error loading theme settings: {ex.Message}");
-            if (themeComboBox.Items.Count > 0)
-                themeComboBox.SelectedIndex = 0;
+            if (SettingsForm_ComboBox_Theme.Items.Count > 0)
+                SettingsForm_ComboBox_Theme.SelectedIndex = 0;
         }
     }
 
@@ -370,11 +347,10 @@ public partial class SettingsForm : Form
     {
         try
         {
-            // Configure DataGridView
-            shortcutsDataGridView.Columns.Clear();
-            shortcutsDataGridView.Columns.Add("Action", "Action");
-            shortcutsDataGridView.Columns.Add("Shortcut", "Shortcut");
-            shortcutsDataGridView.Rows.Clear();
+            SettingsForm_DataGridView_Shortcuts.Columns.Clear();
+            SettingsForm_DataGridView_Shortcuts.Columns.Add("Action", "Action");
+            SettingsForm_DataGridView_Shortcuts.Columns.Add("Shortcut", "Shortcut");
+            SettingsForm_DataGridView_Shortcuts.Rows.Clear();
 
             var user = Core_WipAppVariables.User;
             var shortcutsJson = await Dao_User.GetShortcutsJsonAsync(user);
@@ -394,7 +370,6 @@ public partial class SettingsForm : Form
                 }
                 catch (JsonException)
                 {
-                    // Log or handle malformed JSON, fallback to defaults
                     UpdateStatus("Warning: Shortcuts JSON is malformed. Using defaults.");
                 }
 
@@ -406,20 +381,19 @@ public partial class SettingsForm : Form
                     ? val
                     : Helper_UI_Shortcuts.ToShortcutString(defaultKeys);
 
-                // Update in-memory shortcut for runtime
                 Helper_UI_Shortcuts.ApplyShortcutFromDictionary(action,
                     Helper_UI_Shortcuts.FromShortcutString(shortcutValue));
 
-                shortcutsDataGridView.Rows.Add(action, shortcutValue);
+                SettingsForm_DataGridView_Shortcuts.Rows.Add(action, shortcutValue);
             }
 
-            shortcutsDataGridView.ReadOnly = false;
-            shortcutsDataGridView.AllowUserToAddRows = false;
-            shortcutsDataGridView.AllowUserToDeleteRows = false;
-            shortcutsDataGridView.Columns[0].ReadOnly = true;
-            shortcutsDataGridView.Columns[1].ReadOnly = false;
-            shortcutsDataGridView.CellValueChanged += ShortcutsDataGridView_CellValueChanged;
-            shortcutsDataGridView.CellValidating += ShortcutsDataGridView_CellValidating;
+            SettingsForm_DataGridView_Shortcuts.ReadOnly = false;
+            SettingsForm_DataGridView_Shortcuts.AllowUserToAddRows = false;
+            SettingsForm_DataGridView_Shortcuts.AllowUserToDeleteRows = false;
+            SettingsForm_DataGridView_Shortcuts.Columns[0].ReadOnly = true;
+            SettingsForm_DataGridView_Shortcuts.Columns[1].ReadOnly = false;
+            SettingsForm_DataGridView_Shortcuts.CellValueChanged += ShortcutsDataGridView_CellValueChanged;
+            SettingsForm_DataGridView_Shortcuts.CellValidating += ShortcutsDataGridView_CellValidating;
         }
         catch (Exception ex)
         {
@@ -429,14 +403,12 @@ public partial class SettingsForm : Form
 
     private void ShortcutsDataGridView_CellValidating(object? sender, DataGridViewCellValidatingEventArgs e)
     {
-        if (e.ColumnIndex == 1) // Shortcut column
+        if (e.ColumnIndex == 1)
         {
             var shortcutString = e.FormattedValue?.ToString() ?? "";
 
-            // Allow empty shortcuts
             if (string.IsNullOrWhiteSpace(shortcutString)) return;
 
-            // Validate shortcut format
             try
             {
                 var keys = Helper_UI_Shortcuts.FromShortcutString(shortcutString);
@@ -456,10 +428,10 @@ public partial class SettingsForm : Form
 
     private void ShortcutsDataGridView_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
     {
-        if (e.ColumnIndex == 1 && e.RowIndex >= 0) // Shortcut column
+        if (e.ColumnIndex == 1 && e.RowIndex >= 0)
         {
-            var actionName = shortcutsDataGridView.Rows[e.RowIndex].Cells[0].Value?.ToString();
-            var shortcutString = shortcutsDataGridView.Rows[e.RowIndex].Cells[1].Value?.ToString() ?? "";
+            var actionName = SettingsForm_DataGridView_Shortcuts.Rows[e.RowIndex].Cells[0].Value?.ToString();
+            var shortcutString = SettingsForm_DataGridView_Shortcuts.Rows[e.RowIndex].Cells[1].Value?.ToString() ?? "";
 
             if (!string.IsNullOrEmpty(actionName))
                 try
@@ -480,10 +452,10 @@ public partial class SettingsForm : Form
     {
         if (e.ColumnIndex == 1 && e.RowIndex >= 0)
         {
-            e.Cancel = true; // Prevent direct editing
+            e.Cancel = true;
 
-            var actionName = shortcutsDataGridView.Rows[e.RowIndex].Cells[0].Value?.ToString();
-            var currentShortcut = shortcutsDataGridView.Rows[e.RowIndex].Cells[1].Value?.ToString() ?? "";
+            var actionName = SettingsForm_DataGridView_Shortcuts.Rows[e.RowIndex].Cells[0].Value?.ToString();
+            var currentShortcut = SettingsForm_DataGridView_Shortcuts.Rows[e.RowIndex].Cells[1].Value?.ToString() ?? "";
 
             using (var inputForm = new Form())
             {
@@ -532,14 +504,12 @@ public partial class SettingsForm : Form
                         return;
                     }
 
-                    // Ignore modifier-only presses
                     if (ke.KeyCode == Keys.ControlKey || ke.KeyCode == Keys.ShiftKey || ke.KeyCode == Keys.Menu)
                         return;
 
                     newKeys = ke.KeyData;
                     shortcutBox.Text = Helper_UI_Shortcuts.ToShortcutString(newKeys);
 
-                    // Validation: must include at least one modifier
                     var hasModifier = (newKeys & Keys.Control) == Keys.Control ||
                                       (newKeys & Keys.Alt) == Keys.Alt ||
                                       (newKeys & Keys.Shift) == Keys.Shift;
@@ -564,7 +534,7 @@ public partial class SettingsForm : Form
                 };
 
                 var okButton = new Button { Text = "OK", Location = new Point(215, 110), Size = new Size(75, 23) };
-                var cancelButton = new Button
+                var SettingsForm_Button_Cancel = new Button
                 { Text = "Cancel", Location = new Point(295, 110), Size = new Size(75, 23) };
 
                 okButton.Click += (s, args) =>
@@ -592,15 +562,15 @@ public partial class SettingsForm : Form
                     inputForm.DialogResult = DialogResult.OK;
                     inputForm.Close();
                 };
-                cancelButton.Click += (s, args) =>
+                SettingsForm_Button_Cancel.Click += (s, args) =>
                 {
                     inputForm.DialogResult = DialogResult.Cancel;
                     inputForm.Close();
                 };
 
-                inputForm.Controls.AddRange(new Control[] { label, shortcutBox, errorLabel, okButton, cancelButton });
+                inputForm.Controls.AddRange(new Control[] { label, shortcutBox, errorLabel, okButton, SettingsForm_Button_Cancel });
                 inputForm.AcceptButton = okButton;
-                inputForm.CancelButton = cancelButton;
+                inputForm.CancelButton = SettingsForm_Button_Cancel;
 
                 try
                 {
@@ -613,7 +583,7 @@ public partial class SettingsForm : Form
                 if (inputForm.ShowDialog(this) == DialogResult.OK)
                 {
                     var newShortcut = shortcutBox.Text.Trim();
-                    shortcutsDataGridView.Rows[e.RowIndex].Cells[1].Value = newShortcut;
+                    SettingsForm_DataGridView_Shortcuts.Rows[e.RowIndex].Cells[1].Value = newShortcut;
                     if (!string.IsNullOrEmpty(actionName))
                         Helper_UI_Shortcuts.ApplyShortcutFromDictionary(actionName, newKeys);
                     _hasChanges = true;
@@ -630,13 +600,13 @@ public partial class SettingsForm : Form
 
         var group = GetShortcutGroup(actionName);
 
-        for (var i = 0; i < shortcutsDataGridView.Rows.Count; i++)
+        for (var i = 0; i < SettingsForm_DataGridView_Shortcuts.Rows.Count; i++)
         {
-            var otherAction = shortcutsDataGridView.Rows[i].Cells[0].Value?.ToString();
+            var otherAction = SettingsForm_DataGridView_Shortcuts.Rows[i].Cells[0].Value?.ToString();
             if (otherAction == actionName) continue;
             if (GetShortcutGroup(otherAction) != group) continue;
 
-            var shortcutString = shortcutsDataGridView.Rows[i].Cells[1].Value?.ToString() ?? "";
+            var shortcutString = SettingsForm_DataGridView_Shortcuts.Rows[i].Cells[1].Value?.ToString() ?? "";
             var otherKeys = Helper_UI_Shortcuts.FromShortcutString(shortcutString);
             if (otherKeys == newKeys)
                 return true;
@@ -662,7 +632,7 @@ public partial class SettingsForm : Form
         try
         {
             appNameLabel.Text = "MTM WIP Application";
-            versionLabel.Text = $"Version: {Model_AppVariables.Version ?? "Unknown"}";
+            SettingsForm_Label_Version.Text = $"Version: {Model_AppVariables.Version ?? "Unknown"}";
         }
         catch (Exception ex)
         {
@@ -677,15 +647,12 @@ public partial class SettingsForm : Form
 
         var selected = e.Node.Name;
 
-        // Only show panels for leaf nodes (not category nodes)
         if (e.Node.Nodes.Count > 0)
-            // This is a category node, don't show a panel
             return;
 
         ShowLoadingProgress($"Loading {selected} settings...");
         UpdateLoadingProgress(0, $"Loading {selected} settings...");
 
-        // Load the relevant panel with progress updates
         await LoadPanelAsync(selected);
 
         UpdateLoadingProgress(100, $"{selected} loaded");
@@ -693,7 +660,6 @@ public partial class SettingsForm : Form
         HideLoadingProgress();
         ShowPanel(selected);
 
-        // After showing the panel, try to reload ComboBox data if the control supports it
         if (_settingsPanels.TryGetValue(selected, out var panel) && panel.Controls.Count > 0)
         {
             var control = panel.Controls[0];
@@ -730,13 +696,11 @@ public partial class SettingsForm : Form
                 LoadAboutInfo();
                 UpdateLoadingProgress(80, "About info loaded");
                 break;
-            // --- Add User logic ---
             case "Add User":
                 UpdateLoadingProgress(50, "Loading Add User...");
                 await Task.Delay(200);
                 UpdateLoadingProgress(80, "Add User loaded");
                 break;
-            // --- Placeholders for Edit/Delete User ---
             case "Edit User":
             case "Delete User":
                 UpdateLoadingProgress(50, $"Loading {panelName}...");
@@ -744,7 +708,6 @@ public partial class SettingsForm : Form
                 UpdateLoadingProgress(80, $"{panelName} loaded");
                 break;
             default:
-                // For Add/Edit/Remove Part panels, just a short delay for effect
                 UpdateLoadingProgress(50, $"Loading {panelName}...");
                 await Task.Delay(200);
                 UpdateLoadingProgress(80, $"{panelName} loaded");
@@ -754,16 +717,14 @@ public partial class SettingsForm : Form
 
     private void ShowPanel(string panelName)
     {
-        // Hide all panels
         foreach (var panel in _settingsPanels.Values) panel.Visible = false;
 
-        // Show selected panel
         if (_settingsPanels.ContainsKey(panelName)) _settingsPanels[panelName].Visible = true;
     }
 
     private void UpdateStatus(string message)
     {
-        statusLabel.Text = message;
+        SettingsForm_Label_Status.Text = message;
     }
 
     #region Event Handlers
@@ -788,17 +749,14 @@ public partial class SettingsForm : Form
             _hasChanges = false;
             UpdateStatus("Settings saved successfully");
 
-            // If theme has changed, reinitialize theme on all forms
-            if (_originalThemeName != themeComboBox.SelectedItem?.ToString())
+            if (_originalThemeName != SettingsForm_ComboBox_Theme.SelectedItem?.ToString())
             {
-                Model_AppVariables.ThemeName = themeComboBox.SelectedItem?.ToString();
-                // Reapply theme to all open forms
+                Model_AppVariables.ThemeName = SettingsForm_ComboBox_Theme.SelectedItem?.ToString();
                 foreach (Form openForm in Application.OpenForms) Core_Themes.ApplyTheme(openForm);
             }
 
             UpdateLoadingProgress(100, "Settings saved successfully");
 
-            // Hide progress after a brief delay
             await Task.Delay(500);
             HideLoadingProgress();
 
@@ -825,7 +783,6 @@ public partial class SettingsForm : Form
                 return;
         }
 
-        // If theme was changed, reapply the original theme
         if (_originalThemeName != Model_AppVariables.ThemeName)
         {
             Model_AppVariables.ThemeName = _originalThemeName;
@@ -842,11 +799,11 @@ public partial class SettingsForm : Form
         {
             var user = Model_AppVariables.User;
 
-            await Dao_User.SetWipServerAddressAsync(user, serverTextBox.Text);
-            await Dao_User.SetDatabaseAsync(user, databaseTextBox.Text);
-            await Dao_User.SetWipServerPortAsync(user, portTextBox.Text);
-            await Dao_User.SetVisualUserNameAsync(user, usernameTextBox.Text);
-            await Dao_User.SetVisualPasswordAsync(user, passwordTextBox.Text);
+            await Dao_User.SetWipServerAddressAsync(user, SettingsForm_TextBox_Server.Text);
+            await Dao_User.SetDatabaseAsync(user, SettingsForm_TextBox_Database.Text);
+            await Dao_User.SetWipServerPortAsync(user, SettingsForm_TextBox_Port.Text);
+            await Dao_User.SetVisualUserNameAsync(user, SettingsForm_TextBox_Username.Text);
+            await Dao_User.SetVisualPasswordAsync(user, SettingsForm_TextBox_Password.Text);
         }
         catch (Exception ex)
         {
@@ -859,7 +816,7 @@ public partial class SettingsForm : Form
         try
         {
             var user = Model_AppVariables.User;
-            var themeName = themeComboBox.SelectedItem?.ToString();
+            var themeName = SettingsForm_ComboBox_Theme.SelectedItem?.ToString();
 
             var themeObj = new
             {
@@ -883,29 +840,26 @@ public partial class SettingsForm : Form
     {
         try
         {
-            // Ensure any edits are committed before saving
-            if (shortcutsDataGridView.IsCurrentCellInEditMode)
-                shortcutsDataGridView.EndEdit();
+            if (SettingsForm_DataGridView_Shortcuts.IsCurrentCellInEditMode)
+                SettingsForm_DataGridView_Shortcuts.EndEdit();
 
             var user = Core_WipAppVariables.User;
             var shortcuts = new Dictionary<string, string>();
 
-            for (var i = 0; i < shortcutsDataGridView.Rows.Count; i++)
+            for (var i = 0; i < SettingsForm_DataGridView_Shortcuts.Rows.Count; i++)
             {
-                var row = shortcutsDataGridView.Rows[i];
+                var row = SettingsForm_DataGridView_Shortcuts.Rows[i];
                 var actionName = row.Cells[0].Value?.ToString();
                 var shortcutString = row.Cells[1].Value?.ToString() ?? "";
 
                 if (!string.IsNullOrEmpty(actionName))
                 {
                     shortcuts[actionName] = shortcutString;
-                    // Update in-memory shortcut for runtime
                     Helper_UI_Shortcuts.ApplyShortcutFromDictionary(actionName,
                         Helper_UI_Shortcuts.FromShortcutString(shortcutString));
                 }
             }
 
-            // Wrap in { "Shortcuts": { ... } }
             var json = JsonSerializer.Serialize(new { Shortcuts = shortcuts });
 
             await Dao_User.SetShortcutsJsonAsync(user, json);
@@ -931,21 +885,18 @@ public partial class SettingsForm : Form
 
         try
         {
-            // Reset database settings to defaults
-            serverTextBox.Text = "172.16.1.104";
-            portTextBox.Text = "3306";
-            databaseTextBox.Text = "mtm_wip_application";
-            usernameTextBox.Text = "";
-            passwordTextBox.Text = "";
+            SettingsForm_TextBox_Server.Text = "172.16.1.104";
+            SettingsForm_TextBox_Port.Text = "3306";
+            SettingsForm_TextBox_Database.Text = "mtm_wip_application";
+            SettingsForm_TextBox_Username.Text = "";
+            SettingsForm_TextBox_Password.Text = "";
 
-            // Reset theme to default
             var defaultTheme = Core_Themes.Core_AppThemes.GetThemeNames().FirstOrDefault() ?? "";
             if (!string.IsNullOrEmpty(defaultTheme))
-                themeComboBox.SelectedItem = defaultTheme;
+                SettingsForm_ComboBox_Theme.SelectedItem = defaultTheme;
 
-            // Reset shortcuts to defaults
             var shortcutDict = Helper_UI_Shortcuts.GetShortcutDictionary();
-            shortcutsDataGridView.Rows.Clear();
+            SettingsForm_DataGridView_Shortcuts.Rows.Clear();
             foreach (var kvp in shortcutDict)
             {
                 var action = kvp.Key;
@@ -953,7 +904,7 @@ public partial class SettingsForm : Form
                 var shortcutValue = Helper_UI_Shortcuts.ToShortcutString(defaultKeys);
 
                 Helper_UI_Shortcuts.ApplyShortcutFromDictionary(action, defaultKeys);
-                shortcutsDataGridView.Rows.Add(action, shortcutValue);
+                SettingsForm_DataGridView_Shortcuts.Rows.Add(action, shortcutValue);
             }
 
             _hasChanges = true;
@@ -967,14 +918,12 @@ public partial class SettingsForm : Form
 
     #endregion
 
-
     #region Progress Control
 
     private void InitializeProgressControl()
     {
         try
         {
-            // Create and configure the progress control
             _loadingProgress = new ProgressBarUserControl
             {
                 Size = new Size(350, 120),
@@ -983,30 +932,24 @@ public partial class SettingsForm : Form
                 StatusText = "Loading settings..."
             };
 
-            // Position the progress control at the center of the form
             _loadingProgress.Location = new Point(
                 (Width - _loadingProgress.Width) / 2,
                 (Height - _loadingProgress.Height) / 2
             );
 
-            // Add to form so it appears on top
             Controls.Add(_loadingProgress);
             _loadingProgress.BringToFront();
         }
         catch (Exception ex)
         {
-            // Log error but don't fail initialization
             UpdateStatus($"Warning: Could not initialize progress control - {ex.Message}");
         }
     }
-
-    private void ShowLoadingProgress(string status = "Loading...")
     {
         try
         {
             if (_loadingProgress != null)
             {
-                // Center the progress control on the form
                 _loadingProgress.Location = new Point(
                     (Width - _loadingProgress.Width) / 2,
                     (Height - _loadingProgress.Height) / 2
@@ -1047,5 +990,8 @@ public partial class SettingsForm : Form
         }
     }
 
+    #endregion
+
+    
     #endregion
 }

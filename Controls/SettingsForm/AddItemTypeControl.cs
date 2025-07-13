@@ -1,6 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
 
@@ -8,9 +5,17 @@ namespace MTM_Inventory_Application.Controls.SettingsForm;
 
 public partial class AddItemTypeControl : UserControl
 {
+    #region Fields
+    
+
     #region Events
 
     public event EventHandler? ItemTypeAdded;
+    
+    #endregion
+    
+    #region Constructors
+    
 
     #endregion
 
@@ -20,6 +25,11 @@ public partial class AddItemTypeControl : UserControl
     {
         InitializeComponent();
     }
+    
+    #endregion
+    
+    #region Methods
+    
 
     #endregion
 
@@ -84,5 +94,8 @@ public partial class AddItemTypeControl : UserControl
         itemTypeTextBox.Focus();
     }
 
+    #endregion
+
+    
     #endregion
 }

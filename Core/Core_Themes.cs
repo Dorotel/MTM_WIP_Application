@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.Collections.Concurrent;
 using System.Data;
@@ -215,7 +214,6 @@ public static class Core_Themes
     {
         Color backColor = theme.Colors.FormBackColor ?? Color.White;
         Color foreColor = theme.Colors.FormForeColor ?? Color.Black;
-        // Dim if disabled
         backColor = MaybeDimIfDisabled(control, backColor);
         foreColor = MaybeDimIfDisabled(control, foreColor);
         if (control.BackColor != backColor)
@@ -363,7 +361,6 @@ public static class Core_Themes
             }
         }
 
-
         private static void ApplyOwnerDrawThemes(Control control, Model_UserUiColors colors) =>
             OwnerDrawThemeHelper.ApplyOwnerDrawTheme(control, colors);
 
@@ -379,12 +376,11 @@ public static class Core_Themes
                 btn.BackColor = backColor;
                 btn.ForeColor = foreColor;
                 btn.FlatStyle = FlatStyle.Flat;
-                btn.FlatAppearance.BorderSize = 2; // Always show border
+                btn.FlatAppearance.BorderSize = 2;
                 btn.FlatAppearance.BorderColor = colors.ButtonBorderColor ?? SystemColors.ControlDark;
                 btn.FlatAppearance.MouseDownBackColor = colors.ButtonPressedBackColor ?? SystemColors.ControlDark;
                 btn.FlatAppearance.MouseOverBackColor = colors.ButtonHoverBackColor ?? SystemColors.ControlLight;
 
-                // Use named handlers to allow safe attach/detach
                 btn.MouseEnter -= Button_MouseEnter;
                 btn.MouseLeave -= Button_MouseLeave;
                 btn.MouseDown -= Button_MouseDown;
@@ -477,7 +473,6 @@ public static class Core_Themes
                 tabPage.Paint -= AutoShrinkText_Paint;
                 tabPage.Paint += AutoShrinkText_Paint;
 
-                // OwnerDraw for border, selected/unselected states
                 ApplyOwnerDrawThemes(tabPage, colors);
             }
         }
@@ -496,7 +491,6 @@ public static class Core_Themes
                     txt.ForeColor = colors.TextBoxForeColor.Value;
                 }
 
-                // Border color
                 ApplyOwnerDrawThemes(txt, colors);
             }
         }
@@ -705,7 +699,6 @@ public static class Core_Themes
         {
             if (control is StatusStrip ss)
             {
-                // Always use the form background color for StatusStrip
                 Color formBackColor = Core_AppThemes.GetCurrentTheme().Colors.FormBackColor ?? Color.White;
                 ss.BackColor = formBackColor;
                 if (colors.StatusStripForeColor.HasValue)
@@ -1038,7 +1031,6 @@ public static class Core_Themes
         {
             if (control is UserControl uc)
             {
-                // Always use the form background color for UserControl
                 Color formBackColor = Core_AppThemes.GetCurrentTheme().Colors.FormBackColor ?? Color.White;
                 uc.BackColor = formBackColor;
                 if (colors.UserControlForeColor.HasValue)
@@ -1218,7 +1210,6 @@ public static class Core_Themes
             }
         }
 
-        // Paint handler that auto-shrinks text and respects text alignment for controls like Label, Button, TabPage, etc.
         private static void AutoShrinkText_Paint(object? sender, PaintEventArgs e)
         {
             if (sender is not Control control)
@@ -1226,7 +1217,6 @@ public static class Core_Themes
                 return;
             }
 
-            // Use dimmed colors if disabled
             Color backColor = MaybeDimIfDisabled(control, control.BackColor);
             Color foreColor = MaybeDimIfDisabled(control, control.ForeColor);
 
@@ -1236,7 +1226,6 @@ public static class Core_Themes
             Font font = control.Font;
             Rectangle clientRectangle = control.ClientRectangle;
 
-            // Determine alignment based on control type and properties
             StringFormat format = new() { Trimming = StringTrimming.EllipsisCharacter };
 
             if (control is Label label)
@@ -1332,43 +1321,36 @@ public static class Core_Themes
             }
             else if (control is GroupBox groupBox)
             {
-                // GroupBox text is always top left by default
                 format.Alignment = StringAlignment.Near;
                 format.LineAlignment = StringAlignment.Near;
             }
             else if (control is CheckBox checkBox)
             {
-                // CheckBox text is middle left by default
                 format.Alignment = StringAlignment.Near;
                 format.LineAlignment = StringAlignment.Center;
             }
             else if (control is RadioButton radioButton)
             {
-                // RadioButton text is middle left by default
                 format.Alignment = StringAlignment.Near;
                 format.LineAlignment = StringAlignment.Center;
             }
             else if (control is LinkLabel linkLabel)
             {
-                // LinkLabel text is middle left by default
                 format.Alignment = StringAlignment.Near;
                 format.LineAlignment = StringAlignment.Center;
             }
             else if (control is ToolStrip toolStrip)
             {
-                // ToolStrip text is middle left by default
                 format.Alignment = StringAlignment.Near;
                 format.LineAlignment = StringAlignment.Center;
             }
             else if (control is StatusStrip statusStrip)
             {
-                // StatusStrip text is middle left by default
                 format.Alignment = StringAlignment.Near;
                 format.LineAlignment = StringAlignment.Center;
             }
             else if (control is TabControl)
             {
-                // TabControl text is centered by default
                 format.Alignment = StringAlignment.Center;
                 format.LineAlignment = StringAlignment.Center;
             }
@@ -1378,7 +1360,6 @@ public static class Core_Themes
             }
             else
             {
-                // Default: center
                 format.Alignment = StringAlignment.Center;
                 format.LineAlignment = StringAlignment.Center;
             }
@@ -1396,7 +1377,6 @@ public static class Core_Themes
             using SolidBrush brush = new(foreColor);
             e.Graphics.DrawString(text, shrinkFont, brush, clientRectangle, format);
 
-            // Draw border for Button controls
             if (control is Button btnBorder)
             {
                 Color borderColor = btnBorder.FlatAppearance != null &&

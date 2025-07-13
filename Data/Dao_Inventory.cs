@@ -1,6 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
 using System.Data;
 using MTM_Inventory_Application.Helpers;
 using MySql.Data.MySqlClient;
@@ -21,7 +18,6 @@ public static class Dao_Inventory
     #region Search Methods
 
     public static async Task<DataTable> GetInventoryByPartIdAsync(string partId, bool useAsync = false) =>
-        // Ensure the stored procedure returns BatchNumber AS 'Batch Number'
         await HelperDatabaseCore.ExecuteDataTable(
             "mtm_wip_application.inv_inventory_Get_ByPartID",
             new Dictionary<string, object> { { "p_PartID", partId } },
@@ -29,7 +25,6 @@ public static class Dao_Inventory
 
     public static async Task<DataTable> GetInventoryByPartIdAndOperationAsync(string partId, string operation,
         bool useAsync = false) =>
-        // Ensure the stored procedure returns BatchNumber AS 'Batch Number'
         await HelperDatabaseCore.ExecuteDataTable(
             "mtm_wip_application.inv_inventory_Get_ByPartIDAndOperation",
             new Dictionary<string, object> { { "p_PartID", partId }, { "o_Operation", operation } },
@@ -50,7 +45,6 @@ public static class Dao_Inventory
         string notes,
         bool useAsync = false)
     {
-        // If itemType is null or empty, retrieve it from md_part_ids
         if (string.IsNullOrWhiteSpace(itemType))
         {
             object? itemTypeObj = await HelperDatabaseCore.ExecuteScalar(
@@ -61,7 +55,6 @@ public static class Dao_Inventory
             itemType = itemTypeObj?.ToString() ?? "None";
         }
 
-        // If batchNumber is null or empty, get the next sequential batch number (max 10 digits, no gaps)
         if (string.IsNullOrWhiteSpace(batchNumber))
         {
             object? batchNumberObj = await HelperDatabaseCore.ExecuteScalar(
@@ -74,7 +67,6 @@ public static class Dao_Inventory
                 batchNumInt = bn;
             }
 
-            // Pad only if the batch number is 10 digits or fewer
             batchNumber = batchNumInt.ToString().Length > 10
                 ? batchNumInt.ToString()
                 : batchNumInt.ToString("D10");
@@ -95,7 +87,7 @@ public static class Dao_Inventory
             },
             useAsync, CommandType.StoredProcedure);
 
-        await FixBatchNumbersAsync(); // <-- Added
+        await FixBatchNumbersAsync();
 
         return result;
     }
@@ -111,18 +103,16 @@ public static class Dao_Inventory
 
         foreach (DataGridViewRow row in dgv.SelectedRows)
         {
-            // Use standard column names, or map as needed
             string partId = row.Cells["PartID"].Value?.ToString() ?? "";
             string location = row.Cells["Location"].Value?.ToString() ?? "";
             string operation = row.Cells["Operation"].Value?.ToString() ?? "";
             int quantity = int.TryParse(row.Cells["Quantity"].Value?.ToString(), out int qty) ? qty : 0;
             string batchNumber =
-                row.Cells["BatchNumber"].Value?.ToString() ?? ""; // if your column is named "BatchNumber"
+                row.Cells["BatchNumber"].Value?.ToString() ?? "";
             string itemType = row.Cells["ItemType"].Value?.ToString() ?? "";
             string user = row.Cells["User"].Value?.ToString() ?? "";
             string notes = row.Cells["Notes"].Value?.ToString() ?? "";
 
-            // Optionally skip rows with missing required fields
             if (string.IsNullOrWhiteSpace(partId) || string.IsNullOrWhiteSpace(location) ||
                 string.IsNullOrWhiteSpace(operation))
             {
@@ -149,7 +139,6 @@ public static class Dao_Inventory
         return removedCount;
     }
 
-    // Must match your stored procedure signature
     public static async Task<int> RemoveInventoryItemAsync(
         string partId,
         string location,
@@ -198,7 +187,7 @@ public static class Dao_Inventory
 
         await command.ExecuteNonQueryAsync();
 
-        await FixBatchNumbersAsync(); // <-- Added
+        await FixBatchNumbersAsync();
     }
 
     public static async Task TransferInventoryQuantityAsync(string batchNumber, string partId, string operation,
@@ -217,7 +206,7 @@ public static class Dao_Inventory
         command.Parameters.AddWithValue("@in_NewLocation", newLocation);
         command.Parameters.AddWithValue("@in_User", user);
         await command.ExecuteNonQueryAsync();
-        await FixBatchNumbersAsync(); // <-- Already present
+        await FixBatchNumbersAsync();
     }
 
     public static async Task FixBatchNumbersAsync()

@@ -2,15 +2,17 @@ namespace MTM_Inventory_Application.Controls.Shared
 {
     partial class ProgressBarUserControl
     {
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        #region Fields
+        
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+
+        private System.ComponentModel.IContainer components = null;
+        
+        #endregion
+        
+        #region Methods
+
+
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -18,7 +20,6 @@ namespace MTM_Inventory_Application.Controls.Shared
                 components.Dispose();
             }
             
-            // Stop any running timer
             if (Tag is System.Windows.Forms.Timer timer)
             {
                 timer.Stop();
@@ -31,16 +32,9 @@ namespace MTM_Inventory_Application.Controls.Shared
 
         #region Component Designer generated code
 
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             SuspendLayout();
-            // 
-            // ProgressBarUserControl
-            // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BorderStyle = BorderStyle.FixedSingle;
@@ -51,4 +45,7 @@ namespace MTM_Inventory_Application.Controls.Shared
 
         #endregion
     }
-}
+
+        
+        #endregion
+    }

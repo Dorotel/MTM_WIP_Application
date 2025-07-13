@@ -1,6 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
 
@@ -8,9 +5,17 @@ namespace MTM_Inventory_Application.Controls.SettingsForm;
 
 public partial class AddLocationControl : UserControl
 {
+    #region Fields
+    
+
     #region Events
 
     public event EventHandler? LocationAdded;
+    
+    #endregion
+    
+    #region Constructors
+    
 
     #endregion
 
@@ -21,6 +26,11 @@ public partial class AddLocationControl : UserControl
         InitializeComponent();
         LoadBuildingOptions();
     }
+    
+    #endregion
+    
+    #region Methods
+    
 
     #endregion
 
@@ -106,5 +116,8 @@ public partial class AddLocationControl : UserControl
         locationTextBox.Focus();
     }
 
+    #endregion
+
+    
     #endregion
 }

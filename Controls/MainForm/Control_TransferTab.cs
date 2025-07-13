@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.ComponentModel;
 using System.Data;
@@ -18,8 +17,16 @@ namespace MTM_Inventory_Application.Controls.MainForm;
 
 public partial class ControlTransferTab : UserControl
 {
+    #region Fields
+    
+
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
+    
+    #endregion
+    
+    #region Constructors
+    
 
     #region Initialization
 
@@ -35,7 +42,6 @@ public partial class ControlTransferTab : UserControl
             Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
         Control_TransferTab_Image_NothingFound.Visible = false;
 
-        // Set tooltips for Transfer tab buttons using shortcut constants
         var toolTip = new ToolTip();
         toolTip.SetToolTip(Control_TransferTab_Button_Search,
             $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Search)}");
@@ -48,6 +54,11 @@ public partial class ControlTransferTab : UserControl
 
         _ = Control_TransferTab_OnStartup_LoadComboBoxesAsync();
     }
+    
+    #endregion
+    
+    #region Methods
+    
 
     public void Control_TransferTab_Initialize()
     {
@@ -191,7 +202,6 @@ public partial class ControlTransferTab : UserControl
         Control_TransferTab_Button_Reset.Enabled = false;
         try
         {
-            // Check if Shift key is held down
             if ((ModifierKeys & Keys.Shift) == Keys.Shift)
                 await Control_TransferTab_HardReset();
             else
@@ -223,19 +233,16 @@ public partial class ControlTransferTab : UserControl
             }
 
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(30, "Resetting data tables...");
-            // Hide controls during reset
             Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
             Control_TransferTab_ComboBox_Part.Visible = false;
             Control_TransferTab_ComboBox_Operation.Visible = false;
             Control_TransferTab_ComboBox_ToLocation.Visible = false;
 
-            // Reset the DataTables and reinitialize them
             Debug.WriteLine("[DEBUG] Resetting and refreshing all ComboBox DataTables");
             await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
             Debug.WriteLine("[DEBUG] DataTables reset complete");
 
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(60, "Refilling combo boxes...");
-            // Refill each combobox with proper data
             Debug.WriteLine("[DEBUG] Refilling Part ComboBox");
             await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(Control_TransferTab_ComboBox_Part);
             Debug.WriteLine("[DEBUG] Refilling Operation ComboBox");
@@ -243,7 +250,6 @@ public partial class ControlTransferTab : UserControl
             Debug.WriteLine("[DEBUG] Refilling ToLocation ComboBox");
             await Helper_UI_ComboBoxes.FillLocationComboBoxesAsync(Control_TransferTab_ComboBox_ToLocation);
 
-            // Reset UI fields
             Debug.WriteLine("[DEBUG] Resetting UI fields");
             MainFormControlHelper.ResetComboBox(Control_TransferTab_ComboBox_Part,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
@@ -256,7 +262,6 @@ public partial class ControlTransferTab : UserControl
             Control_TransferTab_DataGridView_Main.Refresh();
             Control_TransferTab_Image_NothingFound.Visible = false;
 
-            // Restore controls and focus
             Debug.WriteLine("[DEBUG] Restoring ComboBox visibility and focus");
             Control_TransferTab_ComboBox_Operation.Visible = true;
             Control_TransferTab_ComboBox_Part.Visible = true;
@@ -308,7 +313,6 @@ public partial class ControlTransferTab : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
             }
 
-            // Reset UI fields
             Debug.WriteLine("[DEBUG] Resetting UI fields");
             MainFormControlHelper.ResetComboBox(Control_TransferTab_ComboBox_Part,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
@@ -321,7 +325,6 @@ public partial class ControlTransferTab : UserControl
             Control_TransferTab_DataGridView_Main.Refresh();
             Control_TransferTab_Image_NothingFound.Visible = false;
 
-            // Update button states
             Control_TransferTab_Button_Search.Enabled = false;
             Control_TransferTab_Button_Transfer.Enabled = false;
             Control_TransferTab_NumericUpDown_Quantity.Value = Control_TransferTab_NumericUpDown_Quantity.Minimum;
@@ -478,7 +481,6 @@ public partial class ControlTransferTab : UserControl
             BatchNumber = batchNumber,
             DateTime = DateTime.Now
         });
-        // Update status strip
         if (MainFormInstance != null)
             MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
                 $@"Last Transfer: {partId} (Op: {operation}), From: {fromLocation} To: {newLocation}, Qty: {transferQuantity} @ {DateTime.Now:hh:mm tt}";
@@ -532,7 +534,6 @@ public partial class ControlTransferTab : UserControl
             totalQty += transferQuantity;
         }
 
-        // Update status strip for the last transfer
         if (MainFormInstance != null)
         {
             var time = DateTime.Now.ToString("hh:mm tt");
@@ -630,12 +631,10 @@ public partial class ControlTransferTab : UserControl
             var hasPart = Control_TransferTab_ComboBox_Part.SelectedIndex > 0;
             var hasQuantity = Control_TransferTab_NumericUpDown_Quantity.Value > 0;
 
-            // Disable/enable location combobox and number box based on data presence
             Control_TransferTab_ComboBox_ToLocation.Enabled = hasData;
             Control_TransferTab_NumericUpDown_Quantity.Enabled =
                 hasData && Control_TransferTab_DataGridView_Main.SelectedRows.Count <= 1;
 
-            // Disable transfer if to location matches selected row's location
             var toLocationIsSameAsRow = false;
             if (hasSelection && hasToLocation)
                 foreach (DataGridViewRow row in Control_TransferTab_DataGridView_Main.SelectedRows)
@@ -805,6 +804,9 @@ public partial class ControlTransferTab : UserControl
         Helper_UI_ComboBoxes.DeselectAllComboBoxText(this);
     }
 
+    #endregion
+
+    
     #endregion
 }
 

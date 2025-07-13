@@ -1,6 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
 using System.Data;
 using MTM_Inventory_Application.Data;
 
@@ -8,8 +5,16 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 {
     public partial class EditUserControl : UserControl
     {
+    #region Fields
+    
+
         #region Events
         public event EventHandler? UserEdited;
+    
+    #endregion
+    
+    #region Constructors
+    
         #endregion
 
         #region Constructors
@@ -31,6 +36,11 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             EditUserControl_Button_Save.Click += EditUserControl_Button_Save_Click;
             EditUserControl_Button_Clear.Click += EditUserControl_Button_Clear_Click;
         }
+    
+    #endregion
+    
+    #region Methods
+    
         #endregion
 
         #region Initialization
@@ -172,4 +182,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         }
         #endregion
     }
+
+    
+    #endregion
 }

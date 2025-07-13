@@ -1,6 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
 using System.Data;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
@@ -9,9 +6,17 @@ namespace MTM_Inventory_Application.Controls.SettingsForm;
 
 public partial class AddPartControl : UserControl
 {
+    #region Fields
+    
+
     #region Events
 
     public event EventHandler? PartAdded;
+    
+    #endregion
+    
+    #region Constructors
+    
 
     #endregion
 
@@ -22,6 +27,11 @@ public partial class AddPartControl : UserControl
         InitializeComponent();
         LoadPartTypes();
     }
+    
+    #endregion
+    
+    #region Methods
+    
 
     #endregion
 
@@ -142,5 +152,8 @@ public partial class AddPartControl : UserControl
         itemNumberTextBox.Focus();
     }
 
+    #endregion
+
+    
     #endregion
 }

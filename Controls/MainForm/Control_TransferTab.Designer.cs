@@ -5,15 +5,38 @@ namespace MTM_Inventory_Application.Controls.MainForm
 {
     partial class ControlTransferTab
     {
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
+        #region Fields
+        
+
+
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        #endregion
+
+        private TableLayoutPanel Control_TransferTab_Panel_Main;
+        private Panel Control_TransferTab_Panel_DataGridView;
+        private PictureBox Control_TransferTab_Image_NothingFound;
+        private DataGridView Control_TransferTab_DataGridView_Main;
+        private Button Control_TransferTab_Button_Toggle_RightPanel;
+        private Button Control_TransferTab_Button_Reset;
+        private Button Control_TransferTab_Button_Transfer;
+        private Button Control_TransferTab_Button_Search;
+        private Panel Control_TransferTab_Panel_Header;
+        private ComboBox Control_TransferTab_ComboBox_Part;
+        private Label Control_TransferTab_Label_Part;
+        private Label Control_TransferTab_Label_Operation;
+        private ComboBox Control_TransferTab_ComboBox_Operation;
+        private ComboBox Control_TransferTab_ComboBox_ToLocation;
+        private Label Control_TransferTab_Label_ToLocation;
+        private NumericUpDown Control_TransferTab_NumericUpDown_Quantity;
+        private Label Control_TransferTab_Label_Quantity;
+        private GroupBox Control_TransferTab_GroupBox_MainControl;
+        
+        #endregion
+        
+        #region Methods
+
+
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -25,10 +48,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         #region Component Designer generated code
 
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             Control_TransferTab_Panel_Main = new TableLayoutPanel();
@@ -57,9 +76,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             ((System.ComponentModel.ISupportInitialize)Control_TransferTab_NumericUpDown_Quantity).BeginInit();
             Control_TransferTab_GroupBox_MainControl.SuspendLayout();
             SuspendLayout();
-            // 
-            // Control_TransferTab_Panel_Main
-            // 
             Control_TransferTab_Panel_Main.ColumnCount = 1;
             Control_TransferTab_Panel_Main.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             Control_TransferTab_Panel_Main.Controls.Add(Control_TransferTab_Panel_DataGridView, 0, 1);
@@ -73,9 +89,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Panel_Main.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             Control_TransferTab_Panel_Main.Size = new Size(809, 362);
             Control_TransferTab_Panel_Main.TabIndex = 0;
-            // 
-            // Control_TransferTab_Panel_DataGridView
-            // 
             Control_TransferTab_Panel_DataGridView.Controls.Add(Control_TransferTab_Image_NothingFound);
             Control_TransferTab_Panel_DataGridView.Controls.Add(Control_TransferTab_DataGridView_Main);
             Control_TransferTab_Panel_DataGridView.Dock = DockStyle.Fill;
@@ -84,9 +97,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Panel_DataGridView.Size = new Size(803, 281);
             Control_TransferTab_Panel_DataGridView.TabIndex = 8;
             Control_TransferTab_Panel_DataGridView.TabStop = true;
-            // 
-            // Control_TransferTab_Image_NothingFound
-            // 
             Control_TransferTab_Image_NothingFound.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             Control_TransferTab_Image_NothingFound.ErrorImage = null;
             Control_TransferTab_Image_NothingFound.Image = Properties.Resources.NothingFound;
@@ -97,9 +107,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Image_NothingFound.SizeMode = PictureBoxSizeMode.Zoom;
             Control_TransferTab_Image_NothingFound.TabIndex = 6;
             Control_TransferTab_Image_NothingFound.TabStop = false;
-            // 
-            // Control_TransferTab_DataGridView_Main
-            // 
             Control_TransferTab_DataGridView_Main.AllowUserToAddRows = false;
             Control_TransferTab_DataGridView_Main.AllowUserToDeleteRows = false;
             Control_TransferTab_DataGridView_Main.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -125,9 +132,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_DataGridView_Main.Size = new Size(803, 281);
             Control_TransferTab_DataGridView_Main.StandardTab = true;
             Control_TransferTab_DataGridView_Main.TabIndex = 4;
-            // 
-            // Control_TransferTab_Panel_Header
-            // 
             Control_TransferTab_Panel_Header.Controls.Add(Control_TransferTab_Button_Toggle_RightPanel);
             Control_TransferTab_Panel_Header.Controls.Add(Control_TransferTab_ComboBox_Operation);
             Control_TransferTab_Panel_Header.Controls.Add(Control_TransferTab_ComboBox_Part);
@@ -145,9 +149,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Panel_Header.Name = "Control_TransferTab_Panel_Header";
             Control_TransferTab_Panel_Header.Size = new Size(803, 69);
             Control_TransferTab_Panel_Header.TabIndex = 22;
-            // 
-            // Control_TransferTab_Button_Toggle_RightPanel
-            // 
             Control_TransferTab_Button_Toggle_RightPanel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             Control_TransferTab_Button_Toggle_RightPanel.Font = new Font("Segoe UI", 10F);
             Control_TransferTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
@@ -159,9 +160,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Button_Toggle_RightPanel.Text = "←";
             Control_TransferTab_Button_Toggle_RightPanel.UseVisualStyleBackColor = true;
             Control_TransferTab_Button_Toggle_RightPanel.Click += Control_TransferTab_Button_Toggle_RightPanel_Click;
-            // 
-            // Control_TransferTab_ComboBox_Operation
-            // 
             Control_TransferTab_ComboBox_Operation.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             Control_TransferTab_ComboBox_Operation.AutoCompleteSource = AutoCompleteSource.ListItems;
             Control_TransferTab_ComboBox_Operation.FormattingEnabled = true;
@@ -169,9 +167,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_ComboBox_Operation.Name = "Control_TransferTab_ComboBox_Operation";
             Control_TransferTab_ComboBox_Operation.Size = new Size(171, 23);
             Control_TransferTab_ComboBox_Operation.TabIndex = 2;
-            // 
-            // Control_TransferTab_ComboBox_Part
-            // 
             Control_TransferTab_ComboBox_Part.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             Control_TransferTab_ComboBox_Part.AutoCompleteSource = AutoCompleteSource.ListItems;
             Control_TransferTab_ComboBox_Part.FormattingEnabled = true;
@@ -179,9 +174,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_ComboBox_Part.Name = "Control_TransferTab_ComboBox_Part";
             Control_TransferTab_ComboBox_Part.Size = new Size(171, 23);
             Control_TransferTab_ComboBox_Part.TabIndex = 1;
-            // 
-            // Control_TransferTab_Button_Reset
-            // 
             Control_TransferTab_Button_Reset.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             Control_TransferTab_Button_Reset.Location = new Point(678, 5);
             Control_TransferTab_Button_Reset.Name = "Control_TransferTab_Button_Reset";
@@ -190,18 +182,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Button_Reset.TabStop = false;
             Control_TransferTab_Button_Reset.Text = "Reset";
             Control_TransferTab_Button_Reset.UseVisualStyleBackColor = true;
-            // 
-            // Control_TransferTab_Label_Part
-            // 
             Control_TransferTab_Label_Part.Location = new Point(3, 8);
             Control_TransferTab_Label_Part.Name = "Control_TransferTab_Label_Part";
             Control_TransferTab_Label_Part.Size = new Size(85, 23);
             Control_TransferTab_Label_Part.TabIndex = 4;
             Control_TransferTab_Label_Part.Text = "Part Number:";
             Control_TransferTab_Label_Part.TextAlign = ContentAlignment.MiddleRight;
-            // 
-            // Control_TransferTab_Button_Transfer
-            // 
             Control_TransferTab_Button_Transfer.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             Control_TransferTab_Button_Transfer.Enabled = false;
             Control_TransferTab_Button_Transfer.Location = new Point(547, 34);
@@ -210,18 +196,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Button_Transfer.TabIndex = 6;
             Control_TransferTab_Button_Transfer.Text = "Save";
             Control_TransferTab_Button_Transfer.UseVisualStyleBackColor = true;
-            // 
-            // Control_TransferTab_Label_Operation
-            // 
             Control_TransferTab_Label_Operation.Location = new Point(3, 37);
             Control_TransferTab_Label_Operation.Name = "Control_TransferTab_Label_Operation";
             Control_TransferTab_Label_Operation.Size = new Size(85, 23);
             Control_TransferTab_Label_Operation.TabIndex = 5;
             Control_TransferTab_Label_Operation.Text = "Operation:";
             Control_TransferTab_Label_Operation.TextAlign = ContentAlignment.MiddleRight;
-            // 
-            // Control_TransferTab_Button_Search
-            // 
             Control_TransferTab_Button_Search.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             Control_TransferTab_Button_Search.Enabled = false;
             Control_TransferTab_Button_Search.Location = new Point(547, 5);
@@ -231,18 +211,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Button_Search.Text = "Search";
             Control_TransferTab_Button_Search.UseVisualStyleBackColor = true;
             Control_TransferTab_Button_Search.Click += Control_TransferTab_Button_Search_Click;
-            // 
-            // Control_TransferTab_Label_ToLocation
-            // 
             Control_TransferTab_Label_ToLocation.Location = new Point(271, 7);
             Control_TransferTab_Label_ToLocation.Name = "Control_TransferTab_Label_ToLocation";
             Control_TransferTab_Label_ToLocation.Size = new Size(86, 23);
             Control_TransferTab_Label_ToLocation.TabIndex = 8;
             Control_TransferTab_Label_ToLocation.Text = "To Location:";
             Control_TransferTab_Label_ToLocation.TextAlign = ContentAlignment.MiddleRight;
-            // 
-            // Control_TransferTab_ComboBox_ToLocation
-            // 
             Control_TransferTab_ComboBox_ToLocation.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             Control_TransferTab_ComboBox_ToLocation.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             Control_TransferTab_ComboBox_ToLocation.AutoCompleteSource = AutoCompleteSource.ListItems;
@@ -253,18 +227,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_ComboBox_ToLocation.Name = "Control_TransferTab_ComboBox_ToLocation";
             Control_TransferTab_ComboBox_ToLocation.Size = new Size(171, 24);
             Control_TransferTab_ComboBox_ToLocation.TabIndex = 3;
-            // 
-            // Control_TransferTab_Label_Quantity
-            // 
             Control_TransferTab_Label_Quantity.Location = new Point(271, 37);
             Control_TransferTab_Label_Quantity.Name = "Control_TransferTab_Label_Quantity";
             Control_TransferTab_Label_Quantity.Size = new Size(86, 23);
             Control_TransferTab_Label_Quantity.TabIndex = 10;
             Control_TransferTab_Label_Quantity.Text = "Quantity:";
             Control_TransferTab_Label_Quantity.TextAlign = ContentAlignment.MiddleRight;
-            // 
-            // Control_TransferTab_NumericUpDown_Quantity
-            // 
             Control_TransferTab_NumericUpDown_Quantity.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             Control_TransferTab_NumericUpDown_Quantity.Enabled = false;
             Control_TransferTab_NumericUpDown_Quantity.Location = new Point(363, 37);
@@ -274,9 +242,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_NumericUpDown_Quantity.Size = new Size(171, 23);
             Control_TransferTab_NumericUpDown_Quantity.TabIndex = 4;
             Control_TransferTab_NumericUpDown_Quantity.Value = new decimal(new int[] { 1, 0, 0, 0 });
-            // 
-            // Control_TransferTab_GroupBox_MainControl
-            // 
             Control_TransferTab_GroupBox_MainControl.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             Control_TransferTab_GroupBox_MainControl.Controls.Add(Control_TransferTab_Panel_Main);
             Control_TransferTab_GroupBox_MainControl.Dock = DockStyle.Fill;
@@ -287,9 +252,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_GroupBox_MainControl.TabIndex = 17;
             Control_TransferTab_GroupBox_MainControl.TabStop = false;
             Control_TransferTab_GroupBox_MainControl.Text = "Inventory Transfer";
-            // 
-            // ControlTransferTab
-            // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
@@ -305,26 +267,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_GroupBox_MainControl.ResumeLayout(false);
             ResumeLayout(false);
         }
-
-        #endregion
-
-        private TableLayoutPanel Control_TransferTab_Panel_Main;
-        private Panel Control_TransferTab_Panel_DataGridView;
-        private PictureBox Control_TransferTab_Image_NothingFound;
-        private DataGridView Control_TransferTab_DataGridView_Main;
-        private Button Control_TransferTab_Button_Toggle_RightPanel;
-        private Button Control_TransferTab_Button_Reset;
-        private Button Control_TransferTab_Button_Transfer;
-        private Button Control_TransferTab_Button_Search;
-        private Panel Control_TransferTab_Panel_Header;
-        private ComboBox Control_TransferTab_ComboBox_Part;
-        private Label Control_TransferTab_Label_Part;
-        private Label Control_TransferTab_Label_Operation;
-        private ComboBox Control_TransferTab_ComboBox_Operation;
-        private ComboBox Control_TransferTab_ComboBox_ToLocation;
-        private Label Control_TransferTab_Label_ToLocation;
-        private NumericUpDown Control_TransferTab_NumericUpDown_Quantity;
-        private Label Control_TransferTab_Label_Quantity;
-        private GroupBox Control_TransferTab_GroupBox_MainControl;
     }
-}
+
+        
+        #endregion
+    }

@@ -1,22 +1,20 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Models;
 
 namespace MTM_Inventory_Application.Forms.Splash;
 
-/// <summary>
-/// Splash screen form displayed during application startup
-/// </summary>
 public partial class SplashScreenForm : Form
 {
+    #region Constructors
+    
+
+    #region Constructors
+    
     public SplashScreenForm()
     {
         System.Diagnostics.Debug.WriteLine("[DEBUG] [SplashScreenForm.ctor] Constructing SplashScreenForm...");
         InitializeComponent();
 
-        // Set dynamic properties that depend on runtime values
         BackColor = Model_AppVariables.UserUiColors?.FormBackColor ?? BackColor;
         _titleLabel!.ForeColor = Model_AppVariables.UserUiColors?.LabelForeColor ?? _titleLabel.ForeColor;
         _versionLabel!.ForeColor = Model_AppVariables.UserUiColors?.LabelForeColor ?? _versionLabel.ForeColor;
@@ -25,10 +23,16 @@ public partial class SplashScreenForm : Form
         ApplyTheme();
         System.Diagnostics.Debug.WriteLine("[DEBUG] [SplashScreenForm.ctor] SplashScreenForm constructed.");
     }
+    
+    #endregion
+    
+    #region Methods
+    
+    
+    #endregion
+    
+    #region Methods
 
-    /// <summary>
-    /// Shows the splash screen and starts the loading process
-    /// </summary>
     public void ShowSplash()
     {
         System.Diagnostics.Debug.WriteLine("[DEBUG] [SplashScreenForm.ShowSplash] Showing splash screen...");
@@ -38,11 +42,6 @@ public partial class SplashScreenForm : Form
         System.Diagnostics.Debug.WriteLine("[DEBUG] [SplashScreenForm.ShowSplash] Splash screen shown.");
     }
 
-    /// <summary>
-    /// Updates the progress and status message
-    /// </summary>
-    /// <param name="progress">Progress value (0-100)</param>
-    /// <param name="status">Status message</param>
     public void UpdateProgress(int progress, string status)
     {
         System.Diagnostics.Debug.WriteLine(
@@ -51,9 +50,6 @@ public partial class SplashScreenForm : Form
         Application.DoEvents();
     }
 
-    /// <summary>
-    /// Completes the loading process and closes the splash screen
-    /// </summary>
     public async Task CompleteSplashAsync()
     {
         System.Diagnostics.Debug.WriteLine("[DEBUG] [SplashScreenForm.CompleteSplashAsync] Completing splash...");
@@ -92,7 +88,6 @@ public partial class SplashScreenForm : Form
             var g = e.Graphics;
             var margin = 16;
 
-            // Shrink the watermark by 10%
             var scale = 0.9f;
             var drawWidth = (int)(watermark.Width * scale);
             var drawHeight = (int)(watermark.Height * scale);
@@ -100,10 +95,9 @@ public partial class SplashScreenForm : Form
             var x = margin;
             var y = margin;
 
-            // Set transparency (adjust alpha as needed)
             var colorMatrix = new System.Drawing.Imaging.ColorMatrix
             {
-                Matrix33 = 0.15f // 15% opacity
+                Matrix33 = 0.15f
             };
             var imageAttributes = new System.Drawing.Imaging.ImageAttributes();
             imageAttributes.SetColorMatrix(colorMatrix, System.Drawing.Imaging.ColorMatrixFlag.Default,
@@ -120,4 +114,9 @@ public partial class SplashScreenForm : Form
             );
         }
     }
+    
+    #endregion
+
+    
+    #endregion
 }

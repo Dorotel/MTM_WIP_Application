@@ -160,14 +160,25 @@ file_header_template = Licensed to the .NET Foundation under one or more agreeme
 # #endregion
 
 # Custom: WinForms controls naming convention (best effort)
+# Pattern: {ClassName}_{ControlType}_{Name}_{Number (if applicable)}
 dotnet_naming_rule.controls_should_use_pascal_case_with_underscores.severity = suggestion
 dotnet_naming_rule.controls_should_use_pascal_case_with_underscores.symbols  = winforms_controls
 dotnet_naming_rule.controls_should_use_pascal_case_with_underscores.style    = pascal_case_with_underscores
 
 dotnet_naming_symbols.winforms_controls.applicable_kinds = field, property
 dotnet_naming_symbols.winforms_controls.applicable_accessibilities = public, private, internal, protected
-# Optionally, restrict to controls by suffix (e.g., ComboBox, Label, Button, etc.)
-# dotnet_naming_symbols.winforms_controls.required_suffix = ComboBox|Label|Button|TextBox|TabControl|TabPage|DataGridView|Panel
 
 dotnet_naming_style.pascal_case_with_underscores.capitalization = pascal_case
 dotnet_naming_style.pascal_case_with_underscores.word_separator = _
+
+# Custom: Methods, variables, and controls should follow the naming pattern
+# {ClassName}_{ControlType}_{Name}_{Number (if applicable)}
+dotnet_naming_rule.class_members_should_follow_naming_pattern.severity = suggestion
+dotnet_naming_rule.class_members_should_follow_naming_pattern.symbols = class_members
+dotnet_naming_rule.class_members_should_follow_naming_pattern.style = class_naming_pattern
+
+dotnet_naming_symbols.class_members.applicable_kinds = field, property, method, event
+dotnet_naming_symbols.class_members.applicable_accessibilities = public, private, internal, protected
+
+dotnet_naming_style.class_naming_pattern.capitalization = pascal_case
+dotnet_naming_style.class_naming_pattern.word_separator = _

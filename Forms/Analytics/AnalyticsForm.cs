@@ -1,11 +1,22 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-namespace MTM_Inventory_Application.Forms.Analytics;
+﻿namespace MTM_Inventory_Application.Forms.Analytics;
 
 public partial class AnalyticsForm : Form
 {
-    public AnalyticsForm() => InitializeComponent();
+    #region Methods
+    
 
+    #region Constructors
+    
+    public AnalyticsForm() => InitializeComponent();
+    
+    #endregion
+    
+    #region Methods
+    
     public void PublicDispose(bool disposing) => throw new NotImplementedException();
+    
+    #endregion
+
+    
+    #endregion
 }

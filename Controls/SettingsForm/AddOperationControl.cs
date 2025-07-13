@@ -1,6 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
 
@@ -8,8 +5,16 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 {
     public partial class AddOperationControl : UserControl
     {
+    #region Fields
+    
+
         #region Events
         public event EventHandler? OperationAdded;
+    
+    #endregion
+    
+    #region Constructors
+    
         #endregion
 
         #region Constructors
@@ -17,6 +22,11 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         {
             InitializeComponent();
         }
+    
+    #endregion
+    
+    #region Methods
+    
         #endregion
 
         #region Initialization
@@ -74,4 +84,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         }
         #endregion
     }
+
+    
+    #endregion
 }
