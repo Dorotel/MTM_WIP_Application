@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
@@ -8,8 +7,16 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 {
     public partial class AddUserControl : UserControl
     {
+    #region Fields
+    
+
         #region Events
         public event EventHandler? UserAdded;
+    
+    #endregion
+    
+    #region Constructors
+    
         #endregion
 
         #region Constructors
@@ -30,6 +37,11 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             AddUserControl_CheckBox_VisualAccess.CheckedChanged += AddUserControl_CheckBox_VisualAccess_CheckedChanged;
             AddUserControl_CheckBox_ViewHidePasswords.CheckedChanged += AddUserControl_CheckBox_ViewHidePasswords_CheckedChanged;
         }
+    
+    #endregion
+    
+    #region Methods
+    
         #endregion
 
         #region Initialization
@@ -173,4 +185,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         }
         #endregion
     }
+
+    
+    #endregion
 }

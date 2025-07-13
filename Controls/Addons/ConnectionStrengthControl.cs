@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.ComponentModel;
 using MTM_Inventory_Application.Models;
@@ -10,9 +9,17 @@ namespace MTM_Inventory_Application.Controls.Addons;
 
 public partial class ConnectionStrengthControl : UserControl
 {
-    private int _strength; // 0-5
-    private int _ping = -1; // Ping in ms, -1 means unknown
+    #region Fields
+    
+
+    private int _strength;
+    private int _ping = -1;
     private readonly ToolTip _toolTip = new();
+    
+    #endregion
+    
+    #region Constructors
+    
 
     #region Properties
 
@@ -77,6 +84,11 @@ public partial class ConnectionStrengthControl : UserControl
         MouseHover += ConnectionStrengthControl_MouseHover;
         Core.Core_Themes.ApplyFocusHighlighting(this);
     }
+    
+    #endregion
+    
+    #region Methods
+    
 
     #endregion
 
@@ -106,8 +118,8 @@ public partial class ConnectionStrengthControl : UserControl
         var barMaxHeight = 10;
         var barMinHeight = 4;
         var totalWidth = barCount * barWidth + (barCount - 1) * spacing;
-        var rightPadding = 4; // Leave 4 pixels padding on the right
-        var startX = Width - totalWidth - rightPadding; // Align to right with padding
+        var rightPadding = 4;
+        var startX = Width - totalWidth - rightPadding;
         var baseY = Height - 2;
 
         for (var i = 0; i < barCount; i++)
@@ -133,7 +145,6 @@ public partial class ConnectionStrengthControl : UserControl
         var lowColor = Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
         var highColor = Model_AppVariables.UserUiColors.SuccessColor ?? Color.LimeGreen;
 
-        // Interpolate from red (low) to green (high)
         var t = barCount == 1 ? 1f : (float)barIndex / (barCount - 1);
         var r = (int)(lowColor.R * (1 - t) + highColor.R * t);
         var g = (int)(lowColor.G * (1 - t) + highColor.G * t);
@@ -160,7 +171,6 @@ public partial class ConnectionStrengthControl : UserControl
         _toolTip.SetToolTip(this, $"Ping: {pingText} ({quality})");
     }
 
-    // Call this method from MainForm after adding to the SplitContainer.Panel2
     private void SyncBackgroundWithParent()
     {
         if (Parent != null)
@@ -170,6 +180,9 @@ public partial class ConnectionStrengthControl : UserControl
         Invalidate();
     }
 
+    #endregion
+
+    
     #endregion
 }
 

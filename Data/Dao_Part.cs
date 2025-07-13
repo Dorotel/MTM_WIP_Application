@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.Data;
 using MTM_Inventory_Application.Helpers;
@@ -73,7 +72,6 @@ internal static class Dao_Part
     {
         try
         {
-            // No parameters needed for getting all parts
             return await HelperDatabaseCore.ExecuteDataTable(
                 "md_part_ids_Get_All",
                 null,

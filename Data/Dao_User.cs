@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.Data;
 using System.Diagnostics;
@@ -126,7 +125,6 @@ internal static class Dao_User
         await SetUserSettingAsync("WipServerAddress", user, value, useAsync);
     }
 
-
     #region Get/Set Database
 
     internal static async Task<string> GetDatabaseAsync(string user, bool useAsync = false)
@@ -193,11 +191,9 @@ internal static class Dao_User
         Debug.WriteLine($"[Dao_User] Entering GetSettingsJsonAsync(field={field}, user={user}, useAsync={useAsync})");
         try
         {
-            // First try to get the field from the usr_ui_settings table as JSON property
             using MySqlConnection conn = new(Model_AppVariables.ConnectionString);
             await conn.OpenAsync();
 
-            // Query the settings JSON directly
             using MySqlCommand cmd = new(
                 "SELECT SettingsJson FROM usr_ui_settings WHERE UserId = @UserId LIMIT 1", conn);
 
@@ -205,7 +201,6 @@ internal static class Dao_User
 
             object? result = await cmd.ExecuteScalarAsync();
 
-            // If we found a settings JSON, try to extract the requested field
             if (result != null && result != DBNull.Value)
             {
                 string? json = result.ToString();
@@ -218,16 +213,13 @@ internal static class Dao_User
                         {
                             string? value;
 
-                            // Handle different JSON value types
                             switch (fieldElement.ValueKind)
                             {
                                 case JsonValueKind.Number:
-                                    // For numbers, directly convert to string
                                     value = fieldElement.ToString();
                                     break;
 
                                 case JsonValueKind.String:
-                                    // For strings, use GetString()
                                     value = fieldElement.GetString();
                                     break;
 
@@ -240,7 +232,6 @@ internal static class Dao_User
                                     break;
 
                                 default:
-                                    // For other types, use ToString() as a fallback
                                     value = fieldElement.ToString();
                                     break;
                             }
@@ -252,11 +243,9 @@ internal static class Dao_User
                     catch (JsonException ex)
                     {
                         Debug.WriteLine($"[Dao_User] JSON parsing error in GetSettingsJsonAsync: {ex.Message}");
-                        // Continue to legacy approach if JSON parsing fails
                     }
                 }
             }
-
 
             using MySqlCommand legacyCmd = new(
                 $"SELECT `{field}` FROM `usr_users` WHERE `User` = @User LIMIT 1", conn);
@@ -617,16 +606,11 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
         }
     }
 
-    /// <summary>
-    /// Gets the RoleID for a user by their UserID using sys_user_roles and sys_roles_Get_ById.
-    /// Returns 0 if not found.
-    /// </summary>
     internal static async Task<int> GetUserRoleIdAsync(int userId, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetUserRoleIdAsync(userId={userId}, useAsync={useAsync})");
         try
         {
-            // First, get the RoleID from sys_user_roles
             Dictionary<string, object> parameters = new() { ["@UserID"] = userId };
             DataTable result = await HelperDatabaseCore.ExecuteDataTable(
                 "SELECT RoleID FROM sys_user_roles WHERE UserID = @UserID LIMIT 1",
@@ -641,7 +625,7 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
                 return roleId;
             }
 
-            return 0; // No role found
+            return 0;
         }
         catch (Exception ex)
         {
@@ -652,9 +636,6 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
         }
     }
 
-    /// <summary>
-    /// Sets the user's role by removing all roles and adding the new one using sys_user_roles_Update.
-    /// </summary>
     internal static async Task SetUserRoleAsync(int userId, int newRoleId, string assignedBy, bool useAsync = false)
     {
         Debug.WriteLine(
@@ -703,9 +684,6 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
         }
     }
 
-    /// <summary>
-    /// Removes a specific role from a user using sys_user_roles_Delete.
-    /// </summary>
     internal static async Task RemoveUserRoleAsync(int userId, int roleId, bool useAsync = false)
     {
         Debug.WriteLine(

@@ -5,7 +5,50 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 {
     partial class EditUserControl
     {
+        #region Fields
+        
+
         private System.ComponentModel.IContainer components = null;
+
+        #endregion
+
+        private ComboBox EditUserControl_ComboBox_Users;
+        private Label EditUserControl_Label_SelectUser;
+        private GroupBox EditUserControl_GroupBox_UserInfo;
+        private Label EditUserControl_Label_FirstName;
+        private TextBox EditUserControl_TextBox_FirstName;
+        private Label EditUserControl_Label_LastName;
+        private TextBox EditUserControl_TextBox_LastName;
+        private Label EditUserControl_Label_UserName;
+        private TextBox EditUserControl_TextBox_UserName;
+        private Label EditUserControl_Label_Shift;
+        private ComboBox EditUserControl_ComboBox_Shift;
+        private Label EditUserControl_Label_Pin;
+        private TextBox EditUserControl_TextBox_Pin;
+        private GroupBox EditUserControl_GroupBox_VisualInfo;
+        private CheckBox EditUserControl_CheckBox_VisualAccess;
+        private Label EditUserControl_Label_VisualUserName;
+        private TextBox EditUserControl_TextBox_VisualUserName;
+        private Label EditUserControl_Label_VisualPassword;
+        private TextBox EditUserControl_TextBox_VisualPassword;
+        private GroupBox EditUserControl_GroupBox_UserPrivileges;
+        private RadioButton EditUserControl_RadioButton_ReadOnly;
+        private RadioButton EditUserControl_RadioButton_NormalUser;
+        private RadioButton EditUserControl_RadioButton_Administrator;
+        private Panel EditUserControl_Panel_LoginInfo;
+        private Label EditUserControl_Label_UserNameWarning;
+        private LinkLabel linkLabel3;
+        private LinkLabel linkLabel2;
+        private LinkLabel linkLabel1;
+        private Panel panel1;
+        private Button EditUserControl_Button_Save;
+        private Button EditUserControl_Button_Clear;
+        private CheckBox EditUserControl_CheckBox_ViewHidePasswords;
+        
+        #endregion
+        
+        #region Methods
+
 
         protected override void Dispose(bool disposing)
         {
@@ -53,7 +96,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             EditUserControl_Button_Save = new Button();
             EditUserControl_CheckBox_ViewHidePasswords = new CheckBox();
 
-            // ComboBox for selecting user
             EditUserControl_Label_SelectUser.Text = "Select User:";
             EditUserControl_Label_SelectUser.Location = new Point(10, 10);
             EditUserControl_Label_SelectUser.Size = new Size(80, 23);
@@ -62,7 +104,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             EditUserControl_ComboBox_Users.Size = new Size(250, 23);
             EditUserControl_ComboBox_Users.DropDownStyle = ComboBoxStyle.DropDownList;
 
-            // User Info GroupBox (reuse AddUserControl layout)
             EditUserControl_GroupBox_UserInfo.Controls.Add(EditUserControl_Panel_LoginInfo);
             EditUserControl_GroupBox_UserInfo.Controls.Add(EditUserControl_Label_FirstName);
             EditUserControl_GroupBox_UserInfo.Controls.Add(EditUserControl_TextBox_FirstName);
@@ -77,7 +118,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             EditUserControl_GroupBox_UserInfo.TabStop = false;
             EditUserControl_GroupBox_UserInfo.Text = "User Information";
 
-            // Panel for login info
             EditUserControl_Panel_LoginInfo.Controls.Add(EditUserControl_Label_UserNameWarning);
             EditUserControl_Panel_LoginInfo.Controls.Add(EditUserControl_TextBox_Pin);
             EditUserControl_Panel_LoginInfo.Controls.Add(EditUserControl_Label_Pin);
@@ -158,7 +198,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             EditUserControl_ComboBox_Shift.Size = new Size(330, 23);
             EditUserControl_ComboBox_Shift.TabIndex = 7;
 
-            // Visual Info GroupBox
             EditUserControl_GroupBox_VisualInfo.Controls.Add(EditUserControl_CheckBox_VisualAccess);
             EditUserControl_GroupBox_VisualInfo.Controls.Add(EditUserControl_Label_VisualUserName);
             EditUserControl_GroupBox_VisualInfo.Controls.Add(EditUserControl_TextBox_VisualUserName);
@@ -203,7 +242,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             EditUserControl_TextBox_VisualPassword.Size = new Size(336, 23);
             EditUserControl_TextBox_VisualPassword.TabIndex = 4;
 
-            // User Privileges GroupBox
             EditUserControl_GroupBox_UserPrivileges.Controls.Add(linkLabel3);
             EditUserControl_GroupBox_UserPrivileges.Controls.Add(linkLabel2);
             EditUserControl_GroupBox_UserPrivileges.Controls.Add(linkLabel1);
@@ -268,7 +306,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             EditUserControl_RadioButton_Administrator.Text = "Administrator";
             EditUserControl_RadioButton_Administrator.UseVisualStyleBackColor = true;
 
-            // Panel for buttons
             panel1.Controls.Add(EditUserControl_CheckBox_ViewHidePasswords);
             panel1.Controls.Add(EditUserControl_Button_Clear);
             panel1.Controls.Add(EditUserControl_Button_Save);
@@ -299,7 +336,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             EditUserControl_CheckBox_ViewHidePasswords.Text = "Show Password Fields";
             EditUserControl_CheckBox_ViewHidePasswords.UseVisualStyleBackColor = true;
 
-            // Add controls to UserControl
             Controls.Add(EditUserControl_Label_SelectUser);
             Controls.Add(EditUserControl_ComboBox_Users);
             Controls.Add(panel1);
@@ -309,40 +345,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             Name = "EditUserControl";
             Size = new Size(600, 440);
         }
-
-        #endregion
-
-        private ComboBox EditUserControl_ComboBox_Users;
-        private Label EditUserControl_Label_SelectUser;
-        private GroupBox EditUserControl_GroupBox_UserInfo;
-        private Label EditUserControl_Label_FirstName;
-        private TextBox EditUserControl_TextBox_FirstName;
-        private Label EditUserControl_Label_LastName;
-        private TextBox EditUserControl_TextBox_LastName;
-        private Label EditUserControl_Label_UserName;
-        private TextBox EditUserControl_TextBox_UserName;
-        private Label EditUserControl_Label_Shift;
-        private ComboBox EditUserControl_ComboBox_Shift;
-        private Label EditUserControl_Label_Pin;
-        private TextBox EditUserControl_TextBox_Pin;
-        private GroupBox EditUserControl_GroupBox_VisualInfo;
-        private CheckBox EditUserControl_CheckBox_VisualAccess;
-        private Label EditUserControl_Label_VisualUserName;
-        private TextBox EditUserControl_TextBox_VisualUserName;
-        private Label EditUserControl_Label_VisualPassword;
-        private TextBox EditUserControl_TextBox_VisualPassword;
-        private GroupBox EditUserControl_GroupBox_UserPrivileges;
-        private RadioButton EditUserControl_RadioButton_ReadOnly;
-        private RadioButton EditUserControl_RadioButton_NormalUser;
-        private RadioButton EditUserControl_RadioButton_Administrator;
-        private Panel EditUserControl_Panel_LoginInfo;
-        private Label EditUserControl_Label_UserNameWarning;
-        private LinkLabel linkLabel3;
-        private LinkLabel linkLabel2;
-        private LinkLabel linkLabel1;
-        private Panel panel1;
-        private Button EditUserControl_Button_Save;
-        private Button EditUserControl_Button_Clear;
-        private CheckBox EditUserControl_CheckBox_ViewHidePasswords;
     }
-}
+
+        
+        #endregion
+    }

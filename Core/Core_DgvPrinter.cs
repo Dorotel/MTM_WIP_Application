@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.Drawing.Printing;
 using MTM_Inventory_Application.Data;
@@ -35,14 +34,12 @@ public class Core_DgvPrinter
 
     #region Properties
 
-    // Add this property to expose the PrintDocument for testing
     public PrintDocument? PrintDocument => _printDocument;
 
     #endregion
 
     #region Column Layout
 
-    // Call this before Print() to customize columns
     public void SetColumnLayout(string columnName, float? width = null, StringAlignment? alignment = null)
     {
         if (width.HasValue)
@@ -92,7 +89,6 @@ public class Core_DgvPrinter
             var font = _dgv.Font;
             var brush = Brushes.Black;
 
-            // Print column headers
             foreach (DataGridViewColumn col in _dgv.Columns)
             {
                 if (!col.Visible) continue;
@@ -103,7 +99,6 @@ public class Core_DgvPrinter
 
             y += rowHeight;
 
-            // Print rows
             while (_currentRow < _dgv.Rows.Count)
             {
                 var row = _dgv.Rows[_currentRow];

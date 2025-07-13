@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.Data;
 using System.Diagnostics;
@@ -340,7 +339,6 @@ public static class Helper_UI_ComboBoxes
                 {
                     if (control is ComboBox combo)
                     {
-                        // UI updates must be invoked on the UI thread
                         if (combo.InvokeRequired)
                         {
                             combo.Invoke(new Action(() => combo.DataSource = null));

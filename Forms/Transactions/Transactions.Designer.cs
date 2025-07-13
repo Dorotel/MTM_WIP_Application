@@ -4,6 +4,9 @@
     {
         #region Fields
         
+
+        #region Fields
+        
         private System.ComponentModel.IContainer components = null;
         private System.Windows.Forms.ComboBox Transactions_ComboBox_SortBy;
         private System.Windows.Forms.Label Transactions_Label_SortBy;
@@ -23,6 +26,11 @@
         private System.Windows.Forms.Label Transactions_Label_UserName;
         private System.Windows.Forms.ComboBox Transactions_ComboBox_Shift;
         private System.Windows.Forms.Label Transactions_Label_Shift;
+        
+        #endregion
+        
+        #region Methods
+
         
         #endregion
         
@@ -154,4 +162,7 @@
         
         #endregion
     }
-}
+
+        
+        #endregion
+    }

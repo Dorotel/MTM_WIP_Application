@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.ComponentModel;
 using System.Data;
@@ -17,12 +16,11 @@ namespace MTM_Inventory_Application.Controls.MainForm;
 
 #region RemoveTab
 
-/// <summary>
-/// Represents the Remove Tab control in the application.
-/// Handles inventory removal operations, undo functionality, and UI interactions.
-/// </summary>
 public partial class ControlRemoveTab : UserControl
 {
+    #region Fields
+    
+
     #region Fields
 
     private readonly List<Model_HistoryRemove> _lastRemovedItems = [];
@@ -33,6 +31,11 @@ public partial class ControlRemoveTab : UserControl
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
+    
+    #endregion
+    
+    #region Constructors
+    
 
     #endregion
 
@@ -64,7 +67,6 @@ public partial class ControlRemoveTab : UserControl
             Control_RemoveTab_Panel_Footer.Controls.Add(undoButton);
         }
 
-        // Set tooltips for Remove tab buttons using shortcut constants
         var toolTip = new ToolTip();
         toolTip.SetToolTip(Control_RemoveTab_Button_Search,
             $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Search)}");
@@ -77,6 +79,11 @@ public partial class ControlRemoveTab : UserControl
             toolTip.SetToolTip(undoBtn,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Undo)}");
     }
+    
+    #endregion
+    
+    #region Methods
+    
 
     #endregion
 
@@ -162,7 +169,6 @@ public partial class ControlRemoveTab : UserControl
 
             if (keyData == Keys.Delete)
             {
-                // Simulate Delete button click
                 Control_RemoveTab_Button_Delete.PerformClick();
                 return true;
             }
@@ -210,7 +216,6 @@ public partial class ControlRemoveTab : UserControl
                 return;
             }
 
-            // Build summary for confirmation
             var sb = new StringBuilder();
             foreach (DataGridViewRow row in dgv.SelectedRows)
             {
@@ -237,10 +242,7 @@ public partial class ControlRemoveTab : UserControl
                 return;
             }
 
-            // Call DAO to remove items
             var removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
-
-            // Optionally update undo and status logic here...
 
             LoggingUtility.Log($"{removedCount} inventory items deleted.");
             Control_RemoveTab_Button_Search_Click(null, null);
@@ -295,7 +297,6 @@ public partial class ControlRemoveTab : UserControl
         Control_RemoveTab_Button_Reset.Enabled = false;
         try
         {
-            // Check if Shift key is held down
             if ((ModifierKeys & Keys.Shift) == Keys.Shift)
                 _ = Control_RemoveTab_HardReset();
             else
@@ -314,15 +315,12 @@ public partial class ControlRemoveTab : UserControl
         Control_RemoveTab_Button_Reset.Enabled = false;
         try
         {
-            // Show progress bar
             MainFormInstance?.TabLoadingProgress?.ShowProgress();
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(10, "Resetting Remove tab...");
 
-            // 1) Hide controls during reset
             Control_RemoveTab_ComboBox_Part.Visible = false;
             Control_RemoveTab_ComboBox_Operation.Visible = false;
 
-            // 2) Update status strip to show reset is in progress
             if (MainFormInstance != null)
             {
                 MainFormInstance.MainForm_StatusStrip_Disconnected.Text = @"Please wait while resetting...";
@@ -331,30 +329,24 @@ public partial class ControlRemoveTab : UserControl
             }
 
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(30, "Resetting data tables...");
-            // 3) Reset the DataTables and reinitialize them
             await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
 
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(60, "Refilling combo boxes...");
-            // 4) Refill each combobox with proper data
             await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(Control_RemoveTab_ComboBox_Part);
             await Helper_UI_ComboBoxes.FillOperationComboBoxesAsync(Control_RemoveTab_ComboBox_Operation);
 
-            // 5) Clear DataGridView
             Control_RemoveTab_DataGridView_Main.DataSource = null;
             Control_RemoveTab_Image_NothingFound.Visible = false;
 
-            // 6) Reset UI fields
             MainFormControlHelper.ResetComboBox(Control_RemoveTab_ComboBox_Part,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
             MainFormControlHelper.ResetComboBox(Control_RemoveTab_ComboBox_Operation,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
 
-            // 7) Restore controls and focus
             Control_RemoveTab_ComboBox_Operation.Visible = true;
             Control_RemoveTab_ComboBox_Part.Visible = true;
             Control_RemoveTab_ComboBox_Part.Focus();
 
-            // 8) Update button states
             Control_RemoveTab_Button_Search.Enabled = true;
             Control_RemoveTab_Button_Delete.Enabled = false;
         }
@@ -391,7 +383,6 @@ public partial class ControlRemoveTab : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
             }
 
-            // Reset UI fields
             MainFormControlHelper.ResetComboBox(Control_RemoveTab_ComboBox_Part,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
             MainFormControlHelper.ResetComboBox(Control_RemoveTab_ComboBox_Operation,
@@ -436,7 +427,6 @@ public partial class ControlRemoveTab : UserControl
             if (MainFormInstance != null) MainFormInstance.MainForm_RemoveTabNormalControl.Visible = false;
             if (MainFormInstance != null) MainFormInstance.MainForm_Control_AdvancedRemove.Visible = true;
 
-            // Reset all Control_AdvancedRemove ComboBoxes' SelectedIndex to 0 and color to Red, focus Part ComboBox
             var adv = MainFormInstance?.MainForm_Control_AdvancedRemove;
             if (adv != null)
             {
@@ -650,7 +640,6 @@ public partial class ControlRemoveTab : UserControl
             Control_RemoveTab_Button_AdvancedItemRemoval.Click +=
                 (s, e) => Control_RemoveTab_Button_AdvancedItemRemoval_Click();
 
-            // Add event handler for Back to Normal button in advanced control
             if (MainFormInstance != null)
             {
                 var adv = MainFormInstance.MainForm_Control_AdvancedRemove;
@@ -755,6 +744,9 @@ public partial class ControlRemoveTab : UserControl
         return itemsToDelete;
     }
 
+    #endregion
+
+    
     #endregion
 }
 

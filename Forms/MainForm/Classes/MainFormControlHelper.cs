@@ -1,15 +1,14 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using MTM_Inventory_Application.Models;
 
 namespace MTM_Inventory_Application.Forms.MainForm.Classes;
 
-/// <summary>
-///     Provides helper methods for common control operations in the main form.
-/// </summary>
 public static class MainFormControlHelper
 {
+    #region Methods
+    
+
     public static void ClearAllTextBoxes(Control parent)
     {
         foreach (Control control in parent.Controls)
@@ -67,11 +66,9 @@ public static class MainFormControlHelper
             form.Invoke(new MethodInvoker(() =>
             {
                 form.ActiveControl = control;
-                // Removed SelectAll/DeselectAll logic
             }));
         else
             form.ActiveControl = control;
-        // Removed SelectAll/DeselectAll logic
     }
 
     public static void AdjustQuantityByKey_Transfers(
@@ -267,4 +264,7 @@ public static class MainFormControlHelper
             richTextBox.Text = text;
         }
     }
+
+    
+    #endregion
 }

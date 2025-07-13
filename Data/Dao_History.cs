@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.Data;
 using MTM_Inventory_Application.Helpers;
@@ -14,13 +13,9 @@ internal class Dao_History
 {
     #region Fields
 
-    // Add fields here if needed in the future
-
     #endregion
 
     #region Constructors
-
-    // Add constructors here if needed in the future
 
     #endregion
 
@@ -53,8 +48,6 @@ internal class Dao_History
     #endregion
 
     #region Helpers
-
-    // Add helper methods here
 
     #endregion
 }

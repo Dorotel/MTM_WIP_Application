@@ -10,6 +10,9 @@ public partial class Transactions : Form
 {
     #region Fields
     
+
+    #region Fields
+    
     private Dao_Transactions _dao;
     private BindingList<Model_Transactions> _displayedTransactions = null!;
     private int _currentPage = 1;
@@ -17,6 +20,11 @@ public partial class Transactions : Form
     private const bool _sortDescending = true;
     private readonly string _currentUser;
     private readonly bool _isAdmin;
+    
+    #endregion
+    
+    #region Constructors
+    
     
     #endregion
     
@@ -40,6 +48,11 @@ public partial class Transactions : Form
 
         Transactions_Button_Reset.Click += (s, e) => ResetFilters();
     }
+    
+    #endregion
+    
+    #region Methods
+    
     
     #endregion
     
@@ -163,6 +176,9 @@ public partial class Transactions : Form
         _displayedTransactions = new BindingList<Model_Transactions>(result);
         Transactions_DataGridView_Transactions.DataSource = _displayedTransactions;
     }
+    
+    #endregion
+
     
     #endregion
 }

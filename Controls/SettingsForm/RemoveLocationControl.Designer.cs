@@ -2,15 +2,31 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 {
     partial class RemoveLocationControl
     {
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
+        #region Fields
+        
+
+
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        #endregion
+
+        private System.Windows.Forms.Label titleLabel;
+        private System.Windows.Forms.Label selectLocationLabel;
+        private System.Windows.Forms.ComboBox locationsComboBox;
+        private System.Windows.Forms.Label locationLabel;
+        private System.Windows.Forms.Label locationValueLabel;
+        private System.Windows.Forms.Label buildingLabel;
+        private System.Windows.Forms.Label buildingValueLabel;
+        private System.Windows.Forms.Label issuedByLabel;
+        private System.Windows.Forms.Label issuedByValueLabel;
+        private System.Windows.Forms.Button removeButton;
+        private System.Windows.Forms.Button cancelButton;
+        
+        #endregion
+        
+        #region Methods
+
+
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,10 +38,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         #region Component Designer generated code
 
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             this.titleLabel = new System.Windows.Forms.Label();
@@ -40,9 +52,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             this.removeButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
-            // 
-            // titleLabel
-            // 
             this.titleLabel.AutoSize = true;
             this.titleLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.titleLabel.Location = new System.Drawing.Point(20, 20);
@@ -50,18 +59,12 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             this.titleLabel.Size = new System.Drawing.Size(135, 21);
             this.titleLabel.TabIndex = 0;
             this.titleLabel.Text = "Remove Location";
-            // 
-            // selectLocationLabel
-            // 
             this.selectLocationLabel.AutoSize = true;
             this.selectLocationLabel.Location = new System.Drawing.Point(20, 60);
             this.selectLocationLabel.Name = "selectLocationLabel";
             this.selectLocationLabel.Size = new System.Drawing.Size(84, 15);
             this.selectLocationLabel.TabIndex = 1;
             this.selectLocationLabel.Text = "Select Location:";
-            // 
-            // locationsComboBox
-            // 
             this.locationsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.locationsComboBox.FormattingEnabled = true;
             this.locationsComboBox.Location = new System.Drawing.Point(120, 57);
@@ -69,60 +72,39 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             this.locationsComboBox.Size = new System.Drawing.Size(300, 23);
             this.locationsComboBox.TabIndex = 2;
             this.locationsComboBox.SelectedIndexChanged += new System.EventHandler(this.LocationsComboBox_SelectedIndexChanged);
-            // 
-            // locationLabel
-            // 
             this.locationLabel.AutoSize = true;
             this.locationLabel.Location = new System.Drawing.Point(20, 100);
             this.locationLabel.Name = "locationLabel";
             this.locationLabel.Size = new System.Drawing.Size(57, 15);
             this.locationLabel.TabIndex = 3;
             this.locationLabel.Text = "Location:";
-            // 
-            // locationValueLabel
-            // 
             this.locationValueLabel.AutoSize = true;
             this.locationValueLabel.Location = new System.Drawing.Point(120, 100);
             this.locationValueLabel.Name = "locationValueLabel";
             this.locationValueLabel.Size = new System.Drawing.Size(0, 15);
             this.locationValueLabel.TabIndex = 4;
-            // 
-            // buildingLabel
-            // 
             this.buildingLabel.AutoSize = true;
             this.buildingLabel.Location = new System.Drawing.Point(20, 140);
             this.buildingLabel.Name = "buildingLabel";
             this.buildingLabel.Size = new System.Drawing.Size(54, 15);
             this.buildingLabel.TabIndex = 5;
             this.buildingLabel.Text = "Building:";
-            // 
-            // buildingValueLabel
-            // 
             this.buildingValueLabel.AutoSize = true;
             this.buildingValueLabel.Location = new System.Drawing.Point(120, 140);
             this.buildingValueLabel.Name = "buildingValueLabel";
             this.buildingValueLabel.Size = new System.Drawing.Size(0, 15);
             this.buildingValueLabel.TabIndex = 6;
-            // 
-            // issuedByLabel
-            // 
             this.issuedByLabel.AutoSize = true;
             this.issuedByLabel.Location = new System.Drawing.Point(20, 180);
             this.issuedByLabel.Name = "issuedByLabel";
             this.issuedByLabel.Size = new System.Drawing.Size(61, 15);
             this.issuedByLabel.TabIndex = 7;
             this.issuedByLabel.Text = "Issued By:";
-            // 
-            // issuedByValueLabel
-            // 
             this.issuedByValueLabel.AutoSize = true;
             this.issuedByValueLabel.Location = new System.Drawing.Point(120, 180);
             this.issuedByValueLabel.Name = "issuedByValueLabel";
             this.issuedByValueLabel.Size = new System.Drawing.Size(0, 15);
             this.issuedByValueLabel.TabIndex = 8;
-            // 
-            // removeButton
-            // 
             this.removeButton.Enabled = false;
             this.removeButton.Location = new System.Drawing.Point(265, 230);
             this.removeButton.Name = "removeButton";
@@ -131,9 +113,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             this.removeButton.Text = "Remove";
             this.removeButton.UseVisualStyleBackColor = true;
             this.removeButton.Click += new System.EventHandler(this.RemoveButton_Click);
-            // 
-            // cancelButton
-            // 
             this.cancelButton.Enabled = false;
             this.cancelButton.Location = new System.Drawing.Point(345, 230);
             this.cancelButton.Name = "cancelButton";
@@ -142,9 +121,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
-            // 
-            // RemoveLocationControl
-            // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.cancelButton);
@@ -164,19 +140,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             this.PerformLayout();
 
         }
-
-        #endregion
-
-        private System.Windows.Forms.Label titleLabel;
-        private System.Windows.Forms.Label selectLocationLabel;
-        private System.Windows.Forms.ComboBox locationsComboBox;
-        private System.Windows.Forms.Label locationLabel;
-        private System.Windows.Forms.Label locationValueLabel;
-        private System.Windows.Forms.Label buildingLabel;
-        private System.Windows.Forms.Label buildingValueLabel;
-        private System.Windows.Forms.Label issuedByLabel;
-        private System.Windows.Forms.Label issuedByValueLabel;
-        private System.Windows.Forms.Button removeButton;
-        private System.Windows.Forms.Button cancelButton;
     }
-}
+
+        
+        #endregion
+    }

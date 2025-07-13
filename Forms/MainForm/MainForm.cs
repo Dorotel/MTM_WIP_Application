@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.ComponentModel;
 using MTM_Inventory_Application.Controls.MainForm;
@@ -19,6 +18,9 @@ namespace MTM_Inventory_Application.Forms.MainForm;
 
 public partial class MainForm : Form
 {
+    #region Fields
+    
+
     private Timer? _connectionStrengthTimer;
     public Helper_Control_MySqlSignal ConnectionStrengthChecker = null!;
     private ProgressBarUserControl _tabLoadingProgress = null!;
@@ -26,8 +28,12 @@ public partial class MainForm : Form
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Service_ConnectionRecoveryManager ConnectionRecoveryManager { get; private set; } = null!;
 
-    // Make the progress bar accessible to other controls
     public ProgressBarUserControl TabLoadingProgress => _tabLoadingProgress;
+    
+    #endregion
+    
+    #region Constructors
+    
 
     #region Initialization
 
@@ -36,16 +42,13 @@ public partial class MainForm : Form
         System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Constructing MainForm...");
         try
         {
-            // Before InitializeComponent
             InitializeComponent();
             AutoScaleMode = AutoScaleMode.Dpi;
             System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] InitializeComponent complete.");
 
-            // Initialize progress control
             InitializeProgressControl();
             System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Progress control initialized.");
 
-            // Do NOT apply user UI settings colors here; theme will be applied globally after construction
             ConnectionStrengthChecker = new Helper_Control_MySqlSignal();
             System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthChecker initialized.");
 
@@ -63,7 +66,7 @@ public partial class MainForm : Form
                 System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm Shown event triggered.");
                 await MainForm_OnStartup_GetUserFullNameAsync();
                 System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] User full name loaded.");
-                await Task.Delay(500); // Ensure controls are visible
+                await Task.Delay(500);
                 if (MainForm_Control_InventoryTab != null)
                 {
                     MainForm_Control_InventoryTab.Control_InventoryTab_ComboBox_Part.Focus();
@@ -84,12 +87,16 @@ public partial class MainForm : Form
 
         System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm constructed.");
     }
+    
+    #endregion
+    
+    #region Methods
+    
 
     private void InitializeProgressControl()
     {
         try
         {
-            // Create and configure the progress control
             _tabLoadingProgress = new ProgressBarUserControl
             {
                 Size = new Size(300, 120),
@@ -98,13 +105,11 @@ public partial class MainForm : Form
                 StatusText = "Loading tab..."
             };
 
-            // Position the progress control over the tab control area
             _tabLoadingProgress.Location = new Point(
                 (MainForm_TabControl.Width - _tabLoadingProgress.Width) / 2,
                 (MainForm_TabControl.Height - _tabLoadingProgress.Height) / 2
             );
 
-            // Add to form so it appears on top of the tab control
             Controls.Add(_tabLoadingProgress);
             _tabLoadingProgress.BringToFront();
         }
@@ -120,7 +125,6 @@ public partial class MainForm : Form
 
     private void MainForm_OnStartup_WireUpEvents()
     {
-        // Wire up tab selection event to focus part ComboBox
         MainForm_TabControl.SelectedIndexChanged += (s, e) =>
         {
             MainForm_TabControl_SelectedIndexChanged(null!, null!);
@@ -140,7 +144,7 @@ public partial class MainForm : Form
                 if (string.IsNullOrEmpty(Model_AppVariables.UserFullName))
                 {
                     Model_AppVariables.UserFullName =
-                        Model_AppVariables.User; // Fallback to username if full name not found
+                        Model_AppVariables.User;
                 }
             }
             catch (Exception ex)
@@ -164,7 +168,7 @@ public partial class MainForm : Form
         {
             _connectionStrengthTimer = new Timer
             {
-                Interval = 5000 // Check every 5 seconds
+                Interval = 5000
             };
             _connectionStrengthTimer.Tick +=
                 async (s, e) => await ConnectionRecoveryManager.UpdateConnectionStrengthAsync();
@@ -198,7 +202,7 @@ public partial class MainForm : Form
             );
             if (result == DialogResult.Cancel)
             {
-                e.Cancel = true; // Prevent the tab change
+                e.Cancel = true;
             }
         }
     }
@@ -207,12 +211,11 @@ public partial class MainForm : Form
     {
         try
         {
-            // Show progress while switching tabs
             await ShowTabLoadingProgressAsync();
 
             switch (MainForm_TabControl.SelectedIndex)
             {
-                case 0: // Inventory Tab
+                case 0:
                     ControlInventoryTab? invTab = MainForm_Control_InventoryTab;
                     Control_AdvancedInventory? advancedInvTab = MainForm_AdvancedInventory;
                     if (invTab is not null)
@@ -265,7 +268,7 @@ public partial class MainForm : Form
                     }
 
                     break;
-                case 1: // Remove Tab
+                case 1:
                     ControlRemoveTab? remTab = MainForm_RemoveTabNormalControl;
                     Control_AdvancedRemove? advancedRemoveTab = MainForm_Control_AdvancedRemove;
                     if (remTab is not null)
@@ -314,7 +317,7 @@ public partial class MainForm : Form
                     }
 
                     break;
-                case 2: // Transfer Tab
+                case 2:
                     ControlTransferTab? transTab = MainForm_Control_TransferTab;
                     if (transTab is not null)
                     {
@@ -379,7 +382,6 @@ public partial class MainForm : Form
         }
         finally
         {
-            // Hide progress when tab switching is complete
             HideTabLoadingProgress();
         }
     }
@@ -390,7 +392,6 @@ public partial class MainForm : Form
         {
             if (_tabLoadingProgress != null)
             {
-                // Center the progress control on the tab control
                 _tabLoadingProgress.Location = new Point(
                     (MainForm_TabControl.Width - _tabLoadingProgress.Width) / 2,
                     (MainForm_TabControl.Height - _tabLoadingProgress.Height) / 2
@@ -399,7 +400,6 @@ public partial class MainForm : Form
                 _tabLoadingProgress.ShowProgress();
                 _tabLoadingProgress.UpdateProgress(25, "Switching tab...");
 
-                // Simulate loading time to show progress
                 await Task.Delay(100);
                 _tabLoadingProgress.UpdateProgress(50, "Loading controls...");
 
@@ -429,7 +429,6 @@ public partial class MainForm : Form
     }
 
     #endregion
-
 
     #region Form Closing
 
@@ -465,7 +464,6 @@ public partial class MainForm : Form
 
     private void MainForm_MenuStrip_Exit_Click(object sender, EventArgs e)
     {
-        // Optional: Prompt user for confirmation before exiting
         DialogResult result = MessageBox.Show(
             "Are you sure you want to exit?",
             "Exit Application",
@@ -480,14 +478,16 @@ public partial class MainForm : Form
 
     private void MainForm_MenuStrip_View_PersonalHistory_Click(object sender, EventArgs e)
     {
-        // Use global application variables for the user and connection info
         string connectionString = Model_AppVariables.ConnectionString;
         string currentUser = Model_AppVariables.User;
         bool isAdmin = Model_AppVariables.UserTypeAdmin;
 
         Transactions.Transactions transactionsForm = new(connectionString, currentUser, isAdmin);
-        transactionsForm.ShowDialog(this); // Show as modal dialog
+        transactionsForm.ShowDialog(this);
     }
+
+    
+    #endregion
 }
 
 #endregion

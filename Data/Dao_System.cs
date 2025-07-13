@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.Data;
 using System.Security.Principal;
@@ -32,7 +31,6 @@ internal static class Dao_System
     {
         try
         {
-            // Get UserID from usr_users
             var userIdObj = await HelperDatabaseCore.ExecuteScalar(
                 "SELECT `ID` FROM `usr_users` WHERE `User` = @userName",
                 new Dictionary<string, object> { ["@userName"] = userName }, useAsync);
@@ -41,7 +39,6 @@ internal static class Dao_System
             {
                 var userId = Convert.ToInt32(userIdObj);
 
-                // Get RoleID for the intended role
                 var roleName = accessType == "Admin" ? "Admin" : "ReadOnly";
                 var roleIdObj = await HelperDatabaseCore.ExecuteScalar(
                     "SELECT `ID` FROM `sys_roles` WHERE `RoleName` = @roleName",
@@ -51,12 +48,10 @@ internal static class Dao_System
                 {
                     var roleId = Convert.ToInt32(roleIdObj);
 
-                    // Remove all existing roles for this user
                     await HelperDatabaseCore.ExecuteNonQuery(
                         "DELETE FROM `sys_user_roles` WHERE `UserID` = @userId",
                         new Dictionary<string, object> { ["@userId"] = userId }, useAsync);
 
-                    // Assign the new role
                     await HelperDatabaseCore.ExecuteNonQuery(
                         "INSERT INTO `sys_user_roles` (`UserID`, `RoleID`, `AssignedBy`) VALUES (@userId, @roleId, @assignedBy)",
                         new Dictionary<string, object>
@@ -127,7 +122,6 @@ internal static class Dao_System
                 {
                     Id = reader.GetInt32(0),
                     User = reader.GetString(1)
-                    // Add more fields as necessary
                 };
 
                 var roleName = reader.GetString(2);

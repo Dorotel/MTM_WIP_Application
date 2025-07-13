@@ -2,15 +2,37 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 {
     partial class RemovePartControl
     {
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
+        #region Fields
+        
+
+
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        #endregion
+
+        private System.Windows.Forms.Label titleLabel;
+        private System.Windows.Forms.Label selectPartLabel;
+        private System.Windows.Forms.ComboBox partsComboBox;
+        private System.Windows.Forms.GroupBox detailsGroupBox;
+        private System.Windows.Forms.Label issuedByValueLabel;
+        private System.Windows.Forms.Label issuedByLabel;
+        private System.Windows.Forms.Label typeValueLabel;
+        private System.Windows.Forms.Label typeLabel;
+        private System.Windows.Forms.Label descriptionValueLabel;
+        private System.Windows.Forms.Label descriptionLabel;
+        private System.Windows.Forms.Label customerValueLabel;
+        private System.Windows.Forms.Label customerLabel;
+        private System.Windows.Forms.Label itemNumberValueLabel;
+        private System.Windows.Forms.Label itemNumberLabel;
+        private System.Windows.Forms.Label warningLabel;
+        private System.Windows.Forms.Button removeButton;
+        private System.Windows.Forms.Button cancelButton;
+        
+        #endregion
+        
+        #region Methods
+
+
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,10 +44,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         #region Component Designer generated code
 
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             titleLabel = new Label();
@@ -47,9 +65,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             cancelButton = new Button();
             detailsGroupBox.SuspendLayout();
             SuspendLayout();
-            // 
-            // titleLabel
-            // 
             titleLabel.AutoSize = true;
             titleLabel.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             titleLabel.Location = new Point(20, 20);
@@ -57,18 +72,12 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             titleLabel.Size = new Size(174, 21);
             titleLabel.TabIndex = 0;
             titleLabel.Text = "Remove Part Number";
-            // 
-            // selectPartLabel
-            // 
             selectPartLabel.AutoSize = true;
             selectPartLabel.Location = new Point(20, 60);
             selectPartLabel.Name = "selectPartLabel";
             selectPartLabel.Size = new Size(65, 15);
             selectPartLabel.TabIndex = 1;
             selectPartLabel.Text = "Select Part:";
-            // 
-            // partsComboBox
-            // 
             partsComboBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             partsComboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
             partsComboBox.FormattingEnabled = true;
@@ -77,9 +86,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             partsComboBox.Size = new Size(300, 23);
             partsComboBox.TabIndex = 2;
             partsComboBox.SelectedIndexChanged += PartsComboBox_SelectedIndexChanged;
-            // 
-            // detailsGroupBox
-            // 
             detailsGroupBox.Controls.Add(issuedByValueLabel);
             detailsGroupBox.Controls.Add(issuedByLabel);
             detailsGroupBox.Controls.Add(typeValueLabel);
@@ -97,93 +103,60 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             detailsGroupBox.TabStop = false;
             detailsGroupBox.Text = "Part Details";
             detailsGroupBox.Visible = false;
-            // 
-            // issuedByValueLabel
-            // 
             issuedByValueLabel.AutoSize = true;
             issuedByValueLabel.Location = new Point(100, 140);
             issuedByValueLabel.Name = "issuedByValueLabel";
             issuedByValueLabel.Size = new Size(0, 15);
             issuedByValueLabel.TabIndex = 9;
-            // 
-            // issuedByLabel
-            // 
             issuedByLabel.AutoSize = true;
             issuedByLabel.Location = new Point(15, 140);
             issuedByLabel.Name = "issuedByLabel";
             issuedByLabel.Size = new Size(59, 15);
             issuedByLabel.TabIndex = 8;
             issuedByLabel.Text = "Issued By:";
-            // 
-            // typeValueLabel
-            // 
             typeValueLabel.AutoSize = true;
             typeValueLabel.Location = new Point(100, 115);
             typeValueLabel.Name = "typeValueLabel";
             typeValueLabel.Size = new Size(0, 15);
             typeValueLabel.TabIndex = 7;
-            // 
-            // typeLabel
-            // 
             typeLabel.AutoSize = true;
             typeLabel.Location = new Point(15, 115);
             typeLabel.Name = "typeLabel";
             typeLabel.Size = new Size(35, 15);
             typeLabel.TabIndex = 6;
             typeLabel.Text = "Type:";
-            // 
-            // descriptionValueLabel
-            // 
             descriptionValueLabel.Location = new Point(100, 65);
             descriptionValueLabel.Name = "descriptionValueLabel";
             descriptionValueLabel.Size = new Size(280, 40);
             descriptionValueLabel.TabIndex = 5;
-            // 
-            // descriptionLabel
-            // 
             descriptionLabel.AutoSize = true;
             descriptionLabel.Location = new Point(15, 65);
             descriptionLabel.Name = "descriptionLabel";
             descriptionLabel.Size = new Size(70, 15);
             descriptionLabel.TabIndex = 4;
             descriptionLabel.Text = "Description:";
-            // 
-            // customerValueLabel
-            // 
             customerValueLabel.AutoSize = true;
             customerValueLabel.Location = new Point(100, 40);
             customerValueLabel.Name = "customerValueLabel";
             customerValueLabel.Size = new Size(0, 15);
             customerValueLabel.TabIndex = 3;
-            // 
-            // customerLabel
-            // 
             customerLabel.AutoSize = true;
             customerLabel.Location = new Point(15, 40);
             customerLabel.Name = "customerLabel";
             customerLabel.Size = new Size(62, 15);
             customerLabel.TabIndex = 2;
             customerLabel.Text = "Customer:";
-            // 
-            // itemNumberValueLabel
-            // 
             itemNumberValueLabel.AutoSize = true;
             itemNumberValueLabel.Location = new Point(100, 20);
             itemNumberValueLabel.Name = "itemNumberValueLabel";
             itemNumberValueLabel.Size = new Size(0, 15);
             itemNumberValueLabel.TabIndex = 1;
-            // 
-            // itemNumberLabel
-            // 
             itemNumberLabel.AutoSize = true;
             itemNumberLabel.Location = new Point(15, 20);
             itemNumberLabel.Name = "itemNumberLabel";
             itemNumberLabel.Size = new Size(81, 15);
             itemNumberLabel.TabIndex = 0;
             itemNumberLabel.Text = "Item Number:";
-            // 
-            // warningLabel
-            // 
             warningLabel.AutoSize = true;
             warningLabel.ForeColor = Color.Red;
             warningLabel.Location = new Point(20, 300);
@@ -191,9 +164,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             warningLabel.Size = new Size(306, 15);
             warningLabel.TabIndex = 4;
             warningLabel.Text = "Warning: This action cannot be undone once confirmed.";
-            // 
-            // removeButton
-            // 
             removeButton.BackColor = Color.IndianRed;
             removeButton.Enabled = false;
             removeButton.ForeColor = Color.White;
@@ -204,9 +174,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             removeButton.Text = "Remove";
             removeButton.UseVisualStyleBackColor = false;
             removeButton.Click += RemoveButton_Click;
-            // 
-            // cancelButton
-            // 
             cancelButton.Location = new Point(345, 330);
             cancelButton.Name = "cancelButton";
             cancelButton.Size = new Size(75, 23);
@@ -214,9 +181,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             cancelButton.Text = "Cancel";
             cancelButton.UseVisualStyleBackColor = true;
             cancelButton.Click += CancelButton_Click;
-            // 
-            // RemovePartControl
-            // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(cancelButton);
@@ -234,25 +198,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             PerformLayout();
 
         }
-
-        #endregion
-
-        private System.Windows.Forms.Label titleLabel;
-        private System.Windows.Forms.Label selectPartLabel;
-        private System.Windows.Forms.ComboBox partsComboBox;
-        private System.Windows.Forms.GroupBox detailsGroupBox;
-        private System.Windows.Forms.Label issuedByValueLabel;
-        private System.Windows.Forms.Label issuedByLabel;
-        private System.Windows.Forms.Label typeValueLabel;
-        private System.Windows.Forms.Label typeLabel;
-        private System.Windows.Forms.Label descriptionValueLabel;
-        private System.Windows.Forms.Label descriptionLabel;
-        private System.Windows.Forms.Label customerValueLabel;
-        private System.Windows.Forms.Label customerLabel;
-        private System.Windows.Forms.Label itemNumberValueLabel;
-        private System.Windows.Forms.Label itemNumberLabel;
-        private System.Windows.Forms.Label warningLabel;
-        private System.Windows.Forms.Button removeButton;
-        private System.Windows.Forms.Button cancelButton;
     }
-}
+
+        
+        #endregion
+    }

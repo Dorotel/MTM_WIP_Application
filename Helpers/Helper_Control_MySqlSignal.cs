@@ -1,19 +1,11 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
 using System.Net.NetworkInformation;
 using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Helpers;
 
-/// <summary>
-/// Checks the connection "strength" to a MySQL server by pinging its host.
-/// </summary>
 public class Helper_Control_MySqlSignal
 {
-    /// <summary>
-    /// Asynchronously gets the connection strength (0-5) and ping time (ms).
-    /// </summary>
+
     public static async Task<(int strength, int pingMs)> GetStrengthAsync()
     {
         string host;
@@ -41,10 +33,9 @@ public class Helper_Control_MySqlSignal
             pingMs = -1;
         }
 
-        // Map ping time to strength (0-5)
         var strength = pingMs switch
         {
-            < 0 => 0, // No response
+            < 0 => 0,
             < 50 => 5,
             < 100 => 4,
             < 200 => 3,

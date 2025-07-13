@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿
 
 using System.ComponentModel;
 using System.Data;
@@ -19,8 +18,16 @@ namespace MTM_Inventory_Application.Controls.MainForm;
 
 public partial class Control_AdvancedInventory : UserControl
 {
+    #region Fields
+    
+
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
+    
+    #endregion
+    
+    #region Constructors
+    
 
     #region Constructor and Initialization
 
@@ -31,7 +38,6 @@ public partial class Control_AdvancedInventory : UserControl
             LoggingUtility.Log("Control_AdvancedInventory constructor entered.");
             InitializeComponent();
 
-            // Set tooltips for Single tab buttons using shortcut constants
             ToolTip toolTip = new();
             toolTip.SetToolTip(AdvancedInventory_Single_Button_Send,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Send)}");
@@ -41,7 +47,6 @@ public partial class Control_AdvancedInventory : UserControl
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Reset)}");
             toolTip.SetToolTip(AdvancedInventory_Single_Button_Normal,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Normal)}");
-            // Set tooltips for MultiLoc tab buttons
             toolTip.SetToolTip(AdvancedInventory_MultiLoc_Button_AddLoc,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_AddLoc)}");
             toolTip.SetToolTip(AdvancedInventory_MultiLoc_Button_SaveAll,
@@ -50,7 +55,6 @@ public partial class Control_AdvancedInventory : UserControl
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_Reset)}");
             toolTip.SetToolTip(AdvancedInventory_Multi_Button_Normal,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Multi_Normal)}");
-            // Set tooltips for Import tab buttons
             toolTip.SetToolTip(AdvancedInventory_Import_Button_OpenExcel,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Import_OpenExcel)}");
             toolTip.SetToolTip(AdvancedInventory_Import_Button_ImportExcel,
@@ -70,7 +74,6 @@ public partial class Control_AdvancedInventory : UserControl
             AdvancedInventory_Single_Button_Reset.TabStop = false;
             AdvancedInventory_MultiLoc_Button_Reset.TabStop = false;
 
-            // Set ComboBox ForeColor to Red initially
             AdvancedInventory_Single_ComboBox_Part.ForeColor =
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             AdvancedInventory_Single_ComboBox_Op.ForeColor =
@@ -122,7 +125,6 @@ public partial class Control_AdvancedInventory : UserControl
             ValidateQtyTextBox(AdvancedInventory_Single_TextBox_Count, "[ How Many Transactions ]");
             ValidateQtyTextBox(AdvancedInventory_MultiLoc_TextBox_Qty, "[ Enter Valid Quantity ]");
 
-
             Enter += (s, e) =>
             {
                 if (AdvancedInventory_TabControl.SelectedIndex == 0 && AdvancedInventory_Single_ComboBox_Part.Visible &&
@@ -148,6 +150,11 @@ public partial class Control_AdvancedInventory : UserControl
             _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "Control_AdvancedInventory_Ctor");
         }
     }
+    
+    #endregion
+    
+    #region Methods
+    
 
     #endregion
 
@@ -165,7 +172,6 @@ public partial class Control_AdvancedInventory : UserControl
             AdvancedInventory_MultiLoc_ComboBox_Part.Visible = true;
             AdvancedInventory_MultiLoc_ComboBox_Op.Visible = true;
             AdvancedInventory_MultiLoc_ComboBox_Loc.Visible = true;
-            // Ensure ForeColor is red after async load
             AdvancedInventory_Single_ComboBox_Part.ForeColor =
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             AdvancedInventory_Single_ComboBox_Op.ForeColor =
@@ -221,7 +227,6 @@ public partial class Control_AdvancedInventory : UserControl
     {
         try
         {
-            // ComboBox events
             AdvancedInventory_Single_ComboBox_Part.SelectedIndexChanged += (s, e) =>
             {
                 Helper_UI_ComboBoxes.ValidateComboBoxItem(AdvancedInventory_Single_ComboBox_Part,
@@ -298,7 +303,6 @@ public partial class Control_AdvancedInventory : UserControl
                     "[ Enter Location ]");
             };
 
-            // TextBox events
             AdvancedInventory_Single_TextBox_Qty.Text = "[ Enter Valid Quantity ]";
             AdvancedInventory_Single_TextBox_Qty.TextChanged += (s, e) =>
             {
@@ -446,7 +450,6 @@ public partial class Control_AdvancedInventory : UserControl
     {
         try
         {
-            // Only handle shortcuts if the Single tab is selected
             if (AdvancedInventory_TabControl.SelectedTab == AdvancedInventory_TabControl_Single)
             {
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Send)
@@ -487,7 +490,6 @@ public partial class Control_AdvancedInventory : UserControl
                 }
             }
 
-            // MultiLoc tab
             if (AdvancedInventory_TabControl.SelectedTab == AdvancedInventory_TabControl_MultiLoc)
             {
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Multi_AddLoc)
@@ -530,7 +532,6 @@ public partial class Control_AdvancedInventory : UserControl
                 }
             }
 
-            // Import tab
             if (AdvancedInventory_TabControl.SelectedTab == AdvancedInventory_TabControl_Import)
             {
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Import_OpenExcel)
@@ -573,14 +574,13 @@ public partial class Control_AdvancedInventory : UserControl
                 }
             }
 
-            // Remove Advanced shortcut (global for this form)
             if (keyData == Core_WipAppVariables.Shortcut_Remove_Advanced)
             {
                 if (MainFormInstance != null && MainFormInstance.MainForm_Control_AdvancedRemove != null)
                 {
                     MainFormInstance.MainForm_AdvancedInventory.Visible = false;
                     MainFormInstance.MainForm_Control_AdvancedRemove.Visible = true;
-                    MainFormInstance.MainForm_TabControl.SelectedIndex = 2; // Assuming Remove tab index is 2
+                    MainFormInstance.MainForm_TabControl.SelectedIndex = 2;
                     return true;
                 }
             }
@@ -615,7 +615,6 @@ public partial class Control_AdvancedInventory : UserControl
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(10, "Resetting Advanced Inventory (Single)...");
             Debug.WriteLine("[DEBUG] AdvancedInventory Single HardReset - start");
 
-            // Update status strip to show reset is in progress
             if (MainFormInstance != null)
             {
                 Debug.WriteLine("[DEBUG] Updating status strip for hard reset");
@@ -625,25 +624,21 @@ public partial class Control_AdvancedInventory : UserControl
             }
 
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(30, "Resetting data tables...");
-            // Hide controls during reset
             Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
             AdvancedInventory_Single_ComboBox_Part.Visible = false;
             AdvancedInventory_Single_ComboBox_Op.Visible = false;
             AdvancedInventory_Single_ComboBox_Loc.Visible = false;
 
-            // Unbind DataSource before DataTable reset
             Debug.WriteLine("[DEBUG] Unbinding ComboBox DataSources");
             AdvancedInventory_Single_ComboBox_Part.DataSource = null;
             AdvancedInventory_Single_ComboBox_Op.DataSource = null;
             AdvancedInventory_Single_ComboBox_Loc.DataSource = null;
 
-            // Reset the DataTables and reinitialize them
             Debug.WriteLine("[DEBUG] Resetting and refreshing all ComboBox DataTables");
             await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
             Debug.WriteLine("[DEBUG] DataTables reset complete");
 
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(60, "Refilling combo boxes...");
-            // Refill each combobox with proper data
             Debug.WriteLine("[DEBUG] Refilling Part ComboBox");
             await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(AdvancedInventory_Single_ComboBox_Part);
             Debug.WriteLine("[DEBUG] Refilling Operation ComboBox");
@@ -651,7 +646,6 @@ public partial class Control_AdvancedInventory : UserControl
             Debug.WriteLine("[DEBUG] Refilling Location ComboBox");
             await Helper_UI_ComboBoxes.FillLocationComboBoxesAsync(AdvancedInventory_Single_ComboBox_Loc);
 
-            // Reset UI fields
             Debug.WriteLine("[DEBUG] Resetting UI fields");
             MainFormControlHelper.ResetComboBox(AdvancedInventory_MultiLoc_ComboBox_Part,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
@@ -677,14 +671,12 @@ public partial class Control_AdvancedInventory : UserControl
             AdvancedInventory_Single_RichTextBox_Notes.Text = string.Empty;
             AdvancedInventory_Single_ListView.Items.Clear();
 
-            // Restore controls and focus
             Debug.WriteLine("[DEBUG] Restoring ComboBox visibility and focus");
             AdvancedInventory_Single_ComboBox_Part.Visible = true;
             AdvancedInventory_Single_ComboBox_Op.Visible = true;
             AdvancedInventory_Single_ComboBox_Loc.Visible = true;
             AdvancedInventory_Single_ComboBox_Part.Focus();
 
-            // Update Save/Send button state
             UpdateSingleSaveButtonState();
 
             Debug.WriteLine("[DEBUG] AdvancedInventory Single HardReset - end");
@@ -725,7 +717,6 @@ public partial class Control_AdvancedInventory : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
             }
 
-            // Reset UI fields
             Debug.WriteLine("[DEBUG] Resetting UI fields");
             MainFormControlHelper.ResetComboBox(AdvancedInventory_MultiLoc_ComboBox_Part,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
@@ -751,7 +742,6 @@ public partial class Control_AdvancedInventory : UserControl
             AdvancedInventory_Single_RichTextBox_Notes.Text = string.Empty;
             AdvancedInventory_Single_ListView.Items.Clear();
 
-            // Update Save/Send button state
             UpdateSingleSaveButtonState();
         }
         catch (Exception ex)
@@ -781,7 +771,6 @@ public partial class Control_AdvancedInventory : UserControl
         AdvancedInventory_Single_Button_Reset.Enabled = false;
         try
         {
-            // Check if Shift key is held down
             if ((ModifierKeys & Keys.Shift) == Keys.Shift)
             {
                 await AdvancedInventory_Single_HardResetAsync();
@@ -806,7 +795,6 @@ public partial class Control_AdvancedInventory : UserControl
         {
             LoggingUtility.Log("AdvancedInventory_Single_Button_Save_Click entered.");
 
-            // Only process if there are items in the ListView
             if (AdvancedInventory_Single_ListView.Items.Count == 0)
             {
                 MessageBox.Show(@"No items to inventory. Please add at least one item to the list.", @"No Items",
@@ -850,7 +838,7 @@ public partial class Control_AdvancedInventory : UserControl
                     qty,
                     Model_AppVariables.PartType ?? "",
                     Model_AppVariables.User,
-                    "", // batchNumber
+                    "",
                     notes,
                     true);
 
@@ -870,7 +858,6 @@ public partial class Control_AdvancedInventory : UserControl
             LoggingUtility.Log(
                 $"Saved {savedCount} inventory transaction(s) from ListView.");
 
-            // Update status strip
             if (MainFormInstance != null && savedCount > 0)
             {
                 string time = DateTime.Now.ToString("hh:mm tt");
@@ -892,7 +879,6 @@ public partial class Control_AdvancedInventory : UserControl
                 }
             }
 
-            // Optionally reset the form after save
             AdvancedInventory_Single_Button_Reset_Click(null, EventArgs.Empty);
         }
         catch (Exception ex)
@@ -910,7 +896,6 @@ public partial class Control_AdvancedInventory : UserControl
             Debug.WriteLine("Send button clicked");
             LoggingUtility.Log("Send button clicked");
 
-            // Get values from controls
             string partId = AdvancedInventory_Single_ComboBox_Part.Text;
             string op = AdvancedInventory_Single_ComboBox_Op.Text;
             string loc = AdvancedInventory_Single_ComboBox_Loc.Text;
@@ -920,7 +905,6 @@ public partial class Control_AdvancedInventory : UserControl
 
             Debug.WriteLine($"partId: {partId}, op: {op}, loc: {loc}, qtyText: {qtyText}, countText: {countText}");
 
-            // Validate input
             if (string.IsNullOrWhiteSpace(partId) || AdvancedInventory_Single_ComboBox_Part.SelectedIndex <= 0)
             {
                 MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
@@ -961,7 +945,6 @@ public partial class Control_AdvancedInventory : UserControl
                 return;
             }
 
-            // Add the specified number of entries to the ListView
             for (int i = 0; i < count; i++)
             {
                 ListViewItem listViewItem = new([
@@ -975,7 +958,6 @@ public partial class Control_AdvancedInventory : UserControl
                     $"Added item to ListView: Part={partId}, Op={op}, Loc={loc}, Qty={qty}, Notes={notes}");
             }
 
-            // Optionally clear the fields after sending
             MainFormControlHelper.ResetComboBox(AdvancedInventory_Single_ComboBox_Part,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
             MainFormControlHelper.ResetComboBox(AdvancedInventory_Single_ComboBox_Op,
@@ -992,7 +974,6 @@ public partial class Control_AdvancedInventory : UserControl
 
             AdvancedInventory_Single_ComboBox_Part.Focus();
 
-            // Update Save button state
             UpdateSingleSaveButtonState();
         }
         catch (Exception ex)
@@ -1068,7 +1049,6 @@ public partial class Control_AdvancedInventory : UserControl
             MainFormInstance?.TabLoadingProgress?.ShowProgress();
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(10, "Resetting Advanced Inventory (MultiLoc)...");
             Debug.WriteLine("[DEBUG] AdvancedInventory MultiLoc HardReset - start");
-            // Update status strip to show reset is in progress
             if (MainFormInstance != null)
             {
                 Debug.WriteLine("[DEBUG] Updating status strip for hard reset");
@@ -1078,25 +1058,21 @@ public partial class Control_AdvancedInventory : UserControl
             }
 
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(30, "Resetting data tables...");
-            // Hide controls during reset
             Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
             AdvancedInventory_MultiLoc_ComboBox_Part.Visible = false;
             AdvancedInventory_MultiLoc_ComboBox_Op.Visible = false;
             AdvancedInventory_MultiLoc_ComboBox_Loc.Visible = false;
 
-            // Unbind DataSource before DataTable reset
             Debug.WriteLine("[DEBUG] Unbinding ComboBox DataSources");
             AdvancedInventory_MultiLoc_ComboBox_Part.DataSource = null;
             AdvancedInventory_MultiLoc_ComboBox_Op.DataSource = null;
             AdvancedInventory_MultiLoc_ComboBox_Loc.DataSource = null;
 
-            // Reset the DataTables and reinitialize them
             Debug.WriteLine("[DEBUG] Resetting and refreshing all ComboBox DataTables");
             await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
             Debug.WriteLine("[DEBUG] DataTables reset complete");
 
             MainFormInstance?.TabLoadingProgress?.UpdateProgress(60, "Refilling combo boxes...");
-            // Refill each combobox with proper data
             Debug.WriteLine("[DEBUG] Refilling Part ComboBox");
             await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(AdvancedInventory_MultiLoc_ComboBox_Part);
             Debug.WriteLine("[DEBUG] Refilling Operation ComboBox");
@@ -1104,7 +1080,6 @@ public partial class Control_AdvancedInventory : UserControl
             Debug.WriteLine("[DEBUG] Refilling Location ComboBox");
             await Helper_UI_ComboBoxes.FillLocationComboBoxesAsync(AdvancedInventory_MultiLoc_ComboBox_Loc);
 
-            // Reset UI fields
             Debug.WriteLine("[DEBUG] Resetting UI fields");
             MainFormControlHelper.ResetComboBox(AdvancedInventory_MultiLoc_ComboBox_Part,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
@@ -1132,14 +1107,12 @@ public partial class Control_AdvancedInventory : UserControl
             AdvancedInventory_MultiLoc_ComboBox_Part.Enabled = true;
             AdvancedInventory_MultiLoc_ComboBox_Op.Enabled = true;
 
-            // Restore controls and focus
             Debug.WriteLine("[DEBUG] Restoring ComboBox visibility and focus");
             AdvancedInventory_MultiLoc_ComboBox_Part.Visible = true;
             AdvancedInventory_MultiLoc_ComboBox_Op.Visible = true;
             AdvancedInventory_MultiLoc_ComboBox_Loc.Visible = true;
             AdvancedInventory_MultiLoc_ComboBox_Part.Focus();
 
-            // Update Save/AddLoc button state
             UpdateMultiSaveButtonState();
 
             Debug.WriteLine("[DEBUG] AdvancedInventory MultiLoc HardReset - end");
@@ -1180,7 +1153,6 @@ public partial class Control_AdvancedInventory : UserControl
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
             }
 
-            // Reset UI fields
             Debug.WriteLine("[DEBUG] Resetting UI fields");
             MainFormControlHelper.ResetComboBox(AdvancedInventory_MultiLoc_ComboBox_Part,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
@@ -1208,7 +1180,6 @@ public partial class Control_AdvancedInventory : UserControl
             AdvancedInventory_MultiLoc_ComboBox_Part.Enabled = true;
             AdvancedInventory_MultiLoc_ComboBox_Op.Enabled = true;
 
-            // Update Save/AddLoc button state
             UpdateMultiSaveButtonState();
         }
         catch (Exception ex)
@@ -1238,7 +1209,6 @@ public partial class Control_AdvancedInventory : UserControl
         AdvancedInventory_MultiLoc_Button_Reset.Enabled = false;
         try
         {
-            // Check if Shift key is held down
             if ((ModifierKeys & Keys.Shift) == Keys.Shift)
             {
                 await AdvancedInventory_MultiLoc_HardResetAsync();
@@ -1263,14 +1233,12 @@ public partial class Control_AdvancedInventory : UserControl
         {
             LoggingUtility.Log("AdvancedInventory_MultiLoc_Button_AddLoc_Click entered.");
 
-            // Get values from controls
             string partId = AdvancedInventory_MultiLoc_ComboBox_Part.Text;
             string op = AdvancedInventory_MultiLoc_ComboBox_Op.Text;
             string loc = AdvancedInventory_MultiLoc_ComboBox_Loc.Text;
             string qtyText = AdvancedInventory_MultiLoc_TextBox_Qty.Text.Trim();
             string notes = AdvancedInventory_MultiLoc_RichTextBox_Notes.Text.Trim();
 
-            // Validate input
             if (string.IsNullOrWhiteSpace(partId) || AdvancedInventory_MultiLoc_ComboBox_Part.SelectedIndex <= 0)
             {
                 MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
@@ -1303,7 +1271,6 @@ public partial class Control_AdvancedInventory : UserControl
                 return;
             }
 
-            // Prevent duplicate location entries
             foreach (ListViewItem item in AdvancedInventory_MultiLoc_ListView_Preview.Items)
             {
                 if (string.Equals(item.SubItems[0].Text, loc, StringComparison.OrdinalIgnoreCase))
@@ -1315,7 +1282,6 @@ public partial class Control_AdvancedInventory : UserControl
                 }
             }
 
-            // Add to ListView
             ListViewItem listViewItem = new([
                 loc,
                 qty.ToString(),
@@ -1326,13 +1292,11 @@ public partial class Control_AdvancedInventory : UserControl
             LoggingUtility.Log(
                 $"Added MultiLoc entry: PartId = {partId}, Op = {op}, Loc={loc}, Qty={qty}, Notes={notes}");
 
-            // Disable part ComboBox after the first location is added
             if (AdvancedInventory_MultiLoc_ListView_Preview.Items.Count == 1)
             {
                 AdvancedInventory_MultiLoc_ComboBox_Part.Enabled = false;
             }
 
-            // Reset only the location, quantity, and notes fields for next entry
             MainFormControlHelper.ResetComboBox(AdvancedInventory_MultiLoc_ComboBox_Loc,
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
             AdvancedInventory_MultiLoc_ComboBox_Loc.Focus();
@@ -1353,7 +1317,6 @@ public partial class Control_AdvancedInventory : UserControl
         {
             LoggingUtility.Log("AdvancedInventory_MultiLoc_Button_SaveAll_Click entered.");
 
-            // Validate that there is at least one entry to save
             if (AdvancedInventory_MultiLoc_ListView_Preview.Items.Count == 0)
             {
                 MessageBox.Show(@"Please add at least one location entry before saving.", @"No Entries",
@@ -1361,7 +1324,6 @@ public partial class Control_AdvancedInventory : UserControl
                 return;
             }
 
-            // Get shared values from controls
             string partId = AdvancedInventory_MultiLoc_ComboBox_Part.Text;
             string op = AdvancedInventory_MultiLoc_ComboBox_Op.Text;
 
@@ -1381,7 +1343,6 @@ public partial class Control_AdvancedInventory : UserControl
                 return;
             }
 
-            // Save each entry in the ListView
             HashSet<string> locations = new();
             int totalQty = 0;
             int savedCount = 0;
@@ -1398,7 +1359,6 @@ public partial class Control_AdvancedInventory : UserControl
                     continue;
                 }
 
-                // Set Model_AppVariables (if needed)
                 Model_AppVariables.PartId = partId;
                 Model_AppVariables.Operation = op;
                 Model_AppVariables.Location = loc;
@@ -1414,7 +1374,7 @@ public partial class Control_AdvancedInventory : UserControl
                     qty,
                     Model_AppVariables.PartType ?? "",
                     Model_AppVariables.User,
-                    "", // batchNumber
+                    "",
                     notes,
                     true);
 
@@ -1432,7 +1392,6 @@ public partial class Control_AdvancedInventory : UserControl
             LoggingUtility.Log(
                 $"Saved {savedCount} multi-location inventory transaction(s) for Part: {partId}, Op: {op}");
 
-            // Update status strip
             if (MainFormInstance != null && savedCount > 0)
             {
                 string time = DateTime.Now.ToString("hh:mm tt");
@@ -1441,7 +1400,6 @@ public partial class Control_AdvancedInventory : UserControl
                     $"Last Inventoried: {partId} (Op: {op}), Location: {locDisplay}, Quantity: {totalQty} @ {time}";
             }
 
-            // Optionally reset the form after save
             AdvancedInventory_MultiLoc_Button_Reset_Click(null, EventArgs.Empty);
         }
         catch (Exception ex)
@@ -1458,12 +1416,10 @@ public partial class Control_AdvancedInventory : UserControl
 
     private static string GetWipAppExcelUserFolder()
     {
-        // Get the log file path to determine the log directory
         string? server = new MySqlConnectionStringBuilder(Model_AppVariables.ConnectionString).Server;
         string userName = Model_AppVariables.User ?? Environment.UserName;
         string logFilePath = Helper_Database_Variables.GetLogFilePath(server, userName);
         string logDir = Directory.GetParent(logFilePath)?.Parent?.FullName ?? "";
-        // Place Excel files as a sibling to the log folder
         string excelRoot = Path.Combine(logDir, "WIP App Excel Files");
         string userFolder = Path.Combine(excelRoot, userName);
         if (!Directory.Exists(userFolder))
@@ -1488,14 +1444,12 @@ public partial class Control_AdvancedInventory : UserControl
             string excelPath = GetUserExcelFilePath();
             if (!File.Exists(excelPath))
             {
-                // Ensure the user folder exists
                 string? userFolder = Path.GetDirectoryName(excelPath);
                 if (!Directory.Exists(userFolder))
                 {
                     Directory.CreateDirectory(userFolder!);
                 }
 
-                // Copy template file to user's Excel file path
                 string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Controls",
                     "MainForm", "WIPAppTemplate.xlsx");
                 if (File.Exists(templatePath))
@@ -1510,7 +1464,6 @@ public partial class Control_AdvancedInventory : UserControl
                 }
             }
 
-            // Always use the default handler for .xlsx files
             Process.Start(new ProcessStartInfo(excelPath) { UseShellExecute = true });
         }
         catch (Exception ex)
@@ -1548,7 +1501,6 @@ public partial class Control_AdvancedInventory : UserControl
                     return;
                 }
 
-                // Get the used range
                 IXLRange? usedRange = worksheet.RangeUsed();
                 if (usedRange == null)
                 {
@@ -1560,7 +1512,6 @@ public partial class Control_AdvancedInventory : UserControl
                 int colCount = usedRange.ColumnCount();
                 int rowCount = usedRange.RowCount();
 
-                // Add columns from the first row
                 IXLRangeRow? headerRow = usedRange.Row(1);
                 for (int col = 1; col <= colCount; col++)
                 {
@@ -1573,7 +1524,6 @@ public partial class Control_AdvancedInventory : UserControl
                     dt.Columns.Add(colName);
                 }
 
-                // Add data rows
                 for (int row = 2; row <= rowCount; row++)
                 {
                     DataRow dataRow = dt.NewRow();
@@ -1614,12 +1564,10 @@ public partial class Control_AdvancedInventory : UserControl
         List<DataGridViewRow> rowsToRemove = new();
         bool anyError = false;
 
-        // Get DataTables from ComboBoxes' DataSource
         DataTable? partTable = AdvancedInventory_Single_ComboBox_Part.DataSource as DataTable;
         DataTable? opTable = AdvancedInventory_Single_ComboBox_Op.DataSource as DataTable;
         DataTable? locTable = AdvancedInventory_Single_ComboBox_Loc.DataSource as DataTable;
 
-        // Get valid values from DataTables
         HashSet<string?> validParts =
             partTable?.AsEnumerable().Select(r => r.Field<string>("PartID"))
                 .Where(s => !string.IsNullOrWhiteSpace(s)).ToHashSet(StringComparer.OrdinalIgnoreCase) ??
@@ -1631,7 +1579,6 @@ public partial class Control_AdvancedInventory : UserControl
             locTable?.AsEnumerable().Select(r => r.Field<string>("Location")).Where(s => !string.IsNullOrWhiteSpace(s))
                 .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
 
-        // Load Excel file for row removal
         string excelPath = GetUserExcelFilePath();
         XLWorkbook? workbook = null;
         IXLWorksheet? worksheet = null;
@@ -1641,7 +1588,6 @@ public partial class Control_AdvancedInventory : UserControl
             worksheet = workbook.Worksheet("Tab 1");
         }
 
-        // Collect all Excel row numbers to delete (1-based)
         List<int> excelRowsToDelete = new();
 
         foreach (DataGridViewRow row in dgv.Rows)
@@ -1664,7 +1610,6 @@ public partial class Control_AdvancedInventory : UserControl
             string notesOriginal = row.Cells["Notes"].Value?.ToString() ?? "";
             string notes = "Excel Import: " + notesOriginal;
 
-            // Validate against ComboBox DataTables
             if (!validParts.Contains(part))
             {
                 row.Cells["Part"].Style.ForeColor =
@@ -1686,7 +1631,6 @@ public partial class Control_AdvancedInventory : UserControl
                 rowValid = false;
             }
 
-            // Quantity must be a number above 0
             if (!int.TryParse(qtyText, out int qty) || qty <= 0)
             {
                 row.Cells["Quantity"].Style.ForeColor =
@@ -1701,7 +1645,6 @@ public partial class Control_AdvancedInventory : UserControl
                     await Dao_Inventory.AddInventoryItemAsync(
                         part, loc, op, qty, "", Model_AppVariables.User ?? Environment.UserName, "", notes, true);
 
-                    // Find the Excel row number to delete (match by order, not by value)
                     if (worksheet != null)
                     {
                         IXLRange? usedRange = worksheet.RangeUsed();
@@ -1737,7 +1680,6 @@ public partial class Control_AdvancedInventory : UserControl
             }
         }
 
-        // Delete rows from Excel in descending order to avoid shifting
         if (worksheet != null && excelRowsToDelete.Count > 0)
         {
             excelRowsToDelete.Sort((a, b) => b.CompareTo(a));
@@ -1746,7 +1688,6 @@ public partial class Control_AdvancedInventory : UserControl
                 worksheet.Row(rowNum).Delete();
             }
 
-            // Push remaining rows up: remove empty rows at the end
             IXLRange? usedRange = worksheet.RangeUsed();
             if (usedRange != null)
             {
@@ -1800,7 +1741,6 @@ public partial class Control_AdvancedInventory : UserControl
             return;
         }
 
-        // Store highlighted cells before refresh
         Dictionary<int, HashSet<string>> highlightMap = new();
         if (AdvancedInventory_Import_DataGridView.DataSource is DataTable)
         {
@@ -1874,7 +1814,6 @@ public partial class Control_AdvancedInventory : UserControl
 
         AdvancedInventory_Import_DataGridView.DataSource = dt;
 
-        // Restore highlights after refresh and re-validate Quantity
         foreach (DataGridViewRow row in AdvancedInventory_Import_DataGridView.Rows)
         {
             if (row.IsNewRow)
@@ -1882,7 +1821,6 @@ public partial class Control_AdvancedInventory : UserControl
                 continue;
             }
 
-            // Restore previous highlights
             if (highlightMap.TryGetValue(row.Index, out HashSet<string>? cols))
             {
                 foreach (DataGridViewCell cell in row.Cells)
@@ -1894,7 +1832,6 @@ public partial class Control_AdvancedInventory : UserControl
                 }
             }
 
-            // Always validate Quantity column
             if (row.DataGridView != null && row.DataGridView.Columns.Contains("Quantity"))
             {
                 DataGridViewCell? qtyCell = row.Cells["Quantity"];
@@ -1907,5 +1844,8 @@ public partial class Control_AdvancedInventory : UserControl
         }
     }
 
+    #endregion
+
+    
     #endregion
 }
