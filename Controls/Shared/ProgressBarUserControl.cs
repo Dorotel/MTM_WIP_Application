@@ -1,10 +1,9 @@
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.ComponentModel;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Models;
-using System.ComponentModel;
-using System.Drawing;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Controls.Shared;
@@ -44,7 +43,10 @@ public partial class ProgressBarUserControl : UserControl
         get => _statusLabel?.Text ?? string.Empty;
         set
         {
-            if (_statusLabel != null) _statusLabel.Text = value;
+            if (_statusLabel != null)
+            {
+                _statusLabel.Text = value;
+            }
         }
     }
 
@@ -57,7 +59,10 @@ public partial class ProgressBarUserControl : UserControl
         get => _loadingImage?.Visible ?? false;
         set
         {
-            if (_loadingImage != null) _loadingImage.Visible = value;
+            if (_loadingImage != null)
+            {
+                _loadingImage.Visible = value;
+            }
         }
     }
 
@@ -115,8 +120,8 @@ public partial class ProgressBarUserControl : UserControl
 
     private void LayoutControls()
     {
-        var spacing = 8;
-        var currentY = spacing;
+        int spacing = 8;
+        int currentY = spacing;
 
         if (_loadingImage != null)
         {
@@ -146,31 +151,43 @@ public partial class ProgressBarUserControl : UserControl
 
     private void LoadingImage_Paint(object? sender, PaintEventArgs e)
     {
-        if (_loadingImage == null) return;
+        if (_loadingImage == null)
+        {
+            return;
+        }
 
         // Simple loading indicator - draw a rotating circle or spinner
-        var g = e.Graphics;
-        var rect = _loadingImage.ClientRectangle;
-        var center = new Point(rect.Width / 2, rect.Height / 2);
-        var radius = Math.Min(rect.Width, rect.Height) / 2 - 4;
+        Graphics g = e.Graphics;
+        Rectangle rect = _loadingImage.ClientRectangle;
+        Point center = new(rect.Width / 2, rect.Height / 2);
+        int radius = Math.Min(rect.Width, rect.Height) / 2 - 4;
 
-        using var pen = new Pen(Model_AppVariables.UserUiColors?.ProgressBarForeColor ?? Color.Blue, 3);
+        using Pen pen = new(Model_AppVariables.UserUiColors?.ProgressBarForeColor ?? Color.Blue, 3);
 
         // Draw spinning arc
-        var startAngle = Environment.TickCount / 10 % 360;
+        int startAngle = Environment.TickCount / 10 % 360;
         g.DrawArc(pen, center.X - radius, center.Y - radius, radius * 2, radius * 2, startAngle, 270);
     }
 
     private void UpdateStatusText()
     {
-        if (_progressBar == null) return;
+        if (_progressBar == null)
+        {
+            return;
+        }
 
         if (_progressBar.Value == 0)
+        {
             StatusText = "Initializing...";
+        }
         else if (_progressBar.Value == 100)
+        {
             StatusText = "Complete";
+        }
         else
+        {
             StatusText = $"Loading... {_progressBar.Value}%";
+        }
     }
 
     /// <summary>
@@ -191,7 +208,7 @@ public partial class ProgressBarUserControl : UserControl
         // Start animation timer for loading image
         if (_loadingImage != null)
         {
-            var timer = new Timer { Interval = 50 };
+            Timer timer = new() { Interval = 50 };
             timer.Tick += (s, e) => _loadingImage.Invalidate();
             timer.Start();
 
@@ -237,7 +254,9 @@ public partial class ProgressBarUserControl : UserControl
 
         ProgressValue = value;
         if (!string.IsNullOrEmpty(status))
+        {
             StatusText = status;
+        }
     }
 
     /// <summary>
@@ -255,10 +274,17 @@ public partial class ProgressBarUserControl : UserControl
         try
         {
             // Use the correct class and namespace for GetCurrentTheme
-            var theme = Core_Themes.Core_AppThemes.GetCurrentTheme();
-            var colors = theme.Colors;
-            if (colors.UserControlBackColor.HasValue) BackColor = colors.UserControlBackColor.Value;
-            if (colors.UserControlForeColor.HasValue) ForeColor = colors.UserControlForeColor.Value;
+            Core_Themes.Core_AppThemes.AppTheme theme = Core_Themes.Core_AppThemes.GetCurrentTheme();
+            Model_UserUiColors colors = theme.Colors;
+            if (colors.UserControlBackColor.HasValue)
+            {
+                BackColor = colors.UserControlBackColor.Value;
+            }
+
+            if (colors.UserControlForeColor.HasValue)
+            {
+                ForeColor = colors.UserControlForeColor.Value;
+            }
         }
         catch
         {
@@ -269,6 +295,9 @@ public partial class ProgressBarUserControl : UserControl
     protected override void OnResize(EventArgs e)
     {
         base.OnResize(e);
-        if (_loadingImage != null && _progressBar != null && _statusLabel != null) LayoutControls();
+        if (_loadingImage != null && _progressBar != null && _statusLabel != null)
+        {
+            LayoutControls();
+        }
     }
 }

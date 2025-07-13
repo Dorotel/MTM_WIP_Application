@@ -1,18 +1,16 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Collections.Concurrent;
+using System.Data;
+using System.Diagnostics;
+using System.Text.Json;
 using MTM_Inventory_Application.Controls.Addons;
 using MTM_Inventory_Application.Controls.MainForm;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace MTM_Inventory_Application.Core;
 
@@ -22,8 +20,8 @@ public static class Core_Themes
 
     public static void ApplyTheme(Form form)
     {
-        var theme = Core_AppThemes.GetCurrentTheme();
-        var themeName = Core_AppThemes.GetEffectiveThemeName();
+        Core_AppThemes.AppTheme theme = Core_AppThemes.GetCurrentTheme();
+        string themeName = Core_AppThemes.GetEffectiveThemeName();
         form.SuspendLayout();
         SetFormTheme(form, theme, themeName);
         ApplyThemeToControls(form.Controls);
@@ -35,24 +33,22 @@ public static class Core_Themes
     {
         Model_AppVariables.ThemeName = await Dao_User.GetSettingsJsonAsync("Theme_Name", userId, true) ?? "Default";
         if (!Core_AppThemes.GetThemeNames().Contains(Model_AppVariables.ThemeName))
+        {
             await Core_AppThemes.LoadThemesFromDatabaseAsync();
-        var appTheme = Core_AppThemes.GetTheme(Model_AppVariables.ThemeName);
+        }
+
+        Core_AppThemes.AppTheme appTheme = Core_AppThemes.GetTheme(Model_AppVariables.ThemeName);
         return appTheme.Colors;
     }
 
-    public static void ApplyThemeToDataGridView(DataGridView dataGridView)
-    {
+    public static void ApplyThemeToDataGridView(DataGridView dataGridView) =>
         ThemeAppliersInternal.ApplyThemeToDataGridView(dataGridView);
-    }
 
-    public static void SizeDataGrid(DataGridView dataGridView)
-    {
-        ThemeAppliersInternal.SizeDataGrid(dataGridView);
-    }
+    public static void SizeDataGrid(DataGridView dataGridView) => ThemeAppliersInternal.SizeDataGrid(dataGridView);
 
     public static void ApplyFocusHighlighting(Control parentControl)
     {
-        var theme = Core_AppThemes.GetCurrentTheme();
+        Core_AppThemes.AppTheme theme = Core_AppThemes.GetCurrentTheme();
         FocusUtils.ApplyFocusEventHandlingToControls(parentControl.Controls, theme.Colors);
     }
 
@@ -118,18 +114,23 @@ public static class Core_Themes
 
         if (!string.IsNullOrWhiteSpace(themeName))
         {
-            var idx = form.Text.LastIndexOf('[');
+            int idx = form.Text.LastIndexOf('[');
             if (idx > 0)
+            {
                 form.Text = form.Text[..idx].TrimEnd();
-            var themeDisplay = $"[{themeName}] | Change (Shift + Alt + S)";
+            }
+
+            string themeDisplay = $"[{themeName}] | Change (Shift + Alt + S)";
             if (!form.Text.Contains(themeDisplay))
+            {
                 form.Text = @$"{form.Text} {themeDisplay}";
+            }
         }
     }
 
     private static void LogControlColor(Control ctrl, string colorType, string colorSource, Color colorValue)
     {
-        var themeName = Core_AppThemes.GetEffectiveThemeName();
+        string themeName = Core_AppThemes.GetEffectiveThemeName();
 
         Debug.WriteLine(
             $"[THEME] {ctrl.Name} ({ctrl.GetType().Name}) - {colorType}: {colorSource} = {colorValue} | Theme: {themeName}");
@@ -138,16 +139,14 @@ public static class Core_Themes
     private static Color DimColor(Color color, double percent)
     {
         percent = Math.Clamp(percent, 0, 1);
-        var r = (int)(color.R * (1 - percent));
-        var g = (int)(color.G * (1 - percent));
-        var b = (int)(color.B * (1 - percent));
+        int r = (int)(color.R * (1 - percent));
+        int g = (int)(color.G * (1 - percent));
+        int b = (int)(color.B * (1 - percent));
         return Color.FromArgb(color.A, r, g, b);
     }
 
-    private static Color MaybeDimIfDisabled(Control control, Color color)
-    {
-        return !control.Enabled ? DimColor(color, 0.25) : color;
-    }
+    private static Color MaybeDimIfDisabled(Control control, Color color) =>
+        !control.Enabled ? DimColor(color, 0.25) : color;
 
     private static void AttachEnabledChangedHandler(Control control)
     {
@@ -159,7 +158,7 @@ public static class Core_Themes
     {
         if (sender is Control ctrl)
         {
-            var theme = Core_AppThemes.GetCurrentTheme();
+            Core_AppThemes.AppTheme theme = Core_AppThemes.GetCurrentTheme();
             ApplyBaseThemeColors(ctrl, theme);
             ApplyControlSpecificTheme(ctrl);
         }
@@ -167,8 +166,9 @@ public static class Core_Themes
 
     private static void ApplyThemeToControls(Control.ControlCollection controls)
     {
-        var theme = Core_AppThemes.GetCurrentTheme();
+        Core_AppThemes.AppTheme theme = Core_AppThemes.GetCurrentTheme();
         foreach (Control ctrl in controls)
+        {
             try
             {
                 AttachEnabledChangedHandler(ctrl);
@@ -176,14 +176,19 @@ public static class Core_Themes
                 {
                     ApplyThemeToDataGridView(dgv);
                     if (theme.Colors.DataGridBackColor.HasValue)
+                    {
                         LogControlColor(dgv, "BackColor", "DataGridBackColor", theme.Colors.DataGridBackColor.Value);
+                    }
+
                     if (theme.Colors.DataGridForeColor.HasValue)
+                    {
                         LogControlColor(dgv, "ForeColor", "DataGridForeColor", theme.Colors.DataGridForeColor.Value);
+                    }
                 }
                 else
                 {
-                    var backColor = theme.Colors.FormBackColor ?? Color.White;
-                    var foreColor = theme.Colors.FormForeColor ?? Color.Black;
+                    Color backColor = theme.Colors.FormBackColor ?? Color.White;
+                    Color foreColor = theme.Colors.FormForeColor ?? Color.Black;
                     LogControlColor(ctrl, "BackColor",
                         theme.Colors.FormBackColor.HasValue ? "FormBackColor" : "Default", backColor);
                     LogControlColor(ctrl, "ForeColor",
@@ -195,45 +200,60 @@ public static class Core_Themes
                 }
 
                 if (ctrl.HasChildren && ctrl.Controls.Count < 10000)
+                {
                     ApplyThemeToControls(ctrl.Controls);
+                }
             }
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
             }
+        }
     }
 
     private static void ApplyBaseThemeColors(Control control, Core_AppThemes.AppTheme theme)
     {
-        var backColor = theme.Colors.FormBackColor ?? Color.White;
-        var foreColor = theme.Colors.FormForeColor ?? Color.Black;
+        Color backColor = theme.Colors.FormBackColor ?? Color.White;
+        Color foreColor = theme.Colors.FormForeColor ?? Color.Black;
         // Dim if disabled
         backColor = MaybeDimIfDisabled(control, backColor);
         foreColor = MaybeDimIfDisabled(control, foreColor);
         if (control.BackColor != backColor)
+        {
             control.BackColor = backColor;
+        }
+
         if (control.ForeColor != foreColor)
+        {
             control.ForeColor = foreColor;
-        var font = theme.FormFont ?? new Font(control.Font.Name, Model_AppVariables.ThemeFontSize, control.Font.Style);
+        }
+
+        Font font = theme.FormFont ?? new Font(control.Font.Name, Model_AppVariables.ThemeFontSize, control.Font.Style);
         if (control.Font == null || control.Font.Size != font.Size || control.Font.Name != font.Name)
+        {
             control.Font = font;
+        }
     }
 
     private static void ApplyControlSpecificTheme(Control control)
     {
-        if (control == null) return;
-        var theme = Core_AppThemes.GetCurrentTheme();
-        var colors = theme.Colors;
+        if (control == null)
+        {
+            return;
+        }
+
+        Core_AppThemes.AppTheme theme = Core_AppThemes.GetCurrentTheme();
+        Model_UserUiColors colors = theme.Colors;
         try
         {
-            var controlType = control.GetType();
-            if (ThemeAppliers.TryGetValue(controlType, out var applier))
+            Type controlType = control.GetType();
+            if (ThemeAppliers.TryGetValue(controlType, out ControlThemeApplier? applier))
             {
                 applier(control, colors);
                 return;
             }
 
-            var currentType = controlType;
+            Type? currentType = controlType;
             while (currentType != null && currentType != typeof(object))
             {
                 if (ThemeAppliers.TryGetValue(currentType, out applier))
@@ -267,7 +287,7 @@ public static class Core_Themes
             {
                 quickButtons.BackColor = colors.CustomControlBackColor ?? colors.ControlBackColor ?? Color.White;
                 quickButtons.ForeColor = colors.CustomControlForeColor ?? colors.ControlForeColor ?? Color.Black;
-                foreach (var btn in quickButtons.Controls.OfType<Button>())
+                foreach (Button btn in quickButtons.Controls.OfType<Button>())
                 {
                     btn.BackColor = colors.ButtonBackColor ?? Color.White;
                     btn.ForeColor = colors.ButtonForeColor ?? Color.Black;
@@ -332,15 +352,20 @@ public static class Core_Themes
 
         public static void ApplyCustomControlTheme(Control control, Model_UserUiColors colors)
         {
-            if (colors.CustomControlBackColor.HasValue) control.BackColor = colors.CustomControlBackColor.Value;
-            if (colors.CustomControlForeColor.HasValue) control.ForeColor = colors.CustomControlForeColor.Value;
+            if (colors.CustomControlBackColor.HasValue)
+            {
+                control.BackColor = colors.CustomControlBackColor.Value;
+            }
+
+            if (colors.CustomControlForeColor.HasValue)
+            {
+                control.ForeColor = colors.CustomControlForeColor.Value;
+            }
         }
 
 
-        private static void ApplyOwnerDrawThemes(Control control, Model_UserUiColors colors)
-        {
+        private static void ApplyOwnerDrawThemes(Control control, Model_UserUiColors colors) =>
             OwnerDrawThemeHelper.ApplyOwnerDrawTheme(control, colors);
-        }
 
         public static void ApplyButtonTheme(Control control, Model_UserUiColors colors)
         {
@@ -349,8 +374,8 @@ public static class Core_Themes
                 btn.Margin = new Padding(1);
                 btn.Paint -= AutoShrinkText_Paint;
                 btn.Paint += AutoShrinkText_Paint;
-                var backColor = colors.ButtonBackColor ?? SystemColors.Control;
-                var foreColor = colors.ButtonForeColor ?? SystemColors.ControlText;
+                Color backColor = colors.ButtonBackColor ?? SystemColors.Control;
+                Color foreColor = colors.ButtonForeColor ?? SystemColors.ControlText;
                 btn.BackColor = backColor;
                 btn.ForeColor = foreColor;
                 btn.FlatStyle = FlatStyle.Flat;
@@ -375,9 +400,14 @@ public static class Core_Themes
                     if (sender is Button b)
                     {
                         if (colors.ButtonHoverBackColor.HasValue)
+                        {
                             b.BackColor = colors.ButtonHoverBackColor.Value;
+                        }
+
                         if (colors.ButtonHoverForeColor.HasValue)
+                        {
                             b.ForeColor = colors.ButtonHoverForeColor.Value;
+                        }
                     }
                 }
 
@@ -395,9 +425,14 @@ public static class Core_Themes
                     if (sender is Button b)
                     {
                         if (colors.ButtonPressedBackColor.HasValue)
+                        {
                             b.BackColor = colors.ButtonPressedBackColor.Value;
+                        }
+
                         if (colors.ButtonPressedForeColor.HasValue)
+                        {
                             b.ForeColor = colors.ButtonPressedForeColor.Value;
+                        }
                     }
                 }
 
@@ -416,8 +451,8 @@ public static class Core_Themes
         {
             if (control is TabControl tab)
             {
-                var backColor = colors.TabControlBackColor ?? colors.FormBackColor ?? Color.White;
-                var foreColor = colors.TabControlForeColor ?? colors.FormForeColor ?? Color.Black;
+                Color backColor = colors.TabControlBackColor ?? colors.FormBackColor ?? Color.White;
+                Color foreColor = colors.TabControlForeColor ?? colors.FormForeColor ?? Color.Black;
                 tab.BackColor = backColor;
                 tab.ForeColor = foreColor;
                 tab.Paint -= AutoShrinkText_Paint;
@@ -429,8 +464,16 @@ public static class Core_Themes
         {
             if (control is TabPage tabPage)
             {
-                if (colors.TabPageBackColor.HasValue) tabPage.BackColor = colors.TabPageBackColor.Value;
-                if (colors.TabPageForeColor.HasValue) tabPage.ForeColor = colors.TabPageForeColor.Value;
+                if (colors.TabPageBackColor.HasValue)
+                {
+                    tabPage.BackColor = colors.TabPageBackColor.Value;
+                }
+
+                if (colors.TabPageForeColor.HasValue)
+                {
+                    tabPage.ForeColor = colors.TabPageForeColor.Value;
+                }
+
                 tabPage.Paint -= AutoShrinkText_Paint;
                 tabPage.Paint += AutoShrinkText_Paint;
 
@@ -443,8 +486,15 @@ public static class Core_Themes
         {
             if (control is TextBox txt)
             {
-                if (colors.TextBoxBackColor.HasValue) txt.BackColor = colors.TextBoxBackColor.Value;
-                if (colors.TextBoxForeColor.HasValue) txt.ForeColor = colors.TextBoxForeColor.Value;
+                if (colors.TextBoxBackColor.HasValue)
+                {
+                    txt.BackColor = colors.TextBoxBackColor.Value;
+                }
+
+                if (colors.TextBoxForeColor.HasValue)
+                {
+                    txt.ForeColor = colors.TextBoxForeColor.Value;
+                }
 
                 // Border color
                 ApplyOwnerDrawThemes(txt, colors);
@@ -455,8 +505,15 @@ public static class Core_Themes
         {
             if (control is MaskedTextBox mtxt)
             {
-                if (colors.MaskedTextBoxBackColor.HasValue) mtxt.BackColor = colors.MaskedTextBoxBackColor.Value;
-                if (colors.MaskedTextBoxForeColor.HasValue) mtxt.ForeColor = colors.MaskedTextBoxForeColor.Value;
+                if (colors.MaskedTextBoxBackColor.HasValue)
+                {
+                    mtxt.BackColor = colors.MaskedTextBoxBackColor.Value;
+                }
+
+                if (colors.MaskedTextBoxForeColor.HasValue)
+                {
+                    mtxt.ForeColor = colors.MaskedTextBoxForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(mtxt, colors);
             }
@@ -466,8 +523,15 @@ public static class Core_Themes
         {
             if (control is RichTextBox rtxt)
             {
-                if (colors.RichTextBoxBackColor.HasValue) rtxt.BackColor = colors.RichTextBoxBackColor.Value;
-                if (colors.RichTextBoxForeColor.HasValue) rtxt.ForeColor = colors.RichTextBoxForeColor.Value;
+                if (colors.RichTextBoxBackColor.HasValue)
+                {
+                    rtxt.BackColor = colors.RichTextBoxBackColor.Value;
+                }
+
+                if (colors.RichTextBoxForeColor.HasValue)
+                {
+                    rtxt.ForeColor = colors.RichTextBoxForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(rtxt, colors);
             }
@@ -477,8 +541,15 @@ public static class Core_Themes
         {
             if (control is ComboBox cb)
             {
-                if (colors.ComboBoxBackColor.HasValue) cb.BackColor = colors.ComboBoxBackColor.Value;
-                if (colors.ComboBoxForeColor.HasValue) cb.ForeColor = colors.ComboBoxForeColor.Value;
+                if (colors.ComboBoxBackColor.HasValue)
+                {
+                    cb.BackColor = colors.ComboBoxBackColor.Value;
+                }
+
+                if (colors.ComboBoxForeColor.HasValue)
+                {
+                    cb.ForeColor = colors.ComboBoxForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(cb, colors);
             }
@@ -488,8 +559,15 @@ public static class Core_Themes
         {
             if (control is ListBox lb)
             {
-                if (colors.ListBoxBackColor.HasValue) lb.BackColor = colors.ListBoxBackColor.Value;
-                if (colors.ListBoxForeColor.HasValue) lb.ForeColor = colors.ListBoxForeColor.Value;
+                if (colors.ListBoxBackColor.HasValue)
+                {
+                    lb.BackColor = colors.ListBoxBackColor.Value;
+                }
+
+                if (colors.ListBoxForeColor.HasValue)
+                {
+                    lb.ForeColor = colors.ListBoxForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(lb, colors);
             }
@@ -499,8 +577,15 @@ public static class Core_Themes
         {
             if (control is CheckedListBox clb)
             {
-                if (colors.CheckedListBoxBackColor.HasValue) clb.BackColor = colors.CheckedListBoxBackColor.Value;
-                if (colors.CheckedListBoxForeColor.HasValue) clb.ForeColor = colors.CheckedListBoxForeColor.Value;
+                if (colors.CheckedListBoxBackColor.HasValue)
+                {
+                    clb.BackColor = colors.CheckedListBoxBackColor.Value;
+                }
+
+                if (colors.CheckedListBoxForeColor.HasValue)
+                {
+                    clb.ForeColor = colors.CheckedListBoxForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(clb, colors);
             }
@@ -510,8 +595,16 @@ public static class Core_Themes
         {
             if (control is Label lbl)
             {
-                if (colors.LabelBackColor.HasValue) lbl.BackColor = colors.LabelBackColor.Value;
-                if (colors.LabelForeColor.HasValue) lbl.ForeColor = colors.LabelForeColor.Value;
+                if (colors.LabelBackColor.HasValue)
+                {
+                    lbl.BackColor = colors.LabelBackColor.Value;
+                }
+
+                if (colors.LabelForeColor.HasValue)
+                {
+                    lbl.ForeColor = colors.LabelForeColor.Value;
+                }
+
                 lbl.Paint -= AutoShrinkText_Paint;
                 lbl.Paint += AutoShrinkText_Paint;
             }
@@ -521,8 +614,15 @@ public static class Core_Themes
         {
             if (control is RadioButton rb)
             {
-                if (colors.RadioButtonBackColor.HasValue) rb.BackColor = colors.RadioButtonBackColor.Value;
-                if (colors.RadioButtonForeColor.HasValue) rb.ForeColor = colors.RadioButtonForeColor.Value;
+                if (colors.RadioButtonBackColor.HasValue)
+                {
+                    rb.BackColor = colors.RadioButtonBackColor.Value;
+                }
+
+                if (colors.RadioButtonForeColor.HasValue)
+                {
+                    rb.ForeColor = colors.RadioButtonForeColor.Value;
+                }
             }
         }
 
@@ -530,8 +630,15 @@ public static class Core_Themes
         {
             if (control is CheckBox cbx)
             {
-                if (colors.CheckBoxBackColor.HasValue) cbx.BackColor = colors.CheckBoxBackColor.Value;
-                if (colors.CheckBoxForeColor.HasValue) cbx.ForeColor = colors.CheckBoxForeColor.Value;
+                if (colors.CheckBoxBackColor.HasValue)
+                {
+                    cbx.BackColor = colors.CheckBoxBackColor.Value;
+                }
+
+                if (colors.CheckBoxForeColor.HasValue)
+                {
+                    cbx.ForeColor = colors.CheckBoxForeColor.Value;
+                }
             }
         }
 
@@ -539,9 +646,20 @@ public static class Core_Themes
         {
             if (control is TreeView tv)
             {
-                if (colors.TreeViewBackColor.HasValue) tv.BackColor = colors.TreeViewBackColor.Value;
-                if (colors.TreeViewForeColor.HasValue) tv.ForeColor = colors.TreeViewForeColor.Value;
-                if (colors.TreeViewLineColor.HasValue) tv.LineColor = colors.TreeViewLineColor.Value;
+                if (colors.TreeViewBackColor.HasValue)
+                {
+                    tv.BackColor = colors.TreeViewBackColor.Value;
+                }
+
+                if (colors.TreeViewForeColor.HasValue)
+                {
+                    tv.ForeColor = colors.TreeViewForeColor.Value;
+                }
+
+                if (colors.TreeViewLineColor.HasValue)
+                {
+                    tv.LineColor = colors.TreeViewLineColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(tv, colors);
             }
@@ -551,8 +669,15 @@ public static class Core_Themes
         {
             if (control is ListView lv)
             {
-                if (colors.ListViewBackColor.HasValue) lv.BackColor = colors.ListViewBackColor.Value;
-                if (colors.ListViewForeColor.HasValue) lv.ForeColor = colors.ListViewForeColor.Value;
+                if (colors.ListViewBackColor.HasValue)
+                {
+                    lv.BackColor = colors.ListViewBackColor.Value;
+                }
+
+                if (colors.ListViewForeColor.HasValue)
+                {
+                    lv.ForeColor = colors.ListViewForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(lv, colors);
             }
@@ -562,8 +687,15 @@ public static class Core_Themes
         {
             if (control is MenuStrip ms)
             {
-                if (colors.MenuStripBackColor.HasValue) ms.BackColor = colors.MenuStripBackColor.Value;
-                if (colors.MenuStripForeColor.HasValue) ms.ForeColor = colors.MenuStripForeColor.Value;
+                if (colors.MenuStripBackColor.HasValue)
+                {
+                    ms.BackColor = colors.MenuStripBackColor.Value;
+                }
+
+                if (colors.MenuStripForeColor.HasValue)
+                {
+                    ms.ForeColor = colors.MenuStripForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(ms, colors);
             }
@@ -574,9 +706,12 @@ public static class Core_Themes
             if (control is StatusStrip ss)
             {
                 // Always use the form background color for StatusStrip
-                var formBackColor = Core_AppThemes.GetCurrentTheme().Colors.FormBackColor ?? Color.White;
+                Color formBackColor = Core_AppThemes.GetCurrentTheme().Colors.FormBackColor ?? Color.White;
                 ss.BackColor = formBackColor;
-                if (colors.StatusStripForeColor.HasValue) ss.ForeColor = colors.StatusStripForeColor.Value;
+                if (colors.StatusStripForeColor.HasValue)
+                {
+                    ss.ForeColor = colors.StatusStripForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(ss, colors);
             }
@@ -586,8 +721,15 @@ public static class Core_Themes
         {
             if (control is ToolStrip ts)
             {
-                if (colors.ToolStripBackColor.HasValue) ts.BackColor = colors.ToolStripBackColor.Value;
-                if (colors.ToolStripForeColor.HasValue) ts.ForeColor = colors.ToolStripForeColor.Value;
+                if (colors.ToolStripBackColor.HasValue)
+                {
+                    ts.BackColor = colors.ToolStripBackColor.Value;
+                }
+
+                if (colors.ToolStripForeColor.HasValue)
+                {
+                    ts.ForeColor = colors.ToolStripForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(ts, colors);
             }
@@ -597,8 +739,16 @@ public static class Core_Themes
         {
             if (control is GroupBox gb)
             {
-                if (colors.GroupBoxBackColor.HasValue) gb.BackColor = colors.GroupBoxBackColor.Value;
-                if (colors.GroupBoxForeColor.HasValue) gb.ForeColor = colors.GroupBoxForeColor.Value;
+                if (colors.GroupBoxBackColor.HasValue)
+                {
+                    gb.BackColor = colors.GroupBoxBackColor.Value;
+                }
+
+                if (colors.GroupBoxForeColor.HasValue)
+                {
+                    gb.ForeColor = colors.GroupBoxForeColor.Value;
+                }
+
                 gb.Paint -= AutoShrinkText_Paint;
                 gb.Paint += AutoShrinkText_Paint;
 
@@ -611,7 +761,9 @@ public static class Core_Themes
             if (control is Panel pnl)
             {
                 if (colors.PanelForeColor.HasValue)
+                {
                     pnl.ForeColor = colors.PanelForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(pnl, colors);
             }
@@ -621,8 +773,15 @@ public static class Core_Themes
         {
             if (control is SplitContainer sc)
             {
-                if (colors.SplitContainerBackColor.HasValue) sc.BackColor = colors.SplitContainerBackColor.Value;
-                if (colors.SplitContainerForeColor.HasValue) sc.ForeColor = colors.SplitContainerForeColor.Value;
+                if (colors.SplitContainerBackColor.HasValue)
+                {
+                    sc.BackColor = colors.SplitContainerBackColor.Value;
+                }
+
+                if (colors.SplitContainerForeColor.HasValue)
+                {
+                    sc.ForeColor = colors.SplitContainerForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(sc, colors);
             }
@@ -633,7 +792,9 @@ public static class Core_Themes
             if (control is FlowLayoutPanel flp)
             {
                 if (colors.FlowLayoutPanelForeColor.HasValue)
+                {
                     flp.ForeColor = colors.FlowLayoutPanelForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(flp, colors);
             }
@@ -644,7 +805,9 @@ public static class Core_Themes
             if (control is TableLayoutPanel tlp)
             {
                 if (colors.TableLayoutPanelForeColor.HasValue)
+                {
                     tlp.ForeColor = colors.TableLayoutPanelForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(tlp, colors);
             }
@@ -654,8 +817,15 @@ public static class Core_Themes
         {
             if (control is DateTimePicker dtp)
             {
-                if (colors.DateTimePickerBackColor.HasValue) dtp.BackColor = colors.DateTimePickerBackColor.Value;
-                if (colors.DateTimePickerForeColor.HasValue) dtp.ForeColor = colors.DateTimePickerForeColor.Value;
+                if (colors.DateTimePickerBackColor.HasValue)
+                {
+                    dtp.BackColor = colors.DateTimePickerBackColor.Value;
+                }
+
+                if (colors.DateTimePickerForeColor.HasValue)
+                {
+                    dtp.ForeColor = colors.DateTimePickerForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(dtp, colors);
             }
@@ -665,14 +835,30 @@ public static class Core_Themes
         {
             if (control is MonthCalendar mc)
             {
-                if (colors.MonthCalendarBackColor.HasValue) mc.BackColor = colors.MonthCalendarBackColor.Value;
-                if (colors.MonthCalendarForeColor.HasValue) mc.ForeColor = colors.MonthCalendarForeColor.Value;
+                if (colors.MonthCalendarBackColor.HasValue)
+                {
+                    mc.BackColor = colors.MonthCalendarBackColor.Value;
+                }
+
+                if (colors.MonthCalendarForeColor.HasValue)
+                {
+                    mc.ForeColor = colors.MonthCalendarForeColor.Value;
+                }
+
                 if (colors.MonthCalendarTitleBackColor.HasValue)
+                {
                     mc.TitleBackColor = colors.MonthCalendarTitleBackColor.Value;
+                }
+
                 if (colors.MonthCalendarTitleForeColor.HasValue)
+                {
                     mc.TitleForeColor = colors.MonthCalendarTitleForeColor.Value;
+                }
+
                 if (colors.MonthCalendarTrailingForeColor.HasValue)
+                {
                     mc.TrailingForeColor = colors.MonthCalendarTrailingForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(mc, colors);
             }
@@ -682,8 +868,15 @@ public static class Core_Themes
         {
             if (control is NumericUpDown nud)
             {
-                if (colors.NumericUpDownBackColor.HasValue) nud.BackColor = colors.NumericUpDownBackColor.Value;
-                if (colors.NumericUpDownForeColor.HasValue) nud.ForeColor = colors.NumericUpDownForeColor.Value;
+                if (colors.NumericUpDownBackColor.HasValue)
+                {
+                    nud.BackColor = colors.NumericUpDownBackColor.Value;
+                }
+
+                if (colors.NumericUpDownForeColor.HasValue)
+                {
+                    nud.ForeColor = colors.NumericUpDownForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(nud, colors);
             }
@@ -693,8 +886,15 @@ public static class Core_Themes
         {
             if (control is TrackBar tb)
             {
-                if (colors.TrackBarBackColor.HasValue) tb.BackColor = colors.TrackBarBackColor.Value;
-                if (colors.TrackBarForeColor.HasValue) tb.ForeColor = colors.TrackBarForeColor.Value;
+                if (colors.TrackBarBackColor.HasValue)
+                {
+                    tb.BackColor = colors.TrackBarBackColor.Value;
+                }
+
+                if (colors.TrackBarForeColor.HasValue)
+                {
+                    tb.ForeColor = colors.TrackBarForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(tb, colors);
             }
@@ -704,8 +904,15 @@ public static class Core_Themes
         {
             if (control is ProgressBar pb)
             {
-                if (colors.ProgressBarBackColor.HasValue) pb.BackColor = colors.ProgressBarBackColor.Value;
-                if (colors.ProgressBarForeColor.HasValue) pb.ForeColor = colors.ProgressBarForeColor.Value;
+                if (colors.ProgressBarBackColor.HasValue)
+                {
+                    pb.BackColor = colors.ProgressBarBackColor.Value;
+                }
+
+                if (colors.ProgressBarForeColor.HasValue)
+                {
+                    pb.ForeColor = colors.ProgressBarForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(pb, colors);
             }
@@ -715,8 +922,15 @@ public static class Core_Themes
         {
             if (control is Controls.Shared.ProgressBarUserControl pbuc)
             {
-                if (colors.UserControlBackColor.HasValue) pbuc.BackColor = colors.UserControlBackColor.Value;
-                if (colors.UserControlForeColor.HasValue) pbuc.ForeColor = colors.UserControlForeColor.Value;
+                if (colors.UserControlBackColor.HasValue)
+                {
+                    pbuc.BackColor = colors.UserControlBackColor.Value;
+                }
+
+                if (colors.UserControlForeColor.HasValue)
+                {
+                    pbuc.ForeColor = colors.UserControlForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(pbuc, colors);
             }
@@ -726,8 +940,15 @@ public static class Core_Themes
         {
             if (control is HScrollBar hsb)
             {
-                if (colors.HScrollBarBackColor.HasValue) hsb.BackColor = colors.HScrollBarBackColor.Value;
-                if (colors.HScrollBarForeColor.HasValue) hsb.ForeColor = colors.HScrollBarForeColor.Value;
+                if (colors.HScrollBarBackColor.HasValue)
+                {
+                    hsb.BackColor = colors.HScrollBarBackColor.Value;
+                }
+
+                if (colors.HScrollBarForeColor.HasValue)
+                {
+                    hsb.ForeColor = colors.HScrollBarForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(hsb, colors);
             }
@@ -737,8 +958,15 @@ public static class Core_Themes
         {
             if (control is VScrollBar vsb)
             {
-                if (colors.VScrollBarBackColor.HasValue) vsb.BackColor = colors.VScrollBarBackColor.Value;
-                if (colors.VScrollBarForeColor.HasValue) vsb.ForeColor = colors.VScrollBarForeColor.Value;
+                if (colors.VScrollBarBackColor.HasValue)
+                {
+                    vsb.BackColor = colors.VScrollBarBackColor.Value;
+                }
+
+                if (colors.VScrollBarForeColor.HasValue)
+                {
+                    vsb.ForeColor = colors.VScrollBarForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(vsb, colors);
             }
@@ -749,7 +977,9 @@ public static class Core_Themes
             if (control is PictureBox pic)
             {
                 if (colors.PictureBoxBackColor.HasValue)
+                {
                     pic.BackColor = colors.PictureBoxBackColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(pic, colors);
             }
@@ -759,8 +989,15 @@ public static class Core_Themes
         {
             if (control is PropertyGrid pg)
             {
-                if (colors.PropertyGridBackColor.HasValue) pg.BackColor = colors.PropertyGridBackColor.Value;
-                if (colors.PropertyGridForeColor.HasValue) pg.ForeColor = colors.PropertyGridForeColor.Value;
+                if (colors.PropertyGridBackColor.HasValue)
+                {
+                    pg.BackColor = colors.PropertyGridBackColor.Value;
+                }
+
+                if (colors.PropertyGridForeColor.HasValue)
+                {
+                    pg.ForeColor = colors.PropertyGridForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(pg, colors);
             }
@@ -770,8 +1007,15 @@ public static class Core_Themes
         {
             if (control is DomainUpDown dud)
             {
-                if (colors.DomainUpDownBackColor.HasValue) dud.BackColor = colors.DomainUpDownBackColor.Value;
-                if (colors.DomainUpDownForeColor.HasValue) dud.ForeColor = colors.DomainUpDownForeColor.Value;
+                if (colors.DomainUpDownBackColor.HasValue)
+                {
+                    dud.BackColor = colors.DomainUpDownBackColor.Value;
+                }
+
+                if (colors.DomainUpDownForeColor.HasValue)
+                {
+                    dud.ForeColor = colors.DomainUpDownForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(dud, colors);
             }
@@ -782,7 +1026,9 @@ public static class Core_Themes
             if (control is WebBrowser wb)
             {
                 if (colors.WebBrowserBackColor.HasValue)
+                {
                     wb.BackColor = colors.WebBrowserBackColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(wb, colors);
             }
@@ -793,9 +1039,13 @@ public static class Core_Themes
             if (control is UserControl uc)
             {
                 // Always use the form background color for UserControl
-                var formBackColor = Core_AppThemes.GetCurrentTheme().Colors.FormBackColor ?? Color.White;
+                Color formBackColor = Core_AppThemes.GetCurrentTheme().Colors.FormBackColor ?? Color.White;
                 uc.BackColor = formBackColor;
-                if (colors.UserControlForeColor.HasValue) uc.ForeColor = colors.UserControlForeColor.Value;
+                if (colors.UserControlForeColor.HasValue)
+                {
+                    uc.ForeColor = colors.UserControlForeColor.Value;
+                }
+
                 ApplyOwnerDrawThemes(uc, colors);
             }
         }
@@ -804,15 +1054,35 @@ public static class Core_Themes
         {
             if (control is LinkLabel ll)
             {
-                if (colors.LinkLabelLinkColor.HasValue) ll.LinkColor = colors.LinkLabelLinkColor.Value;
+                if (colors.LinkLabelLinkColor.HasValue)
+                {
+                    ll.LinkColor = colors.LinkLabelLinkColor.Value;
+                }
+
                 if (colors.LinkLabelActiveLinkColor.HasValue)
+                {
                     ll.ActiveLinkColor = colors.LinkLabelActiveLinkColor.Value;
+                }
+
                 if (colors.LinkLabelVisitedLinkColor.HasValue)
+                {
                     ll.VisitedLinkColor = colors.LinkLabelVisitedLinkColor.Value;
-                if (colors.LinkLabelBackColor.HasValue) ll.BackColor = colors.LinkLabelBackColor.Value;
-                if (colors.LinkLabelForeColor.HasValue) ll.ForeColor = colors.LinkLabelForeColor.Value;
+                }
+
+                if (colors.LinkLabelBackColor.HasValue)
+                {
+                    ll.BackColor = colors.LinkLabelBackColor.Value;
+                }
+
+                if (colors.LinkLabelForeColor.HasValue)
+                {
+                    ll.ForeColor = colors.LinkLabelForeColor.Value;
+                }
+
                 if (colors.LinkLabelHoverColor.HasValue)
+                {
                     OwnerDrawThemeHelper.AttachLinkLabelHoverColor(ll, colors.LinkLabelHoverColor.Value);
+                }
             }
         }
 
@@ -820,8 +1090,15 @@ public static class Core_Themes
         {
             if (control is ContextMenuStrip cms)
             {
-                if (colors.ContextMenuBackColor.HasValue) cms.BackColor = colors.ContextMenuBackColor.Value;
-                if (colors.ContextMenuForeColor.HasValue) cms.ForeColor = colors.ContextMenuForeColor.Value;
+                if (colors.ContextMenuBackColor.HasValue)
+                {
+                    cms.BackColor = colors.ContextMenuBackColor.Value;
+                }
+
+                if (colors.ContextMenuForeColor.HasValue)
+                {
+                    cms.ForeColor = colors.ContextMenuForeColor.Value;
+                }
 
                 ApplyOwnerDrawThemes(cms, colors);
             }
@@ -829,60 +1106,98 @@ public static class Core_Themes
 
         public static void ApplyThemeToDataGridView(DataGridView dataGridView)
         {
-            if (dataGridView == null) return;
+            if (dataGridView == null)
+            {
+                return;
+            }
 
-            var colors = Core_AppThemes.GetCurrentTheme().Colors;
+            Model_UserUiColors colors = Core_AppThemes.GetCurrentTheme().Colors;
 
             if (colors.DataGridBackColor.HasValue)
+            {
                 dataGridView.BackgroundColor = colors.DataGridBackColor.Value;
-            if (colors.DataGridForeColor.HasValue) dataGridView.ForeColor = colors.DataGridForeColor.Value;
+            }
+
+            if (colors.DataGridForeColor.HasValue)
+            {
+                dataGridView.ForeColor = colors.DataGridForeColor.Value;
+            }
 
             if (dataGridView.ColumnHeadersDefaultCellStyle != null)
             {
                 if (colors.DataGridHeaderBackColor.HasValue)
+                {
                     dataGridView.ColumnHeadersDefaultCellStyle.BackColor = colors.DataGridHeaderBackColor.Value;
+                }
+
                 if (colors.DataGridHeaderForeColor.HasValue)
+                {
                     dataGridView.ColumnHeadersDefaultCellStyle.ForeColor = colors.DataGridHeaderForeColor.Value;
+                }
             }
 
             if (dataGridView.RowsDefaultCellStyle != null)
             {
                 if (colors.DataGridRowBackColor.HasValue)
+                {
                     dataGridView.RowsDefaultCellStyle.BackColor = colors.DataGridRowBackColor.Value;
+                }
+
                 if (colors.DataGridForeColor.HasValue)
+                {
                     dataGridView.RowsDefaultCellStyle.ForeColor = colors.DataGridForeColor.Value;
+                }
             }
 
             if (dataGridView.AlternatingRowsDefaultCellStyle != null)
             {
                 if (colors.DataGridAltRowBackColor.HasValue)
+                {
                     dataGridView.AlternatingRowsDefaultCellStyle.BackColor = colors.DataGridAltRowBackColor.Value;
+                }
+
                 if (colors.DataGridForeColor.HasValue)
+                {
                     dataGridView.AlternatingRowsDefaultCellStyle.ForeColor = colors.DataGridForeColor.Value;
+                }
             }
 
-            if (colors.DataGridGridColor.HasValue) dataGridView.GridColor = colors.DataGridGridColor.Value;
+            if (colors.DataGridGridColor.HasValue)
+            {
+                dataGridView.GridColor = colors.DataGridGridColor.Value;
+            }
 
             if (colors.DataGridSelectionBackColor.HasValue)
+            {
                 dataGridView.DefaultCellStyle.SelectionBackColor = colors.DataGridSelectionBackColor.Value;
+            }
+
             if (colors.DataGridSelectionForeColor.HasValue)
+            {
                 dataGridView.DefaultCellStyle.SelectionForeColor = colors.DataGridSelectionForeColor.Value;
+            }
+
             if (colors.DataGridBorderColor.HasValue)
+            {
                 OwnerDrawThemeHelper.ApplyDataGridViewBorderColor(dataGridView, colors.DataGridBorderColor.Value);
+            }
         }
 
         public static void SizeDataGrid(DataGridView dataGridView)
         {
-            if (dataGridView == null) throw new ArgumentNullException(nameof(dataGridView));
+            if (dataGridView == null)
+            {
+                throw new ArgumentNullException(nameof(dataGridView));
+            }
 
             dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
             dataGridView.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
             dataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
 
-            var preferredWidths = new int[dataGridView.Columns.Count];
-            var totalPreferredWidth = 0;
-            for (var i = 0; i < dataGridView.Columns.Count; i++)
+            int[] preferredWidths = new int[dataGridView.Columns.Count];
+            int totalPreferredWidth = 0;
+            for (int i = 0; i < dataGridView.Columns.Count; i++)
             {
                 preferredWidths[i] = dataGridView.Columns[i].Width;
                 totalPreferredWidth += preferredWidths[i];
@@ -890,37 +1205,43 @@ public static class Core_Themes
 
             dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-            for (var i = 0; i < dataGridView.Columns.Count; i++)
+            for (int i = 0; i < dataGridView.Columns.Count; i++)
+            {
                 if (totalPreferredWidth > 0)
+                {
                     dataGridView.Columns[i].FillWeight = (float)preferredWidths[i] / totalPreferredWidth * 100f;
+                }
                 else
+                {
                     dataGridView.Columns[i].FillWeight = 100f / dataGridView.Columns.Count;
+                }
+            }
         }
 
         // Paint handler that auto-shrinks text and respects text alignment for controls like Label, Button, TabPage, etc.
         private static void AutoShrinkText_Paint(object? sender, PaintEventArgs e)
         {
-            if (sender is not Control control) return;
+            if (sender is not Control control)
+            {
+                return;
+            }
 
             // Use dimmed colors if disabled
-            var backColor = MaybeDimIfDisabled(control, control.BackColor);
-            var foreColor = MaybeDimIfDisabled(control, control.ForeColor);
+            Color backColor = MaybeDimIfDisabled(control, control.BackColor);
+            Color foreColor = MaybeDimIfDisabled(control, control.ForeColor);
 
             e.Graphics.Clear(backColor);
 
-            var text = control.Text;
-            var font = control.Font;
-            var clientRectangle = control.ClientRectangle;
+            string text = control.Text;
+            Font font = control.Font;
+            Rectangle clientRectangle = control.ClientRectangle;
 
             // Determine alignment based on control type and properties
-            var format = new StringFormat
-            {
-                Trimming = StringTrimming.EllipsisCharacter
-            };
+            StringFormat format = new() { Trimming = StringTrimming.EllipsisCharacter };
 
             if (control is Label label)
             {
-                var align = label.TextAlign;
+                ContentAlignment align = label.TextAlign;
                 switch (align)
                 {
                     case ContentAlignment.TopLeft:
@@ -963,7 +1284,7 @@ public static class Core_Themes
             }
             else if (control is Button btn)
             {
-                var align = btn.TextAlign;
+                ContentAlignment align = btn.TextAlign;
                 switch (align)
                 {
                     case ContentAlignment.TopLeft:
@@ -1062,8 +1383,8 @@ public static class Core_Themes
                 format.LineAlignment = StringAlignment.Center;
             }
 
-            var textSize = e.Graphics.MeasureString(text, font, clientRectangle.Size, format);
-            var shrinkFont = font;
+            SizeF textSize = e.Graphics.MeasureString(text, font, clientRectangle.Size, format);
+            Font shrinkFont = font;
 
             while ((textSize.Width > clientRectangle.Width || textSize.Height > clientRectangle.Height) &&
                    shrinkFont.Size > 1)
@@ -1072,20 +1393,20 @@ public static class Core_Themes
                 textSize = e.Graphics.MeasureString(text, shrinkFont, clientRectangle.Size, format);
             }
 
-            using var brush = new SolidBrush(foreColor);
+            using SolidBrush brush = new(foreColor);
             e.Graphics.DrawString(text, shrinkFont, brush, clientRectangle, format);
 
             // Draw border for Button controls
             if (control is Button btnBorder)
             {
-                var borderColor = btnBorder.FlatAppearance != null &&
-                                  btnBorder.FlatAppearance.BorderColor != Color.Empty
+                Color borderColor = btnBorder.FlatAppearance != null &&
+                                    btnBorder.FlatAppearance.BorderColor != Color.Empty
                     ? btnBorder.FlatAppearance.BorderColor
                     : btnBorder.Parent != null
                         ? btnBorder.Parent.BackColor
                         : SystemColors.ControlDark;
                 borderColor = MaybeDimIfDisabled(control, borderColor);
-                var borderWidth = btnBorder.FlatAppearance?.BorderSize ?? 1;
+                int borderWidth = btnBorder.FlatAppearance?.BorderSize ?? 1;
                 ControlPaint.DrawBorder(e.Graphics, clientRectangle, borderColor, borderWidth, ButtonBorderStyle.Solid,
                     borderColor, borderWidth, ButtonBorderStyle.Solid,
                     borderColor, borderWidth, ButtonBorderStyle.Solid,
@@ -1113,23 +1434,23 @@ public static class Core_Themes
 
                 void GroupBox_OwnerDrawBorder(object? sender, PaintEventArgs e)
                 {
-                    var borderColor = colors.GroupBoxBorderColor ?? Color.Gray;
-                    var textColor = colors.GroupBoxForeColor ?? groupBox.ForeColor;
-                    var backColor = colors.GroupBoxBackColor ?? groupBox.BackColor;
-                    var rect = groupBox.ClientRectangle;
+                    Color borderColor = colors.GroupBoxBorderColor ?? Color.Gray;
+                    Color textColor = colors.GroupBoxForeColor ?? groupBox.ForeColor;
+                    Color backColor = colors.GroupBoxBackColor ?? groupBox.BackColor;
+                    Rectangle rect = groupBox.ClientRectangle;
                     rect.Width -= 1;
                     rect.Height -= 1;
-                    using (var b = new SolidBrush(backColor))
+                    using (SolidBrush b = new(backColor))
                     {
                         e.Graphics.FillRectangle(b, rect);
                     }
 
-                    var text = groupBox.Text;
-                    var font = groupBox.Font;
-                    var textSize = e.Graphics.MeasureString(text, font);
-                    var textPadding = 8;
-                    var textRect = new Rectangle(textPadding, 0, (int)textSize.Width + 2, (int)textSize.Height);
-                    using (var p = new Pen(borderColor, 1))
+                    string text = groupBox.Text;
+                    Font font = groupBox.Font;
+                    SizeF textSize = e.Graphics.MeasureString(text, font);
+                    int textPadding = 8;
+                    Rectangle textRect = new(textPadding, 0, (int)textSize.Width + 2, (int)textSize.Height);
+                    using (Pen p = new(borderColor, 1))
                     {
                         e.Graphics.DrawLine(p, rect.Left, rect.Top + textRect.Height / 2, textRect.Left - 2,
                             rect.Top + textRect.Height / 2);
@@ -1140,12 +1461,12 @@ public static class Core_Themes
                         e.Graphics.DrawLine(p, rect.Right, rect.Top + textRect.Height / 2, rect.Right, rect.Bottom);
                     }
 
-                    using (var b = new SolidBrush(backColor))
+                    using (SolidBrush b = new(backColor))
                     {
                         e.Graphics.FillRectangle(b, textRect);
                     }
 
-                    using (var b = new SolidBrush(textColor))
+                    using (SolidBrush b = new(textColor))
                     {
                         e.Graphics.DrawString(text, font, b, textRect.Left, 0);
                     }
@@ -1171,10 +1492,8 @@ public static class Core_Themes
             }
         }
 
-        public static void ApplyDataGridViewBorderColor(DataGridView dgv, Color borderColor)
-        {
+        public static void ApplyDataGridViewBorderColor(DataGridView dgv, Color borderColor) =>
             dgv.GridColor = borderColor;
-        }
     }
 
     private static class FocusUtils
@@ -1182,7 +1501,10 @@ public static class Core_Themes
         public static void ApplyFocusEventHandling(Control control, Model_UserUiColors colors)
         {
             if (!CanControlReceiveFocus(control))
+            {
                 return;
+            }
+
             Apply(control, colors);
         }
 
@@ -1193,7 +1515,9 @@ public static class Core_Themes
             {
                 ApplyFocusEventHandling(ctrl, colors);
                 if (ctrl.HasChildren)
+                {
                     ApplyFocusEventHandlingToControls(ctrl.Controls, colors);
+                }
             }
         }
 
@@ -1201,9 +1525,9 @@ public static class Core_Themes
         {
             if (sender is Control ctrl && ctrl.Focused)
             {
-                var colors = Core_AppThemes.GetCurrentTheme().Colors;
-                var focusBackColor = colors.ControlFocusedBackColor ?? Color.LightBlue;
-                var normalForeColor = GetControlThemeForeColor(ctrl, colors);
+                Model_UserUiColors colors = Core_AppThemes.GetCurrentTheme().Colors;
+                Color focusBackColor = colors.ControlFocusedBackColor ?? Color.LightBlue;
+                Color normalForeColor = GetControlThemeForeColor(ctrl, colors);
                 ctrl.BackColor = focusBackColor;
                 ctrl.ForeColor = normalForeColor;
                 switch (ctrl)
@@ -1220,8 +1544,8 @@ public static class Core_Themes
         {
             if (sender is Control ctrl)
             {
-                var colors = Core_AppThemes.GetCurrentTheme().Colors;
-                var normalBackColor = GetControlThemeBackColor(ctrl, colors);
+                Model_UserUiColors colors = Core_AppThemes.GetCurrentTheme().Colors;
+                Color normalBackColor = GetControlThemeBackColor(ctrl, colors);
                 ctrl.BackColor = normalBackColor;
             }
         }
@@ -1229,32 +1553,53 @@ public static class Core_Themes
         private static void TextBox_Click_SelectAll(object? sender, EventArgs e)
         {
             if (sender is TextBox tb)
+            {
                 tb.SelectAll();
+            }
         }
 
         private static void ComboBox_DropDown_SelectAll(object? sender, EventArgs e)
         {
             if (sender is ComboBox cb && cb.DropDownStyle != ComboBoxStyle.DropDownList)
+            {
                 cb.SelectAll();
+            }
         }
 
         private static void Apply(Control control, Model_UserUiColors colors)
         {
             control.Enter -= Control_Enter_Handler;
             control.Leave -= Control_Leave_Handler;
-            if (control is TextBox tb) tb.Click -= TextBox_Click_SelectAll;
-            if (control is ComboBox cb) cb.DropDown -= ComboBox_DropDown_SelectAll;
+            if (control is TextBox tb)
+            {
+                tb.Click -= TextBox_Click_SelectAll;
+            }
+
+            if (control is ComboBox cb)
+            {
+                cb.DropDown -= ComboBox_DropDown_SelectAll;
+            }
 
             control.Enter += Control_Enter_Handler;
             control.Leave += Control_Leave_Handler;
-            if (control is TextBox tbx) tbx.Click += TextBox_Click_SelectAll;
-            if (control is ComboBox cbx) cbx.DropDown += ComboBox_DropDown_SelectAll;
+            if (control is TextBox tbx)
+            {
+                tbx.Click += TextBox_Click_SelectAll;
+            }
+
+            if (control is ComboBox cbx)
+            {
+                cbx.DropDown += ComboBox_DropDown_SelectAll;
+            }
         }
 
         public static bool CanControlReceiveFocus(Control control)
         {
             if (!control.Enabled || !control.Visible || !control.TabStop)
+            {
                 return false;
+            }
+
             return control switch
             {
                 CheckedListBox => false,
@@ -1281,9 +1626,8 @@ public static class Core_Themes
             };
         }
 
-        private static Color GetControlThemeBackColor(Control control, Model_UserUiColors colors)
-        {
-            return control switch
+        private static Color GetControlThemeBackColor(Control control, Model_UserUiColors colors) =>
+            control switch
             {
                 TextBox => colors.TextBoxBackColor ?? colors.ControlBackColor ?? Color.White,
                 ComboBox => colors.ComboBoxBackColor ?? colors.ControlBackColor ?? Color.White,
@@ -1293,11 +1637,9 @@ public static class Core_Themes
                 DateTimePicker => colors.DateTimePickerBackColor ?? colors.ControlBackColor ?? Color.White,
                 _ => colors.ControlBackColor ?? Color.White
             };
-        }
 
-        private static Color GetControlThemeForeColor(Control control, Model_UserUiColors colors)
-        {
-            return control switch
+        private static Color GetControlThemeForeColor(Control control, Model_UserUiColors colors) =>
+            control switch
             {
                 TextBox => colors.TextBoxForeColor ?? colors.ControlForeColor ?? Color.Black,
                 ComboBox => colors.ComboBoxForeColor ?? colors.ControlForeColor ?? Color.Black,
@@ -1307,7 +1649,6 @@ public static class Core_Themes
                 DateTimePicker => colors.DateTimePickerForeColor ?? colors.ControlForeColor ?? Color.Black,
                 _ => colors.ControlForeColor ?? Color.Black
             };
-        }
     }
 
     #endregion
@@ -1348,27 +1689,33 @@ public static class Core_Themes
         {
             try
             {
-                var themes = new Dictionary<string, AppTheme>();
-                var helper = new Helper_Database_Core(Model_AppVariables.ConnectionString);
-                var dt = await helper.ExecuteDataTable("SELECT ThemeName, SettingsJson FROM app_themes", null, true,
+                Dictionary<string, AppTheme> themes = new();
+                Helper_Database_Core helper = new(Model_AppVariables.ConnectionString);
+                DataTable dt = await helper.ExecuteDataTable("SELECT ThemeName, SettingsJson FROM app_themes", null,
+                    true,
                     CommandType.Text);
                 foreach (DataRow row in dt.Rows)
                 {
-                    var themeName = row["ThemeName"]?.ToString();
-                    var SettingsJson = row["SettingsJson"]?.ToString();
+                    string? themeName = row["ThemeName"]?.ToString();
+                    string? SettingsJson = row["SettingsJson"]?.ToString();
                     if (!string.IsNullOrWhiteSpace(themeName) && !string.IsNullOrWhiteSpace(SettingsJson))
+                    {
                         try
                         {
-                            var options = new System.Text.Json.JsonSerializerOptions();
+                            JsonSerializerOptions options = new();
                             options.Converters.Add(new JsonColorConverter());
-                            var colors =
+                            Model_UserUiColors? colors =
                                 System.Text.Json.JsonSerializer.Deserialize<Model_UserUiColors>(SettingsJson, options);
-                            if (colors != null) themes[themeName] = new AppTheme { Colors = colors, FormFont = null };
+                            if (colors != null)
+                            {
+                                themes[themeName] = new AppTheme { Colors = colors, FormFont = null };
+                            }
                         }
                         catch (System.Text.Json.JsonException jsonEx)
                         {
                             LoggingUtility.LogApplicationError(jsonEx);
                         }
+                    }
                 }
 
                 Themes = themes;
@@ -1403,9 +1750,12 @@ public static class Core_Themes
         {
             try
             {
-                var themeName = Model_AppVariables.ThemeName ?? "Default";
-                if (Themes.TryGetValue(themeName, out var theme))
+                string themeName = Model_AppVariables.ThemeName ?? "Default";
+                if (Themes.TryGetValue(themeName, out AppTheme? theme))
+                {
                     return theme;
+                }
+
                 Debug.Assert(Themes != null, "Themes dictionary is not initialized.");
                 return Themes.ContainsKey("Default") ? Themes["Default"] : new AppTheme();
             }
@@ -1420,8 +1770,11 @@ public static class Core_Themes
         {
             try
             {
-                if (Themes.TryGetValue(themeName, out var theme))
+                if (Themes.TryGetValue(themeName, out AppTheme? theme))
+                {
                     return theme;
+                }
+
                 Debug.Assert(Themes != null, "Themes dictionary is not initialized.");
                 return Themes.ContainsKey("Default") ? Themes["Default"] : new AppTheme();
             }
@@ -1436,8 +1789,12 @@ public static class Core_Themes
         {
             try
             {
-                var themeName = Model_AppVariables.ThemeName ?? "Default";
-                if (!Themes.ContainsKey(themeName)) themeName = "Default";
+                string themeName = Model_AppVariables.ThemeName ?? "Default";
+                if (!Themes.ContainsKey(themeName))
+                {
+                    themeName = "Default";
+                }
+
                 Debug.Assert(Themes != null, "Themes dictionary is not initialized.");
                 return themeName;
             }
@@ -1459,12 +1816,18 @@ public static class Core_Themes
                 await LoadAndSetUserThemeNameAsync(userId);
                 await LoadThemesFromDatabaseAsync();
 
-                foreach (var theme in Themes.Values)
+                foreach (AppTheme theme in Themes.Values)
+                {
                     if (theme.FormFont == null)
+                    {
                         theme.FormFont = new Font("Segoe UI", Model_AppVariables.ThemeFontSize);
+                    }
                     else if (Math.Abs(theme.FormFont.Size - Model_AppVariables.ThemeFontSize) > 0.01f)
+                    {
                         theme.FormFont = new Font(theme.FormFont.FontFamily, Model_AppVariables.ThemeFontSize,
                             theme.FormFont.Style);
+                    }
+                }
 
                 Debug.WriteLine($"Themes count: {Themes.Count}, using font size: {Model_AppVariables.ThemeFontSize}");
                 LoggingUtility.Log($"Theme system initialized with font size: {Model_AppVariables.ThemeFontSize}");

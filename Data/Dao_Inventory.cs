@@ -1,8 +1,7 @@
-using System.Collections.Generic;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Data;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using MTM_Inventory_Application.Helpers;
 using MySql.Data.MySqlClient;
 
@@ -21,28 +20,20 @@ public static class Dao_Inventory
 
     #region Search Methods
 
-    public static async Task<DataTable> GetInventoryByPartIdAsync(string partId, bool useAsync = false)
-    {
+    public static async Task<DataTable> GetInventoryByPartIdAsync(string partId, bool useAsync = false) =>
         // Ensure the stored procedure returns BatchNumber AS 'Batch Number'
-        return await HelperDatabaseCore.ExecuteDataTable(
+        await HelperDatabaseCore.ExecuteDataTable(
             "mtm_wip_application.inv_inventory_Get_ByPartID",
             new Dictionary<string, object> { { "p_PartID", partId } },
             useAsync, CommandType.StoredProcedure);
-    }
 
     public static async Task<DataTable> GetInventoryByPartIdAndOperationAsync(string partId, string operation,
-        bool useAsync = false)
-    {
+        bool useAsync = false) =>
         // Ensure the stored procedure returns BatchNumber AS 'Batch Number'
-        return await HelperDatabaseCore.ExecuteDataTable(
+        await HelperDatabaseCore.ExecuteDataTable(
             "mtm_wip_application.inv_inventory_Get_ByPartIDAndOperation",
-            new Dictionary<string, object>
-            {
-                { "p_PartID", partId },
-                { "o_Operation", operation }
-            },
+            new Dictionary<string, object> { { "p_PartID", partId }, { "o_Operation", operation } },
             useAsync, CommandType.StoredProcedure);
-    }
 
     #endregion
 
@@ -62,7 +53,7 @@ public static class Dao_Inventory
         // If itemType is null or empty, retrieve it from md_part_ids
         if (string.IsNullOrWhiteSpace(itemType))
         {
-            var itemTypeObj = await HelperDatabaseCore.ExecuteScalar(
+            object? itemTypeObj = await HelperDatabaseCore.ExecuteScalar(
                 "SELECT `ItemType` FROM `md_part_ids` WHERE `PartID` = @PartID",
                 new Dictionary<string, object> { { "@PartID", partId } },
                 useAsync, CommandType.Text);
@@ -73,13 +64,15 @@ public static class Dao_Inventory
         // If batchNumber is null or empty, get the next sequential batch number (max 10 digits, no gaps)
         if (string.IsNullOrWhiteSpace(batchNumber))
         {
-            var batchNumberObj = await HelperDatabaseCore.ExecuteScalar(
+            object? batchNumberObj = await HelperDatabaseCore.ExecuteScalar(
                 "SELECT IFNULL(MAX(CAST(`BatchNumber` AS UNSIGNED)), 0) + 1 FROM `inv_inventory` WHERE LENGTH(`BatchNumber`) <= 10",
                 null, useAsync, CommandType.Text);
 
-            var batchNumInt = 1;
-            if (batchNumberObj != null && int.TryParse(batchNumberObj.ToString(), out var bn))
+            int batchNumInt = 1;
+            if (batchNumberObj != null && int.TryParse(batchNumberObj.ToString(), out int bn))
+            {
                 batchNumInt = bn;
+            }
 
             // Pad only if the batch number is 10 digits or fewer
             batchNumber = batchNumInt.ToString().Length > 10
@@ -87,7 +80,7 @@ public static class Dao_Inventory
                 : batchNumInt.ToString("D10");
         }
 
-        var result = await HelperDatabaseCore.ExecuteNonQuery(
+        int result = await HelperDatabaseCore.ExecuteNonQuery(
             "inv_inventory_Add_Item",
             new Dictionary<string, object>
             {
@@ -109,30 +102,34 @@ public static class Dao_Inventory
 
     public static async Task<int> RemoveInventoryItemsFromDataGridViewAsync(DataGridView dgv, bool useAsync = false)
     {
-        var removedCount = 0;
+        int removedCount = 0;
 
         if (dgv == null || dgv.SelectedRows.Count == 0)
+        {
             return 0;
+        }
 
         foreach (DataGridViewRow row in dgv.SelectedRows)
         {
             // Use standard column names, or map as needed
-            var partId = row.Cells["PartID"].Value?.ToString() ?? "";
-            var location = row.Cells["Location"].Value?.ToString() ?? "";
-            var operation = row.Cells["Operation"].Value?.ToString() ?? "";
-            var quantity = int.TryParse(row.Cells["Quantity"].Value?.ToString(), out var qty) ? qty : 0;
-            var batchNumber =
+            string partId = row.Cells["PartID"].Value?.ToString() ?? "";
+            string location = row.Cells["Location"].Value?.ToString() ?? "";
+            string operation = row.Cells["Operation"].Value?.ToString() ?? "";
+            int quantity = int.TryParse(row.Cells["Quantity"].Value?.ToString(), out int qty) ? qty : 0;
+            string batchNumber =
                 row.Cells["BatchNumber"].Value?.ToString() ?? ""; // if your column is named "BatchNumber"
-            var itemType = row.Cells["ItemType"].Value?.ToString() ?? "";
-            var user = row.Cells["User"].Value?.ToString() ?? "";
-            var notes = row.Cells["Notes"].Value?.ToString() ?? "";
+            string itemType = row.Cells["ItemType"].Value?.ToString() ?? "";
+            string user = row.Cells["User"].Value?.ToString() ?? "";
+            string notes = row.Cells["Notes"].Value?.ToString() ?? "";
 
             // Optionally skip rows with missing required fields
             if (string.IsNullOrWhiteSpace(partId) || string.IsNullOrWhiteSpace(location) ||
                 string.IsNullOrWhiteSpace(operation))
+            {
                 continue;
+            }
 
-            var result = await RemoveInventoryItemAsync(
+            int result = await RemoveInventoryItemAsync(
                 partId,
                 location,
                 operation,
@@ -144,7 +141,9 @@ public static class Dao_Inventory
                 useAsync);
 
             if (result > 0)
+            {
                 removedCount += result;
+            }
         }
 
         return removedCount;
@@ -162,7 +161,7 @@ public static class Dao_Inventory
         string notes,
         bool useAsync = false)
     {
-        var result = await HelperDatabaseCore.ExecuteNonQuery(
+        int result = await HelperDatabaseCore.ExecuteNonQuery(
             "mtm_wip_application.inv_inventory_Remove_Item",
             new Dictionary<string, object>
             {
@@ -183,12 +182,12 @@ public static class Dao_Inventory
     public static async Task TransferPartSimpleAsync(string batchNumber, string partId, string operation,
         string quantity, string newLocation)
     {
-        var connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
+        string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
 
-        await using var connection = new MySqlConnection(connectionString);
+        await using MySqlConnection connection = new(connectionString);
         await connection.OpenAsync();
 
-        await using var command = new MySqlCommand("inv_inventory_Transfer_Part", connection);
+        await using MySqlCommand command = new("inv_inventory_Transfer_Part", connection);
         command.CommandType = CommandType.StoredProcedure;
 
         command.Parameters.AddWithValue("@in_BatchNumber", batchNumber);
@@ -205,10 +204,10 @@ public static class Dao_Inventory
     public static async Task TransferInventoryQuantityAsync(string batchNumber, string partId, string operation,
         int transferQuantity, int originalQuantity, string newLocation, string user)
     {
-        var connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
-        await using var connection = new MySqlConnection(connectionString);
+        string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
+        await using MySqlConnection connection = new(connectionString);
         await connection.OpenAsync();
-        await using var command = new MySqlCommand("inv_inventory_transfer_quantity", connection);
+        await using MySqlCommand command = new("inv_inventory_transfer_quantity", connection);
         command.CommandType = CommandType.StoredProcedure;
         command.Parameters.AddWithValue("@in_BatchNumber", batchNumber);
         command.Parameters.AddWithValue("@in_PartID", partId);
@@ -223,10 +222,10 @@ public static class Dao_Inventory
 
     public static async Task FixBatchNumbersAsync()
     {
-        var connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
-        await using var connection = new MySqlConnection(connectionString);
+        string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
+        await using MySqlConnection connection = new(connectionString);
         await connection.OpenAsync();
-        await using var command = new MySqlCommand("inv_inventory_Fix_BatchNumbers", connection);
+        await using MySqlCommand command = new("inv_inventory_Fix_BatchNumbers", connection);
         command.CommandType = CommandType.StoredProcedure;
         await command.ExecuteNonQueryAsync();
     }

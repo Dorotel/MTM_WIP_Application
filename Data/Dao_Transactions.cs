@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Text;
-using MySql.Data.MySqlClient;
 using MTM_Inventory_Application.Models;
+using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Data;
 
@@ -10,10 +11,7 @@ internal class Dao_Transactions
 {
     private readonly string _connectionString;
 
-    public Dao_Transactions(string connectionString)
-    {
-        _connectionString = connectionString;
-    }
+    public Dao_Transactions(string connectionString) => _connectionString = connectionString;
 
     /// <summary>
     /// Retrieves transactions using any combination of provided search fields, with sorting and paging.
@@ -39,9 +37,9 @@ internal class Dao_Transactions
         int pageSize = 20 // Number of records per page
     )
     {
-        var transactions = new List<Model_Transactions>();
-        var query = new StringBuilder("SELECT * FROM inv_transaction WHERE 1=1");
-        var parameters = new List<MySqlParameter>();
+        List<Model_Transactions> transactions = new();
+        StringBuilder query = new("SELECT * FROM inv_transaction WHERE 1=1");
+        List<MySqlParameter> parameters = new();
 
         // Security: restrict non-admins to their own transactions
         if (!isAdmin && !string.IsNullOrEmpty(userName))
@@ -122,29 +120,46 @@ internal class Dao_Transactions
         }
 
         // Sorting
-        var validColumns = new HashSet<string>
+        HashSet<string> validColumns = new()
         {
-            "ID", "TransactionType", "BatchNumber", "PartID", "FromLocation",
-            "ToLocation", "Operation", "Quantity", "Notes", "User", "ItemType", "ReceiveDate"
+            "ID",
+            "TransactionType",
+            "BatchNumber",
+            "PartID",
+            "FromLocation",
+            "ToLocation",
+            "Operation",
+            "Quantity",
+            "Notes",
+            "User",
+            "ItemType",
+            "ReceiveDate"
         };
-        if (!validColumns.Contains(sortColumn)) sortColumn = "ReceiveDate"; // fallback to safe default
+        if (!validColumns.Contains(sortColumn))
+        {
+            sortColumn = "ReceiveDate"; // fallback to safe default
+        }
+
         query.Append($" ORDER BY `{sortColumn}` {(sortDescending ? "DESC" : "ASC")}");
 
         // Paging
-        var offset = (page - 1) * pageSize;
+        int offset = (page - 1) * pageSize;
         query.Append(" LIMIT @PageSize OFFSET @Offset");
         parameters.Add(new MySqlParameter("@PageSize", pageSize));
         parameters.Add(new MySqlParameter("@Offset", offset));
 
-        using (var conn = new MySqlConnection(_connectionString))
+        using (MySqlConnection conn = new(_connectionString))
         {
             conn.Open();
-            using (var cmd = new MySqlCommand(query.ToString(), conn))
+            using (MySqlCommand cmd = new(query.ToString(), conn))
             {
                 cmd.Parameters.AddRange(parameters.ToArray());
-                using (var reader = cmd.ExecuteReader())
+                using (MySqlDataReader? reader = cmd.ExecuteReader())
                 {
-                    while (reader.Read()) transactions.Add(MapTransaction(reader));
+                    while (reader.Read())
+                    {
+                        transactions.Add(MapTransaction(reader));
+                    }
                 }
             }
         }
@@ -153,14 +168,14 @@ internal class Dao_Transactions
     }
 
     // Helper: Map DB row to Model_Transactions
-    private Model_Transactions MapTransaction(MySqlDataReader reader)
-    {
-        return new Model_Transactions
+    private Model_Transactions MapTransaction(MySqlDataReader reader) =>
+        new()
         {
             ID = reader.GetInt32("ID"),
-            TransactionType = Enum.TryParse<TransactionType>(reader["TransactionType"].ToString(), out var type)
-                ? type
-                : TransactionType.IN,
+            TransactionType =
+                Enum.TryParse<TransactionType>(reader["TransactionType"].ToString(), out TransactionType type)
+                    ? type
+                    : TransactionType.IN,
             BatchNumber = reader["BatchNumber"] == DBNull.Value ? null : reader["BatchNumber"].ToString(),
             PartID = reader["PartID"] == DBNull.Value ? null : reader["PartID"].ToString(),
             FromLocation = reader["FromLocation"] == DBNull.Value ? null : reader["FromLocation"].ToString(),
@@ -174,5 +189,4 @@ internal class Dao_Transactions
                 ? DateTime.MinValue
                 : Convert.ToDateTime(reader["DateTime"])
         };
-    }
 }

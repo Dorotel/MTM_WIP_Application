@@ -1,10 +1,10 @@
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Data;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
-using MTM_Inventory_Application.Core;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm;
 

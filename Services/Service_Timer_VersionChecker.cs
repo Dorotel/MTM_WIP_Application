@@ -1,9 +1,9 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Data;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Timers;
-using System.Windows.Forms;
 using MTM_Inventory_Application.Controls.MainForm;
 using MTM_Inventory_Application.Forms.MainForm;
 using MTM_Inventory_Application.Helpers;

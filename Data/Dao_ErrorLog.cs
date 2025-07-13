@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Data;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using MTM_Inventory_Application.Forms.MainForm;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
@@ -34,10 +32,10 @@ internal static class Dao_ErrorLog
     internal static async Task<List<(string MethodName, string ErrorMessage)>> GetUniqueErrorsAsync(
         bool useAsync = false)
     {
-        var uniqueErrors = new List<(string MethodName, string ErrorMessage)>();
+        List<(string MethodName, string ErrorMessage)> uniqueErrors = new();
         try
         {
-            using var reader = useAsync
+            using MySqlDataReader reader = useAsync
                 ? await HelperDatabaseCore.ExecuteReader(
                     "SELECT DISTINCT `MethodName`, `ErrorMessage` FROM `log_error`",
                     useAsync: true)
@@ -45,7 +43,9 @@ internal static class Dao_ErrorLog
                     .Result;
 
             while (reader.Read())
+            {
                 uniqueErrors.Add((reader.GetString("MethodName"), reader.GetString("ErrorMessage")));
+            }
 
             LoggingUtility.Log("GetUniqueErrors executed successfully.");
         }
@@ -58,24 +58,19 @@ internal static class Dao_ErrorLog
         return uniqueErrors;
     }
 
-    internal static async Task<DataTable> GetAllErrorsAsync(bool useAsync = false)
-    {
-        return await GetErrorsByQueryAsync("SELECT * FROM `log_error` ORDER BY `ErrorTime` DESC", null, useAsync);
-    }
+    internal static async Task<DataTable> GetAllErrorsAsync(bool useAsync = false) =>
+        await GetErrorsByQueryAsync("SELECT * FROM `log_error` ORDER BY `ErrorTime` DESC", null, useAsync);
 
-    internal static async Task<DataTable> GetErrorsByUserAsync(string user, bool useAsync = false)
-    {
-        return await GetErrorsByQueryAsync(
+    internal static async Task<DataTable> GetErrorsByUserAsync(string user, bool useAsync = false) =>
+        await GetErrorsByQueryAsync(
             "SELECT * FROM `log_error` WHERE `User` = @User ORDER BY `ErrorTime` DESC",
             new Dictionary<string, object> { ["@User"] = user }, useAsync);
-    }
 
-    internal static async Task<DataTable> GetErrorsByDateRangeAsync(DateTime start, DateTime end, bool useAsync = false)
-    {
-        return await GetErrorsByQueryAsync(
+    internal static async Task<DataTable>
+        GetErrorsByDateRangeAsync(DateTime start, DateTime end, bool useAsync = false) =>
+        await GetErrorsByQueryAsync(
             "SELECT * FROM `log_error` WHERE `ErrorTime` BETWEEN @Start AND @End ORDER BY `ErrorTime` DESC",
             new Dictionary<string, object> { ["@Start"] = start, ["@End"] = end }, useAsync);
-    }
 
     private static async Task<DataTable> GetErrorsByQueryAsync(string sql, Dictionary<string, object>? parameters,
         bool useAsync)
@@ -98,33 +93,37 @@ internal static class Dao_ErrorLog
 
     #region Delete Methods
 
-    internal static async Task DeleteErrorByIdAsync(int id, bool useAsync = false)
-    {
+    internal static async Task DeleteErrorByIdAsync(int id, bool useAsync = false) =>
         await ExecuteNonQueryAsync("DELETE FROM `log_error` WHERE `ID` = @Id",
             new Dictionary<string, object> { ["@Id"] = id }, useAsync);
-    }
 
-    internal static async Task DeleteAllErrorsAsync(bool useAsync = false)
-    {
+    internal static async Task DeleteAllErrorsAsync(bool useAsync = false) =>
         await ExecuteNonQueryAsync("DELETE FROM `log_error`", null, useAsync);
-    }
 
     private static async Task ExecuteNonQueryAsync(string sql, Dictionary<string, object>? parameters, bool useAsync)
     {
         try
         {
             if (parameters == null)
+            {
                 await HelperDatabaseCore.ExecuteNonQuery(sql, useAsync: useAsync);
+            }
             else
+            {
                 await HelperDatabaseCore.ExecuteNonQuery(sql, parameters, useAsync);
+            }
         }
         catch (Exception ex)
         {
             // Use database error log for SQL exceptions, application error log otherwise
             if (ex is MySqlException)
+            {
                 LoggingUtility.LogDatabaseError(ex);
+            }
             else
+            {
                 LoggingUtility.LogApplicationError(ex);
+            }
 
             await HandleException_GeneralError_CloseApp(ex, useAsync);
         }
@@ -147,10 +146,14 @@ internal static class Dao_ErrorLog
 
     private static bool ShouldShowErrorMessage(string message)
     {
-        var now = DateTime.Now;
+        DateTime now = DateTime.Now;
         lock (typeof(Dao_ErrorLog))
         {
-            if (_lastErrorMessage == message && now - _lastErrorTime < ErrorMessageCooldown) return false;
+            if (_lastErrorMessage == message && now - _lastErrorTime < ErrorMessageCooldown)
+            {
+                return false;
+            }
+
             _lastErrorMessage = message;
             _lastErrorTime = now;
             return true;
@@ -159,11 +162,14 @@ internal static class Dao_ErrorLog
 
     private static bool ShouldShowSqlErrorMessage(string message)
     {
-        var now = DateTime.Now;
+        DateTime now = DateTime.Now;
         lock (typeof(Dao_ErrorLog))
         {
             if (_lastSqlErrorMessage == message && now - _lastSqlErrorTime < SqlErrorMessageCooldown)
+            {
                 return false;
+            }
+
             _lastSqlErrorMessage = message;
             _lastSqlErrorTime = now;
             return true;
@@ -190,23 +196,26 @@ internal static class Dao_ErrorLog
                 LoggingUtility.Log($"MySQL Error Details: {mysqlEx.Message}");
             }
 
-            var isConnectionError = ex.Message.Contains("Unable to connect to any of the specified MySQL hosts.")
-                                    || ex.Message.Contains("Access denied for user")
-                                    || ex.Message.Contains("Can't connect to MySQL server on")
-                                    || ex.Message.Contains("Unknown MySQL server host")
-                                    || ex.Message.Contains("Lost connection to MySQL server")
-                                    || ex.Message.Contains("MySQL server has gone away");
+            bool isConnectionError = ex.Message.Contains("Unable to connect to any of the specified MySQL hosts.")
+                                     || ex.Message.Contains("Access denied for user")
+                                     || ex.Message.Contains("Can't connect to MySQL server on")
+                                     || ex.Message.Contains("Unknown MySQL server host")
+                                     || ex.Message.Contains("Lost connection to MySQL server")
+                                     || ex.Message.Contains("MySQL server has gone away");
 
-            var message = $"SQL Error in method: {callerName}, Control: {controlName}\n{ex.Message}";
+            string message = $"SQL Error in method: {callerName}, Control: {controlName}\n{ex.Message}";
 
             if (isConnectionError)
             {
                 if (ShouldShowSqlErrorMessage(message))
+                {
                     MessageBox.Show(
                         @"Database connection error. The application will now close.",
                         @"Error",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
+                }
+
                 Process.GetCurrentProcess().Kill();
             }
             else
@@ -223,7 +232,9 @@ internal static class Dao_ErrorLog
                 );
 
                 if (ShouldShowSqlErrorMessage(message))
+                {
                     MessageBox.Show(message, @"SQL Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
         catch (Exception innerEx)
@@ -241,7 +252,7 @@ internal static class Dao_ErrorLog
     {
         try
         {
-            var errorType = ex switch
+            string errorType = ex switch
             {
                 ArgumentNullException => "A required argument was null.",
                 ArgumentOutOfRangeException => "An argument was out of range.",
@@ -254,13 +265,16 @@ internal static class Dao_ErrorLog
                 _ => "An unexpected error occurred."
             };
 
-            var message = $"{errorType}\nMethod: {callerName}\nControl: {controlName}\nException:\n{ex.Message}";
+            string message = $"{errorType}\nMethod: {callerName}\nControl: {controlName}\nException:\n{ex.Message}";
 
-            var isCritical = ex is OutOfMemoryException || ex is StackOverflowException ||
-                             ex is AccessViolationException;
+            bool isCritical = ex is OutOfMemoryException || ex is StackOverflowException ||
+                              ex is AccessViolationException;
 
-            var mainForm = Application.OpenForms.OfType<MainForm>().FirstOrDefault();
-            if (mainForm != null) mainForm.ConnectionRecoveryManager.HandleConnectionLost();
+            MainForm? mainForm = Application.OpenForms.OfType<MainForm>().FirstOrDefault();
+            if (mainForm != null)
+            {
+                mainForm.ConnectionRecoveryManager.HandleConnectionLost();
+            }
 
             LoggingUtility.LogApplicationError(ex);
 
@@ -308,7 +322,7 @@ internal static class Dao_ErrorLog
         string? additionalInfo,
         bool useAsync)
     {
-        var parameters = new Dictionary<string, object>
+        Dictionary<string, object> parameters = new()
         {
             ["@User"] = Model_AppVariables.User,
             ["@Severity"] = severity,
@@ -324,7 +338,7 @@ internal static class Dao_ErrorLog
             ["@ErrorTime"] = DateTime.Now
         };
 
-        var sql = @"
+        string sql = @"
             INSERT INTO `log_error` 
             (`User`, `Severity`, `ErrorType`, `ErrorMessage`, `StackTrace`, `ModuleName`, `MethodName`, `AdditionalInfo`, `MachineName`, `OSVersion`, `AppVersion`, `ErrorTime`) 
             VALUES 
@@ -336,10 +350,8 @@ internal static class Dao_ErrorLog
 
     #region Synchronous Helpers
 
-    internal static List<(string MethodName, string ErrorMessage)> GetUniqueErrors()
-    {
-        return GetUniqueErrorsAsync(false).GetAwaiter().GetResult();
-    }
+    internal static List<(string MethodName, string ErrorMessage)> GetUniqueErrors() =>
+        GetUniqueErrorsAsync(false).GetAwaiter().GetResult();
 
     internal static void LogErrorWithMethod(Exception ex,
         [System.Runtime.CompilerServices.CallerMemberName]

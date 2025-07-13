@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Data;
-using System.Threading.Tasks;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
@@ -29,7 +29,7 @@ internal static class Dao_Part
 
     internal static async Task DeletePart(string partNumber, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object> { ["@partNumber"] = partNumber };
+        Dictionary<string, object> parameters = new() { ["@partNumber"] = partNumber };
         await ExecuteNonQueryAsync(
             "DELETE FROM `md_part_ids` WHERE `Item Number` = @partNumber",
             parameters, useAsync);
@@ -41,11 +41,9 @@ internal static class Dao_Part
 
     internal static async Task InsertPart(string partNumber, string user, string partType, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object>
+        Dictionary<string, object> parameters = new()
         {
-            ["@partNumber"] = partNumber,
-            ["@user"] = user,
-            ["@partType"] = partType
+            ["@partNumber"] = partNumber, ["@user"] = user, ["@partType"] = partType
         };
         await ExecuteNonQueryAsync(
             "INSERT INTO `md_part_ids` (`Item Number`, `IssuedBy`, `ItemType`) VALUES (@partNumber, @user, @partType);",
@@ -58,11 +56,9 @@ internal static class Dao_Part
 
     internal static async Task UpdatePart(string partNumber, string partType, string user, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object>
+        Dictionary<string, object> parameters = new()
         {
-            ["@partNumber"] = partNumber,
-            ["@partType"] = partType,
-            ["@user"] = user
+            ["@partNumber"] = partNumber, ["@partType"] = partType, ["@user"] = user
         };
         await ExecuteNonQueryAsync(
             "UPDATE `md_part_ids` SET `ItemType` = @partType, `IssuedBy` = @user WHERE `Item Number` = @partNumber",
@@ -102,12 +98,9 @@ internal static class Dao_Part
     {
         try
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["p_ItemNumber"] = partNumber
-            };
+            Dictionary<string, object> parameters = new() { ["p_ItemNumber"] = partNumber };
 
-            var table = await HelperDatabaseCore.ExecuteDataTable(
+            DataTable table = await HelperDatabaseCore.ExecuteDataTable(
                 "md_part_ids_Get_ByItemNumber",
                 parameters,
                 useAsync,
@@ -137,12 +130,9 @@ internal static class Dao_Part
     {
         try
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["p_ItemNumber"] = partNumber
-            };
+            Dictionary<string, object> parameters = new() { ["p_ItemNumber"] = partNumber };
 
-            var result = await HelperDatabaseCore.ExecuteScalar(
+            object? result = await HelperDatabaseCore.ExecuteScalar(
                 "md_part_ids_Get_ByItemNumber",
                 parameters,
                 useAsync,
@@ -173,7 +163,7 @@ internal static class Dao_Part
     {
         try
         {
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 ["p_ItemNumber"] = itemNumber,
                 ["p_Customer"] = customer,
@@ -202,7 +192,7 @@ internal static class Dao_Part
     {
         try
         {
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 ["p_ID"] = id,
                 ["p_ItemNumber"] = itemNumber,
@@ -231,10 +221,7 @@ internal static class Dao_Part
     {
         try
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["p_ItemNumber"] = itemNumber
-            };
+            Dictionary<string, object> parameters = new() { ["p_ItemNumber"] = itemNumber };
 
             await HelperDatabaseCore.ExecuteNonQuery("md_part_ids_Delete_ByItemNumber", parameters, useAsync,
                 CommandType.StoredProcedure);

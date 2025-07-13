@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using MTM_Inventory_Application.Core;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Data;
+using System.Diagnostics;
+using System.Text.Json;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using MySql.Data.MySqlClient;
-using System.Data;
-using System.Diagnostics;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace MTM_Inventory_Application.Data;
 
@@ -66,8 +65,8 @@ internal static class Dao_User
         Debug.WriteLine($"[Dao_User] Entering GetThemeFontSizeAsync(user={user}, useAsync={useAsync})");
         try
         {
-            var str = await GetSettingsJsonAsync("Theme_FontSize", user, useAsync);
-            return int.TryParse(str, out var val) ? val : null;
+            string str = await GetSettingsJsonAsync("Theme_FontSize", user, useAsync);
+            return int.TryParse(str, out int val) ? val : null;
         }
         catch (Exception ex)
         {
@@ -87,7 +86,7 @@ internal static class Dao_User
     internal static async Task<string> GetVisualUserNameAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetVisualUserNameAsync(user={user}, useAsync={useAsync})");
-        var value = await GetSettingsJsonAsync("VisualUserName", user, useAsync);
+        string value = await GetSettingsJsonAsync("VisualUserName", user, useAsync);
         Model_Users.VisualUserName = value;
         return Model_Users.VisualUserName;
     }
@@ -101,7 +100,7 @@ internal static class Dao_User
     internal static async Task<string> GetVisualPasswordAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetVisualPasswordAsync(user={user}, useAsync={useAsync})");
-        var value = await GetSettingsJsonAsync("VisualPassword", user, useAsync);
+        string value = await GetSettingsJsonAsync("VisualPassword", user, useAsync);
         Model_Users.VisualPassword = value;
         return Model_Users.VisualPassword;
     }
@@ -115,7 +114,7 @@ internal static class Dao_User
     internal static async Task<string> GetWipServerAddressAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetWipServerAddressAsync(user={user}, useAsync={useAsync})");
-        var value = await GetSettingsJsonAsync("WipServerAddress", user, useAsync);
+        string value = await GetSettingsJsonAsync("WipServerAddress", user, useAsync);
         Model_Users.WipServerAddress = value;
         return Model_Users.WipServerAddress;
     }
@@ -133,7 +132,7 @@ internal static class Dao_User
     internal static async Task<string> GetDatabaseAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetDatabaseAsync(user={user}, useAsync={useAsync})");
-        var value = await GetSettingsJsonAsync("WIPDatabase", user, useAsync);
+        string value = await GetSettingsJsonAsync("WIPDatabase", user, useAsync);
         Model_Users.Database = value;
         return Model_Users.Database;
     }
@@ -153,7 +152,7 @@ internal static class Dao_User
     internal static async Task<string> GetWipServerPortAsync(string user, bool useAsync = false)
     {
         Debug.WriteLine($"[Dao_User] Entering GetWipServerPortAsync(user={user}, useAsync={useAsync})");
-        var value = await GetSettingsJsonAsync("WipServerPort", user, useAsync);
+        string value = await GetSettingsJsonAsync("WipServerPort", user, useAsync);
         Model_Users.WipServerPort = value;
         return Model_Users.WipServerPort;
     }
@@ -172,8 +171,8 @@ internal static class Dao_User
         Debug.WriteLine($"[Dao_User] Entering GetUserFullNameAsync(user={user}, useAsync={useAsync})");
         try
         {
-            var parameters = new Dictionary<string, object> { ["@User"] = user };
-            var result = await HelperDatabaseCore.ExecuteScalar(
+            Dictionary<string, object> parameters = new() { ["@User"] = user };
+            object? result = await HelperDatabaseCore.ExecuteScalar(
                 "SELECT `Full Name` FROM `usr_users` WHERE `User` = @User",
                 parameters, useAsync, CommandType.Text);
             Debug.WriteLine($"[Dao_User] GetUserFullNameAsync result: {result}");
@@ -195,26 +194,27 @@ internal static class Dao_User
         try
         {
             // First try to get the field from the usr_ui_settings table as JSON property
-            using var conn = new MySqlConnection(Model_AppVariables.ConnectionString);
+            using MySqlConnection conn = new(Model_AppVariables.ConnectionString);
             await conn.OpenAsync();
 
             // Query the settings JSON directly
-            using var cmd = new MySqlCommand(
+            using MySqlCommand cmd = new(
                 "SELECT SettingsJson FROM usr_ui_settings WHERE UserId = @UserId LIMIT 1", conn);
 
             cmd.Parameters.AddWithValue("UserId", user);
 
-            var result = await cmd.ExecuteScalarAsync();
+            object? result = await cmd.ExecuteScalarAsync();
 
             // If we found a settings JSON, try to extract the requested field
             if (result != null && result != DBNull.Value)
             {
-                var json = result.ToString();
+                string? json = result.ToString();
                 if (!string.IsNullOrWhiteSpace(json))
+                {
                     try
                     {
-                        using var doc = JsonDocument.Parse(json);
-                        if (doc.RootElement.TryGetProperty(field, out var fieldElement))
+                        using JsonDocument doc = JsonDocument.Parse(json);
+                        if (doc.RootElement.TryGetProperty(field, out JsonElement fieldElement))
                         {
                             string? value;
 
@@ -254,15 +254,16 @@ internal static class Dao_User
                         Debug.WriteLine($"[Dao_User] JSON parsing error in GetSettingsJsonAsync: {ex.Message}");
                         // Continue to legacy approach if JSON parsing fails
                     }
+                }
             }
 
 
-            using var legacyCmd = new MySqlCommand(
+            using MySqlCommand legacyCmd = new(
                 $"SELECT `{field}` FROM `usr_users` WHERE `User` = @User LIMIT 1", conn);
 
             legacyCmd.Parameters.AddWithValue("User", user);
 
-            var legacyResult = await legacyCmd.ExecuteScalarAsync();
+            object? legacyResult = await legacyCmd.ExecuteScalarAsync();
             Debug.WriteLine($"[Dao_User] GetSettingsJsonAsync legacy result: {legacyResult}");
 
             return legacyResult?.ToString() ?? string.Empty;
@@ -281,10 +282,10 @@ internal static class Dao_User
         Debug.WriteLine($"[Dao_User] Entering SetSettingsJsonAsync(userId={userId})");
         try
         {
-            using var conn = new MySqlConnection(Model_AppVariables.ConnectionString);
+            using MySqlConnection conn = new(Model_AppVariables.ConnectionString);
             await conn.OpenAsync();
 
-            using var cmd = new MySqlCommand("usr_ui_settings_SetThemeJson", conn)
+            using MySqlCommand cmd = new("usr_ui_settings_SetThemeJson", conn)
             {
                 CommandType = CommandType.StoredProcedure
             };
@@ -292,13 +293,10 @@ internal static class Dao_User
             cmd.Parameters.AddWithValue("p_UserId", userId);
             cmd.Parameters.AddWithValue("p_ThemeJson", themeJson);
 
-            var statusParam = new MySqlParameter("p_Status", MySqlDbType.Int32)
-            {
-                Direction = ParameterDirection.Output
-            };
+            MySqlParameter statusParam = new("p_Status", MySqlDbType.Int32) { Direction = ParameterDirection.Output };
             cmd.Parameters.Add(statusParam);
 
-            var errorMsgParam = new MySqlParameter("p_ErrorMsg", MySqlDbType.VarChar, 255)
+            MySqlParameter errorMsgParam = new("p_ErrorMsg", MySqlDbType.VarChar, 255)
             {
                 Direction = ParameterDirection.Output
             };
@@ -306,13 +304,15 @@ internal static class Dao_User
 
             await cmd.ExecuteNonQueryAsync();
 
-            var status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
-            var errorMsg = errorMsgParam.Value?.ToString() ?? "";
+            int status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
+            string errorMsg = errorMsgParam.Value?.ToString() ?? "";
 
             Debug.WriteLine($"[Dao_User] SetSettingsJsonAsync status: {status}, errorMsg: {errorMsg}");
 
             if (status != 0)
+            {
                 throw new Exception(errorMsg);
+            }
         }
         catch (Exception ex)
         {
@@ -328,11 +328,7 @@ internal static class Dao_User
             $"[Dao_User] Entering SetUserSettingAsync(field={field}, user={user}, value={value}, useAsync={useAsync})");
         try
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["@User"] = user,
-                [$"@{field}"] = value
-            };
+            Dictionary<string, object> parameters = new() { ["@User"] = user, [$"@{field}"] = value };
             await HelperDatabaseCore.ExecuteNonQuery(
                 $@"
 INSERT INTO `usr_users` (`User`, `{field}`)
@@ -364,7 +360,7 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
             $"[Dao_User] Entering InsertUserAsync(user={user}, fullName={fullName}, shift={shift}, vitsUser={vitsUser}, pin={pin}, lastShownVersion={lastShownVersion}, hideChangeLog={hideChangeLog}, themeName={themeName}, themeFontSize={themeFontSize}, visualUserName={visualUserName}, visualPassword={visualPassword}, wipServerAddress={wipServerAddress}, database = {database},wipServerPort={wipServerPort}, useAsync={useAsync})");
         try
         {
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 ["p_User"] = user,
                 ["p_FullName"] = fullName,
@@ -406,7 +402,7 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
             $"[Dao_User] Entering UpdateUserAsync(user={user}, fullName={fullName}, shift={shift}, pin={pin}, visualUserName={visualUserName}, visualPassword={visualPassword}, useAsync={useAsync})");
         try
         {
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
                 ["p_User"] = user,
                 ["p_FullName"] = fullName,
@@ -432,10 +428,7 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
         Debug.WriteLine($"[Dao_User] Entering DeleteUserAsync(user={user}, useAsync={useAsync})");
         try
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["p_User"] = user
-            };
+            Dictionary<string, object> parameters = new() { ["p_User"] = user };
             await HelperDatabaseCore.ExecuteNonQuery(
                 "usr_users_Delete_User",
                 parameters, useAsync, CommandType.StoredProcedure);
@@ -475,11 +468,8 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
         Debug.WriteLine($"[Dao_User] Entering GetUserByUsernameAsync(user={user}, useAsync={useAsync})");
         try
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["p_User"] = user
-            };
-            var table = await HelperDatabaseCore.ExecuteDataTable(
+            Dictionary<string, object> parameters = new() { ["p_User"] = user };
+            DataTable table = await HelperDatabaseCore.ExecuteDataTable(
                 "usr_users_Get_ByUser",
                 parameters, useAsync, CommandType.StoredProcedure);
             Debug.WriteLine($"[Dao_User] GetUserByUsernameAsync result: {table.Rows.Count} rows");
@@ -499,14 +489,11 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
         Debug.WriteLine($"[Dao_User] Entering UserExistsAsync(user={user}, useAsync={useAsync})");
         try
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["p_User"] = user
-            };
-            var result = await HelperDatabaseCore.ExecuteDataTable(
+            Dictionary<string, object> parameters = new() { ["p_User"] = user };
+            DataTable result = await HelperDatabaseCore.ExecuteDataTable(
                 "usr_users_Exists",
                 parameters, useAsync, CommandType.StoredProcedure);
-            var exists = result.Rows.Count > 0 && Convert.ToInt32(result.Rows[0]["UserExists"]) > 0;
+            bool exists = result.Rows.Count > 0 && Convert.ToInt32(result.Rows[0]["UserExists"]) > 0;
             Debug.WriteLine($"[Dao_User] UserExistsAsync result: {exists}");
             return exists;
         }
@@ -528,17 +515,17 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
         Debug.WriteLine($"[Dao_User] Entering GetShortcutsJsonAsync(userId={userId})");
         try
         {
-            using var conn = new MySqlConnection(Model_AppVariables.ConnectionString);
+            using MySqlConnection conn = new(Model_AppVariables.ConnectionString);
             await conn.OpenAsync();
 
-            using var cmd = new MySqlCommand("usr_ui_settings_GetShortcutsJson", conn)
+            using MySqlCommand cmd = new("usr_ui_settings_GetShortcutsJson", conn)
             {
                 CommandType = CommandType.StoredProcedure
             };
 
             cmd.Parameters.AddWithValue("p_UserId", userId);
 
-            var jsonParam = new MySqlParameter("p_ShortcutsJson", MySqlDbType.JSON)
+            MySqlParameter jsonParam = new("p_ShortcutsJson", MySqlDbType.JSON)
             {
                 Direction = ParameterDirection.Output
             };
@@ -546,7 +533,7 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
 
             await cmd.ExecuteNonQueryAsync();
 
-            var json = jsonParam.Value?.ToString();
+            string? json = jsonParam.Value?.ToString();
             Debug.WriteLine($"[Dao_User] GetShortcutsJsonAsync result: {json}");
             return json ?? "";
         }
@@ -564,10 +551,10 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
         Debug.WriteLine($"[Dao_User] Entering SetShortcutsJsonAsync(userId={userId})");
         try
         {
-            using var conn = new MySqlConnection(Model_AppVariables.ConnectionString);
+            using MySqlConnection conn = new(Model_AppVariables.ConnectionString);
             await conn.OpenAsync();
 
-            using var cmd = new MySqlCommand("usr_ui_settings_SetShortcutsJson", conn)
+            using MySqlCommand cmd = new("usr_ui_settings_SetShortcutsJson", conn)
             {
                 CommandType = CommandType.StoredProcedure
             };
@@ -575,13 +562,10 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
             cmd.Parameters.AddWithValue("p_UserId", userId);
             cmd.Parameters.AddWithValue("p_ShortcutsJson", shortcutsJson);
 
-            var statusParam = new MySqlParameter("p_Status", MySqlDbType.Int32)
-            {
-                Direction = ParameterDirection.Output
-            };
+            MySqlParameter statusParam = new("p_Status", MySqlDbType.Int32) { Direction = ParameterDirection.Output };
             cmd.Parameters.Add(statusParam);
 
-            var errorMsgParam = new MySqlParameter("p_ErrorMsg", MySqlDbType.VarChar, 255)
+            MySqlParameter errorMsgParam = new("p_ErrorMsg", MySqlDbType.VarChar, 255)
             {
                 Direction = ParameterDirection.Output
             };
@@ -589,13 +573,15 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
 
             await cmd.ExecuteNonQueryAsync();
 
-            var status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
-            var errorMsg = errorMsgParam.Value?.ToString() ?? "";
+            int status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
+            string errorMsg = errorMsgParam.Value?.ToString() ?? "";
 
             Debug.WriteLine($"[Dao_User] SetShortcutsJsonAsync status: {status}, errorMsg: {errorMsg}");
 
             if (status != 0)
+            {
                 throw new Exception(errorMsg);
+            }
         }
         catch (Exception ex)
         {
@@ -615,11 +601,9 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
             $"[Dao_User] Entering AddUserRoleAsync(userId={userId}, roleId={roleId}, assignedBy={assignedBy}, useAsync={useAsync})");
         try
         {
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
-                ["p_UserID"] = userId,
-                ["p_RoleID"] = roleId,
-                ["p_AssignedBy"] = assignedBy
+                ["p_UserID"] = userId, ["p_RoleID"] = roleId, ["p_AssignedBy"] = assignedBy
             };
             await HelperDatabaseCore.ExecuteNonQuery(
                 "sys_user_roles_Add",
@@ -643,17 +627,14 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
         try
         {
             // First, get the RoleID from sys_user_roles
-            var parameters = new Dictionary<string, object>
-            {
-                ["@UserID"] = userId
-            };
-            var result = await HelperDatabaseCore.ExecuteDataTable(
+            Dictionary<string, object> parameters = new() { ["@UserID"] = userId };
+            DataTable result = await HelperDatabaseCore.ExecuteDataTable(
                 "SELECT RoleID FROM sys_user_roles WHERE UserID = @UserID LIMIT 1",
                 parameters, useAsync, CommandType.Text);
 
-            if (result.Rows.Count > 0 && int.TryParse(result.Rows[0]["RoleID"]?.ToString(), out var roleId))
+            if (result.Rows.Count > 0 && int.TryParse(result.Rows[0]["RoleID"]?.ToString(), out int roleId))
             {
-                var roleInfo = await HelperDatabaseCore.ExecuteDataTable(
+                DataTable roleInfo = await HelperDatabaseCore.ExecuteDataTable(
                     "sys_roles_Get_ById",
                     new Dictionary<string, object> { ["p_ID"] = roleId },
                     useAsync, CommandType.StoredProcedure);
@@ -680,11 +661,9 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
             $"[Dao_User] Entering SetUserRoleAsync(userId={userId}, newRoleId={newRoleId}, assignedBy={assignedBy}, useAsync={useAsync})");
         try
         {
-            var parameters = new Dictionary<string, object>
+            Dictionary<string, object> parameters = new()
             {
-                ["p_UserID"] = userId,
-                ["p_NewRoleID"] = newRoleId,
-                ["p_AssignedBy"] = assignedBy
+                ["p_UserID"] = userId, ["p_NewRoleID"] = newRoleId, ["p_AssignedBy"] = assignedBy
             };
             await HelperDatabaseCore.ExecuteNonQuery(
                 "sys_user_roles_Update",
@@ -705,13 +684,11 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
             $"[Dao_User] Entering SetUsersRoleAsync(userIds=[{string.Join(",", userIds)}], newRoleId={newRoleId}, assignedBy={assignedBy}, useAsync={useAsync})");
         try
         {
-            foreach (var userId in userIds)
+            foreach (int userId in userIds)
             {
-                var parameters = new Dictionary<string, object>
+                Dictionary<string, object> parameters = new()
                 {
-                    ["p_UserID"] = userId,
-                    ["p_NewRoleID"] = newRoleId,
-                    ["p_AssignedBy"] = assignedBy
+                    ["p_UserID"] = userId, ["p_NewRoleID"] = newRoleId, ["p_AssignedBy"] = assignedBy
                 };
                 await HelperDatabaseCore.ExecuteNonQuery(
                     "sys_user_roles_Update",
@@ -735,11 +712,7 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
             $"[Dao_User] Entering RemoveUserRoleAsync(userId={userId}, roleId={roleId}, useAsync={useAsync})");
         try
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["p_UserID"] = userId,
-                ["p_RoleID"] = roleId
-            };
+            Dictionary<string, object> parameters = new() { ["p_UserID"] = userId, ["p_RoleID"] = roleId };
             await HelperDatabaseCore.ExecuteNonQuery(
                 "sys_user_roles_Delete",
                 parameters, useAsync, CommandType.StoredProcedure);

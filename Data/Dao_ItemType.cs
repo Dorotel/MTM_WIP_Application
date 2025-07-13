@@ -1,7 +1,7 @@
-using System;
-using System.Collections.Generic;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Data;
-using System.Threading.Tasks;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
@@ -25,7 +25,7 @@ internal static class Dao_ItemType
 
     internal static async Task DeleteItemType(string itemType, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object> { ["p_ItemType"] = itemType };
+        Dictionary<string, object> parameters = new() { ["p_ItemType"] = itemType };
         try
         {
             await HelperDatabaseCore.ExecuteNonQuery(
@@ -49,11 +49,7 @@ internal static class Dao_ItemType
 
     internal static async Task InsertItemType(string itemType, string user, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object>
-        {
-            ["p_ItemType"] = itemType,
-            ["p_IssuedBy"] = user
-        };
+        Dictionary<string, object> parameters = new() { ["p_ItemType"] = itemType, ["p_IssuedBy"] = user };
 
         await HelperDatabaseCore.ExecuteNonQuery(
             "md_item_types_Add_ItemType",
@@ -69,26 +65,22 @@ internal static class Dao_ItemType
 
     internal static async Task UpdateItemType(int id, string newItemType, string user, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object>
+        Dictionary<string, object> parameters = new()
         {
-            ["p_ID"] = id,
-            ["p_ItemType"] = newItemType,
-            ["p_IssuedBy"] = user
+            ["p_ID"] = id, ["p_ItemType"] = newItemType, ["p_IssuedBy"] = user
         };
         await HelperDatabaseCore.ExecuteNonQuery("md_item_types_Update_ItemType", parameters, useAsync,
             CommandType.StoredProcedure);
     }
 
-    internal static async Task<DataTable> GetAllItemTypes(bool useAsync = false)
-    {
-        return await HelperDatabaseCore.ExecuteDataTable("md_item_types_Get_All", null, useAsync,
+    internal static async Task<DataTable> GetAllItemTypes(bool useAsync = false) =>
+        await HelperDatabaseCore.ExecuteDataTable("md_item_types_Get_All", null, useAsync,
             CommandType.StoredProcedure);
-    }
 
     internal static async Task<DataRow?> GetItemTypeByName(string itemType, bool useAsync = false)
     {
-        var table = await GetAllItemTypes(useAsync);
-        var rows = table.Select($"ItemType = '{itemType.Replace("'", "''")}'");
+        DataTable table = await GetAllItemTypes(useAsync);
+        DataRow[] rows = table.Select($"ItemType = '{itemType.Replace("'", "''")}'");
         return rows.Length > 0 ? rows[0] : null;
     }
 
@@ -98,8 +90,8 @@ internal static class Dao_ItemType
 
     internal static async Task<bool> ItemTypeExists(string itemType, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object> { ["@itemType"] = itemType };
-        var result = await HelperDatabaseCore.ExecuteScalar(
+        Dictionary<string, object> parameters = new() { ["@itemType"] = itemType };
+        object? result = await HelperDatabaseCore.ExecuteScalar(
             "SELECT COUNT(*) FROM `md_item_types` WHERE `ItemType` = @itemType",
             parameters, useAsync, CommandType.Text);
         return Convert.ToInt32(result) > 0;

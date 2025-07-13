@@ -1,24 +1,9 @@
-﻿// Refactored per REPO_COMPREHENSIVE_CHECKLIST.md: 
-// - One public type per file, file name matches type
-// - Consistent region usage: Fields, Properties, Constructors, Methods, Events
-// - Usings outside namespace, System first, sorted, no unused usings
-// - Explicit access modifiers, auto-properties, clear naming
-// - Remove dead code, split large methods, avoid magic numbers/strings, consistent formatting
-// - Add summary comments for class and key methods
-// - Exception handling and logging as per standards
-// - Namespace and class name match file
-//
-// (No functional code changes, only structure/style)
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using ClosedXML.Excel;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
@@ -47,7 +32,7 @@ public partial class Control_AdvancedInventory : UserControl
             InitializeComponent();
 
             // Set tooltips for Single tab buttons using shortcut constants
-            var toolTip = new ToolTip();
+            ToolTip toolTip = new();
             toolTip.SetToolTip(AdvancedInventory_Single_Button_Send,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Send)}");
             toolTip.SetToolTip(AdvancedInventory_Single_Button_Save,
@@ -387,8 +372,8 @@ public partial class Control_AdvancedInventory : UserControl
     {
         try
         {
-            var text = textBox.Text.Trim();
-            var isValid = int.TryParse(text, out var qty) && qty > 0;
+            string text = textBox.Text.Trim();
+            bool isValid = int.TryParse(text, out int qty) && qty > 0;
             if (isValid)
             {
                 textBox.ForeColor = Model_AppVariables.UserUiColors.TextBoxForeColor ?? Color.Black;
@@ -412,27 +397,27 @@ public partial class Control_AdvancedInventory : UserControl
     private void UpdateSingleSaveButtonState()
     {
         AdvancedInventory_Single_Button_Save.Enabled = AdvancedInventory_Single_ListView.Items.Count > 0;
-        var partValid = AdvancedInventory_Single_ComboBox_Part.SelectedIndex > 0 &&
-                        !string.IsNullOrWhiteSpace(AdvancedInventory_Single_ComboBox_Part.Text);
-        var opValid = AdvancedInventory_Single_ComboBox_Op.SelectedIndex > 0 &&
-                      !string.IsNullOrWhiteSpace(AdvancedInventory_Single_ComboBox_Op.Text);
-        var locValid = AdvancedInventory_Single_ComboBox_Loc.SelectedIndex > 0 &&
-                       !string.IsNullOrWhiteSpace(AdvancedInventory_Single_ComboBox_Loc.Text);
-        var qtyValid = int.TryParse(AdvancedInventory_Single_TextBox_Qty.Text.Trim(), out var qty) && qty > 0;
-        var countValid = int.TryParse(AdvancedInventory_Single_TextBox_Count.Text.Trim(), out var count) && count > 0;
+        bool partValid = AdvancedInventory_Single_ComboBox_Part.SelectedIndex > 0 &&
+                         !string.IsNullOrWhiteSpace(AdvancedInventory_Single_ComboBox_Part.Text);
+        bool opValid = AdvancedInventory_Single_ComboBox_Op.SelectedIndex > 0 &&
+                       !string.IsNullOrWhiteSpace(AdvancedInventory_Single_ComboBox_Op.Text);
+        bool locValid = AdvancedInventory_Single_ComboBox_Loc.SelectedIndex > 0 &&
+                        !string.IsNullOrWhiteSpace(AdvancedInventory_Single_ComboBox_Loc.Text);
+        bool qtyValid = int.TryParse(AdvancedInventory_Single_TextBox_Qty.Text.Trim(), out int qty) && qty > 0;
+        bool countValid = int.TryParse(AdvancedInventory_Single_TextBox_Count.Text.Trim(), out int count) && count > 0;
 
         AdvancedInventory_Single_Button_Send.Enabled = partValid && opValid && locValid && qtyValid && countValid;
     }
 
     private void UpdateMultiSaveButtonState()
     {
-        var partValid = AdvancedInventory_MultiLoc_ComboBox_Part.SelectedIndex > 0 &&
-                        !string.IsNullOrWhiteSpace(AdvancedInventory_MultiLoc_ComboBox_Part.Text);
-        var opValid = AdvancedInventory_MultiLoc_ComboBox_Op.SelectedIndex > 0 &&
-                      !string.IsNullOrWhiteSpace(AdvancedInventory_MultiLoc_ComboBox_Op.Text);
-        var locValid = AdvancedInventory_MultiLoc_ComboBox_Loc.SelectedIndex > 0 &&
-                       !string.IsNullOrWhiteSpace(AdvancedInventory_MultiLoc_ComboBox_Loc.Text);
-        var qtyValid = int.TryParse(AdvancedInventory_MultiLoc_TextBox_Qty.Text.Trim(), out var qty) && qty > 0;
+        bool partValid = AdvancedInventory_MultiLoc_ComboBox_Part.SelectedIndex > 0 &&
+                         !string.IsNullOrWhiteSpace(AdvancedInventory_MultiLoc_ComboBox_Part.Text);
+        bool opValid = AdvancedInventory_MultiLoc_ComboBox_Op.SelectedIndex > 0 &&
+                       !string.IsNullOrWhiteSpace(AdvancedInventory_MultiLoc_ComboBox_Op.Text);
+        bool locValid = AdvancedInventory_MultiLoc_ComboBox_Loc.SelectedIndex > 0 &&
+                        !string.IsNullOrWhiteSpace(AdvancedInventory_MultiLoc_ComboBox_Loc.Text);
+        bool qtyValid = int.TryParse(AdvancedInventory_MultiLoc_TextBox_Qty.Text.Trim(), out int qty) && qty > 0;
         AdvancedInventory_MultiLoc_Button_AddLoc.Enabled = partValid && opValid && locValid && qtyValid;
         AdvancedInventory_MultiLoc_Button_SaveAll.Enabled =
             AdvancedInventory_MultiLoc_ListView_Preview.Items.Count > 0 && partValid && opValid;
@@ -440,8 +425,8 @@ public partial class Control_AdvancedInventory : UserControl
 
     public static void ValidateQtyTextBox(TextBox textBox, string placeholder)
     {
-        var text = textBox.Text.Trim();
-        var isValid = int.TryParse(text, out var value) && value > 0;
+        string text = textBox.Text.Trim();
+        bool isValid = int.TryParse(text, out int value) && value > 0;
         if (isValid)
         {
             textBox.ForeColor = Model_AppVariables.UserUiColors.TextBoxForeColor ?? Color.Black;
@@ -465,107 +450,132 @@ public partial class Control_AdvancedInventory : UserControl
             if (AdvancedInventory_TabControl.SelectedTab == AdvancedInventory_TabControl_Single)
             {
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Send)
+                {
                     if (AdvancedInventory_Single_Button_Send.Visible && AdvancedInventory_Single_Button_Send.Enabled)
                     {
                         AdvancedInventory_Single_Button_Send.PerformClick();
                         return true;
                     }
+                }
 
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Save)
+                {
                     if (AdvancedInventory_Single_Button_Save.Visible && AdvancedInventory_Single_Button_Save.Enabled)
                     {
                         AdvancedInventory_Single_Button_Save.PerformClick();
                         return true;
                     }
+                }
 
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Reset)
+                {
                     if (AdvancedInventory_Single_Button_Reset.Visible && AdvancedInventory_Single_Button_Reset.Enabled)
                     {
                         AdvancedInventory_Single_Button_Reset.PerformClick();
                         return true;
                     }
+                }
 
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Normal)
+                {
                     if (AdvancedInventory_Single_Button_Normal.Visible &&
                         AdvancedInventory_Single_Button_Normal.Enabled)
                     {
                         AdvancedInventory_Single_Button_Normal.PerformClick();
                         return true;
                     }
+                }
             }
 
             // MultiLoc tab
             if (AdvancedInventory_TabControl.SelectedTab == AdvancedInventory_TabControl_MultiLoc)
             {
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Multi_AddLoc)
+                {
                     if (AdvancedInventory_MultiLoc_Button_AddLoc.Visible &&
                         AdvancedInventory_MultiLoc_Button_AddLoc.Enabled)
                     {
                         AdvancedInventory_MultiLoc_Button_AddLoc.PerformClick();
                         return true;
                     }
+                }
 
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Multi_SaveAll)
+                {
                     if (AdvancedInventory_MultiLoc_Button_SaveAll.Visible &&
                         AdvancedInventory_MultiLoc_Button_SaveAll.Enabled)
                     {
                         AdvancedInventory_MultiLoc_Button_SaveAll.PerformClick();
                         return true;
                     }
+                }
 
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Multi_Reset)
+                {
                     if (AdvancedInventory_MultiLoc_Button_Reset.Visible &&
                         AdvancedInventory_MultiLoc_Button_Reset.Enabled)
                     {
                         AdvancedInventory_MultiLoc_Button_Reset.PerformClick();
                         return true;
                     }
+                }
 
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Multi_Normal)
+                {
                     if (AdvancedInventory_Multi_Button_Normal.Visible && AdvancedInventory_Multi_Button_Normal.Enabled)
                     {
                         AdvancedInventory_Multi_Button_Normal.PerformClick();
                         return true;
                     }
+                }
             }
 
             // Import tab
             if (AdvancedInventory_TabControl.SelectedTab == AdvancedInventory_TabControl_Import)
             {
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Import_OpenExcel)
+                {
                     if (AdvancedInventory_Import_Button_OpenExcel.Visible &&
                         AdvancedInventory_Import_Button_OpenExcel.Enabled)
                     {
                         AdvancedInventory_Import_Button_OpenExcel.PerformClick();
                         return true;
                     }
+                }
 
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Import_ImportExcel)
+                {
                     if (AdvancedInventory_Import_Button_ImportExcel.Visible &&
                         AdvancedInventory_Import_Button_ImportExcel.Enabled)
                     {
                         AdvancedInventory_Import_Button_ImportExcel.PerformClick();
                         return true;
                     }
+                }
 
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Import_Save)
+                {
                     if (AdvancedInventory_Import_Button_Save.Visible && AdvancedInventory_Import_Button_Save.Enabled)
                     {
                         AdvancedInventory_Import_Button_Save.PerformClick();
                         return true;
                     }
+                }
 
                 if (keyData == Core_WipAppVariables.Shortcut_AdvInv_Import_Normal)
+                {
                     if (AdvancedInventory_Import_Button_Normal.Visible &&
                         AdvancedInventory_Import_Button_Normal.Enabled)
                     {
                         AdvancedInventory_Import_Button_Normal.PerformClick();
                         return true;
                     }
+                }
             }
 
             // Remove Advanced shortcut (global for this form)
             if (keyData == Core_WipAppVariables.Shortcut_Remove_Advanced)
+            {
                 if (MainFormInstance != null && MainFormInstance.MainForm_Control_AdvancedRemove != null)
                 {
                     MainFormInstance.MainForm_AdvancedInventory.Visible = false;
@@ -573,6 +583,7 @@ public partial class Control_AdvancedInventory : UserControl
                     MainFormInstance.MainForm_TabControl.SelectedIndex = 2; // Assuming Remove tab index is 2
                     return true;
                 }
+            }
 
             if (keyData == Keys.Enter)
             {
@@ -772,9 +783,13 @@ public partial class Control_AdvancedInventory : UserControl
         {
             // Check if Shift key is held down
             if ((ModifierKeys & Keys.Shift) == Keys.Shift)
+            {
                 await AdvancedInventory_Single_HardResetAsync();
+            }
             else
+            {
                 AdvancedInventory_Single_SoftReset();
+            }
         }
         catch (Exception ex)
         {
@@ -799,21 +814,21 @@ public partial class Control_AdvancedInventory : UserControl
                 return;
             }
 
-            var partIds = new HashSet<string>();
-            var operations = new HashSet<string>();
-            var locations = new HashSet<string>();
-            var totalQty = 0;
-            var savedCount = 0;
+            HashSet<string> partIds = new();
+            HashSet<string> operations = new();
+            HashSet<string> locations = new();
+            int totalQty = 0;
+            int savedCount = 0;
             foreach (ListViewItem item in AdvancedInventory_Single_ListView.Items)
             {
-                var partId = item.SubItems.Count > 0 ? item.SubItems[0].Text : "";
-                var op = item.SubItems.Count > 1 ? item.SubItems[1].Text : "";
-                var loc = item.SubItems.Count > 2 ? item.SubItems[2].Text : "";
-                var qtyText = item.SubItems.Count > 3 ? item.SubItems[3].Text : "";
-                var notes = item.SubItems.Count > 4 ? item.SubItems[4].Text : "";
+                string partId = item.SubItems.Count > 0 ? item.SubItems[0].Text : "";
+                string op = item.SubItems.Count > 1 ? item.SubItems[1].Text : "";
+                string loc = item.SubItems.Count > 2 ? item.SubItems[2].Text : "";
+                string qtyText = item.SubItems.Count > 3 ? item.SubItems[3].Text : "";
+                string notes = item.SubItems.Count > 4 ? item.SubItems[4].Text : "";
 
                 if (string.IsNullOrWhiteSpace(partId) || string.IsNullOrWhiteSpace(op) ||
-                    string.IsNullOrWhiteSpace(loc) || !int.TryParse(qtyText, out var qty) || qty <= 0)
+                    string.IsNullOrWhiteSpace(loc) || !int.TryParse(qtyText, out int qty) || qty <= 0)
                 {
                     LoggingUtility.LogApplicationError(new Exception(
                         $"Invalid data in ListView item: Part={partId}, Op={op}, Loc={loc}, Qty={qtyText}"));
@@ -858,17 +873,23 @@ public partial class Control_AdvancedInventory : UserControl
             // Update status strip
             if (MainFormInstance != null && savedCount > 0)
             {
-                var time = DateTime.Now.ToString("hh:mm tt");
-                var locDisplay = locations.Count > 1 ? "Multiple Locations" : locations.FirstOrDefault() ?? "";
+                string time = DateTime.Now.ToString("hh:mm tt");
+                string locDisplay = locations.Count > 1 ? "Multiple Locations" : locations.FirstOrDefault() ?? "";
                 if (partIds.Count == 1 && operations.Count == 1)
+                {
                     MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
                         $"Last Inventoried: {partIds.First()} (Op: {operations.First()}), Location: {locDisplay}, Quantity: {totalQty} @ {time}";
+                }
                 else if (partIds.Count == 1 && operations.Count > 1)
+                {
                     MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
                         $"Last Inventoried: {partIds.First()} (Multiple Ops), Location: {locDisplay}, Quantity: {totalQty} @ {time}";
+                }
                 else
+                {
                     MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
                         $"Last Inventoried: Multiple Part IDs, Location: {locDisplay}, Quantity: Multiple @ {time}";
+                }
             }
 
             // Optionally reset the form after save
@@ -890,12 +911,12 @@ public partial class Control_AdvancedInventory : UserControl
             LoggingUtility.Log("Send button clicked");
 
             // Get values from controls
-            var partId = AdvancedInventory_Single_ComboBox_Part.Text;
-            var op = AdvancedInventory_Single_ComboBox_Op.Text;
-            var loc = AdvancedInventory_Single_ComboBox_Loc.Text;
-            var qtyText = AdvancedInventory_Single_TextBox_Qty.Text.Trim();
-            var countText = AdvancedInventory_Single_TextBox_Count.Text.Trim();
-            var notes = AdvancedInventory_Single_RichTextBox_Notes.Text.Trim();
+            string partId = AdvancedInventory_Single_ComboBox_Part.Text;
+            string op = AdvancedInventory_Single_ComboBox_Op.Text;
+            string loc = AdvancedInventory_Single_ComboBox_Loc.Text;
+            string qtyText = AdvancedInventory_Single_TextBox_Qty.Text.Trim();
+            string countText = AdvancedInventory_Single_TextBox_Count.Text.Trim();
+            string notes = AdvancedInventory_Single_RichTextBox_Notes.Text.Trim();
 
             Debug.WriteLine($"partId: {partId}, op: {op}, loc: {loc}, qtyText: {qtyText}, countText: {countText}");
 
@@ -924,7 +945,7 @@ public partial class Control_AdvancedInventory : UserControl
                 return;
             }
 
-            if (!int.TryParse(qtyText, out var qty) || qty <= 0)
+            if (!int.TryParse(qtyText, out int qty) || qty <= 0)
             {
                 MessageBox.Show(@"Please enter a valid quantity.", @"Validation Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -932,7 +953,7 @@ public partial class Control_AdvancedInventory : UserControl
                 return;
             }
 
-            if (!int.TryParse(countText, out var count) || count <= 0)
+            if (!int.TryParse(countText, out int count) || count <= 0)
             {
                 MessageBox.Show(@"Please enter a valid transaction count.", @"Validation Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -941,9 +962,9 @@ public partial class Control_AdvancedInventory : UserControl
             }
 
             // Add the specified number of entries to the ListView
-            for (var i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
-                var listViewItem = new ListViewItem([
+                ListViewItem listViewItem = new([
                     partId,
                     op,
                     loc,
@@ -997,14 +1018,14 @@ public partial class Control_AdvancedInventory : UserControl
                 MainFormInstance.MainForm_Control_InventoryTab.Visible = true;
                 MainFormInstance.MainForm_AdvancedInventory.Visible = false;
                 MainFormInstance.MainForm_TabControl.SelectedIndex = 0;
-                var invTab = MainFormInstance.MainForm_Control_InventoryTab;
+                ControlInventoryTab? invTab = MainFormInstance.MainForm_Control_InventoryTab;
                 if (invTab is not null)
                 {
-                    var part = invTab.Control_InventoryTab_ComboBox_Part;
-                    var op = invTab.GetType().GetField("Control_InventoryTab_ComboBox_Operation",
+                    ComboBox? part = invTab.Control_InventoryTab_ComboBox_Part;
+                    ComboBox? op = invTab.GetType().GetField("Control_InventoryTab_ComboBox_Operation",
                             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                         ?.GetValue(invTab) as ComboBox;
-                    var loc = invTab.GetType().GetField("Control_InventoryTab_ComboBox_Location",
+                    ComboBox? loc = invTab.GetType().GetField("Control_InventoryTab_ComboBox_Location",
                             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                         ?.GetValue(invTab) as ComboBox;
                     if (part is not null)
@@ -1015,8 +1036,15 @@ public partial class Control_AdvancedInventory : UserControl
                         part.BackColor = Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
                     }
 
-                    if (op is not null) op.SelectedIndex = 0;
-                    if (loc is not null) loc.SelectedIndex = 0;
+                    if (op is not null)
+                    {
+                        op.SelectedIndex = 0;
+                    }
+
+                    if (loc is not null)
+                    {
+                        loc.SelectedIndex = 0;
+                    }
                 }
             }
         }
@@ -1212,9 +1240,13 @@ public partial class Control_AdvancedInventory : UserControl
         {
             // Check if Shift key is held down
             if ((ModifierKeys & Keys.Shift) == Keys.Shift)
+            {
                 await AdvancedInventory_MultiLoc_HardResetAsync();
+            }
             else
+            {
                 AdvancedInventory_MultiLoc_SoftReset();
+            }
         }
         catch (Exception ex)
         {
@@ -1232,11 +1264,11 @@ public partial class Control_AdvancedInventory : UserControl
             LoggingUtility.Log("AdvancedInventory_MultiLoc_Button_AddLoc_Click entered.");
 
             // Get values from controls
-            var partId = AdvancedInventory_MultiLoc_ComboBox_Part.Text;
-            var op = AdvancedInventory_MultiLoc_ComboBox_Op.Text;
-            var loc = AdvancedInventory_MultiLoc_ComboBox_Loc.Text;
-            var qtyText = AdvancedInventory_MultiLoc_TextBox_Qty.Text.Trim();
-            var notes = AdvancedInventory_MultiLoc_RichTextBox_Notes.Text.Trim();
+            string partId = AdvancedInventory_MultiLoc_ComboBox_Part.Text;
+            string op = AdvancedInventory_MultiLoc_ComboBox_Op.Text;
+            string loc = AdvancedInventory_MultiLoc_ComboBox_Loc.Text;
+            string qtyText = AdvancedInventory_MultiLoc_TextBox_Qty.Text.Trim();
+            string notes = AdvancedInventory_MultiLoc_RichTextBox_Notes.Text.Trim();
 
             // Validate input
             if (string.IsNullOrWhiteSpace(partId) || AdvancedInventory_MultiLoc_ComboBox_Part.SelectedIndex <= 0)
@@ -1263,7 +1295,7 @@ public partial class Control_AdvancedInventory : UserControl
                 return;
             }
 
-            if (!int.TryParse(qtyText, out var qty) || qty <= 0)
+            if (!int.TryParse(qtyText, out int qty) || qty <= 0)
             {
                 MessageBox.Show(@"Please enter a valid quantity.", @"Validation Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -1273,6 +1305,7 @@ public partial class Control_AdvancedInventory : UserControl
 
             // Prevent duplicate location entries
             foreach (ListViewItem item in AdvancedInventory_MultiLoc_ListView_Preview.Items)
+            {
                 if (string.Equals(item.SubItems[0].Text, loc, StringComparison.OrdinalIgnoreCase))
                 {
                     MessageBox.Show(@"This location has already been added.", @"Duplicate Entry", MessageBoxButtons.OK,
@@ -1280,9 +1313,10 @@ public partial class Control_AdvancedInventory : UserControl
                     AdvancedInventory_MultiLoc_ComboBox_Loc.Focus();
                     return;
                 }
+            }
 
             // Add to ListView
-            var listViewItem = new ListViewItem([
+            ListViewItem listViewItem = new([
                 loc,
                 qty.ToString(),
                 notes
@@ -1294,7 +1328,9 @@ public partial class Control_AdvancedInventory : UserControl
 
             // Disable part ComboBox after the first location is added
             if (AdvancedInventory_MultiLoc_ListView_Preview.Items.Count == 1)
+            {
                 AdvancedInventory_MultiLoc_ComboBox_Part.Enabled = false;
+            }
 
             // Reset only the location, quantity, and notes fields for next entry
             MainFormControlHelper.ResetComboBox(AdvancedInventory_MultiLoc_ComboBox_Loc,
@@ -1326,8 +1362,8 @@ public partial class Control_AdvancedInventory : UserControl
             }
 
             // Get shared values from controls
-            var partId = AdvancedInventory_MultiLoc_ComboBox_Part.Text;
-            var op = AdvancedInventory_MultiLoc_ComboBox_Op.Text;
+            string partId = AdvancedInventory_MultiLoc_ComboBox_Part.Text;
+            string op = AdvancedInventory_MultiLoc_ComboBox_Op.Text;
 
             if (string.IsNullOrWhiteSpace(partId) || AdvancedInventory_MultiLoc_ComboBox_Part.SelectedIndex <= 0)
             {
@@ -1346,16 +1382,16 @@ public partial class Control_AdvancedInventory : UserControl
             }
 
             // Save each entry in the ListView
-            var locations = new HashSet<string>();
-            var totalQty = 0;
-            var savedCount = 0;
+            HashSet<string> locations = new();
+            int totalQty = 0;
+            int savedCount = 0;
             foreach (ListViewItem item in AdvancedInventory_MultiLoc_ListView_Preview.Items)
             {
-                var loc = item.SubItems[0].Text;
-                var qtyText = item.SubItems[1].Text;
-                var notes = item.SubItems[2].Text;
+                string loc = item.SubItems[0].Text;
+                string qtyText = item.SubItems[1].Text;
+                string notes = item.SubItems[2].Text;
 
-                if (!int.TryParse(qtyText, out var qty) || qty <= 0)
+                if (!int.TryParse(qtyText, out int qty) || qty <= 0)
                 {
                     LoggingUtility.LogApplicationError(
                         new Exception($"Invalid quantity for location '{loc}': '{qtyText}'"));
@@ -1399,8 +1435,8 @@ public partial class Control_AdvancedInventory : UserControl
             // Update status strip
             if (MainFormInstance != null && savedCount > 0)
             {
-                var time = DateTime.Now.ToString("hh:mm tt");
-                var locDisplay = locations.Count > 1 ? "Multiple Locations" : locations.FirstOrDefault() ?? "";
+                string time = DateTime.Now.ToString("hh:mm tt");
+                string locDisplay = locations.Count > 1 ? "Multiple Locations" : locations.FirstOrDefault() ?? "";
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
                     $"Last Inventoried: {partId} (Op: {op}), Location: {locDisplay}, Quantity: {totalQty} @ {time}";
             }
@@ -1423,22 +1459,25 @@ public partial class Control_AdvancedInventory : UserControl
     private static string GetWipAppExcelUserFolder()
     {
         // Get the log file path to determine the log directory
-        var server = new MySqlConnectionStringBuilder(Model_AppVariables.ConnectionString).Server;
-        var userName = Model_AppVariables.User ?? Environment.UserName;
-        var logFilePath = Helper_Database_Variables.GetLogFilePath(server, userName);
-        var logDir = Directory.GetParent(logFilePath)?.Parent?.FullName ?? "";
+        string? server = new MySqlConnectionStringBuilder(Model_AppVariables.ConnectionString).Server;
+        string userName = Model_AppVariables.User ?? Environment.UserName;
+        string logFilePath = Helper_Database_Variables.GetLogFilePath(server, userName);
+        string logDir = Directory.GetParent(logFilePath)?.Parent?.FullName ?? "";
         // Place Excel files as a sibling to the log folder
-        var excelRoot = Path.Combine(logDir, "WIP App Excel Files");
-        var userFolder = Path.Combine(excelRoot, userName);
+        string excelRoot = Path.Combine(logDir, "WIP App Excel Files");
+        string userFolder = Path.Combine(excelRoot, userName);
         if (!Directory.Exists(userFolder))
+        {
             Directory.CreateDirectory(userFolder);
+        }
+
         return userFolder;
     }
 
     private static string GetUserExcelFilePath()
     {
-        var userFolder = GetWipAppExcelUserFolder();
-        var fileName = $"{Model_AppVariables.User ?? Environment.UserName}_import.xlsx";
+        string userFolder = GetWipAppExcelUserFolder();
+        string fileName = $"{Model_AppVariables.User ?? Environment.UserName}_import.xlsx";
         return Path.Combine(userFolder, fileName);
     }
 
@@ -1446,15 +1485,18 @@ public partial class Control_AdvancedInventory : UserControl
     {
         try
         {
-            var excelPath = GetUserExcelFilePath();
+            string excelPath = GetUserExcelFilePath();
             if (!File.Exists(excelPath))
             {
                 // Ensure the user folder exists
-                var userFolder = Path.GetDirectoryName(excelPath);
+                string? userFolder = Path.GetDirectoryName(excelPath);
                 if (!Directory.Exists(userFolder))
+                {
                     Directory.CreateDirectory(userFolder!);
+                }
+
                 // Copy template file to user's Excel file path
-                var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Controls",
+                string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Controls",
                     "MainForm", "WIPAppTemplate.xlsx");
                 if (File.Exists(templatePath))
                 {
@@ -1487,7 +1529,7 @@ public partial class Control_AdvancedInventory : UserControl
     {
         try
         {
-            var excelPath = GetUserExcelFilePath();
+            string excelPath = GetUserExcelFilePath();
             if (!File.Exists(excelPath))
             {
                 MessageBox.Show(@"Excel file not found. Please create or open the Excel file first.", @"File Not Found",
@@ -1495,10 +1537,10 @@ public partial class Control_AdvancedInventory : UserControl
                 return;
             }
 
-            var dt = new DataTable();
-            using (var workbook = new XLWorkbook(excelPath))
+            DataTable dt = new();
+            using (XLWorkbook workbook = new(excelPath))
             {
-                var worksheet = workbook.Worksheet("Tab 1");
+                IXLWorksheet? worksheet = workbook.Worksheet("Tab 1");
                 if (worksheet == null)
                 {
                     MessageBox.Show(@"Worksheet 'Tab 1' not found in the Excel file.", @"Worksheet Not Found",
@@ -1507,7 +1549,7 @@ public partial class Control_AdvancedInventory : UserControl
                 }
 
                 // Get the used range
-                var usedRange = worksheet.RangeUsed();
+                IXLRange? usedRange = worksheet.RangeUsed();
                 if (usedRange == null)
                 {
                     MessageBox.Show(@"No data found in 'Tab 1'.", @"No Data", MessageBoxButtons.OK,
@@ -1515,25 +1557,31 @@ public partial class Control_AdvancedInventory : UserControl
                     return;
                 }
 
-                var colCount = usedRange.ColumnCount();
-                var rowCount = usedRange.RowCount();
+                int colCount = usedRange.ColumnCount();
+                int rowCount = usedRange.RowCount();
 
                 // Add columns from the first row
-                var headerRow = usedRange.Row(1);
-                for (var col = 1; col <= colCount; col++)
+                IXLRangeRow? headerRow = usedRange.Row(1);
+                for (int col = 1; col <= colCount; col++)
                 {
-                    var colName = headerRow.Cell(col).GetValue<string>();
+                    string? colName = headerRow.Cell(col).GetValue<string>();
                     if (string.IsNullOrWhiteSpace(colName))
+                    {
                         colName = $"Column{col}";
+                    }
+
                     dt.Columns.Add(colName);
                 }
 
                 // Add data rows
-                for (var row = 2; row <= rowCount; row++)
+                for (int row = 2; row <= rowCount; row++)
                 {
-                    var dataRow = dt.NewRow();
-                    for (var col = 1; col <= colCount; col++)
+                    DataRow dataRow = dt.NewRow();
+                    for (int col = 1; col <= colCount; col++)
+                    {
                         dataRow[col - 1] = usedRange.Row(row).Cell(col).GetValue<string>();
+                    }
+
                     dt.Rows.Add(dataRow);
                 }
             }
@@ -1558,31 +1606,33 @@ public partial class Control_AdvancedInventory : UserControl
     private async void AdvancedInventory_Import_Button_Save_Click(object? sender, EventArgs e)
     {
         if (AdvancedInventory_Import_DataGridView.DataSource == null)
+        {
             return;
+        }
 
-        var dgv = AdvancedInventory_Import_DataGridView;
-        var rowsToRemove = new List<DataGridViewRow>();
-        var anyError = false;
+        DataGridView? dgv = AdvancedInventory_Import_DataGridView;
+        List<DataGridViewRow> rowsToRemove = new();
+        bool anyError = false;
 
         // Get DataTables from ComboBoxes' DataSource
-        var partTable = AdvancedInventory_Single_ComboBox_Part.DataSource as DataTable;
-        var opTable = AdvancedInventory_Single_ComboBox_Op.DataSource as DataTable;
-        var locTable = AdvancedInventory_Single_ComboBox_Loc.DataSource as DataTable;
+        DataTable? partTable = AdvancedInventory_Single_ComboBox_Part.DataSource as DataTable;
+        DataTable? opTable = AdvancedInventory_Single_ComboBox_Op.DataSource as DataTable;
+        DataTable? locTable = AdvancedInventory_Single_ComboBox_Loc.DataSource as DataTable;
 
         // Get valid values from DataTables
-        var validParts =
+        HashSet<string?> validParts =
             partTable?.AsEnumerable().Select(r => r.Field<string>("PartID"))
                 .Where(s => !string.IsNullOrWhiteSpace(s)).ToHashSet(StringComparer.OrdinalIgnoreCase) ??
             [];
-        var validOps =
+        HashSet<string?> validOps =
             opTable?.AsEnumerable().Select(r => r.Field<string>("Operation")).Where(s => !string.IsNullOrWhiteSpace(s))
                 .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
-        var validLocs =
+        HashSet<string?> validLocs =
             locTable?.AsEnumerable().Select(r => r.Field<string>("Location")).Where(s => !string.IsNullOrWhiteSpace(s))
                 .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
 
         // Load Excel file for row removal
-        var excelPath = GetUserExcelFilePath();
+        string excelPath = GetUserExcelFilePath();
         XLWorkbook? workbook = null;
         IXLWorksheet? worksheet = null;
         if (File.Exists(excelPath))
@@ -1592,22 +1642,27 @@ public partial class Control_AdvancedInventory : UserControl
         }
 
         // Collect all Excel row numbers to delete (1-based)
-        var excelRowsToDelete = new List<int>();
+        List<int> excelRowsToDelete = new();
 
         foreach (DataGridViewRow row in dgv.Rows)
         {
-            if (row.IsNewRow) continue;
+            if (row.IsNewRow)
+            {
+                continue;
+            }
 
-            var rowValid = true;
+            bool rowValid = true;
             foreach (DataGridViewCell cell in row.Cells)
+            {
                 cell.Style.ForeColor = Model_AppVariables.UserUiColors.TextBoxForeColor ?? Color.Black;
+            }
 
-            var part = row.Cells["Part"].Value?.ToString() ?? "";
-            var op = row.Cells["Operation"].Value?.ToString() ?? "";
-            var loc = row.Cells["Location"].Value?.ToString() ?? "";
-            var qtyText = row.Cells["Quantity"].Value?.ToString() ?? "";
-            var notesOriginal = row.Cells["Notes"].Value?.ToString() ?? "";
-            var notes = "Excel Import: " + notesOriginal;
+            string part = row.Cells["Part"].Value?.ToString() ?? "";
+            string op = row.Cells["Operation"].Value?.ToString() ?? "";
+            string loc = row.Cells["Location"].Value?.ToString() ?? "";
+            string qtyText = row.Cells["Quantity"].Value?.ToString() ?? "";
+            string notesOriginal = row.Cells["Notes"].Value?.ToString() ?? "";
+            string notes = "Excel Import: " + notesOriginal;
 
             // Validate against ComboBox DataTables
             if (!validParts.Contains(part))
@@ -1632,7 +1687,7 @@ public partial class Control_AdvancedInventory : UserControl
             }
 
             // Quantity must be a number above 0
-            if (!int.TryParse(qtyText, out var qty) || qty <= 0)
+            if (!int.TryParse(qtyText, out int qty) || qty <= 0)
             {
                 row.Cells["Quantity"].Style.ForeColor =
                     Model_AppVariables.UserUiColors.TextBoxErrorForeColor ?? Color.Red;
@@ -1640,6 +1695,7 @@ public partial class Control_AdvancedInventory : UserControl
             }
 
             if (rowValid)
+            {
                 try
                 {
                     await Dao_Inventory.AddInventoryItemAsync(
@@ -1648,14 +1704,16 @@ public partial class Control_AdvancedInventory : UserControl
                     // Find the Excel row number to delete (match by order, not by value)
                     if (worksheet != null)
                     {
-                        var usedRange = worksheet.RangeUsed();
+                        IXLRange? usedRange = worksheet.RangeUsed();
                         if (usedRange != null)
                         {
-                            var headerRow = usedRange.FirstRow().RowNumber();
-                            var lastRow = usedRange.LastRow().RowNumber();
-                            var excelRowIndex = headerRow + 1 + row.Index;
+                            int headerRow = usedRange.FirstRow().RowNumber();
+                            int lastRow = usedRange.LastRow().RowNumber();
+                            int excelRowIndex = headerRow + 1 + row.Index;
                             if (excelRowIndex <= lastRow)
+                            {
                                 excelRowsToDelete.Add(excelRowIndex);
+                            }
                         }
                     }
 
@@ -1665,41 +1723,55 @@ public partial class Control_AdvancedInventory : UserControl
                 {
                     LoggingUtility.LogApplicationError(ex);
                     foreach (DataGridViewCell cell in row.Cells)
+                    {
                         cell.Style.ForeColor = Model_AppVariables.UserUiColors.TextBoxErrorForeColor ?? Color.Red;
+                    }
+
                     rowValid = false;
                     anyError = true;
                 }
+            }
             else
+            {
                 anyError = true;
+            }
         }
 
         // Delete rows from Excel in descending order to avoid shifting
         if (worksheet != null && excelRowsToDelete.Count > 0)
         {
             excelRowsToDelete.Sort((a, b) => b.CompareTo(a));
-            foreach (var rowNum in excelRowsToDelete)
+            foreach (int rowNum in excelRowsToDelete)
+            {
                 worksheet.Row(rowNum).Delete();
+            }
 
             // Push remaining rows up: remove empty rows at the end
-            var usedRange = worksheet.RangeUsed();
+            IXLRange? usedRange = worksheet.RangeUsed();
             if (usedRange != null)
             {
-                var headerRow = usedRange.FirstRow().RowNumber();
-                var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? headerRow;
-                for (var i = lastRow; i > headerRow; i--)
+                int headerRow = usedRange.FirstRow().RowNumber();
+                int lastRow = worksheet.LastRowUsed()?.RowNumber() ?? headerRow;
+                for (int i = lastRow; i > headerRow; i--)
                 {
-                    var isEmpty = worksheet.Row(i).CellsUsed().All(c => string.IsNullOrWhiteSpace(c.GetString()));
+                    bool isEmpty = worksheet.Row(i).CellsUsed().All(c => string.IsNullOrWhiteSpace(c.GetString()));
                     if (isEmpty)
+                    {
                         worksheet.Row(i).Delete();
+                    }
                 }
             }
 
             workbook?.Save();
         }
 
-        foreach (var row in rowsToRemove)
+        foreach (DataGridViewRow row in rowsToRemove)
+        {
             if (!row.IsNewRow)
+            {
                 dgv.Rows.Remove(row);
+            }
+        }
 
         RefreshImportDataGridView();
 
@@ -1708,8 +1780,10 @@ public partial class Control_AdvancedInventory : UserControl
             MessageBox.Show(@"All transactions saved successfully.", @"Success", MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
             if (MainFormInstance != null)
+            {
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
                     $"Last Import: {DateTime.Now:hh:mm tt} ({dgv.Rows.Count} rows imported)";
+            }
         }
         else
         {
@@ -1720,53 +1794,80 @@ public partial class Control_AdvancedInventory : UserControl
 
     private void RefreshImportDataGridView()
     {
-        var excelPath = GetUserExcelFilePath();
+        string excelPath = GetUserExcelFilePath();
         if (!File.Exists(excelPath))
+        {
             return;
+        }
 
         // Store highlighted cells before refresh
-        var highlightMap = new Dictionary<int, HashSet<string>>();
+        Dictionary<int, HashSet<string>> highlightMap = new();
         if (AdvancedInventory_Import_DataGridView.DataSource is DataTable)
+        {
             foreach (DataGridViewRow row in AdvancedInventory_Import_DataGridView.Rows)
             {
-                if (row.IsNewRow) continue;
-                var cols = new HashSet<string>();
+                if (row.IsNewRow)
+                {
+                    continue;
+                }
+
+                HashSet<string> cols = new();
                 foreach (DataGridViewCell cell in row.Cells)
+                {
                     if (cell.Style.ForeColor == (Model_AppVariables.UserUiColors.TextBoxErrorForeColor ?? Color.Red))
+                    {
                         if (cell.OwningColumn != null)
+                        {
                             cols.Add(cell.OwningColumn.Name);
+                        }
+                    }
+                }
+
                 if (cols.Count > 0)
+                {
                     highlightMap[row.Index] = cols;
+                }
+            }
+        }
+
+        DataTable dt = new();
+        using (XLWorkbook workbook = new(excelPath))
+        {
+            IXLWorksheet? worksheet = workbook.Worksheet("Tab 1");
+            if (worksheet == null)
+            {
+                return;
             }
 
-        var dt = new DataTable();
-        using (var workbook = new XLWorkbook(excelPath))
-        {
-            var worksheet = workbook.Worksheet("Tab 1");
-            if (worksheet == null)
-                return;
-
-            var usedRange = worksheet.RangeUsed();
+            IXLRange? usedRange = worksheet.RangeUsed();
             if (usedRange == null)
-                return;
-
-            var colCount = usedRange.ColumnCount();
-            var rowCount = usedRange.RowCount();
-
-            var headerRow = usedRange.Row(1);
-            for (var col = 1; col <= colCount; col++)
             {
-                var colName = headerRow.Cell(col).GetValue<string>();
+                return;
+            }
+
+            int colCount = usedRange.ColumnCount();
+            int rowCount = usedRange.RowCount();
+
+            IXLRangeRow? headerRow = usedRange.Row(1);
+            for (int col = 1; col <= colCount; col++)
+            {
+                string? colName = headerRow.Cell(col).GetValue<string>();
                 if (string.IsNullOrWhiteSpace(colName))
+                {
                     colName = $"Column{col}";
+                }
+
                 dt.Columns.Add(colName);
             }
 
-            for (var row = 2; row <= rowCount; row++)
+            for (int row = 2; row <= rowCount; row++)
             {
-                var dataRow = dt.NewRow();
-                for (var col = 1; col <= colCount; col++)
+                DataRow dataRow = dt.NewRow();
+                for (int col = 1; col <= colCount; col++)
+                {
                     dataRow[col - 1] = usedRange.Row(row).Cell(col).GetValue<string>();
+                }
+
                 dt.Rows.Add(dataRow);
             }
         }
@@ -1776,21 +1877,32 @@ public partial class Control_AdvancedInventory : UserControl
         // Restore highlights after refresh and re-validate Quantity
         foreach (DataGridViewRow row in AdvancedInventory_Import_DataGridView.Rows)
         {
-            if (row.IsNewRow) continue;
+            if (row.IsNewRow)
+            {
+                continue;
+            }
 
             // Restore previous highlights
-            if (highlightMap.TryGetValue(row.Index, out var cols))
+            if (highlightMap.TryGetValue(row.Index, out HashSet<string>? cols))
+            {
                 foreach (DataGridViewCell cell in row.Cells)
+                {
                     if (cell.OwningColumn != null && cols.Contains(cell.OwningColumn.Name))
+                    {
                         cell.Style.ForeColor = Model_AppVariables.UserUiColors.TextBoxErrorForeColor ?? Color.Red;
+                    }
+                }
+            }
 
             // Always validate Quantity column
             if (row.DataGridView != null && row.DataGridView.Columns.Contains("Quantity"))
             {
-                var qtyCell = row.Cells["Quantity"];
-                var qtyText = qtyCell.Value?.ToString() ?? "";
-                if (!int.TryParse(qtyText, out var qty) || qty <= 0)
+                DataGridViewCell? qtyCell = row.Cells["Quantity"];
+                string qtyText = qtyCell.Value?.ToString() ?? "";
+                if (!int.TryParse(qtyText, out int qty) || qty <= 0)
+                {
                     qtyCell.Style.ForeColor = Model_AppVariables.UserUiColors.TextBoxErrorForeColor ?? Color.Red;
+                }
             }
         }
     }

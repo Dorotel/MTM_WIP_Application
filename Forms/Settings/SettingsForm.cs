@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Text.Json;
+using MTM_Inventory_Application.Controls.SettingsForm;
+using MTM_Inventory_Application.Controls.Shared;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
-using MTM_Inventory_Application.Controls.SettingsForm;
-using MTM_Inventory_Application.Controls.Shared;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace MTM_Inventory_Application.Forms.Settings;
 
@@ -569,7 +565,7 @@ public partial class SettingsForm : Form
 
                 var okButton = new Button { Text = "OK", Location = new Point(215, 110), Size = new Size(75, 23) };
                 var cancelButton = new Button
-                    { Text = "Cancel", Location = new Point(295, 110), Size = new Size(75, 23) };
+                { Text = "Cancel", Location = new Point(295, 110), Size = new Size(75, 23) };
 
                 okButton.Click += (s, args) =>
                 {

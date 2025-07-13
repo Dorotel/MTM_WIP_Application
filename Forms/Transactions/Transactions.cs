@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using MTM_Inventory_Application.Models;
+using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
-using MTM_Inventory_Application.Core;
+using MTM_Inventory_Application.Models;
 
 namespace MTM_Inventory_Application.Forms.Transactions;
 
@@ -89,20 +85,22 @@ public partial class Transactions : Form
         dataGridTransactions.Columns.Clear();
 
         dataGridTransactions.Columns.Add(new DataGridViewTextBoxColumn
-            { HeaderText = "Location", DataPropertyName = "FromLocation", Name = "colLocation" });
+        { HeaderText = "Location", DataPropertyName = "FromLocation", Name = "colLocation" });
         dataGridTransactions.Columns.Add(new DataGridViewTextBoxColumn
-            { HeaderText = "PartID", DataPropertyName = "PartID", Name = "colPartID" });
+        { HeaderText = "PartID", DataPropertyName = "PartID", Name = "colPartID" });
         dataGridTransactions.Columns.Add(new DataGridViewTextBoxColumn
-            { HeaderText = "Quantity", DataPropertyName = "Quantity", Name = "colQuantity" });
+        { HeaderText = "Quantity", DataPropertyName = "Quantity", Name = "colQuantity" });
         dataGridTransactions.Columns.Add(new DataGridViewTextBoxColumn
         {
-            HeaderText = "Date", DataPropertyName = "ReceiveDate", Name = "colDate",
+            HeaderText = "Date",
+            DataPropertyName = "ReceiveDate",
+            Name = "colDate",
             DefaultCellStyle = new DataGridViewCellStyle { Format = "g" }
         });
         dataGridTransactions.Columns.Add(new DataGridViewTextBoxColumn
-            { HeaderText = "User", DataPropertyName = "User", Name = "colUser" });
+        { HeaderText = "User", DataPropertyName = "User", Name = "colUser" });
         dataGridTransactions.Columns.Add(new DataGridViewTextBoxColumn
-            { HeaderText = "ItemType", DataPropertyName = "TransactionType", Name = "colType" });
+        { HeaderText = "ItemType", DataPropertyName = "TransactionType", Name = "colType" });
 
         dataGridTransactions.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dataGridTransactions.ReadOnly = true;

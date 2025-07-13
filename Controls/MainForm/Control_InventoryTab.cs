@@ -1,29 +1,16 @@
-﻿// Refactored per REPO_COMPREHENSIVE_CHECKLIST.md: 
-// - One public type per file, file name matches type
-// - Consistent region usage: Fields, Properties, Constructors, Methods, Events
-// - Usings outside namespace, System first, sorted, no unused usings
-// - Explicit access modifiers, auto-properties, clear naming
-// - Remove dead code, split large methods, avoid magic numbers/strings, consistent formatting
-// - Add summary comments for class and key methods
-// - Exception handling and logging as per standards
-// - Namespace and class name match file
-//
-// (No functional code changes, only structure/style)
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Forms.MainForm.Classes;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Services;
-using MTM_Inventory_Application.Core;
 using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Controls.MainForm;
@@ -100,28 +87,34 @@ public partial class ControlInventoryTab : UserControl
             {
                 // CTRL+S: Save
                 if (keyData == Core_WipAppVariables.Shortcut_Inventory_Save)
+                {
                     if (Control_InventoryTab_Button_Save.Visible && Control_InventoryTab_Button_Save.Enabled)
                     {
                         Control_InventoryTab_Button_Save.PerformClick();
                         return true;
                     }
+                }
 
                 // CTRL+SHIFT+A: Advanced
                 if (keyData == Core_WipAppVariables.Shortcut_Inventory_Advanced)
+                {
                     if (Control_InventoryTab_Button_AdvancedEntry.Visible &&
                         Control_InventoryTab_Button_AdvancedEntry.Enabled)
                     {
                         Control_InventoryTab_Button_AdvancedEntry.PerformClick();
                         return true;
                     }
+                }
 
                 // CTRL+R: Reset
                 if (keyData == Core_WipAppVariables.Shortcut_Inventory_Reset)
+                {
                     if (Control_InventoryTab_Button_Reset.Visible && Control_InventoryTab_Button_Reset.Enabled)
                     {
                         Control_InventoryTab_Button_Reset.PerformClick();
                         return true;
                     }
+                }
             }
 
             if (keyData == Keys.Enter)
@@ -174,11 +167,22 @@ public partial class ControlInventoryTab : UserControl
                 return;
             }
 
-            if (MainFormInstance is not null) MainFormInstance.MainForm_Control_InventoryTab.Visible = false;
-            if (MainFormInstance is not null) MainFormInstance.MainForm_AdvancedInventory.Visible = true;
+            if (MainFormInstance is not null)
+            {
+                MainFormInstance.MainForm_Control_InventoryTab.Visible = false;
+            }
 
-            if (MainFormInstance?.MainForm_AdvancedInventory is null) return;
-            var adv = MainFormInstance.MainForm_AdvancedInventory;
+            if (MainFormInstance is not null)
+            {
+                MainFormInstance.MainForm_AdvancedInventory.Visible = true;
+            }
+
+            if (MainFormInstance?.MainForm_AdvancedInventory is null)
+            {
+                return;
+            }
+
+            Control_AdvancedInventory? adv = MainFormInstance.MainForm_AdvancedInventory;
 
             if (adv.GetType().GetField("AdvancedInventory_Single_ComboBox_Part",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
@@ -233,7 +237,9 @@ public partial class ControlInventoryTab : UserControl
             if (adv.GetType().GetField("AdvancedInventory_TabControl",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     ?.GetValue(adv) is TabControl tab)
+            {
                 tab.SelectedIndex = 0;
+            }
         }
         catch (Exception ex)
         {
@@ -249,9 +255,13 @@ public partial class ControlInventoryTab : UserControl
         {
             // Check if Shift key is held down
             if ((ModifierKeys & Keys.Shift) == Keys.Shift)
+            {
                 Control_InventoryTab_HardReset();
+            }
             else
+            {
                 Control_InventoryTab_SoftReset();
+            }
         }
         catch (Exception ex)
         {
@@ -403,11 +413,11 @@ public partial class ControlInventoryTab : UserControl
         {
             LoggingUtility.Log("Inventory Save button clicked.");
 
-            var partId = Control_InventoryTab_ComboBox_Part.Text;
-            var op = Control_InventoryTab_ComboBox_Operation.Text;
-            var loc = Control_InventoryTab_ComboBox_Location.Text;
-            var qtyText = Control_InventoryTab_TextBox_Quantity.Text.Trim();
-            var notes = Control_InventoryTab_RichTextBox_Notes.Text.Trim();
+            string partId = Control_InventoryTab_ComboBox_Part.Text;
+            string op = Control_InventoryTab_ComboBox_Operation.Text;
+            string loc = Control_InventoryTab_ComboBox_Location.Text;
+            string qtyText = Control_InventoryTab_TextBox_Quantity.Text.Trim();
+            string notes = Control_InventoryTab_RichTextBox_Notes.Text.Trim();
 
             if (string.IsNullOrWhiteSpace(partId) || Control_InventoryTab_ComboBox_Part.SelectedIndex <= 0)
             {
@@ -433,7 +443,7 @@ public partial class ControlInventoryTab : UserControl
                 return;
             }
 
-            if (!int.TryParse(qtyText, out var qty) || qty <= 0)
+            if (!int.TryParse(qtyText, out int qty) || qty <= 0)
             {
                 MessageBox.Show(@"Please enter a valid quantity.", @"Validation Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -466,12 +476,16 @@ public partial class ControlInventoryTab : UserControl
                 MessageBoxIcon.Information);
 
             if (MainFormInstance != null)
+            {
                 MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
                     $@"Last Inventoried Part: {partId} (Op: {op}), Location: {(string.IsNullOrWhiteSpace(loc) ? "" : loc)}, Quantity: {qty} @ {DateTime.Now:hh:mm tt}";
+            }
 
             Control_InventoryTab_Button_Reset_Click();
             if (MainFormInstance != null && MainFormInstance.control_QuickButtons1 != null)
+            {
                 MainFormInstance.control_QuickButtons1.LoadLast10Transactions(Model_AppVariables.User);
+            }
         }
         catch (Exception ex)
         {
@@ -484,12 +498,12 @@ public partial class ControlInventoryTab : UserControl
     private static async Task AddToLast10TransactionsIfUniqueAsync(string user, string partId, string operation,
         int quantity)
     {
-        var connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
-        using var conn = new MySqlConnection(connectionString);
+        string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
+        using MySqlConnection conn = new(connectionString);
         await conn.OpenAsync();
 
         // 1. Check for duplicate in last 10
-        var checkCmd = new MySqlCommand(@"
+        MySqlCommand checkCmd = new(@"
         SELECT COUNT(*) FROM (
             SELECT PartID, Operation, Quantity
             FROM sys_last_10_transactions
@@ -505,12 +519,14 @@ public partial class ControlInventoryTab : UserControl
         checkCmd.Parameters.AddWithValue("@Operation", operation);
         checkCmd.Parameters.AddWithValue("@Quantity", quantity);
 
-        var exists = Convert.ToInt32(await checkCmd.ExecuteScalarAsync()) > 0;
+        bool exists = Convert.ToInt32(await checkCmd.ExecuteScalarAsync()) > 0;
         if (exists)
+        {
             return;
+        }
 
         // 2. Insert new transaction
-        var insertCmd = new MySqlCommand(@"
+        MySqlCommand insertCmd = new(@"
         INSERT INTO sys_last_10_transactions (User, PartID, Operation, Quantity)
         VALUES (@User, @PartID, @Operation, @Quantity)
     ", conn);
@@ -569,7 +585,10 @@ public partial class ControlInventoryTab : UserControl
                     Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
                 if (Control_InventoryTab_ComboBox_Location.SelectedIndex != 0 &&
                     Control_InventoryTab_ComboBox_Location.Items.Count > 0)
+                {
                     Control_InventoryTab_ComboBox_Location.SelectedIndex = 0;
+                }
+
                 Model_AppVariables.Location = null;
             }
         }
@@ -598,7 +617,10 @@ public partial class ControlInventoryTab : UserControl
                     Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
                 if (Control_InventoryTab_ComboBox_Operation.SelectedIndex != 0 &&
                     Control_InventoryTab_ComboBox_Operation.Items.Count > 0)
+                {
                     Control_InventoryTab_ComboBox_Operation.SelectedIndex = 0;
+                }
+
                 Model_AppVariables.Operation = null;
             }
         }
@@ -627,7 +649,10 @@ public partial class ControlInventoryTab : UserControl
                     Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
                 if (Control_InventoryTab_ComboBox_Part.SelectedIndex != 0 &&
                     Control_InventoryTab_ComboBox_Part.Items.Count > 0)
+                {
                     Control_InventoryTab_ComboBox_Part.SelectedIndex = 0;
+                }
+
                 Model_AppVariables.PartId = null;
             }
         }
@@ -644,9 +669,9 @@ public partial class ControlInventoryTab : UserControl
         {
             LoggingUtility.Log("Inventory Quantity TextBox changed.");
 
-            var text = Control_InventoryTab_TextBox_Quantity.Text.Trim();
+            string text = Control_InventoryTab_TextBox_Quantity.Text.Trim();
             const string placeholder = "[ Enter Valid Quantity ]";
-            var isValid = int.TryParse(text, out var qty) && qty > 0;
+            bool isValid = int.TryParse(text, out int qty) && qty > 0;
 
             if (isValid)
             {
@@ -676,13 +701,13 @@ public partial class ControlInventoryTab : UserControl
     {
         try
         {
-            var partValid = Control_InventoryTab_ComboBox_Part.SelectedIndex > 0 &&
-                            !string.IsNullOrWhiteSpace(Control_InventoryTab_ComboBox_Part.Text);
-            var opValid = Control_InventoryTab_ComboBox_Operation.SelectedIndex > 0 &&
-                          !string.IsNullOrWhiteSpace(Control_InventoryTab_ComboBox_Operation.Text);
-            var locValid = Control_InventoryTab_ComboBox_Location.SelectedIndex > 0 &&
-                           !string.IsNullOrWhiteSpace(Control_InventoryTab_ComboBox_Location.Text);
-            var qtyValid = int.TryParse(Control_InventoryTab_TextBox_Quantity.Text.Trim(), out var qty) && qty > 0;
+            bool partValid = Control_InventoryTab_ComboBox_Part.SelectedIndex > 0 &&
+                             !string.IsNullOrWhiteSpace(Control_InventoryTab_ComboBox_Part.Text);
+            bool opValid = Control_InventoryTab_ComboBox_Operation.SelectedIndex > 0 &&
+                           !string.IsNullOrWhiteSpace(Control_InventoryTab_ComboBox_Operation.Text);
+            bool locValid = Control_InventoryTab_ComboBox_Location.SelectedIndex > 0 &&
+                            !string.IsNullOrWhiteSpace(Control_InventoryTab_ComboBox_Location.Text);
+            bool qtyValid = int.TryParse(Control_InventoryTab_TextBox_Quantity.Text.Trim(), out int qty) && qty > 0;
             Control_InventoryTab_Button_Save.Enabled = partValid && opValid && locValid && qtyValid;
         }
         catch (Exception ex)
@@ -776,7 +801,7 @@ public partial class ControlInventoryTab : UserControl
             return;
         }
 
-        var isOutOfDate = currentVersion != serverVersion;
+        bool isOutOfDate = currentVersion != serverVersion;
         Control_InventoryTab_Label_Version.Text =
             $@"Client Version: {currentVersion} | Server Version: {serverVersion}";
         Control_InventoryTab_Label_Version.ForeColor = isOutOfDate

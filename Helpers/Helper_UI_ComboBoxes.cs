@@ -1,13 +1,13 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Reflection;
+using MTM_Inventory_Application.Controls.MainForm;
 using MTM_Inventory_Application.Models;
 using MySql.Data.MySqlClient;
-using static MTM_Inventory_Application.Core.Core_Themes;
+using MethodInvoker = System.Windows.Forms.MethodInvoker;
 
 namespace MTM_Inventory_Application.Helpers;
 
@@ -50,13 +50,10 @@ public static class Helper_UI_ComboBoxes
 
     public static async Task SetupPartDataTable()
     {
-        await using var connection = new MySqlConnection(Model_AppVariables.ConnectionString);
+        await using MySqlConnection connection = new(Model_AppVariables.ConnectionString);
         await connection.OpenAsync();
 
-        var command = new MySqlCommand("md_part_ids_Get_All", connection)
-        {
-            CommandType = CommandType.StoredProcedure
-        };
+        MySqlCommand command = new("md_part_ids_Get_All", connection) { CommandType = CommandType.StoredProcedure };
 
         lock (PartDataLock)
         {
@@ -70,10 +67,10 @@ public static class Helper_UI_ComboBoxes
 
     public static async Task SetupOperationDataTable()
     {
-        await using var connection = new MySqlConnection(Model_AppVariables.ConnectionString);
+        await using MySqlConnection connection = new(Model_AppVariables.ConnectionString);
         await connection.OpenAsync();
 
-        var command = new MySqlCommand("md_operation_numbers_Get_All", connection)
+        MySqlCommand command = new("md_operation_numbers_Get_All", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -90,13 +87,10 @@ public static class Helper_UI_ComboBoxes
 
     public static async Task SetupLocationDataTable()
     {
-        await using var connection = new MySqlConnection(Model_AppVariables.ConnectionString);
+        await using MySqlConnection connection = new(Model_AppVariables.ConnectionString);
         await connection.OpenAsync();
 
-        var command = new MySqlCommand("md_locations_Get_All", connection)
-        {
-            CommandType = CommandType.StoredProcedure
-        };
+        MySqlCommand command = new("md_locations_Get_All", connection) { CommandType = CommandType.StoredProcedure };
 
         lock (LocationDataLock)
         {
@@ -110,13 +104,10 @@ public static class Helper_UI_ComboBoxes
 
     public static async Task Setup2ndLocationDataTable()
     {
-        await using var connection = new MySqlConnection(Model_AppVariables.ConnectionString);
+        await using MySqlConnection connection = new(Model_AppVariables.ConnectionString);
         await connection.OpenAsync();
 
-        var command = new MySqlCommand("md_locations_Get_All", connection)
-        {
-            CommandType = CommandType.StoredProcedure
-        };
+        MySqlCommand command = new("md_locations_Get_All", connection) { CommandType = CommandType.StoredProcedure };
 
         lock (Combobox2ndLocationLock)
         {
@@ -130,10 +121,10 @@ public static class Helper_UI_ComboBoxes
 
     public static async Task SetupUserDataTable()
     {
-        await using var connection = new MySqlConnection(Model_AppVariables.ConnectionString);
+        await using MySqlConnection connection = new(Model_AppVariables.ConnectionString);
         await connection.OpenAsync();
 
-        var command = new MySqlCommand("usr_users_Get_All", connection) { CommandType = CommandType.StoredProcedure };
+        MySqlCommand command = new("usr_users_Get_All", connection) { CommandType = CommandType.StoredProcedure };
 
         lock (UserDataLock)
         {
@@ -255,12 +246,16 @@ public static class Helper_UI_ComboBoxes
         void SetComboBox()
         {
             if (dataLock != null)
+            {
                 lock (dataLock)
                 {
                     SetComboBoxInternal();
                 }
+            }
             else
+            {
                 SetComboBoxInternal();
+            }
         }
 
         void SetComboBoxInternal()
@@ -273,22 +268,29 @@ public static class Helper_UI_ComboBoxes
             }
 
             if (!dataTable.Columns.Contains(displayMember) || !dataTable.Columns.Contains(valueMember))
+            {
                 throw new InvalidOperationException(
                     $"DataTable does not contain required columns: '{displayMember}' or '{valueMember}'. " +
                     $"Actual columns: {string.Join(", ", dataTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName))}");
+            }
 
-            var hasPlaceholder = dataTable.Rows.Count > 0 &&
-                                 dataTable.Rows[0][displayMember]?.ToString() == placeholder;
+            bool hasPlaceholder = dataTable.Rows.Count > 0 &&
+                                  dataTable.Rows[0][displayMember]?.ToString() == placeholder;
 
             if (!hasPlaceholder)
             {
-                var row = dataTable.NewRow();
+                DataRow row = dataTable.NewRow();
                 row[displayMember] = placeholder;
                 if (dataTable.Columns[valueMember] != null &&
                     dataTable.Columns[valueMember]!.DataType == typeof(int))
+                {
                     row[valueMember] = -1;
+                }
                 else
+                {
                     row[valueMember] = placeholder;
+                }
+
                 dataTable.Rows.InsertAt(row, 0);
             }
 
@@ -299,9 +301,13 @@ public static class Helper_UI_ComboBoxes
         }
 
         if (comboBox.InvokeRequired)
+        {
             comboBox.Invoke(SetComboBox);
+        }
         else
+        {
             SetComboBox();
+        }
 
         return Task.CompletedTask;
     }
@@ -312,7 +318,10 @@ public static class Helper_UI_ComboBoxes
 
     public static async Task ResetAndRefreshAllDataTablesAsync()
     {
-        if (MainFormInstance != null) await UnbindAllComboBoxDataSourcesAsync(MainFormInstance);
+        if (MainFormInstance != null)
+        {
+            await UnbindAllComboBoxDataSourcesAsync(MainFormInstance);
+        }
 
         await SetupPartDataTable();
         await SetupOperationDataTable();
@@ -322,9 +331,8 @@ public static class Helper_UI_ComboBoxes
         await ReloadAllTabComboBoxesAsync();
     }
 
-    public static Task UnbindAllComboBoxDataSourcesAsync(Control root)
-    {
-        return Task.Run(() =>
+    public static Task UnbindAllComboBoxDataSourcesAsync(Control root) =>
+        Task.Run(() =>
         {
             void Unbind(Control parent)
             {
@@ -334,18 +342,24 @@ public static class Helper_UI_ComboBoxes
                     {
                         // UI updates must be invoked on the UI thread
                         if (combo.InvokeRequired)
+                        {
                             combo.Invoke(new Action(() => combo.DataSource = null));
+                        }
                         else
+                        {
                             combo.DataSource = null;
+                        }
                     }
 
-                    if (control.HasChildren) Unbind(control);
+                    if (control.HasChildren)
+                    {
+                        Unbind(control);
+                    }
                 }
             }
 
             Unbind(root);
         });
-    }
 
     #endregion
 
@@ -354,23 +368,32 @@ public static class Helper_UI_ComboBoxes
     public static bool ValidateComboBoxItem(ComboBox comboBox, string placeholder)
     {
         if (comboBox == null)
+        {
             return false;
+        }
 
         if (comboBox.DataSource is not DataTable dt)
+        {
             return false;
+        }
 
-        var text = comboBox.Text?.Trim() ?? string.Empty;
-        var displayMember = comboBox.DisplayMember;
+        string text = comboBox.Text?.Trim() ?? string.Empty;
+        string displayMember = comboBox.DisplayMember;
 
         if (string.IsNullOrWhiteSpace(displayMember) || !dt.Columns.Contains(displayMember))
+        {
             return false;
+        }
 
         if (string.IsNullOrWhiteSpace(text))
         {
             comboBox.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             comboBox.Text = placeholder;
             if (comboBox.Items.Count > 0)
+            {
                 comboBox.SelectedIndex = 0;
+            }
+
             return false;
         }
 
@@ -378,14 +401,17 @@ public static class Helper_UI_ComboBoxes
         {
             comboBox.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             if (comboBox.Items.Count > 0)
+            {
                 comboBox.SelectedIndex = 0;
+            }
+
             return true;
         }
 
-        var found = false;
+        bool found = false;
         foreach (DataRow row in dt.Rows)
         {
-            var value = row[displayMember]?.ToString();
+            string? value = row[displayMember]?.ToString();
             if (!string.IsNullOrEmpty(value) && value.Equals(text, StringComparison.OrdinalIgnoreCase))
             {
                 found = true;
@@ -403,7 +429,10 @@ public static class Helper_UI_ComboBoxes
             comboBox.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             comboBox.Text = placeholder;
             if (comboBox.Items.Count > 0)
+            {
                 comboBox.SelectedIndex = 0;
+            }
+
             return false;
         }
     }
@@ -414,7 +443,11 @@ public static class Helper_UI_ComboBoxes
 
     public static void ApplyStandardComboBoxProperties(ComboBox comboBox, bool ownerDraw = false)
     {
-        if (comboBox == null) return;
+        if (comboBox == null)
+        {
+            return;
+        }
+
         comboBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
         comboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
         comboBox.FormattingEnabled = true;
@@ -422,10 +455,7 @@ public static class Helper_UI_ComboBoxes
         comboBox.DrawMode = ownerDraw ? DrawMode.OwnerDrawVariable : DrawMode.Normal;
     }
 
-    public static void DeselectAllComboBoxText(Control parent)
-    {
-        ComboBoxHelpers.DeselectAllComboBoxText(parent);
-    }
+    public static void DeselectAllComboBoxText(Control parent) => ComboBoxHelpers.DeselectAllComboBoxText(parent);
 
     #endregion
 
@@ -435,20 +465,32 @@ public static class Helper_UI_ComboBoxes
     {
         public static void DeselectAllComboBoxText(Control parent)
         {
-            if (parent == null) return;
+            if (parent == null)
+            {
+                return;
+            }
+
             foreach (Control control in parent.Controls)
             {
                 if (control is ComboBox comboBox)
+                {
                     if (comboBox.DropDownStyle != ComboBoxStyle.DropDownList)
                     {
                         if (comboBox.InvokeRequired)
+                        {
                             comboBox.Invoke(new MethodInvoker(() => comboBox.SelectionLength = 0));
+                        }
                         else
+                        {
                             comboBox.SelectionLength = 0;
+                        }
                     }
+                }
 
                 if (control.HasChildren)
+                {
                     DeselectAllComboBoxText(control);
+                }
             }
         }
     }
@@ -460,33 +502,43 @@ public static class Helper_UI_ComboBoxes
     public static async Task ReloadAllTabComboBoxesAsync()
     {
         if (MainFormInstance!.MainForm_RemoveTabNormalControl != null)
+        {
             await MainFormInstance.MainForm_RemoveTabNormalControl
                 .Control_RemoveTab_OnStartup_LoadDataComboBoxesAsync();
+        }
 
         if (MainFormInstance!.MainForm_Control_TransferTab != null)
+        {
             await MainFormInstance!.MainForm_Control_TransferTab
                 .Control_TransferTab_OnStartup_LoadDataComboBoxesAsync();
+        }
 
         if (MainFormInstance!.MainForm_Control_InventoryTab != null)
+        {
             await MainFormInstance!.MainForm_Control_InventoryTab
                 .Control_InventoryTab_OnStartup_LoadDataComboBoxesAsync();
+        }
 
         if (MainFormInstance!.MainForm_Control_AdvancedRemove != null)
         {
-            var advRemove = MainFormInstance!.MainForm_Control_AdvancedRemove;
-            var loadComboBoxesAsync = advRemove.GetType().GetMethod("LoadComboBoxesAsync",
+            Control_AdvancedRemove? advRemove = MainFormInstance!.MainForm_Control_AdvancedRemove;
+            MethodInfo? loadComboBoxesAsync = advRemove.GetType().GetMethod("LoadComboBoxesAsync",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (loadComboBoxesAsync != null)
+            {
                 await ((Task)loadComboBoxesAsync.Invoke(advRemove, null)!)!;
+            }
         }
 
         if (MainFormInstance!.MainForm_AdvancedInventory != null)
         {
-            var advInv = MainFormInstance!.MainForm_AdvancedInventory;
-            var loadAllComboBoxesAsync = advInv.GetType().GetMethod("LoadAllComboBoxesAsync",
+            Control_AdvancedInventory? advInv = MainFormInstance!.MainForm_AdvancedInventory;
+            MethodInfo? loadAllComboBoxesAsync = advInv.GetType().GetMethod("LoadAllComboBoxesAsync",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (loadAllComboBoxesAsync != null)
+            {
                 await ((Task)loadAllComboBoxesAsync.Invoke(advInv, null)!)!;
+            }
         }
     }
 

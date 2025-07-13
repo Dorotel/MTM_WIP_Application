@@ -1,6 +1,8 @@
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Media;
-using System.Threading.Tasks;
+using MTM_Inventory_Application.Controls.Addons;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Forms.MainForm;
 using MTM_Inventory_Application.Helpers;
@@ -65,7 +67,7 @@ public class Service_ConnectionRecoveryManager
     {
         try
         {
-            using var conn = new MySqlConnection(Core_WipAppVariables.ReConnectionString);
+            using MySqlConnection conn = new(Core_WipAppVariables.ReConnectionString);
             await conn.OpenAsync();
             HandleConnectionRestored();
         }
@@ -78,8 +80,8 @@ public class Service_ConnectionRecoveryManager
     public async Task UpdateConnectionStrengthAsync()
     {
         // Use the MainForm's control references via _mainForm
-        var signalStrength = _mainForm.MainForm_Control_SignalStrength;
-        var statusStripDisconnected = _mainForm.MainForm_StatusStrip_Disconnected;
+        ConnectionStrengthControl? signalStrength = _mainForm.MainForm_Control_SignalStrength;
+        ToolStripStatusLabel? statusStripDisconnected = _mainForm.MainForm_StatusStrip_Disconnected;
 
         if (signalStrength.InvokeRequired)
         {
@@ -88,10 +90,13 @@ public class Service_ConnectionRecoveryManager
         }
 
         // Access the connection checker via _mainForm (make it internal or provide a getter)
-        var (strength, pingMs) = await Helper_Control_MySqlSignal.GetStrengthAsync();
+        (int strength, int pingMs) = await Helper_Control_MySqlSignal.GetStrengthAsync();
 
         // Use the instance's IsDisconnectTimerActive property
-        if (IsDisconnectTimerActive) strength = 0;
+        if (IsDisconnectTimerActive)
+        {
+            strength = 0;
+        }
 
         signalStrength.Strength = strength;
         signalStrength.Ping = pingMs;
@@ -100,6 +105,8 @@ public class Service_ConnectionRecoveryManager
 
         // Use the instance method for connection lost
         if (strength == 0 && !IsDisconnectTimerActive)
+        {
             HandleConnectionLost();
+        }
     }
 }

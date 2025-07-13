@@ -1,6 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Data;
-using System.Threading.Tasks;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using MySql.Data.MySqlClient;
@@ -27,11 +28,11 @@ internal class Dao_History
 
     public static async Task AddTransactionHistoryAsync(Model_TransactionHistory history)
     {
-        var connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
-        await using var connection = new MySqlConnection(connectionString);
+        string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
+        await using MySqlConnection connection = new(connectionString);
         await connection.OpenAsync();
 
-        await using var command = new MySqlCommand("inv_transaction_Add", connection);
+        await using MySqlCommand command = new("inv_transaction_Add", connection);
         command.CommandType = CommandType.StoredProcedure;
 
         command.Parameters.AddWithValue("@in_TransactionType", history.TransactionType);

@@ -1,17 +1,16 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.ComponentModel;
+using MTM_Inventory_Application.Controls.MainForm;
+using MTM_Inventory_Application.Controls.Shared;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
+using MTM_Inventory_Application.Forms.Settings;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Services;
-using System.ComponentModel;
-using System.Drawing;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using MTM_Inventory_Application.Forms.Settings;
-using MTM_Inventory_Application.Controls.Shared;
-using MTM_Inventory_Application.Forms.Transactions;
 using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Forms.MainForm;
@@ -139,8 +138,10 @@ public partial class MainForm : Form
                     await Dao_User.GetUserFullNameAsync(Model_AppVariables.User, true);
 
                 if (string.IsNullOrEmpty(Model_AppVariables.UserFullName))
+                {
                     Model_AppVariables.UserFullName =
                         Model_AppVariables.User; // Fallback to username if full name not found
+                }
             }
             catch (Exception ex)
             {
@@ -183,19 +184,22 @@ public partial class MainForm : Form
 
     private void MainForm_TabControl_Selecting(object sender, TabControlCancelEventArgs e)
     {
-        var advancedInvTab = MainForm_AdvancedInventory;
-        var advancedRemoveTab = MainForm_Control_AdvancedRemove;
+        Control_AdvancedInventory? advancedInvTab = MainForm_AdvancedInventory;
+        Control_AdvancedRemove? advancedRemoveTab = MainForm_Control_AdvancedRemove;
 
         if ((advancedInvTab != null && advancedInvTab.Visible) ||
             (advancedRemoveTab != null && advancedRemoveTab.Visible))
         {
-            var result = MessageBox.Show(
+            DialogResult result = MessageBox.Show(
                 @"If you change the current tab now, any work will be lost.",
                 @"Warning",
                 MessageBoxButtons.OKCancel,
                 MessageBoxIcon.Warning
             );
-            if (result == DialogResult.Cancel) e.Cancel = true; // Prevent the tab change
+            if (result == DialogResult.Cancel)
+            {
+                e.Cancel = true; // Prevent the tab change
+            }
         }
     }
 
@@ -209,8 +213,8 @@ public partial class MainForm : Form
             switch (MainForm_TabControl.SelectedIndex)
             {
                 case 0: // Inventory Tab
-                    var invTab = MainForm_Control_InventoryTab;
-                    var advancedInvTab = MainForm_AdvancedInventory;
+                    ControlInventoryTab? invTab = MainForm_Control_InventoryTab;
+                    Control_AdvancedInventory? advancedInvTab = MainForm_AdvancedInventory;
                     if (invTab is not null)
                     {
                         if (invTab.GetType().GetField("Control_InventoryTab_ComboBox_Part",
@@ -254,13 +258,16 @@ public partial class MainForm : Form
                         }
 
                         invTab.Visible = true;
-                        if (advancedInvTab is not null) advancedInvTab.Visible = false;
+                        if (advancedInvTab is not null)
+                        {
+                            advancedInvTab.Visible = false;
+                        }
                     }
 
                     break;
                 case 1: // Remove Tab
-                    var remTab = MainForm_RemoveTabNormalControl;
-                    var advancedRemoveTab = MainForm_Control_AdvancedRemove;
+                    ControlRemoveTab? remTab = MainForm_RemoveTabNormalControl;
+                    Control_AdvancedRemove? advancedRemoveTab = MainForm_Control_AdvancedRemove;
                     if (remTab is not null)
                     {
                         if (remTab.GetType().GetField("Control_RemoveTab_ComboBox_Part",
@@ -290,18 +297,25 @@ public partial class MainForm : Form
                                 ?.GetValue(remTab) is DataGridView dgv)
                         {
                             if (dgv.DataSource == null)
+                            {
                                 dgv.Rows.Clear();
+                            }
                             else
+                            {
                                 dgv.DataSource = null;
+                            }
                         }
 
                         remTab.Visible = true;
-                        if (advancedRemoveTab is not null) advancedRemoveTab.Visible = false;
+                        if (advancedRemoveTab is not null)
+                        {
+                            advancedRemoveTab.Visible = false;
+                        }
                     }
 
                     break;
                 case 2: // Transfer Tab
-                    var transTab = MainForm_Control_TransferTab;
+                    ControlTransferTab? transTab = MainForm_Control_TransferTab;
                     if (transTab is not null)
                     {
                         if (transTab.GetType().GetField("Control_TransferTab_ComboBox_Part",
@@ -337,15 +351,21 @@ public partial class MainForm : Form
                                 ?.GetValue(transTab) is DataGridView dgv)
                         {
                             if (dgv.DataSource == null)
+                            {
                                 dgv.Rows.Clear();
+                            }
                             else
+                            {
                                 dgv.DataSource = null;
+                            }
                         }
 
                         if (transTab.GetType().GetField("Control_TransferTab_NumericUpDown_Quantity",
                                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                                 ?.GetValue(transTab) is NumericUpDown nud)
+                        {
                             nud.Value = nud.Minimum;
+                        }
                     }
 
                     break;
@@ -433,8 +453,12 @@ public partial class MainForm : Form
 
     private void MainForm_MenuStrip_File_Settings_Click(object sender, EventArgs e)
     {
-        using var settingsForm = new SettingsForm();
-        if (settingsForm.ShowDialog(this) != DialogResult.OK) return;
+        using SettingsForm settingsForm = new();
+        if (settingsForm.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
         MainForm_Control_InventoryTab?.Control_InventoryTab_HardReset();
         Core_Themes.ApplyTheme(this);
     }
@@ -442,24 +466,26 @@ public partial class MainForm : Form
     private void MainForm_MenuStrip_Exit_Click(object sender, EventArgs e)
     {
         // Optional: Prompt user for confirmation before exiting
-        var result = MessageBox.Show(
+        DialogResult result = MessageBox.Show(
             "Are you sure you want to exit?",
             "Exit Application",
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Question);
 
-        if (result == DialogResult.Yes) Application.Exit();
+        if (result == DialogResult.Yes)
+        {
+            Application.Exit();
+        }
     }
 
     private void MainForm_MenuStrip_View_PersonalHistory_Click(object sender, EventArgs e)
     {
         // Use global application variables for the user and connection info
-        var connectionString = Model_AppVariables.ConnectionString;
-        var currentUser = Model_AppVariables.User;
-        var isAdmin = Model_AppVariables.UserTypeAdmin;
+        string connectionString = Model_AppVariables.ConnectionString;
+        string currentUser = Model_AppVariables.User;
+        bool isAdmin = Model_AppVariables.UserTypeAdmin;
 
-        var transactionsForm =
-            new Transactions.Transactions(connectionString, currentUser, isAdmin);
+        Transactions.Transactions transactionsForm = new(connectionString, currentUser, isAdmin);
         transactionsForm.ShowDialog(this); // Show as modal dialog
     }
 }

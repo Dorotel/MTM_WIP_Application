@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Forms.MainForm.Classes;
@@ -14,7 +11,6 @@ using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using MySql.Data.MySqlClient;
-using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Controls.MainForm;
 
@@ -34,12 +30,17 @@ public partial class Control_AdvancedRemove : UserControl
             }
 
             if (ControlRemoveTab.MainFormInstance != null)
+            {
                 ControlRemoveTab.MainFormInstance.MainForm_RemoveTabNormalControl.Visible = true;
+            }
+
             if (ControlRemoveTab.MainFormInstance != null)
+            {
                 ControlRemoveTab.MainFormInstance.MainForm_Control_AdvancedRemove.Visible = false;
+            }
 
             // Reset all Control_RemoveTab.cs ComboBoxes' SelectedIndex to 0 and color to Red
-            var removeTab = ControlRemoveTab.MainFormInstance?.MainForm_RemoveTabNormalControl;
+            ControlRemoveTab? removeTab = ControlRemoveTab.MainFormInstance?.MainForm_RemoveTabNormalControl;
             if (removeTab != null)
             {
                 if (removeTab.Controls.Find("Control_RemoveTab_ComboBox_Part", true).FirstOrDefault() is ComboBox part)
@@ -73,73 +74,75 @@ public partial class Control_AdvancedRemove : UserControl
         WireUpComboBoxEvents();
         Core_Themes.ApplyFocusHighlighting(this);
         // Wire up Back to Normal button
-        var btn = Controls.Find("Control_AdvancedRemove_Button_Normal", true);
+        Control[] btn = Controls.Find("Control_AdvancedRemove_Button_Normal", true);
         if (btn.Length > 0 && btn[0] is Button normalBtn)
         {
             normalBtn.Click -= Control_AdvancedRemove_Button_Normal_Click;
             normalBtn.Click += Control_AdvancedRemove_Button_Normal_Click;
-            var toolTip = new ToolTip();
+            ToolTip toolTip = new();
             toolTip.SetToolTip(normalBtn,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Normal)}");
         }
 
         // Wire up Undo button
-        var undoBtn = Controls.Find("Control_AdvancedRemove_Button_Undo", true);
+        Control[] undoBtn = Controls.Find("Control_AdvancedRemove_Button_Undo", true);
         if (undoBtn.Length > 0 && undoBtn[0] is Button undoButton)
         {
             undoButton.Click -= Control_AdvancedRemove_Button_Undo_Click;
             undoButton.Click += Control_AdvancedRemove_Button_Undo_Click;
-            var toolTip = new ToolTip();
+            ToolTip toolTip = new();
             toolTip.SetToolTip(undoButton,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Undo)}");
         }
 
         // Wire up Search button
-        var searchBtn = Controls.Find("Control_AdvancedRemove_Button_Search", true);
+        Control[] searchBtn = Controls.Find("Control_AdvancedRemove_Button_Search", true);
         if (searchBtn.Length > 0 && searchBtn[0] is Button searchButton)
         {
             searchButton.Click -= Control_AdvancedRemove_Button_Search_Click;
             searchButton.Click += Control_AdvancedRemove_Button_Search_Click;
-            var toolTip = new ToolTip();
+            ToolTip toolTip = new();
             toolTip.SetToolTip(searchButton,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Search)}");
         }
 
         // Wire up Reset button
-        var resetBtn = Controls.Find("Control_AdvancedRemove_Button_Reset", true);
+        Control[] resetBtn = Controls.Find("Control_AdvancedRemove_Button_Reset", true);
         if (resetBtn.Length > 0 && resetBtn[0] is Button resetButton)
         {
             resetButton.Click -= Control_AdvancedRemove_Button_Reset_Click;
             resetButton.Click += Control_AdvancedRemove_Button_Reset_Click;
-            var toolTip = new ToolTip();
+            ToolTip toolTip = new();
             toolTip.SetToolTip(resetButton,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Reset)}");
         }
 
         // Wire up Delete button
-        var deleteBtn = Controls.Find("Control_AdvancedRemove_Button_Delete", true);
+        Control[] deleteBtn = Controls.Find("Control_AdvancedRemove_Button_Delete", true);
         if (deleteBtn.Length > 0 && deleteBtn[0] is Button deleteButton)
         {
             deleteButton.Click -= Control_AdvancedRemove_Button_Delete_Click;
             deleteButton.Click += Control_AdvancedRemove_Button_Delete_Click;
-            var toolTip = new ToolTip();
+            ToolTip toolTip = new();
             toolTip.SetToolTip(deleteButton,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Delete)}");
         }
 
         // Add Undo button if not present
         if (Controls.Find("Control_AdvancedRemove_Button_Undo", true).Length == 0)
+        {
             Control_AdvancedRemove_Button_Undo.Click += Control_AdvancedRemove_Button_Undo_Click;
+        }
 
         // Wire up Date checkbox event
         Control_AdvancedRemove_CheckBox_Date.CheckedChanged += (s, e) =>
         {
-            var enabled = Control_AdvancedRemove_CheckBox_Date.Checked;
+            bool enabled = Control_AdvancedRemove_CheckBox_Date.Checked;
             Control_AdvancedRemove_DateTimePicker_From.Enabled = enabled;
             Control_AdvancedRemove_DateTimePicker_To.Enabled = enabled;
         };
         // Set initial state
-        var dateEnabled = Control_AdvancedRemove_CheckBox_Date.Checked;
+        bool dateEnabled = Control_AdvancedRemove_CheckBox_Date.Checked;
         Control_AdvancedRemove_DateTimePicker_From.Enabled = dateEnabled;
         Control_AdvancedRemove_DateTimePicker_To.Enabled = dateEnabled;
 
@@ -166,7 +169,9 @@ public partial class Control_AdvancedRemove : UserControl
 
         // Optionally set the default selected item
         if (Control_AdvancedRemove_ComboBox_Like.Items.Count > 0)
+        {
             Control_AdvancedRemove_ComboBox_Like.SelectedIndex = 0;
+        }
     }
 
     private void ApplyStandardComboBoxProperties()
@@ -204,11 +209,15 @@ public partial class Control_AdvancedRemove : UserControl
         {
             Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_AdvancedRemove_ComboBox_Part, "[ Enter Part Number ]");
             if (Control_AdvancedRemove_ComboBox_Part.SelectedIndex > 0)
+            {
                 Control_AdvancedRemove_ComboBox_Part.ForeColor =
                     Model_AppVariables.UserUiColors.ComboBoxForeColor ?? Color.Black;
+            }
             else
+            {
                 Control_AdvancedRemove_ComboBox_Part.ForeColor =
                     Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
+            }
         };
         Control_AdvancedRemove_ComboBox_Part.Leave += (s, e) =>
         {
@@ -220,11 +229,15 @@ public partial class Control_AdvancedRemove : UserControl
         {
             Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_AdvancedRemove_ComboBox_Op, "[ Enter Operation ]");
             if (Control_AdvancedRemove_ComboBox_Op.SelectedIndex > 0)
+            {
                 Control_AdvancedRemove_ComboBox_Op.ForeColor =
                     Model_AppVariables.UserUiColors.ComboBoxForeColor ?? Color.Black;
+            }
             else
+            {
                 Control_AdvancedRemove_ComboBox_Op.ForeColor =
                     Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
+            }
         };
         Control_AdvancedRemove_ComboBox_Op.Leave += (s, e) =>
         {
@@ -235,11 +248,15 @@ public partial class Control_AdvancedRemove : UserControl
         {
             Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_AdvancedRemove_ComboBox_Loc, "[ Enter Location ]");
             if (Control_AdvancedRemove_ComboBox_Loc.SelectedIndex > 0)
+            {
                 Control_AdvancedRemove_ComboBox_Loc.ForeColor =
                     Model_AppVariables.UserUiColors.ComboBoxForeColor ?? Color.Black;
+            }
             else
+            {
                 Control_AdvancedRemove_ComboBox_Loc.ForeColor =
                     Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
+            }
         };
         Control_AdvancedRemove_ComboBox_Loc.Leave += (s, e) =>
         {
@@ -250,11 +267,15 @@ public partial class Control_AdvancedRemove : UserControl
         {
             Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_AdvancedRemove_ComboBox_User, "[ Enter User ]");
             if (Control_AdvancedRemove_ComboBox_User.SelectedIndex > 0)
+            {
                 Control_AdvancedRemove_ComboBox_User.ForeColor =
                     Model_AppVariables.UserUiColors.ComboBoxForeColor ?? Color.Black;
+            }
             else
+            {
                 Control_AdvancedRemove_ComboBox_User.ForeColor =
                     Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
+            }
         };
         Control_AdvancedRemove_ComboBox_User.Leave += (s, e) =>
         {
@@ -293,7 +314,7 @@ public partial class Control_AdvancedRemove : UserControl
         try
         {
             // Declare variables once at the beginning
-            var dt = new DataTable();
+            DataTable dt = new();
             MySqlCommand cmd;
 
             // Determine which type of search to perform and set up the command
@@ -302,7 +323,7 @@ public partial class Control_AdvancedRemove : UserControl
             {
                 // LIKE search setup code...
                 // No changes needed here
-                var searchText = Control_AdvancedRemove_TextBox_Like.Text.Trim();
+                string searchText = Control_AdvancedRemove_TextBox_Like.Text.Trim();
                 string searchColumn;
 
                 // Determine which column to search based on combobox selection
@@ -324,7 +345,7 @@ public partial class Control_AdvancedRemove : UserControl
                 }
 
                 // Build the LIKE query
-                var query =
+                string query =
                     $"SELECT PartID, Operation, Location, Quantity, Notes, User, ReceiveDate, LastUpdated, BatchNumber " +
                     $"FROM inv_inventory WHERE {searchColumn} LIKE @SearchPattern";
 
@@ -336,33 +357,35 @@ public partial class Control_AdvancedRemove : UserControl
             }
             else
             {
-                var part = Control_AdvancedRemove_ComboBox_Part.Text;
-                var op = Control_AdvancedRemove_ComboBox_Op.Text;
-                var loc = Control_AdvancedRemove_ComboBox_Loc.Text;
-                var qtyMinText = Control_AdvancedRemove_TextBox_QtyMin.Text;
-                var qtyMaxText = Control_AdvancedRemove_TextBox_QtyMax.Text;
-                var notes = Control_AdvancedRemove_TextBox_Notes.Text;
-                var user = Control_AdvancedRemove_ComboBox_User.Text;
-                var filterByDate = Control_AdvancedRemove_CheckBox_Date.Checked;
-                var dateFrom = filterByDate ? Control_AdvancedRemove_DateTimePicker_From.Value.Date : (DateTime?)null;
-                var dateTo = filterByDate
+                string part = Control_AdvancedRemove_ComboBox_Part.Text;
+                string op = Control_AdvancedRemove_ComboBox_Op.Text;
+                string loc = Control_AdvancedRemove_ComboBox_Loc.Text;
+                string qtyMinText = Control_AdvancedRemove_TextBox_QtyMin.Text;
+                string qtyMaxText = Control_AdvancedRemove_TextBox_QtyMax.Text;
+                string notes = Control_AdvancedRemove_TextBox_Notes.Text;
+                string user = Control_AdvancedRemove_ComboBox_User.Text;
+                bool filterByDate = Control_AdvancedRemove_CheckBox_Date.Checked;
+                DateTime? dateFrom =
+                    filterByDate ? Control_AdvancedRemove_DateTimePicker_From.Value.Date : (DateTime?)null;
+                DateTime? dateTo = filterByDate
                     ? Control_AdvancedRemove_DateTimePicker_To.Value.Date.AddDays(1).AddTicks(-1)
                     : (DateTime?)null;
 
-                int? qtyMin = int.TryParse(qtyMinText, out var qmin) ? qmin : null;
-                int? qtyMax = int.TryParse(qtyMaxText, out var qmax) ? qmax : null;
+                int? qtyMin = int.TryParse(qtyMinText, out int qmin) ? qmin : null;
+                int? qtyMax = int.TryParse(qtyMaxText, out int qmax) ? qmax : null;
 
                 // Treat ComboBox SelectedIndex == 0 as nothing selected
-                var partSelected = Control_AdvancedRemove_ComboBox_Part.SelectedIndex > 0 &&
-                                   !string.IsNullOrWhiteSpace(part);
-                var opSelected = Control_AdvancedRemove_ComboBox_Op.SelectedIndex > 0 && !string.IsNullOrWhiteSpace(op);
-                var locSelected = Control_AdvancedRemove_ComboBox_Loc.SelectedIndex > 0 &&
-                                  !string.IsNullOrWhiteSpace(loc);
-                var userSelected = Control_AdvancedRemove_ComboBox_User.SelectedIndex > 0 &&
-                                   !string.IsNullOrWhiteSpace(user);
+                bool partSelected = Control_AdvancedRemove_ComboBox_Part.SelectedIndex > 0 &&
+                                    !string.IsNullOrWhiteSpace(part);
+                bool opSelected = Control_AdvancedRemove_ComboBox_Op.SelectedIndex > 0 &&
+                                  !string.IsNullOrWhiteSpace(op);
+                bool locSelected = Control_AdvancedRemove_ComboBox_Loc.SelectedIndex > 0 &&
+                                   !string.IsNullOrWhiteSpace(loc);
+                bool userSelected = Control_AdvancedRemove_ComboBox_User.SelectedIndex > 0 &&
+                                    !string.IsNullOrWhiteSpace(user);
 
                 // Check if at least one field is filled
-                var anyFieldFilled =
+                bool anyFieldFilled =
                     partSelected ||
                     opSelected ||
                     locSelected ||
@@ -387,13 +410,13 @@ public partial class Control_AdvancedRemove : UserControl
                 }
 
                 // Build dynamic SQL query with StringBuilder
-                var queryBuilder = new StringBuilder();
+                StringBuilder queryBuilder = new();
                 queryBuilder.Append(
                     "SELECT * ");
                 queryBuilder.Append("FROM inv_inventory WHERE 1=1 ");
 
                 // Add conditions based on user input
-                var parameters = new List<MySqlParameter>();
+                List<MySqlParameter> parameters = new();
 
                 if (partSelected)
                 {
@@ -448,24 +471,29 @@ public partial class Control_AdvancedRemove : UserControl
                 cmd = new MySqlCommand(queryBuilder.ToString(), null);
 
                 // Add all parameters to command
-                foreach (var param in parameters) cmd.Parameters.Add(param);
+                foreach (MySqlParameter param in parameters)
+                {
+                    cmd.Parameters.Add(param);
+                }
 
                 // Debug: Show SQL command and parameters
-                var debugSql = queryBuilder.ToString();
+                string debugSql = queryBuilder.ToString();
                 foreach (MySqlParameter param in cmd.Parameters)
+                {
                     debugSql = debugSql.Replace(param.ParameterName, $"'{param.Value}'");
+                }
 
                 LoggingUtility.Log("[SQL DEBUG] " + debugSql);
                 Debug.WriteLine("[SQL DEBUG] " + debugSql);
             }
 
             // Use await using to ensure the connection is properly disposed
-            await using (var conn = new MySqlConnection(Model_AppVariables.ConnectionString))
+            await using (MySqlConnection conn = new(Model_AppVariables.ConnectionString))
             {
                 cmd.Connection = conn;
                 await conn.OpenAsync();
 
-                using (var adapter = new MySqlDataAdapter(cmd))
+                using (MySqlDataAdapter adapter = new(cmd))
                 {
                     adapter.Fill(dt);
                 }
@@ -474,21 +502,25 @@ public partial class Control_AdvancedRemove : UserControl
             // Filter columns if necessary
             if (cmd.CommandType == CommandType.StoredProcedure)
             {
-                var allowedColumns = new[]
+                string[] allowedColumns = new[]
                 {
                     "PartID", "Operation", "Location", "Quantity", "Notes", "User", "ReceiveDate", "LastUpdated",
                     "BatchNumber"
                 };
-                foreach (var col in dt.Columns.Cast<DataColumn>().ToList()
+                foreach (DataColumn? col in dt.Columns.Cast<DataColumn>().ToList()
                              .Where(col => !allowedColumns.Contains(col.ColumnName)))
+                {
                     dt.Columns.Remove(col.ColumnName);
+                }
             }
 
             // Display results - no changes needed here
             Control_AdvancedRemove_DataGridView_Results.DataSource = dt;
             Control_AdvancedRemove_DataGridView_Results.ClearSelection();
             foreach (DataGridViewColumn column in Control_AdvancedRemove_DataGridView_Results.Columns)
+            {
                 column.Visible = true;
+            }
 
             Core_Themes.ApplyThemeToDataGridView(Control_AdvancedRemove_DataGridView_Results);
             Core_Themes.SizeDataGrid(Control_AdvancedRemove_DataGridView_Results);
@@ -507,8 +539,8 @@ public partial class Control_AdvancedRemove : UserControl
     {
         try
         {
-            var dgv = Control_AdvancedRemove_DataGridView_Results;
-            var selectedCount = dgv.SelectedRows.Count;
+            DataGridView? dgv = Control_AdvancedRemove_DataGridView_Results;
+            int selectedCount = dgv.SelectedRows.Count;
             LoggingUtility.Log($"[ADVANCED REMOVE] Delete clicked. Selected rows: {selectedCount}");
             if (selectedCount == 0)
             {
@@ -517,19 +549,19 @@ public partial class Control_AdvancedRemove : UserControl
             }
 
             // Build summary for confirmation
-            var sb = new StringBuilder();
+            StringBuilder sb = new();
             foreach (DataGridViewRow row in dgv.SelectedRows)
             {
-                var partId = row.Cells["PartID"].Value?.ToString() ?? "";
-                var location = row.Cells["Location"].Value?.ToString() ?? "";
-                var operation = row.Cells["Operation"].Value?.ToString() ?? "";
-                var quantity = row.Cells["Quantity"].Value?.ToString() ?? "";
+                string partId = row.Cells["PartID"].Value?.ToString() ?? "";
+                string location = row.Cells["Location"].Value?.ToString() ?? "";
+                string operation = row.Cells["Operation"].Value?.ToString() ?? "";
+                string quantity = row.Cells["Quantity"].Value?.ToString() ?? "";
                 sb.AppendLine($"PartID: {partId}, Location: {location}, Operation: {operation}, Quantity: {quantity}");
             }
 
-            var summary = sb.ToString();
+            string summary = sb.ToString();
 
-            var confirmResult = MessageBox.Show(
+            DialogResult confirmResult = MessageBox.Show(
                 $@"The following items will be deleted:
 
 {summary}Are you sure?",
@@ -544,7 +576,7 @@ public partial class Control_AdvancedRemove : UserControl
             }
 
             // Call DAO to remove items
-            var removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
+            int removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
 
             // Optionally update undo and status logic here...
 
@@ -560,9 +592,12 @@ public partial class Control_AdvancedRemove : UserControl
 
     private async Task Control_AdvancedRemove_HardReset()
     {
-        var resetBtn = Controls.Find("Control_AdvancedRemove_Button_Reset", true);
+        Control[] resetBtn = Controls.Find("Control_AdvancedRemove_Button_Reset", true);
         if (resetBtn.Length > 0 && resetBtn[0] is Button btn)
+        {
             btn.Enabled = false;
+        }
+
         try
         {
             ControlRemoveTab.MainFormInstance?.TabLoadingProgress?.ShowProgress();
@@ -635,7 +670,10 @@ public partial class Control_AdvancedRemove : UserControl
             Control_AdvancedRemove_ComboBox_Loc.Visible = true;
             Control_AdvancedRemove_ComboBox_User.Visible = true;
             if (Control_AdvancedRemove_ComboBox_Part.FindForm() is { } form)
+            {
                 MainFormControlHelper.SetActiveControl(form, Control_AdvancedRemove_ComboBox_Part);
+            }
+
             Debug.WriteLine("[DEBUG] AdvancedRemove HardReset - end");
         }
         catch (Exception ex)
@@ -648,7 +686,10 @@ public partial class Control_AdvancedRemove : UserControl
         {
             Debug.WriteLine("[DEBUG] AdvancedRemove HardReset button re-enabled");
             if (resetBtn.Length > 0 && resetBtn[0] is Button btn2)
+            {
                 btn2.Enabled = true;
+            }
+
             if (ControlRemoveTab.MainFormInstance != null)
             {
                 Debug.WriteLine("[DEBUG] Restoring status strip after hard reset");
@@ -663,9 +704,12 @@ public partial class Control_AdvancedRemove : UserControl
 
     private void Control_AdvancedRemove_SoftReset()
     {
-        var resetBtn = Controls.Find("Control_AdvancedRemove_Button_Reset", true);
+        Control[] resetBtn = Controls.Find("Control_AdvancedRemove_Button_Reset", true);
         if (resetBtn.Length > 0 && resetBtn[0] is Button btn)
+        {
             btn.Enabled = false;
+        }
+
         try
         {
             if (MainFormInstance != null)
@@ -710,7 +754,10 @@ public partial class Control_AdvancedRemove : UserControl
         {
             Debug.WriteLine("[DEBUG] AdvancedRemove SoftReset button re-enabled");
             if (resetBtn.Length > 0 && resetBtn[0] is Button btn2)
+            {
                 btn2.Enabled = true;
+            }
+
             if (ControlRemoveTab.MainFormInstance != null)
             {
                 Debug.WriteLine("[DEBUG] Restoring status strip after soft reset");
@@ -721,7 +768,9 @@ public partial class Control_AdvancedRemove : UserControl
             }
 
             if (Control_AdvancedRemove_ComboBox_Part.FindForm() is { } form)
+            {
                 MainFormControlHelper.SetActiveControl(form, Control_AdvancedRemove_ComboBox_Part);
+            }
         }
     }
 
@@ -730,19 +779,26 @@ public partial class Control_AdvancedRemove : UserControl
         Control_AdvancedRemove_TextBox_Like.Clear();
         Control_AdvancedRemove_ComboBox_Like.SelectedIndex = 0;
         if ((ModifierKeys & Keys.Shift) == Keys.Shift)
+        {
             await Control_AdvancedRemove_HardReset();
+        }
         else
+        {
             Control_AdvancedRemove_SoftReset();
+        }
     }
 
     private async void Control_AdvancedRemove_Button_Undo_Click(object? sender, EventArgs? e)
     {
         if (_lastRemovedItems.Count == 0)
+        {
             return;
+        }
 
         try
         {
-            foreach (var item in _lastRemovedItems)
+            foreach (Model_HistoryRemove item in _lastRemovedItems)
+            {
                 await Dao_Inventory.AddInventoryItemAsync(
                     item.PartId,
                     item.Location,
@@ -754,15 +810,18 @@ public partial class Control_AdvancedRemove : UserControl
                     "Removal reversed via Undo Button.",
                     true
                 );
+            }
 
             MessageBox.Show(@"Undo successful. Removed items have been restored.", @"Undo", MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
             LoggingUtility.Log("Undo: Removed items restored (Advanced Remove tab).");
 
             _lastRemovedItems.Clear();
-            var undoBtn = Controls.Find("Control_AdvancedRemove_Button_Undo", true);
+            Control[] undoBtn = Controls.Find("Control_AdvancedRemove_Button_Undo", true);
             if (undoBtn.Length > 0 && undoBtn[0] is Button btn)
+            {
                 btn.Enabled = false;
+            }
 
             Control_AdvancedRemove_Button_Search_Click(null, null);
         }
@@ -789,7 +848,7 @@ public partial class Control_AdvancedRemove : UserControl
 
         if (keyData == Core_WipAppVariables.Shortcut_Remove_Reset)
         {
-            var resetBtn = Controls.Find("Control_AdvancedRemove_Button_Reset", true);
+            Control[] resetBtn = Controls.Find("Control_AdvancedRemove_Button_Reset", true);
             if (resetBtn.Length > 0 && resetBtn[0] is Button btn)
             {
                 btn.PerformClick();
@@ -799,7 +858,7 @@ public partial class Control_AdvancedRemove : UserControl
 
         if (keyData == Core_WipAppVariables.Shortcut_Remove_Search)
         {
-            var searchBtn = Controls.Find("Control_AdvancedRemove_Button_Search", true);
+            Control[] searchBtn = Controls.Find("Control_AdvancedRemove_Button_Search", true);
             if (searchBtn.Length > 0 && searchBtn[0] is Button btn)
             {
                 btn.PerformClick();
@@ -809,7 +868,7 @@ public partial class Control_AdvancedRemove : UserControl
 
         if (keyData == Core_WipAppVariables.Shortcut_Remove_Normal)
         {
-            var normalBtn = Controls.Find("Control_AdvancedRemove_Button_Normal", true);
+            Control[] normalBtn = Controls.Find("Control_AdvancedRemove_Button_Normal", true);
             if (normalBtn.Length > 0 && normalBtn[0] is Button btn)
             {
                 btn.PerformClick();
@@ -822,7 +881,7 @@ public partial class Control_AdvancedRemove : UserControl
 
     private void Control_AdvancedRemove_ComboBox_Like_SelectedIndexChanged(object sender, EventArgs e)
     {
-        var isDeepSearch = Control_AdvancedRemove_ComboBox_Like.SelectedIndex == 0;
+        bool isDeepSearch = Control_AdvancedRemove_ComboBox_Like.SelectedIndex == 0;
 
         // Enable/disable all search criteria controls based on selection
         Control_AdvancedRemove_ComboBox_Part.Enabled = isDeepSearch;
@@ -856,8 +915,8 @@ public partial class Control_AdvancedRemove : UserControl
     private void Control_AdvancedRemove_Button_SidePanel_Click(object sender, EventArgs e)
     {
         // Toggle the visibility of Panel2 (right panel) in the split container
-        var splitContainer = Control_AdvancedRemove_SplitContainer_Main;
-        var button = sender as Button ?? Control_AdvancedRemove_Button_SidePanel;
+        SplitContainer? splitContainer = Control_AdvancedRemove_SplitContainer_Main;
+        Button? button = sender as Button ?? Control_AdvancedRemove_Button_SidePanel;
 
         if (splitContainer.Panel1Collapsed)
         {
