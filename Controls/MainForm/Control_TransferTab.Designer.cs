@@ -185,7 +185,7 @@
             Control_TransferTab_Button_Reset.Size = new Size(118, 28);
             Control_TransferTab_Button_Reset.TabIndex = 7;
             Control_TransferTab_Button_Reset.TabStop = false;
-            Control_TransferTab_Button_Reset.Text = "&Reset";
+            Control_TransferTab_Button_Reset.Text = "Reset";
             Control_TransferTab_Button_Reset.UseVisualStyleBackColor = true;
             // 
             // Control_TransferTab_Label_Part
@@ -205,7 +205,7 @@
             Control_TransferTab_Button_Transfer.Name = "Control_TransferTab_Button_Transfer";
             Control_TransferTab_Button_Transfer.Size = new Size(213, 28);
             Control_TransferTab_Button_Transfer.TabIndex = 6;
-            Control_TransferTab_Button_Transfer.Text = "&Save";
+            Control_TransferTab_Button_Transfer.Text = "Save";
             Control_TransferTab_Button_Transfer.UseVisualStyleBackColor = true;
             // 
             // Control_TransferTab_Label_Operation

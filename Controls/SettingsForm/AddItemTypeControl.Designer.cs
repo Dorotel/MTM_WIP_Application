@@ -45,7 +45,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             this.titleLabel.Name = "titleLabel";
             this.titleLabel.Size = new System.Drawing.Size(121, 21);
             this.titleLabel.TabIndex = 0;
-            this.titleLabel.Text = "Add Item Type";
+            this.titleLabel.Text = "Add ItemType";
             // 
             // itemTypeLabel
             // 
@@ -54,7 +54,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             this.itemTypeLabel.Name = "itemTypeLabel";
             this.itemTypeLabel.Size = new System.Drawing.Size(65, 15);
             this.itemTypeLabel.TabIndex = 1;
-            this.itemTypeLabel.Text = "Item Type:";
+            this.itemTypeLabel.Text = "ItemType:";
             // 
             // itemTypeTextBox
             // 

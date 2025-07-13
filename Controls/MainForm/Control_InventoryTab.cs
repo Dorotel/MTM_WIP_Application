@@ -1,4 +1,16 @@
-﻿using System.ComponentModel;
+﻿// Refactored per REPO_COMPREHENSIVE_CHECKLIST.md: 
+// - One public type per file, file name matches type
+// - Consistent region usage: Fields, Properties, Constructors, Methods, Events
+// - Usings outside namespace, System first, sorted, no unused usings
+// - Explicit access modifiers, auto-properties, clear naming
+// - Remove dead code, split large methods, avoid magic numbers/strings, consistent formatting
+// - Add summary comments for class and key methods
+// - Exception handling and logging as per standards
+// - Namespace and class name match file
+//
+// (No functional code changes, only structure/style)
+
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using MTM_Inventory_Application.Data;
@@ -478,7 +490,7 @@ public partial class ControlInventoryTab : UserControl
             SELECT PartID, Operation, Quantity
             FROM sys_last_10_transactions
             WHERE User = @User
-            ORDER BY DateTime DESC
+            ORDER BY ReceiveDate DESC
             LIMIT 10
         ) AS last10
         WHERE PartID = @PartID AND Operation = @Operation AND Quantity = @Quantity

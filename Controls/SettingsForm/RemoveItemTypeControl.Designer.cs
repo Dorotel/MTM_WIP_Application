@@ -50,7 +50,7 @@
             titleLabel.Name = "titleLabel";
             titleLabel.Size = new Size(153, 20);
             titleLabel.TabIndex = 0;
-            titleLabel.Text = "Remove Item Type";
+            titleLabel.Text = "Remove ItemType";
             // 
             // itemTypesComboBox
             // 
@@ -69,7 +69,7 @@
             selectItemTypeLabel.Name = "selectItemTypeLabel";
             selectItemTypeLabel.Size = new Size(147, 15);
             selectItemTypeLabel.TabIndex = 2;
-            selectItemTypeLabel.Text = "Select Item Type to Remove:";
+            selectItemTypeLabel.Text = "Select ItemType to Remove:";
             // 
             // itemTypeLabel
             // 
@@ -78,7 +78,7 @@
             itemTypeLabel.Name = "itemTypeLabel";
             itemTypeLabel.Size = new Size(64, 15);
             itemTypeLabel.TabIndex = 3;
-            itemTypeLabel.Text = "Item Type:";
+            itemTypeLabel.Text = "ItemType:";
             // 
             // itemTypeValueLabel
             // 

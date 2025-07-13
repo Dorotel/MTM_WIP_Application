@@ -35,12 +35,13 @@ internal static class Dao_Location
 
     #region Insert
 
-    internal static async Task InsertLocation(string location, string user, bool useAsync = false)
+    internal static async Task InsertLocation(string location, string building, bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
         {
             ["p_Location"] = location,
-            ["p_IssuedBy"] = user
+            ["p_IssuedBy"] = Model_AppVariables.User,
+            ["p_Building"] = building
         };
         await HelperDatabaseCore.ExecuteNonQuery("md_locations_Add_Location", parameters, useAsync,
             CommandType.StoredProcedure);
@@ -50,14 +51,15 @@ internal static class Dao_Location
 
     #region Update
 
-    internal static async Task UpdateLocation(string oldLocation, string newLocation, string user,
+    internal static async Task UpdateLocation(string oldLocation, string newLocation, string building,
         bool useAsync = false)
     {
         var parameters = new Dictionary<string, object>
         {
             ["p_OldLocation"] = oldLocation,
             ["p_Location"] = newLocation,
-            ["p_IssuedBy"] = user
+            ["p_IssuedBy"] = Model_AppVariables.User,
+            ["p_Building"] = building
         };
         await HelperDatabaseCore.ExecuteNonQuery("md_locations_Update_Location", parameters, useAsync,
             CommandType.StoredProcedure);

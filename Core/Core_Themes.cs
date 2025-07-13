@@ -519,10 +519,6 @@ public static class Core_Themes
             {
                 if (colors.RadioButtonBackColor.HasValue) rb.BackColor = colors.RadioButtonBackColor.Value;
                 if (colors.RadioButtonForeColor.HasValue) rb.ForeColor = colors.RadioButtonForeColor.Value;
-                rb.Paint -= AutoShrinkText_Paint;
-                rb.Paint += AutoShrinkText_Paint;
-
-                ApplyOwnerDrawThemes(rb, colors);
             }
         }
 
@@ -532,10 +528,6 @@ public static class Core_Themes
             {
                 if (colors.CheckBoxBackColor.HasValue) cbx.BackColor = colors.CheckBoxBackColor.Value;
                 if (colors.CheckBoxForeColor.HasValue) cbx.ForeColor = colors.CheckBoxForeColor.Value;
-                cbx.Paint -= AutoShrinkText_Paint;
-                cbx.Paint += AutoShrinkText_Paint;
-
-                ApplyOwnerDrawThemes(cbx, colors);
             }
         }
 

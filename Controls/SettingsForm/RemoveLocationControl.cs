@@ -81,7 +81,7 @@ public partial class RemoveLocationControl : UserControl
             {
                 locationValueLabel.Text = _currentLocation["Location"]?.ToString() ?? string.Empty;
                 buildingValueLabel.Text = _currentLocation["Building"]?.ToString() ?? string.Empty;
-                issuedByValueLabel.Text = _currentLocation["Issued By"]?.ToString() ?? "Unknown";
+                issuedByValueLabel.Text = _currentLocation["IssuedBy"]?.ToString() ?? "Unknown";
                 EnableControls(true);
             }
         }

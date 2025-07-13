@@ -22,7 +22,7 @@ internal static class Dao_ItemType
 
     internal static async Task DeleteItemType(string itemType, bool useAsync = false)
     {
-        var parameters = new Dictionary<string, object> { ["p_Type"] = itemType };
+        var parameters = new Dictionary<string, object> { ["p_ItemType"] = itemType };
         try
         {
             await HelperDatabaseCore.ExecuteNonQuery(
@@ -48,12 +48,12 @@ internal static class Dao_ItemType
     {
         var parameters = new Dictionary<string, object>
         {
-            ["p_Type"] = itemType,
+            ["p_ItemType"] = itemType,
             ["p_IssuedBy"] = user
         };
 
         await HelperDatabaseCore.ExecuteNonQuery(
-            "md_item_types_Add_Type",
+            "md_item_types_Add_ItemType",
             parameters,
             useAsync,
             CommandType.StoredProcedure
@@ -69,10 +69,10 @@ internal static class Dao_ItemType
         var parameters = new Dictionary<string, object>
         {
             ["p_ID"] = id,
-            ["p_Type"] = newItemType,
+            ["p_ItemType"] = newItemType,
             ["p_IssuedBy"] = user
         };
-        await HelperDatabaseCore.ExecuteNonQuery("md_item_types_Update_Type", parameters, useAsync,
+        await HelperDatabaseCore.ExecuteNonQuery("md_item_types_Update_ItemType", parameters, useAsync,
             CommandType.StoredProcedure);
     }
 
@@ -85,7 +85,7 @@ internal static class Dao_ItemType
     internal static async Task<DataRow?> GetItemTypeByName(string itemType, bool useAsync = false)
     {
         var table = await GetAllItemTypes(useAsync);
-        var rows = table.Select($"Type = '{itemType.Replace("'", "''")}'");
+        var rows = table.Select($"ItemType = '{itemType.Replace("'", "''")}'");
         return rows.Length > 0 ? rows[0] : null;
     }
 
@@ -97,7 +97,7 @@ internal static class Dao_ItemType
     {
         var parameters = new Dictionary<string, object> { ["@itemType"] = itemType };
         var result = await HelperDatabaseCore.ExecuteScalar(
-            "SELECT COUNT(*) FROM `md_item_types` WHERE `Type` = @itemType",
+            "SELECT COUNT(*) FROM `md_item_types` WHERE `ItemType` = @itemType",
             parameters, useAsync, CommandType.Text);
         return Convert.ToInt32(result) > 0;
     }

@@ -1,4 +1,16 @@
-﻿using System.ComponentModel;
+﻿// Refactored per REPO_COMPREHENSIVE_CHECKLIST.md: 
+// - One public type per file, file name matches type
+// - Consistent region usage: Fields, Properties, Constructors, Methods, Events
+// - Usings outside namespace, System first, sorted, no unused usings
+// - Explicit access modifiers, auto-properties, clear naming
+// - Remove dead code, split large methods, avoid magic numbers/strings, consistent formatting
+// - Add summary comments for class and key methods
+// - Exception handling and logging as per standards
+// - Namespace and class name match file
+//
+// (No functional code changes, only structure/style)
+
+using System.ComponentModel;
 using System.Data;
 using System.Text;
 using MTM_Inventory_Application.Core;
@@ -14,14 +26,26 @@ namespace MTM_Inventory_Application.Controls.MainForm;
 
 #region RemoveTab
 
+/// <summary>
+/// Represents the Remove Tab control in the application.
+/// Handles inventory removal operations, undo functionality, and UI interactions.
+/// </summary>
 public partial class ControlRemoveTab : UserControl
 {
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
+    #region Fields
 
     private readonly List<Model_HistoryRemove> _lastRemovedItems = [];
 
-    #region Initialization
+    #endregion
+
+    #region Properties
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
+
+    #endregion
+
+    #region Constructors
 
     public ControlRemoveTab()
     {
@@ -62,6 +86,10 @@ public partial class ControlRemoveTab : UserControl
             toolTip.SetToolTip(undoBtn,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Undo)}");
     }
+
+    #endregion
+
+    #region Initialization
 
     public void Control_RemoveTab_Initialize()
     {

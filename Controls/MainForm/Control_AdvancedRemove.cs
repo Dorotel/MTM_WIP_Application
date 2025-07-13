@@ -383,7 +383,7 @@ public partial class Control_AdvancedRemove : UserControl
                 // Build dynamic SQL query with StringBuilder
                 var queryBuilder = new StringBuilder();
                 queryBuilder.Append(
-                    "SELECT PartID, Operation, Location, Quantity, Notes, User, ReceiveDate, LastUpdated, BatchNumber ");
+                    "SELECT * ");
                 queryBuilder.Append("FROM inv_inventory WHERE 1=1 ");
 
                 // Add conditions based on user input

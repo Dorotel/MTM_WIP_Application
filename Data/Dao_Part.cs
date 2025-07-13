@@ -45,7 +45,7 @@ internal static class Dao_Part
             ["@partType"] = partType
         };
         await ExecuteNonQueryAsync(
-            "INSERT INTO `md_part_ids` (`Item Number`, `Issued By`, `Type`) VALUES (@partNumber, @user, @partType);",
+            "INSERT INTO `md_part_ids` (`Item Number`, `IssuedBy`, `ItemType`) VALUES (@partNumber, @user, @partType);",
             parameters, useAsync);
     }
 
@@ -62,7 +62,7 @@ internal static class Dao_Part
             ["@user"] = user
         };
         await ExecuteNonQueryAsync(
-            "UPDATE `md_part_ids` SET `Type` = @partType, `Issued By` = @user WHERE `Item Number` = @partNumber",
+            "UPDATE `md_part_ids` SET `ItemType` = @partType, `IssuedBy` = @user WHERE `Item Number` = @partNumber",
             parameters, useAsync);
     }
 
@@ -176,7 +176,7 @@ internal static class Dao_Part
                 ["p_Customer"] = customer,
                 ["p_Description"] = description,
                 ["p_IssuedBy"] = issuedBy,
-                ["p_Type"] = type
+                ["p_ItemType"] = type
             };
 
             await HelperDatabaseCore.ExecuteNonQuery("md_part_ids_Add_Part", parameters, useAsync,
@@ -206,7 +206,7 @@ internal static class Dao_Part
                 ["p_Customer"] = customer,
                 ["p_Description"] = description,
                 ["p_IssuedBy"] = issuedBy,
-                ["p_Type"] = type
+                ["p_ItemType"] = type
             };
 
             await HelperDatabaseCore.ExecuteNonQuery("md_part_ids_Update_Part", parameters, useAsync,
@@ -253,7 +253,7 @@ internal static class Dao_Part
         try
         {
             return await HelperDatabaseCore.ExecuteDataTable(
-                "SELECT DISTINCT `Type` FROM `md_item_types` ORDER BY `Type`", useAsync: useAsync,
+                "SELECT DISTINCT `ItemType` FROM `md_item_types` ORDER BY `ItemType`", useAsync: useAsync,
                 commandType: CommandType.Text);
         }
         catch (MySqlException ex)

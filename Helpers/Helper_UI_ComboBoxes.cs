@@ -151,7 +151,7 @@ public static class Helper_UI_ComboBoxes
             await FillComboBoxAsync(
                 ComboBoxPart_DataTable,
                 comboBox,
-                "Item Number",
+                "PartID",
                 "ID",
                 "[ Enter Part Number ]",
                 PartDataLock

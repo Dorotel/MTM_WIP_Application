@@ -49,7 +49,7 @@
             titleLabel.Name = "titleLabel";
             titleLabel.Size = new Size(125, 20);
             titleLabel.TabIndex = 0;
-            titleLabel.Text = "Edit Item Type";
+            titleLabel.Text = "Edit ItemType";
             // 
             // itemTypesComboBox
             // 
@@ -68,7 +68,7 @@
             selectItemTypeLabel.Name = "selectItemTypeLabel";
             selectItemTypeLabel.Size = new Size(130, 15);
             selectItemTypeLabel.TabIndex = 2;
-            selectItemTypeLabel.Text = "Select Item Type to Edit:";
+            selectItemTypeLabel.Text = "Select ItemType to Edit:";
             // 
             // itemTypeLabel
             // 
@@ -77,7 +77,7 @@
             itemTypeLabel.Name = "itemTypeLabel";
             itemTypeLabel.Size = new Size(64, 15);
             itemTypeLabel.TabIndex = 3;
-            itemTypeLabel.Text = "Item Type:";
+            itemTypeLabel.Text = "ItemType:";
             // 
             // itemTypeTextBox
             // 

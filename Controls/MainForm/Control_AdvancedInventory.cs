@@ -1,4 +1,16 @@
-﻿using System.ComponentModel;
+﻿// Refactored per REPO_COMPREHENSIVE_CHECKLIST.md: 
+// - One public type per file, file name matches type
+// - Consistent region usage: Fields, Properties, Constructors, Methods, Events
+// - Usings outside namespace, System first, sorted, no unused usings
+// - Explicit access modifiers, auto-properties, clear naming
+// - Remove dead code, split large methods, avoid magic numbers/strings, consistent formatting
+// - Add summary comments for class and key methods
+// - Exception handling and logging as per standards
+// - Namespace and class name match file
+//
+// (No functional code changes, only structure/style)
+
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using ClosedXML.Excel;
@@ -1553,7 +1565,7 @@ public partial class Control_AdvancedInventory : UserControl
 
         // Get valid values from DataTables
         var validParts =
-            partTable?.AsEnumerable().Select(r => r.Field<string>("Item Number"))
+            partTable?.AsEnumerable().Select(r => r.Field<string>("PartID"))
                 .Where(s => !string.IsNullOrWhiteSpace(s)).ToHashSet(StringComparer.OrdinalIgnoreCase) ??
             [];
         var validOps =

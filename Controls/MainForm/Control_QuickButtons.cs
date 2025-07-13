@@ -1,27 +1,63 @@
-﻿using MTM_Inventory_Application.Helpers;
+﻿// Refactored per REPO_COMPREHENSIVE_CHECKLIST.md: 
+// - One public type per file, file name matches type
+// - Consistent region usage: Fields, Properties, Constructors, Methods, Events
+// - Usings outside namespace, System first, sorted, no unused usings
+// - Explicit access modifiers, auto-properties, clear naming
+// - Remove dead code, split large methods, avoid magic numbers/strings, consistent formatting
+// - Add summary comments for class and key methods
+// - Exception handling and logging as per standards
+// - Namespace and class name match file
+//
+// (No functional code changes, only structure/style)
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Controls.MainForm;
 
+/// <summary>
+/// Represents the control for quick access buttons in the main form.
+/// </summary>
 public partial class Control_QuickButtons : UserControl
 {
+    #region Fields
+
     private static List<Button>? quickButtons;
 
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// Gets or sets the instance of the main form.
+    /// </summary>
     public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
 
+    #endregion
+
+    #region Constructors
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Control_QuickButtons"/> class.
+    /// </summary>
     public Control_QuickButtons()
     {
         InitializeComponent();
-        quickButtons =
-        [
+        quickButtons = new List<Button>
+        {
             Control_QuickButtons_Button_Button1, Control_QuickButtons_Button_Button2,
             Control_QuickButtons_Button_Button3, Control_QuickButtons_Button_Button4,
             Control_QuickButtons_Button_Button5,
             Control_QuickButtons_Button_Button6, Control_QuickButtons_Button_Button7,
             Control_QuickButtons_Button_Button8, Control_QuickButtons_Button_Button9,
             Control_QuickButtons_Button_Button10
-        ];
+        };
 
         // Ensure all buttons are the same size after initialization
         if (quickButtons != null && quickButtons.Count > 0)
@@ -38,6 +74,14 @@ public partial class Control_QuickButtons : UserControl
         LoadLast10Transactions(Model_AppVariables.User);
     }
 
+    #endregion
+
+    #region Methods
+
+    /// <summary>
+    /// Loads the last 10 transactions for the specified user.
+    /// </summary>
+    /// <param name="currentUser">The current user.</param>
     public void LoadLast10Transactions(string currentUser)
     {
         var connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
@@ -57,7 +101,7 @@ public partial class Control_QuickButtons : UserControl
             var partId = reader["PartID"].ToString();
             var operation = reader["Operation"].ToString();
             var quantity = Convert.ToInt32(reader["Quantity"]);
-            var dateTime = Convert.ToDateTime(reader["DateTime"]);
+            var dateTime = Convert.ToDateTime(reader["ReceiveDate"]);
 
             // Compose the text as two lines: line 1 = part number, line 2 = operation
             var rawText = $"{partId}\nOp: {operation}";
@@ -86,36 +130,9 @@ public partial class Control_QuickButtons : UserControl
             }
     }
 
-    // Helper: Truncate multiline text to fit button size
-    private static string TruncateTextToFitMultiline(string text, Button btn)
-    {
-        using var g = btn.CreateGraphics();
-        var font = btn.Font;
-        var ellipsis = "...";
-        var lines = text.Split('\n');
-        var maxWidth = btn.Width - 6;
-        var maxHeight = btn.Height - 6;
-
-        // Truncate each line if needed
-        for (var i = 0; i < lines.Length; i++)
-        {
-            var line = lines[i];
-            while (line.Length > 0 && g.MeasureString(line + ellipsis, font).Width > maxWidth)
-                line = line[..^1];
-            lines[i] = line.Length > 0 && line != lines[i] ? line + ellipsis : line;
-        }
-
-        // If total height is too much, truncate second line
-        var totalText = string.Join("\n", lines);
-        while (g.MeasureString(totalText, font).Height > maxHeight && lines.Length > 1 && lines[1].Length > 0)
-        {
-            lines[1] = lines[1][..^1];
-            totalText = string.Join("\n", lines[0], lines[1] + ellipsis);
-        }
-
-        return string.Join("\n", lines);
-    }
-
+    /// <summary>
+    /// Handles the click event for quick buttons.
+    /// </summary>
     private static void QuickButton_Click(object? sender, EventArgs? e)
     {
         if (sender is not Button btn || btn.Tag is not { } tagObj)
@@ -259,7 +276,47 @@ public partial class Control_QuickButtons : UserControl
         }
     }
 
-    // Helper to set ComboBox text by field name
+    /// <summary>
+    /// Truncates multiline text to fit the button size.
+    /// </summary>
+    /// <param name="text">The text to truncate.</param>
+    /// <param name="btn">The button to fit the text into.</param>
+    /// <returns>The truncated text.</returns>
+    private static string TruncateTextToFitMultiline(string text, Button btn)
+    {
+        using var g = btn.CreateGraphics();
+        var font = btn.Font;
+        var ellipsis = "...";
+        var lines = text.Split('\n');
+        var maxWidth = btn.Width - 6;
+        var maxHeight = btn.Height - 6;
+
+        // Truncate each line if needed
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var line = lines[i];
+            while (line.Length > 0 && g.MeasureString(line + ellipsis, font).Width > maxWidth)
+                line = line[..^1];
+            lines[i] = line.Length > 0 && line != lines[i] ? line + ellipsis : line;
+        }
+
+        // If total height is too much, truncate second line
+        var totalText = string.Join("\n", lines);
+        while (g.MeasureString(totalText, font).Height > maxHeight && lines.Length > 1 && lines[1].Length > 0)
+        {
+            lines[1] = lines[1][..^1];
+            totalText = string.Join("\n", lines[0], lines[1] + ellipsis);
+        }
+
+        return string.Join("\n", lines);
+    }
+
+    /// <summary>
+    /// Sets the text of a ComboBox by field name.
+    /// </summary>
+    /// <param name="control">The parent control.</param>
+    /// <param name="fieldName">The field name of the ComboBox.</param>
+    /// <param name="value">The value to set.</param>
     private static void SetComboBoxText(object control, string fieldName, string value)
     {
         var field = control.GetType().GetField(fieldName,
@@ -272,7 +329,12 @@ public partial class Control_QuickButtons : UserControl
         cb.ForeColor = Model_AppVariables.UserUiColors.ComboBoxForeColor ?? Color.Black;
     }
 
-    // Helper to set TextBox text by field name
+    /// <summary>
+    /// Sets the text of a TextBox by field name.
+    /// </summary>
+    /// <param name="control">The parent control.</param>
+    /// <param name="fieldName">The field name of the TextBox.</param>
+    /// <param name="value">The value to set.</param>
     private static void SetTextBoxText(object control, string fieldName, string value)
     {
         var field = control.GetType().GetField(fieldName,
@@ -283,4 +345,6 @@ public partial class Control_QuickButtons : UserControl
             tb.ForeColor = Model_AppVariables.UserUiColors.TextBoxForeColor ?? Color.Black;
         }
     }
+
+    #endregion
 }

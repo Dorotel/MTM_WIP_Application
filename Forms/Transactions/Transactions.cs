@@ -69,7 +69,7 @@ public partial class Transactions : Form
         comboSortBy.Items.Add("Date");
         comboSortBy.Items.Add("Quantity");
         comboSortBy.Items.Add("User");
-        comboSortBy.Items.Add("Type");
+        comboSortBy.Items.Add("ItemType");
         comboSortBy.SelectedIndex = 0;
     }
 
@@ -96,13 +96,13 @@ public partial class Transactions : Form
             { HeaderText = "Quantity", DataPropertyName = "Quantity", Name = "colQuantity" });
         dataGridTransactions.Columns.Add(new DataGridViewTextBoxColumn
         {
-            HeaderText = "Date", DataPropertyName = "DateTime", Name = "colDate",
+            HeaderText = "Date", DataPropertyName = "ReceiveDate", Name = "colDate",
             DefaultCellStyle = new DataGridViewCellStyle { Format = "g" }
         });
         dataGridTransactions.Columns.Add(new DataGridViewTextBoxColumn
             { HeaderText = "User", DataPropertyName = "User", Name = "colUser" });
         dataGridTransactions.Columns.Add(new DataGridViewTextBoxColumn
-            { HeaderText = "Type", DataPropertyName = "TransactionType", Name = "colType" });
+            { HeaderText = "ItemType", DataPropertyName = "TransactionType", Name = "colType" });
 
         dataGridTransactions.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dataGridTransactions.ReadOnly = true;

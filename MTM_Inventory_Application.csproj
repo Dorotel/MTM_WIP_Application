@@ -19,6 +19,9 @@
 	  <EmbeddedResource Remove="Forms\Login\**" />
 	  <None Remove="Forms\Login\**" />
 	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="DATABASE_SCHEMA.sql" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<CompilerVisibleProperty Include="C:\Users\jkoll\source\repos\MTM_WIP_Application\PlantUMLFiles" />

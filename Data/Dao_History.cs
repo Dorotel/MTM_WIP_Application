@@ -42,7 +42,7 @@ internal class Dao_History
         command.Parameters.AddWithValue("@in_User", history.User);
         command.Parameters.AddWithValue("@in_ItemType", (object?)history.ItemType ?? DBNull.Value);
         command.Parameters.AddWithValue("@in_BatchNumber", (object?)history.BatchNumber ?? DBNull.Value);
-        command.Parameters.AddWithValue("@in_DateTime", history.DateTime);
+        command.Parameters.AddWithValue("@in_ReceiveDate", history.DateTime);
 
         await command.ExecuteNonQueryAsync();
     }

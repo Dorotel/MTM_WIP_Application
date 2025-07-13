@@ -60,12 +60,13 @@ public static class Dao_Inventory
         if (string.IsNullOrWhiteSpace(itemType))
         {
             var itemTypeObj = await HelperDatabaseCore.ExecuteScalar(
-                "SELECT `Type` FROM `md_part_ids` WHERE `ID` = @PartID",
+                "SELECT `ItemType` FROM `md_part_ids` WHERE `PartID` = @PartID",
                 new Dictionary<string, object> { { "@PartID", partId } },
                 useAsync, CommandType.Text);
 
             itemType = itemTypeObj?.ToString() ?? "None";
         }
+
         // If batchNumber is null or empty, get the next sequential batch number (max 10 digits, no gaps)
         if (string.IsNullOrWhiteSpace(batchNumber))
         {
@@ -73,8 +74,8 @@ public static class Dao_Inventory
                 "SELECT IFNULL(MAX(CAST(`BatchNumber` AS UNSIGNED)), 0) + 1 FROM `inv_inventory` WHERE LENGTH(`BatchNumber`) <= 10",
                 null, useAsync, CommandType.Text);
 
-            int batchNumInt = 1;
-            if (batchNumberObj != null && int.TryParse(batchNumberObj.ToString(), out int bn))
+            var batchNumInt = 1;
+            if (batchNumberObj != null && int.TryParse(batchNumberObj.ToString(), out var bn))
                 batchNumInt = bn;
 
             // Pad only if the batch number is 10 digits or fewer
@@ -105,7 +106,7 @@ public static class Dao_Inventory
 
     public static async Task<int> RemoveInventoryItemsFromDataGridViewAsync(DataGridView dgv, bool useAsync = false)
     {
-        int removedCount = 0;
+        var removedCount = 0;
 
         if (dgv == null || dgv.SelectedRows.Count == 0)
             return 0;
@@ -113,20 +114,22 @@ public static class Dao_Inventory
         foreach (DataGridViewRow row in dgv.SelectedRows)
         {
             // Use standard column names, or map as needed
-            string partId = row.Cells["PartID"].Value?.ToString() ?? "";
-            string location = row.Cells["Location"].Value?.ToString() ?? "";
-            string operation = row.Cells["Operation"].Value?.ToString() ?? "";
-            int quantity = int.TryParse(row.Cells["Quantity"].Value?.ToString(), out int qty) ? qty : 0;
-            string batchNumber = row.Cells["Batch Number"].Value?.ToString() ?? ""; // if your column is named "Batch Number"
-            string itemType = row.Cells["ItemType"].Value?.ToString() ?? "";
-            string user = row.Cells["User"].Value?.ToString() ?? "";
-            string notes = row.Cells["Notes"].Value?.ToString() ?? "";
+            var partId = row.Cells["PartID"].Value?.ToString() ?? "";
+            var location = row.Cells["Location"].Value?.ToString() ?? "";
+            var operation = row.Cells["Operation"].Value?.ToString() ?? "";
+            var quantity = int.TryParse(row.Cells["Quantity"].Value?.ToString(), out var qty) ? qty : 0;
+            var batchNumber =
+                row.Cells["BatchNumber"].Value?.ToString() ?? ""; // if your column is named "BatchNumber"
+            var itemType = row.Cells["ItemType"].Value?.ToString() ?? "";
+            var user = row.Cells["User"].Value?.ToString() ?? "";
+            var notes = row.Cells["Notes"].Value?.ToString() ?? "";
 
             // Optionally skip rows with missing required fields
-            if (string.IsNullOrWhiteSpace(partId) || string.IsNullOrWhiteSpace(location) || string.IsNullOrWhiteSpace(operation))
+            if (string.IsNullOrWhiteSpace(partId) || string.IsNullOrWhiteSpace(location) ||
+                string.IsNullOrWhiteSpace(operation))
                 continue;
 
-            int result = await RemoveInventoryItemAsync(
+            var result = await RemoveInventoryItemAsync(
                 partId,
                 location,
                 operation,
@@ -160,14 +163,14 @@ public static class Dao_Inventory
             "mtm_wip_application.inv_inventory_Remove_Item",
             new Dictionary<string, object>
             {
-            { "p_PartID", partId },
-            { "p_Location", location },
-            { "p_Operation", operation },
-            { "p_Quantity", quantity },
-            { "p_ItemType", itemType },
-            { "p_User", user },
-            { "p_BatchNumber", batchNumber },
-            { "p_Notes", notes }
+                { "p_PartID", partId },
+                { "p_Location", location },
+                { "p_Operation", operation },
+                { "p_Quantity", quantity },
+                { "p_ItemType", itemType },
+                { "p_User", user },
+                { "p_BatchNumber", batchNumber },
+                { "p_Notes", notes }
             },
             useAsync, CommandType.StoredProcedure);
 

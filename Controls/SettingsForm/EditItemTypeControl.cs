@@ -38,10 +38,10 @@ public partial class EditItemTypeControl : UserControl
         {
             var itemTypes = await Dao_ItemType.GetAllItemTypes();
             itemTypesComboBox.Items.Clear();
-            itemTypesComboBox.Items.Add("Select Item Type to Edit");
+            itemTypesComboBox.Items.Add("Select ItemType to Edit");
             foreach (DataRow row in itemTypes.Rows)
             {
-                var itemType = row["Type"]?.ToString();
+                var itemType = row["ItemType"]?.ToString();
                 if (!string.IsNullOrWhiteSpace(itemType))
                     itemTypesComboBox.Items.Add(itemType);
             }
@@ -50,7 +50,7 @@ public partial class EditItemTypeControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error loading item types: {ex.Message}", "Error", MessageBoxButtons.OK,
+            MessageBox.Show($"Error loading ItemTypes: {ex.Message}", "Error", MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
     }
@@ -103,7 +103,7 @@ public partial class EditItemTypeControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error loading item type data: {ex.Message}", "Error", MessageBoxButtons.OK,
+            MessageBox.Show($"Error loading ItemType data: {ex.Message}", "Error", MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
     }
@@ -114,24 +114,24 @@ public partial class EditItemTypeControl : UserControl
         {
             if (_currentItemType == null)
             {
-                MessageBox.Show("No item type selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("No ItemType selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(itemTypeTextBox.Text))
             {
-                MessageBox.Show("Item type is required.", "Validation Error", MessageBoxButtons.OK,
+                MessageBox.Show("ItemType is required.", "Validation Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
                 itemTypeTextBox.Focus();
                 return;
             }
 
             var newItemType = itemTypeTextBox.Text.Trim();
-            var currentItemType = _currentItemType["Type"]?.ToString();
+            var currentItemType = _currentItemType["ItemType"]?.ToString();
             if (!string.Equals(newItemType, currentItemType, StringComparison.OrdinalIgnoreCase))
                 if (await Dao_ItemType.ItemTypeExists(newItemType))
                 {
-                    MessageBox.Show($"Item type '{newItemType}' already exists.", "Duplicate Item Type",
+                    MessageBox.Show($"ItemType '{newItemType}' already exists.", "Duplicate ItemType",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     itemTypeTextBox.Focus();
                     return;
@@ -143,12 +143,12 @@ public partial class EditItemTypeControl : UserControl
             ClearForm();
             SetFormEnabled(false);
             ItemTypeUpdated?.Invoke(this, EventArgs.Empty);
-            MessageBox.Show("Item type updated successfully.", "Success", MessageBoxButtons.OK,
+            MessageBox.Show("ItemType updated successfully.", "Success", MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error updating item type: {ex.Message}", "Error", MessageBoxButtons.OK,
+            MessageBox.Show($"Error updating ItemType: {ex.Message}", "Error", MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
     }
@@ -167,8 +167,8 @@ public partial class EditItemTypeControl : UserControl
     private void LoadItemTypeData()
     {
         if (_currentItemType == null) return;
-        itemTypeTextBox.Text = _currentItemType["Type"]?.ToString() ?? string.Empty;
-        originalIssuedByValueLabel.Text = _currentItemType["Issued By"]?.ToString() ?? string.Empty;
+        itemTypeTextBox.Text = _currentItemType["ItemType"]?.ToString() ?? string.Empty;
+        originalIssuedByValueLabel.Text = _currentItemType["IssuedBy"]?.ToString() ?? string.Empty;
     }
 
     private void SetFormEnabled(bool enabled)

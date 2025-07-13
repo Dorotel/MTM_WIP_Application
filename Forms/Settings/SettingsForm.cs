@@ -38,9 +38,9 @@ public partial class SettingsForm : Form
             ["Add Location"] = addLocationPanel,
             ["Edit Location"] = editLocationPanel,
             ["Remove Location"] = removeLocationPanel,
-            ["Add Item Type"] = addItemTypePanel,
-            ["Edit Item Type"] = editItemTypePanel,
-            ["Remove Item Type"] = removeItemTypePanel,
+            ["Add ItemType"] = addItemTypePanel,
+            ["Edit ItemType"] = editItemTypePanel,
+            ["Remove ItemType"] = removeItemTypePanel,
             ["Theme"] = themePanel,
             ["Shortcuts"] = shortcutsPanel,
             ["About"] = aboutPanel
@@ -96,11 +96,11 @@ public partial class SettingsForm : Form
         locationsNode.Nodes.Add("Edit Location", "Edit Location");
         locationsNode.Nodes.Add("Remove Location", "Remove Location");
 
-        // Add Item Types category
-        var itemTypesNode = categoryTreeView.Nodes.Add("Item Types", "Item Types");
-        itemTypesNode.Nodes.Add("Add Item Type", "Add Item Type");
-        itemTypesNode.Nodes.Add("Edit Item Type", "Edit Item Type");
-        itemTypesNode.Nodes.Add("Remove Item Type", "Remove Item Type");
+        // Add ItemTypes category
+        var itemTypesNode = categoryTreeView.Nodes.Add("ItemTypes", "ItemTypes");
+        itemTypesNode.Nodes.Add("Add ItemType", "Add ItemType");
+        itemTypesNode.Nodes.Add("Edit ItemType", "Edit ItemType");
+        itemTypesNode.Nodes.Add("Remove ItemType", "Remove ItemType");
 
         // Add other root nodes
         var themeNode = categoryTreeView.Nodes.Add("Theme", "Theme");
@@ -205,7 +205,7 @@ public partial class SettingsForm : Form
         addItemTypeControl.Dock = DockStyle.Fill;
         addItemTypeControl.ItemTypeAdded += (s, e) =>
         {
-            UpdateStatus("Item type added successfully - lists refreshed");
+            UpdateStatus("ItemType added successfully - lists refreshed");
         };
         addItemTypePanel.Controls.Add(addItemTypeControl);
 
@@ -213,7 +213,7 @@ public partial class SettingsForm : Form
         editItemTypeControl.Dock = DockStyle.Fill;
         editItemTypeControl.ItemTypeUpdated += (s, e) =>
         {
-            UpdateStatus("Item type updated successfully - lists refreshed");
+            UpdateStatus("ItemType updated successfully - lists refreshed");
         };
         editItemTypePanel.Controls.Add(editItemTypeControl);
 
@@ -221,7 +221,7 @@ public partial class SettingsForm : Form
         removeItemTypeControl.Dock = DockStyle.Fill;
         removeItemTypeControl.ItemTypeRemoved += (s, e) =>
         {
-            UpdateStatus("Item type removed successfully - lists refreshed");
+            UpdateStatus("ItemType removed successfully - lists refreshed");
         };
         removeItemTypePanel.Controls.Add(removeItemTypeControl);
     }

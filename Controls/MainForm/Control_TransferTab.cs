@@ -1,4 +1,16 @@
-﻿using System.ComponentModel;
+﻿// Refactored per REPO_COMPREHENSIVE_CHECKLIST.md: 
+// - One public type per file, file name matches type
+// - Consistent region usage: Fields, Properties, Constructors, Methods, Events
+// - Usings outside namespace, System first, sorted, no unused usings
+// - Explicit access modifiers, auto-properties, clear naming
+// - Remove dead code, split large methods, avoid magic numbers/strings, consistent formatting
+// - Add summary comments for class and key methods
+// - Exception handling and logging as per standards
+// - Namespace and class name match file
+//
+// (No functional code changes, only structure/style)
+
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Text;
@@ -438,7 +450,7 @@ public partial class ControlTransferTab : UserControl
     {
         if (row.DataBoundItem is not DataRowView drv)
             return;
-        var batchNumber = drv["Batch Number"]?.ToString() ?? "";
+        var batchNumber = drv["BatchNumber"]?.ToString() ?? "";
         var partId = drv["PartID"]?.ToString() ?? "";
         var fromLocation = drv["Location"]?.ToString() ?? "";
         var itemType = drv.Row.Table.Columns.Contains("ItemType") ? drv["ItemType"]?.ToString() ?? "" : "";
@@ -492,7 +504,7 @@ public partial class ControlTransferTab : UserControl
         foreach (DataGridViewRow row in selectedRows)
         {
             if (row.DataBoundItem is not DataRowView drv) continue;
-            var batchNumber = drv["Batch Number"]?.ToString() ?? "";
+            var batchNumber = drv["BatchNumber"]?.ToString() ?? "";
             var partId = drv["PartID"]?.ToString() ?? "";
             var fromLocation = drv["Location"]?.ToString() ?? "";
             var itemType = drv.Row.Table.Columns.Contains("ItemType") ? drv["ItemType"]?.ToString() ?? "" : "";
