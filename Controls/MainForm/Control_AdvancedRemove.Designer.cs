@@ -1,4 +1,7 @@
-﻿namespace MTM_Inventory_Application.Controls.MainForm
+﻿using System.Drawing;
+using System.Windows.Forms;
+
+namespace MTM_Inventory_Application.Controls.MainForm
 {
     partial class Control_AdvancedRemove
     {

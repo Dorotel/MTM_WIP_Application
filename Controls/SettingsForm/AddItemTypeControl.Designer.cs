@@ -28,8 +28,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         /// </summary>
         private void InitializeComponent()
         {
-            this.titleLabel = new System.Windows.Forms.Label();
-            this.itemTypeLabel = new System.Windows.Forms.Label();
+            this.Control_AddItemType_Label_Title = new System.Windows.Forms.Label();
+            this.Control_AddItemType_Label_ItemType = new System.Windows.Forms.Label();
             this.itemTypeTextBox = new System.Windows.Forms.TextBox();
             this.issuedByLabel = new System.Windows.Forms.Label();
             this.issuedByValueLabel = new System.Windows.Forms.Label();
@@ -37,24 +37,24 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             this.clearButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // titleLabel
+            // Control_AddItemType_Label_Title
             // 
-            this.titleLabel.AutoSize = true;
-            this.titleLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.titleLabel.Location = new System.Drawing.Point(20, 20);
-            this.titleLabel.Name = "titleLabel";
-            this.titleLabel.Size = new System.Drawing.Size(121, 21);
-            this.titleLabel.TabIndex = 0;
-            this.titleLabel.Text = "Add ItemType";
+            this.Control_AddItemType_Label_Title.AutoSize = true;
+            this.Control_AddItemType_Label_Title.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.Control_AddItemType_Label_Title.Location = new System.Drawing.Point(20, 20);
+            this.Control_AddItemType_Label_Title.Name = "Control_AddItemType_Label_Title";
+            this.Control_AddItemType_Label_Title.Size = new System.Drawing.Size(121, 21);
+            this.Control_AddItemType_Label_Title.TabIndex = 0;
+            this.Control_AddItemType_Label_Title.Text = "Add ItemType";
             // 
-            // itemTypeLabel
+            // Control_AddItemType_ItemType
             // 
-            this.itemTypeLabel.AutoSize = true;
-            this.itemTypeLabel.Location = new System.Drawing.Point(20, 60);
-            this.itemTypeLabel.Name = "itemTypeLabel";
-            this.itemTypeLabel.Size = new System.Drawing.Size(65, 15);
-            this.itemTypeLabel.TabIndex = 1;
-            this.itemTypeLabel.Text = "ItemType:";
+            this.Control_AddItemType_Label_ItemType.AutoSize = true;
+            this.Control_AddItemType_Label_ItemType.Location = new System.Drawing.Point(20, 60);
+            this.Control_AddItemType_Label_ItemType.Name = "Control_AddItemType_Label_ItemType";
+            this.Control_AddItemType_Label_ItemType.Size = new System.Drawing.Size(65, 15);
+            this.Control_AddItemType_Label_ItemType.TabIndex = 1;
+            this.Control_AddItemType_Label_ItemType.Text = "ItemType:";
             // 
             // itemTypeTextBox
             // 
@@ -110,8 +110,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             this.Controls.Add(this.issuedByValueLabel);
             this.Controls.Add(this.issuedByLabel);
             this.Controls.Add(this.itemTypeTextBox);
-            this.Controls.Add(this.itemTypeLabel);
-            this.Controls.Add(this.titleLabel);
+            this.Controls.Add(this.Control_AddItemType_Label_ItemType);
+            this.Controls.Add(this.Control_AddItemType_Label_Title);
             this.Name = "AddItemTypeControl";
             this.Size = new System.Drawing.Size(450, 200);
             this.ResumeLayout(false);
@@ -121,8 +121,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         #endregion
 
-        private System.Windows.Forms.Label titleLabel;
-        private System.Windows.Forms.Label itemTypeLabel;
+        private System.Windows.Forms.Label Control_AddItemType_Label_Title;
+        private System.Windows.Forms.Label Control_AddItemType_Label_ItemType;
         private System.Windows.Forms.TextBox itemTypeTextBox;
         private System.Windows.Forms.Label issuedByLabel;
         private System.Windows.Forms.Label issuedByValueLabel;

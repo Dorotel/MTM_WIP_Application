@@ -1,11 +1,17 @@
-﻿using MTM_Inventory_Application.Core;
+﻿using System;
+using System.Collections.Generic;
+using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Controls.SettingsForm;
 using MTM_Inventory_Application.Controls.Shared;
 using System.Data;
+using System.Drawing;
+using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MTM_Inventory_Application.Forms.Settings;
 

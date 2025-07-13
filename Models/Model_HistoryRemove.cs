@@ -1,4 +1,6 @@
-﻿namespace MTM_Inventory_Application.Models;
+﻿using System;
+
+namespace MTM_Inventory_Application.Models;
 
 internal class Model_HistoryRemove
 {

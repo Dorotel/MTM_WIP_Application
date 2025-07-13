@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading.Tasks;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
 
@@ -40,5 +41,4 @@ public static class MainFormUserSettingsHelper
         Model_AppVariables.ThemeFontSize = fontSize ?? 9;
         Debug.WriteLine("[DEBUG] Finished loading user theme settings from DB");
     }
-
 }

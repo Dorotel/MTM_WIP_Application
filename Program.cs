@@ -1,3 +1,4 @@
+using System;
 using MTM_Inventory_Application.Controls.MainForm;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Forms.MainForm;
@@ -8,6 +9,8 @@ using MTM_Inventory_Application.Services;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Data;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MTM_Inventory_Application;
 

@@ -1,5 +1,10 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Diagnostics;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using MTM_Inventory_Application.Models;
 using MySql.Data.MySqlClient;
 using static MTM_Inventory_Application.Core.Core_Themes;

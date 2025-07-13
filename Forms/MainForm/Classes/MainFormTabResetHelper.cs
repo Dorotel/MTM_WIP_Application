@@ -1,4 +1,7 @@
-﻿namespace MTM_Inventory_Application.Forms.MainForm.Classes;
+﻿using System.Drawing;
+using System.Windows.Forms;
+
+namespace MTM_Inventory_Application.Forms.MainForm.Classes;
 
 /// <summary>
 ///     Provides helper methods for resetting the controls on each MainForm tab.

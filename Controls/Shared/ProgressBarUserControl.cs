@@ -1,6 +1,11 @@
+using System;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Models;
 using System.ComponentModel;
+using System.Drawing;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Controls.Shared;
 
@@ -186,7 +191,7 @@ public partial class ProgressBarUserControl : UserControl
         // Start animation timer for loading image
         if (_loadingImage != null)
         {
-            var timer = new System.Windows.Forms.Timer { Interval = 50 };
+            var timer = new Timer { Interval = 50 };
             timer.Tick += (s, e) => _loadingImage.Invalidate();
             timer.Start();
 
@@ -207,7 +212,7 @@ public partial class ProgressBarUserControl : UserControl
         }
 
         // Stop animation timer
-        if (Tag is System.Windows.Forms.Timer timer)
+        if (Tag is Timer timer)
         {
             timer.Stop();
             timer.Dispose();

@@ -10,9 +10,15 @@
 //
 // (No functional code changes, only structure/style)
 
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using ClosedXML.Excel;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;

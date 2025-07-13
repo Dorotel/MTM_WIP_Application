@@ -1,4 +1,7 @@
-﻿namespace MTM_Inventory_Application.Forms.Analytics;
+﻿using System;
+using System.Windows.Forms;
+
+namespace MTM_Inventory_Application.Forms.Analytics;
 
 public partial class AnalyticsForm : Form
 {

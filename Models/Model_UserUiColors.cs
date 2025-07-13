@@ -1,3 +1,5 @@
+using System.Drawing;
+
 namespace MTM_Inventory_Application.Models;
 
 /// <summary>

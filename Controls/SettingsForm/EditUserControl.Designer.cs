@@ -1,3 +1,6 @@
+using System.Drawing;
+using System.Windows.Forms;
+
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
     partial class EditUserControl

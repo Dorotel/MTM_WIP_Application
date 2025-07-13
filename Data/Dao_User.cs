@@ -1,4 +1,6 @@
-﻿using MTM_Inventory_Application.Core;
+﻿using System;
+using System.Collections.Generic;
+using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
@@ -6,6 +8,7 @@ using MySql.Data.MySqlClient;
 using System.Data;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace MTM_Inventory_Application.Data;
 
@@ -354,7 +357,7 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
     internal static async Task InsertUserAsync(
         string user, string fullName, string shift, bool vitsUser, string pin,
         string lastShownVersion, string hideChangeLog, string themeName, int themeFontSize,
-        string visualUserName, string visualPassword, string wipServerAddress, string database ,string wipServerPort,
+        string visualUserName, string visualPassword, string wipServerAddress, string database, string wipServerPort,
         bool useAsync = false)
     {
         Debug.WriteLine(
@@ -608,7 +611,8 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
 
     internal static async Task AddUserRoleAsync(int userId, int roleId, string assignedBy, bool useAsync = false)
     {
-        Debug.WriteLine($"[Dao_User] Entering AddUserRoleAsync(userId={userId}, roleId={roleId}, assignedBy={assignedBy}, useAsync={useAsync})");
+        Debug.WriteLine(
+            $"[Dao_User] Entering AddUserRoleAsync(userId={userId}, roleId={roleId}, assignedBy={assignedBy}, useAsync={useAsync})");
         try
         {
             var parameters = new Dictionary<string, object>
@@ -647,12 +651,12 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
                 "SELECT RoleID FROM sys_user_roles WHERE UserID = @UserID LIMIT 1",
                 parameters, useAsync, CommandType.Text);
 
-            if (result.Rows.Count > 0 && int.TryParse(result.Rows[0]["RoleID"]?.ToString(), out int roleId))
+            if (result.Rows.Count > 0 && int.TryParse(result.Rows[0]["RoleID"]?.ToString(), out var roleId))
             {
                 var roleInfo = await HelperDatabaseCore.ExecuteDataTable(
-                     "sys_roles_Get_ById",
-                     new Dictionary<string, object> { ["p_ID"] = roleId },
-                     useAsync, CommandType.StoredProcedure);
+                    "sys_roles_Get_ById",
+                    new Dictionary<string, object> { ["p_ID"] = roleId },
+                    useAsync, CommandType.StoredProcedure);
                 return roleId;
             }
 
@@ -672,7 +676,8 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
     /// </summary>
     internal static async Task SetUserRoleAsync(int userId, int newRoleId, string assignedBy, bool useAsync = false)
     {
-        Debug.WriteLine($"[Dao_User] Entering SetUserRoleAsync(userId={userId}, newRoleId={newRoleId}, assignedBy={assignedBy}, useAsync={useAsync})");
+        Debug.WriteLine(
+            $"[Dao_User] Entering SetUserRoleAsync(userId={userId}, newRoleId={newRoleId}, assignedBy={assignedBy}, useAsync={useAsync})");
         try
         {
             var parameters = new Dictionary<string, object>
@@ -693,9 +698,11 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
         }
     }
 
-    internal static async Task SetUsersRoleAsync(IEnumerable<int> userIds, int newRoleId, string assignedBy, bool useAsync = false)
+    internal static async Task SetUsersRoleAsync(IEnumerable<int> userIds, int newRoleId, string assignedBy,
+        bool useAsync = false)
     {
-        Debug.WriteLine($"[Dao_User] Entering SetUsersRoleAsync(userIds=[{string.Join(",", userIds)}], newRoleId={newRoleId}, assignedBy={assignedBy}, useAsync={useAsync})");
+        Debug.WriteLine(
+            $"[Dao_User] Entering SetUsersRoleAsync(userIds=[{string.Join(",", userIds)}], newRoleId={newRoleId}, assignedBy={assignedBy}, useAsync={useAsync})");
         try
         {
             foreach (var userId in userIds)
@@ -724,7 +731,8 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
     /// </summary>
     internal static async Task RemoveUserRoleAsync(int userId, int roleId, bool useAsync = false)
     {
-        Debug.WriteLine($"[Dao_User] Entering RemoveUserRoleAsync(userId={userId}, roleId={roleId}, useAsync={useAsync})");
+        Debug.WriteLine(
+            $"[Dao_User] Entering RemoveUserRoleAsync(userId={userId}, roleId={roleId}, useAsync={useAsync})");
         try
         {
             var parameters = new Dictionary<string, object>
@@ -743,6 +751,7 @@ ON DUPLICATE KEY UPDATE `{field}` = VALUES(`{field}`);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
         }
     }
+
     #endregion
 }
 

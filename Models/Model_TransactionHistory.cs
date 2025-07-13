@@ -1,3 +1,5 @@
+using System;
+
 namespace MTM_Inventory_Application.Models;
 
 internal class Model_TransactionHistory

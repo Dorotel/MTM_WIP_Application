@@ -1,4 +1,8 @@
-﻿using System.Drawing.Printing;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Printing;
+using System.Windows.Forms;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Logging;
 

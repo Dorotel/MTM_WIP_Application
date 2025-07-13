@@ -10,9 +10,13 @@
 //
 // (No functional code changes, only structure/style)
 
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Forms.MainForm.Classes;
 using MTM_Inventory_Application.Helpers;

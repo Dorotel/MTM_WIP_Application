@@ -1,3 +1,6 @@
+using System.Drawing;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using MTM_Inventory_Application.Controls.Shared;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Models;
@@ -43,7 +46,8 @@ public partial class SplashScreenForm : Form
     /// <param name="status">Status message</param>
     public void UpdateProgress(int progress, string status)
     {
-        System.Diagnostics.Debug.WriteLine($"[DEBUG] [SplashScreenForm.UpdateProgress] Progress: {progress}, Status: {status}");
+        System.Diagnostics.Debug.WriteLine(
+            $"[DEBUG] [SplashScreenForm.UpdateProgress] Progress: {progress}, Status: {status}");
         _progressControl!.UpdateProgress(progress, status);
         Application.DoEvents();
     }
@@ -69,7 +73,8 @@ public partial class SplashScreenForm : Form
         }
         catch
         {
-            System.Diagnostics.Debug.WriteLine("[DEBUG] [SplashScreenForm.ApplyTheme] Theme application failed (ignored).");
+            System.Diagnostics.Debug.WriteLine(
+                "[DEBUG] [SplashScreenForm.ApplyTheme] Theme application failed (ignored).");
         }
     }
 
@@ -86,15 +91,15 @@ public partial class SplashScreenForm : Form
         if (watermark != null)
         {
             var g = e.Graphics;
-            int margin = 16;
+            var margin = 16;
 
             // Shrink the watermark by 10%
-            float scale = 0.9f;
-            int drawWidth = (int)(watermark.Width * scale);
-            int drawHeight = (int)(watermark.Height * scale);
+            var scale = 0.9f;
+            var drawWidth = (int)(watermark.Width * scale);
+            var drawHeight = (int)(watermark.Height * scale);
 
-            int x = margin;
-            int y = margin;
+            var x = margin;
+            var y = margin;
 
             // Set transparency (adjust alpha as needed)
             var colorMatrix = new System.Drawing.Imaging.ColorMatrix
@@ -102,7 +107,8 @@ public partial class SplashScreenForm : Form
                 Matrix33 = 0.15f // 15% opacity
             };
             var imageAttributes = new System.Drawing.Imaging.ImageAttributes();
-            imageAttributes.SetColorMatrix(colorMatrix, System.Drawing.Imaging.ColorMatrixFlag.Default, System.Drawing.Imaging.ColorAdjustType.Bitmap);
+            imageAttributes.SetColorMatrix(colorMatrix, System.Drawing.Imaging.ColorMatrixFlag.Default,
+                System.Drawing.Imaging.ColorAdjustType.Bitmap);
 
             var destRect = new Rectangle(x, y, drawWidth, drawHeight);
 

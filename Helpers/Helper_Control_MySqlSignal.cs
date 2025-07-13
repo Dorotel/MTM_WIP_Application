@@ -1,4 +1,6 @@
+using System;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Helpers;

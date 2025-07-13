@@ -1,4 +1,6 @@
-﻿using MTM_Inventory_Application.Models;
+﻿using System.Drawing;
+using System.Windows.Forms;
+using MTM_Inventory_Application.Models;
 
 namespace MTM_Inventory_Application.Forms.MainForm.Classes;
 

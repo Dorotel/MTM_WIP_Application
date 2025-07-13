@@ -1,4 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using DocumentFormat.OpenXml.Vml.Office;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
@@ -41,14 +46,14 @@ internal static class LoggingUtility
                         if (logFiles.Count > maxLogs)
                         {
                             var filesToDelete = logFiles.Skip(maxLogs).ToList();
-                            foreach (var logFile in filesToDelete) 
+                            foreach (var logFile in filesToDelete)
                             {
                                 cts.Token.ThrowIfCancellationRequested();
                                 File.Delete(logFile);
                             }
                         }
                     }, cts.Token);
-                    
+
                     task.Wait(cts.Token);
                 }
                 catch (OperationCanceledException)
@@ -99,11 +104,8 @@ internal static class LoggingUtility
                     using var writer = new StreamWriter(filePath, true);
                     writer.WriteLine(logEntry);
                 });
-                
-                if (!task.Wait(TimeSpan.FromSeconds(5)))
-                {
-                    Debug.WriteLine($"[DEBUG] Log write timeout for: {filePath}");
-                }
+
+                if (!task.Wait(TimeSpan.FromSeconds(5))) Debug.WriteLine($"[DEBUG] Log write timeout for: {filePath}");
             }
         }
         catch (Exception ex)
@@ -122,14 +124,14 @@ internal static class LoggingUtility
         try
         {
             Debug.WriteLine("[DEBUG] Starting logging initialization...");
-            
+
             var server = new MySqlConnectionStringBuilder(Model_AppVariables.ConnectionString).Server;
             var userName = Model_AppVariables.User;
-            
+
             Debug.WriteLine($"[DEBUG] Server: {server}, User: {userName}");
-            
+
             // Add timeout for log path operations
-            string logFilePath = await Task.Run(async () =>
+            var logFilePath = await Task.Run(async () =>
             {
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 try
@@ -146,19 +148,19 @@ internal static class LoggingUtility
                     return Path.Combine(tempDir, $"{userName} {timestamp}.log");
                 }
             });
-            
+
             _logDirectory = Path.GetDirectoryName(logFilePath) ?? "";
             var baseFileName = Path.GetFileNameWithoutExtension(logFilePath);
             _normalLogFile = Path.Combine(_logDirectory, $"{baseFileName}_normal.log");
             _dbErrorLogFile = Path.Combine(_logDirectory, $"{baseFileName}_db_error.log");
             _appErrorLogFile = Path.Combine(_logDirectory, $"{baseFileName}_app_error.log");
-            
+
             Debug.WriteLine($"[DEBUG] Log directory: {_logDirectory}");
             Debug.WriteLine($"[DEBUG] Normal log file: {_normalLogFile}");
-            
+
             Log("Initializing logging...");
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
-            
+
             Debug.WriteLine("[DEBUG] Logging initialization completed");
         }
         catch (Exception ex)

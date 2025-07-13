@@ -1,10 +1,13 @@
-﻿using MTM_Inventory_Application.Core;
+﻿using System;
+using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace MTM_Inventory_Application.Services;
 
@@ -16,9 +19,16 @@ internal static class Service_OnStartup
         {
             var logMsg = $"[STARTUP TRACE] {msg}";
             Trace.WriteLine(logMsg);
-            System.Diagnostics.Trace.WriteLine(logMsg);
-            var logPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "startup_trace.log");
-            try { await System.IO.File.AppendAllTextAsync(logPath, logMsg + Environment.NewLine); } catch (Exception ex) { Console.WriteLine("Log write error: " + ex); }
+            Trace.WriteLine(logMsg);
+            var logPath = Path.Combine(Path.GetTempPath(), "startup_trace.log");
+            try
+            {
+                await File.AppendAllTextAsync(logPath, logMsg + Environment.NewLine);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Log write error: " + ex);
+            }
         }
 
         await LogStep("Starting startup sequence...");
