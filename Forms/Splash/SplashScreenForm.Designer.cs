@@ -9,7 +9,7 @@ namespace MTM_Inventory_Application.Forms.Splash
         #region Fields
         
         private System.ComponentModel.IContainer components = null!;
-        private Controls.Shared.ProgressBarUserControl? _progressControl;
+        private Controls.Shared.Control_ProgressBarUserControl? _progressControl;
         private Label? _titleLabel;
         private Label? _versionLabel;
         
@@ -36,7 +36,7 @@ namespace MTM_Inventory_Application.Forms.Splash
             this.components = new System.ComponentModel.Container();
             this._titleLabel = new System.Windows.Forms.Label();
             this._versionLabel = new System.Windows.Forms.Label();
-            this._progressControl = new Controls.Shared.ProgressBarUserControl();
+            this._progressControl = new Controls.Shared.Control_ProgressBarUserControl();
 
             this.SuspendLayout();
 

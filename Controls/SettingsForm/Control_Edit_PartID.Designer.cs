@@ -12,7 +12,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         private System.Windows.Forms.Label titleLabel;
         private System.Windows.Forms.Label selectPartLabel;
-        private System.Windows.Forms.ComboBox partsComboBox;
+        private System.Windows.Forms.ComboBox Control_Edit_PartID_ComboBox_Part;
         private System.Windows.Forms.Label itemNumberLabel;
         private System.Windows.Forms.TextBox itemNumberTextBox;
         private System.Windows.Forms.Label customerLabel;
@@ -20,7 +20,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         private System.Windows.Forms.Label descriptionLabel;
         private System.Windows.Forms.TextBox descriptionTextBox;
         private System.Windows.Forms.Label typeLabel;
-        private System.Windows.Forms.ComboBox typeComboBox;
+        private System.Windows.Forms.ComboBox Control_Edit_PartID_ComboBox_ItemType;
         private System.Windows.Forms.Label issuedByLabel;
         private System.Windows.Forms.Label issuedByValueLabel;
         private System.Windows.Forms.Button saveButton;
@@ -46,7 +46,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         {
             titleLabel = new Label();
             selectPartLabel = new Label();
-            partsComboBox = new ComboBox();
+            Control_Edit_PartID_ComboBox_Part = new ComboBox();
             itemNumberLabel = new Label();
             itemNumberTextBox = new TextBox();
             customerLabel = new Label();
@@ -54,7 +54,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             descriptionLabel = new Label();
             descriptionTextBox = new TextBox();
             typeLabel = new Label();
-            typeComboBox = new ComboBox();
+            Control_Edit_PartID_ComboBox_ItemType = new ComboBox();
             issuedByLabel = new Label();
             issuedByValueLabel = new Label();
             saveButton = new Button();
@@ -73,14 +73,14 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             selectPartLabel.Size = new Size(65, 15);
             selectPartLabel.TabIndex = 1;
             selectPartLabel.Text = "Select Part:";
-            partsComboBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            partsComboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
-            partsComboBox.FormattingEnabled = true;
-            partsComboBox.Location = new Point(120, 57);
-            partsComboBox.Name = "partsComboBox";
-            partsComboBox.Size = new Size(300, 23);
-            partsComboBox.TabIndex = 2;
-            partsComboBox.SelectedIndexChanged += PartsComboBox_SelectedIndexChanged;
+            Control_Edit_PartID_ComboBox_Part.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            Control_Edit_PartID_ComboBox_Part.AutoCompleteSource = AutoCompleteSource.ListItems;
+            Control_Edit_PartID_ComboBox_Part.FormattingEnabled = true;
+            Control_Edit_PartID_ComboBox_Part.Location = new Point(120, 57);
+            Control_Edit_PartID_ComboBox_Part.Name = "Control_Edit_PartID_ComboBox_Part";
+            Control_Edit_PartID_ComboBox_Part.Size = new Size(300, 23);
+            Control_Edit_PartID_ComboBox_Part.TabIndex = 2;
+            Control_Edit_PartID_ComboBox_Part.SelectedIndexChanged += Control_Edit_PartID_ComboBox_Part_SelectedIndexChanged;
             itemNumberLabel.AutoSize = true;
             itemNumberLabel.Location = new Point(20, 100);
             itemNumberLabel.Name = "itemNumberLabel";
@@ -121,13 +121,13 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             typeLabel.Size = new Size(35, 15);
             typeLabel.TabIndex = 9;
             typeLabel.Text = "Type:";
-            typeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            typeComboBox.Enabled = false;
-            typeComboBox.FormattingEnabled = true;
-            typeComboBox.Location = new Point(120, 257);
-            typeComboBox.Name = "typeComboBox";
-            typeComboBox.Size = new Size(200, 23);
-            typeComboBox.TabIndex = 10;
+            Control_Edit_PartID_ComboBox_ItemType.DropDownStyle = ComboBoxStyle.DropDownList;
+            Control_Edit_PartID_ComboBox_ItemType.Enabled = false;
+            Control_Edit_PartID_ComboBox_ItemType.FormattingEnabled = true;
+            Control_Edit_PartID_ComboBox_ItemType.Location = new Point(120, 257);
+            Control_Edit_PartID_ComboBox_ItemType.Name = "Control_Edit_PartID_ComboBox_ItemType";
+            Control_Edit_PartID_ComboBox_ItemType.Size = new Size(200, 23);
+            Control_Edit_PartID_ComboBox_ItemType.TabIndex = 10;
             issuedByLabel.AutoSize = true;
             issuedByLabel.Location = new Point(20, 300);
             issuedByLabel.Name = "issuedByLabel";
@@ -160,7 +160,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             Controls.Add(saveButton);
             Controls.Add(issuedByValueLabel);
             Controls.Add(issuedByLabel);
-            Controls.Add(typeComboBox);
+            Controls.Add(Control_Edit_PartID_ComboBox_ItemType);
             Controls.Add(typeLabel);
             Controls.Add(descriptionTextBox);
             Controls.Add(descriptionLabel);
@@ -168,7 +168,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             Controls.Add(customerLabel);
             Controls.Add(itemNumberTextBox);
             Controls.Add(itemNumberLabel);
-            Controls.Add(partsComboBox);
+            Controls.Add(Control_Edit_PartID_ComboBox_Part);
             Controls.Add(selectPartLabel);
             Controls.Add(titleLabel);
             Name = "Control_Edit_PartID";

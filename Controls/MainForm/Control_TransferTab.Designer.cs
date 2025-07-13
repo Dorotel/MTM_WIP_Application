@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace MTM_Inventory_Application.Controls.MainForm
 {
-    partial class ControlTransferTab
+    partial class Control_TransferTab
     {
         #region Fields
         
@@ -256,7 +256,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             Controls.Add(Control_TransferTab_GroupBox_MainControl);
-            Name = "ControlTransferTab";
+            Name = "Control_TransferTab";
             Size = new Size(815, 384);
             Control_TransferTab_Panel_Main.ResumeLayout(false);
             Control_TransferTab_Panel_DataGridView.ResumeLayout(false);

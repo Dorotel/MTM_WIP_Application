@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace MTM_Inventory_Application.Controls.MainForm
 {
-    partial class ControlRemoveTab
+    partial class Control_RemoveTab
     {
         #region Fields
         
@@ -241,7 +241,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             Controls.Add(Control_RemoveTab_GroupBox_MainControl);
-            Name = "ControlRemoveTab";
+            Name = "Control_RemoveTab";
             Size = new Size(815, 384);
             Control_RemoveTab_GroupBox_MainControl.ResumeLayout(false);
             Control_RemoveTab_Panel_Main.ResumeLayout(false);

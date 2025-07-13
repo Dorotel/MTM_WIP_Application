@@ -4,6 +4,122 @@ Use this prompt with your AI tool to generate the most exhaustive, precise, and 
 
 ---
 
+## Example Output Format
+## Refactor: Standardize UserControl/File Naming and Update References
+
+---
+
+## Comprehensive Commit Body
+
+### What
+
+- Renamed all UserControl and related files in `Controls/SettingsForm/` to follow the new `{ClassName}_{ControlType}_{Name}` convention (e.g., `EditUserControl` ? `Control_Edit_User`, `RemoveUserControl` ? `Control_Remove_User`, etc.).
+- Added new files for renamed controls: `Control_Edit_User.cs`, `Control_Edit_User.Designer.cs`, `Control_Remove_User.cs`, and their `.resx` resources.
+- Removed legacy files: `EditUserControl.cs`, `EditUserControl.Designer.cs`, `RemoveUserControl.cs`, and related resources.
+- Updated all references in:
+  - `Forms/Settings/SettingsForm.cs`
+  - `Forms/Settings/SettingsForm.Designer.cs`
+  - `Forms/MainForm/MainForm.Designer.cs`
+  - `Controls/Shared/ProgressBarUserControl.cs`
+  - `MTM_Inventory_Application.csproj`
+- Added `Documents/Updates/Renaming_Refactoring_Reference.md` to document the renaming/refactoring process, conventions, and provide a mapping table.
+- Removed obsolete documentation and tooling files related to previous naming/diagram conventions and refactoring scripts.
+
+### Why
+
+- Motivation: To enforce a consistent, descriptive, and maintainable naming convention for all UserControls and related files, improving code readability, maintainability, and onboarding for new developers.
+- Problems Solved: Addressed technical debt from inconsistent or ambiguous control/file names, reduced risk of naming collisions, and improved traceability across the codebase.
+- Business/User Value: Enhances maintainability, reduces onboarding time, and supports future refactoring and automation efforts.
+- Prior Issues/Requests: Aligns with workspace documentation and prior PR guidance for naming and refactoring.
+
+### How
+
+- Implementation: Used a systematic approach to rename all UserControl and related files, updating both code-behind and designer files, as well as all references in forms, project files, and resources.
+- Design Rationale: Adopted a `{ClassName}_{ControlType}_{Name}` pattern for clarity and scalability. Chose not to rename third-party or resource files unless required by dependencies.
+- Alternatives Considered: Considered partial renaming or only updating new files, but full standardization was selected for long-term maintainability.
+- Control Flow/API Changes: Updated all instantiations, event handlers, and references to the new control names. Ensured all dependent files and project references were updated.
+- Documentation: Added a comprehensive reference file (`Renaming_Refactoring_Reference.md`) and removed outdated documentation/tools.
+
+### Scope & Impact
+
+- Affected Modules: All UserControls in `Controls/SettingsForm/`, forms referencing these controls, shared controls, and the main project file.
+- Ripple Effects: Requires all developers to use the new naming convention for future work. May impact any scripts or tools referencing old names.
+- Breaking Changes: None to public APIs, but all internal references to renamed controls must be updated.
+- Dependencies/CI: Project file updated; no external dependencies affected.
+
+### Testing
+
+- Manual Testing: Performed manual UI smoke tests to verify all controls load and function as expected after renaming.
+- Automated Testing: Built the solution and ran all unit/integration tests to ensure no regressions.
+- Test Coverage: All affected forms and controls were exercised; no new test cases added, but all existing tests passed.
+- Validation Steps: Build the solution, run all tests, and manually open and interact with all affected forms.
+- Known Issues: None identified; all references updated and validated.
+
+### Migration/Deployment
+
+- Migration Steps: No data migrations required. All renaming is code-level.
+- Deployment Notes: Ensure all developers pull the latest changes and update any local scripts/tools referencing old control names.
+- Rollback: Revert this commit to restore previous naming.
+- QA Guidance: Review all renamed files and references; verify UI and functionality.
+
+### References/Traceability
+
+- See `Documents/Updates/Renaming_Refactoring_Reference.md` for mapping and rationale.
+- See `COMMITPROMPT.md` for commit message structure.
+- Supersedes prior documentation in `PR_Naming_Convention_and_Diagrams.md` and `TASK_Reference_Details.md`.
+
+### TODOs/Follow-ups
+
+- Update any external documentation or scripts referencing old control names.
+- Consider automating future renaming with improved tooling.
+- Monitor for any missed references in less commonly used forms or scripts.
+
+---
+
+## Affected Entities Table
+
+| File/Entity                                             | Change   | Purpose/Notes                                              | Cross-Reference                        |
+|---------------------------------------------------------|----------|------------------------------------------------------------|----------------------------------------|
+| Controls/SettingsForm/EditUserControl.cs                | Removed  | Legacy control, replaced by new naming                     | See new: Control_Edit_User.cs          |
+| Controls/SettingsForm/EditUserControl.Designer.cs       | Removed  | Legacy designer, replaced by new naming                    | See new: Control_Edit_User.Designer.cs |
+| Controls/SettingsForm/RemoveUserControl.cs              | Removed  | Legacy control, replaced by new naming                     | See new: Control_Remove_User.cs        |
+| Controls/SettingsForm/RemoveUserControl.Designer.cs     | Renamed  | Standardized to new naming convention                      | Control_Remove_User.Designer.cs        |
+| Controls/SettingsForm/Control_Edit_User.cs              | Added    | New control with standardized name                         |                                        |
+| Controls/SettingsForm/Control_Edit_User.Designer.cs     | Added    | New designer with standardized name                        |                                        |
+| Controls/SettingsForm/Control_Remove_User.cs            | Added    | New control with standardized name                         |                                        |
+| Controls/SettingsForm/Control_Remove_User.Designer.cs   | Renamed  | Standardized to new naming convention                      |                                        |
+| Controls/SettingsForm/Control_Edit_User.resx            | Added    | Resource for new control                                   |                                        |
+| Controls/SettingsForm/Control_Remove_User.resx          | Renamed  | Resource for new control                                   |                                        |
+| Forms/Settings/SettingsForm.cs                          | Edited   | Updated references to renamed controls                     |                                        |
+| Forms/Settings/SettingsForm.Designer.cs                 | Edited   | Updated references to renamed controls                     |                                        |
+| Forms/MainForm/MainForm.Designer.cs                     | Edited   | Updated references to renamed controls                     |                                        |
+| Controls/Shared/ProgressBarUserControl.cs               | Edited   | Updated references to renamed controls                     |                                        |
+| MTM_Inventory_Application.csproj                        | Edited   | Updated to include/remove renamed/added/removed files      |                                        |
+| Documents/Updates/Renaming_Refactoring_Reference.md     | Added    | Documents naming convention, mapping, and migration steps  |                                        |
+| PR_Naming_Convention_and_Diagrams.md                    | Removed  | Obsolete documentation                                     | See new: Renaming_Refactoring_Reference.md |
+| TASK_Reference_Details.md                               | Removed  | Obsolete documentation                                     | See new: Renaming_Refactoring_Reference.md |
+| Tools/CommentRemover/*, Tools/DiagramGenerator/*, etc.  | Removed  | Obsolete scripts/tools for previous naming conventions      |                                        |
+
+---
+
+## Changelog Summary
+
+- **Added:**  
+  - `Control_Edit_User.cs`, `Control_Edit_User.Designer.cs`, `Control_Edit_User.resx`
+  - `Control_Remove_User.cs`, `Control_Remove_User.Designer.cs`, `Control_Remove_User.resx`
+  - `Documents/Updates/Renaming_Refactoring_Reference.md`
+- **Changed:**  
+  - Updated all references in forms, designer files, and project file to use new control names.
+- **Removed:**  
+  - Legacy controls and designers: `EditUserControl.*`, `RemoveUserControl.*`, and related resources.
+  - Obsolete documentation and tooling: `PR_Naming_Convention_and_Diagrams.md`, `TASK_Reference_Details.md`, `Tools/CommentRemover/*`, `Tools/DiagramGenerator/*`, `Tools/RegionOrganizer/*`, `Tools/RenamerTool/*`.
+
+---
+
+**Sign-off:**  
+_Signed-off-by: [author] <email>_
+---
+
 ## Prompt
 
 > Generate an **ultra-detailed, professional commit message** for the following code changes. The commit message must strictly adhere to the following structure and requirements:
@@ -64,7 +180,9 @@ Use this prompt with your AI tool to generate the most exhaustive, precise, and 
 >
 > **Input Diff:**  
 > ```
-> [PASTE YOUR DIFF HERE]
+>
+> READ DIFF.md
+>
 > ```
 >
 > ---

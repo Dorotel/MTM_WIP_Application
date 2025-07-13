@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace MTM_Inventory_Application.Controls.MainForm
 {
-    partial class ControlInventoryTab
+    partial class Control_InventoryTab
     {
         #region Fields
         
@@ -243,7 +243,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             Controls.Add(Control_InventoryTab_GroupBox_Main);
-            Name = "ControlInventoryTab";
+            Name = "Control_InventoryTab";
             Size = new Size(815, 384);
             Control_InventoryTab_GroupBox_Main.ResumeLayout(false);
             Control_InventoryTab_TableLayout_Main.ResumeLayout(false);

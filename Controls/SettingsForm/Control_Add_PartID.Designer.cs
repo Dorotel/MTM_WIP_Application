@@ -13,7 +13,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         private System.Windows.Forms.Label descriptionLabel;
         private System.Windows.Forms.TextBox descriptionTextBox;
         private System.Windows.Forms.Label typeLabel;
-        private System.Windows.Forms.ComboBox typeComboBox;
+        private System.Windows.Forms.ComboBox Control_Add_PartID_ComboBox_ItemType;
         private System.Windows.Forms.Label issuedByLabel;
         private System.Windows.Forms.Label issuedByValueLabel;
         private System.Windows.Forms.Button saveButton;
@@ -46,7 +46,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             descriptionLabel = new Label();
             descriptionTextBox = new TextBox();
             typeLabel = new Label();
-            typeComboBox = new ComboBox();
+            Control_Add_PartID_ComboBox_ItemType = new ComboBox();
             issuedByLabel = new Label();
             issuedByValueLabel = new Label();
             saveButton = new Button();
@@ -121,14 +121,14 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             typeLabel.TabIndex = 7;
             typeLabel.Text = "Type:";
             // 
-            // typeComboBox
+            // Control_Add_PartID_ComboBox_ItemType
             // 
-            typeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            typeComboBox.FormattingEnabled = true;
-            typeComboBox.Location = new Point(120, 217);
-            typeComboBox.Name = "typeComboBox";
-            typeComboBox.Size = new Size(200, 23);
-            typeComboBox.TabIndex = 8;
+            Control_Add_PartID_ComboBox_ItemType.DropDownStyle = ComboBoxStyle.DropDownList;
+            Control_Add_PartID_ComboBox_ItemType.FormattingEnabled = true;
+            Control_Add_PartID_ComboBox_ItemType.Location = new Point(120, 217);
+            Control_Add_PartID_ComboBox_ItemType.Name = "Control_Add_PartID_ComboBox_ItemType";
+            Control_Add_PartID_ComboBox_ItemType.Size = new Size(200, 23);
+            Control_Add_PartID_ComboBox_ItemType.TabIndex = 8;
             // 
             // issuedByLabel
             // 
@@ -168,7 +168,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             cancelButton.UseVisualStyleBackColor = true;
             cancelButton.Click += CancelButton_Click;
             // 
-            // AddPartControl
+            // Control_Add_PartID
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -176,7 +176,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             Controls.Add(saveButton);
             Controls.Add(issuedByValueLabel);
             Controls.Add(issuedByLabel);
-            Controls.Add(typeComboBox);
+            Controls.Add(Control_Add_PartID_ComboBox_ItemType);
             Controls.Add(typeLabel);
             Controls.Add(descriptionTextBox);
             Controls.Add(descriptionLabel);

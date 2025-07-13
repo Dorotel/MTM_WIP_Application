@@ -3,10 +3,9 @@
     partial class SettingsForm
     {
         #region Fields
-        
-
 
         private System.ComponentModel.IContainer components = null;
+        private System.Windows.Forms.Button SettingsForm_Button_SwitchTheme;
 
         #endregion
 
@@ -55,11 +54,8 @@
         private System.Windows.Forms.Panel SettingsForm_Panel_EditUser;
         private System.Windows.Forms.Panel SettingsForm_Panel_DeleteUser;
         private GroupBox groupBox1;
-        
 
-        
         #region Methods
-
 
         protected override void Dispose(bool disposing)
         {
@@ -69,7 +65,9 @@
             }
             base.Dispose(disposing);
         }
+
         #endregion
+
         #region Windows Form Designer generated code
 
         private void InitializeComponent()
@@ -99,6 +97,7 @@
             SettingsForm_Panel_Theme = new Panel();
             groupBox1 = new GroupBox();
             SettingsForm_ComboBox_Theme = new ComboBox();
+            SettingsForm_Button_SwitchTheme = new Button();
             SettingsForm_Panel_Shortcuts = new Panel();
             SettingsForm_DataGridView_Shortcuts = new DataGridView();
             SettingsForm_Panel_About = new Panel();
@@ -293,6 +292,7 @@
             SettingsForm_Panel_Theme.TabIndex = 3;
             SettingsForm_Panel_Theme.Visible = false;
             groupBox1.Controls.Add(SettingsForm_ComboBox_Theme);
+            groupBox1.Controls.Add(SettingsForm_Button_SwitchTheme);
             groupBox1.Location = new Point(6, 8);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(296, 57);
@@ -303,8 +303,14 @@
             SettingsForm_ComboBox_Theme.FormattingEnabled = true;
             SettingsForm_ComboBox_Theme.Location = new Point(6, 22);
             SettingsForm_ComboBox_Theme.Name = "SettingsForm_ComboBox_Theme";
-            SettingsForm_ComboBox_Theme.Size = new Size(284, 23);
+            SettingsForm_ComboBox_Theme.Size = new Size(184, 23);
             SettingsForm_ComboBox_Theme.TabIndex = 1;
+            SettingsForm_Button_SwitchTheme.Location = new System.Drawing.Point(200, 22);
+            SettingsForm_Button_SwitchTheme.Size = new System.Drawing.Size(75, 23);
+            SettingsForm_Button_SwitchTheme.Name = "SettingsForm_Button_SwitchTheme";
+            SettingsForm_Button_SwitchTheme.Text = "Switch";
+            SettingsForm_Button_SwitchTheme.TabIndex = 2;
+            SettingsForm_Button_SwitchTheme.UseVisualStyleBackColor = true;
             SettingsForm_Panel_Shortcuts.Controls.Add(SettingsForm_DataGridView_Shortcuts);
             SettingsForm_Panel_Shortcuts.Dock = DockStyle.Fill;
             SettingsForm_Panel_Shortcuts.Location = new Point(0, 0);
@@ -477,10 +483,8 @@
             SettingsForm_Panel_About.PerformLayout();
             SettingsForm_Panel_DeleteUser.ResumeLayout(false);
             ResumeLayout(false);
-
         }
-    }
 
-        
         #endregion
     }
+}

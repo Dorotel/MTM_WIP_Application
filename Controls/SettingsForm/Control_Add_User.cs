@@ -42,7 +42,10 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         {
             base.OnLoad(e);
             Control_Add_User_ComboBox_Shift.Items.Clear();
-            Control_Add_User_ComboBox_Shift.Items.AddRange(new object[] { "First", "Second", "Third", "Weekend" });
+            Control_Add_User_ComboBox_Shift.Items.AddRange(new object[]
+            {
+                "[ Enter Shift ]", "First", "Second", "Third", "Weekend"
+            });
             Control_Add_User_ComboBox_Shift.SelectedIndex = 0;
         }
 
@@ -97,7 +100,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                     return;
                 }
 
-                if (Control_Add_User_ComboBox_Shift.SelectedIndex <= -1)
+                if (Control_Add_User_ComboBox_Shift.SelectedIndex <= 0)
                 {
                     MessageBox.Show("Please select a shift.", "Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);

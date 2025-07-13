@@ -1,6 +1,6 @@
-namespace MTM_Inventory_Application.Controls.Shared
+﻿namespace MTM_Inventory_Application.Controls.Addons
 {
-    partial class ProgressBarUserControl
+    partial class Control_ConnectionStrengthControl
     {
         #region Fields
         
@@ -19,14 +19,6 @@ namespace MTM_Inventory_Application.Controls.Shared
             {
                 components.Dispose();
             }
-            
-            if (Tag is System.Windows.Forms.Timer timer)
-            {
-                timer.Stop();
-                timer.Dispose();
-                Tag = null;
-            }
-            
             base.Dispose(disposing);
         }
 
@@ -37,9 +29,9 @@ namespace MTM_Inventory_Application.Controls.Shared
             SuspendLayout();
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BorderStyle = BorderStyle.FixedSingle;
-            Name = "ProgressBarUserControl";
-            Size = new Size(298, 118);
+            
+            Name = "Control_ConnectionStrengthControl";
+            Size = new Size(10, 10);
             ResumeLayout(false);
         }
 

@@ -13,15 +13,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         #region Constructors
 
-        #endregion
-
-        #region Constructors
-
         public Control_Add_Operation() => InitializeComponent();
-
-        #endregion
-
-        #region Methods
 
         #endregion
 
