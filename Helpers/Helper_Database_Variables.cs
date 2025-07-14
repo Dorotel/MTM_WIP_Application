@@ -16,7 +16,7 @@ public static class Helper_Database_Variables
     {
         try
         {
-            server ??= Model_AppVariables.WipServerAddress ?? "localhost";
+            server ??= Model_AppVariables.WipServerAddress ?? "172.16.1.104";
             database ??= Model_Users.Database;
             uid ??= Model_AppVariables.User.ToUpper();
             return $"SERVER={server};DATABASE={database};UID={uid};Allow User Variables=True ;";

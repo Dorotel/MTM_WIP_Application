@@ -55,6 +55,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Image_NothingFound = new PictureBox();
             Control_TransferTab_DataGridView_Main = new DataGridView();
             Control_TransferTab_Panel_Header = new Panel();
+            Control_TransferTab_Button_Print = new Button();
             Control_TransferTab_Button_Toggle_RightPanel = new Button();
             Control_TransferTab_ComboBox_Operation = new ComboBox();
             Control_TransferTab_ComboBox_Part = new ComboBox();
@@ -68,7 +69,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Label_Quantity = new Label();
             Control_TransferTab_NumericUpDown_Quantity = new NumericUpDown();
             Control_TransferTab_GroupBox_MainControl = new GroupBox();
-            Control_TransferTab_Button_Print = new Button();
             Control_TransferTab_Panel_Main.SuspendLayout();
             Control_TransferTab_Panel_DataGridView.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)Control_TransferTab_Image_NothingFound).BeginInit();
@@ -166,6 +166,18 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Panel_Header.Name = "Control_TransferTab_Panel_Header";
             Control_TransferTab_Panel_Header.Size = new Size(803, 69);
             Control_TransferTab_Panel_Header.TabIndex = 22;
+            // 
+            // Control_TransferTab_Button_Print
+            // 
+            Control_TransferTab_Button_Print.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Control_TransferTab_Button_Print.Enabled = false;
+            Control_TransferTab_Button_Print.Location = new Point(657, 35);
+            Control_TransferTab_Button_Print.Name = "Control_TransferTab_Button_Print";
+            Control_TransferTab_Button_Print.Size = new Size(104, 28);
+            Control_TransferTab_Button_Print.TabIndex = 1000;
+            Control_TransferTab_Button_Print.TabStop = false;
+            Control_TransferTab_Button_Print.Text = "Print";
+            Control_TransferTab_Button_Print.UseVisualStyleBackColor = true;
             // 
             // Control_TransferTab_Button_Toggle_RightPanel
             // 
@@ -267,12 +279,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_ComboBox_ToLocation.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             Control_TransferTab_ComboBox_ToLocation.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             Control_TransferTab_ComboBox_ToLocation.AutoCompleteSource = AutoCompleteSource.ListItems;
-            Control_TransferTab_ComboBox_ToLocation.DrawMode = DrawMode.OwnerDrawVariable;
             Control_TransferTab_ComboBox_ToLocation.Enabled = false;
             Control_TransferTab_ComboBox_ToLocation.FormattingEnabled = true;
             Control_TransferTab_ComboBox_ToLocation.Location = new Point(363, 7);
             Control_TransferTab_ComboBox_ToLocation.Name = "Control_TransferTab_ComboBox_ToLocation";
-            Control_TransferTab_ComboBox_ToLocation.Size = new Size(171, 24);
+            Control_TransferTab_ComboBox_ToLocation.Size = new Size(171, 23);
             Control_TransferTab_ComboBox_ToLocation.TabIndex = 3;
             // 
             // Control_TransferTab_Label_Quantity
@@ -308,18 +319,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_GroupBox_MainControl.TabIndex = 17;
             Control_TransferTab_GroupBox_MainControl.TabStop = false;
             Control_TransferTab_GroupBox_MainControl.Text = "Inventory Transfer";
-            // 
-            // Control_TransferTab_Button_Print
-            // 
-            Control_TransferTab_Button_Print.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            Control_TransferTab_Button_Print.Enabled = false;
-            Control_TransferTab_Button_Print.Location = new Point(657, 35);
-            Control_TransferTab_Button_Print.Name = "Control_TransferTab_Button_Print";
-            Control_TransferTab_Button_Print.Size = new Size(104, 28);
-            Control_TransferTab_Button_Print.TabIndex = 1000;
-            Control_TransferTab_Button_Print.TabStop = false;
-            Control_TransferTab_Button_Print.Text = "Print";
-            Control_TransferTab_Button_Print.UseVisualStyleBackColor = true;
             // 
             // Control_TransferTab
             // 

@@ -162,12 +162,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             try
             {
                 await LoadAllComboBoxesAsync();
-                AdvancedInventory_Single_ComboBox_Part.Visible = true;
-                AdvancedInventory_Single_ComboBox_Op.Visible = true;
-                AdvancedInventory_Single_ComboBox_Loc.Visible = true;
-                AdvancedInventory_MultiLoc_ComboBox_Part.Visible = true;
-                AdvancedInventory_MultiLoc_ComboBox_Op.Visible = true;
-                AdvancedInventory_MultiLoc_ComboBox_Loc.Visible = true;
                 AdvancedInventory_Single_ComboBox_Part.ForeColor =
                     Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
                 AdvancedInventory_Single_ComboBox_Op.ForeColor =
@@ -631,10 +625,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 }
 
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(30, "Resetting data tables...");
-                Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
-                AdvancedInventory_Single_ComboBox_Part.Visible = false;
-                AdvancedInventory_Single_ComboBox_Op.Visible = false;
-                AdvancedInventory_Single_ComboBox_Loc.Visible = false;
 
                 Debug.WriteLine("[DEBUG] Unbinding ComboBox DataSources");
                 AdvancedInventory_Single_ComboBox_Part.DataSource = null;
@@ -678,10 +668,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 AdvancedInventory_Single_RichTextBox_Notes.Text = string.Empty;
                 AdvancedInventory_Single_ListView.Items.Clear();
 
-                Debug.WriteLine("[DEBUG] Restoring ComboBox visibility and focus");
-                AdvancedInventory_Single_ComboBox_Part.Visible = true;
-                AdvancedInventory_Single_ComboBox_Op.Visible = true;
-                AdvancedInventory_Single_ComboBox_Loc.Visible = true;
                 AdvancedInventory_Single_ComboBox_Part.Focus();
 
                 UpdateSingleSaveButtonState();
@@ -1068,9 +1054,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(30, "Resetting data tables...");
                 Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
-                AdvancedInventory_MultiLoc_ComboBox_Part.Visible = false;
-                AdvancedInventory_MultiLoc_ComboBox_Op.Visible = false;
-                AdvancedInventory_MultiLoc_ComboBox_Loc.Visible = false;
 
                 Debug.WriteLine("[DEBUG] Unbinding ComboBox DataSources");
                 AdvancedInventory_MultiLoc_ComboBox_Part.DataSource = null;
@@ -1116,10 +1099,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 AdvancedInventory_MultiLoc_ComboBox_Part.Enabled = true;
                 AdvancedInventory_MultiLoc_ComboBox_Op.Enabled = true;
 
-                Debug.WriteLine("[DEBUG] Restoring ComboBox visibility and focus");
-                AdvancedInventory_MultiLoc_ComboBox_Part.Visible = true;
-                AdvancedInventory_MultiLoc_ComboBox_Op.Visible = true;
-                AdvancedInventory_MultiLoc_ComboBox_Loc.Visible = true;
                 AdvancedInventory_MultiLoc_ComboBox_Part.Focus();
 
                 UpdateMultiSaveButtonState();

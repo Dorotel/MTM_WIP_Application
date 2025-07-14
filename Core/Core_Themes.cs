@@ -1738,7 +1738,7 @@ namespace MTM_Inventory_Application.Core
                 {
                     Dictionary<string, AppTheme> themes = new();
                     Helper_Database_Core helper = new(Model_AppVariables.ConnectionString);
-                    DataTable dt = await helper.ExecuteDataTable("SELECT ThemeName, SettingsJson FROM app_themes", null,
+                    DataTable dt = await helper.ExecuteDataTable("SELECT * FROM app_themes", null,
                         true,
                         CommandType.Text);
                     foreach (DataRow row in dt.Rows)

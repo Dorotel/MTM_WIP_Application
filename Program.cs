@@ -89,6 +89,7 @@ namespace MTM_Inventory_Application
                 _splashScreen?.UpdateProgress(progress, "Starting startup sequence...");
                 await Task.Delay(100);
 
+                // 1. Initializing logging
                 progress = 5;
                 _splashScreen?.UpdateProgress(progress, "Initializing logging...");
                 await LoggingUtility.InitializeLoggingAsync();
@@ -96,6 +97,7 @@ namespace MTM_Inventory_Application
                 _splashScreen?.UpdateProgress(progress, "Logging initialized.");
                 await Task.Delay(50);
 
+                // 2. Cleaning up old logs
                 progress = 15;
                 _splashScreen?.UpdateProgress(progress, "Cleaning up old logs...");
                 await LoggingUtility.CleanUpOldLogsIfNeededAsync();
@@ -103,6 +105,7 @@ namespace MTM_Inventory_Application
                 _splashScreen?.UpdateProgress(progress, "Old logs cleaned up.");
                 await Task.Delay(50);
 
+                // 3. Wiping app data folders
                 progress = 25;
                 _splashScreen?.UpdateProgress(progress, "Wiping app data folders...");
                 await Task.Run(() => Service_OnStartup_AppDataCleaner.WipeAppDataFolders());
@@ -110,50 +113,67 @@ namespace MTM_Inventory_Application
                 _splashScreen?.UpdateProgress(progress, "App data folders wiped.");
                 await Task.Delay(50);
 
-                progress = 32;
+                // 4. Migrating saved locations from old WIP Application
+                progress = 35;
+                _splashScreen?.UpdateProgress(progress, "Migrating saved locations...");
+                await Dao_Inventory.MigrateSavedLocations();
+                progress = 40;
+                _splashScreen?.UpdateProgress(progress, "Saved locations migrated.");
+                await Task.Delay(50);
+
+                // 5. Setting up Data Tables
+                progress = 45;
                 _splashScreen?.UpdateProgress(progress, "Setting up Data Tables...");
                 await Helper_UI_ComboBoxes.SetupDataTables();
-                progress = 36;
+                progress = 50;
                 _splashScreen?.UpdateProgress(progress, "Data Tables set up.");
                 await Task.Delay(50);
 
-                progress = 58;
+                // 6. Initializing version checker
+                progress = 60;
                 _splashScreen?.UpdateProgress(progress, "Initializing version checker...");
                 Service_Timer_VersionChecker.Initialize();
-                progress = 60;
+                progress = 65;
                 _splashScreen?.UpdateProgress(progress, "Version checker initialized.");
                 await Task.Delay(50);
 
-                progress = 65;
+                // 7. Initializing theme system
+                progress = 70;
                 _splashScreen?.UpdateProgress(progress, "Initializing theme system...");
                 await Core_Themes.Core_AppThemes.InitializeThemeSystemAsync(Model_AppVariables.User);
-                progress = 70;
+                progress = 75;
                 _splashScreen?.UpdateProgress(progress, "Theme system initialized.");
                 await Task.Delay(50);
 
-                progress = 72;
+                // 8. User full name loaded
+                progress = 80;
                 _splashScreen?.UpdateProgress(progress, $"User Full Name loaded: {Model_AppVariables.User}");
                 await Task.Delay(50);
 
-                progress = 75;
+                // 9. Loading theme settings
+                progress = 85;
                 _splashScreen?.UpdateProgress(progress, "Loading theme settings...");
                 int? fontSize = await Dao_User.GetThemeFontSizeAsync(Model_AppVariables.User);
                 Model_AppVariables.ThemeFontSize = fontSize ?? 9;
                 Model_AppVariables.UserUiColors = await Core_Themes.GetUserThemeColorsAsync(Model_AppVariables.User);
-                progress = 80;
+                progress = 90;
                 _splashScreen?.UpdateProgress(progress, "Theme settings loaded.");
                 await Task.Delay(50);
 
-                progress = 85;
+                // 10. Startup sequence completed
+                progress = 93;
                 _splashScreen?.UpdateProgress(progress, "Startup sequence completed.");
                 await Task.Delay(100);
 
-                progress = 90;
+                // 11. Creating main form
+                progress = 95;
                 _splashScreen?.UpdateProgress(progress, "Creating main form...");
                 await Task.Delay(200);
                 _mainForm = new MainForm();
                 _mainForm.FormClosed += (s, e) => ExitThread();
-                progress = 92;
+
+                // 12. Configuring form instances
+                progress = 97;
                 _splashScreen?.UpdateProgress(progress, "Configuring form instances...");
                 Control_RemoveTab.MainFormInstance = _mainForm;
                 Control_InventoryTab.MainFormInstance = _mainForm;
@@ -163,9 +183,13 @@ namespace MTM_Inventory_Application
                 Control_QuickButtons.MainFormInstance = _mainForm;
                 Helper_UI_ComboBoxes.MainFormInstance = _mainForm;
                 Service_Timer_VersionChecker.MainFormInstance = _mainForm;
-                progress = 95;
+
+                // 13. Applying theme
+                progress = 99;
                 _splashScreen?.UpdateProgress(progress, "Applying theme...");
                 Core_Themes.ApplyTheme(_mainForm);
+
+                // 14. Ready to start!
                 progress = 100;
                 _splashScreen?.UpdateProgress(progress, "Ready to start!");
                 await Task.Delay(500);

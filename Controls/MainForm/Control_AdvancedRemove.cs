@@ -199,10 +199,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 await Helper_UI_ComboBoxes.FillOperationComboBoxesAsync(Control_AdvancedRemove_ComboBox_Op);
                 await Helper_UI_ComboBoxes.FillLocationComboBoxesAsync(Control_AdvancedRemove_ComboBox_Loc);
                 await Helper_UI_ComboBoxes.FillUserComboBoxesAsync(Control_AdvancedRemove_ComboBox_User);
-                Control_AdvancedRemove_ComboBox_Part.Visible = true;
-                Control_AdvancedRemove_ComboBox_Op.Visible = true;
-                Control_AdvancedRemove_ComboBox_Loc.Visible = true;
-                Control_AdvancedRemove_ComboBox_User.Visible = true;
             }
             catch (Exception ex)
             {
@@ -352,7 +348,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     }
 
                     string query =
-                        $"SELECT PartID, Operation, Location, Quantity, Notes, User, ReceiveDate, LastUpdated, BatchNumber " +
+                        $"SELECT * " +
                         $"FROM inv_inventory WHERE {searchColumn} LIKE @SearchPattern";
 
                     cmd = new MySqlCommand(query, null);
@@ -615,10 +611,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Control_RemoveTab.MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(30,
                     "Resetting data tables...");
                 Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
-                Control_AdvancedRemove_ComboBox_Part.Visible = false;
-                Control_AdvancedRemove_ComboBox_Op.Visible = false;
-                Control_AdvancedRemove_ComboBox_Loc.Visible = false;
-                Control_AdvancedRemove_ComboBox_User.Visible = false;
 
                 Debug.WriteLine("[DEBUG] Resetting and refreshing all ComboBox DataTables");
                 await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
@@ -658,11 +650,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Control_AdvancedRemove_DataGridView_Results.Rows.Clear();
                 Control_AdvancedRemove_Image_NothingFound.Visible = false;
 
-                Debug.WriteLine("[DEBUG] Restoring ComboBox visibility and focus");
-                Control_AdvancedRemove_ComboBox_Part.Visible = true;
-                Control_AdvancedRemove_ComboBox_Op.Visible = true;
-                Control_AdvancedRemove_ComboBox_Loc.Visible = true;
-                Control_AdvancedRemove_ComboBox_User.Visible = true;
                 if (Control_AdvancedRemove_ComboBox_Part.FindForm() is { } form)
                 {
                     MainFormControlHelper.SetActiveControl(form, Control_AdvancedRemove_ComboBox_Part);

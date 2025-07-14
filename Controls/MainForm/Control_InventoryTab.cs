@@ -78,14 +78,10 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_InventoryTab_Label_Version.Visible = true;
             Control_InventoryTab_Button_AdvancedEntry.Visible = isAdmin || isNormal;
             Control_InventoryTab_Label_Part.Visible = true;
-            Control_InventoryTab_ComboBox_Operation.Visible = isAdmin || isNormal || isReadOnly;
             Control_InventoryTab_Label_Op.Visible = true;
-            Control_InventoryTab_ComboBox_Location.Visible = isAdmin || isNormal || isReadOnly;
             Control_InventoryTab_Label_Loc.Visible = true;
             Control_InventoryTab_Label_Qty.Visible = true;
             Control_InventoryTab_TextBox_Quantity.Visible = isAdmin || isNormal || isReadOnly;
-            Control_InventoryTab_ComboBox_Part.Visible = isAdmin || isNormal || isReadOnly;
-            Control_InventoryTab_Label_Notes.Visible = true;
             Control_InventoryTab_RichTextBox_Notes.Visible = isAdmin || isNormal || isReadOnly;
             Control_InventoryTab_TableLayout_Main.Visible = true;
             Control_InventoryTab_Panel_Top.Visible = true;
@@ -320,6 +316,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
         {
             try
             {
+                MainFormInstance?.TabLoadingControlProgress?.ShowProgress();
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(10, "Resetting Inventory tab...");
                 if ((ModifierKeys & Keys.Shift) == Keys.Shift)
                 {
                     Control_InventoryTab_HardReset();
@@ -328,12 +326,17 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 {
                     Control_InventoryTab_SoftReset();
                 }
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Reset complete");
             }
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
                 _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                     "MainForm_Inventory_Button_Reset_Click");
+            }
+            finally
+            {
+                MainFormInstance?.TabLoadingControlProgress?.HideProgress();
             }
         }
 
@@ -355,9 +358,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(30, "Resetting data tables...");
                 Debug.WriteLine("[DEBUG] Hiding ComboBoxes");
-                Control_InventoryTab_ComboBox_Part.Visible = false;
-                Control_InventoryTab_ComboBox_Operation.Visible = false;
-                Control_InventoryTab_ComboBox_Location.Visible = false;
 
                 Debug.WriteLine("[DEBUG] Resetting and refreshing all ComboBox DataTables");
                 await Helper_UI_ComboBoxes.ResetAndRefreshAllDataTablesAsync();
@@ -383,15 +383,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 MainFormControlHelper.ResetRichTextBox(Control_InventoryTab_RichTextBox_Notes,
                     Model_AppVariables.UserUiColors.RichTextBoxErrorForeColor ?? Color.Red, "");
 
-                Debug.WriteLine("[DEBUG] Restoring ComboBox visibility and focus");
-                Control_InventoryTab_ComboBox_Part.Visible = true;
-                Control_InventoryTab_ComboBox_Operation.Visible = true;
-                Control_InventoryTab_ComboBox_Location.Visible = true;
                 Control_InventoryTab_ComboBox_Part.Focus();
 
                 Control_InventoryTab_Update_SaveButtonState();
 
                 Debug.WriteLine("[DEBUG] InventoryTab Reset button clicked - end");
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Reset complete");
             }
             catch (Exception ex)
             {
@@ -420,7 +417,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_InventoryTab_Button_Reset.Enabled = false;
             try
             {
-                Control_InventoryTab_Button_Reset.Enabled = false;
+                MainFormInstance?.TabLoadingControlProgress?.ShowProgress();
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(10, "Resetting Inventory tab...");
                 if (MainFormInstance != null)
                 {
                     Debug.WriteLine("[DEBUG] Updating status strip for Soft Reset");
@@ -441,6 +439,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 MainFormControlHelper.ResetRichTextBox(Control_InventoryTab_RichTextBox_Notes,
                     Model_AppVariables.UserUiColors.RichTextBoxErrorForeColor ?? Color.Red, "");
                 Control_InventoryTab_Button_Save.Enabled = false;
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Reset complete");
             }
             catch (Exception ex)
             {
@@ -461,6 +460,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
                         @"Disconnected from Server, please standby...";
                 }
+                MainFormInstance?.TabLoadingControlProgress?.HideProgress();
             }
         }
 
@@ -468,6 +468,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
         {
             try
             {
+                MainFormInstance?.TabLoadingControlProgress?.ShowProgress();
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(10, "Saving inventory transaction...");
                 LoggingUtility.Log("Inventory Save button clicked.");
 
                 string partId = Control_InventoryTab_ComboBox_Part.Text;
@@ -515,6 +517,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Model_AppVariables.InventoryQuantity = qty;
                 Model_AppVariables.User ??= Environment.UserName;
 
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(40, "Adding inventory item...");
                 await Dao_Inventory.AddInventoryItemAsync(
                     partId,
                     loc,
@@ -526,10 +529,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     notes,
                     true);
 
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(70, "Updating recent transactions...");
                 await AddToLast10TransactionsIfUniqueAsync(Model_AppVariables.User, partId, op, qty);
-
-                MessageBox.Show(@"Inventory transaction saved successfully.", @"Success", MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
 
                 if (MainFormInstance != null)
                 {
@@ -537,16 +538,22 @@ namespace MTM_Inventory_Application.Controls.MainForm
                         $@"Last Inventoried Part: {partId} (Op: {op}), Location: {(string.IsNullOrWhiteSpace(loc) ? "" : loc)}, Quantity: {qty} @ {DateTime.Now:hh:mm tt}";
                 }
 
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(90, "Resetting form...");
                 Control_InventoryTab_Button_Reset_Click();
                 if (MainFormInstance != null && MainFormInstance.control_QuickButtons1 != null)
                 {
                     MainFormInstance.control_QuickButtons1.LoadLast10Transactions(Model_AppVariables.User);
                 }
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Save complete");
             }
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "MainForm_Inventory_Button_Save");
+            }
+            finally
+            {
+                MainFormInstance?.TabLoadingControlProgress?.HideProgress();
             }
         }
 
@@ -559,7 +566,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
             MySqlCommand checkCmd = new(@"
         SELECT COUNT(*) FROM (
-            SELECT PartID, Operation, Quantity
+            SELECT *
             FROM sys_last_10_transactions
             WHERE User = @User
             ORDER BY ReceiveDate DESC

@@ -45,9 +45,9 @@ internal static class Model_AppVariables
 
     public static string? ThemeName { get; set; } = "Default";
     public static float ThemeFontSize { get; set; } = 9f;
-    public static string? WipDataGridTheme { get; set; }
-    public static string? WipServerAddress { get; set; }
-    public static string? WipServerPort { get; set; }
+    public static string? WipDataGridTheme { get; set; } = "Default";
+    public static string? WipServerAddress { get; set; } = "172.16.1.104";
+    public static string? WipServerPort { get; set; } = "3306";
     public static string? Version { get; set; } = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
 
     public static string ConnectionString { get; set; } =

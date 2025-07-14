@@ -15,6 +15,20 @@ public static class Dao_Inventory
 
     #endregion
 
+    #region Migration Methods
+
+    public static async Task MigrateSavedLocations()
+    {
+        var connectionString = Helper_Database_Variables.GetConnectionString(null, "mtm database", null, null);
+        await using var connection = new MySqlConnection(connectionString);
+        await connection.OpenAsync();
+        await using var command = new MySqlCommand("migrate_saved_locations", connection);
+        command.CommandType = CommandType.StoredProcedure;
+        await command.ExecuteNonQueryAsync();
+    }
+
+    #endregion
+
     #region Search Methods
 
     public static async Task<DataTable> GetInventoryByPartIdAsync(string partId, bool useAsync = false) =>
@@ -168,25 +182,20 @@ public static class Dao_Inventory
         return result;
     }
 
-    public static async Task TransferPartSimpleAsync(string batchNumber, string partId, string operation,
-        string quantity, string newLocation)
+    public static async Task TransferPartSimpleAsync(string batchNumber, string partId, string operation, string quantity, string newLocation)
     {
-        string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
-
-        await using MySqlConnection connection = new(connectionString);
+        var connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
+        await using var connection = new MySqlConnection(connectionString);
         await connection.OpenAsync();
-
-        await using MySqlCommand command = new("inv_inventory_Transfer_Part", connection);
+        await using var command = new MySqlCommand("inv_inventory_Transfer_Part", connection);
         command.CommandType = CommandType.StoredProcedure;
 
         command.Parameters.AddWithValue("@in_BatchNumber", batchNumber);
         command.Parameters.AddWithValue("@in_PartID", partId);
         command.Parameters.AddWithValue("@in_Operation", operation);
-        command.Parameters.AddWithValue("@in_Quantity", quantity);
         command.Parameters.AddWithValue("@in_NewLocation", newLocation);
 
         await command.ExecuteNonQueryAsync();
-
         await FixBatchNumbersAsync();
     }
 
@@ -212,11 +221,30 @@ public static class Dao_Inventory
     public static async Task FixBatchNumbersAsync()
     {
         string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
-        await using MySqlConnection connection = new(connectionString);
+        await using var connection = new MySqlConnection(connectionString);
         await connection.OpenAsync();
-        await using MySqlCommand command = new("inv_inventory_Fix_BatchNumbers", connection);
+        await using var command = new MySqlCommand("inv_inventory_Fix_BatchNumbers", connection);
         command.CommandType = CommandType.StoredProcedure;
+
+        // Add output parameters
+        var statusParam = new MySqlParameter("p_Status", MySqlDbType.Int32)
+        {
+            Direction = ParameterDirection.Output
+        };
+        var errorMsgParam = new MySqlParameter("p_ErrorMsg", MySqlDbType.VarChar, 255)
+        {
+            Direction = ParameterDirection.Output
+        };
+        command.Parameters.Add(statusParam);
+        command.Parameters.Add(errorMsgParam);
+
         await command.ExecuteNonQueryAsync();
+
+        // Optionally, read the output values
+        int status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
+        string errorMsg = errorMsgParam.Value?.ToString() ?? "";
+
+        // Handle status/error as needed
     }
 
     #endregion

@@ -130,8 +130,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 LoggingUtility.Log("Initial setup of ComboBoxes in the Remove Tab.");
                 Control_RemoveTab_Button_Search.Enabled = false;
                 Control_RemoveTab_Button_Delete.Enabled = false;
-                Control_RemoveTab_ComboBox_Operation.Visible = true;
-                Control_RemoveTab_ComboBox_Part.Visible = true;
 
                 try
                 {
@@ -224,11 +222,13 @@ namespace MTM_Inventory_Application.Controls.MainForm
         #endregion
 
         #region Button Clicks
-
         private async void Control_RemoveTab_Button_Delete_Click(object? sender, EventArgs? e)
         {
             try
             {
+                MainFormInstance?.TabLoadingControlProgress?.ShowProgress();
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(10, "Preparing to delete...");
+
                 DataGridView? dgv = Control_RemoveTab_DataGridView_Main;
                 int selectedCount = dgv.SelectedRows.Count;
                 LoggingUtility.Log($"Delete clicked. Selected rows: {selectedCount}");
@@ -239,15 +239,31 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     return;
                 }
 
-                StringBuilder sb = new();
+                // --- Collect items for undo ---
+                _lastRemovedItems.Clear();
                 foreach (DataGridViewRow row in dgv.SelectedRows)
                 {
-                    string partId = row.Cells["PartID"].Value?.ToString() ?? "";
-                    string location = row.Cells["Location"].Value?.ToString() ?? "";
-                    string operation = row.Cells["Operation"].Value?.ToString() ?? "";
-                    string quantity = row.Cells["Quantity"].Value?.ToString() ?? "";
+                    if (row.DataBoundItem is DataRowView drv)
+                    {
+                        _lastRemovedItems.Add(new Model_HistoryRemove
+                        {
+                            PartId = drv["PartID"]?.ToString() ?? "",
+                            Location = drv["Location"]?.ToString() ?? "",
+                            Operation = drv["Operation"]?.ToString() ?? "",
+                            Quantity = int.TryParse(drv["Quantity"]?.ToString(), out int qty) ? qty : 0,
+                            ItemType = drv.Row.Table.Columns.Contains("ItemType") ? drv["ItemType"]?.ToString() ?? "" : "",
+                            User = drv.Row.Table.Columns.Contains("User") ? drv["User"]?.ToString() ?? "" : "",
+                            BatchNumber = drv.Row.Table.Columns.Contains("BatchNumber") ? drv["BatchNumber"]?.ToString() ?? "" : "",
+                            Notes = drv.Row.Table.Columns.Contains("Notes") ? drv["Notes"]?.ToString() ?? "" : ""
+                        });
+                    }
+                }
+
+                StringBuilder sb = new();
+                foreach (var item in _lastRemovedItems)
+                {
                     sb.AppendLine(
-                        $"PartID: {partId}, Location: {location}, Operation: {operation}, Quantity: {quantity}");
+                        $"PartID: {item.PartId}, Location: {item.Location}, Operation: {item.Operation}, Quantity: {item.Quantity}");
                 }
 
                 string summary = sb.ToString();
@@ -263,13 +279,23 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 if (confirmResult != DialogResult.Yes)
                 {
                     LoggingUtility.Log("User cancelled deletion.");
+                    _lastRemovedItems.Clear();
                     return;
                 }
 
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(60, "Deleting items...");
                 int removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
 
                 LoggingUtility.Log($"{removedCount} inventory items deleted.");
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(80, "Refreshing results...");
                 Control_RemoveTab_Button_Search_Click(null, null);
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Delete complete");
+
+                // --- Enable Undo button if items were removed ---
+                if (_lastRemovedItems.Count > 0 && Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] is Button undoBtn)
+                {
+                    undoBtn.Enabled = true;
+                }
             }
             catch (Exception ex)
             {
@@ -277,14 +303,20 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                     new StringBuilder().Append("Control_RemoveTab_Button_Delete_Click").ToString());
             }
+            finally
+            {
+                MainFormInstance?.TabLoadingControlProgress?.HideProgress();
+            }
         }
-
         private async void Control_RemoveTab_Button_Undo_Click(object? sender, EventArgs? e)
         {
             if (_lastRemovedItems.Count == 0)
             {
                 return;
             }
+
+            MainFormInstance?.TabLoadingControlProgress?.ShowProgress();
+            MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(10, "Restoring removed items...");
 
             try
             {
@@ -303,6 +335,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     );
                 }
 
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(80, "Refreshing results...");
                 MessageBox.Show(@"Undo successful. Removed items have been restored.", @"Undo", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
                 LoggingUtility.Log("Undo: Removed items restored.");
@@ -314,6 +347,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 }
 
                 Control_RemoveTab_Button_Search_Click(null, null);
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Undo complete");
             }
             catch (Exception ex)
             {
@@ -321,10 +355,16 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 MessageBox.Show(@"Undo failed: " + ex.Message, @"Undo Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
+            finally
+            {
+                MainFormInstance?.TabLoadingControlProgress?.HideProgress();
+            }
         }
-
         private void Control_RemoveTab_Button_Reset_Click()
         {
+            MainFormInstance?.TabLoadingControlProgress?.ShowProgress();
+            MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(10, "Resetting Remove tab...");
+
             Control_RemoveTab_Button_Reset.Enabled = false;
             try
             {
@@ -336,12 +376,17 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 {
                     Control_RemoveTab_SoftReset();
                 }
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Reset complete");
             }
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
                 _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
                     new StringBuilder().Append("MainForm_Remove_Button_Reset_Click").ToString());
+            }
+            finally
+            {
+                MainFormInstance?.TabLoadingControlProgress?.HideProgress();
             }
         }
 
@@ -352,9 +397,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 MainFormInstance?.TabLoadingControlProgress?.ShowProgress();
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(10, "Resetting Remove tab...");
-
-                Control_RemoveTab_ComboBox_Part.Visible = false;
-                Control_RemoveTab_ComboBox_Operation.Visible = false;
 
                 if (MainFormInstance != null)
                 {
@@ -378,8 +420,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 MainFormControlHelper.ResetComboBox(Control_RemoveTab_ComboBox_Operation,
                     Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
 
-                Control_RemoveTab_ComboBox_Operation.Visible = true;
-                Control_RemoveTab_ComboBox_Part.Visible = true;
                 Control_RemoveTab_ComboBox_Part.Focus();
 
                 Control_RemoveTab_Button_Search.Enabled = true;
@@ -535,11 +575,13 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     new StringBuilder().Append("Control_RemoveTab_Button_Normal_Click").ToString());
             }
         }
-
         private async void Control_RemoveTab_Button_Search_Click(object? sender, EventArgs? e)
         {
             try
             {
+                MainFormInstance?.TabLoadingControlProgress?.ShowProgress();
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(10, "Searching inventory...");
+
                 LoggingUtility.Log("RemoveTab Search button clicked.");
 
                 string partId = Control_RemoveTab_ComboBox_Part.Text;
@@ -557,13 +599,16 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (!string.IsNullOrWhiteSpace(op) && Control_RemoveTab_ComboBox_Operation.SelectedIndex > 0)
                 {
+                    MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(40, "Querying by part and operation...");
                     results = await Dao_Inventory.GetInventoryByPartIdAndOperationAsync(partId, op, true);
                 }
                 else
                 {
+                    MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(40, "Querying by part...");
                     results = await Dao_Inventory.GetInventoryByPartIdAsync(partId, true);
                 }
 
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(70, "Updating results...");
                 Control_RemoveTab_DataGridView_Main.DataSource = results;
                 Control_RemoveTab_DataGridView_Main.ClearSelection();
 
@@ -584,6 +629,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Core_Themes.SizeDataGrid(Control_RemoveTab_DataGridView_Main);
 
                 Control_RemoveTab_Image_NothingFound.Visible = results.Rows.Count == 0;
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Search complete");
             }
             catch (Exception ex)
             {
@@ -591,10 +637,16 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                     new StringBuilder().Append("Control_RemoveTab_Button_Search_Click").ToString());
             }
+            finally
+            {
+                MainFormInstance?.TabLoadingControlProgress?.HideProgress();
+            }
         }
-
         private void Control_RemoveTab_Button_Print_Click(object? sender, EventArgs? e)
         {
+            MainFormInstance?.TabLoadingControlProgress?.ShowProgress();
+            MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(10, "Preparing print...");
+
             try
             {
                 if (Control_RemoveTab_DataGridView_Main.Rows.Count == 0)
@@ -604,12 +656,18 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 }
                 var printer = new Core_DgvPrinter();
                 Control_RemoveTab_DataGridView_Main.Tag = Control_RemoveTab_ComboBox_Part.Text;
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(60, "Printing...");
                 printer.Print(Control_RemoveTab_DataGridView_Main);
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Print complete");
             }
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
                 MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                MainFormInstance?.TabLoadingControlProgress?.HideProgress();
             }
         }
 
