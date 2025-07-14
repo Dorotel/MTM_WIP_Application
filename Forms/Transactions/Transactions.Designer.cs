@@ -101,6 +101,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Image_NothingFound = new PictureBox();
             Transactions_DataGridView_Transactions = new DataGridView();
             Transfer_Panel_PageButtons = new Panel();
+            Transfer_Button_SelectionHistory = new Button();
             Transfer_Button_Next = new Button();
             Transfer_Button_Previous = new Button();
             Transactions_TabelLayoutPanel_Bottom = new TableLayoutPanel();
@@ -672,11 +673,22 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transfer_Panel_PageButtons.Size = new Size(399, 29);
             Transfer_Panel_PageButtons.TabIndex = 6;
             // 
+            // Transfer_Button_SelectionHistory
+            // 
+            Transfer_Button_SelectionHistory.Enabled = false;
+            Transfer_Button_SelectionHistory.Location = new Point(144, 3);
+            Transfer_Button_SelectionHistory.Name = "Transfer_Button_SelectionHistory";
+            Transfer_Button_SelectionHistory.Size = new Size(114, 23);
+            Transfer_Button_SelectionHistory.TabIndex = 2;
+            Transfer_Button_SelectionHistory.Text = "Selection History";
+            Transfer_Button_SelectionHistory.UseVisualStyleBackColor = true;
+            Transfer_Button_SelectionHistory.Click += Transfer_Button_BranchHistory_Click;
+            // 
             // Transfer_Button_Next
             // 
             Transfer_Button_Next.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             Transfer_Button_Next.Enabled = false;
-            Transfer_Button_Next.Location = new Point(282, 3);
+            Transfer_Button_Next.Location = new Point(281, 3);
             Transfer_Button_Next.Name = "Transfer_Button_Next";
             Transfer_Button_Next.Size = new Size(114, 23);
             Transfer_Button_Next.TabIndex = 1;
@@ -711,6 +723,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // 
             // Transactions_Panel_Bottom_Right
             // 
+            Transactions_Panel_Bottom_Right.Controls.Add(Transfer_Button_SelectionHistory);
             Transactions_Panel_Bottom_Right.Controls.Add(Transactions_Button_Print);
             Transactions_Panel_Bottom_Right.Controls.Add(Transactions_Button_Reset);
             Transactions_Panel_Bottom_Right.Location = new Point(412, 3);
@@ -728,7 +741,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // 
             // Transactions_Button_Reset
             // 
-            Transactions_Button_Reset.Location = new Point(325, 2);
+            Transactions_Button_Reset.Location = new Point(324, 2);
             Transactions_Button_Reset.Name = "Transactions_Button_Reset";
             Transactions_Button_Reset.Size = new Size(75, 23);
             Transactions_Button_Reset.TabIndex = 0;
@@ -839,5 +852,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private Panel Transfer_Panel_PageButtons;
         private Button Transfer_Button_Next;
         private Button Transfer_Button_Previous;
+        private Button Transfer_Button_SelectionHistory;
     }
 }

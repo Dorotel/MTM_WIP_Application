@@ -134,10 +134,10 @@ namespace MTM_Inventory_Application.Core
                     form.Text = form.Text[..idx].TrimEnd();
                 }
 
-                string themeDisplay = $"[{themeName}] | Change (Shift + Alt + S)";
+                string themeDisplay = $"Current Theme: [{themeName}]";
                 if (!form.Text.Contains(themeDisplay))
                 {
-                    form.Text = @$"{form.Text} {themeDisplay}";
+                    form.Text = @$"{form.Text} | {themeDisplay}";
                 }
             }
         }

@@ -69,6 +69,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private async Task OnFormLoadAsync()
         {
             Transactions_Button_Print.Enabled = false; // Disable print button on load
+            Transfer_Button_SelectionHistory.Enabled = false; // Disable selection history button on load
             await LoadUserCombosAsync();
             await LoadBuildingComboAsync();
             await LoadPartComboAsync();
@@ -128,6 +129,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 Control_AdvancedRemove_DateTimePicker_To.Enabled = Control_AdvancedRemove_CheckBox_Date.Checked;
             };
             Transactions_Button_SidePanel.Click += Transactions_Button_SidePanel_Click;
+            Transfer_Button_SelectionHistory.Click += Transfer_Button_BranchHistory_Click;
 
             // Enable/disable search button based on combo selection
             Transactions_ComboBox_SearchPartID.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
@@ -176,24 +178,56 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
             Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "TransactionType", DataPropertyName = "TransactionType", Name = "colTransactionType"
+                HeaderText = "PartID",
+                DataPropertyName = "PartID",
+                Name = "colPartID",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
             Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "PartID", DataPropertyName = "PartID", Name = "colPartID"
+                HeaderText = "Quantity",
+                DataPropertyName = "Quantity",
+                Name = "colQuantity",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
             Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Quantity", DataPropertyName = "Quantity", Name = "colQuantity"
+                HeaderText = "Operation",
+                DataPropertyName = "Operation",
+                Name = "colOperation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
             Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "FromLocation", DataPropertyName = "FromLocation", Name = "colFromLocation"
+                HeaderText = "User",
+                DataPropertyName = "User",
+                Name = "colUser",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
             Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "ToLocation", DataPropertyName = "ToLocation", Name = "colToLocation"
+                HeaderText = "BatchNumber",
+                DataPropertyName = "BatchNumber",
+                Name = "colBatchNumber",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "ReceiveDate",
+                DataPropertyName = "ReceiveDate",
+                Name = "colReceiveDate",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            var descCol = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Description",
+                DataPropertyName = "Description",
+                Name = "colDescription",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                DefaultCellStyle = new DataGridViewCellStyle { WrapMode = DataGridViewTriState.True }
+            };
+            Transactions_DataGridView_Transactions.Columns.Add(descCol);
+            Transactions_DataGridView_Transactions.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
 
             Transactions_DataGridView_Transactions.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             Transactions_DataGridView_Transactions.ReadOnly = true;
@@ -403,22 +437,59 @@ namespace MTM_Inventory_Application.Forms.Transactions
             System.Diagnostics.Debug.WriteLine($"[DEBUG] Transactions mapped: {result.Count}");
 
             _displayedTransactions = new BindingList<Model_Transactions>(result);
+            Transactions_DataGridView_Transactions.AutoGenerateColumns = false;
+            Transactions_DataGridView_Transactions.Columns.Clear();
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "PartID",
+                DataPropertyName = "PartID",
+                Name = "colPartID",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Operation",
+                DataPropertyName = "Operation",
+                Name = "colOperation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Quantity",
+                DataPropertyName = "Quantity",
+                Name = "colQuantity",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "FromLocation",
+                DataPropertyName = "FromLocation",
+                Name = "colFromLocation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "ToLocation",
+                DataPropertyName = "ToLocation",
+                Name = "colToLocation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "ReceiveDate",
+                DataPropertyName = "DateTime",
+                Name = "colReceiveDate",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
             Transactions_DataGridView_Transactions.DataSource = _displayedTransactions;
             Transactions_Image_NothingFound.Visible = result.Count == 0;
             Transactions_DataGridView_Transactions.Visible = result.Count > 0;
-            Transactions_Button_Print.Enabled = result.Count > 0; // Enable/disable print button
+            Transactions_Button_Print.Enabled = result.Count > 0;
+            Transfer_Button_SelectionHistory.Enabled = result.Count > 0;
             if (_displayedTransactions.Count > 0)
             {
                 Transactions_DataGridView_Transactions.ClearSelection();
             }
-
-            // Hide all columns except the required ones
-            foreach (DataGridViewColumn col in Transactions_DataGridView_Transactions.Columns)
-            {
-                col.Visible = col.Name == "colTransactionType" || col.Name == "colPartID" ||
-                              col.Name == "colQuantity" || col.Name == "colFromLocation" || col.Name == "colToLocation";
-            }
-
             UpdatePagingButtons(result.Count);
             System.Diagnostics.Debug.WriteLine("[DEBUG] LoadTransactionsAsync finished");
         }
@@ -430,7 +501,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 DataGridViewRow row = Transactions_DataGridView_Transactions.SelectedRows[0];
                 if (row.DataBoundItem is Model_Transactions tx)
                 {
-                    Transactions_TextBox_Report_TransactionType.Text = tx.TransactionType.ToString();
                     Transactions_TextBox_Report_BatchNumber.Text = tx.BatchNumber ?? "";
                     Transactions_TextBox_Report_PartID.Text = tx.PartID ?? "";
                     Transactions_TextBox_Report_FromLocation.Text = tx.FromLocation ?? "";
@@ -445,7 +515,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
             else
             {
-                Transactions_TextBox_Report_TransactionType.Text = "";
                 Transactions_TextBox_Report_BatchNumber.Text = "";
                 Transactions_TextBox_Report_PartID.Text = "";
                 Transactions_TextBox_Report_FromLocation.Text = "";
@@ -474,6 +543,155 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
         }
 
+        private async void Transfer_Button_BranchHistory_Click(object sender, EventArgs e)
+        {
+            if (Transactions_DataGridView_Transactions.SelectedRows.Count != 1)
+                return;
+            var selected = Transactions_DataGridView_Transactions.SelectedRows[0].DataBoundItem as Model_Transactions;
+            if (selected == null || string.IsNullOrWhiteSpace(selected.BatchNumber))
+            {
+                MessageBox.Show("No Batch Number found for the selected transaction.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var progress = new Controls.Shared.Control_ProgressBarUserControl();
+            Controls.Add(progress);
+            progress.BringToFront();
+            progress.ShowProgress();
+            progress.UpdateProgress(10, "Loading batch history...");
+            await Task.Delay(100);
+
+            var batchNumber = selected.BatchNumber;
+            var results = await Task.Run(() => _dao.SearchTransactions(
+                userName: isAdmin ? string.Empty : _currentUser,
+                isAdmin: isAdmin,
+                batchNumber: batchNumber,
+                sortColumn: "ReceiveDate",
+                sortDescending: true,
+                page: 1,
+                pageSize: 1000
+            ));
+            progress.UpdateProgress(80, "Mapping results...");
+            await Task.Delay(100);
+
+            // Build description for each row
+            var describedResults = new List<dynamic>();
+            for (int i = 0; i < results.Count; i++)
+            {
+                var curr = results[i];
+                string desc = "";
+                if (i == results.Count - 1) // last row (oldest)
+                {
+                    desc = "Initial Transaction";
+                }
+                else
+                {
+                    var prev = results[i + 1];
+                    if (curr.TransactionType == TransactionType.OUT)
+                        desc = "Removed From System";
+                    else if (curr.TransactionType == TransactionType.TRANSFER && prev.ToLocation != curr.FromLocation)
+                        desc = $"Part transferred from {prev.ToLocation ?? "Unknown"} to {curr.ToLocation ?? "Unknown"}";
+                    else if (curr.TransactionType == TransactionType.IN)
+                        desc = "Received Into System";
+                    else
+                        desc = "Transaction";
+                }
+                describedResults.Add(new
+                {
+                    curr.PartID,
+                    curr.Quantity,
+                    curr.Operation,
+                    curr.User,
+                    curr.BatchNumber,
+                    curr.FromLocation,
+                    curr.ToLocation,
+                    ReceiveDate = curr.DateTime,
+                    Description = desc
+                });
+            }
+
+            Transactions_DataGridView_Transactions.AutoGenerateColumns = false;
+            Transactions_DataGridView_Transactions.Columns.Clear();
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "PartID",
+                DataPropertyName = "PartID",
+                Name = "colPartID",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Quantity",
+                DataPropertyName = "Quantity",
+                Name = "colQuantity",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Operation",
+                DataPropertyName = "Operation",
+                Name = "colOperation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "User",
+                DataPropertyName = "User",
+                Name = "colUser",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "BatchNumber",
+                DataPropertyName = "BatchNumber",
+                Name = "colBatchNumber",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "FromLocation",
+                DataPropertyName = "FromLocation",
+                Name = "colFromLocation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "ToLocation",
+                DataPropertyName = "ToLocation",
+                Name = "colToLocation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "ReceiveDate",
+                DataPropertyName = "ReceiveDate",
+                Name = "colReceiveDate",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            var descCol = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Description",
+                DataPropertyName = "Description",
+                Name = "colDescription",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                DefaultCellStyle = new DataGridViewCellStyle { WrapMode = DataGridViewTriState.True }
+            };
+            Transactions_DataGridView_Transactions.Columns.Add(descCol);
+            Transactions_DataGridView_Transactions.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+
+            Transactions_DataGridView_Transactions.DataSource = new BindingList<dynamic>(describedResults);
+            Transactions_Image_NothingFound.Visible = describedResults.Count == 0;
+            Transactions_DataGridView_Transactions.Visible = describedResults.Count > 0;
+            Transactions_Button_Print.Enabled = describedResults.Count > 0;
+            Transfer_Button_SelectionHistory.Enabled = describedResults.Count > 0;
+            if (describedResults.Count > 0)
+            {
+                Transactions_DataGridView_Transactions.ClearSelection();
+            }
+            progress.UpdateProgress(100, "Complete");
+            await Task.Delay(200);
+            progress.HideProgress();
+        }
         #endregion
     }
 }

@@ -157,14 +157,14 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             MainForm_MenuStrip_View_PersonalHistory.Name = "MainForm_MenuStrip_View_PersonalHistory";
             MainForm_MenuStrip_View_PersonalHistory.ShortcutKeys = Keys.Control | Keys.H;
-            MainForm_MenuStrip_View_PersonalHistory.Size = new Size(219, 22);
+            MainForm_MenuStrip_View_PersonalHistory.Size = new Size(218, 22);
             MainForm_MenuStrip_View_PersonalHistory.Text = "Transaction History";
             MainForm_MenuStrip_View_PersonalHistory.Click += MainForm_MenuStrip_View_PersonalHistory_Click;
             // 
             // MainForm_MenuStrip_View_Separator2
             // 
             MainForm_MenuStrip_View_Separator2.Name = "MainForm_MenuStrip_View_Separator2";
-            MainForm_MenuStrip_View_Separator2.Size = new Size(216, 6);
+            MainForm_MenuStrip_View_Separator2.Size = new Size(215, 6);
             // 
             // MainForm_StatusStrip
             // 
@@ -248,6 +248,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // MainForm_SplitContainer_Middle.Panel1
             // 
             MainForm_SplitContainer_Middle.Panel1.Controls.Add(MainForm_TabControl);
+            MainForm_SplitContainer_Middle.Panel1.Margin = new Padding(3);
             // 
             // MainForm_SplitContainer_Middle.Panel2
             // 
@@ -292,7 +293,6 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_Control_InventoryTab.BackColor = SystemColors.Control;
             MainForm_Control_InventoryTab.Dock = DockStyle.Fill;
             MainForm_Control_InventoryTab.Location = new Point(0, 0);
-            MainForm_Control_InventoryTab.Margin = new Padding(0);
             MainForm_Control_InventoryTab.Name = "MainForm_Control_InventoryTab";
             MainForm_Control_InventoryTab.Size = new Size(817, 398);
             MainForm_Control_InventoryTab.TabIndex = 0;
@@ -325,6 +325,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_RemoveTabNormalControl.Dock = DockStyle.Fill;
             MainForm_RemoveTabNormalControl.Location = new Point(0, 0);
             MainForm_RemoveTabNormalControl.Name = "MainForm_RemoveTabNormalControl";
+            MainForm_RemoveTabNormalControl.Padding = new Padding(3);
             MainForm_RemoveTabNormalControl.Size = new Size(817, 398);
             MainForm_RemoveTabNormalControl.TabIndex = 0;
             // 

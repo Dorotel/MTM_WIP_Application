@@ -42,6 +42,16 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 AutoScaleMode = AutoScaleMode.Dpi;
                 System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] InitializeComponent complete.");
 
+                // Set the form title with user and privilege info
+                string privilege = "Unknown";
+                if (Model_AppVariables.UserTypeAdmin)
+                    privilege = "Administrator";
+                else if (Model_AppVariables.UserTypeNormal)
+                    privilege = "Normal User";
+                else if (Model_AppVariables.UserTypeReadOnly)
+                    privilege = "Read Only";
+                this.Text = $"Manitowoc Tool and Manufacturing WIP Inventory System | {Model_AppVariables.User} | {privilege}";
+
                 InitializeProgressControl();
                 System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Progress control initialized.");
 

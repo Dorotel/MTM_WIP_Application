@@ -1,6 +1,4 @@
-﻿
-
-using System.Text;
+﻿using System.Text;
 using MTM_Inventory_Application.Models;
 using MySql.Data.MySqlClient;
 
@@ -55,7 +53,7 @@ internal class Dao_Transactions
 
         if (!string.IsNullOrEmpty(batchNumber))
         {
-            query.Append(" AND `Batch Number` = @BatchNumber");
+            query.Append(" AND BatchNumber = @BatchNumber");
             parameters.Add(new MySqlParameter("@BatchNumber", batchNumber));
         }
 
@@ -103,13 +101,13 @@ internal class Dao_Transactions
 
         if (fromDate.HasValue)
         {
-            query.Append(" AND DateTime >= @FromDate");
+            query.Append(" AND ReceiveDate >= @FromDate");
             parameters.Add(new MySqlParameter("@FromDate", fromDate.Value));
         }
 
         if (toDate.HasValue)
         {
-            query.Append(" AND DateTime <= @ToDate");
+            query.Append(" AND ReceiveDate <= @ToDate");
             parameters.Add(new MySqlParameter("@ToDate", toDate.Value));
         }
 
@@ -178,6 +176,6 @@ internal class Dao_Transactions
             ItemType = reader["ItemType"] == DBNull.Value ? null : reader["ItemType"].ToString(),
             DateTime = reader["ReceiveDate"] == DBNull.Value
                 ? DateTime.MinValue
-                : Convert.ToDateTime(reader["DateTime"])
+                : Convert.ToDateTime(reader["ReceiveDate"])
         };
 }

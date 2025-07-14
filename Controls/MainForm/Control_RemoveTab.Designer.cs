@@ -55,6 +55,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_Image_NothingFound = new PictureBox();
             Control_RemoveTab_DataGridView_Main = new DataGridView();
             Control_RemoveTab_Panel_Footer = new Panel();
+            Control_RemoveTab_Button_Print = new Button();
             Control_RemoveTab_Button_Undo = new Button();
             Control_RemoveTab_Button_Toggle_RightPanel = new Button();
             Control_RemoveTab_Button_AdvancedItemRemoval = new Button();
@@ -66,7 +67,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_Label_Part = new Label();
             Control_RemoveTab_Label_Operation = new Label();
             Control_RemoveTab_ComboBox_Operation = new ComboBox();
-            Control_RemoveTab_Button_Print = new Button();
             Control_RemoveTab_GroupBox_MainControl.SuspendLayout();
             Control_RemoveTab_Panel_Main.SuspendLayout();
             Control_RemoveTab_Panel_DataGridView.SuspendLayout();
@@ -173,6 +173,16 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_Panel_Footer.Padding = new Padding(3);
             Control_RemoveTab_Panel_Footer.Size = new Size(803, 36);
             Control_RemoveTab_Panel_Footer.TabIndex = 20;
+            // 
+            // Control_RemoveTab_Button_Print
+            // 
+            Control_RemoveTab_Button_Print.Enabled = false;
+            Control_RemoveTab_Button_Print.Location = new Point(571, 5);
+            Control_RemoveTab_Button_Print.Name = "Control_RemoveTab_Button_Print";
+            Control_RemoveTab_Button_Print.Size = new Size(60, 28);
+            Control_RemoveTab_Button_Print.TabIndex = 16;
+            Control_RemoveTab_Button_Print.Text = "Print";
+            Control_RemoveTab_Button_Print.UseVisualStyleBackColor = true;
             // 
             // Control_RemoveTab_Button_Undo
             // 
@@ -290,16 +300,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_ComboBox_Operation.Name = "Control_RemoveTab_ComboBox_Operation";
             Control_RemoveTab_ComboBox_Operation.Size = new Size(218, 23);
             Control_RemoveTab_ComboBox_Operation.TabIndex = 2;
-            // 
-            // Control_RemoveTab_Button_Print
-            // 
-            Control_RemoveTab_Button_Print.Enabled = false;
-            Control_RemoveTab_Button_Print.Location = new Point(571, 5);
-            Control_RemoveTab_Button_Print.Name = "Control_RemoveTab_Button_Print";
-            Control_RemoveTab_Button_Print.Size = new Size(60, 28);
-            Control_RemoveTab_Button_Print.TabIndex = 16;
-            Control_RemoveTab_Button_Print.Text = "Print";
-            Control_RemoveTab_Button_Print.UseVisualStyleBackColor = true;
             // 
             // Control_RemoveTab
             // 

@@ -1,6 +1,4 @@
-﻿
-
-using MTM_Inventory_Application.Helpers;
+﻿using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using MySql.Data.MySqlClient;
 
@@ -8,9 +6,6 @@ namespace MTM_Inventory_Application.Controls.MainForm;
 
 public partial class Control_QuickButtons : UserControl
 {
-    #region Fields
-    
-
     #region Fields
 
     private static List<Button>? quickButtons;
@@ -20,11 +15,6 @@ public partial class Control_QuickButtons : UserControl
     #region Properties
 
     public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
-    
-    #endregion
-    
-    #region Constructors
-    
 
     #endregion
 
@@ -43,24 +33,18 @@ public partial class Control_QuickButtons : UserControl
             Control_QuickButtons_Button_Button10
         };
 
-        if (quickButtons != null && quickButtons.Count > 0)
+        if (quickButtons.Count > 0)
         {
-            var maxWidth = quickButtons.Max(b => b.Width);
-            var maxHeight = quickButtons.Max(b => b.Height);
-            foreach (var btn in quickButtons) btn.Size = new Size(maxWidth, maxHeight);
-        }
-
-        LoadLast10Transactions(Model_AppVariables.User);
-        if (quickButtons != null)
+            int maxWidth = quickButtons.Max(b => b.Width);
+            int maxHeight = quickButtons.Max(b => b.Height);
             foreach (var btn in quickButtons)
+            {
+                btn.Size = new Size(maxWidth, maxHeight);
                 btn.Click += QuickButton_Click;
+            }
+        }
         LoadLast10Transactions(Model_AppVariables.User);
     }
-    
-    #endregion
-    
-    #region Methods
-    
 
     #endregion
 
@@ -68,56 +52,66 @@ public partial class Control_QuickButtons : UserControl
 
     public void LoadLast10Transactions(string currentUser)
     {
-        var connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
-        using var conn = new MySqlConnection(connectionString);
-        using var cmd = new MySqlCommand("sys_last_10_transactions_Get_ByUser", conn)
+        try
         {
-            CommandType = System.Data.CommandType.StoredProcedure
-        };
-        cmd.Parameters.AddWithValue("p_User", currentUser);
-
-        conn.Open();
-        using var reader = cmd.ExecuteReader();
-
-        var i = 0;
-        while (reader.Read() && quickButtons != null && i < quickButtons.Count)
-        {
-            var partId = reader["PartID"].ToString();
-            var operation = reader["Operation"].ToString();
-            var quantity = Convert.ToInt32(reader["Quantity"]);
-            var dateTime = Convert.ToDateTime(reader["ReceiveDate"]);
-
-            var rawText = $"{partId}\nOp: {operation}";
-            quickButtons[i].Text = TruncateTextToFitMultiline(rawText, quickButtons[i]);
-            quickButtons[i].TextAlign = ContentAlignment.MiddleCenter;
-            quickButtons[i].UseMnemonic = false;
-            quickButtons[i].Padding = new Padding(0);
-            quickButtons[i].Margin = new Padding(0);
-
-            var tooltipText =
-                $"Part Number: {partId} | Operation: {operation}\nQuantity: {quantity} | Date/Time: {dateTime:MM/dd/yyyy hh:mm:ss tt}";
-            Control_QuickButtons_Tooltip.SetToolTip(quickButtons[i], tooltipText);
-            quickButtons[i].Tag = new { partId, operation, quantity, dateTime };
-            quickButtons[i].Visible = true;
-            i++;
-        }
-
-        if (quickButtons != null)
-            for (; i < quickButtons.Count; i++)
+            var connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
+            using var conn = new MySqlConnection(connectionString);
+            using var cmd = new MySqlCommand("sys_last_10_transactions_Get_ByUser", conn)
             {
-                quickButtons[i].Text = string.Empty;
-                Control_QuickButtons_Tooltip.SetToolTip(quickButtons[i], string.Empty);
-                quickButtons[i].Tag = null;
-                quickButtons[i].Visible = false;
+                CommandType = System.Data.CommandType.StoredProcedure
+            };
+            cmd.Parameters.AddWithValue("p_User", currentUser);
+
+            conn.Open();
+            using var reader = cmd.ExecuteReader();
+
+            int i = 0;
+            while (reader.Read() && quickButtons != null && i < quickButtons.Count)
+            {
+                string partId = reader["PartID"].ToString() ?? string.Empty;
+                string operation = reader["Operation"].ToString() ?? string.Empty;
+                int quantity = reader["Quantity"] is int q ? q : Convert.ToInt32(reader["Quantity"]);
+                DateTime dateTime = reader["ReceiveDate"] is DateTime dt ? dt : Convert.ToDateTime(reader["ReceiveDate"]);
+
+                // Always show PartID on top, Operation on bottom
+                string rawText = $"{partId}\n{operation}";
+                quickButtons[i].Text = TruncateTextToFitMultiline(rawText, quickButtons[i]);
+                quickButtons[i].TextAlign = ContentAlignment.MiddleCenter;
+                quickButtons[i].UseMnemonic = false;
+                quickButtons[i].Padding = Padding.Empty;
+                quickButtons[i].Margin = Padding.Empty;
+
+                string tooltipText = $"Part Number: {partId} | Operation: {operation}\nQuantity: {quantity} | Date/Time: {dateTime:MM/dd/yyyy hh:mm:ss tt}";
+                Control_QuickButtons_Tooltip.SetToolTip(quickButtons[i], tooltipText);
+                quickButtons[i].Tag = new { partId, operation, quantity, dateTime };
+                quickButtons[i].Visible = true;
+                i++;
             }
+
+            if (quickButtons != null)
+            {
+                for (; i < quickButtons.Count; i++)
+                {
+                    quickButtons[i].Text = string.Empty;
+                    Control_QuickButtons_Tooltip.SetToolTip(quickButtons[i], string.Empty);
+                    quickButtons[i].Tag = null;
+                    quickButtons[i].Visible = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log error for reliability
+            MTM_Inventory_Application.Logging.LoggingUtility.LogApplicationError(ex);
+        }
     }
 
     private static void QuickButton_Click(object? sender, EventArgs? e)
     {
-        if (sender is not Button btn || btn.Tag is not { } tagObj)
+        if (sender is not Button btn || btn.Tag is null)
             return;
 
-        dynamic tag = tagObj;
+        dynamic tag = btn.Tag;
         string partId = tag.partId;
         string operation = tag.operation;
         int quantity = tag.quantity;
@@ -126,28 +120,22 @@ public partial class Control_QuickButtons : UserControl
         if (mainForm == null)
             return;
 
-        static void SetComboBoxes(object control, string partField, string opField, string part, string op)
+        void SetComboBoxes(object control, string partField, string opField, string part, string op)
         {
             SetComboBoxText(control, partField, part);
             SetComboBoxText(control, opField, op);
         }
 
-        static void TriggerEnterEvent(Control control)
+        void TriggerEnterEvent(Control control)
         {
-            if (control != null)
-            {
-                var enterEventArgs = new EventArgs();
-                var onEnterMethod = control.GetType().GetMethod("OnEnter",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                onEnterMethod?.Invoke(control, new object[] { enterEventArgs });
-            }
+            var enterEventArgs = EventArgs.Empty;
+            var onEnterMethod = control.GetType().GetMethod("OnEnter", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            onEnterMethod?.Invoke(control, new object[] { enterEventArgs });
         }
 
-        static void SetFocusOnControl(object parentControl, string fieldName)
+        void SetFocusOnControl(object parentControl, string fieldName)
         {
-            var field = parentControl.GetType().GetField(fieldName,
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public |
-                System.Reflection.BindingFlags.Instance);
+            var field = parentControl.GetType().GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
             if (field?.GetValue(parentControl) is Control targetControl && targetControl.CanFocus)
             {
                 targetControl.Focus();
@@ -155,89 +143,70 @@ public partial class Control_QuickButtons : UserControl
             }
         }
 
+        void ClickSearchButtonIfAvailable(object control, string fieldName)
+        {
+            var field = control.GetType().GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (field?.GetValue(control) is Button searchButton && searchButton.Enabled && searchButton.Visible)
+                searchButton.PerformClick();
+        }
+
         if (mainForm.MainForm_Control_InventoryTab?.Visible == true)
         {
             var inv = mainForm.MainForm_Control_InventoryTab;
-            SetComboBoxes(inv, "Control_InventoryTab_ComboBox_Part", "Control_InventoryTab_ComboBox_Operation", partId,
-                operation);
+            SetComboBoxes(inv, "Control_InventoryTab_ComboBox_Part", "Control_InventoryTab_ComboBox_Operation", partId, operation);
             SetTextBoxText(inv, "Control_InventoryTab_TextBox_Quantity", quantity.ToString());
-
             SetFocusOnControl(inv, "Control_InventoryTab_ComboBox_Location");
             return;
         }
-
         if (mainForm.MainForm_RemoveTabNormalControl?.Visible == true)
         {
             var rem = mainForm.MainForm_RemoveTabNormalControl;
-            SetComboBoxes(rem, "Control_RemoveTab_ComboBox_Part", "Control_RemoveTab_ComboBox_Operation", partId,
-                operation);
+            SetComboBoxes(rem, "Control_RemoveTab_ComboBox_Part", "Control_RemoveTab_ComboBox_Operation", partId, operation);
             rem.Focus();
             TriggerEnterEvent(rem);
-
             ClickSearchButtonIfAvailable(rem, "Control_RemoveTab_Button_Search");
             return;
         }
-
         if (mainForm.MainForm_Control_TransferTab?.Visible == true)
         {
             var trn = mainForm.MainForm_Control_TransferTab;
-            SetComboBoxes(trn, "Control_TransferTab_ComboBox_Part", "Control_TransferTab_ComboBox_Operation", partId,
-                operation);
+            SetComboBoxes(trn, "Control_TransferTab_ComboBox_Part", "Control_TransferTab_ComboBox_Operation", partId, operation);
             trn.Focus();
             TriggerEnterEvent(trn);
-
             ClickSearchButtonIfAvailable(trn, "Control_TransferTab_Button_Search");
             return;
         }
-
         if (mainForm.MainForm_AdvancedInventory?.Visible == true)
         {
             var advInv = mainForm.MainForm_AdvancedInventory;
-            var tabControlField = advInv.GetType().GetField("AdvancedInventory_TabControl",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var tabControlField = advInv.GetType().GetField("AdvancedInventory_TabControl", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var tabControl = tabControlField?.GetValue(advInv) as TabControl;
             if (tabControl != null)
             {
                 var selectedTab = tabControl.SelectedTab;
                 if (selectedTab != null && selectedTab.Name == "AdvancedInventory_TabControl_MultiLoc")
                 {
-                    SetComboBoxes(advInv, "AdvancedInventory_MultiLoc_ComboBox_Part",
-                        "AdvancedInventory_MultiLoc_ComboBox_Op", partId, operation);
+                    SetComboBoxes(advInv, "AdvancedInventory_MultiLoc_ComboBox_Part", "AdvancedInventory_MultiLoc_ComboBox_Op", partId, operation);
                     SetTextBoxText(advInv, "AdvancedInventory_MultiLoc_TextBox_Qty", quantity.ToString());
                 }
                 else
                 {
-                    SetComboBoxes(advInv, "AdvancedInventory_Single_ComboBox_Part",
-                        "AdvancedInventory_Single_ComboBox_Op", partId, operation);
+                    SetComboBoxes(advInv, "AdvancedInventory_Single_ComboBox_Part", "AdvancedInventory_Single_ComboBox_Op", partId, operation);
                     SetTextBoxText(advInv, "AdvancedInventory_Single_TextBox_Qty", quantity.ToString());
                 }
             }
-
             advInv.Focus();
             TriggerEnterEvent(advInv);
             return;
         }
-
         if (mainForm.MainForm_Control_AdvancedRemove?.Visible == true)
         {
             var advRem = mainForm.MainForm_Control_AdvancedRemove;
-            SetComboBoxes(advRem, "Control_AdvancedRemove_ComboBox_Part", "Control_AdvancedRemove_ComboBox_Op", partId,
-                operation);
+            SetComboBoxes(advRem, "Control_AdvancedRemove_ComboBox_Part", "Control_AdvancedRemove_ComboBox_Op", partId, operation);
             advRem.Focus();
             TriggerEnterEvent(advRem);
-
             ClickSearchButtonIfAvailable(advRem, "Control_AdvancedRemove_Button_Search");
             return;
-        }
-
-        return;
-
-        static void ClickSearchButtonIfAvailable(object control, string fieldName)
-        {
-            var field = control.GetType().GetField(fieldName,
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (field?.GetValue(control) is Button searchButton && searchButton.Enabled && searchButton.Visible)
-                searchButton.PerformClick();
         }
     }
 
@@ -245,34 +214,42 @@ public partial class Control_QuickButtons : UserControl
     {
         using var g = btn.CreateGraphics();
         var font = btn.Font;
-        var ellipsis = "...";
+        const string ellipsis = "...";
         var lines = text.Split('\n');
-        var maxWidth = btn.Width - 6;
-        var maxHeight = btn.Height - 6;
+        int maxWidth = btn.Width - 6;
+        int maxHeight = btn.Height - 6;
 
-        for (var i = 0; i < lines.Length; i++)
+        // Try to fit both lines by shrinking font size if needed
+        float fontSize = font.Size;
+        Font testFont = font;
+        string[] fittedLines = (string[])lines.Clone();
+        string totalText = string.Join("\n", fittedLines);
+        SizeF textSize = g.MeasureString(totalText, testFont);
+        int minFontSize = 6;
+        while ((textSize.Width > maxWidth || textSize.Height > maxHeight) && fontSize > minFontSize)
         {
-            var line = lines[i];
-            while (line.Length > 0 && g.MeasureString(line + ellipsis, font).Width > maxWidth)
+            fontSize -= 0.5f;
+            testFont = new Font(font.FontFamily, fontSize, font.Style);
+            textSize = g.MeasureString(totalText, testFont);
+        }
+        // If still doesn't fit, truncate lines
+        for (int i = 0; i < fittedLines.Length; i++)
+        {
+            var line = fittedLines[i];
+            while (line.Length > 0 && g.MeasureString(line + ellipsis, testFont).Width > maxWidth)
                 line = line[..^1];
-            lines[i] = line.Length > 0 && line != lines[i] ? line + ellipsis : line;
+            fittedLines[i] = line.Length > 0 && line != lines[i] ? line + ellipsis : line;
         }
-
-        var totalText = string.Join("\n", lines);
-        while (g.MeasureString(totalText, font).Height > maxHeight && lines.Length > 1 && lines[1].Length > 0)
-        {
-            lines[1] = lines[1][..^1];
-            totalText = string.Join("\n", lines[0], lines[1] + ellipsis);
-        }
-
-        return string.Join("\n", lines);
+        totalText = string.Join("\n", fittedLines);
+        // Set the button font to the new size if changed
+        if (btn.Font.Size != fontSize)
+            btn.Font = new Font(font.FontFamily, fontSize, font.Style);
+        return totalText;
     }
 
     private static void SetComboBoxText(object control, string fieldName, string value)
     {
-        var field = control.GetType().GetField(fieldName,
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public |
-            System.Reflection.BindingFlags.Instance);
+        var field = control.GetType().GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
         if (field?.GetValue(control) is not ComboBox cb) return;
         cb.SelectedIndex = cb.FindStringExact(value);
         if (cb.SelectedIndex < 0)
@@ -282,8 +259,7 @@ public partial class Control_QuickButtons : UserControl
 
     private static void SetTextBoxText(object control, string fieldName, string value)
     {
-        var field = control.GetType().GetField(fieldName,
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var field = control.GetType().GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         if (field?.GetValue(control) is TextBox tb)
         {
             tb.Text = value;
@@ -291,8 +267,5 @@ public partial class Control_QuickButtons : UserControl
         }
     }
 
-    #endregion
-
-    
     #endregion
 }
