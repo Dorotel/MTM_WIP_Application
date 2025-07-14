@@ -237,6 +237,7 @@ namespace MTM_Inventory_Application.Forms.Settings
             LoadSettings();
 
             ApplyTheme();
+            ApplyPrivileges();
         }
 
         private void ApplyTheme()
@@ -265,6 +266,84 @@ namespace MTM_Inventory_Application.Forms.Settings
             {
                 // Re-enable UI elements
                 SettingsForm_ComboBox_Theme.Enabled = comboBoxWasEnabled;
+            }
+        }
+
+        private void ApplyPrivileges()
+        {
+            bool isAdmin = Model_AppVariables.UserTypeAdmin;
+            bool isNormal = Model_AppVariables.UserTypeNormal;
+            bool isReadOnly = Model_AppVariables.UserTypeReadOnly;
+
+            // Rebuild tree to ensure all nodes are present before hiding
+            InitializeCategoryTreeView();
+
+            // Helper to find a node by path (root or child)
+            TreeNode? FindNodeByPath(params string[] path)
+            {
+                TreeNodeCollection nodes = SettingsForm_TreeView_Category.Nodes;
+                TreeNode? node = null;
+                foreach (string name in path)
+                {
+                    node = (node == null ? nodes.Cast<TreeNode>() : node.Nodes.Cast<TreeNode>()).FirstOrDefault(n =>
+                        n.Name == name);
+                    if (node == null)
+                    {
+                        break;
+                    }
+                }
+
+                return node;
+            }
+
+            // Helper to hide a node by path
+            void HideNode(params string[] path)
+            {
+                TreeNode? node = FindNodeByPath(path);
+                if (node != null)
+                {
+                    if (node.Parent == null)
+                    {
+                        SettingsForm_TreeView_Category.Nodes.Remove(node);
+                    }
+                    else
+                    {
+                        node.Parent.Nodes.Remove(node);
+                    }
+                }
+            }
+
+            if (isAdmin)
+            {
+                // All nodes shown by default
+                return;
+            }
+
+            if (isNormal)
+            {
+                HideNode("Database");
+                HideNode("Users");
+                HideNode("Part Numbers", "Edit Part Number");
+                HideNode("Part Numbers", "Remove Part Number");
+                HideNode("Operations", "Edit Operation");
+                HideNode("Operations", "Remove Operation");
+                HideNode("Locations", "Edit Location");
+                HideNode("Locations", "Remove Location");
+                HideNode("ItemTypes", "Edit ItemType");
+                HideNode("ItemTypes", "Remove ItemType");
+                HideNode("Users", "Edit User");
+                HideNode("Users", "Delete User");
+            }
+
+            if (isReadOnly)
+            {
+                HideNode("Database");
+                HideNode("Users");
+                HideNode("Part Numbers");
+                HideNode("Operations");
+                HideNode("Locations");
+                HideNode("ItemTypes");
+                HideNode("Shortcuts");
             }
         }
 
@@ -1026,12 +1105,37 @@ namespace MTM_Inventory_Application.Forms.Settings
                     SettingsForm_DataGridView_Shortcuts.Rows.Add(action, shortcutValue);
                 }
 
-                _hasChanges = true;
+
                 UpdateStatus("All settings reset to defaults. Click Save to apply.");
             }
             catch (Exception ex)
             {
                 UpdateStatus($"Error resetting to defaults: {ex.Message}");
+            }
+        }
+
+        private static void CloseAndResetIfChanged()
+        {
+            DialogResult result = MessageBox.Show(
+                "You have changes that require a restart. Exit and reset the application?",
+                "Unsaved Changes",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+            if (result == DialogResult.Yes)
+            {
+                // Reset the application (restart)
+                Application.Restart();
+                Application.ExitThread();
+            }
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                CloseAndResetIfChanged();
             }
         }
 

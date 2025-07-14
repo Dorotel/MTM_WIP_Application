@@ -483,9 +483,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
         {
             string connectionString = Model_AppVariables.ConnectionString;
             string currentUser = Model_AppVariables.User;
-            bool isAdmin = Model_AppVariables.UserTypeAdmin;
 
-            Transactions.Transactions transactionsForm = new(connectionString, currentUser, isAdmin);
+            Transactions.Transactions transactionsForm = new(connectionString, currentUser);
             transactionsForm.ShowDialog(this);
         }
 

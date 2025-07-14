@@ -215,7 +215,7 @@
             SettingsForm_TabPage_Connection.Padding = new Padding(3);
             SettingsForm_TabPage_Connection.Size = new Size(830, 464);
             SettingsForm_TabPage_Connection.TabIndex = 0;
-            SettingsForm_TabPage_Connection.Text = "Connection Settings";
+            SettingsForm_TabPage_Connection.Text = "";
             SettingsForm_TabPage_Connection.UseVisualStyleBackColor = true;
             SettingsForm_GroupBox_Connection.Controls.Add(SettingsForm_TextBox_Password);
             SettingsForm_GroupBox_Connection.Controls.Add(SettingsForm_Label_Password);

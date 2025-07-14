@@ -47,7 +47,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         private async void RemoveUserControl_ComboBox_Users_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            if (RemoveUserControl_ComboBox_Users.SelectedItem is not string userName)
+            if (RemoveUserControl_ComboBox_Users.Text is not { } userName)
             {
                 RemoveUserControl_Label_FullName.Text = "";
                 RemoveUserControl_Label_Role.Text = "";
@@ -86,7 +86,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         private async void RemoveUserControl_Button_Remove_Click(object? sender, EventArgs e)
         {
-            if (RemoveUserControl_ComboBox_Users.SelectedItem is not string userName)
+            if (RemoveUserControl_ComboBox_Users.Text is not { } userName)
             {
                 return;
             }

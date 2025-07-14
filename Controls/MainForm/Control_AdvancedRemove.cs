@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Diagnostics;
+using System.Drawing.Printing;
 using System.Text;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
@@ -77,6 +78,15 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 ToolTip toolTip = new();
                 toolTip.SetToolTip(deleteButton,
                     $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Delete)}");
+            }
+
+            Control[] printBtn = Controls.Find("Control_AdvancedRemove_Button_Print", true);
+            if (printBtn.Length > 0 && printBtn[0] is Button printButton)
+            {
+                printButton.Click -= Control_AdvancedRemove_Button_Print_Click;
+                printButton.Click += Control_AdvancedRemove_Button_Print_Click;
+                ToolTip toolTip = new();
+                toolTip.SetToolTip(printButton, "Print the current results");
             }
 
             if (Controls.Find("Control_AdvancedRemove_Button_Undo", true).Length == 0)
@@ -306,6 +316,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_AdvancedRemove_ComboBox_User.Leave +=
                 (s, e) => Control_AdvancedRemove_ComboBox_User.BackColor =
                     Model_AppVariables.UserUiColors.ControlBackColor ?? SystemColors.Window;
+
+            Control_AdvancedRemove_DataGridView_Results.SelectionChanged += (s, e) => Control_AdvancedRemove_Update_ButtonStates();
+            Control_AdvancedRemove_DataGridView_Results.DataSourceChanged += (s, e) => Control_AdvancedRemove_Update_ButtonStates();
         }
 
         private async void Control_AdvancedRemove_Button_Search_Click(object? sender, EventArgs? e)
@@ -321,7 +334,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     string searchText = Control_AdvancedRemove_TextBox_Like.Text.Trim();
                     string searchColumn;
 
-                    switch (Control_AdvancedRemove_ComboBox_Like.SelectedItem!.ToString())
+                    switch (Control_AdvancedRemove_ComboBox_Like.Text!.ToString())
                     {
                         case "Part ID":
                             searchColumn = "PartID";
@@ -500,15 +513,22 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 Control_AdvancedRemove_DataGridView_Results.DataSource = dt;
                 Control_AdvancedRemove_DataGridView_Results.ClearSelection();
+                // Only show columns in this order: Location, PartID, Operation, Quantity, Notes
+                string[] columnsToShow = { "Location", "PartID", "Operation", "Quantity", "Notes" };
                 foreach (DataGridViewColumn column in Control_AdvancedRemove_DataGridView_Results.Columns)
                 {
-                    column.Visible = true;
+                    column.Visible = columnsToShow.Contains(column.Name);
                 }
-
+                // Reorder columns
+                for (int i = 0; i < columnsToShow.Length; i++)
+                {
+                    if (Control_AdvancedRemove_DataGridView_Results.Columns.Contains(columnsToShow[i]))
+                        Control_AdvancedRemove_DataGridView_Results.Columns[columnsToShow[i]].DisplayIndex = i;
+                }
                 Core_Themes.ApplyThemeToDataGridView(Control_AdvancedRemove_DataGridView_Results);
                 Core_Themes.SizeDataGrid(Control_AdvancedRemove_DataGridView_Results);
-
                 Control_AdvancedRemove_Image_NothingFound.Visible = dt.Rows.Count == 0;
+                Control_AdvancedRemove_Update_ButtonStates();
             }
             catch (Exception ex)
             {
@@ -803,6 +823,40 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 LoggingUtility.LogApplicationError(ex);
                 MessageBox.Show(@"Undo failed: " + ex.Message, @"Undo Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
+            }
+        }
+
+        private void Control_AdvancedRemove_Button_Print_Click(object? sender, EventArgs? e)
+        {
+            try
+            {
+                if (Control_AdvancedRemove_DataGridView_Results.Rows.Count == 0)
+                {
+                    MessageBox.Show("No data to print.", "Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                var printer = new Core_DgvPrinter();
+                Control_AdvancedRemove_DataGridView_Results.Tag = Control_AdvancedRemove_ComboBox_Part.Text;
+                printer.Print(Control_AdvancedRemove_DataGridView_Results);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Control_AdvancedRemove_Update_ButtonStates()
+        {
+            try
+            {
+                bool hasData = Control_AdvancedRemove_DataGridView_Results.Rows.Count > 0;
+                if (Control_AdvancedRemove_Button_Print != null)
+                    Control_AdvancedRemove_Button_Print.Enabled = hasData;
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
             }
         }
 

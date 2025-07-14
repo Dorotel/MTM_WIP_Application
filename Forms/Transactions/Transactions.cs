@@ -6,6 +6,7 @@ using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
+using System.Drawing.Printing;
 
 namespace MTM_Inventory_Application.Forms.Transactions
 {
@@ -18,7 +19,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private const int _pageSize = 20;
         private const bool _sortDescending = true;
         private readonly string _currentUser;
-        private readonly bool _isAdmin;
+        private readonly bool isAdmin;
         private ComboBox Transactions_ComboBox_SearchPartID;
         private Dao_Transactions _dao;
 
@@ -26,15 +27,13 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
         #region Constructors
 
-        public Transactions(string connectionString, string currentUser, bool isAdmin)
+        public Transactions(string connectionString, string currentUser)
         {
             InitializeComponent();
 
             _dao = new Dao_Transactions(connectionString);
             _currentUser = currentUser;
-            _isAdmin = isAdmin;
-
-            Core_Themes.ApplyTheme(this);
+            isAdmin = Model_AppVariables.UserTypeAdmin;
 
             SetupSortCombo();
             SetupDataGrid();
@@ -57,6 +56,10 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     await LoadTransactionsAsync();
                 }
             };
+
+            // Print button logic
+            Transactions_Button_Print.Click += Transactions_Button_Print_Click;
+            Core_Themes.ApplyTheme(this);
         }
 
         #endregion
@@ -65,6 +68,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
         private async Task OnFormLoadAsync()
         {
+            Transactions_Button_Print.Enabled = false; // Disable print button on load
             await LoadUserCombosAsync();
             await LoadBuildingComboAsync();
             await LoadPartComboAsync();
@@ -76,19 +80,9 @@ namespace MTM_Inventory_Application.Forms.Transactions
         {
             await Helper_UI_ComboBoxes.FillUserComboBoxesAsync(Transactions_ComboBox_UserFullName);
             Transactions_ComboBox_UserFullName.SelectedIndex = 0;
-            if (!_isAdmin)
+            if (!isAdmin)
             {
-                // Set to current user and disable
-                for (int i = 0; i < Transactions_ComboBox_UserFullName.Items.Count; i++)
-                {
-                    object? item = Transactions_ComboBox_UserFullName.Items[i];
-                    if (item != null && item.ToString()?.Equals(_currentUser, StringComparison.OrdinalIgnoreCase) ==
-                        true)
-                    {
-                        Transactions_ComboBox_UserFullName.SelectedIndex = i;
-                        break;
-                    }
-                }
+                Transactions_ComboBox_UserFullName.Text = Model_AppVariables.User;
 
                 Transactions_ComboBox_UserFullName.Enabled = false;
             }
@@ -412,6 +406,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_DataGridView_Transactions.DataSource = _displayedTransactions;
             Transactions_Image_NothingFound.Visible = result.Count == 0;
             Transactions_DataGridView_Transactions.Visible = result.Count > 0;
+            Transactions_Button_Print.Enabled = result.Count > 0; // Enable/disable print button
             if (_displayedTransactions.Count > 0)
             {
                 Transactions_DataGridView_Transactions.ClearSelection();
@@ -461,6 +456,21 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 Transactions_TextBox_Report_User.Text = "";
                 Transactions_TextBox_Report_ItemType.Text = "";
                 Transactions_TextBox_Report_ReceiveDate.Text = "";
+            }
+        }
+
+        private void Transactions_Button_Print_Click(object? sender, EventArgs? e)
+        {
+            try
+            {
+                Core_DgvPrinter printer = new();
+                // Optionally set column widths/alignments here if needed
+                printer.Print(Transactions_DataGridView_Transactions);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error printing transactions: {ex.Message}", "Print Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 

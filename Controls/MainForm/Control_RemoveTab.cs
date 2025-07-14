@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
+using System.Drawing.Printing;
 using System.Text;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
@@ -18,8 +20,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
     {
         #region Fields
 
-        #region Fields
-
         private readonly List<Model_HistoryRemove> _lastRemovedItems = [];
 
         #endregion
@@ -28,10 +28,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
-
-        #endregion
-
-        #region Constructors
 
         #endregion
 
@@ -63,6 +59,13 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Control_RemoveTab_Panel_Footer.Controls.Add(undoButton);
             }
 
+            if (Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Print"] is Button printButton)
+            {
+                printButton.Click -= Control_RemoveTab_Button_Print_Click;
+                printButton.Click += Control_RemoveTab_Button_Print_Click;
+                // Tooltip for printButton intentionally omitted to avoid variable conflict
+            }
+
             ToolTip toolTip = new();
             toolTip.SetToolTip(Control_RemoveTab_Button_Search,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Search)}");
@@ -70,23 +73,49 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Delete)}");
             toolTip.SetToolTip(Control_RemoveTab_Button_Reset,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Reset)}");
-            Button? undoBtn = Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] as Button;
-            if (undoBtn != null)
-            {
-                toolTip.SetToolTip(undoBtn,
-                    $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Undo)}");
-            }
+            ApplyPrivileges();
         }
 
         #endregion
 
         #region Methods
 
+        #region Privileges
+
+        private void ApplyPrivileges()
+        {
+            bool isAdmin = Model_AppVariables.UserTypeAdmin;
+            bool isNormal = Model_AppVariables.UserTypeNormal;
+            bool isReadOnly = Model_AppVariables.UserTypeReadOnly;
+
+            // Buttons
+            Control_RemoveTab_Button_AdvancedItemRemoval.Visible = isAdmin || isNormal;
+            Control_RemoveTab_Button_Reset.Visible = true;
+            Control_RemoveTab_Button_Delete.Visible = isAdmin || isNormal;
+            Control_RemoveTab_Button_Search.Visible = true;
+            Control_RemoveTab_Button_Toggle_RightPanel.Visible = true;
+            if (Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] is Button undoBtn)
+            {
+                undoBtn.Visible = isAdmin || isNormal;
+            }
+
+            // For Read-Only, hide buttons and disable ComboBoxes
+            if (isReadOnly)
+            {
+                Control_RemoveTab_Button_AdvancedItemRemoval.Visible = false;
+                Control_RemoveTab_Button_Delete.Visible = false;
+                if (Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] is Button undoBtn2)
+                {
+                    undoBtn2.Visible = false;
+                }
+            }
+        }
+
         #endregion
 
         #region Initialization
 
-        public void Control_RemoveTab_Initialize() => Control_RemoveTab_Button_Reset.TabStop = false;
+        private void Control_RemoveTab_Initialize() => Control_RemoveTab_Button_Reset.TabStop = false;
 
         #endregion
 
@@ -538,9 +567,17 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Control_RemoveTab_DataGridView_Main.DataSource = results;
                 Control_RemoveTab_DataGridView_Main.ClearSelection();
 
+                // Only show columns in this order: Location, PartID, Operation, Quantity, Notes
+                string[] columnsToShow = { "Location", "PartID", "Operation", "Quantity", "Notes" };
                 foreach (DataGridViewColumn column in Control_RemoveTab_DataGridView_Main.Columns)
                 {
-                    column.Visible = true;
+                    column.Visible = columnsToShow.Contains(column.Name);
+                }
+                // Reorder columns
+                for (int i = 0; i < columnsToShow.Length; i++)
+                {
+                    if (Control_RemoveTab_DataGridView_Main.Columns.Contains(columnsToShow[i]))
+                        Control_RemoveTab_DataGridView_Main.Columns[columnsToShow[i]].DisplayIndex = i;
                 }
 
                 Core_Themes.ApplyThemeToDataGridView(Control_RemoveTab_DataGridView_Main);
@@ -553,6 +590,26 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 LoggingUtility.LogApplicationError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                     new StringBuilder().Append("Control_RemoveTab_Button_Search_Click").ToString());
+            }
+        }
+
+        private void Control_RemoveTab_Button_Print_Click(object? sender, EventArgs? e)
+        {
+            try
+            {
+                if (Control_RemoveTab_DataGridView_Main.Rows.Count == 0)
+                {
+                    MessageBox.Show("No data to print.", "Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                var printer = new Core_DgvPrinter();
+                Control_RemoveTab_DataGridView_Main.Tag = Control_RemoveTab_ComboBox_Part.Text;
+                printer.Print(Control_RemoveTab_DataGridView_Main);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -634,6 +691,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 bool hasData = Control_RemoveTab_DataGridView_Main.Rows.Count > 0;
                 bool hasSelection = Control_RemoveTab_DataGridView_Main.SelectedRows.Count > 0;
                 Control_RemoveTab_Button_Delete.Enabled = hasData && hasSelection;
+                // Print button enable/disable
+                if (Control_RemoveTab_Button_Print != null)
+                    Control_RemoveTab_Button_Print.Enabled = hasData;
             }
             catch (Exception ex)
             {
@@ -714,6 +774,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 Control_RemoveTab_DataGridView_Main.SelectionChanged +=
                     (s, e) => Control_RemoveTab_Update_ButtonStates();
+
+                // Also update print button state on data source change
+                Control_RemoveTab_DataGridView_Main.DataSourceChanged += (s, e) => Control_RemoveTab_Update_ButtonStates();
 
                 Control_RemoveTab_Button_Delete.Click += Control_RemoveTab_Button_Delete_Click;
 

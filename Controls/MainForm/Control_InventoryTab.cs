@@ -55,11 +55,72 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_InventoryTab_TextBox_Quantity.Text = "[ Enter Valid Quantity ]";
             Control_InventoryTab_TextBox_Quantity.ForeColor =
                 Model_AppVariables.UserUiColors.TextBoxErrorForeColor ?? Color.Red;
+
+            ApplyPrivileges();
         }
 
         #endregion
 
-        #region Methods
+        #region Privlages
+
+        private void ApplyPrivileges()
+        {
+            bool isAdmin = Model_AppVariables.UserTypeAdmin;
+            bool isNormal = Model_AppVariables.UserTypeNormal;
+            bool isReadOnly = Model_AppVariables.UserTypeReadOnly;
+
+            // Admin and Normal: all controls visible/enabled
+            // Read-Only: only specific controls visible/enabled
+            Control_InventoryTab_GroupBox_Main.Visible = isAdmin || isNormal || isReadOnly;
+            Control_InventoryTab_Panel_BottomGroup.Visible = isAdmin || isNormal || isReadOnly;
+            Control_InventoryTab_Button_Reset.Visible = isAdmin || isNormal;
+            Control_InventoryTab_Button_Save.Visible = isAdmin || isNormal;
+            Control_InventoryTab_Label_Version.Visible = true;
+            Control_InventoryTab_Button_AdvancedEntry.Visible = isAdmin || isNormal;
+            Control_InventoryTab_Label_Part.Visible = true;
+            Control_InventoryTab_ComboBox_Operation.Visible = isAdmin || isNormal || isReadOnly;
+            Control_InventoryTab_Label_Op.Visible = true;
+            Control_InventoryTab_ComboBox_Location.Visible = isAdmin || isNormal || isReadOnly;
+            Control_InventoryTab_Label_Loc.Visible = true;
+            Control_InventoryTab_Label_Qty.Visible = true;
+            Control_InventoryTab_TextBox_Quantity.Visible = isAdmin || isNormal || isReadOnly;
+            Control_InventoryTab_ComboBox_Part.Visible = isAdmin || isNormal || isReadOnly;
+            Control_InventoryTab_Label_Notes.Visible = true;
+            Control_InventoryTab_RichTextBox_Notes.Visible = isAdmin || isNormal || isReadOnly;
+            Control_InventoryTab_TableLayout_Main.Visible = true;
+            Control_InventoryTab_Panel_Top.Visible = true;
+            Control_InventoryTab_Button_Toggle_RightPanel.Visible = isAdmin || isNormal;
+            // ToolTip is always available
+            // All other input controls (if any):
+            // If you add more, follow the same pattern
+
+            // For Read-Only, set controls to ReadOnly/Disabled if applicable
+            if (isReadOnly)
+            {
+                Control_InventoryTab_ComboBox_Part.Enabled = false;
+                Control_InventoryTab_ComboBox_Operation.Enabled = false;
+                Control_InventoryTab_ComboBox_Location.Enabled = false;
+                Control_InventoryTab_TextBox_Quantity.Enabled = false;
+                Control_InventoryTab_RichTextBox_Notes.ReadOnly = true;
+                Control_InventoryTab_Button_Save.Visible = false;
+                Control_InventoryTab_Button_Reset.Visible = false;
+                Control_InventoryTab_Button_AdvancedEntry.Visible = false;
+                Control_InventoryTab_Button_Toggle_RightPanel.Visible = false;
+            }
+            else
+            {
+                Control_InventoryTab_ComboBox_Part.Enabled = true;
+                Control_InventoryTab_ComboBox_Operation.Enabled = true;
+                Control_InventoryTab_ComboBox_Location.Enabled = true;
+                Control_InventoryTab_TextBox_Quantity.Enabled = true;
+                Control_InventoryTab_RichTextBox_Notes.ReadOnly = false;
+                Control_InventoryTab_Button_Save.Visible = true;
+                Control_InventoryTab_Button_Reset.Visible = true;
+                Control_InventoryTab_Button_AdvancedEntry.Visible = true;
+                Control_InventoryTab_Button_Toggle_RightPanel.Visible = true;
+            }
+            // TODO: If there are TreeView branches, set their .Visible property here as well.
+        }
 
         #endregion
 

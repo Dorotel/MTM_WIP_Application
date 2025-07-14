@@ -40,10 +40,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         #endregion
 
-        #region Methods
-
-        #endregion
-
         #region Initialization
 
         protected override void OnLoad(EventArgs e)
@@ -101,7 +97,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         private async void Control_Edit_User_ComboBox_Users_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            if (Control_Edit_User_ComboBox_Users.SelectedItem is string userName)
+            if (Control_Edit_User_ComboBox_Users.Text is { } userName)
             {
                 DataRow? userRow = await Dao_User.GetUserByUsernameAsync(userName, true);
                 if (userRow != null)
@@ -110,7 +106,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                     Control_Edit_User_TextBox_FirstName.Text = names.Length > 0 ? names[0] : "";
                     Control_Edit_User_TextBox_LastName.Text = names.Length > 1 ? string.Join(" ", names.Skip(1)) : "";
                     Control_Edit_User_TextBox_UserName.Text = userRow["User"]?.ToString() ?? "";
-                    Control_Edit_User_ComboBox_Shift.SelectedItem = userRow["Shift"]?.ToString() ?? "First";
+                    Control_Edit_User_ComboBox_Shift.Text = userRow["Shift"]?.ToString() ?? "First";
                     Control_Edit_User_TextBox_Pin.Text = userRow["Pin"]?.ToString() ?? "";
                     Control_Edit_User_CheckBox_VisualAccess.Checked =
                         !string.IsNullOrWhiteSpace(userRow["VisualUserName"]?.ToString());
@@ -129,7 +125,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         {
             try
             {
-                if (Control_Edit_User_ComboBox_Users.SelectedItem is not string userName)
+                if (Control_Edit_User_ComboBox_Users.Text is not { } userName)
                 {
                     return;
                 }

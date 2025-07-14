@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Drawing.Printing;
 using System.Text;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
@@ -22,14 +23,13 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         #endregion
 
-        #region Constructors
-
         #region Initialization
 
         public Control_TransferTab()
         {
             InitializeComponent();
             Control_TransferTab_Initialize();
+            ApplyPrivileges();
             Control_TransferTab_ComboBox_Part.ForeColor =
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             Control_TransferTab_ComboBox_Operation.ForeColor =
@@ -47,6 +47,13 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Reset)}");
             toolTip.SetToolTip(Control_TransferTab_Button_Toggle_RightPanel,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Left)}/{Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Right)}");
+
+            if (Control_TransferTab_Panel_Header.Controls["Control_TransferTab_Button_Print"] is Button printButton)
+            {
+                printButton.Click -= Control_TransferTab_Button_Print_Click;
+                printButton.Click += Control_TransferTab_Button_Print_Click;
+                toolTip.SetToolTip(printButton, "Print the current results");
+            }
 
             _ = Control_TransferTab_OnStartup_LoadComboBoxesAsync();
         }
@@ -392,11 +399,18 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 Control_TransferTab_DataGridView_Main.DataSource = results;
                 Control_TransferTab_DataGridView_Main.ClearSelection();
+                // Only show columns in this order: Location, PartID, Operation, Quantity, Notes
+                string[] columnsToShow = { "Location", "PartID", "Operation", "Quantity", "Notes" };
                 foreach (DataGridViewColumn column in Control_TransferTab_DataGridView_Main.Columns)
                 {
-                    column.Visible = true;
+                    column.Visible = columnsToShow.Contains(column.Name);
                 }
-
+                // Reorder columns
+                for (int i = 0; i < columnsToShow.Length; i++)
+                {
+                    if (Control_TransferTab_DataGridView_Main.Columns.Contains(columnsToShow[i]))
+                        Control_TransferTab_DataGridView_Main.Columns[columnsToShow[i]].DisplayIndex = i;
+                }
                 Core_Themes.ApplyThemeToDataGridView(Control_TransferTab_DataGridView_Main);
                 Core_Themes.SizeDataGrid(Control_TransferTab_DataGridView_Main);
                 Control_TransferTab_Image_NothingFound.Visible = results.Rows.Count == 0;
@@ -450,6 +464,26 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 LoggingUtility.LogApplicationError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
                     new StringBuilder().Append("Control_TransferTab_Button_Transfer_Click").ToString());
+            }
+        }
+
+        private void Control_TransferTab_Button_Print_Click(object? sender, EventArgs? e)
+        {
+            try
+            {
+                if (Control_TransferTab_DataGridView_Main.Rows.Count == 0)
+                {
+                    MessageBox.Show("No data to print.", "Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                var printer = new Core_DgvPrinter();
+                Control_TransferTab_DataGridView_Main.Tag = Control_TransferTab_ComboBox_Part.Text;
+                printer.Print(Control_TransferTab_DataGridView_Main);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -696,6 +730,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 Control_TransferTab_Button_Transfer.Enabled =
                     hasData && hasSelection && hasToLocation && hasPart && hasQuantity && !toLocationIsSameAsRow;
+                // Print button enable/disable
+                if (Control_TransferTab_Button_Print != null)
+                    Control_TransferTab_Button_Print.Enabled = hasData;
             }
             catch (Exception ex)
             {
@@ -795,6 +832,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     (s, e) => Control_TransferTab_Update_ButtonStates();
                 Control_TransferTab_DataGridView_Main.SelectionChanged +=
                     Control_TransferTab_DataGridView_Main_SelectionChanged;
+                Control_TransferTab_DataGridView_Main.DataSourceChanged += (s, e) => Control_TransferTab_Update_ButtonStates();
                 Control_TransferTab_Button_Transfer.Click +=
                     async (s, e) => await Control_TransferTab_Button_Save_ClickAsync(s, e);
                 LoggingUtility.Log("Transfer tab events wired up.");
@@ -852,6 +890,45 @@ namespace MTM_Inventory_Application.Controls.MainForm
         }
 
         #endregion
+
+        #region Privileges
+
+        private void ApplyPrivileges()
+        {
+            bool isAdmin = Model_AppVariables.UserTypeAdmin;
+            bool isNormal = Model_AppVariables.UserTypeNormal;
+            bool isReadOnly = Model_AppVariables.UserTypeReadOnly;
+
+            // ComboBoxes
+            Control_TransferTab_ComboBox_Part.Enabled = isAdmin || isNormal || isReadOnly;
+            Control_TransferTab_ComboBox_Operation.Enabled = isAdmin || isNormal || isReadOnly;
+            Control_TransferTab_ComboBox_ToLocation.Enabled = isAdmin || isNormal || isReadOnly;
+            // NumericUpDown
+            Control_TransferTab_NumericUpDown_Quantity.ReadOnly = isReadOnly;
+            Control_TransferTab_NumericUpDown_Quantity.Enabled = isAdmin || isNormal || isReadOnly;
+            // DataGridView
+            Control_TransferTab_DataGridView_Main.ReadOnly = isReadOnly;
+            Control_TransferTab_DataGridView_Main.Enabled = isAdmin || isNormal || isReadOnly;
+            // Buttons
+            Control_TransferTab_Button_Transfer.Visible = isAdmin || isNormal;
+            Control_TransferTab_Button_Transfer.Enabled = isAdmin || isNormal;
+            Control_TransferTab_Button_Reset.Visible = true;
+            Control_TransferTab_Button_Reset.Enabled = true;
+            Control_TransferTab_Button_Search.Visible = true;
+            Control_TransferTab_Button_Search.Enabled = true;
+            Control_TransferTab_Button_Toggle_RightPanel.Visible = true;
+            Control_TransferTab_Button_Toggle_RightPanel.Enabled = true;
+            // Panels, labels, images, etc. are always visible
+            // If you add more, follow the same pattern
+
+            // For Read-Only, hide Transfer button
+            if (isReadOnly)
+            {
+                Control_TransferTab_Button_Transfer.Visible = false;
+                Control_TransferTab_Button_Transfer.Enabled = false;
+            }
+            // TODO: If there are TreeView branches, set their .Visible property here as well.
+        }
 
         #endregion
     }
