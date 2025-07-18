@@ -29,6 +29,169 @@ public static class Dao_Inventory
 
     #endregion
 
+    #region Batch Fix Methods
+
+    /// <summary>
+    /// Splits batch numbers in inv_transaction table where a batch has multiple IN and OUT transactions,
+    /// grouping by ReceiveDate (date only), assigning new batch numbers, and updating the batch sequence.
+    /// Reports progress if a progress reporter is provided. Processes up to 250 batches per run and repeats until all are fixed.
+    /// Before starting, calculates how many batches will need to be fixed and throws an exception with the count and runs required.
+    /// </summary>
+    public static async Task SplitBatchNumbersByReceiveDateAsync(
+        IProgress<(int percent, string status, int cycle, int totalCycles, int batchInCycle, int batchesInCycle, int totalFixed)>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
+
+        // Calculate how many batches need to be fixed before starting
+        int totalProblematicBatches = 0;
+        await using (var connection = new MySqlConnection(connectionString))
+        {
+            await connection.OpenAsync();
+            const string countBatchesSql = @"
+                SELECT COUNT(*)
+                FROM (
+                    SELECT BatchNumber
+                    FROM mtm_wip_application.inv_transaction
+                    GROUP BY BatchNumber
+                    HAVING SUM(CASE WHEN TransactionType = 'IN' THEN 1 ELSE 0 END) > 1
+                       AND SUM(CASE WHEN TransactionType = 'OUT' THEN 1 ELSE 0 END) > 1
+                ) t;";
+            await using (var cmd = new MySqlCommand(countBatchesSql, connection))
+            {
+                object? result = await cmd.ExecuteScalarAsync();
+                totalProblematicBatches = Convert.ToInt32(result);
+            }
+        }
+        int totalCycles = (int)Math.Ceiling(totalProblematicBatches / 250.0);
+
+        int totalFixed = 0;
+        int runCount = 0;
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            runCount++;
+            await using var connection = new MySqlConnection(connectionString);
+            await connection.OpenAsync();
+            await using var transaction = await connection.BeginTransactionAsync();
+            try
+            {
+                progress?.Report((0, $"Finding problematic batch numbers (run {runCount})...", runCount, totalCycles, 0, 0, totalFixed));
+                // 1. Get all problematic BatchNumbers
+                var batchNumbers = new List<string>();
+                const string getBatchesSql = @"
+                    SELECT BatchNumber
+                    FROM (
+                        SELECT BatchNumber,
+                               SUM(CASE WHEN TransactionType = 'IN' THEN 1 ELSE 0 END) AS in_count,
+                               SUM(CASE WHEN TransactionType = 'OUT' THEN 1 ELSE 0 END) AS out_count
+                        FROM mtm_wip_application.inv_transaction
+                        GROUP BY BatchNumber
+                        HAVING in_count > 1 AND out_count > 1
+                    ) t;";
+                await using (var cmd = new MySqlCommand(getBatchesSql, connection, transaction))
+                await using (var reader = await cmd.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        batchNumbers.Add(reader.GetString(0));
+                    }
+                }
+
+                if (batchNumbers.Count == 0)
+                {
+                    progress?.Report((100, $"All problematic batches fixed. Total fixed: {totalFixed}", runCount, totalCycles, 0, 0, totalFixed));
+                    await transaction.CommitAsync();
+                    break;
+                }
+
+                // Only process up to 250 batches per run
+                var toProcess = batchNumbers.Take(250).ToList();
+                progress?.Report((5, $"Run {runCount}: Processing {toProcess.Count} of {batchNumbers.Count} problematic batch numbers...", runCount, totalCycles, 0, toProcess.Count, totalFixed));
+
+                // 2. Get the last used batch number
+                long lastBatchNumber;
+                const string getLastBatchSql = "SELECT last_batch_number FROM mtm_wip_application.inv_inventory_batch_seq;";
+                await using (var cmd = new MySqlCommand(getLastBatchSql, connection, transaction))
+                {
+                    object lastBatchObj = await cmd.ExecuteScalarAsync();
+                    lastBatchNumber = Convert.ToInt64(lastBatchObj);
+                }
+
+                int total = toProcess.Count;
+                int current = 0;
+
+                // 3. For each problematic batch number...
+                foreach (var batchNumber in toProcess)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    current++;
+                    int percent = 5 + (int)(90.0 * current / total);
+                    progress?.Report((percent, $"Run {runCount}: Processing batch {current} of {total} ({batchNumber})...", runCount, totalCycles, current, total, totalFixed));
+
+                    // 3a. Get distinct ReceiveDate (date only) for this batch
+                    var dateList = new List<DateTime>();
+                    const string getDatesSql = @"
+                        SELECT DISTINCT DATE(ReceiveDate)
+                        FROM mtm_wip_application.inv_transaction
+                        WHERE BatchNumber = @BatchNumber
+                        ORDER BY DATE(ReceiveDate);";
+                    await using (var cmd = new MySqlCommand(getDatesSql, connection, transaction))
+                    {
+                        cmd.Parameters.AddWithValue("@BatchNumber", batchNumber);
+                        await using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                dateList.Add(reader.GetDateTime(0).Date);
+                            }
+                        }
+                    }
+
+                    // 3b. For each date, update that group's BatchNumber to a new one
+                    foreach (var date in dateList)
+                    {
+                        lastBatchNumber += 1;
+                        string newBatchNumber = lastBatchNumber.ToString().PadLeft(10, '0');
+
+                        const string updateBatchSql = @"
+                            UPDATE mtm_wip_application.inv_transaction
+                            SET BatchNumber = @NewBatchNumber
+                            WHERE BatchNumber = @BatchNumber AND DATE(ReceiveDate) = @TxDate;";
+                        await using (var cmd = new MySqlCommand(updateBatchSql, connection, transaction))
+                        {
+                            cmd.Parameters.AddWithValue("@NewBatchNumber", newBatchNumber);
+                            cmd.Parameters.AddWithValue("@BatchNumber", batchNumber);
+                            cmd.Parameters.AddWithValue("@TxDate", date);
+                            await cmd.ExecuteNonQueryAsync();
+                        }
+                    }
+                }
+
+                // 4. Update the batch sequence table
+                progress?.Report((98, $"Run {runCount}: Updating batch sequence table...", runCount, totalCycles, total, total, totalFixed));
+                const string updateSeqSql = "UPDATE mtm_wip_application.inv_inventory_batch_seq SET last_batch_number = @LastBatchNumber;";
+                await using (var cmd = new MySqlCommand(updateSeqSql, connection, transaction))
+                {
+                    cmd.Parameters.AddWithValue("@LastBatchNumber", lastBatchNumber);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+
+                await transaction.CommitAsync();
+                totalFixed += toProcess.Count;
+                progress?.Report((99, $"Run {runCount} complete. {toProcess.Count} batches fixed. Total fixed: {totalFixed}", runCount, totalCycles, total, total, totalFixed));
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                progress?.Report((0, $"Error occurred in run {runCount}. Rolled back changes.", runCount, totalCycles, 0, 0, totalFixed));
+                throw;
+            }
+        }
+    }
+
+    #endregion
+
     #region Search Methods
 
     public static async Task<DataTable> GetInventoryByPartIdAsync(string partId, bool useAsync = false) =>

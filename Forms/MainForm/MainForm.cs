@@ -27,6 +27,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         public Control_ProgressBarUserControl TabLoadingControlProgress => _tabLoadingControlProgress;
 
+        private CancellationTokenSource? _batchCancelTokenSource;
+
         #endregion
 
         #region Constructors
@@ -498,8 +500,135 @@ namespace MTM_Inventory_Application.Forms.MainForm
             transactionsForm.ShowDialog(this);
         }
 
-        #endregion
+        private async void squashBatchNumbersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Query the number of problematic batches before running the fix
+                string connectionString = MTM_Inventory_Application.Helpers.Helper_Database_Variables.GetConnectionString(null, null, null, null);
+                int totalProblematicBatches = 0;
+                using (var connection = new MySql.Data.MySqlClient.MySqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    const string countBatchesSql = @"
+                SELECT COUNT(*)
+                FROM (
+                    SELECT BatchNumber
+                    FROM mtm_wip_application.inv_transaction
+                    GROUP BY BatchNumber
+                    HAVING SUM(CASE WHEN TransactionType = 'IN' THEN 1 ELSE 0 END) > 1
+                       AND SUM(CASE WHEN TransactionType = 'OUT' THEN 1 ELSE 0 END) > 1
+                ) t;";
+                    using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(countBatchesSql, connection))
+                    {
+                        object? result = await cmd.ExecuteScalarAsync();
+                        totalProblematicBatches = Convert.ToInt32(result);
+                    }
+                }
+                int cyclesRequired = (int)Math.Ceiling(totalProblematicBatches / 250.0);
+
+                if (totalProblematicBatches == 0)
+                {
+                    MessageBox.Show("No problematic batches found.", "Batch Number Squash", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var prompt = $"Total problematic batches: {totalProblematicBatches}\n" +
+                             $"Estimated runs needed (max 250 per run): {cyclesRequired}\n\n" +
+                             "Do you want to continue?";
+                var resultPrompt = MessageBox.Show(prompt, "Batch Number Squash", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                if (resultPrompt != DialogResult.Yes)
+                    return;
+
+                if (_tabLoadingControlProgress != null)
+                {
+                    _tabLoadingControlProgress.Location = new Point(
+                        (Width - _tabLoadingControlProgress.Width) / 2,
+                        (Height - _tabLoadingControlProgress.Height) / 2
+                    );
+                    _tabLoadingControlProgress.ShowProgress();
+                    _tabLoadingControlProgress.UpdateProgress(0, "Starting batch number squash...");
+                    _tabLoadingControlProgress.EnableCancel(true);
+                }
+
+                _batchCancelTokenSource = new CancellationTokenSource();
+                _tabLoadingControlProgress.CancelRequested += () => _batchCancelTokenSource?.Cancel();
+
+                var cycleTimes = new List<TimeSpan>();
+                int batchesFixed = 0;
+                bool wasCancelled = false;
+                var swCycle = new System.Diagnostics.Stopwatch();
+
+                var progress = new Progress<(int percent, string status, int cycle, int totalCycles, int batchInCycle, int batchesInCycle, int totalFixed)>(tuple =>
+                {
+                    // Estimate time remaining
+                    string timeLeft = "";
+                    if (cycleTimes.Count > 0 && tuple.cycle <= tuple.totalCycles)
+                    {
+                        double avgSeconds = cycleTimes.Average(ts => ts.TotalSeconds);
+                        int cyclesLeft = tuple.totalCycles - tuple.cycle + 1;
+                        var est = TimeSpan.FromSeconds(avgSeconds * cyclesLeft);
+                        timeLeft = $" | Est. time left: {est:mm\\:ss}";
+                    }
+
+                    string detail = $"Cycle {tuple.cycle} of {tuple.totalCycles} | " +
+                                    $"Batch {tuple.batchInCycle} of {tuple.batchesInCycle} in this cycle | " +
+                                    $"Total fixed: {tuple.totalFixed} of {totalProblematicBatches}{timeLeft}";
+
+                    _tabLoadingControlProgress?.UpdateProgress(tuple.percent, $"{tuple.status}\n{detail}");
+                });
+
+                try
+                {
+                    int lastCycle = 0;
+                    swCycle.Restart();
+                    await Dao_Inventory.SplitBatchNumbersByReceiveDateAsync(
+                        progress,
+                        _batchCancelTokenSource.Token
+                    );
+                }
+                catch (OperationCanceledException)
+                {
+                    wasCancelled = true;
+                }
+                finally
+                {
+                    _batchCancelTokenSource = null;
+                    if (_tabLoadingControlProgress != null)
+                    {
+                        _tabLoadingControlProgress.EnableCancel(false);
+                        _tabLoadingControlProgress.CancelRequested -= () => _batchCancelTokenSource?.Cancel();
+                    }
+                }
+
+                if (_tabLoadingControlProgress != null)
+                {
+                    await _tabLoadingControlProgress.CompleteProgressAsync();
+                }
+
+                if (wasCancelled)
+                {
+                    MessageBox.Show("Batch number squash was cancelled by the user.", "Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Batch number squash complete.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (_tabLoadingControlProgress != null)
+                {
+                    _tabLoadingControlProgress.UpdateProgress(0, "Error occurred.");
+                    _tabLoadingControlProgress.HideProgress();
+                }
+                MTM_Inventory_Application.Logging.LoggingUtility.LogApplicationError(ex);
+                MessageBox.Show($"Error during batch number squash: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 
+    #endregion
     #endregion
 }

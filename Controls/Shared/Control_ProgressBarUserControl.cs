@@ -105,7 +105,27 @@ namespace MTM_Inventory_Application.Controls.Shared
             Controls.Add(_progressBar);
             Controls.Add(_statusLabel);
         }
+        private Button? _cancelButton;
+        public event Action? CancelRequested;
 
+        public void EnableCancel(bool enable)
+        {
+            if (_cancelButton == null)
+            {
+                _cancelButton = new Button
+                {
+                    Text = "Cancel",
+                    Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
+                    Size = new Size(80, 30),
+                    Visible = enable
+                };
+                _cancelButton.Click += (s, e) => CancelRequested?.Invoke();
+                Controls.Add(_cancelButton);
+                _cancelButton.BringToFront();
+                _cancelButton.Location = new Point(Width - _cancelButton.Width - 10, Height - _cancelButton.Height - 10);
+            }
+            _cancelButton.Visible = enable;
+        }
         private void LayoutControls()
         {
             int spacing = 8;
