@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Microsoft.Win32;
 using MTM_Inventory_Application.Controls.MainForm;
 using MTM_Inventory_Application.Controls.Shared;
 using MTM_Inventory_Application.Core;
@@ -74,6 +75,10 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 MainForm_OnStartup_WireUpEvents();
                 System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Events wired up.");
 
+                // Wire up DPI change handling for runtime DPI awareness
+                MainForm_OnStartup_WireUpDpiChangeEvents();
+                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] DPI change events wired up.");
+
                 Shown += async (s, e) =>
                 {
                     System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm Shown event triggered.");
@@ -142,6 +147,66 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 MainForm_TabControl_SelectedIndexChanged(null!, null!);
             };
             MainForm_TabControl.Selecting += MainForm_TabControl_Selecting!;
+        }
+
+        /// <summary>
+        /// Wires up DPI change event handling for runtime DPI awareness.
+        /// This ensures the application responds properly to DPI changes when moving between monitors
+        /// or when the user changes system DPI settings.
+        /// </summary>
+        private void MainForm_OnStartup_WireUpDpiChangeEvents()
+        {
+            try
+            {
+                // Handle DPI changes when form is moved between monitors or DPI settings change
+                DpiChanged += MainForm_DpiChanged;
+                
+                // Handle system DPI changes
+                SystemEvents.DisplaySettingsChanged += (s, e) =>
+                {
+                    try
+                    {
+                        // Refresh DPI scaling for all forms when display settings change
+                        Core_Themes.RefreshDpiScalingForAllForms();
+                        LoggingUtility.Log("Display settings changed - DPI scaling refreshed");
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggingUtility.LogApplicationError(ex);
+                    }
+                };
+                
+                LoggingUtility.Log("DPI change event handlers wired up successfully");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                System.Diagnostics.Debug.WriteLine($"[DEBUG] Error wiring up DPI change events: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Handles DPI changes for the main form and all its controls.
+        /// </summary>
+        private void MainForm_DpiChanged(object? sender, DpiChangedEventArgs e)
+        {
+            try
+            {
+                LoggingUtility.Log($"MainForm DPI changed from {e.DeviceDpiOld} to {e.DeviceDpiNew}");
+                
+                // Use the Core_Themes DPI change handler
+                Core_Themes.HandleDpiChanged(this, e.DeviceDpiOld, e.DeviceDpiNew);
+                
+                // Reapply theme after DPI change to ensure proper color scaling
+                Core_Themes.ApplyTheme(this);
+                
+                LoggingUtility.Log("MainForm DPI change handling completed");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                System.Diagnostics.Debug.WriteLine($"[DEBUG] Error handling DPI change: {ex.Message}");
+            }
         }
 
         private static async Task MainForm_OnStartup_GetUserFullNameAsync()

@@ -32,7 +32,7 @@ public static class Helper_Database_Variables
 
     #region Log File Path
 
-    public static string GetLogFilePath(string server, string userName)
+    public static async Task<string> GetLogFilePathAsync(string server, string userName)
     {
         try
         {
@@ -43,14 +43,13 @@ public static class Helper_Database_Variables
             var userDirectory = Path.Combine(logDirectory, userName);
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            var directoryTask = Task.Run(() =>
-            {
-                if (!Directory.Exists(userDirectory)) Directory.CreateDirectory(userDirectory);
-            }, cts.Token);
-
+            
             try
             {
-                directoryTask.Wait(cts.Token);
+                await Task.Run(() =>
+                {
+                    if (!Directory.Exists(userDirectory)) Directory.CreateDirectory(userDirectory);
+                }, cts.Token);
             }
             catch (OperationCanceledException)
             {
@@ -63,9 +62,16 @@ public static class Helper_Database_Variables
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[DEBUG] Error in GetLogFilePath: {ex.Message}");
+            Debug.WriteLine($"[DEBUG] Error in GetLogFilePathAsync: {ex.Message}");
             throw;
         }
+    }
+
+    // Keep the synchronous version for backward compatibility, but mark as obsolete
+    [Obsolete("Use GetLogFilePathAsync for better async performance")]
+    public static string GetLogFilePath(string server, string userName)
+    {
+        return GetLogFilePathAsync(server, userName).GetAwaiter().GetResult();
     }
 
     #endregion

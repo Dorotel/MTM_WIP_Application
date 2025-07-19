@@ -148,6 +148,63 @@ namespace MTM_Inventory_Application.Core
             }
         }
 
+        /// <summary>
+        /// Handles DPI changes at runtime. Call this when the application detects a DPI change
+        /// or when a form is moved between monitors with different DPI settings.
+        /// </summary>
+        /// <param name="form">The form that experienced a DPI change</param>
+        /// <param name="oldDpi">The old DPI value</param>
+        /// <param name="newDpi">The new DPI value</param>
+        public static void HandleDpiChanged(Form form, int oldDpi, int newDpi)
+        {
+            try
+            {
+                float scaleFactor = (float)newDpi / oldDpi;
+                LoggingUtility.Log($"DPI changed from {oldDpi} to {newDpi} (scale factor: {scaleFactor:F2}) for form '{form.Name}'");
+
+                form.SuspendLayout();
+
+                // Reapply DPI scaling and layout adjustments with new DPI
+                ApplyDpiScaling(form);
+                ApplyRuntimeLayoutAdjustments(form);
+
+                // Recursively handle DPI changes for all user controls
+                HandleDpiChangedForControlHierarchy(form.Controls, scaleFactor);
+
+                form.ResumeLayout();
+                
+                LoggingUtility.Log($"DPI change handling completed for form '{form.Name}'");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Provides a way to manually trigger DPI scaling refresh for all open forms.
+        /// Useful for troubleshooting DPI scaling issues.
+        /// </summary>
+        public static void RefreshDpiScalingForAllForms()
+        {
+            try
+            {
+                foreach (Form form in Application.OpenForms)
+                {
+                    if (form.IsDisposed || !form.Visible) continue;
+
+                    ApplyDpiScaling(form);
+                    ApplyRuntimeLayoutAdjustments(form);
+                }
+                
+                LoggingUtility.Log("DPI scaling refreshed for all open forms");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
         #endregion
 
         #region DPI Scaling and Layout Helpers
@@ -324,6 +381,38 @@ namespace MTM_Inventory_Application.Core
             catch
             {
                 return 1.0f; // Default to 100% if unable to get DPI
+            }
+        }
+
+        /// <summary>
+        /// Recursively handles DPI changes for a control hierarchy.
+        /// </summary>
+        private static void HandleDpiChangedForControlHierarchy(Control.ControlCollection controls, float scaleFactor)
+        {
+            foreach (Control control in controls)
+            {
+                try
+                {
+                    // Apply DPI scaling to user controls
+                    if (control is UserControl userControl)
+                    {
+                        ApplyDpiScaling(userControl);
+                        ApplyRuntimeLayoutAdjustments(userControl);
+                    }
+
+                    // Apply specific adjustments to important controls
+                    ApplyControlSpecificLayoutAdjustments(control);
+
+                    // Recursively handle child controls
+                    if (control.HasChildren && control.Controls.Count > 0)
+                    {
+                        HandleDpiChangedForControlHierarchy(control.Controls, scaleFactor);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                }
             }
         }
 

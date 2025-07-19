@@ -29,17 +29,15 @@ internal static class Dao_ErrorLog
     #region Query Methods
 
     internal static async Task<List<(string MethodName, string ErrorMessage)>> GetUniqueErrorsAsync(
-        bool useAsync = false)
+        bool useAsync = true) // Default to async for better performance
     {
         List<(string MethodName, string ErrorMessage)> uniqueErrors = new();
         try
         {
-            using MySqlDataReader reader = useAsync
-                ? await HelperDatabaseCore.ExecuteReader(
-                    "SELECT DISTINCT `MethodName`, `ErrorMessage` FROM `log_error`",
-                    useAsync: true)
-                : HelperDatabaseCore.ExecuteReader("SELECT DISTINCT `MethodName`, `ErrorMessage` FROM `log_error`")
-                    .Result;
+            // Always use async - remove the anti-pattern of .Result blocking
+            using MySqlDataReader reader = await HelperDatabaseCore.ExecuteReader(
+                "SELECT DISTINCT `MethodName`, `ErrorMessage` FROM `log_error`",
+                useAsync: true);
 
             while (reader.Read())
             {
