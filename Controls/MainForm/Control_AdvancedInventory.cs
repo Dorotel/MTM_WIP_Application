@@ -33,6 +33,10 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 LoggingUtility.Log("Control_AdvancedInventory constructor entered.");
                 InitializeComponent();
+                
+                // Apply comprehensive DPI scaling and runtime layout adjustments
+                Core_Themes.ApplyDpiScaling(this);
+                Core_Themes.ApplyRuntimeLayoutAdjustments(this);
 
                 ToolTip toolTip = new();
                 toolTip.SetToolTip(AdvancedInventory_Single_Button_Send,

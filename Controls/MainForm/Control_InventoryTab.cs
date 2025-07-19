@@ -30,6 +30,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
         public Control_InventoryTab()
         {
             InitializeComponent();
+            
+            // Apply comprehensive DPI scaling and runtime layout adjustments
+            Core_Themes.ApplyDpiScaling(this);
+            Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+            
             Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Save,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Save)}");
             Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_AdvancedEntry,

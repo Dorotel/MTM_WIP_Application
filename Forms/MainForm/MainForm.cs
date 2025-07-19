@@ -42,6 +42,11 @@ namespace MTM_Inventory_Application.Forms.MainForm
             {
                 InitializeComponent();
                 AutoScaleMode = AutoScaleMode.Dpi;
+                
+                // Apply comprehensive DPI scaling and runtime layout adjustments
+                Core_Themes.ApplyDpiScaling(this);
+                Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+                
                 System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] InitializeComponent complete.");
 
                 // Set the form title with user and privilege info

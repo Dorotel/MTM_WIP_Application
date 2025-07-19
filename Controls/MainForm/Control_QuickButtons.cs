@@ -23,6 +23,11 @@ public partial class Control_QuickButtons : UserControl
     public Control_QuickButtons()
     {
         InitializeComponent();
+        
+        // Apply comprehensive DPI scaling and runtime layout adjustments
+        Core_Themes.ApplyDpiScaling(this);
+        Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+        
         quickButtons = new List<Button>
         {
             Control_QuickButtons_Button_Button1, Control_QuickButtons_Button_Button2,

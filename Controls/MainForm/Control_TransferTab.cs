@@ -32,6 +32,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
         public Control_TransferTab()
         {
             InitializeComponent();
+            
+            // Apply comprehensive DPI scaling and runtime layout adjustments
+            Core_Themes.ApplyDpiScaling(this);
+            Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+            
             Control_TransferTab_Initialize();
             ApplyPrivileges();
             var errorColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;

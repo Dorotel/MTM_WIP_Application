@@ -14,6 +14,11 @@ public partial class SplashScreenForm : Form
     {
         System.Diagnostics.Debug.WriteLine("[DEBUG] [SplashScreenForm.ctor] Constructing SplashScreenForm...");
         InitializeComponent();
+        
+        // Apply comprehensive DPI scaling and runtime layout adjustments
+        AutoScaleMode = AutoScaleMode.Dpi;
+        Core_Themes.ApplyDpiScaling(this);
+        Core_Themes.ApplyRuntimeLayoutAdjustments(this);
 
         BackColor = Model_AppVariables.UserUiColors?.FormBackColor ?? BackColor;
         _titleLabel!.ForeColor = Model_AppVariables.UserUiColors?.LabelForeColor ?? _titleLabel.ForeColor;

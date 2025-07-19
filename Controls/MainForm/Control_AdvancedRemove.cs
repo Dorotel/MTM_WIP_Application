@@ -26,6 +26,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
         public Control_AdvancedRemove()
         {
             InitializeComponent();
+            
+            // Apply comprehensive DPI scaling and runtime layout adjustments
+            Core_Themes.ApplyDpiScaling(this);
+            Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+            
             Control_AdvancedRemove_Initialize();
             ApplyStandardComboBoxProperties();
             WireUpComboBoxEvents();

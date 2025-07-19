@@ -22,10 +22,17 @@ namespace MTM_Inventory_Application.Core
             Core_AppThemes.AppTheme theme = Core_AppThemes.GetCurrentTheme();
             string themeName = Core_AppThemes.GetEffectiveThemeName();
             form.SuspendLayout();
+            
+            // Apply DPI scaling and layout adjustments first
+            ApplyDpiScaling(form);
+            ApplyRuntimeLayoutAdjustments(form);
+            
+            // Then apply theme colors
             SetFormTheme(form, theme, themeName);
             ApplyThemeToControls(form.Controls);
+            
             form.ResumeLayout();
-            LoggingUtility.Log($"Global theme '{themeName}' applied to form '{form.Name}'.");
+            LoggingUtility.Log($"Global theme '{themeName}' with DPI scaling applied to form '{form.Name}'.");
         }
 
         public static async Task<Model_UserUiColors> GetUserThemeColorsAsync(string userId)
@@ -49,6 +56,275 @@ namespace MTM_Inventory_Application.Core
         {
             Core_AppThemes.AppTheme theme = Core_AppThemes.GetCurrentTheme();
             FocusUtils.ApplyFocusEventHandlingToControls(parentControl.Controls, theme.Colors);
+        }
+
+        /// <summary>
+        /// Applies comprehensive DPI scaling and layout adjustments to a form and all its controls.
+        /// This ensures pixel-perfect scaling at all DPI settings (100%, 125%, 150%, 200%).
+        /// </summary>
+        /// <param name="form">The form to apply DPI scaling to</param>
+        public static void ApplyDpiScaling(Form form)
+        {
+            try
+            {
+                // Set AutoScaleMode to DPI for the form
+                form.AutoScaleMode = AutoScaleMode.Dpi;
+                
+                form.SuspendLayout();
+                ApplyDpiScalingToControlHierarchy(form.Controls);
+                form.ResumeLayout();
+                
+                LoggingUtility.Log($"DPI scaling applied to form '{form.Name}' and all its controls.");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Applies comprehensive DPI scaling and layout adjustments to a user control and all its controls.
+        /// This ensures pixel-perfect scaling at all DPI settings (100%, 125%, 150%, 200%).
+        /// </summary>
+        /// <param name="userControl">The user control to apply DPI scaling to</param>
+        public static void ApplyDpiScaling(UserControl userControl)
+        {
+            try
+            {
+                // Set AutoScaleMode to DPI for the user control
+                userControl.AutoScaleMode = AutoScaleMode.Dpi;
+                
+                userControl.SuspendLayout();
+                ApplyDpiScalingToControlHierarchy(userControl.Controls);
+                userControl.ResumeLayout();
+                
+                LoggingUtility.Log($"DPI scaling applied to user control '{userControl.Name}' and all its controls.");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Applies runtime layout adjustments that were moved from designer files.
+        /// This includes margin/padding adjustments and SplitContainer configurations.
+        /// </summary>
+        /// <param name="form">The form to apply layout adjustments to</param>
+        public static void ApplyRuntimeLayoutAdjustments(Form form)
+        {
+            try
+            {
+                form.SuspendLayout();
+                ApplyLayoutAdjustmentsToControlHierarchy(form.Controls);
+                form.ResumeLayout();
+                
+                LoggingUtility.Log($"Runtime layout adjustments applied to form '{form.Name}'.");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Applies runtime layout adjustments that were moved from designer files.
+        /// This includes margin/padding adjustments and SplitContainer configurations.
+        /// </summary>
+        /// <param name="userControl">The user control to apply layout adjustments to</param>
+        public static void ApplyRuntimeLayoutAdjustments(UserControl userControl)
+        {
+            try
+            {
+                userControl.SuspendLayout();
+                ApplyLayoutAdjustmentsToControlHierarchy(userControl.Controls);
+                userControl.ResumeLayout();
+                
+                LoggingUtility.Log($"Runtime layout adjustments applied to user control '{userControl.Name}'.");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        #endregion
+
+        #region DPI Scaling and Layout Helpers
+
+        /// <summary>
+        /// Recursively applies DPI scaling to a control hierarchy.
+        /// Sets AutoScaleMode = Dpi on user controls and forms.
+        /// </summary>
+        private static void ApplyDpiScalingToControlHierarchy(Control.ControlCollection controls)
+        {
+            foreach (Control control in controls)
+            {
+                try
+                {
+                    // Set AutoScaleMode to DPI for user controls (forms are handled separately)
+                    if (control is UserControl userControl)
+                    {
+                        userControl.AutoScaleMode = AutoScaleMode.Dpi;
+                    }
+
+                    // Recursively apply to child controls
+                    if (control.HasChildren && control.Controls.Count > 0)
+                    {
+                        ApplyDpiScalingToControlHierarchy(control.Controls);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Recursively applies layout adjustments to a control hierarchy.
+        /// Handles margins, padding, and SplitContainer configurations for optimal DPI scaling.
+        /// </summary>
+        private static void ApplyLayoutAdjustmentsToControlHierarchy(Control.ControlCollection controls)
+        {
+            foreach (Control control in controls)
+            {
+                try
+                {
+                    ApplyControlSpecificLayoutAdjustments(control);
+
+                    // Recursively apply to child controls
+                    if (control.HasChildren && control.Controls.Count > 0)
+                    {
+                        ApplyLayoutAdjustmentsToControlHierarchy(control.Controls);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Applies control-specific layout adjustments for optimal DPI scaling.
+        /// This method handles TableLayoutPanel, GroupBox, Panel, and SplitContainer configurations.
+        /// </summary>
+        private static void ApplyControlSpecificLayoutAdjustments(Control control)
+        {
+            switch (control)
+            {
+                case TableLayoutPanel tlp:
+                    // Runtime adjustment: Set minimal margins and padding for TableLayoutPanel
+                    tlp.Margin = new Padding(0);
+                    tlp.Padding = new Padding(1); // Minimum padding for proper appearance
+                    LoggingUtility.Log($"Applied TableLayoutPanel layout adjustments to '{tlp.Name}'");
+                    break;
+
+                case GroupBox groupBox:
+                    // Runtime adjustment: Set minimal margins and padding for GroupBox
+                    groupBox.Margin = new Padding(1);
+                    groupBox.Padding = new Padding(3); // Slightly larger padding for groupbox appearance
+                    LoggingUtility.Log($"Applied GroupBox layout adjustments to '{groupBox.Name}'");
+                    break;
+
+                case Panel panel:
+                    // Runtime adjustment: Set minimal margins for Panel
+                    panel.Margin = new Padding(0);
+                    LoggingUtility.Log($"Applied Panel layout adjustments to '{panel.Name}'");
+                    break;
+
+                case SplitContainer splitContainer:
+                    // Runtime adjustment: Configure SplitContainer for proper DPI scaling
+                    ApplySplitContainerLayoutAdjustments(splitContainer);
+                    break;
+
+                case Button button:
+                    // Runtime adjustment: Ensure buttons have minimal margins for proper scaling
+                    button.Margin = new Padding(1);
+                    break;
+
+                case Label label:
+                    // Runtime adjustment: Ensure labels have minimal margins for proper scaling
+                    label.Margin = new Padding(0);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Applies specific layout adjustments to SplitContainer controls for optimal DPI scaling.
+        /// This method configures splitter distances and ensures panels remain flush and aligned.
+        /// </summary>
+        private static void ApplySplitContainerLayoutAdjustments(SplitContainer splitContainer)
+        {
+            try
+            {
+                // Runtime adjustment: Configure SplitContainer properties for DPI scaling
+                if (splitContainer.Name == "MainForm_SplitContainer_Middle")
+                {
+                    // Main form split container: Set splitter distance based on DPI
+                    // This ensures the left panel (tabs) and right panel (data grid) maintain proper proportions
+                    int baseDistance = 600; // Base distance at 100% DPI
+                    float dpiScale = GetCurrentDpiScale();
+                    splitContainer.SplitterDistance = (int)(baseDistance * dpiScale);
+                    
+                    LoggingUtility.Log($"Applied MainForm SplitContainer distance: {splitContainer.SplitterDistance} (DPI scale: {dpiScale})");
+                }
+                else
+                {
+                    // Generic SplitContainer adjustments: Ensure proper scaling
+                    // Maintain relative proportions based on current size
+                    if (splitContainer.Orientation == Orientation.Vertical)
+                    {
+                        // For vertical splitters, maintain proportional distance
+                        int targetDistance = splitContainer.Width / 2;
+                        if (splitContainer.SplitterDistance != targetDistance && targetDistance > splitContainer.Panel1MinSize)
+                        {
+                            splitContainer.SplitterDistance = Math.Max(targetDistance, splitContainer.Panel1MinSize);
+                        }
+                    }
+                    else
+                    {
+                        // For horizontal splitters, maintain proportional distance
+                        int targetDistance = splitContainer.Height / 2;
+                        if (splitContainer.SplitterDistance != targetDistance && targetDistance > splitContainer.Panel1MinSize)
+                        {
+                            splitContainer.SplitterDistance = Math.Max(targetDistance, splitContainer.Panel1MinSize);
+                        }
+                    }
+                    
+                    LoggingUtility.Log($"Applied generic SplitContainer layout adjustments to '{splitContainer.Name}'");
+                }
+
+                // Ensure both panels have minimal margins
+                splitContainer.Panel1.Margin = new Padding(0);
+                splitContainer.Panel2.Margin = new Padding(0);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets the current DPI scale factor compared to 96 DPI (100% scaling).
+        /// </summary>
+        /// <returns>DPI scale factor (1.0 = 100%, 1.25 = 125%, 1.5 = 150%, 2.0 = 200%)</returns>
+        private static float GetCurrentDpiScale()
+        {
+            try
+            {
+                // Get the current DPI from the primary screen
+                using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
+                {
+                    float dpiX = graphics.DpiX;
+                    return dpiX / 96f; // 96 DPI is 100% scaling
+                }
+            }
+            catch
+            {
+                return 1.0f; // Default to 100% if unable to get DPI
+            }
         }
 
         #endregion

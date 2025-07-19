@@ -26,6 +26,11 @@ namespace MTM_Inventory_Application.Forms.Settings
         public SettingsForm()
         {
             InitializeComponent();
+            
+            // Apply comprehensive DPI scaling and runtime layout adjustments
+            AutoScaleMode = AutoScaleMode.Dpi;
+            Core_Themes.ApplyDpiScaling(this);
+            Core_Themes.ApplyRuntimeLayoutAdjustments(this);
 
             _settingsPanels = new Dictionary<string, Panel>
             {
