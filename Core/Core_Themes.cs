@@ -13,6 +13,27 @@ using MTM_Inventory_Application.Models;
 
 namespace MTM_Inventory_Application.Core
 {
+    /// <summary>
+    /// Core theming system that provides comprehensive DPI scaling and UI responsiveness.
+    /// 
+    /// This class handles:
+    /// 1. Runtime DPI scaling for all forms and controls (per Telerik WinForms DPI scaling article)
+    /// 2. Async/await UI responsiveness improvements (per Grant Winney async WinForms article)
+    /// 3. Theme application with proper color handling
+    /// 4. Runtime layout adjustments moved from designer files
+    /// 5. Dynamic DPI change handling for multi-monitor scenarios
+    /// 
+    /// Key Features:
+    /// - AutoScaleMode.Dpi set on all forms and controls for proper DPI scaling
+    /// - Runtime margin/padding adjustments for TableLayoutPanel, GroupBox, Panel
+    /// - SplitContainer distance calculations based on DPI scale
+    /// - Event-driven DPI change handling for monitor switching
+    /// - Comprehensive control hierarchy traversal for complete coverage
+    /// 
+    /// References:
+    /// - https://www.telerik.com/blogs/winforms-scaling-at-large-dpi-settings-is-it-even-possible-
+    /// - https://grantwinney.com/using-async-await-and-task-to-keep-the-winforms-ui-more-responsive/
+    /// </summary>
     public static class Core_Themes
     {
         #region Public API
@@ -24,6 +45,7 @@ namespace MTM_Inventory_Application.Core
             form.SuspendLayout();
             
             // Apply DPI scaling and layout adjustments first
+            // This ensures pixel-perfect scaling at all DPI settings (100%, 125%, 150%, 200%)
             ApplyDpiScaling(form);
             ApplyRuntimeLayoutAdjustments(form);
             
