@@ -98,7 +98,6 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_Control_TransferTab = new Control_TransferTab();
             control_QuickButtons1 = new Control_QuickButtons();
             flowLayoutPanel1 = new FlowLayoutPanel();
-            squashBatchNumbersToolStripMenuItem = new ToolStripMenuItem();
             MainForm_MenuStrip.SuspendLayout();
             MainForm_StatusStrip.SuspendLayout();
             MainForm_TableLayout.SuspendLayout();
@@ -126,7 +125,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             // MainForm_MenuStrip_File
             // 
-            MainForm_MenuStrip_File.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_File_Settings, MainForm_MenuStrip_Exit, squashBatchNumbersToolStripMenuItem });
+            MainForm_MenuStrip_File.DropDownItems.AddRange(new ToolStripItem[] { MainForm_MenuStrip_File_Settings, MainForm_MenuStrip_Exit });
             MainForm_MenuStrip_File.Name = "MainForm_MenuStrip_File";
             MainForm_MenuStrip_File.Size = new Size(37, 24);
             MainForm_MenuStrip_File.Text = "File";
@@ -135,7 +134,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             MainForm_MenuStrip_File_Settings.Name = "MainForm_MenuStrip_File_Settings";
             MainForm_MenuStrip_File_Settings.ShortcutKeys = Keys.Control | Keys.Shift | Keys.S;
-            MainForm_MenuStrip_File_Settings.Size = new Size(194, 22);
+            MainForm_MenuStrip_File_Settings.Size = new Size(188, 22);
             MainForm_MenuStrip_File_Settings.Text = "Settings";
             MainForm_MenuStrip_File_Settings.Click += MainForm_MenuStrip_File_Settings_Click;
             // 
@@ -143,7 +142,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             MainForm_MenuStrip_Exit.Name = "MainForm_MenuStrip_Exit";
             MainForm_MenuStrip_Exit.ShortcutKeys = Keys.Alt | Keys.F4;
-            MainForm_MenuStrip_Exit.Size = new Size(194, 22);
+            MainForm_MenuStrip_Exit.Size = new Size(188, 22);
             MainForm_MenuStrip_Exit.Text = "Exit";
             MainForm_MenuStrip_Exit.Click += MainForm_MenuStrip_Exit_Click;
             // 
@@ -311,10 +310,10 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             MainForm_TabControl_Remove.Controls.Add(MainForm_RemoveTabNormalControl);
             MainForm_TabControl_Remove.Controls.Add(MainForm_Control_AdvancedRemove);
-            MainForm_TabControl_Remove.Location = new Point(4, 24);
+            MainForm_TabControl_Remove.Location = new Point(4, 44);
             MainForm_TabControl_Remove.Margin = new Padding(0);
             MainForm_TabControl_Remove.Name = "MainForm_TabControl_Remove";
-            MainForm_TabControl_Remove.Size = new Size(817, 398);
+            MainForm_TabControl_Remove.Size = new Size(192, 52);
             MainForm_TabControl_Remove.TabIndex = 1;
             MainForm_TabControl_Remove.Text = "Remove (Ctrl + 2)";
             MainForm_TabControl_Remove.ToolTipText = "Shortcut: Ctrl+2";
@@ -327,7 +326,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_RemoveTabNormalControl.Location = new Point(0, 0);
             MainForm_RemoveTabNormalControl.Name = "MainForm_RemoveTabNormalControl";
             MainForm_RemoveTabNormalControl.Padding = new Padding(3);
-            MainForm_RemoveTabNormalControl.Size = new Size(817, 398);
+            MainForm_RemoveTabNormalControl.Size = new Size(192, 52);
             MainForm_RemoveTabNormalControl.TabIndex = 0;
             // 
             // MainForm_Control_AdvancedRemove
@@ -335,17 +334,17 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_Control_AdvancedRemove.Dock = DockStyle.Fill;
             MainForm_Control_AdvancedRemove.Location = new Point(0, 0);
             MainForm_Control_AdvancedRemove.Name = "MainForm_Control_AdvancedRemove";
-            MainForm_Control_AdvancedRemove.Size = new Size(817, 398);
+            MainForm_Control_AdvancedRemove.Size = new Size(192, 52);
             MainForm_Control_AdvancedRemove.TabIndex = 1;
             MainForm_Control_AdvancedRemove.Visible = false;
             // 
             // MainForm_TabControl_Transfer
             // 
             MainForm_TabControl_Transfer.Controls.Add(MainForm_Control_TransferTab);
-            MainForm_TabControl_Transfer.Location = new Point(4, 24);
+            MainForm_TabControl_Transfer.Location = new Point(4, 64);
             MainForm_TabControl_Transfer.Margin = new Padding(0);
             MainForm_TabControl_Transfer.Name = "MainForm_TabControl_Transfer";
-            MainForm_TabControl_Transfer.Size = new Size(817, 398);
+            MainForm_TabControl_Transfer.Size = new Size(192, 32);
             MainForm_TabControl_Transfer.TabIndex = 2;
             MainForm_TabControl_Transfer.Text = "Transfer (Ctrl+3)";
             MainForm_TabControl_Transfer.ToolTipText = "Shortcut: Ctrl+3";
@@ -358,7 +357,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_Control_TransferTab.Location = new Point(0, 0);
             MainForm_Control_TransferTab.Margin = new Padding(0);
             MainForm_Control_TransferTab.Name = "MainForm_Control_TransferTab";
-            MainForm_Control_TransferTab.Size = new Size(817, 398);
+            MainForm_Control_TransferTab.Size = new Size(192, 32);
             MainForm_Control_TransferTab.TabIndex = 0;
             // 
             // control_QuickButtons1
@@ -379,13 +378,6 @@ namespace MTM_Inventory_Application.Forms.MainForm
             flowLayoutPanel1.Name = "flowLayoutPanel1";
             flowLayoutPanel1.Size = new Size(984, 31);
             flowLayoutPanel1.TabIndex = 94;
-            // 
-            // squashBatchNumbersToolStripMenuItem
-            // 
-            squashBatchNumbersToolStripMenuItem.Name = "squashBatchNumbersToolStripMenuItem";
-            squashBatchNumbersToolStripMenuItem.Size = new Size(194, 22);
-            squashBatchNumbersToolStripMenuItem.Text = "Squash BatchNumbers";
-            squashBatchNumbersToolStripMenuItem.Click += squashBatchNumbersToolStripMenuItem_Click;
             // 
             // MainForm
             // 
@@ -422,7 +414,6 @@ namespace MTM_Inventory_Application.Forms.MainForm
             ResumeLayout(false);
 
         }
-        private ToolStripMenuItem squashBatchNumbersToolStripMenuItem;
     }
 
         
