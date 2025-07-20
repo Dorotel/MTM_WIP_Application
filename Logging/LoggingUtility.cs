@@ -99,19 +99,31 @@ internal static class LoggingUtility
         {
             if (!string.IsNullOrEmpty(filePath))
             {
-                // Use fire-and-forget async operation for logging to avoid blocking UI
-                // Logging should not block the application flow
                 _ = Task.Run(async () =>
                 {
-                    try
+                    const int maxRetries = 5;
+                    const int delayMs = 100;
+                    int attempt = 0;
+                    while (true)
                     {
-                        // Use async file operations for better performance
-                        await using var writer = new StreamWriter(filePath, true);
-                        await writer.WriteLineAsync(logEntry);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"[DEBUG] Failed to write log entry to file: {ex.Message}");
+                        try
+                        {
+                            // Use FileStream with FileShare.Write to allow multiple processes to write
+                            await using var fs = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.Write);
+                            await using var writer = new StreamWriter(fs);
+                            await writer.WriteLineAsync(logEntry);
+                            break; // Success
+                        }
+                        catch (IOException) when (attempt < maxRetries)
+                        {
+                            attempt++;
+                            await Task.Delay(delayMs);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"[DEBUG] Failed to write log entry to file: {ex.Message}");
+                            break;
+                        }
                     }
                 });
             }
@@ -119,7 +131,6 @@ internal static class LoggingUtility
         catch (Exception ex)
         {
             Debug.WriteLine($"[DEBUG] Failed to initiate log write operation: {ex.Message}");
-            // Don't call Log() here to avoid recursion
         }
     }
 

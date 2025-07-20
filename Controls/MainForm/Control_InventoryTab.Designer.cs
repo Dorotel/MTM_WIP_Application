@@ -98,7 +98,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_InventoryTab_TableLayout_Main
             // 
-            Control_InventoryTab_TableLayout_Main.AutoSize = true;
+            Control_InventoryTab_TableLayout_Main.AutoSize = false;
             Control_InventoryTab_TableLayout_Main.ColumnCount = 1;
             Control_InventoryTab_TableLayout_Main.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             Control_InventoryTab_TableLayout_Main.Controls.Add(Control_InventoryTab_Panel_Top, 0, 0);
@@ -108,15 +108,17 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_InventoryTab_TableLayout_Main.Location = new Point(3, 19);
             Control_InventoryTab_TableLayout_Main.Name = "Control_InventoryTab_TableLayout_Main";
             Control_InventoryTab_TableLayout_Main.RowCount = 3;
-            Control_InventoryTab_TableLayout_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            Control_InventoryTab_TableLayout_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            Control_InventoryTab_TableLayout_Main.RowStyles.Add(new RowStyle());
+            Control_InventoryTab_TableLayout_Main.RowStyles.Clear();
+            Control_InventoryTab_TableLayout_Main.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // Top input area
+            Control_InventoryTab_TableLayout_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // RichTextBox area
+            Control_InventoryTab_TableLayout_Main.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // Buttons
             Control_InventoryTab_TableLayout_Main.Size = new Size(809, 362);
             Control_InventoryTab_TableLayout_Main.TabIndex = 0;
             // 
             // Control_InventoryTab_Panel_Top
             // 
             Control_InventoryTab_Panel_Top.Controls.Add(tableLayoutPanel2);
+            Control_InventoryTab_Panel_Top.Dock = DockStyle.Fill;
             Control_InventoryTab_Panel_Top.Location = new Point(3, 3);
             Control_InventoryTab_Panel_Top.Name = "Control_InventoryTab_Panel_Top";
             Control_InventoryTab_Panel_Top.Size = new Size(803, 152);
@@ -126,8 +128,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             tableLayoutPanel2.AutoSize = true;
             tableLayoutPanel2.ColumnCount = 2;
-            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle());
-            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel2.Controls.Add(Control_InventoryTab_Label_Part, 0, 0);
             tableLayoutPanel2.Controls.Add(Control_InventoryTab_Label_Notes, 0, 4);
             tableLayoutPanel2.Controls.Add(Control_InventoryTab_ComboBox_Part, 1, 0);
@@ -141,11 +143,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
             tableLayoutPanel2.Location = new Point(0, 0);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
             tableLayoutPanel2.RowCount = 5;
-            tableLayoutPanel2.RowStyles.Add(new RowStyle());
-            tableLayoutPanel2.RowStyles.Add(new RowStyle());
-            tableLayoutPanel2.RowStyles.Add(new RowStyle());
-            tableLayoutPanel2.RowStyles.Add(new RowStyle());
-            tableLayoutPanel2.RowStyles.Add(new RowStyle());
+            tableLayoutPanel2.RowStyles.Clear();
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tableLayoutPanel2.Size = new Size(803, 152);
             tableLayoutPanel2.TabIndex = 7;
             // 
@@ -249,7 +252,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_InventoryTab_Panel_BottomGroup
             // 
-            Control_InventoryTab_Panel_BottomGroup.AutoSize = true;
+            Control_InventoryTab_Panel_BottomGroup.AutoSize = false;
             Control_InventoryTab_Panel_BottomGroup.Controls.Add(panel1);
             Control_InventoryTab_Panel_BottomGroup.Dock = DockStyle.Fill;
             Control_InventoryTab_Panel_BottomGroup.Location = new Point(3, 161);
@@ -277,13 +280,13 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // tableLayoutPanel1
             // 
-            tableLayoutPanel1.AutoSize = true;
+            tableLayoutPanel1.AutoSize = false;
             tableLayoutPanel1.ColumnCount = 5;
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             tableLayoutPanel1.Controls.Add(Control_InventoryTab_Button_Toggle_RightPanel, 4, 0);
             tableLayoutPanel1.Controls.Add(Control_InventoryTab_Label_Version, 2, 0);
             tableLayoutPanel1.Controls.Add(Control_InventoryTab_Button_Save, 0, 0);

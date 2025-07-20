@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using Microsoft.Win32;
 using MTM_Inventory_Application.Controls.MainForm;
 using MTM_Inventory_Application.Controls.Shared;
@@ -9,6 +10,7 @@ using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Services;
+using MySql.Data.MySqlClient;
 using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Forms.MainForm
@@ -38,52 +40,60 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         public MainForm()
         {
-            System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Constructing MainForm...");
+            Debug.WriteLine("[DEBUG] [MainForm.ctor] Constructing MainForm...");
             try
             {
                 InitializeComponent();
                 AutoScaleMode = AutoScaleMode.Dpi;
-                
+
                 // Apply comprehensive DPI scaling and runtime layout adjustments
                 Core_Themes.ApplyDpiScaling(this);
                 Core_Themes.ApplyRuntimeLayoutAdjustments(this);
-                
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] InitializeComponent complete.");
+
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] InitializeComponent complete.");
 
                 // Set the form title with user and privilege info
                 string privilege = "Unknown";
                 if (Model_AppVariables.UserTypeAdmin)
+                {
                     privilege = "Administrator";
+                }
                 else if (Model_AppVariables.UserTypeNormal)
+                {
                     privilege = "Normal User";
+                }
                 else if (Model_AppVariables.UserTypeReadOnly)
+                {
                     privilege = "Read Only";
-                this.Text = $"Manitowoc Tool and Manufacturing WIP Inventory System | {Model_AppVariables.User} | {privilege}";
+                }
+
+                Text =
+                    $"Manitowoc Tool and Manufacturing WIP Inventory System | {Model_AppVariables.User} | {privilege}";
 
                 InitializeProgressControl();
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Progress control initialized.");
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] Progress control initialized.");
 
                 ConnectionStrengthChecker = new Helper_Control_MySqlSignal();
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthChecker initialized.");
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthChecker initialized.");
 
                 ConnectionRecoveryManager = new Service_ConnectionRecoveryManager(this);
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionRecoveryManager initialized.");
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionRecoveryManager initialized.");
 
                 MainForm_OnStartup_SetupConnectionStrengthControl();
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthControl setup complete.");
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthControl setup complete.");
 
                 MainForm_OnStartup_WireUpEvents();
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Events wired up.");
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] Events wired up.");
 
                 // Wire up DPI change handling for runtime DPI awareness
                 MainForm_OnStartup_WireUpDpiChangeEvents();
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] DPI change events wired up.");
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] DPI change events wired up.");
 
                 Shown += async (s, e) =>
                 {
-                    System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm Shown event triggered.");
+                    Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm Shown event triggered.");
                     await MainForm_OnStartup_GetUserFullNameAsync();
-                    System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] User full name loaded.");
+                    Debug.WriteLine("[DEBUG] [MainForm.ctor] User full name loaded.");
                     await Task.Delay(500);
                     if (MainForm_Control_InventoryTab != null)
                     {
@@ -93,17 +103,17 @@ namespace MTM_Inventory_Application.Forms.MainForm
                             Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
                     }
 
-                    System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm is now idle and ready.");
+                    Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm is now idle and ready.");
                 };
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[DEBUG] [MainForm.ctor] Exception: {ex}");
+                Debug.WriteLine($"[DEBUG] [MainForm.ctor] Exception: {ex}");
                 LoggingUtility.LogApplicationError(ex);
                 _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm));
             }
 
-            System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm constructed.");
+            Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm constructed.");
         }
 
         #endregion
@@ -160,7 +170,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             {
                 // Handle DPI changes when form is moved between monitors or DPI settings change
                 DpiChanged += MainForm_DpiChanged;
-                
+
                 // Handle system DPI changes
                 SystemEvents.DisplaySettingsChanged += (s, e) =>
                 {
@@ -175,13 +185,13 @@ namespace MTM_Inventory_Application.Forms.MainForm
                         LoggingUtility.LogApplicationError(ex);
                     }
                 };
-                
+
                 LoggingUtility.Log("DPI change event handlers wired up successfully");
             }
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                System.Diagnostics.Debug.WriteLine($"[DEBUG] Error wiring up DPI change events: {ex.Message}");
+                Debug.WriteLine($"[DEBUG] Error wiring up DPI change events: {ex.Message}");
             }
         }
 
@@ -193,19 +203,19 @@ namespace MTM_Inventory_Application.Forms.MainForm
             try
             {
                 LoggingUtility.Log($"MainForm DPI changed from {e.DeviceDpiOld} to {e.DeviceDpiNew}");
-                
+
                 // Use the Core_Themes DPI change handler
                 Core_Themes.HandleDpiChanged(this, e.DeviceDpiOld, e.DeviceDpiNew);
-                
+
                 // Reapply theme after DPI change to ensure proper color scaling
                 Core_Themes.ApplyTheme(this);
-                
+
                 LoggingUtility.Log("MainForm DPI change handling completed");
             }
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                System.Diagnostics.Debug.WriteLine($"[DEBUG] Error handling DPI change: {ex.Message}");
+                Debug.WriteLine($"[DEBUG] Error handling DPI change: {ex.Message}");
             }
         }
 
@@ -575,9 +585,9 @@ namespace MTM_Inventory_Application.Forms.MainForm
             try
             {
                 // Query the number of problematic batches before running the fix
-                string connectionString = MTM_Inventory_Application.Helpers.Helper_Database_Variables.GetConnectionString(null, null, null, null);
+                string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
                 int totalProblematicBatches = 0;
-                using (var connection = new MySql.Data.MySqlClient.MySqlConnection(connectionString))
+                using (MySqlConnection connection = new(connectionString))
                 {
                     await connection.OpenAsync();
                     const string countBatchesSql = @"
@@ -589,27 +599,32 @@ namespace MTM_Inventory_Application.Forms.MainForm
                     HAVING SUM(CASE WHEN TransactionType = 'IN' THEN 1 ELSE 0 END) > 1
                        AND SUM(CASE WHEN TransactionType = 'OUT' THEN 1 ELSE 0 END) > 1
                 ) t;";
-                    using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(countBatchesSql, connection))
+                    using (MySqlCommand cmd = new(countBatchesSql, connection))
                     {
                         object? result = await cmd.ExecuteScalarAsync();
                         totalProblematicBatches = Convert.ToInt32(result);
                     }
                 }
+
                 int cyclesRequired = (int)Math.Ceiling(totalProblematicBatches / 250.0);
 
                 if (totalProblematicBatches == 0)
                 {
-                    MessageBox.Show("No problematic batches found.", "Batch Number Squash", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("No problematic batches found.", "Batch Number Squash", MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
                     return;
                 }
 
-                var prompt = $"Total problematic batches: {totalProblematicBatches}\n" +
-                             $"Estimated runs needed (max 250 per run): {cyclesRequired}\n\n" +
-                             "Do you want to continue?";
-                var resultPrompt = MessageBox.Show(prompt, "Batch Number Squash", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                string prompt = $"Total problematic batches: {totalProblematicBatches}\n" +
+                                $"Estimated runs needed (max 250 per run): {cyclesRequired}\n\n" +
+                                "Do you want to continue?";
+                DialogResult resultPrompt = MessageBox.Show(prompt, "Batch Number Squash", MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
 
                 if (resultPrompt != DialogResult.Yes)
+                {
                     return;
+                }
 
                 if (_tabLoadingControlProgress != null)
                 {
@@ -625,12 +640,13 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 _batchCancelTokenSource = new CancellationTokenSource();
                 _tabLoadingControlProgress.CancelRequested += () => _batchCancelTokenSource?.Cancel();
 
-                var cycleTimes = new List<TimeSpan>();
+                List<TimeSpan> cycleTimes = new();
                 int batchesFixed = 0;
                 bool wasCancelled = false;
-                var swCycle = new System.Diagnostics.Stopwatch();
+                Stopwatch swCycle = new();
 
-                var progress = new Progress<(int percent, string status, int cycle, int totalCycles, int batchInCycle, int batchesInCycle, int totalFixed)>(tuple =>
+                Progress<(int percent, string status, int cycle, int totalCycles, int batchInCycle, int batchesInCycle,
+                    int totalFixed)> progress = new(tuple =>
                 {
                     // Estimate time remaining
                     string timeLeft = "";
@@ -638,7 +654,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
                     {
                         double avgSeconds = cycleTimes.Average(ts => ts.TotalSeconds);
                         int cyclesLeft = tuple.totalCycles - tuple.cycle + 1;
-                        var est = TimeSpan.FromSeconds(avgSeconds * cyclesLeft);
+                        TimeSpan est = TimeSpan.FromSeconds(avgSeconds * cyclesLeft);
                         timeLeft = $" | Est. time left: {est:mm\\:ss}";
                     }
 
@@ -679,11 +695,13 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
                 if (wasCancelled)
                 {
-                    MessageBox.Show("Batch number squash was cancelled by the user.", "Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Batch number squash was cancelled by the user.", "Cancelled", MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
                 }
                 else
                 {
-                    MessageBox.Show("Batch number squash complete.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Batch number squash complete.", "Success", MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
@@ -693,12 +711,15 @@ namespace MTM_Inventory_Application.Forms.MainForm
                     _tabLoadingControlProgress.UpdateProgress(0, "Error occurred.");
                     _tabLoadingControlProgress.HideProgress();
                 }
-                MTM_Inventory_Application.Logging.LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($"Error during batch number squash: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                LoggingUtility.LogApplicationError(ex);
+                MessageBox.Show($"Error during batch number squash: {ex.Message}", "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
     }
 
     #endregion
+
     #endregion
 }

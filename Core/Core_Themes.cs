@@ -43,16 +43,16 @@ namespace MTM_Inventory_Application.Core
             Core_AppThemes.AppTheme theme = Core_AppThemes.GetCurrentTheme();
             string themeName = Core_AppThemes.GetEffectiveThemeName();
             form.SuspendLayout();
-            
+
             // Apply DPI scaling and layout adjustments first
             // This ensures pixel-perfect scaling at all DPI settings (100%, 125%, 150%, 200%)
             ApplyDpiScaling(form);
             ApplyRuntimeLayoutAdjustments(form);
-            
+
             // Then apply theme colors
             SetFormTheme(form, theme, themeName);
             ApplyThemeToControls(form.Controls);
-            
+
             form.ResumeLayout();
             LoggingUtility.Log($"Global theme '{themeName}' with DPI scaling applied to form '{form.Name}'.");
         }
@@ -91,11 +91,42 @@ namespace MTM_Inventory_Application.Core
             {
                 // Set AutoScaleMode to DPI for the form
                 form.AutoScaleMode = AutoScaleMode.Dpi;
-                
+
                 form.SuspendLayout();
                 ApplyDpiScalingToControlHierarchy(form.Controls);
+
+                // --- Resize form if any child (recursively) is larger than the form ---
+                Size required = GetDeepestRequiredSize(form);
+                bool resizeNeeded = false;
+                int newWidth = form.Width;
+                int newHeight = form.Height;
+                if (required.Width > form.Width)
+                {
+                    newWidth = required.Width;
+                    resizeNeeded = true;
+                }
+
+                if (required.Height > form.Height)
+                {
+                    newHeight = required.Height;
+                    resizeNeeded = true;
+                }
+
+                if (resizeNeeded)
+                {
+                    form.Width = newWidth;
+                    form.Height = newHeight;
+                    // Also update MaximumSize
+                    if (form.MaximumSize.Width < newWidth || form.MaximumSize.Height < newHeight)
+                    {
+                        form.MaximumSize = new Size(Math.Max(form.MaximumSize.Width, newWidth),
+                            Math.Max(form.MaximumSize.Height, newHeight));
+                    }
+                }
+                // --- End resize logic ---
+
                 form.ResumeLayout();
-                
+
                 LoggingUtility.Log($"DPI scaling applied to form '{form.Name}' and all its controls.");
             }
             catch (Exception ex)
@@ -115,11 +146,11 @@ namespace MTM_Inventory_Application.Core
             {
                 // Set AutoScaleMode to DPI for the user control
                 userControl.AutoScaleMode = AutoScaleMode.Dpi;
-                
+
                 userControl.SuspendLayout();
                 ApplyDpiScalingToControlHierarchy(userControl.Controls);
                 userControl.ResumeLayout();
-                
+
                 LoggingUtility.Log($"DPI scaling applied to user control '{userControl.Name}' and all its controls.");
             }
             catch (Exception ex)
@@ -140,7 +171,7 @@ namespace MTM_Inventory_Application.Core
                 form.SuspendLayout();
                 ApplyLayoutAdjustmentsToControlHierarchy(form.Controls);
                 form.ResumeLayout();
-                
+
                 LoggingUtility.Log($"Runtime layout adjustments applied to form '{form.Name}'.");
             }
             catch (Exception ex)
@@ -161,7 +192,7 @@ namespace MTM_Inventory_Application.Core
                 userControl.SuspendLayout();
                 ApplyLayoutAdjustmentsToControlHierarchy(userControl.Controls);
                 userControl.ResumeLayout();
-                
+
                 LoggingUtility.Log($"Runtime layout adjustments applied to user control '{userControl.Name}'.");
             }
             catch (Exception ex)
@@ -182,7 +213,8 @@ namespace MTM_Inventory_Application.Core
             try
             {
                 float scaleFactor = (float)newDpi / oldDpi;
-                LoggingUtility.Log($"DPI changed from {oldDpi} to {newDpi} (scale factor: {scaleFactor:F2}) for form '{form.Name}'");
+                LoggingUtility.Log(
+                    $"DPI changed from {oldDpi} to {newDpi} (scale factor: {scaleFactor:F2}) for form '{form.Name}'");
 
                 form.SuspendLayout();
 
@@ -194,7 +226,7 @@ namespace MTM_Inventory_Application.Core
                 HandleDpiChangedForControlHierarchy(form.Controls, scaleFactor);
 
                 form.ResumeLayout();
-                
+
                 LoggingUtility.Log($"DPI change handling completed for form '{form.Name}'");
             }
             catch (Exception ex)
@@ -213,12 +245,15 @@ namespace MTM_Inventory_Application.Core
             {
                 foreach (Form form in Application.OpenForms)
                 {
-                    if (form.IsDisposed || !form.Visible) continue;
+                    if (form.IsDisposed || !form.Visible)
+                    {
+                        continue;
+                    }
 
                     ApplyDpiScaling(form);
                     ApplyRuntimeLayoutAdjustments(form);
                 }
-                
+
                 LoggingUtility.Log("DPI scaling refreshed for all open forms");
             }
             catch (Exception ex)
@@ -251,6 +286,36 @@ namespace MTM_Inventory_Application.Core
                     if (control.HasChildren && control.Controls.Count > 0)
                     {
                         ApplyDpiScalingToControlHierarchy(control.Controls);
+
+                        // --- Resize parent if any child (recursively) is larger than parent ---
+                        Size required = GetDeepestRequiredSize(control);
+                        bool resizeNeeded = false;
+                        int newWidth = control.Width;
+                        int newHeight = control.Height;
+                        if (required.Width > control.Width)
+                        {
+                            newWidth = required.Width;
+                            resizeNeeded = true;
+                        }
+
+                        if (required.Height > control.Height)
+                        {
+                            newHeight = required.Height;
+                            resizeNeeded = true;
+                        }
+
+                        if (resizeNeeded)
+                        {
+                            control.Width = newWidth;
+                            control.Height = newHeight;
+                            // Also update MaximumSize
+                            if (control.MaximumSize.Width < newWidth || control.MaximumSize.Height < newHeight)
+                            {
+                                control.MaximumSize = new Size(Math.Max(control.MaximumSize.Width, newWidth),
+                                    Math.Max(control.MaximumSize.Height, newHeight));
+                            }
+                        }
+                        // --- End resize logic ---
                     }
                 }
                 catch (Exception ex)
@@ -341,37 +406,42 @@ namespace MTM_Inventory_Application.Core
                 // Runtime adjustment: Configure SplitContainer properties for DPI scaling
                 if (splitContainer.Name == "MainForm_SplitContainer_Middle")
                 {
-                    // Main form split container: Set splitter distance based on DPI
-                    // This ensures the left panel (tabs) and right panel (data grid) maintain proper proportions
-                    int baseDistance = 600; // Base distance at 100% DPI
-                    float dpiScale = GetCurrentDpiScale();
-                    splitContainer.SplitterDistance = (int)(baseDistance * dpiScale);
-                    
-                    LoggingUtility.Log($"Applied MainForm SplitContainer distance: {splitContainer.SplitterDistance} (DPI scale: {dpiScale})");
+                    // Set splitter distance to 80% of the width for proportional layout
+                    if (splitContainer.Orientation == Orientation.Vertical && splitContainer.Width > 0)
+                    {
+                        int targetDistance = (int)(splitContainer.Width * 0.8);
+                        if (splitContainer.SplitterDistance != targetDistance &&
+                            targetDistance > splitContainer.Panel1MinSize)
+                        {
+                            splitContainer.SplitterDistance = Math.Max(targetDistance, splitContainer.Panel1MinSize);
+                        }
+
+                        LoggingUtility.Log(
+                            $"Applied MainForm SplitContainer distance: {splitContainer.SplitterDistance} (Proportional 80%)");
+                    }
                 }
                 else
                 {
                     // Generic SplitContainer adjustments: Ensure proper scaling
-                    // Maintain relative proportions based on current size
                     if (splitContainer.Orientation == Orientation.Vertical)
                     {
-                        // For vertical splitters, maintain proportional distance
                         int targetDistance = splitContainer.Width / 2;
-                        if (splitContainer.SplitterDistance != targetDistance && targetDistance > splitContainer.Panel1MinSize)
+                        if (splitContainer.SplitterDistance != targetDistance &&
+                            targetDistance > splitContainer.Panel1MinSize)
                         {
                             splitContainer.SplitterDistance = Math.Max(targetDistance, splitContainer.Panel1MinSize);
                         }
                     }
                     else
                     {
-                        // For horizontal splitters, maintain proportional distance
                         int targetDistance = splitContainer.Height / 2;
-                        if (splitContainer.SplitterDistance != targetDistance && targetDistance > splitContainer.Panel1MinSize)
+                        if (splitContainer.SplitterDistance != targetDistance &&
+                            targetDistance > splitContainer.Panel1MinSize)
                         {
                             splitContainer.SplitterDistance = Math.Max(targetDistance, splitContainer.Panel1MinSize);
                         }
                     }
-                    
+
                     LoggingUtility.Log($"Applied generic SplitContainer layout adjustments to '{splitContainer.Name}'");
                 }
 
@@ -435,6 +505,49 @@ namespace MTM_Inventory_Application.Core
                 {
                     LoggingUtility.LogApplicationError(ex);
                 }
+            }
+        }
+
+        // Helper to recursively calculate the required size for a control and all its children
+        private static Size GetDeepestRequiredSize(Control control)
+        {
+            if (!control.Visible)
+            {
+                return Size.Empty;
+            }
+
+            if (control.HasChildren && control.Controls.Count > 0)
+            {
+                int maxRight = 0, maxBottom = 0;
+                foreach (Control child in control.Controls)
+                {
+                    if (!child.Visible)
+                    {
+                        continue;
+                    }
+
+                    Size childRequired = GetDeepestRequiredSize(child);
+                    int childRight = child.Left + childRequired.Width + child.Margin.Right;
+                    int childBottom = child.Top + childRequired.Height + child.Margin.Bottom;
+                    if (childRight > maxRight)
+                    {
+                        maxRight = childRight;
+                    }
+
+                    if (childBottom > maxBottom)
+                    {
+                        maxBottom = childBottom;
+                    }
+                }
+
+                // For containers, also consider their own padding
+                maxRight += control.Padding.Right;
+                maxBottom += control.Padding.Bottom;
+                return new Size(maxRight, maxBottom);
+            }
+            else
+            {
+                return control.Size;
             }
         }
 
@@ -1727,45 +1840,55 @@ namespace MTM_Inventory_Application.Core
                 }
                 else if (control is Button btn)
                 {
-                    ContentAlignment align = btn.TextAlign;
-                    switch (align)
+                    // If the button's parent is Control_QuickButtons, force CenterRight alignment
+                    if (btn.Parent is Control_QuickButtons)
                     {
-                        case ContentAlignment.TopLeft:
-                            format.Alignment = StringAlignment.Near;
-                            format.LineAlignment = StringAlignment.Near;
-                            break;
-                        case ContentAlignment.TopCenter:
-                            format.Alignment = StringAlignment.Center;
-                            format.LineAlignment = StringAlignment.Near;
-                            break;
-                        case ContentAlignment.TopRight:
-                            format.Alignment = StringAlignment.Far;
-                            format.LineAlignment = StringAlignment.Near;
-                            break;
-                        case ContentAlignment.MiddleLeft:
-                            format.Alignment = StringAlignment.Near;
-                            format.LineAlignment = StringAlignment.Center;
-                            break;
-                        case ContentAlignment.MiddleCenter:
-                            format.Alignment = StringAlignment.Center;
-                            format.LineAlignment = StringAlignment.Center;
-                            break;
-                        case ContentAlignment.MiddleRight:
-                            format.Alignment = StringAlignment.Far;
-                            format.LineAlignment = StringAlignment.Center;
-                            break;
-                        case ContentAlignment.BottomLeft:
-                            format.Alignment = StringAlignment.Near;
-                            format.LineAlignment = StringAlignment.Far;
-                            break;
-                        case ContentAlignment.BottomCenter:
-                            format.Alignment = StringAlignment.Center;
-                            format.LineAlignment = StringAlignment.Far;
-                            break;
-                        case ContentAlignment.BottomRight:
-                            format.Alignment = StringAlignment.Far;
-                            format.LineAlignment = StringAlignment.Far;
-                            break;
+                        Debug.Write("QuickButton Set");
+                        format.Alignment = StringAlignment.Far;
+                        format.LineAlignment = StringAlignment.Center;
+                    }
+                    else
+                    {
+                        ContentAlignment align = btn.TextAlign;
+                        switch (align)
+                        {
+                            case ContentAlignment.TopLeft:
+                                format.Alignment = StringAlignment.Near;
+                                format.LineAlignment = StringAlignment.Near;
+                                break;
+                            case ContentAlignment.TopCenter:
+                                format.Alignment = StringAlignment.Center;
+                                format.LineAlignment = StringAlignment.Near;
+                                break;
+                            case ContentAlignment.TopRight:
+                                format.Alignment = StringAlignment.Far;
+                                format.LineAlignment = StringAlignment.Near;
+                                break;
+                            case ContentAlignment.MiddleLeft:
+                                format.Alignment = StringAlignment.Near;
+                                format.LineAlignment = StringAlignment.Center;
+                                break;
+                            case ContentAlignment.MiddleCenter:
+                                format.Alignment = StringAlignment.Center;
+                                format.LineAlignment = StringAlignment.Center;
+                                break;
+                            case ContentAlignment.MiddleRight:
+                                format.Alignment = StringAlignment.Far;
+                                format.LineAlignment = StringAlignment.Center;
+                                break;
+                            case ContentAlignment.BottomLeft:
+                                format.Alignment = StringAlignment.Near;
+                                format.LineAlignment = StringAlignment.Far;
+                                break;
+                            case ContentAlignment.BottomCenter:
+                                format.Alignment = StringAlignment.Center;
+                                format.LineAlignment = StringAlignment.Far;
+                                break;
+                            case ContentAlignment.BottomRight:
+                                format.Alignment = StringAlignment.Far;
+                                format.LineAlignment = StringAlignment.Far;
+                                break;
+                        }
                     }
                 }
                 else if (control is TabPage)
@@ -1818,13 +1941,18 @@ namespace MTM_Inventory_Application.Core
                     format.LineAlignment = StringAlignment.Center;
                 }
 
+                // Shrink font until text fits in a single line (no wrapping)
                 SizeF textSize = e.Graphics.MeasureString(text, font, clientRectangle.Size, format);
                 Font shrinkFont = font;
-
-                while ((textSize.Width > clientRectangle.Width || textSize.Height > clientRectangle.Height) &&
-                       shrinkFont.Size > 1)
+                int minFontSize = 6;
+                float fontSize = font.Size;
+                float singleLineHeight = e.Graphics.MeasureString("A", font).Height;
+                while ((textSize.Width > clientRectangle.Width || textSize.Height > singleLineHeight) &&
+                       fontSize > minFontSize)
                 {
-                    shrinkFont = new Font(shrinkFont.FontFamily, shrinkFont.Size - 0.5f, shrinkFont.Style);
+                    fontSize -= 0.5f;
+                    shrinkFont = new Font(shrinkFont.FontFamily, fontSize, shrinkFont.Style);
+                    singleLineHeight = e.Graphics.MeasureString("A", shrinkFont).Height;
                     textSize = e.Graphics.MeasureString(text, shrinkFont, clientRectangle.Size, format);
                 }
 

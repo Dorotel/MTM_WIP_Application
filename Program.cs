@@ -18,6 +18,19 @@ namespace MTM_Inventory_Application
         {
             try
             {
+                Application.ThreadException += (sender, args) =>
+                {
+                    Console.WriteLine($"[Global Exception] ThreadException: {args.Exception}");
+                    LoggingUtility.LogApplicationError(args.Exception);
+                };
+                AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+                {
+                    if (args.ExceptionObject is Exception ex)
+                    {
+                        Console.WriteLine($"[Global Exception] UnhandledException: {ex}");
+                        LoggingUtility.LogApplicationError(ex);
+                    }
+                };
                 Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
@@ -37,6 +50,7 @@ namespace MTM_Inventory_Application
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[Global Exception] Main catch: {ex}");
                 LoggingUtility.LogApplicationError(ex);
                 _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(Main));
             }
