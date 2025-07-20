@@ -410,6 +410,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             // 
             // Control_Edit_User
             // 
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             Controls.Add(Control_Edit_User_Label_SelectUser);
             Controls.Add(Control_Edit_User_ComboBox_Users);
             Controls.Add(Control_Edit_User_Panel_Buttons);

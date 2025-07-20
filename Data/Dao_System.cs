@@ -98,7 +98,7 @@ internal static class Dao_System
         return user;
     }
 
-    internal static async Task<List<Model_Users>> System_UserAccessTypeAsync(bool useAsync = false)
+    internal static async Task<List<Model_Users>> System_UserAccessTypeAsync(bool useAsync = true) // Default to async
     {
         var user = Model_AppVariables.User;
         var result = new List<Model_Users>();
@@ -112,9 +112,8 @@ internal static class Dao_System
                   JOIN sys_user_roles ur ON u.ID = ur.UserID
                   JOIN sys_roles r ON ur.RoleID = r.ID";
 
-            using var reader = useAsync
-                ? await HelperDatabaseCore.ExecuteReader(sql, null, true, CommandType.Text)
-                : HelperDatabaseCore.ExecuteReader(sql, null, false, CommandType.Text).Result;
+            // Always use async - remove the anti-pattern of .Result blocking
+            using var reader = await HelperDatabaseCore.ExecuteReader(sql, null, true, CommandType.Text);
 
             while (reader.Read())
             {

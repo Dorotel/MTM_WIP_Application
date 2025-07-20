@@ -55,13 +55,19 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             saveButton = new Button();
             cancelButton = new Button();
             SuspendLayout();
+            // 
+            // titleLabel
+            // 
             titleLabel.AutoSize = true;
             titleLabel.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold);
             titleLabel.Location = new Point(20, 20);
             titleLabel.Name = "titleLabel";
-            titleLabel.Size = new Size(125, 20);
+            titleLabel.Size = new Size(120, 20);
             titleLabel.TabIndex = 0;
             titleLabel.Text = "Edit ItemType";
+            // 
+            // itemTypesComboBox
+            // 
             itemTypesComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             itemTypesComboBox.FormattingEnabled = true;
             itemTypesComboBox.Location = new Point(20, 80);
@@ -69,47 +75,71 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             itemTypesComboBox.Size = new Size(300, 23);
             itemTypesComboBox.TabIndex = 1;
             itemTypesComboBox.SelectedIndexChanged += ItemTypesComboBox_SelectedIndexChanged;
+            // 
+            // selectItemTypeLabel
+            // 
             selectItemTypeLabel.AutoSize = true;
             selectItemTypeLabel.Location = new Point(20, 60);
             selectItemTypeLabel.Name = "selectItemTypeLabel";
             selectItemTypeLabel.Size = new Size(130, 15);
             selectItemTypeLabel.TabIndex = 2;
             selectItemTypeLabel.Text = "Select ItemType to Edit:";
+            // 
+            // itemTypeLabel
+            // 
             itemTypeLabel.AutoSize = true;
             itemTypeLabel.Location = new Point(20, 120);
             itemTypeLabel.Name = "itemTypeLabel";
-            itemTypeLabel.Size = new Size(64, 15);
+            itemTypeLabel.Size = new Size(59, 15);
             itemTypeLabel.TabIndex = 3;
             itemTypeLabel.Text = "ItemType:";
+            // 
+            // itemTypeTextBox
+            // 
             itemTypeTextBox.Enabled = false;
             itemTypeTextBox.Location = new Point(20, 140);
             itemTypeTextBox.MaxLength = 100;
             itemTypeTextBox.Name = "itemTypeTextBox";
             itemTypeTextBox.Size = new Size(300, 23);
             itemTypeTextBox.TabIndex = 4;
+            // 
+            // originalIssuedByLabel
+            // 
             originalIssuedByLabel.AutoSize = true;
             originalIssuedByLabel.Location = new Point(20, 180);
             originalIssuedByLabel.Name = "originalIssuedByLabel";
-            originalIssuedByLabel.Size = new Size(102, 15);
+            originalIssuedByLabel.Size = new Size(113, 15);
             originalIssuedByLabel.TabIndex = 5;
             originalIssuedByLabel.Text = "Originally Issued By:";
+            // 
+            // originalIssuedByValueLabel
+            // 
             originalIssuedByValueLabel.AutoSize = true;
             originalIssuedByValueLabel.Location = new Point(20, 200);
             originalIssuedByValueLabel.Name = "originalIssuedByValueLabel";
             originalIssuedByValueLabel.Size = new Size(0, 15);
             originalIssuedByValueLabel.TabIndex = 6;
+            // 
+            // issuedByLabel
+            // 
             issuedByLabel.AutoSize = true;
             issuedByLabel.Location = new Point(20, 240);
             issuedByLabel.Name = "issuedByLabel";
-            issuedByLabel.Size = new Size(60, 15);
+            issuedByLabel.Size = new Size(59, 15);
             issuedByLabel.TabIndex = 7;
             issuedByLabel.Text = "Issued By:";
+            // 
+            // issuedByValueLabel
+            // 
             issuedByValueLabel.AutoSize = true;
             issuedByValueLabel.Location = new Point(20, 260);
             issuedByValueLabel.Name = "issuedByValueLabel";
-            issuedByValueLabel.Size = new Size(77, 15);
+            issuedByValueLabel.Size = new Size(73, 15);
             issuedByValueLabel.TabIndex = 8;
             issuedByValueLabel.Text = "Current User";
+            // 
+            // saveButton
+            // 
             saveButton.Enabled = false;
             saveButton.Location = new Point(20, 300);
             saveButton.Name = "saveButton";
@@ -118,6 +148,9 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             saveButton.Text = "Save";
             saveButton.UseVisualStyleBackColor = true;
             saveButton.Click += SaveButton_Click;
+            // 
+            // cancelButton
+            // 
             cancelButton.Location = new Point(110, 300);
             cancelButton.Name = "cancelButton";
             cancelButton.Size = new Size(75, 23);
@@ -125,8 +158,11 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             cancelButton.Text = "Cancel";
             cancelButton.UseVisualStyleBackColor = true;
             cancelButton.Click += CancelButton_Click;
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
+            // 
+            // Control_Edit_ItemType
+            // 
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             Controls.Add(titleLabel);
             Controls.Add(itemTypesComboBox);
             Controls.Add(selectItemTypeLabel);

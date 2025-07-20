@@ -30,29 +30,26 @@ internal static class LoggingUtility
     {
         try
         {
+            // Run the file operations on a background thread with proper timeout
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            
             await Task.Run(() =>
             {
                 try
                 {
-                    // Add timeout for network operations
-                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                    var task = Task.Run(() =>
+                    var logFiles = Directory.GetFiles(logDirectory, "*.log")
+                        .OrderByDescending(File.GetCreationTime)
+                        .ToList();
+                        
+                    if (logFiles.Count > maxLogs)
                     {
-                        var logFiles = Directory.GetFiles(logDirectory, "*.log")
-                            .OrderByDescending(File.GetCreationTime)
-                            .ToList();
-                        if (logFiles.Count > maxLogs)
+                        var filesToDelete = logFiles.Skip(maxLogs).ToList();
+                        foreach (var logFile in filesToDelete)
                         {
-                            var filesToDelete = logFiles.Skip(maxLogs).ToList();
-                            foreach (var logFile in filesToDelete)
-                            {
-                                cts.Token.ThrowIfCancellationRequested();
-                                File.Delete(logFile);
-                            }
+                            cts.Token.ThrowIfCancellationRequested();
+                            File.Delete(logFile);
                         }
-                    }, cts.Token);
-
-                    task.Wait(cts.Token);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -62,16 +59,22 @@ internal static class LoggingUtility
                 {
                     Debug.WriteLine($"[DEBUG] Error during log file cleanup: {ex.Message}");
                 }
-            });
+            }, cts.Token);
 
             if (Debugger.IsAttached) return;
 
+            // Clean up application data directories
             var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "MTM_WIP_APP");
             var localAppDataPath =
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MTM_WIP_APP");
-            Service_OnStartup_AppDataCleaner.DeleteDirectoryContents(appDataPath);
-            Service_OnStartup_AppDataCleaner.DeleteDirectoryContents(localAppDataPath);
+            
+            // Run directory cleanup operations asynchronously
+            await Task.Run(() =>
+            {
+                Service_OnStartup_AppDataCleaner.DeleteDirectoryContents(appDataPath);
+                Service_OnStartup_AppDataCleaner.DeleteDirectoryContents(localAppDataPath);
+            }, cts.Token);
         }
         catch (Exception ex)
         {
@@ -96,20 +99,38 @@ internal static class LoggingUtility
         {
             if (!string.IsNullOrEmpty(filePath))
             {
-                // Add timeout for file writing operations
-                var task = Task.Run(() =>
+                _ = Task.Run(async () =>
                 {
-                    using var writer = new StreamWriter(filePath, true);
-                    writer.WriteLine(logEntry);
+                    const int maxRetries = 5;
+                    const int delayMs = 100;
+                    int attempt = 0;
+                    while (true)
+                    {
+                        try
+                        {
+                            // Use FileStream with FileShare.Write to allow multiple processes to write
+                            await using var fs = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.Write);
+                            await using var writer = new StreamWriter(fs);
+                            await writer.WriteLineAsync(logEntry);
+                            break; // Success
+                        }
+                        catch (IOException) when (attempt < maxRetries)
+                        {
+                            attempt++;
+                            await Task.Delay(delayMs);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"[DEBUG] Failed to write log entry to file: {ex.Message}");
+                            break;
+                        }
+                    }
                 });
-
-                if (!task.Wait(TimeSpan.FromSeconds(5))) Debug.WriteLine($"[DEBUG] Log write timeout for: {filePath}");
             }
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[DEBUG] Failed to write log entry to file: {ex.Message}");
-            // Don't call Log() here to avoid recursion
+            Debug.WriteLine($"[DEBUG] Failed to initiate log write operation: {ex.Message}");
         }
     }
 
@@ -128,24 +149,23 @@ internal static class LoggingUtility
 
             Debug.WriteLine($"[DEBUG] Server: {server}, User: {userName}");
 
-            // Add timeout for log path operations
-            var logFilePath = await Task.Run(async () =>
+            // Add timeout for log path operations with proper async pattern
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            
+            string logFilePath;
+            try
             {
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                try
-                {
-                    return await Task.Run(() => Helper_Database_Variables.GetLogFilePath(server, userName), cts.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    Debug.WriteLine("[DEBUG] Log path creation timed out, using fallback");
-                    // Fallback to local temp directory
-                    var tempDir = Path.Combine(Path.GetTempPath(), "MTM_WIP_APP", "Logs", userName);
-                    Directory.CreateDirectory(tempDir);
-                    var timestamp = DateTime.Now.ToString("MM-dd-yyyy @ h-mm tt");
-                    return Path.Combine(tempDir, $"{userName} {timestamp}.log");
-                }
-            });
+                logFilePath = await Helper_Database_Variables.GetLogFilePathAsync(server, userName);
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.WriteLine("[DEBUG] Log path creation timed out, using fallback");
+                // Fallback to local temp directory
+                var tempDir = Path.Combine(Path.GetTempPath(), "MTM_WIP_APP", "Logs", userName);
+                Directory.CreateDirectory(tempDir);
+                var timestamp = DateTime.Now.ToString("MM-dd-yyyy @ h-mm tt");
+                logFilePath = Path.Combine(tempDir, $"{userName} {timestamp}.log");
+            }
 
             _logDirectory = Path.GetDirectoryName(logFilePath) ?? "";
             var baseFileName = Path.GetFileNameWithoutExtension(logFilePath);

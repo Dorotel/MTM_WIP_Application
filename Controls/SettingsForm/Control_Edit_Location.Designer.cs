@@ -35,112 +35,148 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             base.Dispose(disposing);
         }
-#endregion
+        #endregion
         #region Component Designer generated code
 
         private void InitializeComponent()
         {
-            this.titleLabel = new System.Windows.Forms.Label();
-            this.selectLocationLabel = new System.Windows.Forms.Label();
-            this.locationsComboBox = new System.Windows.Forms.ComboBox();
-            this.locationLabel = new System.Windows.Forms.Label();
-            this.locationTextBox = new System.Windows.Forms.TextBox();
-            this.buildingLabel = new System.Windows.Forms.Label();
-            this.buildingComboBox = new System.Windows.Forms.ComboBox();
-            this.issuedByLabel = new System.Windows.Forms.Label();
-            this.issuedByValueLabel = new System.Windows.Forms.Label();
-            this.saveButton = new System.Windows.Forms.Button();
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.SuspendLayout();
-            this.titleLabel.AutoSize = true;
-            this.titleLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.titleLabel.Location = new System.Drawing.Point(20, 20);
-            this.titleLabel.Name = "titleLabel";
-            this.titleLabel.Size = new System.Drawing.Size(110, 21);
-            this.titleLabel.TabIndex = 0;
-            this.titleLabel.Text = "Edit Location";
-            this.selectLocationLabel.AutoSize = true;
-            this.selectLocationLabel.Location = new System.Drawing.Point(20, 60);
-            this.selectLocationLabel.Name = "selectLocationLabel";
-            this.selectLocationLabel.Size = new System.Drawing.Size(84, 15);
-            this.selectLocationLabel.TabIndex = 1;
-            this.selectLocationLabel.Text = "Select Location:";
-            this.locationsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.locationsComboBox.FormattingEnabled = true;
-            this.locationsComboBox.Location = new System.Drawing.Point(120, 57);
-            this.locationsComboBox.Name = "locationsComboBox";
-            this.locationsComboBox.Size = new System.Drawing.Size(300, 23);
-            this.locationsComboBox.TabIndex = 2;
-            this.locationsComboBox.SelectedIndexChanged += new System.EventHandler(this.LocationsComboBox_SelectedIndexChanged);
-            this.locationLabel.AutoSize = true;
-            this.locationLabel.Location = new System.Drawing.Point(20, 100);
-            this.locationLabel.Name = "locationLabel";
-            this.locationLabel.Size = new System.Drawing.Size(57, 15);
-            this.locationLabel.TabIndex = 3;
-            this.locationLabel.Text = "Location:";
-            this.locationTextBox.Enabled = false;
-            this.locationTextBox.Location = new System.Drawing.Point(120, 97);
-            this.locationTextBox.Name = "locationTextBox";
-            this.locationTextBox.Size = new System.Drawing.Size(300, 23);
-            this.locationTextBox.TabIndex = 4;
-            this.buildingLabel.AutoSize = true;
-            this.buildingLabel.Location = new System.Drawing.Point(20, 140);
-            this.buildingLabel.Name = "buildingLabel";
-            this.buildingLabel.Size = new System.Drawing.Size(54, 15);
-            this.buildingLabel.TabIndex = 5;
-            this.buildingLabel.Text = "Building:";
-            this.buildingComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.buildingComboBox.Enabled = false;
-            this.buildingComboBox.FormattingEnabled = true;
-            this.buildingComboBox.Location = new System.Drawing.Point(120, 137);
-            this.buildingComboBox.Name = "buildingComboBox";
-            this.buildingComboBox.Size = new System.Drawing.Size(200, 23);
-            this.buildingComboBox.TabIndex = 6;
-            this.issuedByLabel.AutoSize = true;
-            this.issuedByLabel.Location = new System.Drawing.Point(20, 180);
-            this.issuedByLabel.Name = "issuedByLabel";
-            this.issuedByLabel.Size = new System.Drawing.Size(61, 15);
-            this.issuedByLabel.TabIndex = 7;
-            this.issuedByLabel.Text = "Issued By:";
-            this.issuedByValueLabel.AutoSize = true;
-            this.issuedByValueLabel.Location = new System.Drawing.Point(120, 180);
-            this.issuedByValueLabel.Name = "issuedByValueLabel";
-            this.issuedByValueLabel.Size = new System.Drawing.Size(83, 15);
-            this.issuedByValueLabel.TabIndex = 8;
-            this.issuedByValueLabel.Text = "Current User";
-            this.saveButton.Enabled = false;
-            this.saveButton.Location = new System.Drawing.Point(265, 230);
-            this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(75, 23);
-            this.saveButton.TabIndex = 9;
-            this.saveButton.Text = "Save";
-            this.saveButton.UseVisualStyleBackColor = true;
-            this.saveButton.Click += new System.EventHandler(this.SaveButton_Click);
-            this.cancelButton.Enabled = false;
-            this.cancelButton.Location = new System.Drawing.Point(345, 230);
-            this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 10;
-            this.cancelButton.Text = "Cancel";
-            this.cancelButton.UseVisualStyleBackColor = true;
-            this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.saveButton);
-            this.Controls.Add(this.issuedByValueLabel);
-            this.Controls.Add(this.issuedByLabel);
-            this.Controls.Add(this.buildingComboBox);
-            this.Controls.Add(this.buildingLabel);
-            this.Controls.Add(this.locationTextBox);
-            this.Controls.Add(this.locationLabel);
-            this.Controls.Add(this.locationsComboBox);
-            this.Controls.Add(this.selectLocationLabel);
-            this.Controls.Add(this.titleLabel);
-            this.Name = "Control_Edit_Location";
-            this.Size = new System.Drawing.Size(450, 280);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            titleLabel = new Label();
+            selectLocationLabel = new Label();
+            locationsComboBox = new ComboBox();
+            locationLabel = new Label();
+            locationTextBox = new TextBox();
+            buildingLabel = new Label();
+            buildingComboBox = new ComboBox();
+            issuedByLabel = new Label();
+            issuedByValueLabel = new Label();
+            saveButton = new Button();
+            cancelButton = new Button();
+            SuspendLayout();
+            // 
+            // titleLabel
+            // 
+            titleLabel.AutoSize = true;
+            titleLabel.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            titleLabel.Location = new Point(20, 20);
+            titleLabel.Name = "titleLabel";
+            titleLabel.Size = new Size(110, 21);
+            titleLabel.TabIndex = 0;
+            titleLabel.Text = "Edit Location";
+            // 
+            // selectLocationLabel
+            // 
+            selectLocationLabel.AutoSize = true;
+            selectLocationLabel.Location = new Point(20, 60);
+            selectLocationLabel.Name = "selectLocationLabel";
+            selectLocationLabel.Size = new Size(90, 15);
+            selectLocationLabel.TabIndex = 1;
+            selectLocationLabel.Text = "Select Location:";
+            // 
+            // locationsComboBox
+            // 
+            locationsComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            locationsComboBox.FormattingEnabled = true;
+            locationsComboBox.Location = new Point(120, 57);
+            locationsComboBox.Name = "locationsComboBox";
+            locationsComboBox.Size = new Size(300, 23);
+            locationsComboBox.TabIndex = 2;
+            locationsComboBox.SelectedIndexChanged += LocationsComboBox_SelectedIndexChanged;
+            // 
+            // locationLabel
+            // 
+            locationLabel.AutoSize = true;
+            locationLabel.Location = new Point(20, 100);
+            locationLabel.Name = "locationLabel";
+            locationLabel.Size = new Size(56, 15);
+            locationLabel.TabIndex = 3;
+            locationLabel.Text = "Location:";
+            // 
+            // locationTextBox
+            // 
+            locationTextBox.Enabled = false;
+            locationTextBox.Location = new Point(120, 97);
+            locationTextBox.Name = "locationTextBox";
+            locationTextBox.Size = new Size(300, 23);
+            locationTextBox.TabIndex = 4;
+            // 
+            // buildingLabel
+            // 
+            buildingLabel.AutoSize = true;
+            buildingLabel.Location = new Point(20, 140);
+            buildingLabel.Name = "buildingLabel";
+            buildingLabel.Size = new Size(54, 15);
+            buildingLabel.TabIndex = 5;
+            buildingLabel.Text = "Building:";
+            // 
+            // buildingComboBox
+            // 
+            buildingComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            buildingComboBox.Enabled = false;
+            buildingComboBox.FormattingEnabled = true;
+            buildingComboBox.Location = new Point(120, 137);
+            buildingComboBox.Name = "buildingComboBox";
+            buildingComboBox.Size = new Size(200, 23);
+            buildingComboBox.TabIndex = 6;
+            // 
+            // issuedByLabel
+            // 
+            issuedByLabel.AutoSize = true;
+            issuedByLabel.Location = new Point(20, 180);
+            issuedByLabel.Name = "issuedByLabel";
+            issuedByLabel.Size = new Size(59, 15);
+            issuedByLabel.TabIndex = 7;
+            issuedByLabel.Text = "Issued By:";
+            // 
+            // issuedByValueLabel
+            // 
+            issuedByValueLabel.AutoSize = true;
+            issuedByValueLabel.Location = new Point(120, 180);
+            issuedByValueLabel.Name = "issuedByValueLabel";
+            issuedByValueLabel.Size = new Size(73, 15);
+            issuedByValueLabel.TabIndex = 8;
+            issuedByValueLabel.Text = "Current User";
+            // 
+            // saveButton
+            // 
+            saveButton.Enabled = false;
+            saveButton.Location = new Point(265, 230);
+            saveButton.Name = "saveButton";
+            saveButton.Size = new Size(75, 23);
+            saveButton.TabIndex = 9;
+            saveButton.Text = "Save";
+            saveButton.UseVisualStyleBackColor = true;
+            saveButton.Click += SaveButton_Click;
+            // 
+            // cancelButton
+            // 
+            cancelButton.Enabled = false;
+            cancelButton.Location = new Point(345, 230);
+            cancelButton.Name = "cancelButton";
+            cancelButton.Size = new Size(75, 23);
+            cancelButton.TabIndex = 10;
+            cancelButton.Text = "Cancel";
+            cancelButton.UseVisualStyleBackColor = true;
+            cancelButton.Click += CancelButton_Click;
+            // 
+            // Control_Edit_Location
+            // 
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            Controls.Add(cancelButton);
+            Controls.Add(saveButton);
+            Controls.Add(issuedByValueLabel);
+            Controls.Add(issuedByLabel);
+            Controls.Add(buildingComboBox);
+            Controls.Add(buildingLabel);
+            Controls.Add(locationTextBox);
+            Controls.Add(locationLabel);
+            Controls.Add(locationsComboBox);
+            Controls.Add(selectLocationLabel);
+            Controls.Add(titleLabel);
+            Name = "Control_Edit_Location";
+            Size = new Size(450, 280);
+            ResumeLayout(false);
+            PerformLayout();
 
         }
     }

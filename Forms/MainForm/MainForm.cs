@@ -1,4 +1,7 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Reflection;
+using Microsoft.Win32;
 using MTM_Inventory_Application.Controls.MainForm;
 using MTM_Inventory_Application.Controls.Shared;
 using MTM_Inventory_Application.Core;
@@ -8,6 +11,7 @@ using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Services;
+using MySql.Data.MySqlClient;
 using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Forms.MainForm
@@ -37,63 +41,80 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         public MainForm()
         {
-            System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Constructing MainForm...");
+            Debug.WriteLine("[DEBUG] [MainForm.ctor] Constructing MainForm...");
             try
             {
                 InitializeComponent();
                 AutoScaleMode = AutoScaleMode.Dpi;
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] InitializeComponent complete.");
+
+                // Apply comprehensive DPI scaling and runtime layout adjustments
+                Core_Themes.ApplyDpiScaling(this);
+                Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] InitializeComponent complete.");
 
                 // Set the form title with user and privilege info
                 string privilege = "Unknown";
                 if (Model_AppVariables.UserTypeAdmin)
+                {
                     privilege = "Administrator";
+                }
                 else if (Model_AppVariables.UserTypeNormal)
+                {
                     privilege = "Normal User";
+                }
                 else if (Model_AppVariables.UserTypeReadOnly)
+                {
                     privilege = "Read Only";
-                this.Text = $"Manitowoc Tool and Manufacturing WIP Inventory System | {Model_AppVariables.User} | {privilege}";
+                }
+
+                Text =
+                    $"Manitowoc Tool and Manufacturing WIP Inventory System | {Model_AppVariables.User} | {privilege}";
 
                 InitializeProgressControl();
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Progress control initialized.");
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] Progress control initialized.");
 
                 ConnectionStrengthChecker = new Helper_Control_MySqlSignal();
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthChecker initialized.");
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthChecker initialized.");
 
                 ConnectionRecoveryManager = new Service_ConnectionRecoveryManager(this);
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionRecoveryManager initialized.");
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionRecoveryManager initialized.");
 
                 MainForm_OnStartup_SetupConnectionStrengthControl();
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthControl setup complete.");
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthControl setup complete.");
 
                 MainForm_OnStartup_WireUpEvents();
-                System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] Events wired up.");
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] Events wired up.");
+
+                // Wire up DPI change handling for runtime DPI awareness
+                MainForm_OnStartup_WireUpDpiChangeEvents();
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] DPI change events wired up.");
 
                 Shown += async (s, e) =>
                 {
-                    System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm Shown event triggered.");
+                    Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm Shown event triggered.");
                     await MainForm_OnStartup_GetUserFullNameAsync();
-                    System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] User full name loaded.");
+                    Debug.WriteLine("[DEBUG] [MainForm.ctor] User full name loaded.");
                     await Task.Delay(500);
-                    if (MainForm_Control_InventoryTab != null)
+                    if (MainForm_UserControl_InventoryTab != null)
                     {
-                        MainForm_Control_InventoryTab.Control_InventoryTab_ComboBox_Part.Focus();
-                        MainForm_Control_InventoryTab.Control_InventoryTab_ComboBox_Part.SelectAll();
-                        MainForm_Control_InventoryTab.Control_InventoryTab_ComboBox_Part.BackColor =
+                        MainForm_UserControl_InventoryTab.Control_InventoryTab_ComboBox_Part.Focus();
+                        MainForm_UserControl_InventoryTab.Control_InventoryTab_ComboBox_Part.SelectAll();
+                        MainForm_UserControl_InventoryTab.Control_InventoryTab_ComboBox_Part.BackColor =
                             Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
                     }
 
-                    System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm is now idle and ready.");
+                    Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm is now idle and ready.");
                 };
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[DEBUG] [MainForm.ctor] Exception: {ex}");
+                Debug.WriteLine($"[DEBUG] [MainForm.ctor] Exception: {ex}");
                 LoggingUtility.LogApplicationError(ex);
                 _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm));
             }
 
-            System.Diagnostics.Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm constructed.");
+            Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm constructed.");
         }
 
         #endregion
@@ -137,6 +158,66 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 MainForm_TabControl_SelectedIndexChanged(null!, null!);
             };
             MainForm_TabControl.Selecting += MainForm_TabControl_Selecting!;
+        }
+
+        /// <summary>
+        /// Wires up DPI change event handling for runtime DPI awareness.
+        /// This ensures the application responds properly to DPI changes when moving between monitors
+        /// or when the user changes system DPI settings.
+        /// </summary>
+        private void MainForm_OnStartup_WireUpDpiChangeEvents()
+        {
+            try
+            {
+                // Handle DPI changes when form is moved between monitors or DPI settings change
+                DpiChanged += MainForm_DpiChanged;
+
+                // Handle system DPI changes
+                SystemEvents.DisplaySettingsChanged += (s, e) =>
+                {
+                    try
+                    {
+                        // Refresh DPI scaling for all forms when display settings change
+                        Core_Themes.RefreshDpiScalingForAllForms();
+                        LoggingUtility.Log("Display settings changed - DPI scaling refreshed");
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggingUtility.LogApplicationError(ex);
+                    }
+                };
+
+                LoggingUtility.Log("DPI change event handlers wired up successfully");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                Debug.WriteLine($"[DEBUG] Error wiring up DPI change events: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Handles DPI changes for the main form and all its controls.
+        /// </summary>
+        private void MainForm_DpiChanged(object? sender, DpiChangedEventArgs e)
+        {
+            try
+            {
+                LoggingUtility.Log($"MainForm DPI changed from {e.DeviceDpiOld} to {e.DeviceDpiNew}");
+
+                // Use the Core_Themes DPI change handler
+                Core_Themes.HandleDpiChanged(this, e.DeviceDpiOld, e.DeviceDpiNew);
+
+                // Reapply theme after DPI change to ensure proper color scaling
+                Core_Themes.ApplyTheme(this);
+
+                LoggingUtility.Log("MainForm DPI change handling completed");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                Debug.WriteLine($"[DEBUG] Error handling DPI change: {ex.Message}");
+            }
         }
 
         private static async Task MainForm_OnStartup_GetUserFullNameAsync()
@@ -192,8 +273,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         private void MainForm_TabControl_Selecting(object sender, TabControlCancelEventArgs e)
         {
-            Control_AdvancedInventory? advancedInvTab = MainForm_AdvancedInventory;
-            Control_AdvancedRemove? advancedRemoveTab = MainForm_Control_AdvancedRemove;
+            Control_AdvancedInventory? advancedInvTab = MainForm_UserControl_AdvancedInventory;
+            Control_AdvancedRemove? advancedRemoveTab = MainForm_UserControl_AdvancedRemove;
 
             if ((advancedInvTab != null && advancedInvTab.Visible) ||
                 (advancedRemoveTab != null && advancedRemoveTab.Visible))
@@ -216,174 +297,74 @@ namespace MTM_Inventory_Application.Forms.MainForm
             try
             {
                 await ShowTabLoadingProgressAsync();
+                Debug.WriteLine("Resetting");
+                // Call all SoftReset methods on all user controls
+                UserControl[] allUserControls = new UserControl[]
+                {
+                    MainForm_UserControl_InventoryTab, MainForm_UserControl_AdvancedInventory,
+                    MainForm_UserControl_RemoveTab, MainForm_UserControl_AdvancedRemove,
+                    MainForm_UserControl_TransferTab
+                };
 
+                foreach (UserControl ctrl in allUserControls)
+                {
+                    Debug.WriteLine(ctrl?.ToString());
+                    if (ctrl == null)
+                    {
+                        continue;
+                    }
+
+                    string[] methods = new[]
+                    {
+                        "Control_InventoryTab_SoftReset", "Control_AdvancedInventory_SoftReset",
+                        "Control_RemoveTab_SoftReset", "Control_AdvancedRemove_SoftReset",
+                        "Control_TransferTab_SoftReset"
+                    };
+                    foreach (string methodName in methods)
+                    {
+                        MethodInfo? method = ctrl.GetType().GetMethod(methodName,
+                            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                        if (method != null)
+                        {
+                            Debug.WriteLine($"Invoking {method.Name} on {ctrl.GetType().Name}");
+                            method.Invoke(ctrl, null);
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"Method {methodName} not found on {ctrl.GetType().Name}");
+                        }
+                    }
+                }
+
+                // Only handle visibility after resets
                 switch (MainForm_TabControl.SelectedIndex)
                 {
                     case 0:
-                        Control_InventoryTab? invTab = MainForm_Control_InventoryTab;
-                        Control_AdvancedInventory? advancedInvTab = MainForm_AdvancedInventory;
-                        if (invTab is not null)
+                        if (MainForm_UserControl_InventoryTab is not null)
                         {
-                            if (invTab.GetType().GetField("Control_InventoryTab_ComboBox_Part",
-                                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
-                                    ?.GetValue(invTab) is ComboBox part)
+                            MainForm_UserControl_InventoryTab.Visible = true;
+                            if (MainForm_UserControl_AdvancedInventory is not null)
                             {
-                                part.SelectedIndex = 0;
-                                part.Focus();
-                                part.SelectAll();
-                                part.BackColor = Model_AppVariables.UserUiColors.ControlFocusedBackColor ??
-                                                 Color.LightBlue;
-                                part.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-                                ;
-                            }
-
-                            if (invTab.GetType().GetField("Control_InventoryTab_TextBox_Quantity",
-                                        System.Reflection.BindingFlags.NonPublic |
-                                        System.Reflection.BindingFlags.Instance)
-                                    ?.GetValue(invTab) is TextBox qty)
-                            {
-                                qty.Text = @"[ Enter Valid Quantity ]";
-                                qty.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-                                ;
-                            }
-
-                            if (invTab.GetType().GetField("Control_InventoryTab_ComboBox_Operation",
-                                        System.Reflection.BindingFlags.NonPublic |
-                                        System.Reflection.BindingFlags.Instance)
-                                    ?.GetValue(invTab) is ComboBox op)
-                            {
-                                op.SelectedIndex = 0;
-                                op.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-                                ;
-                            }
-
-                            if (invTab.GetType().GetField("Control_InventoryTab_ComboBox_Location",
-                                        System.Reflection.BindingFlags.NonPublic |
-                                        System.Reflection.BindingFlags.Instance)
-                                    ?.GetValue(invTab) is ComboBox loc)
-                            {
-                                loc.SelectedIndex = 0;
-                                loc.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-                                ;
-                            }
-
-                            invTab.Visible = true;
-                            if (advancedInvTab is not null)
-                            {
-                                advancedInvTab.Visible = false;
+                                MainForm_UserControl_AdvancedInventory.Visible = false;
                             }
                         }
 
                         break;
                     case 1:
-                        Control_RemoveTab? remTab = MainForm_RemoveTabNormalControl;
-                        Control_AdvancedRemove? advancedRemoveTab = MainForm_Control_AdvancedRemove;
-                        if (remTab is not null)
+                        if (MainForm_UserControl_RemoveTab is not null)
                         {
-                            if (remTab.GetType().GetField("Control_RemoveTab_ComboBox_Part",
-                                        System.Reflection.BindingFlags.NonPublic |
-                                        System.Reflection.BindingFlags.Instance)
-                                    ?.GetValue(remTab) is ComboBox part)
+                            MainForm_UserControl_RemoveTab.Visible = true;
+                            if (MainForm_UserControl_AdvancedRemove is not null)
                             {
-                                part.SelectedIndex = 0;
-                                part.Focus();
-                                part.SelectAll();
-                                part.BackColor = Model_AppVariables.UserUiColors.ControlFocusedBackColor ??
-                                                 Color.LightBlue;
-                                part.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-                                ;
-                            }
-
-                            if (remTab.GetType().GetField("Control_RemoveTab_ComboBox_Operation",
-                                        System.Reflection.BindingFlags.NonPublic |
-                                        System.Reflection.BindingFlags.Instance)
-                                    ?.GetValue(remTab) is ComboBox op)
-                            {
-                                op.SelectedIndex = 0;
-                                op.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-                                ;
-                            }
-
-                            if (remTab.GetType().GetField("Control_RemoveTab_DataGridView_Main",
-                                        System.Reflection.BindingFlags.NonPublic |
-                                        System.Reflection.BindingFlags.Instance)
-                                    ?.GetValue(remTab) is DataGridView dgv)
-                            {
-                                if (dgv.DataSource == null)
-                                {
-                                    dgv.Rows.Clear();
-                                }
-                                else
-                                {
-                                    dgv.DataSource = null;
-                                }
-                            }
-
-                            remTab.Visible = true;
-                            if (advancedRemoveTab is not null)
-                            {
-                                advancedRemoveTab.Visible = false;
+                                MainForm_UserControl_AdvancedRemove.Visible = false;
                             }
                         }
 
                         break;
                     case 2:
-                        Control_TransferTab? transTab = MainForm_Control_TransferTab;
-                        if (transTab is not null)
+                        if (MainForm_UserControl_TransferTab is not null)
                         {
-                            if (transTab.GetType().GetField("Control_TransferTab_ComboBox_Part",
-                                        System.Reflection.BindingFlags.NonPublic |
-                                        System.Reflection.BindingFlags.Instance)
-                                    ?.GetValue(transTab) is ComboBox part)
-                            {
-                                part.SelectedIndex = 0;
-                                part.Focus();
-                                part.SelectAll();
-                                part.BackColor = Model_AppVariables.UserUiColors.ControlFocusedBackColor ??
-                                                 Color.LightBlue;
-                                part.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-                            }
-
-                            if (transTab.GetType().GetField("Control_TransferTab_ComboBox_Operation",
-                                        System.Reflection.BindingFlags.NonPublic |
-                                        System.Reflection.BindingFlags.Instance)
-                                    ?.GetValue(transTab) is ComboBox op)
-                            {
-                                op.SelectedIndex = 0;
-                                op.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-                            }
-
-                            if (transTab.GetType().GetField("Control_TransferTab_ComboBox_ToLocation",
-                                        System.Reflection.BindingFlags.NonPublic |
-                                        System.Reflection.BindingFlags.Instance)
-                                    ?.GetValue(transTab) is ComboBox loc)
-                            {
-                                loc.SelectedIndex = 0;
-                                loc.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-                            }
-
-                            if (transTab.GetType().GetField("Control_TransferTab_DataGridView_Main",
-                                        System.Reflection.BindingFlags.NonPublic |
-                                        System.Reflection.BindingFlags.Instance)
-                                    ?.GetValue(transTab) is DataGridView dgv)
-                            {
-                                if (dgv.DataSource == null)
-                                {
-                                    dgv.Rows.Clear();
-                                }
-                                else
-                                {
-                                    dgv.DataSource = null;
-                                }
-                            }
-
-                            if (transTab.GetType().GetField("Control_TransferTab_NumericUpDown_Quantity",
-                                        System.Reflection.BindingFlags.NonPublic |
-                                        System.Reflection.BindingFlags.Instance)
-                                    ?.GetValue(transTab) is NumericUpDown nud)
-                            {
-                                nud.Value = nud.Minimum;
-                            }
+                            MainForm_UserControl_TransferTab.Visible = true;
                         }
 
                         break;
@@ -397,6 +378,20 @@ namespace MTM_Inventory_Application.Forms.MainForm
             }
             finally
             {
+                // Set focus to the main input control for the currently visible tab
+                switch (MainForm_TabControl.SelectedIndex)
+                {
+                    case 0:
+                        MainForm_UserControl_InventoryTab?.Control_InventoryTab_ComboBox_Part?.Focus();
+                        break;
+                    case 1:
+                        MainForm_UserControl_RemoveTab?.Control_RemoveTab_ComboBox_Part?.Focus();
+                        break;
+                    case 2:
+                        MainForm_UserControl_TransferTab?.Control_TransferTab_ComboBox_Part?.Focus();
+                        break;
+                }
+
                 HideTabLoadingProgress();
             }
         }
@@ -473,7 +468,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 return;
             }
 
-            MainForm_Control_InventoryTab?.Control_InventoryTab_HardReset();
+            MainForm_UserControl_InventoryTab?.Control_InventoryTab_HardReset();
             Core_Themes.ApplyTheme(this);
         }
 
@@ -499,136 +494,9 @@ namespace MTM_Inventory_Application.Forms.MainForm
             Transactions.Transactions transactionsForm = new(connectionString, currentUser);
             transactionsForm.ShowDialog(this);
         }
-
-        private async void squashBatchNumbersToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // Query the number of problematic batches before running the fix
-                string connectionString = MTM_Inventory_Application.Helpers.Helper_Database_Variables.GetConnectionString(null, null, null, null);
-                int totalProblematicBatches = 0;
-                using (var connection = new MySql.Data.MySqlClient.MySqlConnection(connectionString))
-                {
-                    await connection.OpenAsync();
-                    const string countBatchesSql = @"
-                SELECT COUNT(*)
-                FROM (
-                    SELECT BatchNumber
-                    FROM mtm_wip_application.inv_transaction
-                    GROUP BY BatchNumber
-                    HAVING SUM(CASE WHEN TransactionType = 'IN' THEN 1 ELSE 0 END) > 1
-                       AND SUM(CASE WHEN TransactionType = 'OUT' THEN 1 ELSE 0 END) > 1
-                ) t;";
-                    using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(countBatchesSql, connection))
-                    {
-                        object? result = await cmd.ExecuteScalarAsync();
-                        totalProblematicBatches = Convert.ToInt32(result);
-                    }
-                }
-                int cyclesRequired = (int)Math.Ceiling(totalProblematicBatches / 250.0);
-
-                if (totalProblematicBatches == 0)
-                {
-                    MessageBox.Show("No problematic batches found.", "Batch Number Squash", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                var prompt = $"Total problematic batches: {totalProblematicBatches}\n" +
-                             $"Estimated runs needed (max 250 per run): {cyclesRequired}\n\n" +
-                             "Do you want to continue?";
-                var resultPrompt = MessageBox.Show(prompt, "Batch Number Squash", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-
-                if (resultPrompt != DialogResult.Yes)
-                    return;
-
-                if (_tabLoadingControlProgress != null)
-                {
-                    _tabLoadingControlProgress.Location = new Point(
-                        (Width - _tabLoadingControlProgress.Width) / 2,
-                        (Height - _tabLoadingControlProgress.Height) / 2
-                    );
-                    _tabLoadingControlProgress.ShowProgress();
-                    _tabLoadingControlProgress.UpdateProgress(0, "Starting batch number squash...");
-                    _tabLoadingControlProgress.EnableCancel(true);
-                }
-
-                _batchCancelTokenSource = new CancellationTokenSource();
-                _tabLoadingControlProgress.CancelRequested += () => _batchCancelTokenSource?.Cancel();
-
-                var cycleTimes = new List<TimeSpan>();
-                int batchesFixed = 0;
-                bool wasCancelled = false;
-                var swCycle = new System.Diagnostics.Stopwatch();
-
-                var progress = new Progress<(int percent, string status, int cycle, int totalCycles, int batchInCycle, int batchesInCycle, int totalFixed)>(tuple =>
-                {
-                    // Estimate time remaining
-                    string timeLeft = "";
-                    if (cycleTimes.Count > 0 && tuple.cycle <= tuple.totalCycles)
-                    {
-                        double avgSeconds = cycleTimes.Average(ts => ts.TotalSeconds);
-                        int cyclesLeft = tuple.totalCycles - tuple.cycle + 1;
-                        var est = TimeSpan.FromSeconds(avgSeconds * cyclesLeft);
-                        timeLeft = $" | Est. time left: {est:mm\\:ss}";
-                    }
-
-                    string detail = $"Cycle {tuple.cycle} of {tuple.totalCycles} | " +
-                                    $"Batch {tuple.batchInCycle} of {tuple.batchesInCycle} in this cycle | " +
-                                    $"Total fixed: {tuple.totalFixed} of {totalProblematicBatches}{timeLeft}";
-
-                    _tabLoadingControlProgress?.UpdateProgress(tuple.percent, $"{tuple.status}\n{detail}");
-                });
-
-                try
-                {
-                    int lastCycle = 0;
-                    swCycle.Restart();
-                    await Dao_Inventory.SplitBatchNumbersByReceiveDateAsync(
-                        progress,
-                        _batchCancelTokenSource.Token
-                    );
-                }
-                catch (OperationCanceledException)
-                {
-                    wasCancelled = true;
-                }
-                finally
-                {
-                    _batchCancelTokenSource = null;
-                    if (_tabLoadingControlProgress != null)
-                    {
-                        _tabLoadingControlProgress.EnableCancel(false);
-                        _tabLoadingControlProgress.CancelRequested -= () => _batchCancelTokenSource?.Cancel();
-                    }
-                }
-
-                if (_tabLoadingControlProgress != null)
-                {
-                    await _tabLoadingControlProgress.CompleteProgressAsync();
-                }
-
-                if (wasCancelled)
-                {
-                    MessageBox.Show("Batch number squash was cancelled by the user.", "Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    MessageBox.Show("Batch number squash complete.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                if (_tabLoadingControlProgress != null)
-                {
-                    _tabLoadingControlProgress.UpdateProgress(0, "Error occurred.");
-                    _tabLoadingControlProgress.HideProgress();
-                }
-                MTM_Inventory_Application.Logging.LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($"Error during batch number squash: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
     }
 
     #endregion
+
     #endregion
 }

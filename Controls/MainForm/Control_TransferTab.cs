@@ -32,9 +32,14 @@ namespace MTM_Inventory_Application.Controls.MainForm
         public Control_TransferTab()
         {
             InitializeComponent();
+
+            // Apply comprehensive DPI scaling and runtime layout adjustments
+            Core_Themes.ApplyDpiScaling(this);
+            Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+
             Control_TransferTab_Initialize();
             ApplyPrivileges();
-            var errorColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
+            Color errorColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             Control_TransferTab_ComboBox_Part.ForeColor = errorColor;
             Control_TransferTab_ComboBox_Operation.ForeColor = errorColor;
             Control_TransferTab_ComboBox_ToLocation.ForeColor = errorColor;
@@ -50,12 +55,10 @@ namespace MTM_Inventory_Application.Controls.MainForm
             SharedToolTip.SetToolTip(Control_TransferTab_Button_Toggle_RightPanel,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Left)}/{Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Right)}");
 
-            if (Control_TransferTab_Panel_Header.Controls["Control_TransferTab_Button_Print"] is Button printButton)
-            {
-                printButton.Click -= Control_TransferTab_Button_Print_Click;
-                printButton.Click += Control_TransferTab_Button_Print_Click;
-                SharedToolTip.SetToolTip(printButton, "Print the current results");
-            }
+            // Setup Print button event and tooltip directly
+            Control_TransferTab_Button_Print.Click -= Control_TransferTab_Button_Print_Click;
+            Control_TransferTab_Button_Print.Click += Control_TransferTab_Button_Print_Click;
+            SharedToolTip.SetToolTip(Control_TransferTab_Button_Print, "Print the current results");
 
             _ = Control_TransferTab_OnStartup_LoadComboBoxesAsync();
             Control_TransferTab_Update_ButtonStates();
@@ -209,6 +212,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
         #endregion
 
         #region Button Clicks
+
         private async void Control_TransferTab_Button_Reset_Click()
         {
             // Show progress bar at the start
@@ -226,6 +230,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 {
                     Control_TransferTab_SoftReset();
                 }
+
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Reset complete");
             }
             catch (Exception ex)
@@ -334,11 +339,17 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 Debug.WriteLine("[DEBUG] Resetting UI fields");
                 MainFormControlHelper.ResetComboBox(Control_TransferTab_ComboBox_Part,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red, 0);
                 MainFormControlHelper.ResetComboBox(Control_TransferTab_ComboBox_Operation,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red, 0);
                 MainFormControlHelper.ResetComboBox(Control_TransferTab_ComboBox_ToLocation,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red, 0);
+
+                Control_TransferTab_ComboBox_Part.ForeColor = Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
+                Control_TransferTab_ComboBox_Operation.ForeColor =
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
+                Control_TransferTab_ComboBox_ToLocation.ForeColor =
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
 
                 Control_TransferTab_DataGridView_Main.DataSource = null;
                 Control_TransferTab_DataGridView_Main.Refresh();
@@ -395,7 +406,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     Control_TransferTab_ComboBox_Operation.Text != @"[ Enter Operation ]")
                 {
                     LoggingUtility.Log($"Searching inventory for Part ID: {partId} and Operation: {op}");
-                    MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(40, "Querying by part and operation...");
+                    MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(40,
+                        "Querying by part and operation...");
                     results = await Dao_Inventory.GetInventoryByPartIdAndOperationAsync(partId, op, true);
                 }
                 else
@@ -406,23 +418,27 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 }
 
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(70, "Updating results...");
-                var dgv = Control_TransferTab_DataGridView_Main;
+                DataGridView? dgv = Control_TransferTab_DataGridView_Main;
                 dgv.SuspendLayout();
                 dgv.DataSource = results;
                 // Only show columns in this order: Location, PartID, Operation, Quantity, Notes
                 string[] columnsToShowArr = { "Location", "PartID", "Operation", "Quantity", "Notes" };
-                var columnsToShow = new HashSet<string>(columnsToShowArr);
+                HashSet<string> columnsToShow = new(columnsToShowArr);
                 foreach (DataGridViewColumn column in dgv.Columns)
                 {
                     column.Visible = columnsToShow.Contains(column.Name);
                 }
+
                 // Reorder columns only if needed
                 for (int i = 0; i < columnsToShowArr.Length; i++)
                 {
-                    var colName = columnsToShowArr[i];
+                    string colName = columnsToShowArr[i];
                     if (dgv.Columns.Contains(colName) && dgv.Columns[colName].DisplayIndex != i)
+                    {
                         dgv.Columns[colName].DisplayIndex = i;
+                    }
                 }
+
                 Control_TransferTab_Image_NothingFound.Visible = results.Rows.Count == 0;
                 if (results.Rows.Count > 0)
                 {
@@ -430,7 +446,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     Core_Themes.SizeDataGrid(dgv);
                     if (dgv.Rows.Count > 0)
                     {
-                        var firstRow = dgv.Rows[0];
+                        DataGridViewRow firstRow = dgv.Rows[0];
                         if (!firstRow.Selected)
                         {
                             dgv.ClearSelection();
@@ -438,6 +454,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                         }
                     }
                 }
+
                 dgv.ResumeLayout();
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Search complete");
             }
@@ -518,7 +535,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     MessageBox.Show("No data to print.", "Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
-                var printer = new Core_DgvPrinter();
+
+                Core_DgvPrinter printer = new();
                 Control_TransferTab_DataGridView_Main.Tag = Control_TransferTab_ComboBox_Part.Text;
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(60, "Printing...");
                 printer.Print(Control_TransferTab_DataGridView_Main);
@@ -527,7 +545,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
             finally
             {
@@ -669,7 +688,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 {
                     string qtyDisplay = partIds.Count == 1 ? totalQty.ToString() : "Multiple";
                     MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
-                        $@"Last Transfer: Multiple Part IDs, From: {fromLocDisplay} To: {newLocation}, Qty: {qtyDisplay} @ {time}";
+                        $@"Last Transfer: Multiple Part ID's, From: {fromLocDisplay} To: {newLocation}, Qty: {qtyDisplay} @ {time}";
                 }
             }
         }
@@ -776,7 +795,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     hasData && hasSelection && hasToLocation && hasPart && hasQuantity && !toLocationIsSameAsRow;
                 // Print button enable/disable
                 if (Control_TransferTab_Button_Print != null)
+                {
                     Control_TransferTab_Button_Print.Enabled = hasData;
+                }
             }
             catch (Exception ex)
             {
@@ -790,66 +811,40 @@ namespace MTM_Inventory_Application.Controls.MainForm
         {
             try
             {
+                // Use lambda to match EventHandler signature for async void method
                 Control_TransferTab_Button_Reset.Click += (s, e) => Control_TransferTab_Button_Reset_Click();
+
+                // Helper for validation and state update
+                void ValidateAndUpdate(ComboBox combo, string placeholder)
+                {
+                    Helper_UI_ComboBoxes.ValidateComboBoxItem(combo, placeholder);
+                    Control_TransferTab_Update_ButtonStates();
+                }
+
+                // PART ComboBox
                 Control_TransferTab_ComboBox_Part.SelectedIndexChanged += (s, e) =>
                 {
                     Control_TransferTab_ComboBox_Part_SelectedIndexChanged();
-                    Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_Part,
-                        "[ Enter Part Number ]");
-                    Control_TransferTab_Update_ButtonStates();
+                    ValidateAndUpdate(Control_TransferTab_ComboBox_Part, "[ Enter Part Number ]");
                 };
                 Control_TransferTab_ComboBox_Part.Leave += (s, e) =>
                 {
+                    Control_TransferTab_ComboBox_Part.BackColor =
+                        Model_AppVariables.UserUiColors.ControlBackColor ?? SystemColors.Window;
                     Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_Part,
                         "[ Enter Part Number ]");
                 };
-
-                Control_TransferTab_ComboBox_Operation.SelectedIndexChanged += (s, e) =>
-                {
-                    Control_TransferTab_ComboBox_Operation_SelectedIndexChanged();
-                    Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_Operation,
-                        "[ Enter Operation ]");
-                    Control_TransferTab_Update_ButtonStates();
-                };
-                Control_TransferTab_ComboBox_Operation.Leave += (s, e) =>
-                {
-                    Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_Operation,
-                        "[ Enter Operation ]");
-                };
-
-                Control_TransferTab_ComboBox_ToLocation.SelectedIndexChanged +=
-                    (s, e) =>
-                    {
-                        Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_ToLocation,
-                            "[ Enter Location ]");
-                        Control_TransferTab_Update_ButtonStates();
-                    };
-                Control_TransferTab_ComboBox_ToLocation.Leave += (s, e) =>
-                {
-                    Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_ToLocation,
-                        "[ Enter Location ]");
-                };
-
-                Control_TransferTab_NumericUpDown_Quantity.ValueChanged +=
-                    (s, e) => Control_TransferTab_Update_ButtonStates();
-
                 Control_TransferTab_ComboBox_Part.Enter += (s, e) =>
                 {
                     Control_TransferTab_ComboBox_Part.BackColor =
                         Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
                 };
-                Control_TransferTab_ComboBox_Part.Leave += (s, e) =>
-                {
-                    Control_TransferTab_ComboBox_Part.BackColor =
-                        Model_AppVariables.UserUiColors.ControlBackColor ?? SystemColors.Window;
-                    Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_Part,
-                        "[ Enter Part Number ]");
-                };
 
-                Control_TransferTab_ComboBox_Operation.Enter += (s, e) =>
+                // OPERATION ComboBox
+                Control_TransferTab_ComboBox_Operation.SelectedIndexChanged += (s, e) =>
                 {
-                    Control_TransferTab_ComboBox_Operation.BackColor =
-                        Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
+                    Control_TransferTab_ComboBox_Operation_SelectedIndexChanged();
+                    ValidateAndUpdate(Control_TransferTab_ComboBox_Operation, "[ Enter Operation ]");
                 };
                 Control_TransferTab_ComboBox_Operation.Leave += (s, e) =>
                 {
@@ -858,11 +853,16 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_Operation,
                         "[ Enter Operation ]");
                 };
-
-                Control_TransferTab_ComboBox_ToLocation.Enter += (s, e) =>
+                Control_TransferTab_ComboBox_Operation.Enter += (s, e) =>
                 {
-                    Control_TransferTab_ComboBox_ToLocation.BackColor =
+                    Control_TransferTab_ComboBox_Operation.BackColor =
                         Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
+                };
+
+                // TO LOCATION ComboBox
+                Control_TransferTab_ComboBox_ToLocation.SelectedIndexChanged += (s, e) =>
+                {
+                    ValidateAndUpdate(Control_TransferTab_ComboBox_ToLocation, "[ Enter Location ]");
                 };
                 Control_TransferTab_ComboBox_ToLocation.Leave += (s, e) =>
                 {
@@ -871,14 +871,28 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_TransferTab_ComboBox_ToLocation,
                         "[ Enter Location ]");
                 };
+                Control_TransferTab_ComboBox_ToLocation.Enter += (s, e) =>
+                {
+                    Control_TransferTab_ComboBox_ToLocation.BackColor =
+                        Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
+                };
 
+                // NumericUpDown
+                Control_TransferTab_NumericUpDown_Quantity.ValueChanged +=
+                    (s, e) => Control_TransferTab_Update_ButtonStates();
+
+                // DataGridView
                 Control_TransferTab_DataGridView_Main.SelectionChanged +=
                     (s, e) => Control_TransferTab_Update_ButtonStates();
                 Control_TransferTab_DataGridView_Main.SelectionChanged +=
                     Control_TransferTab_DataGridView_Main_SelectionChanged;
-                Control_TransferTab_DataGridView_Main.DataSourceChanged += (s, e) => Control_TransferTab_Update_ButtonStates();
+                Control_TransferTab_DataGridView_Main.DataSourceChanged +=
+                    (s, e) => Control_TransferTab_Update_ButtonStates();
+
+                // Transfer button
                 Control_TransferTab_Button_Transfer.Click +=
                     async (s, e) => await Control_TransferTab_Button_Save_ClickAsync(s, e);
+
                 LoggingUtility.Log("Transfer tab events wired up.");
             }
             catch (Exception ex)
@@ -979,14 +993,33 @@ namespace MTM_Inventory_Application.Controls.MainForm
         #region Helper Methods
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetComboBoxForeColor(ComboBox combo, bool valid)
-        {
+        private void SetComboBoxForeColor(ComboBox combo, bool valid) =>
             combo.ForeColor = valid
                 ? Model_AppVariables.UserUiColors.ComboBoxForeColor ?? Color.Black
                 : Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-        }
 
         #endregion
+
+        private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
+        {
+        }
+
+        private void Control_TransferTab_Button_Toggle_Split_Click(object sender, EventArgs e)
+        {
+            SplitContainer? splitContainer = Control_TransferTab_SplitContainer_Main;
+            Button? button = sender as Button ?? Control_TransferTab_Button_Toggle_Split;
+
+            if (splitContainer.Panel1Collapsed)
+            {
+                splitContainer.Panel1Collapsed = false;
+                button.Text = "Collapse ◀";
+            }
+            else
+            {
+                splitContainer.Panel1Collapsed = true;
+                button.Text = "Expand ▶";
+            }
+        }
     }
 
     #endregion

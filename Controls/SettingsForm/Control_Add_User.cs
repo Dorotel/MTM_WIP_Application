@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
 
@@ -17,6 +18,11 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         public Control_Add_User()
         {
             InitializeComponent();
+
+            // Apply comprehensive DPI scaling and runtime layout adjustments
+            Core_Themes.ApplyDpiScaling(this);
+            Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+
             Control_Add_User_RadioButton_NormalUser.Checked = true;
             Control_Add_User_TextBox_FirstName.KeyPress += Control_Add_User_TextBox_NoSpaces_KeyPress;
             Control_Add_User_TextBox_LastName.KeyPress += Control_Add_User_TextBox_NoSpaces_KeyPress;

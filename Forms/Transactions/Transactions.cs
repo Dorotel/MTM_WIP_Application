@@ -30,6 +30,11 @@ namespace MTM_Inventory_Application.Forms.Transactions
         public Transactions(string connectionString, string currentUser)
         {
             InitializeComponent();
+            
+            // Apply comprehensive DPI scaling and runtime layout adjustments
+            AutoScaleMode = AutoScaleMode.Dpi;
+            Core_Themes.ApplyDpiScaling(this);
+            Core_Themes.ApplyRuntimeLayoutAdjustments(this);
 
             _dao = new Dao_Transactions(connectionString);
             _currentUser = currentUser;

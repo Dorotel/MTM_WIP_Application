@@ -35,8 +35,11 @@ namespace MTM_Inventory_Application.Controls.Shared
         private void InitializeComponent()
         {
             SuspendLayout();
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
+            // 
+            // Control_ProgressBarUserControl
+            // 
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             BorderStyle = BorderStyle.FixedSingle;
             Name = "Control_ProgressBarUserControl";
             Size = new Size(298, 118);

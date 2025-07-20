@@ -7,8 +7,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         private System.ComponentModel.IContainer components = null;
 
         #endregion
-
-        private System.Windows.Forms.Label Control_Add_Location_Label_Title;
         private System.Windows.Forms.Label Control_Add_Location_Label_Location;
         private System.Windows.Forms.TextBox Control_Add_Location_TextBox_Location;
         private System.Windows.Forms.Label Control_Add_Location_Label_Building;
@@ -33,87 +31,160 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         private void InitializeComponent()
         {
-            this.Control_Add_Location_Label_Title = new System.Windows.Forms.Label();
-            this.Control_Add_Location_Label_Location = new System.Windows.Forms.Label();
-            this.Control_Add_Location_TextBox_Location = new System.Windows.Forms.TextBox();
-            this.Control_Add_Location_Label_Building = new System.Windows.Forms.Label();
-            this.Control_Add_Location_ComboBox_Building = new System.Windows.Forms.ComboBox();
-            this.Control_Add_Location_Label_IssuedBy = new System.Windows.Forms.Label();
-            this.Control_Add_Location_Label_IssuedByValue = new System.Windows.Forms.Label();
-            this.Control_Add_Location_Button_Save = new System.Windows.Forms.Button();
-            this.Control_Add_Location_Button_Clear = new System.Windows.Forms.Button();
-            this.SuspendLayout();
-            this.Control_Add_Location_Label_Title.AutoSize = true;
-            this.Control_Add_Location_Label_Title.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.Control_Add_Location_Label_Title.Location = new System.Drawing.Point(20, 20);
-            this.Control_Add_Location_Label_Title.Name = "Control_Add_Location_Label_Title";
-            this.Control_Add_Location_Label_Title.Size = new System.Drawing.Size(106, 21);
-            this.Control_Add_Location_Label_Title.TabIndex = 0;
-            this.Control_Add_Location_Label_Title.Text = "Add Location";
-            this.Control_Add_Location_Label_Location.AutoSize = true;
-            this.Control_Add_Location_Label_Location.Location = new System.Drawing.Point(20, 60);
-            this.Control_Add_Location_Label_Location.Name = "Control_Add_Location_Label_Location";
-            this.Control_Add_Location_Label_Location.Size = new System.Drawing.Size(57, 15);
-            this.Control_Add_Location_Label_Location.TabIndex = 1;
-            this.Control_Add_Location_Label_Location.Text = "Location:";
-            this.Control_Add_Location_TextBox_Location.Location = new System.Drawing.Point(120, 57);
-            this.Control_Add_Location_TextBox_Location.Name = "Control_Add_Location_TextBox_Location";
-            this.Control_Add_Location_TextBox_Location.Size = new System.Drawing.Size(300, 23);
-            this.Control_Add_Location_TextBox_Location.TabIndex = 2;
-            this.Control_Add_Location_Label_Building.AutoSize = true;
-            this.Control_Add_Location_Label_Building.Location = new System.Drawing.Point(20, 100);
-            this.Control_Add_Location_Label_Building.Name = "Control_Add_Location_Label_Building";
-            this.Control_Add_Location_Label_Building.Size = new System.Drawing.Size(54, 15);
-            this.Control_Add_Location_Label_Building.TabIndex = 3;
-            this.Control_Add_Location_Label_Building.Text = "Building:";
-            this.Control_Add_Location_ComboBox_Building.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Control_Add_Location_ComboBox_Building.FormattingEnabled = true;
-            this.Control_Add_Location_ComboBox_Building.Location = new System.Drawing.Point(120, 97);
-            this.Control_Add_Location_ComboBox_Building.Name = "Control_Add_Location_ComboBox_Building";
-            this.Control_Add_Location_ComboBox_Building.Size = new System.Drawing.Size(200, 23);
-            this.Control_Add_Location_ComboBox_Building.TabIndex = 4;
-            this.Control_Add_Location_Label_IssuedBy.AutoSize = true;
-            this.Control_Add_Location_Label_IssuedBy.Location = new System.Drawing.Point(20, 140);
-            this.Control_Add_Location_Label_IssuedBy.Name = "Control_Add_Location_Label_IssuedBy";
-            this.Control_Add_Location_Label_IssuedBy.Size = new System.Drawing.Size(61, 15);
-            this.Control_Add_Location_Label_IssuedBy.TabIndex = 5;
-            this.Control_Add_Location_Label_IssuedBy.Text = "Issued By:";
-            this.Control_Add_Location_Label_IssuedByValue.AutoSize = true;
-            this.Control_Add_Location_Label_IssuedByValue.Location = new System.Drawing.Point(120, 140);
-            this.Control_Add_Location_Label_IssuedByValue.Name = "Control_Add_Location_Label_IssuedByValue";
-            this.Control_Add_Location_Label_IssuedByValue.Size = new System.Drawing.Size(83, 15);
-            this.Control_Add_Location_Label_IssuedByValue.TabIndex = 6;
-            this.Control_Add_Location_Label_IssuedByValue.Text = "Current User";
-            this.Control_Add_Location_Button_Save.Location = new System.Drawing.Point(265, 190);
-            this.Control_Add_Location_Button_Save.Name = "Control_Add_Location_Button_Save";
-            this.Control_Add_Location_Button_Save.Size = new System.Drawing.Size(75, 23);
-            this.Control_Add_Location_Button_Save.TabIndex = 7;
-            this.Control_Add_Location_Button_Save.Text = "Save";
-            this.Control_Add_Location_Button_Save.UseVisualStyleBackColor = true;
-            this.Control_Add_Location_Button_Save.Click += new System.EventHandler(this.Control_Add_Location_Button_Save_Click);
-            this.Control_Add_Location_Button_Clear.Location = new System.Drawing.Point(345, 190);
-            this.Control_Add_Location_Button_Clear.Name = "Control_Add_Location_Button_Clear";
-            this.Control_Add_Location_Button_Clear.Size = new System.Drawing.Size(75, 23);
-            this.Control_Add_Location_Button_Clear.TabIndex = 8;
-            this.Control_Add_Location_Button_Clear.Text = "Clear";
-            this.Control_Add_Location_Button_Clear.UseVisualStyleBackColor = true;
-            this.Control_Add_Location_Button_Clear.Click += new System.EventHandler(this.Control_Add_Location_Button_Clear_Click);
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.Control_Add_Location_Button_Clear);
-            this.Controls.Add(this.Control_Add_Location_Button_Save);
-            this.Controls.Add(this.Control_Add_Location_Label_IssuedByValue);
-            this.Controls.Add(this.Control_Add_Location_Label_IssuedBy);
-            this.Controls.Add(this.Control_Add_Location_ComboBox_Building);
-            this.Controls.Add(this.Control_Add_Location_Label_Building);
-            this.Controls.Add(this.Control_Add_Location_TextBox_Location);
-            this.Controls.Add(this.Control_Add_Location_Label_Location);
-            this.Controls.Add(this.Control_Add_Location_Label_Title);
-            this.Name = "Control_Add_Location";
-            this.Size = new System.Drawing.Size(450, 240);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            Control_Add_Location_Label_Location = new Label();
+            Control_Add_Location_TextBox_Location = new TextBox();
+            Control_Add_Location_Label_Building = new Label();
+            Control_Add_Location_ComboBox_Building = new ComboBox();
+            Control_Add_Location_Label_IssuedBy = new Label();
+            Control_Add_Location_Label_IssuedByValue = new Label();
+            Control_Add_Location_Button_Save = new Button();
+            Control_Add_Location_Button_Clear = new Button();
+            tableLayoutPanel1 = new TableLayoutPanel();
+            groupBox1 = new GroupBox();
+            tableLayoutPanel1.SuspendLayout();
+            groupBox1.SuspendLayout();
+            SuspendLayout();
+            // 
+            // Control_Add_Location_Label_Location
+            // 
+            Control_Add_Location_Label_Location.AutoSize = true;
+            Control_Add_Location_Label_Location.Dock = DockStyle.Fill;
+            Control_Add_Location_Label_Location.Location = new Point(3, 0);
+            Control_Add_Location_Label_Location.Name = "Control_Add_Location_Label_Location";
+            Control_Add_Location_Label_Location.Size = new Size(120, 29);
+            Control_Add_Location_Label_Location.TabIndex = 1;
+            Control_Add_Location_Label_Location.Text = "Location:";
+            Control_Add_Location_Label_Location.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // Control_Add_Location_TextBox_Location
+            // 
+            Control_Add_Location_TextBox_Location.Dock = DockStyle.Fill;
+            Control_Add_Location_TextBox_Location.Location = new Point(129, 3);
+            Control_Add_Location_TextBox_Location.Name = "Control_Add_Location_TextBox_Location";
+            Control_Add_Location_TextBox_Location.Size = new Size(462, 23);
+            Control_Add_Location_TextBox_Location.TabIndex = 2;
+            // 
+            // Control_Add_Location_Label_Building
+            // 
+            Control_Add_Location_Label_Building.AutoSize = true;
+            Control_Add_Location_Label_Building.Dock = DockStyle.Fill;
+            Control_Add_Location_Label_Building.Location = new Point(3, 29);
+            Control_Add_Location_Label_Building.Name = "Control_Add_Location_Label_Building";
+            Control_Add_Location_Label_Building.Size = new Size(120, 29);
+            Control_Add_Location_Label_Building.TabIndex = 3;
+            Control_Add_Location_Label_Building.Text = "Building:";
+            Control_Add_Location_Label_Building.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // Control_Add_Location_ComboBox_Building
+            // 
+            Control_Add_Location_ComboBox_Building.Dock = DockStyle.Fill;
+            Control_Add_Location_ComboBox_Building.DropDownStyle = ComboBoxStyle.DropDownList;
+            Control_Add_Location_ComboBox_Building.FormattingEnabled = true;
+            Control_Add_Location_ComboBox_Building.Location = new Point(129, 32);
+            Control_Add_Location_ComboBox_Building.Name = "Control_Add_Location_ComboBox_Building";
+            Control_Add_Location_ComboBox_Building.Size = new Size(462, 23);
+            Control_Add_Location_ComboBox_Building.TabIndex = 4;
+            // 
+            // Control_Add_Location_Label_IssuedBy
+            // 
+            Control_Add_Location_Label_IssuedBy.AutoSize = true;
+            Control_Add_Location_Label_IssuedBy.Dock = DockStyle.Fill;
+            Control_Add_Location_Label_IssuedBy.Location = new Point(3, 58);
+            Control_Add_Location_Label_IssuedBy.Name = "Control_Add_Location_Label_IssuedBy";
+            Control_Add_Location_Label_IssuedBy.Size = new Size(120, 15);
+            Control_Add_Location_Label_IssuedBy.TabIndex = 5;
+            Control_Add_Location_Label_IssuedBy.Text = "Issued By:";
+            Control_Add_Location_Label_IssuedBy.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // Control_Add_Location_Label_IssuedByValue
+            // 
+            Control_Add_Location_Label_IssuedByValue.AutoSize = true;
+            Control_Add_Location_Label_IssuedByValue.Dock = DockStyle.Fill;
+            Control_Add_Location_Label_IssuedByValue.Location = new Point(129, 58);
+            Control_Add_Location_Label_IssuedByValue.Name = "Control_Add_Location_Label_IssuedByValue";
+            Control_Add_Location_Label_IssuedByValue.Size = new Size(462, 15);
+            Control_Add_Location_Label_IssuedByValue.TabIndex = 6;
+            Control_Add_Location_Label_IssuedByValue.Text = "Current User";
+            Control_Add_Location_Label_IssuedByValue.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // Control_Add_Location_Button_Save
+            // 
+            Control_Add_Location_Button_Save.AutoSize = true;
+            Control_Add_Location_Button_Save.Dock = DockStyle.Fill;
+            Control_Add_Location_Button_Save.Location = new Point(3, 85);
+            Control_Add_Location_Button_Save.Name = "Control_Add_Location_Button_Save";
+            Control_Add_Location_Button_Save.Size = new Size(120, 25);
+            Control_Add_Location_Button_Save.TabIndex = 7;
+            Control_Add_Location_Button_Save.Text = "Save";
+            Control_Add_Location_Button_Save.UseVisualStyleBackColor = true;
+            Control_Add_Location_Button_Save.Click += Control_Add_Location_Button_Save_Click;
+            // 
+            // Control_Add_Location_Button_Clear
+            // 
+            Control_Add_Location_Button_Clear.AutoSize = true;
+            Control_Add_Location_Button_Clear.Dock = DockStyle.Fill;
+            Control_Add_Location_Button_Clear.Location = new Point(129, 85);
+            Control_Add_Location_Button_Clear.Name = "Control_Add_Location_Button_Clear";
+            Control_Add_Location_Button_Clear.Size = new Size(462, 25);
+            Control_Add_Location_Button_Clear.TabIndex = 8;
+            Control_Add_Location_Button_Clear.Text = "Clear";
+            Control_Add_Location_Button_Clear.UseVisualStyleBackColor = true;
+            Control_Add_Location_Button_Clear.Click += Control_Add_Location_Button_Clear_Click;
+            // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.AutoSize = true;
+            tableLayoutPanel1.ColumnCount = 2;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.Controls.Add(Control_Add_Location_Label_Location, 0, 0);
+            tableLayoutPanel1.Controls.Add(Control_Add_Location_Button_Clear, 1, 4);
+            tableLayoutPanel1.Controls.Add(Control_Add_Location_TextBox_Location, 1, 0);
+            tableLayoutPanel1.Controls.Add(Control_Add_Location_Button_Save, 0, 4);
+            tableLayoutPanel1.Controls.Add(Control_Add_Location_Label_Building, 0, 1);
+            tableLayoutPanel1.Controls.Add(Control_Add_Location_Label_IssuedByValue, 1, 2);
+            tableLayoutPanel1.Controls.Add(Control_Add_Location_ComboBox_Building, 1, 1);
+            tableLayoutPanel1.Controls.Add(Control_Add_Location_Label_IssuedBy, 0, 2);
+            tableLayoutPanel1.Dock = DockStyle.Fill;
+            tableLayoutPanel1.Location = new Point(3, 19);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 5;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.Size = new Size(594, 113);
+            tableLayoutPanel1.TabIndex = 9;
+            // 
+            // groupBox1
+            // 
+            groupBox1.AutoSize = true;
+            groupBox1.Controls.Add(tableLayoutPanel1);
+            groupBox1.Dock = DockStyle.Fill;
+            groupBox1.Location = new Point(0, 0);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(600, 135);
+            groupBox1.TabIndex = 10;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Add Location";
+            // 
+            // Control_Add_Location
+            // 
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            Controls.Add(groupBox1);
+            Name = "Control_Add_Location";
+            Size = new Size(600, 135);
+            tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel1.PerformLayout();
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
+        private TableLayoutPanel tableLayoutPanel1;
+        private GroupBox groupBox1;
     }
     #endregion
 }

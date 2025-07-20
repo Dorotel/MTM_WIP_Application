@@ -520,27 +520,27 @@ namespace MTM_Inventory_Application.Helpers
 
         public static async Task ReloadAllTabComboBoxesAsync()
         {
-            if (MainFormInstance!.MainForm_RemoveTabNormalControl != null)
+            if (MainFormInstance!.MainForm_UserControl_RemoveTab != null)
             {
-                await MainFormInstance.MainForm_RemoveTabNormalControl
+                await MainFormInstance.MainForm_UserControl_RemoveTab
                     .Control_RemoveTab_OnStartup_LoadDataComboBoxesAsync();
             }
 
-            if (MainFormInstance!.MainForm_Control_TransferTab != null)
+            if (MainFormInstance!.MainForm_UserControl_TransferTab != null)
             {
-                await MainFormInstance!.MainForm_Control_TransferTab
+                await MainFormInstance!.MainForm_UserControl_TransferTab
                     .Control_TransferTab_OnStartup_LoadDataComboBoxesAsync();
             }
 
-            if (MainFormInstance!.MainForm_Control_InventoryTab != null)
+            if (MainFormInstance!.MainForm_UserControl_InventoryTab != null)
             {
-                await MainFormInstance!.MainForm_Control_InventoryTab
+                await MainFormInstance!.MainForm_UserControl_InventoryTab
                     .Control_InventoryTab_OnStartup_LoadDataComboBoxesAsync();
             }
 
-            if (MainFormInstance!.MainForm_Control_AdvancedRemove != null)
+            if (MainFormInstance!.MainForm_UserControl_AdvancedRemove != null)
             {
-                Control_AdvancedRemove? advRemove = MainFormInstance!.MainForm_Control_AdvancedRemove;
+                Control_AdvancedRemove? advRemove = MainFormInstance!.MainForm_UserControl_AdvancedRemove;
                 MethodInfo? loadComboBoxesAsync = advRemove.GetType().GetMethod("LoadComboBoxesAsync",
                     BindingFlags.NonPublic | BindingFlags.Instance);
                 if (loadComboBoxesAsync != null)
@@ -549,9 +549,9 @@ namespace MTM_Inventory_Application.Helpers
                 }
             }
 
-            if (MainFormInstance!.MainForm_AdvancedInventory != null)
+            if (MainFormInstance!.MainForm_UserControl_AdvancedInventory != null)
             {
-                Control_AdvancedInventory? advInv = MainFormInstance!.MainForm_AdvancedInventory;
+                Control_AdvancedInventory? advInv = MainFormInstance!.MainForm_UserControl_AdvancedInventory;
                 MethodInfo? loadAllComboBoxesAsync = advInv.GetType().GetMethod("LoadAllComboBoxesAsync",
                     BindingFlags.NonPublic | BindingFlags.Instance);
                 if (loadAllComboBoxesAsync != null)

@@ -13,6 +13,27 @@ using MTM_Inventory_Application.Models;
 
 namespace MTM_Inventory_Application.Core
 {
+    /// <summary>
+    /// Core theming system that provides comprehensive DPI scaling and UI responsiveness.
+    /// 
+    /// This class handles:
+    /// 1. Runtime DPI scaling for all forms and controls (per Telerik WinForms DPI scaling article)
+    /// 2. Async/await UI responsiveness improvements (per Grant Winney async WinForms article)
+    /// 3. Theme application with proper color handling
+    /// 4. Runtime layout adjustments moved from designer files
+    /// 5. Dynamic DPI change handling for multi-monitor scenarios
+    /// 
+    /// Key Features:
+    /// - AutoScaleMode.Dpi set on all forms and controls for proper DPI scaling
+    /// - Runtime margin/padding adjustments for TableLayoutPanel, GroupBox, Panel
+    /// - SplitContainer distance calculations based on DPI scale
+    /// - Event-driven DPI change handling for monitor switching
+    /// - Comprehensive control hierarchy traversal for complete coverage
+    /// 
+    /// References:
+    /// - https://www.telerik.com/blogs/winforms-scaling-at-large-dpi-settings-is-it-even-possible-
+    /// - https://grantwinney.com/using-async-await-and-task-to-keep-the-winforms-ui-more-responsive/
+    /// </summary>
     public static class Core_Themes
     {
         #region Public API
@@ -22,10 +43,18 @@ namespace MTM_Inventory_Application.Core
             Core_AppThemes.AppTheme theme = Core_AppThemes.GetCurrentTheme();
             string themeName = Core_AppThemes.GetEffectiveThemeName();
             form.SuspendLayout();
+
+            // Apply DPI scaling and layout adjustments first
+            // This ensures pixel-perfect scaling at all DPI settings (100%, 125%, 150%, 200%)
+            ApplyDpiScaling(form);
+            ApplyRuntimeLayoutAdjustments(form);
+
+            // Then apply theme colors
             SetFormTheme(form, theme, themeName);
             ApplyThemeToControls(form.Controls);
+
             form.ResumeLayout();
-            LoggingUtility.Log($"Global theme '{themeName}' applied to form '{form.Name}'.");
+            LoggingUtility.Log($"Global theme '{themeName}' with DPI scaling applied to form '{form.Name}'.");
         }
 
         public static async Task<Model_UserUiColors> GetUserThemeColorsAsync(string userId)
@@ -51,7 +80,560 @@ namespace MTM_Inventory_Application.Core
             FocusUtils.ApplyFocusEventHandlingToControls(parentControl.Controls, theme.Colors);
         }
 
+        /// <summary>
+        /// Applies comprehensive DPI scaling and layout adjustments to a form and all its controls.
+        /// This ensures pixel-perfect scaling at all DPI settings (100%, 125%, 150%, 200%).
+        /// </summary>
+        /// <param name="form">The form to apply DPI scaling to</param>
+        public static void ApplyDpiScaling(Form form)
+        {
+            try
+            {
+                // Set AutoScaleMode to DPI for the form
+                form.AutoScaleMode = AutoScaleMode.Dpi;
+
+                form.SuspendLayout();
+                ApplyDpiScalingToControlHierarchy(form.Controls);
+
+                // --- Resize form if any child (recursively) is larger than the form ---
+                Size required = GetDeepestRequiredSize(form);
+                bool resizeNeeded = false;
+                int newWidth = form.Width;
+                int newHeight = form.Height;
+                if (required.Width > form.Width)
+                {
+                    newWidth = required.Width;
+                    resizeNeeded = true;
+                }
+
+                if (required.Height > form.Height)
+                {
+                    newHeight = required.Height;
+                    resizeNeeded = true;
+                }
+
+                if (resizeNeeded)
+                {
+                    form.Width = newWidth;
+                    form.Height = newHeight;
+                    // Also update MaximumSize
+                    if (form.MaximumSize.Width < newWidth || form.MaximumSize.Height < newHeight)
+                    {
+                        form.MaximumSize = new Size(Math.Max(form.MaximumSize.Width, newWidth),
+                            Math.Max(form.MaximumSize.Height, newHeight));
+                    }
+                }
+                // --- End resize logic ---
+
+                form.ResumeLayout();
+
+                LoggingUtility.Log($"DPI scaling applied to form '{form.Name}' and all its controls.");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Applies comprehensive DPI scaling and layout adjustments to a user control and all its controls.
+        /// This ensures pixel-perfect scaling at all DPI settings (100%, 125%, 150%, 200%).
+        /// </summary>
+        /// <param name="userControl">The user control to apply DPI scaling to</param>
+        public static void ApplyDpiScaling(UserControl userControl)
+        {
+            try
+            {
+                // Set AutoScaleMode to DPI for the user control
+                userControl.AutoScaleMode = AutoScaleMode.Dpi;
+
+                userControl.SuspendLayout();
+                ApplyDpiScalingToControlHierarchy(userControl.Controls);
+                userControl.ResumeLayout();
+
+                LoggingUtility.Log($"DPI scaling applied to user control '{userControl.Name}' and all its controls.");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Applies runtime layout adjustments that were moved from designer files.
+        /// This includes margin/padding adjustments and SplitContainer configurations.
+        /// </summary>
+        /// <param name="form">The form to apply layout adjustments to</param>
+        public static void ApplyRuntimeLayoutAdjustments(Form form)
+        {
+            try
+            {
+                form.SuspendLayout();
+                ApplyLayoutAdjustmentsToControlHierarchy(form.Controls);
+                form.ResumeLayout();
+
+                LoggingUtility.Log($"Runtime layout adjustments applied to form '{form.Name}'.");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Applies runtime layout adjustments that were moved from designer files.
+        /// This includes margin/padding adjustments and SplitContainer configurations.
+        /// </summary>
+        /// <param name="userControl">The user control to apply layout adjustments to</param>
+        public static void ApplyRuntimeLayoutAdjustments(UserControl userControl)
+        {
+            try
+            {
+                userControl.SuspendLayout();
+                ApplyLayoutAdjustmentsToControlHierarchy(userControl.Controls);
+                userControl.ResumeLayout();
+
+                LoggingUtility.Log($"Runtime layout adjustments applied to user control '{userControl.Name}'.");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Handles DPI changes at runtime. Call this when the application detects a DPI change
+        /// or when a form is moved between monitors with different DPI settings.
+        /// </summary>
+        /// <param name="form">The form that experienced a DPI change</param>
+        /// <param name="oldDpi">The old DPI value</param>
+        /// <param name="newDpi">The new DPI value</param>
+        public static void HandleDpiChanged(Form form, int oldDpi, int newDpi)
+        {
+            try
+            {
+                float scaleFactor = (float)newDpi / oldDpi;
+                LoggingUtility.Log(
+                    $"DPI changed from {oldDpi} to {newDpi} (scale factor: {scaleFactor:F2}) for form '{form.Name}'");
+
+                form.SuspendLayout();
+
+                // Reapply DPI scaling and layout adjustments with new DPI
+                ApplyDpiScaling(form);
+                ApplyRuntimeLayoutAdjustments(form);
+
+                // Recursively handle DPI changes for all user controls
+                HandleDpiChangedForControlHierarchy(form.Controls, scaleFactor);
+
+                form.ResumeLayout();
+
+                LoggingUtility.Log($"DPI change handling completed for form '{form.Name}'");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Provides a way to manually trigger DPI scaling refresh for all open forms.
+        /// Useful for troubleshooting DPI scaling issues.
+        /// </summary>
+        public static void RefreshDpiScalingForAllForms()
+        {
+            try
+            {
+                foreach (Form form in Application.OpenForms)
+                {
+                    if (form.IsDisposed || !form.Visible)
+                    {
+                        continue;
+                    }
+
+                    ApplyDpiScaling(form);
+                    ApplyRuntimeLayoutAdjustments(form);
+                }
+
+                LoggingUtility.Log("DPI scaling refreshed for all open forms");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
         #endregion
+
+        #region DPI Scaling and Layout Helpers
+
+        /// <summary>
+        /// Recursively applies DPI scaling to a control hierarchy.
+        /// Sets AutoScaleMode = Dpi on user controls and forms.
+        /// </summary>
+        private static void ApplyDpiScalingToControlHierarchy(Control.ControlCollection controls)
+        {
+            foreach (Control control in controls)
+            {
+                try
+                {
+                    // Set AutoScaleMode to DPI for user controls (forms are handled separately)
+                    if (control is UserControl userControl)
+                    {
+                        userControl.AutoScaleMode = AutoScaleMode.Dpi;
+                    }
+
+                    // Recursively apply to child controls
+                    if (control.HasChildren && control.Controls.Count > 0)
+                    {
+                        ApplyDpiScalingToControlHierarchy(control.Controls);
+
+                        // --- Resize parent if any child (recursively) is larger than parent ---
+                        Size required = GetDeepestRequiredSize(control);
+                        bool resizeNeeded = false;
+                        int newWidth = control.Width;
+                        int newHeight = control.Height;
+                        if (required.Width > control.Width)
+                        {
+                            newWidth = required.Width;
+                            resizeNeeded = true;
+                        }
+
+                        if (required.Height > control.Height)
+                        {
+                            newHeight = required.Height;
+                            resizeNeeded = true;
+                        }
+
+                        if (resizeNeeded)
+                        {
+                            control.Width = newWidth;
+                            control.Height = newHeight;
+                            // Also update MaximumSize
+                            if (control.MaximumSize.Width < newWidth || control.MaximumSize.Height < newHeight)
+                            {
+                                control.MaximumSize = new Size(Math.Max(control.MaximumSize.Width, newWidth),
+                                    Math.Max(control.MaximumSize.Height, newHeight));
+                            }
+                        }
+                        // --- End resize logic ---
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Recursively applies layout adjustments to a control hierarchy.
+        /// Handles margins, padding, and SplitContainer configurations for optimal DPI scaling.
+        /// </summary>
+        private static void ApplyLayoutAdjustmentsToControlHierarchy(Control.ControlCollection controls)
+        {
+            foreach (Control control in controls)
+            {
+                try
+                {
+                    ApplyControlSpecificLayoutAdjustments(control);
+
+                    // Recursively apply to child controls
+                    if (control.HasChildren && control.Controls.Count > 0)
+                    {
+                        ApplyLayoutAdjustmentsToControlHierarchy(control.Controls);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Applies control-specific layout adjustments for optimal DPI scaling.
+        /// This method handles TableLayoutPanel, GroupBox, Panel, and SplitContainer configurations.
+        /// </summary>
+        private static void ApplyControlSpecificLayoutAdjustments(Control control)
+        {
+            switch (control)
+            {
+                case TableLayoutPanel tlp:
+                    // Runtime adjustment: Set minimal margins and padding for TableLayoutPanel
+                    tlp.Margin = new Padding(0);
+                    tlp.Padding = new Padding(1); // Minimum padding for proper appearance
+                    LoggingUtility.Log($"Applied TableLayoutPanel layout adjustments to '{tlp.Name}'");
+                    break;
+
+                case GroupBox groupBox:
+                    // Runtime adjustment: Set minimal margins and padding for GroupBox
+                    groupBox.Margin = new Padding(1);
+                    groupBox.Padding = new Padding(3); // Slightly larger padding for groupbox appearance
+                    LoggingUtility.Log($"Applied GroupBox layout adjustments to '{groupBox.Name}'");
+                    break;
+
+                case Panel panel:
+                    // Runtime adjustment: Set minimal margins for Panel
+                    panel.Margin = new Padding(0);
+                    LoggingUtility.Log($"Applied Panel layout adjustments to '{panel.Name}'");
+                    break;
+
+                case SplitContainer splitContainer:
+                    // Runtime adjustment: Configure SplitContainer for proper DPI scaling
+                    ApplySplitContainerLayoutAdjustments(splitContainer);
+                    break;
+
+                case Button button:
+                    // Runtime adjustment: Ensure buttons have minimal margins for proper scaling
+                    button.Margin = new Padding(1);
+                    break;
+
+                case Label label:
+                    // Runtime adjustment: Ensure labels have minimal margins for proper scaling
+                    label.Margin = new Padding(0);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Applies specific layout adjustments to SplitContainer controls for optimal DPI scaling.
+        /// This method configures splitter distances and ensures panels remain flush and aligned.
+        /// </summary>
+        private static void ApplySplitContainerLayoutAdjustments(SplitContainer splitContainer)
+        {
+            try
+            {
+                // Calculate valid range for SplitterDistance
+                int min = splitContainer.Panel1MinSize;
+                int max = splitContainer.Width - splitContainer.Panel2MinSize;
+                if (max < min)
+                {
+                    max = min; // Prevent invalid range
+                }
+
+                // Only set SplitterDistance if the SplitContainer is large enough
+                if (splitContainer.Width > splitContainer.Panel1MinSize + splitContainer.Panel2MinSize)
+                {
+                    int targetDistance;
+                    // Custom logic for Control_TransferTab_SplitContainer_Main: left 20%, right 80%
+                    if (splitContainer.Name == "Control_TransferTab_SplitContainer_Main" &&
+                        splitContainer.Orientation == Orientation.Vertical && splitContainer.Width > 0)
+                    {
+                        targetDistance = (int)(splitContainer.Width * 0.35);
+                    }
+                    else if (splitContainer.Name == "SettingsForm_SplitContainer_Main" &&
+                             splitContainer.Orientation == Orientation.Vertical && splitContainer.Width > 0)
+                    {
+                        targetDistance = (int)(splitContainer.Width * 0.15);
+                    }
+                    else if (splitContainer.Name == "MainForm_SplitContainer_Middle" &&
+                             splitContainer.Orientation == Orientation.Vertical && splitContainer.Width > 0)
+                    {
+                        targetDistance = (int)(splitContainer.Width * 0.8);
+                    }
+                    else if (splitContainer.Orientation == Orientation.Vertical)
+                    {
+                        targetDistance = splitContainer.Width / 2;
+                    }
+                    else
+                    {
+                        targetDistance = splitContainer.Height / 2;
+                    }
+
+                    targetDistance = Math.Max(min, Math.Min(targetDistance, max));
+                    if (splitContainer.SplitterDistance != targetDistance)
+                    {
+                        splitContainer.SplitterDistance = targetDistance;
+                    }
+                }
+
+                // Ensure both panels have minimal margins
+                splitContainer.Panel1.Margin = new Padding(0);
+                splitContainer.Panel2.Margin = new Padding(0);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets the current DPI scale factor compared to 96 DPI (100% scaling).
+        /// </summary>
+        /// <returns>DPI scale factor (1.0 = 100%, 1.25 = 125%, 1.5 = 150%, 2.0 = 200%)</returns>
+        private static float GetCurrentDpiScale()
+        {
+            try
+            {
+                // Get the current DPI from the primary screen
+                using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
+                {
+                    float dpiX = graphics.DpiX;
+                    return dpiX / 96f; // 96 DPI is 100% scaling
+                }
+            }
+            catch
+            {
+                return 1.0f; // Default to 100% if unable to get DPI
+            }
+        }
+
+        /// <summary>
+        /// Recursively handles DPI changes for a control hierarchy.
+        /// </summary>
+        private static void HandleDpiChangedForControlHierarchy(Control.ControlCollection controls, float scaleFactor)
+        {
+            foreach (Control control in controls)
+            {
+                try
+                {
+                    // Apply DPI scaling to user controls
+                    if (control is UserControl userControl)
+                    {
+                        ApplyDpiScaling(userControl);
+                        ApplyRuntimeLayoutAdjustments(userControl);
+                    }
+
+                    // Apply specific adjustments to important controls
+                    ApplyControlSpecificLayoutAdjustments(control);
+
+                    // Recursively handle child controls
+                    if (control.HasChildren && control.Controls.Count > 0)
+                    {
+                        HandleDpiChangedForControlHierarchy(control.Controls, scaleFactor);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                }
+            }
+        }
+
+        // Helper to recursively calculate the required size for a control and all its children
+        private static Size GetDeepestRequiredSize(Control control)
+        {
+            if (!control.Visible)
+            {
+                return Size.Empty;
+            }
+
+            if (control.HasChildren && control.Controls.Count > 0)
+            {
+                int maxRight = 0, maxBottom = 0;
+                foreach (Control child in control.Controls)
+                {
+                    if (!child.Visible)
+                    {
+                        continue;
+                    }
+
+                    Size childRequired = GetDeepestRequiredSize(child);
+                    int childRight = child.Left + childRequired.Width + child.Margin.Right;
+                    int childBottom = child.Top + childRequired.Height + child.Margin.Bottom;
+                    if (childRight > maxRight)
+                    {
+                        maxRight = childRight;
+                    }
+
+                    if (childBottom > maxBottom)
+                    {
+                        maxBottom = childBottom;
+                    }
+                }
+
+                // For containers, also consider their own padding
+                maxRight += control.Padding.Right;
+                maxBottom += control.Padding.Bottom;
+                return new Size(maxRight, maxBottom);
+            }
+            else
+            {
+                return control.Size;
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Ensures that the entire parent chain (up to the top-level form) is resized to fully accommodate the given control.
+        /// This is especially important after DPI scaling or when loading user controls at runtime.
+        /// </summary>
+        /// <param name="control">The control to start from (typically a user control being loaded)</param>
+        public static void EnsureParentChainAccommodates(Control control)
+        {
+            try
+            {
+                // Get the current DPI scale (e.g., 1.0 for 100%, 1.25 for 125%)
+                float scale = GetCurrentDpiScale();
+
+                Control? current = control;
+                while (current != null && current.Parent != null)
+                {
+                    Control parent = current.Parent;
+
+                    // Use existing method to get required size
+                    Size required = GetDeepestRequiredSize(current);
+
+                    // Apply DPI scaling to required size
+                    int scaledWidth = (int)Math.Ceiling(required.Width * scale);
+                    int scaledHeight = (int)Math.Ceiling(required.Height * scale);
+
+                    // Calculate the bounds of the control within its parent
+                    int requiredRight = current.Left + scaledWidth + current.Margin.Right;
+                    int requiredBottom = current.Top + scaledHeight + current.Margin.Bottom;
+
+                    bool resizeNeeded = false;
+                    int newWidth = parent.Width;
+                    int newHeight = parent.Height;
+
+                    if (requiredRight > parent.Width)
+                    {
+                        newWidth = requiredRight;
+                        resizeNeeded = true;
+                    }
+
+                    if (requiredBottom > parent.Height)
+                    {
+                        newHeight = requiredBottom;
+                        resizeNeeded = true;
+                    }
+
+                    if (resizeNeeded)
+                    {
+                        Debug.WriteLine(
+                            $"[EnsureParentChainAccommodates] Resizing parent '{parent.Name}' from ({parent.Width}, {parent.Height}) to ({newWidth}, {newHeight})");
+                        parent.Width = newWidth;
+                        parent.Height = newHeight;
+
+                        if (parent.MaximumSize.Width < newWidth || parent.MaximumSize.Height < newHeight)
+                        {
+                            parent.MaximumSize = new Size(
+                                Math.Max(parent.MaximumSize.Width, newWidth),
+                                Math.Max(parent.MaximumSize.Height, newHeight)
+                            );
+                            Debug.WriteLine(
+                                $"[EnsureParentChainAccommodates] Updated parent.MaximumSize to ({parent.MaximumSize.Width}, {parent.MaximumSize.Height})");
+                        }
+
+                        parent.PerformLayout();
+                        parent.Invalidate();
+                    }
+                    else
+                    {
+                        Debug.WriteLine(
+                            $"[EnsureParentChainAccommodates] No resize needed for parent '{parent.Name}'.");
+                    }
+
+                    current = parent;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[EnsureParentChainAccommodates] Exception: {ex}");
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
 
         #region Private Helpers
 
@@ -303,10 +885,80 @@ namespace MTM_Inventory_Application.Core
                 {
                     quickButtons.BackColor = colors.CustomControlBackColor ?? colors.ControlBackColor ?? Color.White;
                     quickButtons.ForeColor = colors.CustomControlForeColor ?? colors.ControlForeColor ?? Color.Black;
-                    foreach (Button btn in quickButtons.Controls.OfType<Button>())
+                    foreach (Button btn in Control_QuickButtons.quickButtons ?? Enumerable.Empty<Button>())
                     {
                         btn.BackColor = colors.ButtonBackColor ?? Color.White;
                         btn.ForeColor = colors.ButtonForeColor ?? Color.Black;
+                        btn.FlatStyle = FlatStyle.Flat;
+                        btn.FlatAppearance.BorderSize = 2;
+                        btn.FlatAppearance.BorderColor = colors.ButtonBorderColor ?? SystemColors.ControlDark;
+                        btn.FlatAppearance.MouseDownBackColor =
+                            colors.ButtonPressedBackColor ?? SystemColors.ControlDark;
+                        btn.FlatAppearance.MouseOverBackColor =
+                            colors.ButtonHoverBackColor ?? SystemColors.ControlLight;
+                        btn.Padding = new Padding(2);
+                        btn.Paint -= AutoShrinkText_Paint;
+                        btn.Paint += AutoShrinkText_Paint;
+
+                        btn.MouseEnter -= Button_MouseEnter;
+                        btn.MouseLeave -= Button_MouseLeave;
+                        btn.MouseDown -= Button_MouseDown;
+                        btn.MouseUp -= Button_MouseUp;
+
+                        btn.MouseEnter += Button_MouseEnter;
+                        btn.MouseLeave += Button_MouseLeave;
+                        btn.MouseDown += Button_MouseDown;
+                        btn.MouseUp += Button_MouseUp;
+
+                        void Button_MouseEnter(object? sender, EventArgs e)
+                        {
+                            if (sender is Button b)
+                            {
+                                if (colors.ButtonHoverBackColor.HasValue)
+                                {
+                                    b.BackColor = colors.ButtonHoverBackColor.Value;
+                                }
+
+                                if (colors.ButtonHoverForeColor.HasValue)
+                                {
+                                    b.ForeColor = colors.ButtonHoverForeColor.Value;
+                                }
+                            }
+                        }
+
+                        void Button_MouseLeave(object? sender, EventArgs e)
+                        {
+                            if (sender is Button b)
+                            {
+                                b.BackColor = colors.ButtonBackColor ?? Color.White;
+                                b.ForeColor = colors.ButtonForeColor ?? Color.Black;
+                            }
+                        }
+
+                        void Button_MouseDown(object? sender, MouseEventArgs e)
+                        {
+                            if (sender is Button b)
+                            {
+                                if (colors.ButtonPressedBackColor.HasValue)
+                                {
+                                    b.BackColor = colors.ButtonPressedBackColor.Value;
+                                }
+
+                                if (colors.ButtonPressedForeColor.HasValue)
+                                {
+                                    b.ForeColor = colors.ButtonPressedForeColor.Value;
+                                }
+                            }
+                        }
+
+                        void Button_MouseUp(object? sender, MouseEventArgs e)
+                        {
+                            if (sender is Button b)
+                            {
+                                b.BackColor = colors.ButtonBackColor ?? Color.White;
+                                b.ForeColor = colors.ButtonForeColor ?? Color.Black;
+                            }
+                        }
                     }
                 }
             }
@@ -386,6 +1038,12 @@ namespace MTM_Inventory_Application.Core
             {
                 if (control is Button btn)
                 {
+                    // Skip all visual logic if this button is inside Control_QuickButtons
+                    if (btn.Parent is Control_QuickButtons)
+                    {
+                        return;
+                    }
+
                     btn.Margin = new Padding(1);
                     btn.Paint -= AutoShrinkText_Paint;
                     btn.Paint += AutoShrinkText_Paint;
@@ -1340,45 +1998,55 @@ namespace MTM_Inventory_Application.Core
                 }
                 else if (control is Button btn)
                 {
-                    ContentAlignment align = btn.TextAlign;
-                    switch (align)
+                    // If the button's parent is Control_QuickButtons, force CenterRight alignment
+                    if (btn.Parent is Control_QuickButtons)
                     {
-                        case ContentAlignment.TopLeft:
-                            format.Alignment = StringAlignment.Near;
-                            format.LineAlignment = StringAlignment.Near;
-                            break;
-                        case ContentAlignment.TopCenter:
-                            format.Alignment = StringAlignment.Center;
-                            format.LineAlignment = StringAlignment.Near;
-                            break;
-                        case ContentAlignment.TopRight:
-                            format.Alignment = StringAlignment.Far;
-                            format.LineAlignment = StringAlignment.Near;
-                            break;
-                        case ContentAlignment.MiddleLeft:
-                            format.Alignment = StringAlignment.Near;
-                            format.LineAlignment = StringAlignment.Center;
-                            break;
-                        case ContentAlignment.MiddleCenter:
-                            format.Alignment = StringAlignment.Center;
-                            format.LineAlignment = StringAlignment.Center;
-                            break;
-                        case ContentAlignment.MiddleRight:
-                            format.Alignment = StringAlignment.Far;
-                            format.LineAlignment = StringAlignment.Center;
-                            break;
-                        case ContentAlignment.BottomLeft:
-                            format.Alignment = StringAlignment.Near;
-                            format.LineAlignment = StringAlignment.Far;
-                            break;
-                        case ContentAlignment.BottomCenter:
-                            format.Alignment = StringAlignment.Center;
-                            format.LineAlignment = StringAlignment.Far;
-                            break;
-                        case ContentAlignment.BottomRight:
-                            format.Alignment = StringAlignment.Far;
-                            format.LineAlignment = StringAlignment.Far;
-                            break;
+                        Debug.Write("QuickButton Set");
+                        format.Alignment = StringAlignment.Far;
+                        format.LineAlignment = StringAlignment.Center;
+                    }
+                    else
+                    {
+                        ContentAlignment align = btn.TextAlign;
+                        switch (align)
+                        {
+                            case ContentAlignment.TopLeft:
+                                format.Alignment = StringAlignment.Near;
+                                format.LineAlignment = StringAlignment.Near;
+                                break;
+                            case ContentAlignment.TopCenter:
+                                format.Alignment = StringAlignment.Center;
+                                format.LineAlignment = StringAlignment.Near;
+                                break;
+                            case ContentAlignment.TopRight:
+                                format.Alignment = StringAlignment.Far;
+                                format.LineAlignment = StringAlignment.Near;
+                                break;
+                            case ContentAlignment.MiddleLeft:
+                                format.Alignment = StringAlignment.Near;
+                                format.LineAlignment = StringAlignment.Center;
+                                break;
+                            case ContentAlignment.MiddleCenter:
+                                format.Alignment = StringAlignment.Center;
+                                format.LineAlignment = StringAlignment.Center;
+                                break;
+                            case ContentAlignment.MiddleRight:
+                                format.Alignment = StringAlignment.Far;
+                                format.LineAlignment = StringAlignment.Center;
+                                break;
+                            case ContentAlignment.BottomLeft:
+                                format.Alignment = StringAlignment.Near;
+                                format.LineAlignment = StringAlignment.Far;
+                                break;
+                            case ContentAlignment.BottomCenter:
+                                format.Alignment = StringAlignment.Center;
+                                format.LineAlignment = StringAlignment.Far;
+                                break;
+                            case ContentAlignment.BottomRight:
+                                format.Alignment = StringAlignment.Far;
+                                format.LineAlignment = StringAlignment.Far;
+                                break;
+                        }
                     }
                 }
                 else if (control is TabPage)
@@ -1431,13 +2099,18 @@ namespace MTM_Inventory_Application.Core
                     format.LineAlignment = StringAlignment.Center;
                 }
 
+                // Shrink font until text fits in a single line (no wrapping)
                 SizeF textSize = e.Graphics.MeasureString(text, font, clientRectangle.Size, format);
                 Font shrinkFont = font;
-
-                while ((textSize.Width > clientRectangle.Width || textSize.Height > clientRectangle.Height) &&
-                       shrinkFont.Size > 1)
+                int minFontSize = 6;
+                float fontSize = font.Size;
+                float singleLineHeight = e.Graphics.MeasureString("A", font).Height;
+                while ((textSize.Width > clientRectangle.Width || textSize.Height > singleLineHeight) &&
+                       fontSize > minFontSize)
                 {
-                    shrinkFont = new Font(shrinkFont.FontFamily, shrinkFont.Size - 0.5f, shrinkFont.Style);
+                    fontSize -= 0.5f;
+                    shrinkFont = new Font(shrinkFont.FontFamily, fontSize, shrinkFont.Style);
+                    singleLineHeight = e.Graphics.MeasureString("A", shrinkFont).Height;
                     textSize = e.Graphics.MeasureString(text, shrinkFont, clientRectangle.Size, format);
                 }
 

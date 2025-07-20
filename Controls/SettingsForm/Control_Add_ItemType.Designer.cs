@@ -7,8 +7,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         private System.ComponentModel.IContainer components = null;
 
         #endregion
-
-        private System.Windows.Forms.Label Control_Add_ItemType_Label_Title;
         private System.Windows.Forms.Label Control_Add_ItemType_Label_ItemType;
         private System.Windows.Forms.TextBox Control_Add_ItemType_TextBox_ItemType;
         private System.Windows.Forms.Label Control_Add_ItemType_Label_IssuedBy;
@@ -33,71 +31,134 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         private void InitializeComponent()
         {
-            this.Control_Add_ItemType_Label_Title = new System.Windows.Forms.Label();
-            this.Control_Add_ItemType_Label_ItemType = new System.Windows.Forms.Label();
-            this.Control_Add_ItemType_TextBox_ItemType = new System.Windows.Forms.TextBox();
-            this.Control_Add_ItemType_Label_IssuedBy = new System.Windows.Forms.Label();
-            this.Control_Add_ItemType_Label_IssuedByValue = new System.Windows.Forms.Label();
-            this.Control_Add_ItemType_Button_Save = new System.Windows.Forms.Button();
-            this.Control_Add_ItemType_Button_Clear = new System.Windows.Forms.Button();
-            this.SuspendLayout();
-            this.Control_Add_ItemType_Label_Title.AutoSize = true;
-            this.Control_Add_ItemType_Label_Title.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.Control_Add_ItemType_Label_Title.Location = new System.Drawing.Point(20, 20);
-            this.Control_Add_ItemType_Label_Title.Name = "Control_Add_ItemType_Label_Title";
-            this.Control_Add_ItemType_Label_Title.Size = new System.Drawing.Size(121, 21);
-            this.Control_Add_ItemType_Label_Title.TabIndex = 0;
-            this.Control_Add_ItemType_Label_Title.Text = "Add ItemType";
-            this.Control_Add_ItemType_Label_ItemType.AutoSize = true;
-            this.Control_Add_ItemType_Label_ItemType.Location = new System.Drawing.Point(20, 60);
-            this.Control_Add_ItemType_Label_ItemType.Name = "Control_Add_ItemType_Label_ItemType";
-            this.Control_Add_ItemType_Label_ItemType.Size = new System.Drawing.Size(65, 15);
-            this.Control_Add_ItemType_Label_ItemType.TabIndex = 1;
-            this.Control_Add_ItemType_Label_ItemType.Text = "ItemType:";
-            this.Control_Add_ItemType_TextBox_ItemType.Location = new System.Drawing.Point(120, 57);
-            this.Control_Add_ItemType_TextBox_ItemType.Name = "Control_Add_ItemType_TextBox_ItemType";
-            this.Control_Add_ItemType_TextBox_ItemType.Size = new System.Drawing.Size(300, 23);
-            this.Control_Add_ItemType_TextBox_ItemType.TabIndex = 2;
-            this.Control_Add_ItemType_Label_IssuedBy.AutoSize = true;
-            this.Control_Add_ItemType_Label_IssuedBy.Location = new System.Drawing.Point(20, 100);
-            this.Control_Add_ItemType_Label_IssuedBy.Name = "Control_Add_ItemType_Label_IssuedBy";
-            this.Control_Add_ItemType_Label_IssuedBy.Size = new System.Drawing.Size(61, 15);
-            this.Control_Add_ItemType_Label_IssuedBy.TabIndex = 3;
-            this.Control_Add_ItemType_Label_IssuedBy.Text = "Issued By:";
-            this.Control_Add_ItemType_Label_IssuedByValue.AutoSize = true;
-            this.Control_Add_ItemType_Label_IssuedByValue.Location = new System.Drawing.Point(120, 100);
-            this.Control_Add_ItemType_Label_IssuedByValue.Name = "Control_Add_ItemType_Label_IssuedByValue";
-            this.Control_Add_ItemType_Label_IssuedByValue.Size = new System.Drawing.Size(83, 15);
-            this.Control_Add_ItemType_Label_IssuedByValue.TabIndex = 4;
-            this.Control_Add_ItemType_Label_IssuedByValue.Text = "Current User";
-            this.Control_Add_ItemType_Button_Save.Location = new System.Drawing.Point(265, 150);
-            this.Control_Add_ItemType_Button_Save.Name = "Control_Add_ItemType_Button_Save";
-            this.Control_Add_ItemType_Button_Save.Size = new System.Drawing.Size(75, 23);
-            this.Control_Add_ItemType_Button_Save.TabIndex = 5;
-            this.Control_Add_ItemType_Button_Save.Text = "Save";
-            this.Control_Add_ItemType_Button_Save.UseVisualStyleBackColor = true;
-            this.Control_Add_ItemType_Button_Save.Click += new System.EventHandler(this.Control_Add_ItemType_Button_Save_Click);
-            this.Control_Add_ItemType_Button_Clear.Location = new System.Drawing.Point(345, 150);
-            this.Control_Add_ItemType_Button_Clear.Name = "Control_Add_ItemType_Button_Clear";
-            this.Control_Add_ItemType_Button_Clear.Size = new System.Drawing.Size(75, 23);
-            this.Control_Add_ItemType_Button_Clear.TabIndex = 6;
-            this.Control_Add_ItemType_Button_Clear.Text = "Clear";
-            this.Control_Add_ItemType_Button_Clear.UseVisualStyleBackColor = true;
-            this.Control_Add_ItemType_Button_Clear.Click += new System.EventHandler(this.Control_Add_ItemType_Button_Clear_Click);
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.Control_Add_ItemType_Button_Clear);
-            this.Controls.Add(this.Control_Add_ItemType_Button_Save);
-            this.Controls.Add(this.Control_Add_ItemType_Label_IssuedByValue);
-            this.Controls.Add(this.Control_Add_ItemType_Label_IssuedBy);
-            this.Controls.Add(this.Control_Add_ItemType_TextBox_ItemType);
-            this.Controls.Add(this.Control_Add_ItemType_Label_ItemType);
-            this.Controls.Add(this.Control_Add_ItemType_Label_Title);
-            this.Name = "Control_Add_ItemType";
-            this.Size = new System.Drawing.Size(450, 200);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            Control_Add_ItemType_Label_ItemType = new Label();
+            Control_Add_ItemType_TextBox_ItemType = new TextBox();
+            Control_Add_ItemType_Label_IssuedBy = new Label();
+            Control_Add_ItemType_Label_IssuedByValue = new Label();
+            Control_Add_ItemType_Button_Save = new Button();
+            Control_Add_ItemType_Button_Clear = new Button();
+            Control_Add_ItemType_GroupBox_Main = new GroupBox();
+            Control_Add_ItemType_TableLayout = new TableLayoutPanel();
+            Control_Add_ItemType_GroupBox_Main.SuspendLayout();
+            Control_Add_ItemType_TableLayout.SuspendLayout();
+            SuspendLayout();
+            // 
+            // Control_Add_ItemType_Label_ItemType
+            // 
+            Control_Add_ItemType_Label_ItemType.AutoSize = true;
+            Control_Add_ItemType_Label_ItemType.Dock = DockStyle.Fill;
+            Control_Add_ItemType_Label_ItemType.Location = new Point(3, 0);
+            Control_Add_ItemType_Label_ItemType.Name = "Control_Add_ItemType_Label_ItemType";
+            Control_Add_ItemType_Label_ItemType.Size = new Size(120, 29);
+            Control_Add_ItemType_Label_ItemType.TabIndex = 1;
+            Control_Add_ItemType_Label_ItemType.Text = "ItemType:";
+            Control_Add_ItemType_Label_ItemType.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // Control_Add_ItemType_TextBox_ItemType
+            // 
+            Control_Add_ItemType_TextBox_ItemType.Dock = DockStyle.Fill;
+            Control_Add_ItemType_TextBox_ItemType.Location = new Point(129, 3);
+            Control_Add_ItemType_TextBox_ItemType.Name = "Control_Add_ItemType_TextBox_ItemType";
+            Control_Add_ItemType_TextBox_ItemType.Size = new Size(462, 23);
+            Control_Add_ItemType_TextBox_ItemType.TabIndex = 2;
+            // 
+            // Control_Add_ItemType_Label_IssuedBy
+            // 
+            Control_Add_ItemType_Label_IssuedBy.AutoSize = true;
+            Control_Add_ItemType_Label_IssuedBy.Dock = DockStyle.Fill;
+            Control_Add_ItemType_Label_IssuedBy.Location = new Point(3, 29);
+            Control_Add_ItemType_Label_IssuedBy.Name = "Control_Add_ItemType_Label_IssuedBy";
+            Control_Add_ItemType_Label_IssuedBy.Size = new Size(120, 15);
+            Control_Add_ItemType_Label_IssuedBy.TabIndex = 3;
+            Control_Add_ItemType_Label_IssuedBy.Text = "Issued By:";
+            Control_Add_ItemType_Label_IssuedBy.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // Control_Add_ItemType_Label_IssuedByValue
+            // 
+            Control_Add_ItemType_Label_IssuedByValue.AutoSize = true;
+            Control_Add_ItemType_Label_IssuedByValue.Dock = DockStyle.Fill;
+            Control_Add_ItemType_Label_IssuedByValue.Location = new Point(129, 29);
+            Control_Add_ItemType_Label_IssuedByValue.Name = "Control_Add_ItemType_Label_IssuedByValue";
+            Control_Add_ItemType_Label_IssuedByValue.Size = new Size(462, 15);
+            Control_Add_ItemType_Label_IssuedByValue.TabIndex = 4;
+            Control_Add_ItemType_Label_IssuedByValue.Text = "Current User";
+            // 
+            // Control_Add_ItemType_Button_Save
+            // 
+            Control_Add_ItemType_Button_Save.AutoSize = true;
+            Control_Add_ItemType_Button_Save.Dock = DockStyle.Fill;
+            Control_Add_ItemType_Button_Save.Location = new Point(3, 54);
+            Control_Add_ItemType_Button_Save.Name = "Control_Add_ItemType_Button_Save";
+            Control_Add_ItemType_Button_Save.Size = new Size(120, 25);
+            Control_Add_ItemType_Button_Save.TabIndex = 5;
+            Control_Add_ItemType_Button_Save.Text = "Save";
+            Control_Add_ItemType_Button_Save.UseVisualStyleBackColor = true;
+            Control_Add_ItemType_Button_Save.Click += Control_Add_ItemType_Button_Save_Click;
+            // 
+            // Control_Add_ItemType_Button_Clear
+            // 
+            Control_Add_ItemType_Button_Clear.AutoSize = true;
+            Control_Add_ItemType_Button_Clear.Dock = DockStyle.Fill;
+            Control_Add_ItemType_Button_Clear.Location = new Point(129, 54);
+            Control_Add_ItemType_Button_Clear.Name = "Control_Add_ItemType_Button_Clear";
+            Control_Add_ItemType_Button_Clear.Size = new Size(462, 25);
+            Control_Add_ItemType_Button_Clear.TabIndex = 6;
+            Control_Add_ItemType_Button_Clear.Text = "Clear";
+            Control_Add_ItemType_Button_Clear.UseVisualStyleBackColor = true;
+            Control_Add_ItemType_Button_Clear.Click += Control_Add_ItemType_Button_Clear_Click;
+            // 
+            // Control_Add_ItemType_GroupBox_Main
+            // 
+            Control_Add_ItemType_GroupBox_Main.AutoSize = true;
+            Control_Add_ItemType_GroupBox_Main.Controls.Add(Control_Add_ItemType_TableLayout);
+            Control_Add_ItemType_GroupBox_Main.Dock = DockStyle.Fill;
+            Control_Add_ItemType_GroupBox_Main.Location = new Point(0, 0);
+            Control_Add_ItemType_GroupBox_Main.Name = "Control_Add_ItemType_GroupBox_Main";
+            Control_Add_ItemType_GroupBox_Main.Size = new Size(600, 104);
+            Control_Add_ItemType_GroupBox_Main.TabIndex = 7;
+            Control_Add_ItemType_GroupBox_Main.TabStop = false;
+            Control_Add_ItemType_GroupBox_Main.Text = "Add Item Type";
+            // 
+            // Control_Add_ItemType_TableLayout
+            // 
+            Control_Add_ItemType_TableLayout.AutoSize = true;
+            Control_Add_ItemType_TableLayout.ColumnCount = 2;
+            Control_Add_ItemType_TableLayout.ColumnStyles.Add(new ColumnStyle());
+            Control_Add_ItemType_TableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            Control_Add_ItemType_TableLayout.Controls.Add(Control_Add_ItemType_Label_ItemType, 0, 0);
+            Control_Add_ItemType_TableLayout.Controls.Add(Control_Add_ItemType_Button_Clear, 1, 3);
+            Control_Add_ItemType_TableLayout.Controls.Add(Control_Add_ItemType_Label_IssuedBy, 0, 1);
+            Control_Add_ItemType_TableLayout.Controls.Add(Control_Add_ItemType_Button_Save, 0, 3);
+            Control_Add_ItemType_TableLayout.Controls.Add(Control_Add_ItemType_TextBox_ItemType, 1, 0);
+            Control_Add_ItemType_TableLayout.Controls.Add(Control_Add_ItemType_Label_IssuedByValue, 1, 1);
+            Control_Add_ItemType_TableLayout.Dock = DockStyle.Fill;
+            Control_Add_ItemType_TableLayout.Location = new Point(3, 19);
+            Control_Add_ItemType_TableLayout.Name = "Control_Add_ItemType_TableLayout";
+            Control_Add_ItemType_TableLayout.RowCount = 4;
+            Control_Add_ItemType_TableLayout.RowStyles.Add(new RowStyle());
+            Control_Add_ItemType_TableLayout.RowStyles.Add(new RowStyle());
+            Control_Add_ItemType_TableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            Control_Add_ItemType_TableLayout.RowStyles.Add(new RowStyle());
+            Control_Add_ItemType_TableLayout.Size = new Size(594, 82);
+            Control_Add_ItemType_TableLayout.TabIndex = 0;
+            // 
+            // Control_Add_ItemType
+            // 
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            AutoSize = true;
+            Controls.Add(Control_Add_ItemType_GroupBox_Main);
+            Name = "Control_Add_ItemType";
+            Size = new Size(600, 104);
+            Control_Add_ItemType_GroupBox_Main.ResumeLayout(false);
+            Control_Add_ItemType_GroupBox_Main.PerformLayout();
+            Control_Add_ItemType_TableLayout.ResumeLayout(false);
+            Control_Add_ItemType_TableLayout.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
+        private GroupBox Control_Add_ItemType_GroupBox_Main;
+        private TableLayoutPanel Control_Add_ItemType_TableLayout;
     }
     #endregion
 }

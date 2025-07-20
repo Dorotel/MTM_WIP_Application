@@ -18,6 +18,19 @@ namespace MTM_Inventory_Application
         {
             try
             {
+                Application.ThreadException += (sender, args) =>
+                {
+                    Console.WriteLine($"[Global Exception] ThreadException: {args.Exception}");
+                    LoggingUtility.LogApplicationError(args.Exception);
+                };
+                AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+                {
+                    if (args.ExceptionObject is Exception ex)
+                    {
+                        Console.WriteLine($"[Global Exception] UnhandledException: {ex}");
+                        LoggingUtility.LogApplicationError(ex);
+                    }
+                };
                 Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
@@ -37,6 +50,7 @@ namespace MTM_Inventory_Application
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[Global Exception] Main catch: {ex}");
                 LoggingUtility.LogApplicationError(ex);
                 _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(Main));
             }
@@ -187,13 +201,27 @@ namespace MTM_Inventory_Application
                 // 13. Applying theme
                 progress = 99;
                 _splashScreen?.UpdateProgress(progress, "Applying theme...");
-                Core_Themes.ApplyTheme(_mainForm);
+                if (_mainForm.InvokeRequired)
+                {
+                    _mainForm.Invoke(new Action(() => Core_Themes.ApplyTheme(_mainForm)));
+                }
+                else
+                {
+                    Core_Themes.ApplyTheme(_mainForm);
+                }
 
                 // 14. Ready to start!
                 progress = 100;
                 _splashScreen?.UpdateProgress(progress, "Ready to start!");
                 await Task.Delay(500);
-                _mainForm.Show();
+                if (_mainForm.InvokeRequired)
+                {
+                    _mainForm.Invoke(new Action(() => _mainForm.Show()));
+                }
+                else
+                {
+                    _mainForm.Show();
+                }
                 if (_splashScreen != null)
                 {
                     _splashScreen.FormClosed -= SplashScreen_FormClosed;

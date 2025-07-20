@@ -27,11 +27,13 @@
         private void InitializeComponent()
         {
             SuspendLayout();
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            
+            // 
+            // Control_ConnectionStrengthControl
+            // 
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             Name = "Control_ConnectionStrengthControl";
-            Size = new Size(10, 10);
+            Size = new Size(40, 27);
             ResumeLayout(false);
         }
 
