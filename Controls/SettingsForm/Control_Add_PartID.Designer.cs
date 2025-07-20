@@ -170,8 +170,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             // 
             // Control_Add_PartID
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             Controls.Add(cancelButton);
             Controls.Add(saveButton);
             Controls.Add(issuedByValueLabel);

@@ -139,6 +139,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             // 
             // Control_Remove_User
             // 
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             Controls.Add(RemoveUserControl_Label_SelectUser);
             Controls.Add(RemoveUserControl_ComboBox_Users);
             Controls.Add(RemoveUserControl_Button_Remove);

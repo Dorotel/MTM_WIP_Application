@@ -30,11 +30,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
         public Control_InventoryTab()
         {
             InitializeComponent();
-            
+
             // Apply comprehensive DPI scaling and runtime layout adjustments
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
-            
+
             Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Save,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Save)}");
             Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_AdvancedEntry,
@@ -77,7 +77,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // Admin and Normal: all controls visible/enabled
             // Read-Only: only specific controls visible/enabled
             Control_InventoryTab_GroupBox_Main.Visible = isAdmin || isNormal || isReadOnly;
-            Control_InventoryTab_Panel_BottomGroup.Visible = isAdmin || isNormal || isReadOnly;
             Control_InventoryTab_Button_Reset.Visible = isAdmin || isNormal;
             Control_InventoryTab_Button_Save.Visible = isAdmin || isNormal;
             Control_InventoryTab_Label_Version.Visible = true;
@@ -89,7 +88,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_InventoryTab_TextBox_Quantity.Visible = isAdmin || isNormal || isReadOnly;
             Control_InventoryTab_RichTextBox_Notes.Visible = isAdmin || isNormal || isReadOnly;
             Control_InventoryTab_TableLayout_Main.Visible = true;
-            Control_InventoryTab_Panel_Top.Visible = true;
+            Control_InventoryTab_TableLayout_TopGroup.Visible = true;
             Control_InventoryTab_Button_Toggle_RightPanel.Visible = isAdmin || isNormal;
             // ToolTip is always available
             // All other input controls (if any):
@@ -237,20 +236,20 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (MainFormInstance is not null)
                 {
-                    MainFormInstance.MainForm_Control_InventoryTab.Visible = false;
+                    MainFormInstance.MainForm_UserControl_InventoryTab.Visible = false;
                 }
 
                 if (MainFormInstance is not null)
                 {
-                    MainFormInstance.MainForm_AdvancedInventory.Visible = true;
+                    MainFormInstance.MainForm_UserControl_AdvancedInventory.Visible = true;
                 }
 
-                if (MainFormInstance?.MainForm_AdvancedInventory is null)
+                if (MainFormInstance?.MainForm_UserControl_AdvancedInventory is null)
                 {
                     return;
                 }
 
-                Control_AdvancedInventory? adv = MainFormInstance.MainForm_AdvancedInventory;
+                Control_AdvancedInventory? adv = MainFormInstance.MainForm_UserControl_AdvancedInventory;
 
                 if (adv.GetType().GetField("AdvancedInventory_Single_ComboBox_Part",
                             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
@@ -331,6 +330,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 {
                     Control_InventoryTab_SoftReset();
                 }
+
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Reset complete");
             }
             catch (Exception ex)
@@ -434,15 +434,15 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 Debug.WriteLine("[DEBUG] Resetting UI fields");
                 MainFormControlHelper.ResetComboBox(Control_InventoryTab_ComboBox_Part,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red, 0);
                 MainFormControlHelper.ResetComboBox(Control_InventoryTab_ComboBox_Operation,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red, 0);
                 MainFormControlHelper.ResetComboBox(Control_InventoryTab_ComboBox_Location,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red, 0);
                 MainFormControlHelper.ResetTextBox(Control_InventoryTab_TextBox_Quantity,
-                    Model_AppVariables.UserUiColors.TextBoxErrorForeColor ?? Color.Red, "[ Enter Valid Quantity ]");
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red, "[ Enter Valid Quantity ]");
                 MainFormControlHelper.ResetRichTextBox(Control_InventoryTab_RichTextBox_Notes,
-                    Model_AppVariables.UserUiColors.RichTextBoxErrorForeColor ?? Color.Red, "");
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red, "");
                 Control_InventoryTab_Button_Save.Enabled = false;
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Reset complete");
             }
@@ -465,6 +465,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     MainFormInstance.MainForm_StatusStrip_Disconnected.Text =
                         @"Disconnected from Server, please standby...";
                 }
+
                 MainFormInstance?.TabLoadingControlProgress?.HideProgress();
             }
         }
@@ -545,10 +546,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(90, "Resetting form...");
                 Control_InventoryTab_Button_Reset_Click();
-                if (MainFormInstance != null && MainFormInstance.control_QuickButtons1 != null)
+                if (MainFormInstance != null && MainFormInstance.MainForm_UserControl_QuickButtons != null)
                 {
-                    MainFormInstance.control_QuickButtons1.LoadLast10Transactions(Model_AppVariables.User);
+                    MainFormInstance.MainForm_UserControl_QuickButtons.LoadLast10Transactions(Model_AppVariables.User);
                 }
+
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Save complete");
             }
             catch (Exception ex)

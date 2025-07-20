@@ -38,89 +38,119 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         private void InitializeComponent()
         {
-            this.titleLabel = new System.Windows.Forms.Label();
-            this.selectOperationLabel = new System.Windows.Forms.Label();
-            this.operationsComboBox = new System.Windows.Forms.ComboBox();
-            this.operationLabel = new System.Windows.Forms.Label();
-            this.operationValueLabel = new System.Windows.Forms.Label();
-            this.issuedByLabel = new System.Windows.Forms.Label();
-            this.issuedByValueLabel = new System.Windows.Forms.Label();
-            this.removeButton = new System.Windows.Forms.Button();
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.SuspendLayout();
-            this.titleLabel.AutoSize = true;
-            this.titleLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.titleLabel.Location = new System.Drawing.Point(20, 20);
-            this.titleLabel.Name = "titleLabel";
-            this.titleLabel.Size = new System.Drawing.Size(147, 21);
-            this.titleLabel.TabIndex = 0;
-            this.titleLabel.Text = "Remove Operation";
-            this.selectOperationLabel.AutoSize = true;
-            this.selectOperationLabel.Location = new System.Drawing.Point(20, 60);
-            this.selectOperationLabel.Name = "selectOperationLabel";
-            this.selectOperationLabel.Size = new System.Drawing.Size(96, 15);
-            this.selectOperationLabel.TabIndex = 1;
-            this.selectOperationLabel.Text = "Select Operation:";
-            this.operationsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.operationsComboBox.FormattingEnabled = true;
-            this.operationsComboBox.Location = new System.Drawing.Point(140, 57);
-            this.operationsComboBox.Name = "operationsComboBox";
-            this.operationsComboBox.Size = new System.Drawing.Size(280, 23);
-            this.operationsComboBox.TabIndex = 2;
-            this.operationsComboBox.SelectedIndexChanged += new System.EventHandler(this.OperationsComboBox_SelectedIndexChanged);
-            this.operationLabel.AutoSize = true;
-            this.operationLabel.Location = new System.Drawing.Point(20, 100);
-            this.operationLabel.Name = "operationLabel";
-            this.operationLabel.Size = new System.Drawing.Size(108, 15);
-            this.operationLabel.TabIndex = 3;
-            this.operationLabel.Text = "Operation Number:";
-            this.operationValueLabel.AutoSize = true;
-            this.operationValueLabel.Location = new System.Drawing.Point(140, 100);
-            this.operationValueLabel.Name = "operationValueLabel";
-            this.operationValueLabel.Size = new System.Drawing.Size(0, 15);
-            this.operationValueLabel.TabIndex = 4;
-            this.issuedByLabel.AutoSize = true;
-            this.issuedByLabel.Location = new System.Drawing.Point(20, 140);
-            this.issuedByLabel.Name = "issuedByLabel";
-            this.issuedByLabel.Size = new System.Drawing.Size(61, 15);
-            this.issuedByLabel.TabIndex = 5;
-            this.issuedByLabel.Text = "Issued By:";
-            this.issuedByValueLabel.AutoSize = true;
-            this.issuedByValueLabel.Location = new System.Drawing.Point(140, 140);
-            this.issuedByValueLabel.Name = "issuedByValueLabel";
-            this.issuedByValueLabel.Size = new System.Drawing.Size(0, 15);
-            this.issuedByValueLabel.TabIndex = 6;
-            this.removeButton.Enabled = false;
-            this.removeButton.Location = new System.Drawing.Point(265, 190);
-            this.removeButton.Name = "removeButton";
-            this.removeButton.Size = new System.Drawing.Size(75, 23);
-            this.removeButton.TabIndex = 7;
-            this.removeButton.Text = "Remove";
-            this.removeButton.UseVisualStyleBackColor = true;
-            this.removeButton.Click += new System.EventHandler(this.RemoveButton_Click);
-            this.cancelButton.Enabled = false;
-            this.cancelButton.Location = new System.Drawing.Point(345, 190);
-            this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 8;
-            this.cancelButton.Text = "Cancel";
-            this.cancelButton.UseVisualStyleBackColor = true;
-            this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.removeButton);
-            this.Controls.Add(this.issuedByValueLabel);
-            this.Controls.Add(this.issuedByLabel);
-            this.Controls.Add(this.operationValueLabel);
-            this.Controls.Add(this.operationLabel);
-            this.Controls.Add(this.operationsComboBox);
-            this.Controls.Add(this.selectOperationLabel);
-            this.Controls.Add(this.titleLabel);
-            this.Name = "Control_Remove_Operation";
-            this.Size = new System.Drawing.Size(450, 240);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            titleLabel = new Label();
+            selectOperationLabel = new Label();
+            operationsComboBox = new ComboBox();
+            operationLabel = new Label();
+            operationValueLabel = new Label();
+            issuedByLabel = new Label();
+            issuedByValueLabel = new Label();
+            removeButton = new Button();
+            cancelButton = new Button();
+            SuspendLayout();
+            // 
+            // titleLabel
+            // 
+            titleLabel.AutoSize = true;
+            titleLabel.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            titleLabel.Location = new Point(20, 20);
+            titleLabel.Name = "titleLabel";
+            titleLabel.Size = new Size(153, 21);
+            titleLabel.TabIndex = 0;
+            titleLabel.Text = "Remove Operation";
+            // 
+            // selectOperationLabel
+            // 
+            selectOperationLabel.AutoSize = true;
+            selectOperationLabel.Location = new Point(20, 60);
+            selectOperationLabel.Name = "selectOperationLabel";
+            selectOperationLabel.Size = new Size(97, 15);
+            selectOperationLabel.TabIndex = 1;
+            selectOperationLabel.Text = "Select Operation:";
+            // 
+            // operationsComboBox
+            // 
+            operationsComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            operationsComboBox.FormattingEnabled = true;
+            operationsComboBox.Location = new Point(140, 57);
+            operationsComboBox.Name = "operationsComboBox";
+            operationsComboBox.Size = new Size(280, 23);
+            operationsComboBox.TabIndex = 2;
+            operationsComboBox.SelectedIndexChanged += OperationsComboBox_SelectedIndexChanged;
+            // 
+            // operationLabel
+            // 
+            operationLabel.AutoSize = true;
+            operationLabel.Location = new Point(20, 100);
+            operationLabel.Name = "operationLabel";
+            operationLabel.Size = new Size(110, 15);
+            operationLabel.TabIndex = 3;
+            operationLabel.Text = "Operation Number:";
+            // 
+            // operationValueLabel
+            // 
+            operationValueLabel.AutoSize = true;
+            operationValueLabel.Location = new Point(140, 100);
+            operationValueLabel.Name = "operationValueLabel";
+            operationValueLabel.Size = new Size(0, 15);
+            operationValueLabel.TabIndex = 4;
+            // 
+            // issuedByLabel
+            // 
+            issuedByLabel.AutoSize = true;
+            issuedByLabel.Location = new Point(20, 140);
+            issuedByLabel.Name = "issuedByLabel";
+            issuedByLabel.Size = new Size(59, 15);
+            issuedByLabel.TabIndex = 5;
+            issuedByLabel.Text = "Issued By:";
+            // 
+            // issuedByValueLabel
+            // 
+            issuedByValueLabel.AutoSize = true;
+            issuedByValueLabel.Location = new Point(140, 140);
+            issuedByValueLabel.Name = "issuedByValueLabel";
+            issuedByValueLabel.Size = new Size(0, 15);
+            issuedByValueLabel.TabIndex = 6;
+            // 
+            // removeButton
+            // 
+            removeButton.Enabled = false;
+            removeButton.Location = new Point(265, 190);
+            removeButton.Name = "removeButton";
+            removeButton.Size = new Size(75, 23);
+            removeButton.TabIndex = 7;
+            removeButton.Text = "Remove";
+            removeButton.UseVisualStyleBackColor = true;
+            removeButton.Click += RemoveButton_Click;
+            // 
+            // cancelButton
+            // 
+            cancelButton.Enabled = false;
+            cancelButton.Location = new Point(345, 190);
+            cancelButton.Name = "cancelButton";
+            cancelButton.Size = new Size(75, 23);
+            cancelButton.TabIndex = 8;
+            cancelButton.Text = "Cancel";
+            cancelButton.UseVisualStyleBackColor = true;
+            cancelButton.Click += CancelButton_Click;
+            // 
+            // Control_Remove_Operation
+            // 
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            Controls.Add(cancelButton);
+            Controls.Add(removeButton);
+            Controls.Add(issuedByValueLabel);
+            Controls.Add(issuedByLabel);
+            Controls.Add(operationValueLabel);
+            Controls.Add(operationLabel);
+            Controls.Add(operationsComboBox);
+            Controls.Add(selectOperationLabel);
+            Controls.Add(titleLabel);
+            Name = "Control_Remove_Operation";
+            Size = new Size(450, 240);
+            ResumeLayout(false);
+            PerformLayout();
 
         }
     }

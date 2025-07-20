@@ -403,46 +403,48 @@ namespace MTM_Inventory_Application.Core
         {
             try
             {
-                // Runtime adjustment: Configure SplitContainer properties for DPI scaling
-                if (splitContainer.Name == "MainForm_SplitContainer_Middle")
+                // Calculate valid range for SplitterDistance
+                int min = splitContainer.Panel1MinSize;
+                int max = splitContainer.Width - splitContainer.Panel2MinSize;
+                if (max < min)
                 {
-                    // Set splitter distance to 80% of the width for proportional layout
-                    if (splitContainer.Orientation == Orientation.Vertical && splitContainer.Width > 0)
-                    {
-                        int targetDistance = (int)(splitContainer.Width * 0.8);
-                        if (splitContainer.SplitterDistance != targetDistance &&
-                            targetDistance > splitContainer.Panel1MinSize)
-                        {
-                            splitContainer.SplitterDistance = Math.Max(targetDistance, splitContainer.Panel1MinSize);
-                        }
-
-                        LoggingUtility.Log(
-                            $"Applied MainForm SplitContainer distance: {splitContainer.SplitterDistance} (Proportional 80%)");
-                    }
+                    max = min; // Prevent invalid range
                 }
-                else
+
+                // Only set SplitterDistance if the SplitContainer is large enough
+                if (splitContainer.Width > splitContainer.Panel1MinSize + splitContainer.Panel2MinSize)
                 {
-                    // Generic SplitContainer adjustments: Ensure proper scaling
-                    if (splitContainer.Orientation == Orientation.Vertical)
+                    int targetDistance;
+                    // Custom logic for Control_TransferTab_SplitContainer_Main: left 20%, right 80%
+                    if (splitContainer.Name == "Control_TransferTab_SplitContainer_Main" &&
+                        splitContainer.Orientation == Orientation.Vertical && splitContainer.Width > 0)
                     {
-                        int targetDistance = splitContainer.Width / 2;
-                        if (splitContainer.SplitterDistance != targetDistance &&
-                            targetDistance > splitContainer.Panel1MinSize)
-                        {
-                            splitContainer.SplitterDistance = Math.Max(targetDistance, splitContainer.Panel1MinSize);
-                        }
+                        targetDistance = (int)(splitContainer.Width * 0.35);
+                    }
+                    else if (splitContainer.Name == "SettingsForm_SplitContainer_Main" &&
+                             splitContainer.Orientation == Orientation.Vertical && splitContainer.Width > 0)
+                    {
+                        targetDistance = (int)(splitContainer.Width * 0.15);
+                    }
+                    else if (splitContainer.Name == "MainForm_SplitContainer_Middle" &&
+                             splitContainer.Orientation == Orientation.Vertical && splitContainer.Width > 0)
+                    {
+                        targetDistance = (int)(splitContainer.Width * 0.8);
+                    }
+                    else if (splitContainer.Orientation == Orientation.Vertical)
+                    {
+                        targetDistance = splitContainer.Width / 2;
                     }
                     else
                     {
-                        int targetDistance = splitContainer.Height / 2;
-                        if (splitContainer.SplitterDistance != targetDistance &&
-                            targetDistance > splitContainer.Panel1MinSize)
-                        {
-                            splitContainer.SplitterDistance = Math.Max(targetDistance, splitContainer.Panel1MinSize);
-                        }
+                        targetDistance = splitContainer.Height / 2;
                     }
 
-                    LoggingUtility.Log($"Applied generic SplitContainer layout adjustments to '{splitContainer.Name}'");
+                    targetDistance = Math.Max(min, Math.Min(targetDistance, max));
+                    if (splitContainer.SplitterDistance != targetDistance)
+                    {
+                        splitContainer.SplitterDistance = targetDistance;
+                    }
                 }
 
                 // Ensure both panels have minimal margins
@@ -552,6 +554,86 @@ namespace MTM_Inventory_Application.Core
         }
 
         #endregion
+
+        /// <summary>
+        /// Ensures that the entire parent chain (up to the top-level form) is resized to fully accommodate the given control.
+        /// This is especially important after DPI scaling or when loading user controls at runtime.
+        /// </summary>
+        /// <param name="control">The control to start from (typically a user control being loaded)</param>
+        public static void EnsureParentChainAccommodates(Control control)
+        {
+            try
+            {
+                // Get the current DPI scale (e.g., 1.0 for 100%, 1.25 for 125%)
+                float scale = GetCurrentDpiScale();
+
+                Control? current = control;
+                while (current != null && current.Parent != null)
+                {
+                    Control parent = current.Parent;
+
+                    // Use existing method to get required size
+                    Size required = GetDeepestRequiredSize(current);
+
+                    // Apply DPI scaling to required size
+                    int scaledWidth = (int)Math.Ceiling(required.Width * scale);
+                    int scaledHeight = (int)Math.Ceiling(required.Height * scale);
+
+                    // Calculate the bounds of the control within its parent
+                    int requiredRight = current.Left + scaledWidth + current.Margin.Right;
+                    int requiredBottom = current.Top + scaledHeight + current.Margin.Bottom;
+
+                    bool resizeNeeded = false;
+                    int newWidth = parent.Width;
+                    int newHeight = parent.Height;
+
+                    if (requiredRight > parent.Width)
+                    {
+                        newWidth = requiredRight;
+                        resizeNeeded = true;
+                    }
+
+                    if (requiredBottom > parent.Height)
+                    {
+                        newHeight = requiredBottom;
+                        resizeNeeded = true;
+                    }
+
+                    if (resizeNeeded)
+                    {
+                        Debug.WriteLine(
+                            $"[EnsureParentChainAccommodates] Resizing parent '{parent.Name}' from ({parent.Width}, {parent.Height}) to ({newWidth}, {newHeight})");
+                        parent.Width = newWidth;
+                        parent.Height = newHeight;
+
+                        if (parent.MaximumSize.Width < newWidth || parent.MaximumSize.Height < newHeight)
+                        {
+                            parent.MaximumSize = new Size(
+                                Math.Max(parent.MaximumSize.Width, newWidth),
+                                Math.Max(parent.MaximumSize.Height, newHeight)
+                            );
+                            Debug.WriteLine(
+                                $"[EnsureParentChainAccommodates] Updated parent.MaximumSize to ({parent.MaximumSize.Width}, {parent.MaximumSize.Height})");
+                        }
+
+                        parent.PerformLayout();
+                        parent.Invalidate();
+                    }
+                    else
+                    {
+                        Debug.WriteLine(
+                            $"[EnsureParentChainAccommodates] No resize needed for parent '{parent.Name}'.");
+                    }
+
+                    current = parent;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[EnsureParentChainAccommodates] Exception: {ex}");
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
 
         #region Private Helpers
 
@@ -803,10 +885,80 @@ namespace MTM_Inventory_Application.Core
                 {
                     quickButtons.BackColor = colors.CustomControlBackColor ?? colors.ControlBackColor ?? Color.White;
                     quickButtons.ForeColor = colors.CustomControlForeColor ?? colors.ControlForeColor ?? Color.Black;
-                    foreach (Button btn in quickButtons.Controls.OfType<Button>())
+                    foreach (Button btn in Control_QuickButtons.quickButtons ?? Enumerable.Empty<Button>())
                     {
                         btn.BackColor = colors.ButtonBackColor ?? Color.White;
                         btn.ForeColor = colors.ButtonForeColor ?? Color.Black;
+                        btn.FlatStyle = FlatStyle.Flat;
+                        btn.FlatAppearance.BorderSize = 2;
+                        btn.FlatAppearance.BorderColor = colors.ButtonBorderColor ?? SystemColors.ControlDark;
+                        btn.FlatAppearance.MouseDownBackColor =
+                            colors.ButtonPressedBackColor ?? SystemColors.ControlDark;
+                        btn.FlatAppearance.MouseOverBackColor =
+                            colors.ButtonHoverBackColor ?? SystemColors.ControlLight;
+                        btn.Padding = new Padding(2);
+                        btn.Paint -= AutoShrinkText_Paint;
+                        btn.Paint += AutoShrinkText_Paint;
+
+                        btn.MouseEnter -= Button_MouseEnter;
+                        btn.MouseLeave -= Button_MouseLeave;
+                        btn.MouseDown -= Button_MouseDown;
+                        btn.MouseUp -= Button_MouseUp;
+
+                        btn.MouseEnter += Button_MouseEnter;
+                        btn.MouseLeave += Button_MouseLeave;
+                        btn.MouseDown += Button_MouseDown;
+                        btn.MouseUp += Button_MouseUp;
+
+                        void Button_MouseEnter(object? sender, EventArgs e)
+                        {
+                            if (sender is Button b)
+                            {
+                                if (colors.ButtonHoverBackColor.HasValue)
+                                {
+                                    b.BackColor = colors.ButtonHoverBackColor.Value;
+                                }
+
+                                if (colors.ButtonHoverForeColor.HasValue)
+                                {
+                                    b.ForeColor = colors.ButtonHoverForeColor.Value;
+                                }
+                            }
+                        }
+
+                        void Button_MouseLeave(object? sender, EventArgs e)
+                        {
+                            if (sender is Button b)
+                            {
+                                b.BackColor = colors.ButtonBackColor ?? Color.White;
+                                b.ForeColor = colors.ButtonForeColor ?? Color.Black;
+                            }
+                        }
+
+                        void Button_MouseDown(object? sender, MouseEventArgs e)
+                        {
+                            if (sender is Button b)
+                            {
+                                if (colors.ButtonPressedBackColor.HasValue)
+                                {
+                                    b.BackColor = colors.ButtonPressedBackColor.Value;
+                                }
+
+                                if (colors.ButtonPressedForeColor.HasValue)
+                                {
+                                    b.ForeColor = colors.ButtonPressedForeColor.Value;
+                                }
+                            }
+                        }
+
+                        void Button_MouseUp(object? sender, MouseEventArgs e)
+                        {
+                            if (sender is Button b)
+                            {
+                                b.BackColor = colors.ButtonBackColor ?? Color.White;
+                                b.ForeColor = colors.ButtonForeColor ?? Color.Black;
+                            }
+                        }
                     }
                 }
             }
@@ -886,6 +1038,12 @@ namespace MTM_Inventory_Application.Core
             {
                 if (control is Button btn)
                 {
+                    // Skip all visual logic if this button is inside Control_QuickButtons
+                    if (btn.Parent is Control_QuickButtons)
+                    {
+                        return;
+                    }
+
                     btn.Margin = new Padding(1);
                     btn.Paint -= AutoShrinkText_Paint;
                     btn.Paint += AutoShrinkText_Paint;

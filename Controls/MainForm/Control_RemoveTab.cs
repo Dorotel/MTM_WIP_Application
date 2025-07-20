@@ -36,11 +36,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
         public Control_RemoveTab()
         {
             InitializeComponent();
-            
+
             // Apply comprehensive DPI scaling and runtime layout adjustments
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
-            
+
             Control_RemoveTab_Initialize();
             Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Part);
             Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Operation);
@@ -50,26 +50,21 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             Control_RemoveTab_Image_NothingFound.Visible = false;
             _ = Control_RemoveTab_OnStartup_LoadComboBoxesAsync();
-            if (Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] == null)
-            {
-                Button undoButton = new()
-                {
-                    Name = "Control_RemoveTab_Button_Undo",
-                    Text = "Undo",
-                    Enabled = false,
-                    AutoSize = true,
-                    Anchor = AnchorStyles.Right
-                };
-                undoButton.Click += Control_RemoveTab_Button_Undo_Click;
-                Control_RemoveTab_Panel_Footer.Controls.Add(undoButton);
-            }
 
-            if (Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Print"] is Button printButton)
+            Button undoButton = new()
             {
-                printButton.Click -= Control_RemoveTab_Button_Print_Click;
-                printButton.Click += Control_RemoveTab_Button_Print_Click;
-                // Tooltip for printButton intentionally omitted to avoid variable conflict
-            }
+                Name = "Control_RemoveTab_Button_Undo",
+                Text = "Undo",
+                Enabled = false,
+                AutoSize = true,
+                Anchor = AnchorStyles.Right
+            };
+            undoButton.Click += Control_RemoveTab_Button_Undo_Click;
+
+            Control_RemoveTab_Button_Print.Click -= Control_RemoveTab_Button_Print_Click;
+            Control_RemoveTab_Button_Print.Click += Control_RemoveTab_Button_Print_Click;
+            // Tooltip for printButton intentionally omitted to avoid variable conflict
+
 
             ToolTip toolTip = new();
             toolTip.SetToolTip(Control_RemoveTab_Button_Search,
@@ -99,20 +94,15 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_Button_Delete.Visible = isAdmin || isNormal;
             Control_RemoveTab_Button_Search.Visible = true;
             Control_RemoveTab_Button_Toggle_RightPanel.Visible = true;
-            if (Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] is Button undoBtn)
-            {
-                undoBtn.Visible = isAdmin || isNormal;
-            }
+            Control_RemoveTab_Button_Undo.Visible = isAdmin || isNormal;
+
 
             // For Read-Only, hide buttons and disable ComboBoxes
             if (isReadOnly)
             {
                 Control_RemoveTab_Button_AdvancedItemRemoval.Visible = false;
                 Control_RemoveTab_Button_Delete.Visible = false;
-                if (Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] is Button undoBtn2)
-                {
-                    undoBtn2.Visible = false;
-                }
+                Control_RemoveTab_Button_Undo.Visible = false;
             }
         }
 
@@ -227,6 +217,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
         #endregion
 
         #region Button Clicks
+
         private async void Control_RemoveTab_Button_Delete_Click(object? sender, EventArgs? e)
         {
             try
@@ -255,17 +246,21 @@ namespace MTM_Inventory_Application.Controls.MainForm
                             PartId = drv["PartID"]?.ToString() ?? "",
                             Location = drv["Location"]?.ToString() ?? "",
                             Operation = drv["Operation"]?.ToString() ?? "",
-                            Quantity = int.TryParse(drv["Quantity"]?.ToString(), out int qty) ? qty : 0,
-                            ItemType = drv.Row.Table.Columns.Contains("ItemType") ? drv["ItemType"]?.ToString() ?? "" : "",
+                            Quantity = TryParse(drv["Quantity"]?.ToString(), out int qty) ? qty : 0,
+                            ItemType =
+                                drv.Row.Table.Columns.Contains("ItemType") ? drv["ItemType"]?.ToString() ?? "" : "",
                             User = drv.Row.Table.Columns.Contains("User") ? drv["User"]?.ToString() ?? "" : "",
-                            BatchNumber = drv.Row.Table.Columns.Contains("BatchNumber") ? drv["BatchNumber"]?.ToString() ?? "" : "",
+                            BatchNumber =
+                                drv.Row.Table.Columns.Contains("BatchNumber")
+                                    ? drv["BatchNumber"]?.ToString() ?? ""
+                                    : "",
                             Notes = drv.Row.Table.Columns.Contains("Notes") ? drv["Notes"]?.ToString() ?? "" : ""
                         });
                     }
                 }
 
                 StringBuilder sb = new();
-                foreach (var item in _lastRemovedItems)
+                foreach (Model_HistoryRemove item in _lastRemovedItems)
                 {
                     sb.AppendLine(
                         $"PartID: {item.PartId}, Location: {item.Location}, Operation: {item.Operation}, Quantity: {item.Quantity}");
@@ -297,9 +292,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Delete complete");
 
                 // --- Enable Undo button if items were removed ---
-                if (_lastRemovedItems.Count > 0 && Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] is Button undoBtn)
+                if (_lastRemovedItems.Count > 0)
                 {
-                    undoBtn.Enabled = true;
+                    Control_RemoveTab_Button_Undo.Enabled = true;
                 }
             }
             catch (Exception ex)
@@ -313,6 +308,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 MainFormInstance?.TabLoadingControlProgress?.HideProgress();
             }
         }
+
         private async void Control_RemoveTab_Button_Undo_Click(object? sender, EventArgs? e)
         {
             if (_lastRemovedItems.Count == 0)
@@ -346,10 +342,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 LoggingUtility.Log("Undo: Removed items restored.");
 
                 _lastRemovedItems.Clear();
-                if (Control_RemoveTab_Panel_Footer.Controls["Control_RemoveTab_Button_Undo"] is Button undoBtn)
-                {
-                    undoBtn.Enabled = false;
-                }
+
+                Control_RemoveTab_Button_Undo.Enabled = false;
+
 
                 Control_RemoveTab_Button_Search_Click(null, null);
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Undo complete");
@@ -365,6 +360,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 MainFormInstance?.TabLoadingControlProgress?.HideProgress();
             }
         }
+
         private void Control_RemoveTab_Button_Reset_Click()
         {
             MainFormInstance?.TabLoadingControlProgress?.ShowProgress();
@@ -381,6 +377,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 {
                     Control_RemoveTab_SoftReset();
                 }
+
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Reset complete");
             }
             catch (Exception ex)
@@ -506,15 +503,15 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (MainFormInstance != null)
                 {
-                    MainFormInstance.MainForm_RemoveTabNormalControl.Visible = false;
+                    MainFormInstance.MainForm_UserControl_RemoveTab.Visible = false;
                 }
 
                 if (MainFormInstance != null)
                 {
-                    MainFormInstance.MainForm_Control_AdvancedRemove.Visible = true;
+                    MainFormInstance.MainForm_UserControl_AdvancedRemove.Visible = true;
                 }
 
-                Control_AdvancedRemove? adv = MainFormInstance?.MainForm_Control_AdvancedRemove;
+                Control_AdvancedRemove? adv = MainFormInstance?.MainForm_UserControl_AdvancedRemove;
                 if (adv != null)
                 {
                     if (adv.Controls.Find("Control_AdvancedRemove_ComboBox_Part", true).FirstOrDefault() is ComboBox
@@ -565,12 +562,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (MainFormInstance != null)
                 {
-                    MainFormInstance.MainForm_RemoveTabNormalControl.Visible = true;
+                    MainFormInstance.MainForm_UserControl_RemoveTab.Visible = true;
                 }
 
                 if (MainFormInstance != null)
                 {
-                    MainFormInstance.MainForm_Control_AdvancedRemove.Visible = false;
+                    MainFormInstance.MainForm_UserControl_AdvancedRemove.Visible = false;
                 }
             }
             catch (Exception ex)
@@ -580,6 +577,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     new StringBuilder().Append("Control_RemoveTab_Button_Normal_Click").ToString());
             }
         }
+
         private async void Control_RemoveTab_Button_Search_Click(object? sender, EventArgs? e)
         {
             try
@@ -604,7 +602,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (!string.IsNullOrWhiteSpace(op) && Control_RemoveTab_ComboBox_Operation.SelectedIndex > 0)
                 {
-                    MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(40, "Querying by part and operation...");
+                    MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(40,
+                        "Querying by part and operation...");
                     results = await Dao_Inventory.GetInventoryByPartIdAndOperationAsync(partId, op, true);
                 }
                 else
@@ -623,11 +622,14 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 {
                     column.Visible = columnsToShow.Contains(column.Name);
                 }
+
                 // Reorder columns
                 for (int i = 0; i < columnsToShow.Length; i++)
                 {
                     if (Control_RemoveTab_DataGridView_Main.Columns.Contains(columnsToShow[i]))
+                    {
                         Control_RemoveTab_DataGridView_Main.Columns[columnsToShow[i]].DisplayIndex = i;
+                    }
                 }
 
                 Core_Themes.ApplyThemeToDataGridView(Control_RemoveTab_DataGridView_Main);
@@ -647,6 +649,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 MainFormInstance?.TabLoadingControlProgress?.HideProgress();
             }
         }
+
         private void Control_RemoveTab_Button_Print_Click(object? sender, EventArgs? e)
         {
             MainFormInstance?.TabLoadingControlProgress?.ShowProgress();
@@ -659,7 +662,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     MessageBox.Show("No data to print.", "Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
-                var printer = new Core_DgvPrinter();
+
+                Core_DgvPrinter printer = new();
                 Control_RemoveTab_DataGridView_Main.Tag = Control_RemoveTab_ComboBox_Part.Text;
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(60, "Printing...");
                 printer.Print(Control_RemoveTab_DataGridView_Main);
@@ -668,7 +672,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
             finally
             {
@@ -756,7 +761,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Control_RemoveTab_Button_Delete.Enabled = hasData && hasSelection;
                 // Print button enable/disable
                 if (Control_RemoveTab_Button_Print != null)
+                {
                     Control_RemoveTab_Button_Print.Enabled = hasData;
+                }
             }
             catch (Exception ex)
             {
@@ -801,7 +808,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (MainFormInstance != null)
                 {
-                    Control_AdvancedRemove? adv = MainFormInstance.MainForm_Control_AdvancedRemove;
+                    Control_AdvancedRemove? adv = MainFormInstance.MainForm_UserControl_AdvancedRemove;
                     Control[] btn = adv.Controls.Find("Control_AdvancedRemove_Button_Normal", true);
                     if (btn.Length > 0 && btn[0] is Button normalBtn)
                     {
@@ -839,7 +846,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     (s, e) => Control_RemoveTab_Update_ButtonStates();
 
                 // Also update print button state on data source change
-                Control_RemoveTab_DataGridView_Main.DataSourceChanged += (s, e) => Control_RemoveTab_Update_ButtonStates();
+                Control_RemoveTab_DataGridView_Main.DataSourceChanged +=
+                    (s, e) => Control_RemoveTab_Update_ButtonStates();
 
                 Control_RemoveTab_Button_Delete.Click += Control_RemoveTab_Button_Delete_Click;
 

@@ -66,7 +66,7 @@ namespace MTM_Inventory_Application.Services
 
         public async Task UpdateConnectionStrengthAsync()
         {
-            Control_ConnectionStrengthControl? signalStrength = _mainForm.MainForm_Control_SignalStrength;
+            Control_ConnectionStrengthControl? signalStrength = _mainForm.MainForm_UserControl_SignalStrength;
             ToolStripStatusLabel? statusStripDisconnected = _mainForm.MainForm_StatusStrip_Disconnected;
 
             if (signalStrength.InvokeRequired)

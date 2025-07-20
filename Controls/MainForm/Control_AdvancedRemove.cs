@@ -26,11 +26,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
         public Control_AdvancedRemove()
         {
             InitializeComponent();
-            
+
             // Apply comprehensive DPI scaling and runtime layout adjustments
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
-            
+
+            // No longer need to initialize or wire up removed ComboBoxes or Like controls
             Control_AdvancedRemove_Initialize();
             ApplyStandardComboBoxProperties();
             WireUpComboBoxEvents();
@@ -94,11 +95,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 toolTip.SetToolTip(printButton, "Print the current results");
             }
 
-            if (Controls.Find("Control_AdvancedRemove_Button_Undo", true).Length == 0)
-            {
-                Control_AdvancedRemove_Button_Undo.Click += Control_AdvancedRemove_Button_Undo_Click;
-            }
-
             Control_AdvancedRemove_CheckBox_Date.CheckedChanged += (s, e) =>
             {
                 bool enabled = Control_AdvancedRemove_CheckBox_Date.Checked;
@@ -128,15 +124,15 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (Control_RemoveTab.MainFormInstance != null)
                 {
-                    Control_RemoveTab.MainFormInstance.MainForm_RemoveTabNormalControl.Visible = true;
+                    Control_RemoveTab.MainFormInstance.MainForm_UserControl_RemoveTab.Visible = true;
                 }
 
                 if (Control_RemoveTab.MainFormInstance != null)
                 {
-                    Control_RemoveTab.MainFormInstance.MainForm_Control_AdvancedRemove.Visible = false;
+                    Control_RemoveTab.MainFormInstance.MainForm_UserControl_AdvancedRemove.Visible = false;
                 }
 
-                Control_RemoveTab? removeTab = Control_RemoveTab.MainFormInstance?.MainForm_RemoveTabNormalControl;
+                Control_RemoveTab? removeTab = Control_RemoveTab.MainFormInstance?.MainForm_UserControl_RemoveTab;
                 if (removeTab != null)
                 {
                     if (removeTab.Controls.Find("Control_RemoveTab_ComboBox_Part", true).FirstOrDefault() is ComboBox
@@ -166,43 +162,17 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         private void Control_AdvancedRemove_Initialize()
         {
-            Control_AdvancedRemove_ComboBox_Part.ForeColor =
-                Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-            Control_AdvancedRemove_ComboBox_Op.ForeColor =
-                Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-            Control_AdvancedRemove_ComboBox_Loc.ForeColor =
-                Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-            Control_AdvancedRemove_ComboBox_User.ForeColor =
-                Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-            Control_AdvancedRemove_ComboBox_Like.Items.Clear();
-            Control_AdvancedRemove_ComboBox_Like.Items.AddRange([
-                "[ Deep Search ]",
-                "Part ID",
-                "Location",
-                "User"
-            ]);
-
-            if (Control_AdvancedRemove_ComboBox_Like.Items.Count > 0)
-            {
-                Control_AdvancedRemove_ComboBox_Like.SelectedIndex = 0;
-            }
+            // No longer need to set ComboBox colors for removed controls
         }
 
-        private void ApplyStandardComboBoxProperties()
-        {
-            Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(Control_AdvancedRemove_ComboBox_Part);
-            Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(Control_AdvancedRemove_ComboBox_Op);
-            Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(Control_AdvancedRemove_ComboBox_Loc);
+        private void ApplyStandardComboBoxProperties() =>
+            // Only apply to User ComboBox
             Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(Control_AdvancedRemove_ComboBox_User);
-        }
 
         private async Task LoadComboBoxesAsync()
         {
             try
             {
-                await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(Control_AdvancedRemove_ComboBox_Part);
-                await Helper_UI_ComboBoxes.FillOperationComboBoxesAsync(Control_AdvancedRemove_ComboBox_Op);
-                await Helper_UI_ComboBoxes.FillLocationComboBoxesAsync(Control_AdvancedRemove_ComboBox_Loc);
                 await Helper_UI_ComboBoxes.FillUserComboBoxesAsync(Control_AdvancedRemove_ComboBox_User);
             }
             catch (Exception ex)
@@ -213,67 +183,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         private void WireUpComboBoxEvents()
         {
-            Control_AdvancedRemove_ComboBox_Part.SelectedIndexChanged += (s, e) =>
-            {
-                Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_AdvancedRemove_ComboBox_Part,
-                    "[ Enter Part Number ]");
-                if (Control_AdvancedRemove_ComboBox_Part.SelectedIndex > 0)
-                {
-                    Control_AdvancedRemove_ComboBox_Part.ForeColor =
-                        Model_AppVariables.UserUiColors.ComboBoxForeColor ?? Color.Black;
-                }
-                else
-                {
-                    Control_AdvancedRemove_ComboBox_Part.ForeColor =
-                        Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-                }
-            };
-            Control_AdvancedRemove_ComboBox_Part.Leave += (s, e) =>
-            {
-                Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_AdvancedRemove_ComboBox_Part,
-                    "[ Enter Part Number ]");
-            };
-
-            Control_AdvancedRemove_ComboBox_Op.SelectedIndexChanged += (s, e) =>
-            {
-                Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_AdvancedRemove_ComboBox_Op, "[ Enter Operation ]");
-                if (Control_AdvancedRemove_ComboBox_Op.SelectedIndex > 0)
-                {
-                    Control_AdvancedRemove_ComboBox_Op.ForeColor =
-                        Model_AppVariables.UserUiColors.ComboBoxForeColor ?? Color.Black;
-                }
-                else
-                {
-                    Control_AdvancedRemove_ComboBox_Op.ForeColor =
-                        Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-                }
-            };
-            Control_AdvancedRemove_ComboBox_Op.Leave += (s, e) =>
-            {
-                Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_AdvancedRemove_ComboBox_Op,
-                    "[ Enter Operation ]");
-            };
-
-            Control_AdvancedRemove_ComboBox_Loc.SelectedIndexChanged += (s, e) =>
-            {
-                Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_AdvancedRemove_ComboBox_Loc, "[ Enter Location ]");
-                if (Control_AdvancedRemove_ComboBox_Loc.SelectedIndex > 0)
-                {
-                    Control_AdvancedRemove_ComboBox_Loc.ForeColor =
-                        Model_AppVariables.UserUiColors.ComboBoxForeColor ?? Color.Black;
-                }
-                else
-                {
-                    Control_AdvancedRemove_ComboBox_Loc.ForeColor =
-                        Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
-                }
-            };
-            Control_AdvancedRemove_ComboBox_Loc.Leave += (s, e) =>
-            {
-                Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_AdvancedRemove_ComboBox_Loc,
-                    "[ Enter Location ]");
-            };
-
+            // Only wire up User ComboBox events
             Control_AdvancedRemove_ComboBox_User.SelectedIndexChanged += (s, e) =>
             {
                 Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_AdvancedRemove_ComboBox_User, "[ Enter User ]");
@@ -293,24 +203,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Helper_UI_ComboBoxes.ValidateComboBoxItem(Control_AdvancedRemove_ComboBox_User, "[ Enter User ]");
             };
 
-            Control_AdvancedRemove_ComboBox_Part.Enter +=
-                (s, e) => Control_AdvancedRemove_ComboBox_Part.BackColor =
-                    Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
-            Control_AdvancedRemove_ComboBox_Part.Leave +=
-                (s, e) => Control_AdvancedRemove_ComboBox_Part.BackColor =
-                    Model_AppVariables.UserUiColors.ControlBackColor ?? SystemColors.Window;
-            Control_AdvancedRemove_ComboBox_Op.Enter +=
-                (s, e) => Control_AdvancedRemove_ComboBox_Op.BackColor =
-                    Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
-            Control_AdvancedRemove_ComboBox_Op.Leave +=
-                (s, e) => Control_AdvancedRemove_ComboBox_Op.BackColor =
-                    Model_AppVariables.UserUiColors.ControlBackColor ?? SystemColors.Window;
-            Control_AdvancedRemove_ComboBox_Loc.Enter +=
-                (s, e) => Control_AdvancedRemove_ComboBox_Loc.BackColor =
-                    Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
-            Control_AdvancedRemove_ComboBox_Loc.Leave +=
-                (s, e) => Control_AdvancedRemove_ComboBox_Loc.BackColor =
-                    Model_AppVariables.UserUiColors.ControlBackColor ?? SystemColors.Window;
             Control_AdvancedRemove_ComboBox_User.Enter +=
                 (s, e) => Control_AdvancedRemove_ComboBox_User.BackColor =
                     Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
@@ -318,8 +210,10 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 (s, e) => Control_AdvancedRemove_ComboBox_User.BackColor =
                     Model_AppVariables.UserUiColors.ControlBackColor ?? SystemColors.Window;
 
-            Control_AdvancedRemove_DataGridView_Results.SelectionChanged += (s, e) => Control_AdvancedRemove_Update_ButtonStates();
-            Control_AdvancedRemove_DataGridView_Results.DataSourceChanged += (s, e) => Control_AdvancedRemove_Update_ButtonStates();
+            Control_AdvancedRemove_DataGridView_Results.SelectionChanged +=
+                (s, e) => Control_AdvancedRemove_Update_ButtonStates();
+            Control_AdvancedRemove_DataGridView_Results.DataSourceChanged +=
+                (s, e) => Control_AdvancedRemove_Update_ButtonStates();
         }
 
         private async void Control_AdvancedRemove_Button_Search_Click(object? sender, EventArgs? e)
@@ -329,163 +223,120 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 DataTable dt = new();
                 MySqlCommand cmd;
 
-                if (!string.IsNullOrWhiteSpace(Control_AdvancedRemove_TextBox_Like.Text) &&
-                    Control_AdvancedRemove_ComboBox_Like.SelectedIndex > 0)
+                // Gather search fields from textboxes and user combobox
+                string part = Control_AdvancedRemove_TextBox_Part.Text.Trim();
+                string op = Control_AdvancedRemove_TextBox_Operation.Text.Trim();
+                string loc = Control_AdvancedRemove_TextBox_Location.Text.Trim();
+                string qtyMinText = Control_AdvancedRemove_TextBox_QtyMin.Text.Trim();
+                string qtyMaxText = Control_AdvancedRemove_TextBox_QtyMax.Text.Trim();
+                string notes = Control_AdvancedRemove_TextBox_Notes.Text.Trim();
+                string user = Control_AdvancedRemove_ComboBox_User.Text.Trim();
+                bool filterByDate = Control_AdvancedRemove_CheckBox_Date.Checked;
+                DateTime? dateFrom =
+                    filterByDate ? Control_AdvancedRemove_DateTimePicker_From.Value.Date : (DateTime?)null;
+                DateTime? dateTo = filterByDate
+                    ? Control_AdvancedRemove_DateTimePicker_To.Value.Date.AddDays(1).AddTicks(-1)
+                    : (DateTime?)null;
+
+                int? qtyMin = int.TryParse(qtyMinText, out int qmin) ? qmin : null;
+                int? qtyMax = int.TryParse(qtyMaxText, out int qmax) ? qmax : null;
+
+                bool userSelected = Control_AdvancedRemove_ComboBox_User.SelectedIndex > 0 &&
+                                    !string.IsNullOrWhiteSpace(user);
+
+                bool anyFieldFilled =
+                    !string.IsNullOrWhiteSpace(part) ||
+                    !string.IsNullOrWhiteSpace(op) ||
+                    !string.IsNullOrWhiteSpace(loc) ||
+                    qtyMin.HasValue ||
+                    qtyMax.HasValue ||
+                    !string.IsNullOrWhiteSpace(notes) ||
+                    userSelected ||
+                    (filterByDate && dateFrom != null && dateTo != null);
+
+                if (!anyFieldFilled)
                 {
-                    string searchText = Control_AdvancedRemove_TextBox_Like.Text.Trim();
-                    string searchColumn;
-
-                    switch (Control_AdvancedRemove_ComboBox_Like.Text!.ToString())
-                    {
-                        case "Part ID":
-                            searchColumn = "PartID";
-                            break;
-                        case "Location":
-                            searchColumn = "Location";
-                            break;
-                        case "User":
-                            searchColumn = "User";
-                            break;
-                        default:
-                            MessageBox.Show(@"Please select a valid search field.", @"Search Error",
-                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
-                    }
-
-                    string query =
-                        $"SELECT * " +
-                        $"FROM inv_inventory WHERE {searchColumn} LIKE @SearchPattern";
-
-                    cmd = new MySqlCommand(query, null);
-                    cmd.Parameters.AddWithValue("@SearchPattern", $"%{searchText}%");
-
-                    LoggingUtility.Log($"[SQL DEBUG] LIKE Search: {query} with pattern '%{searchText}%'");
-                    Debug.WriteLine($"[SQL DEBUG] LIKE Search: {query} with pattern '%{searchText}%'");
+                    MessageBox.Show(@"Please fill in at least one field to search.", @"Validation Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
                 }
-                else
+
+                if (filterByDate && dateFrom > dateTo)
                 {
-                    string part = Control_AdvancedRemove_ComboBox_Part.Text;
-                    string op = Control_AdvancedRemove_ComboBox_Op.Text;
-                    string loc = Control_AdvancedRemove_ComboBox_Loc.Text;
-                    string qtyMinText = Control_AdvancedRemove_TextBox_QtyMin.Text;
-                    string qtyMaxText = Control_AdvancedRemove_TextBox_QtyMax.Text;
-                    string notes = Control_AdvancedRemove_TextBox_Notes.Text;
-                    string user = Control_AdvancedRemove_ComboBox_User.Text;
-                    bool filterByDate = Control_AdvancedRemove_CheckBox_Date.Checked;
-                    DateTime? dateFrom =
-                        filterByDate ? Control_AdvancedRemove_DateTimePicker_From.Value.Date : (DateTime?)null;
-                    DateTime? dateTo = filterByDate
-                        ? Control_AdvancedRemove_DateTimePicker_To.Value.Date.AddDays(1).AddTicks(-1)
-                        : (DateTime?)null;
-
-                    int? qtyMin = int.TryParse(qtyMinText, out int qmin) ? qmin : null;
-                    int? qtyMax = int.TryParse(qtyMaxText, out int qmax) ? qmax : null;
-
-                    bool partSelected = Control_AdvancedRemove_ComboBox_Part.SelectedIndex > 0 &&
-                                        !string.IsNullOrWhiteSpace(part);
-                    bool opSelected = Control_AdvancedRemove_ComboBox_Op.SelectedIndex > 0 &&
-                                      !string.IsNullOrWhiteSpace(op);
-                    bool locSelected = Control_AdvancedRemove_ComboBox_Loc.SelectedIndex > 0 &&
-                                       !string.IsNullOrWhiteSpace(loc);
-                    bool userSelected = Control_AdvancedRemove_ComboBox_User.SelectedIndex > 0 &&
-                                        !string.IsNullOrWhiteSpace(user);
-
-                    bool anyFieldFilled =
-                        partSelected ||
-                        opSelected ||
-                        locSelected ||
-                        qtyMin.HasValue ||
-                        qtyMax.HasValue ||
-                        !string.IsNullOrWhiteSpace(notes) ||
-                        userSelected ||
-                        (filterByDate && dateFrom != null && dateTo != null);
-
-                    if (!anyFieldFilled)
-                    {
-                        MessageBox.Show(@"Please fill in at least one field to search.", @"Validation Error",
-                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
-                    }
-
-                    if (filterByDate && dateFrom > dateTo)
-                    {
-                        MessageBox.Show(@"The 'From' date cannot be after the 'To' date.", @"Validation Error",
-                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
-                    }
-
-                    StringBuilder queryBuilder = new();
-                    queryBuilder.Append(
-                        "SELECT * ");
-                    queryBuilder.Append("FROM inv_inventory WHERE 1=1 ");
-
-                    List<MySqlParameter> parameters = new();
-
-                    if (partSelected)
-                    {
-                        queryBuilder.Append("AND PartID = @PartID ");
-                        parameters.Add(new MySqlParameter("@PartID", part));
-                    }
-
-                    if (opSelected)
-                    {
-                        queryBuilder.Append("AND Operation = @Operation ");
-                        parameters.Add(new MySqlParameter("@Operation", op));
-                    }
-
-                    if (locSelected)
-                    {
-                        queryBuilder.Append("AND Location = @Location ");
-                        parameters.Add(new MySqlParameter("@Location", loc));
-                    }
-
-                    if (qtyMin.HasValue)
-                    {
-                        queryBuilder.Append("AND Quantity >= @QtyMin ");
-                        parameters.Add(new MySqlParameter("@QtyMin", qtyMin.Value));
-                    }
-
-                    if (qtyMax.HasValue)
-                    {
-                        queryBuilder.Append("AND Quantity <= @QtyMax ");
-                        parameters.Add(new MySqlParameter("@QtyMax", qtyMax.Value));
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(notes))
-                    {
-                        queryBuilder.Append("AND Notes LIKE @Notes ");
-                        parameters.Add(new MySqlParameter("@Notes", $"%{notes}%"));
-                    }
-
-                    if (userSelected)
-                    {
-                        queryBuilder.Append("AND User = @User ");
-                        parameters.Add(new MySqlParameter("@User", user));
-                    }
-
-                    if (filterByDate && dateFrom.HasValue && dateTo.HasValue)
-                    {
-                        queryBuilder.Append("AND ReceiveDate BETWEEN @DateFrom AND @DateTo ");
-                        parameters.Add(new MySqlParameter("@DateFrom", dateFrom));
-                        parameters.Add(new MySqlParameter("@DateTo", dateTo));
-                    }
-
-                    cmd = new MySqlCommand(queryBuilder.ToString(), null);
-
-                    foreach (MySqlParameter param in parameters)
-                    {
-                        cmd.Parameters.Add(param);
-                    }
-
-                    string debugSql = queryBuilder.ToString();
-                    foreach (MySqlParameter param in cmd.Parameters)
-                    {
-                        debugSql = debugSql.Replace(param.ParameterName, $"'{param.Value}'");
-                    }
-
-                    LoggingUtility.Log("[SQL DEBUG] " + debugSql);
-                    Debug.WriteLine("[SQL DEBUG] " + debugSql);
+                    MessageBox.Show(@"The 'From' date cannot be after the 'To' date.", @"Validation Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
                 }
+
+                StringBuilder queryBuilder = new();
+                queryBuilder.Append("SELECT * ");
+                queryBuilder.Append("FROM inv_inventory WHERE 1=1 ");
+
+                List<MySqlParameter> parameters = new();
+
+                if (!string.IsNullOrWhiteSpace(part))
+                {
+                    queryBuilder.Append("AND PartID LIKE @PartID ");
+                    parameters.Add(new MySqlParameter("@PartID", $"%{part}%"));
+                }
+
+                if (!string.IsNullOrWhiteSpace(op))
+                {
+                    queryBuilder.Append("AND Operation LIKE @Operation ");
+                    parameters.Add(new MySqlParameter("@Operation", $"%{op}%"));
+                }
+
+                if (!string.IsNullOrWhiteSpace(loc))
+                {
+                    queryBuilder.Append("AND Location LIKE @Location ");
+                    parameters.Add(new MySqlParameter("@Location", $"%{loc}%"));
+                }
+
+                if (qtyMin.HasValue)
+                {
+                    queryBuilder.Append("AND Quantity >= @QtyMin ");
+                    parameters.Add(new MySqlParameter("@QtyMin", qtyMin.Value));
+                }
+
+                if (qtyMax.HasValue)
+                {
+                    queryBuilder.Append("AND Quantity <= @QtyMax ");
+                    parameters.Add(new MySqlParameter("@QtyMax", qtyMax.Value));
+                }
+
+                if (!string.IsNullOrWhiteSpace(notes))
+                {
+                    queryBuilder.Append("AND Notes LIKE @Notes ");
+                    parameters.Add(new MySqlParameter("@Notes", $"%{notes}%"));
+                }
+
+                if (userSelected)
+                {
+                    queryBuilder.Append("AND User = @User ");
+                    parameters.Add(new MySqlParameter("@User", user));
+                }
+
+                if (filterByDate && dateFrom.HasValue && dateTo.HasValue)
+                {
+                    queryBuilder.Append("AND ReceiveDate BETWEEN @DateFrom AND @DateTo ");
+                    parameters.Add(new MySqlParameter("@DateFrom", dateFrom));
+                    parameters.Add(new MySqlParameter("@DateTo", dateTo));
+                }
+
+                cmd = new MySqlCommand(queryBuilder.ToString(), null);
+                foreach (MySqlParameter param in parameters)
+                {
+                    cmd.Parameters.Add(param);
+                }
+
+                string debugSql = queryBuilder.ToString();
+                foreach (MySqlParameter param in cmd.Parameters)
+                {
+                    debugSql = debugSql.Replace(param.ParameterName, $"'{param.Value}'");
+                }
+
+                LoggingUtility.Log("[SQL DEBUG] " + debugSql);
+                Debug.WriteLine("[SQL DEBUG] " + debugSql);
 
                 await using (MySqlConnection conn = new(Model_AppVariables.ConnectionString))
                 {
@@ -520,12 +371,16 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 {
                     column.Visible = columnsToShow.Contains(column.Name);
                 }
+
                 // Reorder columns
                 for (int i = 0; i < columnsToShow.Length; i++)
                 {
                     if (Control_AdvancedRemove_DataGridView_Results.Columns.Contains(columnsToShow[i]))
+                    {
                         Control_AdvancedRemove_DataGridView_Results.Columns[columnsToShow[i]].DisplayIndex = i;
+                    }
                 }
+
                 Core_Themes.ApplyThemeToDataGridView(Control_AdvancedRemove_DataGridView_Results);
                 Core_Themes.SizeDataGrid(Control_AdvancedRemove_DataGridView_Results);
                 Control_AdvancedRemove_Image_NothingFound.Visible = dt.Rows.Count == 0;
@@ -552,15 +407,35 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     return;
                 }
 
-                StringBuilder sb = new();
+                // Gather deleted items for undo
+                _lastRemovedItems.Clear();
                 foreach (DataGridViewRow row in dgv.SelectedRows)
                 {
                     string partId = row.Cells["PartID"].Value?.ToString() ?? "";
                     string location = row.Cells["Location"].Value?.ToString() ?? "";
                     string operation = row.Cells["Operation"].Value?.ToString() ?? "";
-                    string quantity = row.Cells["Quantity"].Value?.ToString() ?? "";
+                    int quantity = int.TryParse(row.Cells["Quantity"].Value?.ToString(), out int q) ? q : 0;
+                    string itemType = row.Cells["ItemType"]?.Value?.ToString() ?? ""; // If you have this column
+                    string user = row.Cells["User"]?.Value?.ToString() ?? "";
+                    string batchNumber = row.Cells["BatchNumber"]?.Value?.ToString() ?? "";
+
+                    _lastRemovedItems.Add(new Model_HistoryRemove
+                    {
+                        PartId = partId,
+                        Location = location,
+                        Operation = operation,
+                        Quantity = quantity,
+                        ItemType = itemType,
+                        User = user,
+                        BatchNumber = batchNumber
+                    });
+                }
+
+                StringBuilder sb = new();
+                foreach (Model_HistoryRemove item in _lastRemovedItems)
+                {
                     sb.AppendLine(
-                        $"PartID: {partId}, Location: {location}, Operation: {operation}, Quantity: {quantity}");
+                        $"PartID: {item.PartId}, Location: {item.Location}, Operation: {item.Operation}, Quantity: {item.Quantity}");
                 }
 
                 string summary = sb.ToString();
@@ -576,12 +451,20 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 if (confirmResult != DialogResult.Yes)
                 {
                     LoggingUtility.Log("[ADVANCED REMOVE] User cancelled deletion.");
+                    _lastRemovedItems.Clear();
                     return;
                 }
 
                 int removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
 
                 LoggingUtility.Log($"[ADVANCED REMOVE] {removedCount} inventory items deleted.");
+
+                // Enable Undo button if items were deleted
+                if (_lastRemovedItems.Count > 0)
+                {
+                    Control_AdvancedRemove_Button_Undo.Enabled = true;
+                }
+
                 Control_AdvancedRemove_Button_Search_Click(null, null);
             }
             catch (Exception ex)
@@ -623,27 +506,18 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 Control_RemoveTab.MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(60,
                     "Refilling combo boxes...");
-                Debug.WriteLine("[DEBUG] Refilling Part ComboBox");
-                await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(Control_AdvancedRemove_ComboBox_Part);
-                Debug.WriteLine("[DEBUG] Refilling Operation ComboBox");
-                await Helper_UI_ComboBoxes.FillOperationComboBoxesAsync(Control_AdvancedRemove_ComboBox_Op);
-                Debug.WriteLine("[DEBUG] Refilling Location ComboBox");
-                await Helper_UI_ComboBoxes.FillLocationComboBoxesAsync(Control_AdvancedRemove_ComboBox_Loc);
                 Debug.WriteLine("[DEBUG] Refilling User ComboBox");
                 await Helper_UI_ComboBoxes.FillUserComboBoxesAsync(Control_AdvancedRemove_ComboBox_User);
 
-                MainFormControlHelper.ResetComboBox(Control_AdvancedRemove_ComboBox_Part,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
-                MainFormControlHelper.ResetComboBox(Control_AdvancedRemove_ComboBox_Op,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
-                MainFormControlHelper.ResetComboBox(Control_AdvancedRemove_ComboBox_Loc,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
                 MainFormControlHelper.ResetComboBox(Control_AdvancedRemove_ComboBox_User,
                     Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
 
                 Control_AdvancedRemove_TextBox_QtyMin.Text = string.Empty;
                 Control_AdvancedRemove_TextBox_QtyMax.Text = string.Empty;
                 Control_AdvancedRemove_TextBox_Notes.Text = string.Empty;
+                Control_AdvancedRemove_TextBox_Part.Text = string.Empty;
+                Control_AdvancedRemove_TextBox_Operation.Text = string.Empty;
+                Control_AdvancedRemove_TextBox_Location.Text = string.Empty;
 
                 Control_AdvancedRemove_CheckBox_Date.Checked = false;
                 Control_AdvancedRemove_DateTimePicker_From.Value = DateTime.Today;
@@ -655,9 +529,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Control_AdvancedRemove_DataGridView_Results.Rows.Clear();
                 Control_AdvancedRemove_Image_NothingFound.Visible = false;
 
-                if (Control_AdvancedRemove_ComboBox_Part.FindForm() is { } form)
+                if (Control_AdvancedRemove_ComboBox_User.FindForm() is { } form)
                 {
-                    MainFormControlHelper.SetActiveControl(form, Control_AdvancedRemove_ComboBox_Part);
+                    MainFormControlHelper.SetActiveControl(form, Control_AdvancedRemove_ComboBox_User);
                 }
 
                 Debug.WriteLine("[DEBUG] AdvancedRemove HardReset - end");
@@ -706,18 +580,25 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     MainFormInstance.MainForm_StatusStrip_SavedStatus.Visible = false;
                 }
 
-                MainFormControlHelper.ResetComboBox(Control_AdvancedRemove_ComboBox_Part,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
-                MainFormControlHelper.ResetComboBox(Control_AdvancedRemove_ComboBox_Op,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
-                MainFormControlHelper.ResetComboBox(Control_AdvancedRemove_ComboBox_Loc,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
                 MainFormControlHelper.ResetComboBox(Control_AdvancedRemove_ComboBox_User,
-                    Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red, 0);
-
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red, 0);
                 Control_AdvancedRemove_TextBox_QtyMin.Text = string.Empty;
+                Control_AdvancedRemove_TextBox_QtyMin.ForeColor =
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
                 Control_AdvancedRemove_TextBox_QtyMax.Text = string.Empty;
+                Control_AdvancedRemove_TextBox_QtyMax.ForeColor =
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
                 Control_AdvancedRemove_TextBox_Notes.Text = string.Empty;
+                Control_AdvancedRemove_TextBox_Notes.ForeColor =
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
+                Control_AdvancedRemove_TextBox_Part.Text = string.Empty;
+                Control_AdvancedRemove_TextBox_Part.ForeColor = Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
+                Control_AdvancedRemove_TextBox_Operation.Text = string.Empty;
+                Control_AdvancedRemove_TextBox_Operation.ForeColor =
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
+                Control_AdvancedRemove_TextBox_Location.Text = string.Empty;
+                Control_AdvancedRemove_TextBox_Location.ForeColor =
+                    Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
 
                 Control_AdvancedRemove_CheckBox_Date.Checked = false;
                 Control_AdvancedRemove_DateTimePicker_From.Value = DateTime.Today;
@@ -725,6 +606,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Control_AdvancedRemove_DateTimePicker_From.Enabled = false;
                 Control_AdvancedRemove_DateTimePicker_To.Enabled = false;
 
+                // Reset DataGridView as well
                 Control_AdvancedRemove_DataGridView_Results.DataSource = null;
                 Control_AdvancedRemove_DataGridView_Results.Rows.Clear();
                 Control_AdvancedRemove_Image_NothingFound.Visible = false;
@@ -752,17 +634,15 @@ namespace MTM_Inventory_Application.Controls.MainForm
                         @"Disconnected from Server, please standby...";
                 }
 
-                if (Control_AdvancedRemove_ComboBox_Part.FindForm() is { } form)
+                if (Control_AdvancedRemove_ComboBox_User.FindForm() is { } form)
                 {
-                    MainFormControlHelper.SetActiveControl(form, Control_AdvancedRemove_ComboBox_Part);
+                    MainFormControlHelper.SetActiveControl(form, Control_AdvancedRemove_ComboBox_User);
                 }
             }
         }
 
         private async void Control_AdvancedRemove_Button_Reset_Click(object? sender, EventArgs? e)
         {
-            Control_AdvancedRemove_TextBox_Like.Clear();
-            Control_AdvancedRemove_ComboBox_Like.SelectedIndex = 0;
             if ((ModifierKeys & Keys.Shift) == Keys.Shift)
             {
                 await Control_AdvancedRemove_HardReset();
@@ -827,14 +707,17 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     MessageBox.Show("No data to print.", "Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
-                var printer = new Core_DgvPrinter();
-                Control_AdvancedRemove_DataGridView_Results.Tag = Control_AdvancedRemove_ComboBox_Part.Text;
+
+                Core_DgvPrinter printer = new();
+                // Use Part textbox for tag
+                Control_AdvancedRemove_DataGridView_Results.Tag = Control_AdvancedRemove_TextBox_Part.Text;
                 printer.Print(Control_AdvancedRemove_DataGridView_Results);
             }
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 
@@ -844,7 +727,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 bool hasData = Control_AdvancedRemove_DataGridView_Results.Rows.Count > 0;
                 if (Control_AdvancedRemove_Button_Print != null)
+                {
                     Control_AdvancedRemove_Button_Print.Enabled = hasData;
+                }
             }
             catch (Exception ex)
             {
@@ -897,36 +782,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
 
             return base.ProcessCmdKey(ref msg, keyData);
-        }
-
-        private void Control_AdvancedRemove_ComboBox_Like_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            bool isDeepSearch = Control_AdvancedRemove_ComboBox_Like.SelectedIndex == 0;
-
-            Control_AdvancedRemove_ComboBox_Part.Enabled = isDeepSearch;
-            Control_AdvancedRemove_ComboBox_Loc.Enabled = isDeepSearch;
-            Control_AdvancedRemove_ComboBox_Op.Enabled = isDeepSearch;
-            Control_AdvancedRemove_ComboBox_User.Enabled = isDeepSearch;
-            Control_AdvancedRemove_TextBox_QtyMin.Enabled = isDeepSearch;
-            Control_AdvancedRemove_TextBox_QtyMax.Enabled = isDeepSearch;
-            Control_AdvancedRemove_CheckBox_Date.Enabled = isDeepSearch;
-            Control_AdvancedRemove_DateTimePicker_From.Enabled =
-                isDeepSearch && Control_AdvancedRemove_CheckBox_Date.Checked;
-            Control_AdvancedRemove_DateTimePicker_To.Enabled =
-                isDeepSearch && Control_AdvancedRemove_CheckBox_Date.Checked;
-            Control_AdvancedRemove_TextBox_Notes.Enabled = isDeepSearch;
-
-            Control_AdvancedRemove_TextBox_Like.Enabled = !isDeepSearch;
-
-            if (isDeepSearch)
-            {
-                Control_AdvancedRemove_ComboBox_Part.Focus();
-                Control_AdvancedRemove_TextBox_Like.Clear();
-            }
-            else
-            {
-                Control_AdvancedRemove_TextBox_Like.Focus();
-            }
         }
 
         private void Control_AdvancedRemove_Button_SidePanel_Click(object sender, EventArgs e)

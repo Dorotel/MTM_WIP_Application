@@ -201,13 +201,27 @@ namespace MTM_Inventory_Application
                 // 13. Applying theme
                 progress = 99;
                 _splashScreen?.UpdateProgress(progress, "Applying theme...");
-                Core_Themes.ApplyTheme(_mainForm);
+                if (_mainForm.InvokeRequired)
+                {
+                    _mainForm.Invoke(new Action(() => Core_Themes.ApplyTheme(_mainForm)));
+                }
+                else
+                {
+                    Core_Themes.ApplyTheme(_mainForm);
+                }
 
                 // 14. Ready to start!
                 progress = 100;
                 _splashScreen?.UpdateProgress(progress, "Ready to start!");
                 await Task.Delay(500);
-                _mainForm.Show();
+                if (_mainForm.InvokeRequired)
+                {
+                    _mainForm.Invoke(new Action(() => _mainForm.Show()));
+                }
+                else
+                {
+                    _mainForm.Show();
+                }
                 if (_splashScreen != null)
                 {
                     _splashScreen.FormClosed -= SplashScreen_FormClosed;

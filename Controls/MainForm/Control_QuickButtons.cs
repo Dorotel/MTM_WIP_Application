@@ -10,7 +10,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
     {
         #region Fields
 
-        private static List<Button>? quickButtons;
+        internal static List<Button>? quickButtons;
 
         #endregion
 
@@ -98,7 +98,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     // Format: (Operation) - [PartID x Quantity] (single line, no wrapping)
                     string rawText = $"({operation}) - [{partId} x {quantity}]";
                     quickButtons[i].Text = TruncateTextToFitSingleLine(rawText, quickButtons[i]);
-                    quickButtons[i].TextAlign = ContentAlignment.MiddleCenter;
                     quickButtons[i].UseMnemonic = false;
                     quickButtons[i].Padding = Padding.Empty;
                     quickButtons[i].Margin = Padding.Empty;
@@ -187,9 +186,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 }
             }
 
-            if (mainForm.MainForm_Control_InventoryTab?.Visible == true)
+            if (mainForm.MainForm_UserControl_InventoryTab?.Visible == true)
             {
-                Control_InventoryTab? inv = mainForm.MainForm_Control_InventoryTab;
+                Control_InventoryTab? inv = mainForm.MainForm_UserControl_InventoryTab;
                 SetComboBoxes(inv, "Control_InventoryTab_ComboBox_Part", "Control_InventoryTab_ComboBox_Operation",
                     partId, operation);
                 SetTextBoxText(inv, "Control_InventoryTab_TextBox_Quantity", quantity.ToString());
@@ -197,9 +196,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 return;
             }
 
-            if (mainForm.MainForm_RemoveTabNormalControl?.Visible == true)
+            if (mainForm.MainForm_UserControl_RemoveTab?.Visible == true)
             {
-                Control_RemoveTab? rem = mainForm.MainForm_RemoveTabNormalControl;
+                Control_RemoveTab? rem = mainForm.MainForm_UserControl_RemoveTab;
                 SetComboBoxes(rem, "Control_RemoveTab_ComboBox_Part", "Control_RemoveTab_ComboBox_Operation", partId,
                     operation);
                 rem.Focus();
@@ -208,9 +207,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 return;
             }
 
-            if (mainForm.MainForm_Control_TransferTab?.Visible == true)
+            if (mainForm.MainForm_UserControl_TransferTab?.Visible == true)
             {
-                Control_TransferTab? trn = mainForm.MainForm_Control_TransferTab;
+                Control_TransferTab? trn = mainForm.MainForm_UserControl_TransferTab;
                 SetComboBoxes(trn, "Control_TransferTab_ComboBox_Part", "Control_TransferTab_ComboBox_Operation",
                     partId, operation);
                 trn.Focus();
@@ -219,9 +218,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 return;
             }
 
-            if (mainForm.MainForm_AdvancedInventory?.Visible == true)
+            if (mainForm.MainForm_UserControl_AdvancedInventory?.Visible == true)
             {
-                Control_AdvancedInventory? advInv = mainForm.MainForm_AdvancedInventory;
+                Control_AdvancedInventory? advInv = mainForm.MainForm_UserControl_AdvancedInventory;
                 FieldInfo? tabControlField = advInv.GetType().GetField("AdvancedInventory_TabControl",
                     BindingFlags.NonPublic | BindingFlags.Instance);
                 TabControl? tabControl = tabControlField?.GetValue(advInv) as TabControl;
@@ -247,9 +246,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 return;
             }
 
-            if (mainForm.MainForm_Control_AdvancedRemove?.Visible == true)
+            if (mainForm.MainForm_UserControl_AdvancedRemove?.Visible == true)
             {
-                Control_AdvancedRemove? advRem = mainForm.MainForm_Control_AdvancedRemove;
+                Control_AdvancedRemove? advRem = mainForm.MainForm_UserControl_AdvancedRemove;
                 SetComboBoxes(advRem, "Control_AdvancedRemove_ComboBox_Part", "Control_AdvancedRemove_ComboBox_Op",
                     partId, operation);
                 advRem.Focus();

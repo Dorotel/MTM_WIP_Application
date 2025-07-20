@@ -326,6 +326,7 @@ namespace MTM_Inventory_Application.Forms.Settings
 
             if (isNormal)
             {
+                SettingsForm_TabControl_Database.Visible = false;
                 HideNode("Database");
                 HideNode("Users");
                 HideNode("Part Numbers", "Edit Part Number");
@@ -392,7 +393,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 string user = Model_AppVariables.User;
 
                 SettingsForm_TextBox_Server.Text =
-                    await Dao_User.GetWipServerAddressAsync(user) ?? "localhost"; //172.16.1.104
+                    await Dao_User.GetWipServerAddressAsync(user) ?? "172.16.1.104"; //172.16.1.104
                 SettingsForm_TextBox_Port.Text = await Dao_User.GetWipServerPortAsync(user) ?? "3306";
                 SettingsForm_TextBox_Database.Text = await Dao_User.GetDatabaseAsync(user) ?? "mtm_wip_application";
                 SettingsForm_TextBox_Username.Text = await Dao_User.GetVisualUserNameAsync(user) ?? "";
@@ -1087,7 +1088,7 @@ namespace MTM_Inventory_Application.Forms.Settings
 
             try
             {
-                SettingsForm_TextBox_Server.Text = "localhost"; //172.16.1.104
+                SettingsForm_TextBox_Server.Text = "172.16.1.104"; //172.16.1.104
                 SettingsForm_TextBox_Port.Text = "3306";
                 SettingsForm_TextBox_Database.Text = "mtm_wip_application";
                 SettingsForm_TextBox_Username.Text = "";
