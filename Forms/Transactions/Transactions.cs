@@ -403,33 +403,52 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     {
                         Tag = inTransaction
                     };
+                    
+                    // Add other transactions as child nodes, ordered by date
+                    var otherTransactions = transactions.Where(t => t != inTransaction).OrderBy(t => t.DateTime);
+                    foreach (var transaction in otherTransactions)
+                    {
+                        string icon = transaction.TransactionType switch
+                        {
+                            TransactionType.OUT => "❌",
+                            TransactionType.TRANSFER => "🔄",
+                            _ => "📋"
+                        };
+                        
+                        var childNode = new TreeNode($"{icon} {transaction.TransactionType}: {transaction.Operation ?? transaction.TransactionType.ToString()} (Qty: {transaction.Quantity}, {transaction.DateTime:MM/dd/yyyy})")
+                        {
+                            Tag = transaction
+                        };
+                        rootNode.Nodes.Add(childNode);
+                    }
                 }
                 else
                 {
-                    // If no IN transaction, use the first transaction as root
+                    // If no IN transaction, use the first transaction as root and show batch info
                     var firstTransaction = transactions.First();
-                    rootNode = new TreeNode($"📦 {batchNumber} - {firstTransaction.TransactionType}: {firstTransaction.PartID} (Qty: {firstTransaction.Quantity}, {firstTransaction.DateTime:MM/dd/yyyy})")
+                    rootNode = new TreeNode($"📋 {batchNumber} - {firstTransaction.TransactionType}: {firstTransaction.PartID} (Qty: {firstTransaction.Quantity}, {firstTransaction.DateTime:MM/dd/yyyy})")
                     {
                         Tag = firstTransaction
                     };
-                }
-
-                // Add other transactions as child nodes, ordered by date
-                var otherTransactions = transactions.Where(t => t != inTransaction && t != transactions.First()).OrderBy(t => t.DateTime);
-                foreach (var transaction in otherTransactions)
-                {
-                    string icon = transaction.TransactionType switch
-                    {
-                        TransactionType.OUT => "❌",
-                        TransactionType.TRANSFER => "🔄",
-                        _ => "📋"
-                    };
                     
-                    var childNode = new TreeNode($"{icon} {transaction.TransactionType}: {transaction.Operation ?? transaction.TransactionType.ToString()} (Qty: {transaction.Quantity}, {transaction.DateTime:MM/dd/yyyy})")
+                    // Add remaining transactions as child nodes, ordered by date
+                    var remainingTransactions = transactions.Skip(1).OrderBy(t => t.DateTime);
+                    foreach (var transaction in remainingTransactions)
                     {
-                        Tag = transaction
-                    };
-                    rootNode.Nodes.Add(childNode);
+                        string icon = transaction.TransactionType switch
+                        {
+                            TransactionType.OUT => "❌",
+                            TransactionType.TRANSFER => "🔄",
+                            TransactionType.IN => "📦",
+                            _ => "📋"
+                        };
+                        
+                        var childNode = new TreeNode($"{icon} {transaction.TransactionType}: {transaction.Operation ?? transaction.TransactionType.ToString()} (Qty: {transaction.Quantity}, {transaction.DateTime:MM/dd/yyyy})")
+                        {
+                            Tag = transaction
+                        };
+                        rootNode.Nodes.Add(childNode);
+                    }
                 }
 
                 Transactions_TreeView_Transactions.Nodes.Add(rootNode);
