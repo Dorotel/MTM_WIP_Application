@@ -183,6 +183,8 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_TreeView_Transactions.ShowLines = true;
             Transactions_TreeView_Transactions.ShowPlusMinus = true;
             Transactions_TreeView_Transactions.ShowRootLines = true;
+            Transactions_TreeView_Transactions.ItemHeight = 20; // Better spacing
+            Transactions_TreeView_Transactions.Indent = 25; // Better indentation
         }
 
         private void ResetFilters()
@@ -194,6 +196,13 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Control_AdvancedRemove_CheckBox_Date.Checked = false;
             SetupDateRangeDefaults();
             _currentPage = 1;
+            
+            // Clear TreeView and reset UI state
+            Transactions_TreeView_Transactions.Nodes.Clear();
+            Transactions_Image_NothingFound.Visible = false;
+            Transactions_TreeView_Transactions.Visible = false;
+            Transactions_Button_Print.Enabled = false;
+            Transfer_Button_SelectionHistory.Enabled = false;
         }
 
         private void UpdatePagingButtons(int resultCount)
@@ -452,6 +461,9 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 }
 
                 Transactions_TreeView_Transactions.Nodes.Add(rootNode);
+                
+                // Expand root nodes by default for better user experience
+                rootNode.Expand();
             }
 
             Transactions_Image_NothingFound.Visible = result.Count == 0;
