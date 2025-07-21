@@ -440,6 +440,30 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         #endregion
 
+        #region Tab Shortcuts
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Core_WipAppVariables.Shortcut_MainForm_Tab1)
+            {
+                MainForm_TabControl.SelectedIndex = 0;
+                return true;
+            }
+            if (keyData == Core_WipAppVariables.Shortcut_MainForm_Tab2)
+            {
+                MainForm_TabControl.SelectedIndex = 1;
+                return true;
+            }
+            if (keyData == Core_WipAppVariables.Shortcut_MainForm_Tab3)
+            {
+                MainForm_TabControl.SelectedIndex = 2;
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        #endregion
+
         #region Form Closing
 
         protected override void OnFormClosing(FormClosingEventArgs e)

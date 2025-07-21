@@ -29,7 +29,6 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         private System.Drawing.Printing.PrintDocument MainForm_Inventory_PrintDocument;
         private PrintPreviewDialog MainForm_Inventory_PrintDialog;
-        private ToolTip MainForm_ToolTip;
 
         private System.Windows.Forms.Timer MainForm_Last10_Timer;
         public Control_ConnectionStrengthControl MainForm_UserControl_SignalStrength;
@@ -312,10 +311,10 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             MainForm_TabControl_Remove.Controls.Add(MainForm_UserControl_RemoveTab);
             MainForm_TabControl_Remove.Controls.Add(MainForm_UserControl_AdvancedRemove);
-            MainForm_TabControl_Remove.Location = new Point(4, 24);
+            MainForm_TabControl_Remove.Location = new Point(4, 44);
             MainForm_TabControl_Remove.Margin = new Padding(0);
             MainForm_TabControl_Remove.Name = "MainForm_TabControl_Remove";
-            MainForm_TabControl_Remove.Size = new Size(731, 372);
+            MainForm_TabControl_Remove.Size = new Size(192, 52);
             MainForm_TabControl_Remove.TabIndex = 1;
             MainForm_TabControl_Remove.Text = "Remove (Ctrl + 2)";
             MainForm_TabControl_Remove.ToolTipText = "Shortcut: Ctrl+2";
@@ -329,7 +328,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_UserControl_RemoveTab.Margin = new Padding(3, 4, 3, 4);
             MainForm_UserControl_RemoveTab.Name = "MainForm_UserControl_RemoveTab";
             MainForm_UserControl_RemoveTab.Padding = new Padding(3);
-            MainForm_UserControl_RemoveTab.Size = new Size(731, 372);
+            MainForm_UserControl_RemoveTab.Size = new Size(192, 52);
             MainForm_UserControl_RemoveTab.TabIndex = 0;
             // 
             // MainForm_UserControl_AdvancedRemove
@@ -339,17 +338,17 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_UserControl_AdvancedRemove.Location = new Point(0, 0);
             MainForm_UserControl_AdvancedRemove.Margin = new Padding(4);
             MainForm_UserControl_AdvancedRemove.Name = "MainForm_UserControl_AdvancedRemove";
-            MainForm_UserControl_AdvancedRemove.Size = new Size(731, 372);
+            MainForm_UserControl_AdvancedRemove.Size = new Size(192, 52);
             MainForm_UserControl_AdvancedRemove.TabIndex = 1;
             MainForm_UserControl_AdvancedRemove.Visible = false;
             // 
             // MainForm_TabControl_Transfer
             // 
             MainForm_TabControl_Transfer.Controls.Add(MainForm_UserControl_TransferTab);
-            MainForm_TabControl_Transfer.Location = new Point(4, 24);
+            MainForm_TabControl_Transfer.Location = new Point(4, 64);
             MainForm_TabControl_Transfer.Margin = new Padding(0);
             MainForm_TabControl_Transfer.Name = "MainForm_TabControl_Transfer";
-            MainForm_TabControl_Transfer.Size = new Size(731, 372);
+            MainForm_TabControl_Transfer.Size = new Size(192, 32);
             MainForm_TabControl_Transfer.TabIndex = 2;
             MainForm_TabControl_Transfer.Text = "Transfer (Ctrl+3)";
             MainForm_TabControl_Transfer.ToolTipText = "Shortcut: Ctrl+3";
@@ -363,7 +362,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_UserControl_TransferTab.Location = new Point(0, 0);
             MainForm_UserControl_TransferTab.Margin = new Padding(0);
             MainForm_UserControl_TransferTab.Name = "MainForm_UserControl_TransferTab";
-            MainForm_UserControl_TransferTab.Size = new Size(731, 372);
+            MainForm_UserControl_TransferTab.Size = new Size(192, 32);
             MainForm_UserControl_TransferTab.TabIndex = 0;
             // 
             // MainForm_UserControl_QuickButtons
@@ -431,6 +430,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         }
         private TableLayoutPanel tableLayoutPanel1;
+        internal ToolTip MainForm_ToolTip;
     }
 
 

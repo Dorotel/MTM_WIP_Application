@@ -1,6 +1,7 @@
 ﻿
 
 using MTM_Inventory_Application.Core;
+using MTM_Inventory_Application.Forms.MainForm;
 
 namespace MTM_Inventory_Application.Helpers;
 
@@ -12,17 +13,35 @@ internal class Helper_UI_Shortcuts
     {
         if (keys == Keys.None) return "";
         var parts = new List<string>();
-        if (keys.HasFlag(Keys.Control)) parts.Add("CTRL");
-        if (keys.HasFlag(Keys.Shift)) parts.Add("SHIFT");
-        if (keys.HasFlag(Keys.Alt)) parts.Add("ALT");
+
+        // Modifiers
+        if (keys.HasFlag(Keys.Control)) parts.Add("Ctrl");
+        if (keys.HasFlag(Keys.Shift)) parts.Add("Shift");
+        if (keys.HasFlag(Keys.Alt)) parts.Add("Alt");
+
+        // Remove modifiers to get the main key
         var keyOnly = keys & ~Keys.Control & ~Keys.Shift & ~Keys.Alt;
         if (keyOnly != Keys.None)
         {
-            if (keyOnly == Keys.Left) parts.Add("LEFT");
-            else if (keyOnly == Keys.Right) parts.Add("RIGHT");
-            else if (keyOnly == Keys.Up) parts.Add("UP");
-            else if (keyOnly == Keys.Down) parts.Add("DOWN");
-            else parts.Add(keyOnly.ToString().ToUpper());
+            // Handle D0-D9 as "0"-"9"
+            if (keyOnly >= Keys.D0 && keyOnly <= Keys.D9)
+            {
+                parts.Add(((int)keyOnly - (int)Keys.D0).ToString());
+            }
+            // Handle NumPad0-NumPad9 as "Num0"-"Num9"
+            else if (keyOnly >= Keys.NumPad0 && keyOnly <= Keys.NumPad9)
+            {
+                parts.Add("Num" + ((int)keyOnly - (int)Keys.NumPad0));
+            }
+            // Handle arrows and other common keys
+            else if (keyOnly == Keys.Left) parts.Add("Left");
+            else if (keyOnly == Keys.Right) parts.Add("Right");
+            else if (keyOnly == Keys.Up) parts.Add("Up");
+            else if (keyOnly == Keys.Down) parts.Add("Down");
+            else if (keyOnly == Keys.Enter) parts.Add("Enter");
+            else if (keyOnly == Keys.Delete) parts.Add("Delete");
+            else if (keyOnly == Keys.Escape) parts.Add("Esc");
+            else parts.Add(keyOnly.ToString());
         }
 
         return string.Join(" + ", parts);
@@ -81,6 +100,9 @@ internal class Helper_UI_Shortcuts
     {
         return new Dictionary<string, Keys>
         {
+            ["Main Form - Inventory Tab"] = Core_WipAppVariables.Shortcut_MainForm_Tab1,
+            ["Main Form - Transfer Tab"] = Core_WipAppVariables.Shortcut_MainForm_Tab2,
+            ["Main Form - Remove Tab"] = Core_WipAppVariables.Shortcut_MainForm_Tab3,
             ["Inventory - Save"] = Core_WipAppVariables.Shortcut_Inventory_Save,
             ["Inventory - Advanced"] = Core_WipAppVariables.Shortcut_Inventory_Advanced,
             ["Inventory - Reset"] = Core_WipAppVariables.Shortcut_Inventory_Reset,
@@ -109,6 +131,7 @@ internal class Helper_UI_Shortcuts
             ["Transfer - Reset"] = Core_WipAppVariables.Shortcut_Transfer_Reset,
             ["Transfer - Toggle Right Panel (Right)"] = Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Right,
             ["Transfer - Toggle Right Panel (Left)"] = Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Left
+
         };
     }
 
@@ -116,6 +139,15 @@ internal class Helper_UI_Shortcuts
     {
         switch (actionName)
         {
+            case "Main Form - Inventory Tab":
+                Core_WipAppVariables.Shortcut_MainForm_Tab1 = newKeys;
+                break;
+            case "Main Form - Transfer Tab":
+                Core_WipAppVariables.Shortcut_MainForm_Tab2 = newKeys;
+                break;
+            case "Main Form - Remove Tab":
+                Core_WipAppVariables.Shortcut_MainForm_Tab3 = newKeys;
+                break;
             case "Inventory - Save":
                 Core_WipAppVariables.Shortcut_Inventory_Save = newKeys;
                 break;
@@ -200,6 +232,36 @@ internal class Helper_UI_Shortcuts
             case "Transfer - Toggle Right Panel (Left)":
                 Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Left = newKeys;
                 break;
+        }
+    }
+
+    public static void UpdateMainFormTabShortcuts(MainForm mainForm)
+    {
+        var tabShortcuts = new[]
+        {
+        (Index: 0, Shortcut: Core_WipAppVariables.Shortcut_MainForm_Tab1),
+        (Index: 1, Shortcut: Core_WipAppVariables.Shortcut_MainForm_Tab2),
+        (Index: 2, Shortcut: Core_WipAppVariables.Shortcut_MainForm_Tab3)
+    };
+
+        var tabNames = new[]
+        {
+        "New (Pick-Up)",
+        "Remove (Deliver)",
+        "Transfer (Location to Location)"
+    };
+
+        for (int i = 0; i < tabShortcuts.Length; i++)
+        {
+            if (mainForm.MainForm_TabControl.TabPages.Count > i)
+            {
+                var tabPage = mainForm.MainForm_TabControl.TabPages[i];
+                var shortcutStr = "Shortcut: " + ToShortcutString(tabShortcuts[i].Shortcut);
+                tabPage.Text = $"{tabNames[i]}";
+                // Set tooltip for tab header, not TabPage control
+                mainForm.MainForm_ToolTip?.SetToolTip(mainForm.MainForm_TabControl, shortcutStr);
+                mainForm.MainForm_TabControl.TabPages[i].ToolTipText = shortcutStr; // Also set ToolTipText property
+            }
         }
     }
 

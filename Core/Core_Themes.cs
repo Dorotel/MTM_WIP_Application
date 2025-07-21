@@ -52,7 +52,10 @@ namespace MTM_Inventory_Application.Core
             // Then apply theme colors
             SetFormTheme(form, theme, themeName);
             ApplyThemeToControls(form.Controls);
-
+            if (form is Forms.MainForm.MainForm mainForm)
+            {
+                Helper_UI_Shortcuts.UpdateMainFormTabShortcuts(mainForm);
+            }
             form.ResumeLayout();
             LoggingUtility.Log($"Global theme '{themeName}' with DPI scaling applied to form '{form.Name}'.");
         }

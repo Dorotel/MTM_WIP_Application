@@ -58,6 +58,10 @@ internal static class Core_WipAppVariables
     public static Keys Shortcut_Transfer_ToggleRightPanel_Right = Keys.Alt | Keys.Right;
     public static Keys Shortcut_Transfer_ToggleRightPanel_Left = Keys.Alt | Keys.Left;
 
+    public static Keys Shortcut_MainForm_Tab1 = Keys.Control | Keys.D1;
+    public static Keys Shortcut_MainForm_Tab2 = Keys.Control | Keys.D2;
+    public static Keys Shortcut_MainForm_Tab3 = Keys.Control | Keys.D3;
+
     #endregion
 }
 

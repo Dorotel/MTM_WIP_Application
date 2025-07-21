@@ -619,13 +619,9 @@ namespace MTM_Inventory_Application.Forms.Settings
                         newKeys = ke.KeyData;
                         shortcutBox.Text = Helper_UI_Shortcuts.ToShortcutString(newKeys);
 
-                        bool hasModifier = (newKeys & Keys.Control) == Keys.Control ||
-                                           (newKeys & Keys.Alt) == Keys.Alt ||
-                                           (newKeys & Keys.Shift) == Keys.Shift;
-
-                        if (!hasModifier)
+                        if (newKeys == Keys.None)
                         {
-                            errorLabel.Text = "Shortcut must include ALT, CTRL, SHIFT, or a combination.";
+                            errorLabel.Text = "Shortcut cannot be empty.";
                             errorLabel.Visible = true;
                         }
                         else if (IsShortcutConflict(actionName, newKeys))
@@ -645,18 +641,16 @@ namespace MTM_Inventory_Application.Forms.Settings
                     Button okButton = new() { Text = "OK", Location = new Point(215, 110), Size = new Size(75, 23) };
                     Button SettingsForm_Button_Cancel = new()
                     {
-                        Text = "Cancel", Location = new Point(295, 110), Size = new Size(75, 23)
+                        Text = "Cancel",
+                        Location = new Point(295, 110),
+                        Size = new Size(75, 23)
                     };
 
                     okButton.Click += (s, args) =>
                     {
-                        bool hasModifier = (newKeys & Keys.Control) == Keys.Control ||
-                                           (newKeys & Keys.Alt) == Keys.Alt ||
-                                           (newKeys & Keys.Shift) == Keys.Shift;
-
-                        if (newKeys == Keys.None || !hasModifier)
+                        if (newKeys == Keys.None)
                         {
-                            errorLabel.Text = "Shortcut must include ALT, CTRL, SHIFT, or a combination.";
+                            errorLabel.Text = "Shortcut cannot be empty.";
                             errorLabel.Visible = true;
                             return;
                         }
@@ -681,7 +675,7 @@ namespace MTM_Inventory_Application.Forms.Settings
 
                     inputForm.Controls.AddRange(new Control[]
                     {
-                        label, shortcutBox, errorLabel, okButton, SettingsForm_Button_Cancel
+                label, shortcutBox, errorLabel, okButton, SettingsForm_Button_Cancel
                     });
                     inputForm.AcceptButton = okButton;
                     inputForm.CancelButton = SettingsForm_Button_Cancel;
