@@ -30,7 +30,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private Panel Transactions_Panel_DataGridView;
 
         // Results container (right panel of split)
-        private DataGridView Transactions_DataGridView_Transactions;
+        private TreeView Transactions_TreeView_Transactions;
 
         // Bottom container
         private Panel Transactions_Panel_Bottom_Left;
@@ -99,7 +99,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transfer_TableLayout_Right = new TableLayoutPanel();
             Transactions_Panel_DataGridView = new Panel();
             Transactions_Image_NothingFound = new PictureBox();
-            Transactions_DataGridView_Transactions = new DataGridView();
+            Transactions_TreeView_Transactions = new TreeView();
             Transfer_Panel_PageButtons = new Panel();
             Transfer_Button_SelectionHistory = new Button();
             Transfer_Button_Next = new Button();
@@ -128,7 +128,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transfer_TableLayout_Right.SuspendLayout();
             Transactions_Panel_DataGridView.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)Transactions_Image_NothingFound).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)Transactions_DataGridView_Transactions).BeginInit();
             Transfer_Panel_PageButtons.SuspendLayout();
             Transactions_TabelLayoutPanel_Bottom.SuspendLayout();
             Transactions_Panel_Bottom_Right.SuspendLayout();
@@ -632,7 +631,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // Transactions_Panel_DataGridView
             // 
             Transactions_Panel_DataGridView.Controls.Add(Transactions_Image_NothingFound);
-            Transactions_Panel_DataGridView.Controls.Add(Transactions_DataGridView_Transactions);
+            Transactions_Panel_DataGridView.Controls.Add(Transactions_TreeView_Transactions);
             Transactions_Panel_DataGridView.Dock = DockStyle.Fill;
             Transactions_Panel_DataGridView.Location = new Point(3, 3);
             Transactions_Panel_DataGridView.Name = "Transactions_Panel_DataGridView";
@@ -654,13 +653,18 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Image_NothingFound.TabStop = false;
             Transactions_Image_NothingFound.Visible = false;
             // 
-            // Transactions_DataGridView_Transactions
+            // Transactions_TreeView_Transactions
             // 
-            Transactions_DataGridView_Transactions.Dock = DockStyle.Fill;
-            Transactions_DataGridView_Transactions.Location = new Point(0, 0);
-            Transactions_DataGridView_Transactions.Name = "Transactions_DataGridView_Transactions";
-            Transactions_DataGridView_Transactions.Size = new Size(399, 483);
-            Transactions_DataGridView_Transactions.TabIndex = 0;
+            Transactions_TreeView_Transactions.Dock = DockStyle.Fill;
+            Transactions_TreeView_Transactions.FullRowSelect = true;
+            Transactions_TreeView_Transactions.HideSelection = false;
+            Transactions_TreeView_Transactions.Location = new Point(0, 0);
+            Transactions_TreeView_Transactions.Name = "Transactions_TreeView_Transactions";
+            Transactions_TreeView_Transactions.ShowLines = true;
+            Transactions_TreeView_Transactions.ShowPlusMinus = true;
+            Transactions_TreeView_Transactions.ShowRootLines = true;
+            Transactions_TreeView_Transactions.Size = new Size(399, 483);
+            Transactions_TreeView_Transactions.TabIndex = 0;
             // 
             // Transfer_Panel_PageButtons
             // 
@@ -801,7 +805,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transfer_TableLayout_Right.PerformLayout();
             Transactions_Panel_DataGridView.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)Transactions_Image_NothingFound).EndInit();
-            ((System.ComponentModel.ISupportInitialize)Transactions_DataGridView_Transactions).EndInit();
             Transfer_Panel_PageButtons.ResumeLayout(false);
             Transactions_TabelLayoutPanel_Bottom.ResumeLayout(false);
             Transactions_Panel_Bottom_Right.ResumeLayout(false);
