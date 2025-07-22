@@ -663,8 +663,18 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     return;
                 }
 
+                // Get visible column names for print
+                List<string> visibleColumns = new();
+                foreach (DataGridViewColumn col in Control_RemoveTab_DataGridView_Main.Columns)
+                {
+                    if (col.Visible)
+                        visibleColumns.Add(col.Name);
+                }
+
                 Core_DgvPrinter printer = new();
                 Control_RemoveTab_DataGridView_Main.Tag = Control_RemoveTab_ComboBox_Part.Text;
+                // Set visible columns for print
+                printer.SetPrintVisibleColumns(visibleColumns);
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(60, "Printing...");
                 printer.Print(Control_RemoveTab_DataGridView_Main);
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Print complete");

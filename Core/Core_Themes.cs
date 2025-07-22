@@ -72,8 +72,330 @@ namespace MTM_Inventory_Application.Core
             return appTheme.Colors;
         }
 
-        public static void ApplyThemeToDataGridView(DataGridView dataGridView) =>
-            ThemeAppliersInternal.ApplyThemeToDataGridView(dataGridView);
+        public static void ApplyThemeToDataGridView(DataGridView dataGridView)
+        {
+            if (dataGridView == null)
+            {
+                return;
+            }
+
+            Model_UserUiColors colors = Core_AppThemes.GetCurrentTheme().Colors;
+
+            if (colors.DataGridBackColor.HasValue)
+            {
+                dataGridView.BackgroundColor = colors.DataGridBackColor.Value;
+            }
+
+            if (colors.DataGridForeColor.HasValue)
+            {
+                dataGridView.ForeColor = colors.DataGridForeColor.Value;
+            }
+
+            if (dataGridView.ColumnHeadersDefaultCellStyle != null)
+            {
+                if (colors.DataGridHeaderBackColor.HasValue)
+                {
+                    dataGridView.ColumnHeadersDefaultCellStyle.BackColor = colors.DataGridHeaderBackColor.Value;
+                }
+
+                if (colors.DataGridHeaderForeColor.HasValue)
+                {
+                    dataGridView.ColumnHeadersDefaultCellStyle.ForeColor = colors.DataGridHeaderForeColor.Value;
+                }
+            }
+
+            if (dataGridView.RowsDefaultCellStyle != null)
+            {
+                if (colors.DataGridRowBackColor.HasValue)
+                {
+                    dataGridView.RowsDefaultCellStyle.BackColor = colors.DataGridRowBackColor.Value;
+                }
+
+                if (colors.DataGridForeColor.HasValue)
+                {
+                    dataGridView.RowsDefaultCellStyle.ForeColor = colors.DataGridForeColor.Value;
+                }
+            }
+
+            if (dataGridView.AlternatingRowsDefaultCellStyle != null)
+            {
+                if (colors.DataGridAltRowBackColor.HasValue)
+                {
+                    dataGridView.AlternatingRowsDefaultCellStyle.BackColor = colors.DataGridAltRowBackColor.Value;
+                }
+
+                if (colors.DataGridForeColor.HasValue)
+                {
+                    dataGridView.AlternatingRowsDefaultCellStyle.ForeColor = colors.DataGridForeColor.Value;
+                }
+            }
+
+            if (colors.DataGridGridColor.HasValue)
+            {
+                dataGridView.GridColor = colors.DataGridGridColor.Value;
+            }
+
+            if (colors.DataGridSelectionBackColor.HasValue)
+            {
+                dataGridView.DefaultCellStyle.SelectionBackColor = colors.DataGridSelectionBackColor.Value;
+            }
+
+            if (colors.DataGridSelectionForeColor.HasValue)
+            {
+                dataGridView.DefaultCellStyle.SelectionForeColor = colors.DataGridSelectionForeColor.Value;
+            }
+
+            if (colors.DataGridBorderColor.HasValue)
+            {
+                OwnerDrawThemeHelper.ApplyDataGridViewBorderColor(dataGridView, colors.DataGridBorderColor.Value);
+            }
+
+            // Add column visibility context menu
+            AttachColumnVisibilityMenu(dataGridView);
+        }
+
+        /// <summary>
+        /// Attaches a context menu to a DataGridView header row for toggling column visibility
+        /// </summary>
+        private static void AttachColumnVisibilityMenu(DataGridView dataGridView)
+        {
+            // Remove any existing handlers to avoid duplicates
+            dataGridView.MouseDown -= DataGridView_MouseDown;
+            dataGridView.MouseDown += DataGridView_MouseDown;
+
+            // Create or get existing context menu
+            ContextMenuStrip menu = dataGridView.ContextMenuStrip ?? new ContextMenuStrip();
+            if (dataGridView.ContextMenuStrip == null)
+            {
+                dataGridView.ContextMenuStrip = menu;
+            }
+
+            // Store original context menu to use when not clicking on header
+            dataGridView.Tag = dataGridView.Tag ?? menu;
+
+            static void DataGridView_MouseDown(object? sender, MouseEventArgs e)
+            {
+                if (sender is not DataGridView dgv || e.Button != MouseButtons.Right)
+                    return;
+
+                // Check if click was on the column header area
+                var headerRect = dgv.DisplayRectangle;
+                headerRect.Height = dgv.ColumnHeadersHeight;
+
+                if (headerRect.Contains(e.Location))
+                {
+                    ShowColumnVisibilityMenu(dgv, e.Location);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Shows the column visibility context menu for a DataGridView
+        /// </summary>
+        private static void ShowColumnVisibilityMenu(DataGridView dgv, Point location)
+        {
+            // Get the column that was clicked (if any)
+            DataGridViewColumn? clickedColumn = null;
+            int headerHeight = dgv.ColumnHeadersHeight;
+
+            // If click is on header row, find which column was clicked
+            if (location.Y <= headerHeight)
+            {
+                int x = location.X;
+                int cumulativeWidth = 0;
+                foreach (DataGridViewColumn col in dgv.Columns)
+                {
+                    if (!col.Visible) continue;
+                    cumulativeWidth += col.Width;
+                    if (x < cumulativeWidth)
+                    {
+                        clickedColumn = col;
+                        break;
+                    }
+                }
+            }
+
+            // Create a new context menu each time to ensure it's up to date
+            ContextMenuStrip menu = new();
+
+            // Add a title item
+            ToolStripMenuItem titleItem = new("Column Visibility")
+            {
+                Enabled = false,
+                Font = new Font(menu.Font, FontStyle.Bold)
+            };
+            menu.Items.Add(titleItem);
+            menu.Items.Add(new ToolStripSeparator());
+
+            // Add each column as a checkbox menu item
+            foreach (DataGridViewColumn col in dgv.Columns)
+            {
+                ToolStripMenuItem item = new(col.HeaderText)
+                {
+                    Checked = col.Visible,
+                    Tag = col.Name
+                };
+
+                item.Click += (s, e) =>
+                {
+                    if (s is ToolStripMenuItem menuItem && menuItem.Tag is string colName)
+                    {
+                        DataGridViewColumn? column = dgv.Columns[colName];
+                        if (column != null)
+                        {
+                            // Toggle visibility
+                            column.Visible = !column.Visible;
+                            menuItem.Checked = column.Visible;
+                        }
+                    }
+                };
+
+                menu.Items.Add(item);
+            }
+
+            // Add "Select All" and "Deselect All" options
+            menu.Items.Add(new ToolStripSeparator());
+
+            ToolStripMenuItem selectAllItem = new("Select All");
+            selectAllItem.Click += (s, e) =>
+            {
+                foreach (DataGridViewColumn col in dgv.Columns)
+                {
+                    col.Visible = true;
+                }
+
+                // Update all checkboxes
+                foreach (ToolStripItem item in menu.Items)
+                {
+                    if (item is ToolStripMenuItem menuItem && menuItem.Tag is string)
+                    {
+                        menuItem.Checked = true;
+                    }
+                }
+            };
+            menu.Items.Add(selectAllItem);
+
+            ToolStripMenuItem deselectAllItem = new("Deselect All");
+            deselectAllItem.Click += (s, e) =>
+            {
+                // Don't hide all columns - keep at least one visible
+                bool hasOneVisible = false;
+
+                foreach (DataGridViewColumn col in dgv.Columns)
+                {
+                    if (!hasOneVisible)
+                    {
+                        col.Visible = true;
+                        hasOneVisible = true;
+                    }
+                    else
+                    {
+                        col.Visible = false;
+                    }
+                }
+
+                // Update all checkboxes
+                foreach (ToolStripItem item in menu.Items)
+                {
+                    if (item is ToolStripMenuItem menuItem && menuItem.Tag is string colName)
+                    {
+                        menuItem.Checked = dgv.Columns[colName]?.Visible ?? false;
+                    }
+                }
+            };
+            menu.Items.Add(deselectAllItem);
+
+            // Add "Save Grid Settings" option
+            menu.Items.Add(new ToolStripSeparator());
+            ToolStripMenuItem saveSettingsItem = new("Save Grid Settings");
+            saveSettingsItem.Click += async (s, e) =>
+            {
+                try
+                {
+                    // Serialize column visibility and order
+                    var columns = dgv.Columns.Cast<DataGridViewColumn>()
+                        .OrderBy(c => c.DisplayIndex)
+                        .Select(c => new
+                        {
+                            Name = c.Name,
+                            Visible = c.Visible,
+                            DisplayIndex = c.DisplayIndex
+                        }).ToList();
+                    string json = JsonSerializer.Serialize(new { Columns = columns });
+                    // Get userId (from Model_AppVariables.User)
+                    string userId = MTM_Inventory_Application.Models.Model_AppVariables.User;
+                    await MTM_Inventory_Application.Data.Dao_User.SetGridViewSettingsJsonAsync(userId, json);
+                    MessageBox.Show("Grid settings saved successfully.", "Grid Settings", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error saving grid settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+            menu.Items.Add(saveSettingsItem);
+
+            // Add column reordering options if a specific column was clicked
+            if (clickedColumn != null)
+            {
+                menu.Items.Add(new ToolStripSeparator());
+
+                ToolStripMenuItem columnOrderTitle = new("Column Order")
+                {
+                    Enabled = false,
+                    Font = new Font(menu.Font, FontStyle.Bold)
+                };
+                menu.Items.Add(columnOrderTitle);
+
+                // Move column left
+                ToolStripMenuItem moveLeftItem = new("Move Left")
+                {
+                    Enabled = clickedColumn.DisplayIndex > 0
+                };
+                moveLeftItem.Click += (s, e) =>
+                {
+                    int newIndex = clickedColumn.DisplayIndex - 1;
+                    if (newIndex >= 0)
+                    {
+                        clickedColumn.DisplayIndex = newIndex;
+                    }
+                };
+                menu.Items.Add(moveLeftItem);
+
+                // Move column right
+                ToolStripMenuItem moveRightItem = new("Move Right")
+                {
+                    Enabled = clickedColumn.DisplayIndex < dgv.Columns.Count - 1
+                };
+                moveRightItem.Click += (s, e) =>
+                {
+                    int newIndex = clickedColumn.DisplayIndex + 1;
+                    if (newIndex < dgv.Columns.Count)
+                    {
+                        clickedColumn.DisplayIndex = newIndex;
+                    }
+                };
+                menu.Items.Add(moveRightItem);
+
+                // Move to first position
+                ToolStripMenuItem moveFirstItem = new("Move to First")
+                {
+                    Enabled = clickedColumn.DisplayIndex > 0
+                };
+                moveFirstItem.Click += (s, e) => { clickedColumn.DisplayIndex = 0; };
+                menu.Items.Add(moveFirstItem);
+
+                // Move to last position
+                ToolStripMenuItem moveLastItem = new("Move to Last")
+                {
+                    Enabled = clickedColumn.DisplayIndex < dgv.Columns.Count - 1
+                };
+                moveLastItem.Click += (s, e) => { clickedColumn.DisplayIndex = dgv.Columns.Count - 1; };
+                menu.Items.Add(moveLastItem);
+            }
+
+            // Show the menu
+            menu.Show(dgv, location);
+        }
 
         public static void SizeDataGrid(DataGridView dataGridView) => ThemeAppliersInternal.SizeDataGrid(dataGridView);
 
@@ -2567,5 +2889,43 @@ namespace MTM_Inventory_Application.Core
         }
 
         #endregion
+
+        public static async Task ApplyThemeToDataGridViewWithUserSettingsAsync(DataGridView dataGridView, string gridName)
+        {
+            // Apply theme as usual
+            ApplyThemeToDataGridView(dataGridView);
+
+            // Load and apply saved grid settings (column visibility/order)
+            try
+            {
+                string userId = MTM_Inventory_Application.Models.Model_AppVariables.User;
+                string json = await MTM_Inventory_Application.Data.Dao_User.GetGridViewSettingsJsonAsync(userId);
+                if (!string.IsNullOrWhiteSpace(json))
+                {
+                    using var doc = JsonDocument.Parse(json);
+                    if (doc.RootElement.TryGetProperty("Columns", out var columnsElem) && columnsElem.ValueKind == JsonValueKind.Array)
+                    {
+                        var columns = columnsElem.EnumerateArray().ToList();
+                        // Set visibility and order for each column
+                        foreach (var colElem in columns)
+                        {
+                            string? name = colElem.GetProperty("Name").GetString();
+                            bool visible = colElem.GetProperty("Visible").GetBoolean();
+                            int displayIndex = colElem.GetProperty("DisplayIndex").GetInt32();
+                            if (!string.IsNullOrEmpty(name) && dataGridView.Columns.Contains(name))
+                            {
+                                var col = dataGridView.Columns[name];
+                                col.Visible = visible;
+                                col.DisplayIndex = displayIndex;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[Core_Themes] Error loading grid settings: {ex}");
+            }
+        }
     }
 }

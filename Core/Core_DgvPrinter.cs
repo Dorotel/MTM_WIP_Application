@@ -21,6 +21,7 @@ public class Core_DgvPrinter
     private readonly Dictionary<string, float> _columnWidths = new();
     private readonly Dictionary<string, StringAlignment> _columnAlignments = new();
 #pragma warning restore IDE0028
+    private HashSet<string>? _printVisibleColumns;
 
     #endregion
 
@@ -50,6 +51,13 @@ public class Core_DgvPrinter
             _columnAlignments[columnName] = alignment.Value;
     }
 
+    public void SetPrintVisibleColumns(IEnumerable<string> columnNames)
+    {
+        _printVisibleColumns = columnNames != null
+            ? new HashSet<string>(columnNames)
+            : null;
+    }
+
     #endregion
 
     #region Printing
@@ -61,8 +69,34 @@ public class Core_DgvPrinter
             _dgv = dgv ?? throw new ArgumentNullException(nameof(dgv));
             _currentRow = 0;
             LoggingUtility.Log("Starting print operation in Core_DgvPrinter.");
-            _printDocument.Print();
-            LoggingUtility.Log("Print operation completed in Core_DgvPrinter.");
+
+            // Show print preview first
+            using (PrintPreviewDialog previewDialog = new PrintPreviewDialog())
+            {
+                previewDialog.Document = _printDocument;
+                previewDialog.Width = 1000;
+                previewDialog.Height = 800;
+                previewDialog.StartPosition = FormStartPosition.CenterScreen;
+                previewDialog.ShowDialog();
+            }
+
+            // Then show print dialog
+            using (PrintDialog printDialog = new PrintDialog())
+            {
+                printDialog.Document = _printDocument;
+                printDialog.AllowSomePages = true;
+                printDialog.UseEXDialog = true;
+
+                if (printDialog.ShowDialog() == DialogResult.OK)
+                {
+                    _printDocument.Print();
+                    LoggingUtility.Log("Print operation completed in Core_DgvPrinter.");
+                }
+                else
+                {
+                    LoggingUtility.Log("Print operation cancelled by user.");
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -149,7 +183,11 @@ public class Core_DgvPrinter
             List<DataGridViewColumn> visibleCols = new();
             foreach (DataGridViewColumn col in _dgv.Columns)
             {
-                if (!col.Visible) continue;
+                bool isVisible = col.Visible;
+                if (_printVisibleColumns != null)
+                    isVisible = isVisible && _printVisibleColumns.Contains(col.Name);
+
+                if (!isVisible) continue;
                 float colWidth = _columnWidths.TryGetValue(col.Name, out var w) ? w : col.Width;
                 colWidths.Add(colWidth);
                 visibleCols.Add(col);

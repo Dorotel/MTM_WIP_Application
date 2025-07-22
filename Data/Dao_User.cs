@@ -1,6 +1,4 @@
-﻿
-
-using System.Data;
+﻿using System.Data;
 using System.Diagnostics;
 using System.Text.Json;
 using MTM_Inventory_Application.Helpers;
@@ -308,6 +306,76 @@ internal static class Dao_User
             Debug.WriteLine($"[Dao_User] Exception in SetSettingsJsonAsync: {ex}");
             LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true);
+        }
+    }
+
+    // Add method to support saving named settings JSON for grid view settings
+    public static async Task SetGridViewSettingsJsonAsync(string userId, string settingsJson)
+    {
+        Debug.WriteLine($"[Dao_User] Entering SetGridViewSettingsJsonAsync(userId={userId})");
+        try
+        {
+            using MySqlConnection conn = new(Model_AppVariables.ConnectionString);
+            await conn.OpenAsync(); 
+            using MySqlCommand cmd = new("usr_ui_settings_SetJsonSetting", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+            cmd.Parameters.AddWithValue("p_UserId", userId);
+            cmd.Parameters.AddWithValue("p_SettingJson", settingsJson);
+            MySqlParameter statusParam = new("p_Status", MySqlDbType.Int32) { Direction = ParameterDirection.Output };
+            cmd.Parameters.Add(statusParam);
+            MySqlParameter errorMsgParam = new("p_ErrorMsg", MySqlDbType.VarChar, 255)
+            {
+                Direction = ParameterDirection.Output
+            };
+            cmd.Parameters.Add(errorMsgParam);
+            await cmd.ExecuteNonQueryAsync();
+            int status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
+            string errorMsg = errorMsgParam.Value?.ToString() ?? "";
+            Debug.WriteLine($"[Dao_User] SetGridViewSettingsJsonAsync status: {status}, errorMsg: {errorMsg}");
+            if (status != 0)
+            {
+                throw new Exception(errorMsg);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Dao_User] Exception in SetGridViewSettingsJsonAsync: {ex}");
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true);
+        }
+    }
+
+    // Add method to load named settings JSON for grid view settings
+    public static async Task<string> GetGridViewSettingsJsonAsync(string userId)
+    {
+        Debug.WriteLine($"[Dao_User] Entering GetGridViewSettingsJsonAsync(userId={userId})");
+        try
+        {
+            using MySqlConnection conn = new(Model_AppVariables.ConnectionString);
+            await conn.OpenAsync();
+            using MySqlCommand cmd = new("usr_ui_settings_GetJsonSetting", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+            cmd.Parameters.AddWithValue("p_UserId", userId);
+            MySqlParameter jsonParam = new("p_SettingJson", MySqlDbType.JSON)
+            {
+                Direction = ParameterDirection.Output
+            };
+            cmd.Parameters.Add(jsonParam);
+            await cmd.ExecuteNonQueryAsync();
+            string? json = jsonParam.Value?.ToString();
+            Debug.WriteLine($"[Dao_User] GetGridViewSettingsJsonAsync result: {json}");
+            return json ?? "";
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Dao_User] Exception in GetGridViewSettingsJsonAsync: {ex}");
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true);
+            return "";
         }
     }
 

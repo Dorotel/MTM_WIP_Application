@@ -538,6 +538,16 @@ namespace MTM_Inventory_Application.Forms.Transactions
             try
             {
                 Core_DgvPrinter printer = new();
+                // Get visible column names for print
+                List<string> visibleColumns = new();
+                foreach (DataGridViewColumn col in Transactions_DataGridView_Transactions.Columns)
+                {
+                    if (col.Visible)
+                        visibleColumns.Add(col.Name);
+                }
+                
+                // Set visible columns for print
+                printer.SetPrintVisibleColumns(visibleColumns);
                 // Optionally set column widths/alignments here if needed
                 printer.Print(Transactions_DataGridView_Transactions);
             }
