@@ -948,7 +948,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 bool panelCollapsed = MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed;
                 MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = !panelCollapsed;
-                Control_TransferTab_Button_Toggle_RightPanel.Text = panelCollapsed ? "→" : "←";
+                Control_TransferTab_Button_Toggle_RightPanel.Text = panelCollapsed ? "➡️" : "⬅️";
                 Control_TransferTab_Button_Toggle_RightPanel.ForeColor = panelCollapsed
                     ? Model_AppVariables.UserUiColors.SuccessColor ?? Color.Green
                     : Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
@@ -1022,12 +1022,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
             if (splitContainer.Panel1Collapsed)
             {
                 splitContainer.Panel1Collapsed = false;
-                button.Text = "Collapse ◀";
+                button.Text = "Collapse ⬅️";
             }
             else
             {
                 splitContainer.Panel1Collapsed = true;
-                button.Text = "Expand ▶";
+                button.Text = "Expand ➡️";
             }
         }
     }

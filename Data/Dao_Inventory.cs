@@ -1,6 +1,7 @@
 using System.Data;
 using MTM_Inventory_Application.Helpers;
 using MySql.Data.MySqlClient;
+using System.Windows.Forms;
 
 namespace MTM_Inventory_Application.Data;
 
@@ -269,13 +270,14 @@ public static class Dao_Inventory
         return result;
     }
 
-    public static async Task<int> RemoveInventoryItemsFromDataGridViewAsync(DataGridView dgv, bool useAsync = false)
+    public static async Task<(int RemovedCount, List<string> ErrorMessages)> RemoveInventoryItemsFromDataGridViewAsync(DataGridView dgv, bool useAsync = false)
     {
         int removedCount = 0;
+        List<string> errorMessages = new();
 
         if (dgv == null || dgv.SelectedRows.Count == 0)
         {
-            return 0;
+            return (0, errorMessages);
         }
 
         foreach (DataGridViewRow row in dgv.SelectedRows)
@@ -284,8 +286,7 @@ public static class Dao_Inventory
             string location = row.Cells["Location"].Value?.ToString() ?? "";
             string operation = row.Cells["Operation"].Value?.ToString() ?? "";
             int quantity = int.TryParse(row.Cells["Quantity"].Value?.ToString(), out int qty) ? qty : 0;
-            string batchNumber =
-                row.Cells["BatchNumber"].Value?.ToString() ?? "";
+            string batchNumber = row.Cells["BatchNumber"].Value?.ToString() ?? "";
             string itemType = row.Cells["ItemType"].Value?.ToString() ?? "";
             string user = row.Cells["User"].Value?.ToString() ?? "";
             string notes = row.Cells["Notes"].Value?.ToString() ?? "";
@@ -296,7 +297,7 @@ public static class Dao_Inventory
                 continue;
             }
 
-            int result = await RemoveInventoryItemAsync(
+            var (status, errorMsg) = await RemoveInventoryItemAsync(
                 partId,
                 location,
                 operation,
@@ -307,16 +308,20 @@ public static class Dao_Inventory
                 notes,
                 useAsync);
 
-            if (result > 0)
+            if (status > 0)
             {
-                removedCount += result;
+                removedCount += status;
+            }
+            else if (!string.IsNullOrWhiteSpace(errorMsg))
+            {
+                errorMessages.Add($"PartID: {partId}, Location: {location}, Operation: {operation}, Error: {errorMsg}");
             }
         }
 
-        return removedCount;
+        return (removedCount, errorMessages);
     }
 
-    public static async Task<int> RemoveInventoryItemAsync(
+    public static async Task<(int Status, string ErrorMsg)> RemoveInventoryItemAsync(
         string partId,
         string location,
         string operation,
@@ -327,22 +332,36 @@ public static class Dao_Inventory
         string notes,
         bool useAsync = false)
     {
-        int result = await HelperDatabaseCore.ExecuteNonQuery(
-            "mtm_wip_application.inv_inventory_Remove_Item",
-            new Dictionary<string, object>
-            {
-                { "p_PartID", partId },
-                { "p_Location", location },
-                { "p_Operation", operation },
-                { "p_Quantity", quantity },
-                { "p_ItemType", itemType },
-                { "p_User", user },
-                { "p_BatchNumber", batchNumber },
-                { "p_Notes", notes }
-            },
-            useAsync, CommandType.StoredProcedure);
+        string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
+        await using var connection = new MySqlConnection(connectionString);
+        await connection.OpenAsync();
+        await using var command = new MySqlCommand("mtm_wip_application.inv_inventory_Remove_Item_1_1", connection);
+        command.CommandType = CommandType.StoredProcedure;
 
-        return result;
+        command.Parameters.AddWithValue("p_PartID", partId);
+        command.Parameters.AddWithValue("p_Location", location);
+        command.Parameters.AddWithValue("p_Operation", operation);
+        command.Parameters.AddWithValue("p_Quantity", quantity);
+        command.Parameters.AddWithValue("p_ItemType", itemType);
+        command.Parameters.AddWithValue("p_User", user);
+        command.Parameters.AddWithValue("p_BatchNumber", batchNumber);
+        command.Parameters.AddWithValue("p_Notes", notes);
+
+        var statusParam = new MySqlParameter("p_Status", MySqlDbType.Int32)
+        {
+            Direction = ParameterDirection.Output
+        };
+        var errorMsgParam = new MySqlParameter("p_ErrorMsg", MySqlDbType.VarChar, 255)
+        {
+            Direction = ParameterDirection.Output
+        };
+        command.Parameters.Add(statusParam);
+        command.Parameters.Add(errorMsgParam);
+
+        await command.ExecuteNonQueryAsync();
+        int status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
+        string errorMsg = errorMsgParam.Value?.ToString() ?? string.Empty;
+        return (status, errorMsg);
     }
 
     public static async Task TransferPartSimpleAsync(string batchNumber, string partId, string operation, string quantity, string newLocation)

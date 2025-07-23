@@ -189,6 +189,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // Control_AdvancedRemove_Button_Reset
             // 
             Control_AdvancedRemove_Button_Reset.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Control_AdvancedRemove_Button_Reset.AutoSize = true;
             Control_AdvancedRemove_Button_Reset.Location = new Point(3, 3);
             Control_AdvancedRemove_Button_Reset.Name = "Control_AdvancedRemove_Button_Reset";
             Control_AdvancedRemove_Button_Reset.Size = new Size(80, 22);
@@ -198,6 +199,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // Control_AdvancedRemove_Button_Print
             // 
             Control_AdvancedRemove_Button_Print.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Control_AdvancedRemove_Button_Print.AutoSize = true;
             Control_AdvancedRemove_Button_Print.Enabled = false;
             Control_AdvancedRemove_Button_Print.Location = new Point(89, 3);
             Control_AdvancedRemove_Button_Print.Name = "Control_AdvancedRemove_Button_Print";
@@ -207,6 +209,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_AdvancedRemove_Button_Normal
             // 
+            Control_AdvancedRemove_Button_Normal.AutoSize = true;
             Control_AdvancedRemove_Button_Normal.ForeColor = Color.DarkRed;
             Control_AdvancedRemove_Button_Normal.Location = new Point(264, 3);
             Control_AdvancedRemove_Button_Normal.Name = "Control_AdvancedRemove_Button_Normal";
@@ -238,6 +241,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_AdvancedRemove_Button_Search
             // 
+            Control_AdvancedRemove_Button_Search.AutoSize = true;
             Control_AdvancedRemove_Button_Search.Location = new Point(3, 3);
             Control_AdvancedRemove_Button_Search.Name = "Control_AdvancedRemove_Button_Search";
             Control_AdvancedRemove_Button_Search.Size = new Size(80, 22);
@@ -246,6 +250,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_AdvancedRemove_Button_Undo
             // 
+            Control_AdvancedRemove_Button_Undo.AutoSize = true;
             Control_AdvancedRemove_Button_Undo.Enabled = false;
             Control_AdvancedRemove_Button_Undo.Location = new Point(89, 3);
             Control_AdvancedRemove_Button_Undo.Name = "Control_AdvancedRemove_Button_Undo";
@@ -256,17 +261,19 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // Control_AdvancedRemove_Button_SidePanel
             // 
             Control_AdvancedRemove_Button_SidePanel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Control_AdvancedRemove_Button_SidePanel.AutoSize = true;
             Control_AdvancedRemove_Button_SidePanel.Location = new Point(305, 3);
             Control_AdvancedRemove_Button_SidePanel.Name = "Control_AdvancedRemove_Button_SidePanel";
             Control_AdvancedRemove_Button_SidePanel.Size = new Size(80, 22);
             Control_AdvancedRemove_Button_SidePanel.TabIndex = 10;
-            Control_AdvancedRemove_Button_SidePanel.Text = "Collapse ◀";
+            Control_AdvancedRemove_Button_SidePanel.Text = "Collapse ⬅️";
             Control_AdvancedRemove_Button_SidePanel.UseVisualStyleBackColor = true;
             Control_AdvancedRemove_Button_SidePanel.Click += Control_AdvancedRemove_Button_SidePanel_Click;
             // 
             // Control_AdvancedRemove_Button_Delete
             // 
             Control_AdvancedRemove_Button_Delete.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Control_AdvancedRemove_Button_Delete.AutoSize = true;
             Control_AdvancedRemove_Button_Delete.Location = new Point(219, 3);
             Control_AdvancedRemove_Button_Delete.Name = "Control_AdvancedRemove_Button_Delete";
             Control_AdvancedRemove_Button_Delete.Size = new Size(80, 22);
@@ -601,7 +608,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_AdvancedRemove_TableLayout_Row4.ResumeLayout(false);
             Control_AdvancedRemove_TableLayout_Row4.PerformLayout();
             Control_AdvancedRemove_TableLayout_BottomRight.ResumeLayout(false);
+            Control_AdvancedRemove_TableLayout_BottomRight.PerformLayout();
             Control_AdvancedRemove_TableLayout_BottomLeft.ResumeLayout(false);
+            Control_AdvancedRemove_TableLayout_BottomLeft.PerformLayout();
             Control_AdvancedRemove_Panel_Top.ResumeLayout(false);
             Control_AdvancedRemove_SplitContainer_Main.Panel1.ResumeLayout(false);
             Control_AdvancedRemove_SplitContainer_Main.Panel2.ResumeLayout(false);

@@ -121,26 +121,25 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // Control_TransferTab_Button_Toggle_Split
             // 
             Control_TransferTab_Button_Toggle_Split.AutoSize = true;
-            Control_TransferTab_Button_Toggle_Split.Dock = DockStyle.Fill;
+            Control_TransferTab_Button_Toggle_Split.Font = new Font("Segoe UI Emoji", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             Control_TransferTab_Button_Toggle_Split.Location = new Point(3, 3);
             Control_TransferTab_Button_Toggle_Split.Name = "Control_TransferTab_Button_Toggle_Split";
-            Control_TransferTab_Button_Toggle_Split.Size = new Size(202, 28);
+            Control_TransferTab_Button_Toggle_Split.Size = new Size(111, 28);
             Control_TransferTab_Button_Toggle_Split.TabIndex = 1000;
-            Control_TransferTab_Button_Toggle_Split.Text = "Collapse ◀";
+            Control_TransferTab_Button_Toggle_Split.Text = "Transfer Panel ⬅️";
             Control_TransferTab_Button_Toggle_Split.UseVisualStyleBackColor = true;
             Control_TransferTab_Button_Toggle_Split.Click += Control_TransferTab_Button_Toggle_Split_Click;
             // 
             // Control_TransferTab_Button_Toggle_RightPanel
             // 
-            Control_TransferTab_Button_Toggle_RightPanel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            Control_TransferTab_Button_Toggle_RightPanel.Font = new Font("Segoe UI", 10F);
-            Control_TransferTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
-            Control_TransferTab_Button_Toggle_RightPanel.Location = new Point(924, 3);
+            Control_TransferTab_Button_Toggle_RightPanel.AutoSize = true;
+            Control_TransferTab_Button_Toggle_RightPanel.Font = new Font("Segoe UI Emoji", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            Control_TransferTab_Button_Toggle_RightPanel.Location = new Point(833, 3);
             Control_TransferTab_Button_Toggle_RightPanel.Name = "Control_TransferTab_Button_Toggle_RightPanel";
-            Control_TransferTab_Button_Toggle_RightPanel.Size = new Size(28, 27);
+            Control_TransferTab_Button_Toggle_RightPanel.Size = new Size(119, 27);
             Control_TransferTab_Button_Toggle_RightPanel.TabIndex = 999;
             Control_TransferTab_Button_Toggle_RightPanel.TabStop = false;
-            Control_TransferTab_Button_Toggle_RightPanel.Text = "←";
+            Control_TransferTab_Button_Toggle_RightPanel.Text = "Quick Buttons ➡️";
             Control_TransferTab_Button_Toggle_RightPanel.UseVisualStyleBackColor = true;
             Control_TransferTab_Button_Toggle_RightPanel.Click += Control_TransferTab_Button_Toggle_RightPanel_Click;
             // 
@@ -302,6 +301,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_TransferTab_Button_Transfer
             // 
+            Control_TransferTab_Button_Transfer.AutoSize = true;
             Control_TransferTab_Button_Transfer.Dock = DockStyle.Fill;
             Control_TransferTab_Button_Transfer.Enabled = false;
             Control_TransferTab_Button_Transfer.Location = new Point(193, 3);
@@ -313,6 +313,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_TransferTab_Button_Search
             // 
+            Control_TransferTab_Button_Search.AutoSize = true;
             Control_TransferTab_Button_Search.Dock = DockStyle.Fill;
             Control_TransferTab_Button_Search.Enabled = false;
             Control_TransferTab_Button_Search.Location = new Point(3, 3);
@@ -325,6 +326,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_TransferTab_Button_Print
             // 
+            Control_TransferTab_Button_Print.AutoSize = true;
             Control_TransferTab_Button_Print.Dock = DockStyle.Fill;
             Control_TransferTab_Button_Print.Enabled = false;
             Control_TransferTab_Button_Print.Location = new Point(3, 36);
@@ -337,6 +339,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_TransferTab_Button_Reset
             // 
+            Control_TransferTab_Button_Reset.AutoSize = true;
             Control_TransferTab_Button_Reset.Dock = DockStyle.Fill;
             Control_TransferTab_Button_Reset.Location = new Point(193, 36);
             Control_TransferTab_Button_Reset.Name = "Control_TransferTab_Button_Reset";
@@ -434,6 +437,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)Control_TransferTab_NumericUpDown_Quantity).EndInit();
             tableLayoutPanel2.ResumeLayout(false);
+            tableLayoutPanel2.PerformLayout();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             Control_TransferTab_Panel_DataGridView.ResumeLayout(false);

@@ -455,13 +455,20 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     return;
                 }
 
-                int removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
-
+                var (removedCount, errorMessages) = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
                 LoggingUtility.Log($"[ADVANCED REMOVE] {removedCount} inventory items deleted.");
 
-                // Enable Undo button if items were deleted
-                if (_lastRemovedItems.Count > 0)
+                if (removedCount == 0)
                 {
+                    string msg = "No items were deleted. This may be because the selected items no longer exist in inventory, the data did not match exactly, or a database constraint prevented deletion.";
+                    if (errorMessages.Count > 0)
+                        msg += "\n\n" + string.Join("\n", errorMessages);
+                    MessageBox.Show(msg, "Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Control_AdvancedRemove_Button_Undo.Enabled = false;
+                }
+                else
+                {
+                    // Enable Undo button if items were deleted
                     Control_AdvancedRemove_Button_Undo.Enabled = true;
                 }
 
@@ -792,12 +799,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
             if (splitContainer.Panel1Collapsed)
             {
                 splitContainer.Panel1Collapsed = false;
-                button.Text = "Collapse ◀";
+                button.Text = "Collapse ⬅️";
             }
             else
             {
                 splitContainer.Panel1Collapsed = true;
-                button.Text = "Expand ▶";
+                button.Text = "Expand ➡️";
             }
         }
 

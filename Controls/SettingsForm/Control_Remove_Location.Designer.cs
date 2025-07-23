@@ -56,7 +56,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             // titleLabel
             // 
             titleLabel.AutoSize = true;
-            titleLabel.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            titleLabel.Font = new Font("Segoe UI Emoji", 12F, FontStyle.Bold);
             titleLabel.Location = new Point(20, 20);
             titleLabel.Name = "titleLabel";
             titleLabel.Size = new Size(142, 21);

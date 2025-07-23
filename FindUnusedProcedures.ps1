@@ -10,7 +10,7 @@
 $procList = @(
     "GetUserRoleNamesList", "GetUserRolesList", "InsertMissingUsrUiSettings", "Reload_md_operation_numbers_from_md_part_ids", "Reload_md_part_ids_from_sequences",
     "inv_inventory_Add_Item", "inv_inventory_Fix_BatchNumbers", "inv_inventory_Get_ByPartID", "inv_inventory_Get_ByPartIDandOperation", "inv_inventory_Get_ByUser",
-    "inv_inventory_Remove_Item", "inv_inventory_Transfer_Part", "inv_inventory_Transfer_Quantity", "inv_transaction_Add", "log_changelog_Get_Current",
+    "inv_inventory_Remove_Item_1_1", "inv_inventory_Transfer_Part", "inv_inventory_Transfer_Quantity", "inv_transaction_Add", "log_changelog_Get_Current",
     "md_item_types_Add_ItemType", "md_item_types_Delete_ByID", "md_item_types_Delete_ByType", "md_item_types_Get_All", "md_item_types_Update_ItemType",
     "md_locations_Add_Location", "md_locations_Delete_ByLocation", "md_locations_Get_All", "md_locations_Update_Location",
     "md_operation_numbers_Add_Operation", "md_operation_numbers_Delete_ByOperation", "md_operation_numbers_Get_All", "md_operation_numbers_Update_Operation",

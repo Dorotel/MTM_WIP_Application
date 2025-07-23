@@ -10,6 +10,7 @@ using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
+using System.Reflection;
 
 namespace MTM_Inventory_Application.Core
 {
@@ -414,44 +415,9 @@ namespace MTM_Inventory_Application.Core
         {
             try
             {
-                // Set AutoScaleMode to DPI for the form
-                form.AutoScaleMode = AutoScaleMode.Dpi;
-
                 form.SuspendLayout();
                 ApplyDpiScalingToControlHierarchy(form.Controls);
-
-                // --- Resize form if any child (recursively) is larger than the form ---
-                Size required = GetDeepestRequiredSize(form);
-                bool resizeNeeded = false;
-                int newWidth = form.Width;
-                int newHeight = form.Height;
-                if (required.Width > form.Width)
-                {
-                    newWidth = required.Width;
-                    resizeNeeded = true;
-                }
-
-                if (required.Height > form.Height)
-                {
-                    newHeight = required.Height;
-                    resizeNeeded = true;
-                }
-
-                if (resizeNeeded)
-                {
-                    form.Width = newWidth;
-                    form.Height = newHeight;
-                    // Also update MaximumSize
-                    if (form.MaximumSize.Width < newWidth || form.MaximumSize.Height < newHeight)
-                    {
-                        form.MaximumSize = new Size(Math.Max(form.MaximumSize.Width, newWidth),
-                            Math.Max(form.MaximumSize.Height, newHeight));
-                    }
-                }
-                // --- End resize logic ---
-
                 form.ResumeLayout();
-
                 LoggingUtility.Log($"DPI scaling applied to form '{form.Name}' and all its controls.");
             }
             catch (Exception ex)
@@ -469,13 +435,9 @@ namespace MTM_Inventory_Application.Core
         {
             try
             {
-                // Set AutoScaleMode to DPI for the user control
-                userControl.AutoScaleMode = AutoScaleMode.Dpi;
-
                 userControl.SuspendLayout();
                 ApplyDpiScalingToControlHierarchy(userControl.Controls);
                 userControl.ResumeLayout();
-
                 LoggingUtility.Log($"DPI scaling applied to user control '{userControl.Name}' and all its controls.");
             }
             catch (Exception ex)
@@ -601,46 +563,10 @@ namespace MTM_Inventory_Application.Core
             {
                 try
                 {
-                    // Set AutoScaleMode to DPI for user controls (forms are handled separately)
-                    if (control is UserControl userControl)
-                    {
-                        userControl.AutoScaleMode = AutoScaleMode.Dpi;
-                    }
-
                     // Recursively apply to child controls
                     if (control.HasChildren && control.Controls.Count > 0)
                     {
                         ApplyDpiScalingToControlHierarchy(control.Controls);
-
-                        // --- Resize parent if any child (recursively) is larger than parent ---
-                        Size required = GetDeepestRequiredSize(control);
-                        bool resizeNeeded = false;
-                        int newWidth = control.Width;
-                        int newHeight = control.Height;
-                        if (required.Width > control.Width)
-                        {
-                            newWidth = required.Width;
-                            resizeNeeded = true;
-                        }
-
-                        if (required.Height > control.Height)
-                        {
-                            newHeight = required.Height;
-                            resizeNeeded = true;
-                        }
-
-                        if (resizeNeeded)
-                        {
-                            control.Width = newWidth;
-                            control.Height = newHeight;
-                            // Also update MaximumSize
-                            if (control.MaximumSize.Width < newWidth || control.MaximumSize.Height < newHeight)
-                            {
-                                control.MaximumSize = new Size(Math.Max(control.MaximumSize.Width, newWidth),
-                                    Math.Max(control.MaximumSize.Height, newHeight));
-                            }
-                        }
-                        // --- End resize logic ---
                     }
                 }
                 catch (Exception ex)
@@ -2749,11 +2675,33 @@ namespace MTM_Inventory_Application.Core
                             {
                                 JsonSerializerOptions options = new();
                                 options.Converters.Add(new JsonColorConverter());
-                                Model_UserUiColors? colors =
-                                    JsonSerializer.Deserialize<Model_UserUiColors>(SettingsJson, options);
+                                // Try legacy format first
+                                Model_UserUiColors? colors = null;
+                                try
+                                {
+                                    colors = JsonSerializer.Deserialize<Model_UserUiColors>(SettingsJson, options);
+                                }
+                                catch { }
                                 if (colors != null)
                                 {
                                     themes[themeName] = new AppTheme { Colors = colors, FormFont = null };
+                                }
+                                else
+                                {
+                                    // Try new simplified format
+                                    try
+                                    {
+                                        var st = JsonSerializer.Deserialize<SimplifiedTheme>(SettingsJson);
+                                        if (st != null)
+                                        {
+                                            colors = MapSimplifiedThemeToUserUiColors(st);
+                                            themes[themeName] = new AppTheme { Colors = colors, FormFont = null };
+                                        }
+                                    }
+                                    catch (Exception ex2)
+                                    {
+                                        LoggingUtility.LogApplicationError(ex2);
+                                    }
                                 }
                             }
                             catch (JsonException jsonEx)
@@ -2865,7 +2813,7 @@ namespace MTM_Inventory_Application.Core
                     {
                         if (theme.FormFont == null)
                         {
-                            theme.FormFont = new Font("Segoe UI", Model_AppVariables.ThemeFontSize);
+                            theme.FormFont = new Font("Segoe UI Emoji", Model_AppVariables.ThemeFontSize);
                         }
                         else if (Math.Abs(theme.FormFont.Size - Model_AppVariables.ThemeFontSize) > 0.01f)
                         {
@@ -2926,6 +2874,98 @@ namespace MTM_Inventory_Application.Core
             {
                 Debug.WriteLine($"[Core_Themes] Error loading grid settings: {ex}");
             }
+        }
+
+        public class SimplifiedTheme
+        {
+            public BaseColors? Base { get; set; }
+            public AccentColors? Accent { get; set; }
+            public StateColors? State { get; set; }
+            public ComponentColors? Component { get; set; }
+
+            public class BaseColors
+            {
+                public string? Background { get; set; }
+                public string? Foreground { get; set; }
+                public string? Border { get; set; }
+            }
+            public class AccentColors
+            {
+                public string? Primary { get; set; }
+                public string? Secondary { get; set; }
+                public string? Dark { get; set; }
+            }
+            public class StateColors
+            {
+                public string? Info { get; set; }
+                public string? Success { get; set; }
+                public string? Warning { get; set; }
+                public string? Error { get; set; }
+            }
+            public class ComponentColors
+            {
+                public string? InputBackground { get; set; }
+                public string? ButtonBackground { get; set; }
+                public string? HeaderBackground { get; set; }
+                public string? AltRowBackground { get; set; }
+                public string? TabUnselected { get; set; }
+                public string? ToolTipBackground { get; set; }
+                public string? StatusBackground { get; set; }
+            }
+        }
+
+        private static Model_UserUiColors MapSimplifiedThemeToUserUiColors(SimplifiedTheme st)
+        {
+            var colors = new Model_UserUiColors();
+            if (st.Base != null)
+            {
+                colors.FormBackColor = ParseColor(st.Base.Background);
+                colors.FormForeColor = ParseColor(st.Base.Foreground);
+                colors.ControlBackColor = ParseColor(st.Base.Background);
+                colors.ControlForeColor = ParseColor(st.Base.Foreground);
+                colors.PanelBackColor = ParseColor(st.Base.Background);
+                colors.PanelForeColor = ParseColor(st.Base.Foreground);
+                colors.PanelBorderColor = ParseColor(st.Base.Border);
+            }
+            if (st.Accent != null)
+            {
+                colors.AccentColor = ParseColor(st.Accent.Primary);
+                colors.SecondaryAccentColor = ParseColor(st.Accent.Secondary);
+                colors.ButtonHoverBackColor = ParseColor(st.Accent.Primary);
+                colors.ButtonHoverForeColor = ParseColor(st.Base?.Foreground);
+                colors.ButtonPressedBackColor = ParseColor(st.Accent.Dark);
+                colors.ButtonPressedForeColor = ParseColor(st.Base?.Foreground);
+            }
+            if (st.State != null)
+            {
+                colors.InfoColor = ParseColor(st.State.Info);
+                colors.SuccessColor = ParseColor(st.State.Success);
+                colors.WarningColor = ParseColor(st.State.Warning);
+                colors.ErrorColor = ParseColor(st.State.Error);
+            }
+            if (st.Component != null)
+            {
+                colors.TextBoxBackColor = ParseColor(st.Component.InputBackground);
+                colors.TextBoxForeColor = ParseColor(st.Base?.Foreground);
+                colors.ButtonBackColor = ParseColor(st.Component.ButtonBackground);
+                colors.ButtonForeColor = ParseColor(st.Base?.Foreground);
+                colors.DataGridHeaderBackColor = ParseColor(st.Component.HeaderBackground);
+                colors.DataGridAltRowBackColor = ParseColor(st.Component.AltRowBackground);
+                colors.TabUnselectedBackColor = ParseColor(st.Component.TabUnselected);
+                colors.ToolTipBackColor = ParseColor(st.Component.ToolTipBackground);
+                colors.StatusStripBackColor = ParseColor(st.Component.StatusBackground);
+            }
+            return colors;
+        }
+
+        private static Color? ParseColor(string? hex)
+        {
+            if (string.IsNullOrWhiteSpace(hex)) return null;
+            try
+            {
+                return ColorTranslator.FromHtml(hex);
+            }
+            catch { return null; }
         }
     }
 }

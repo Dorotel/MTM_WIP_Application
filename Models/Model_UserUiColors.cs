@@ -248,4 +248,5 @@ public class Model_UserUiColors
     public Color? WindowTitleBarInactiveForeColor { get; set; } = Color.FromArgb(136, 136, 136);
     public Color? WindowBorderColor { get; set; } = Color.FromArgb(60, 60, 60);
     public Color? WindowResizeHandleColor { get; set; } = Color.FromArgb(60, 60, 60);
+    public Color? FormBorderColor { get; internal set; }
 }

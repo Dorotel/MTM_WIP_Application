@@ -235,58 +235,72 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     return;
                 }
 
-                // --- Collect items for undo ---
+                // --- Only add to history and inv_transaction if actually removed ---
                 _lastRemovedItems.Clear();
+                StringBuilder sb = new();
+                int attempted = 0;
+                var (removedCount, errorMessages) = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv, true);
                 foreach (DataGridViewRow row in dgv.SelectedRows)
                 {
                     if (row.DataBoundItem is DataRowView drv)
                     {
-                        _lastRemovedItems.Add(new Model_HistoryRemove
+                        attempted++;
+                        var item = new Model_HistoryRemove
                         {
                             PartId = drv["PartID"]?.ToString() ?? "",
                             Location = drv["Location"]?.ToString() ?? "",
                             Operation = drv["Operation"]?.ToString() ?? "",
                             Quantity = TryParse(drv["Quantity"]?.ToString(), out int qty) ? qty : 0,
-                            ItemType =
-                                drv.Row.Table.Columns.Contains("ItemType") ? drv["ItemType"]?.ToString() ?? "" : "",
+                            ItemType = drv.Row.Table.Columns.Contains("ItemType") ? drv["ItemType"]?.ToString() ?? "" : "",
                             User = drv.Row.Table.Columns.Contains("User") ? drv["User"]?.ToString() ?? "" : "",
-                            BatchNumber =
-                                drv.Row.Table.Columns.Contains("BatchNumber")
-                                    ? drv["BatchNumber"]?.ToString() ?? ""
-                                    : "",
-                            Notes = drv.Row.Table.Columns.Contains("Notes") ? drv["Notes"]?.ToString() ?? "" : ""
-                        });
-                    }
-                }
+                            BatchNumber = drv.Row.Table.Columns.Contains("BatchNumber") ? drv["BatchNumber"]?.ToString() ?? "" : "",
+                            Notes = drv.Row.Table.Columns.Contains("Notes") ? drv["Notes"]?.ToString() ?? "" : "",
+                            ReceiveDate = drv.Row.Table.Columns.Contains("ReceiveDate") && DateTime.TryParse(drv["ReceiveDate"]?.ToString(), out var dt) ? dt : DateTime.Now
+                        };
+                        if (removedCount > 0)
+                        {
+                            _lastRemovedItems.Add(item);
+                            sb.AppendLine($"PartID: {item.PartId}, Location: {item.Location}, Operation: {item.Operation}, Quantity: {item.Quantity}");
 
-                StringBuilder sb = new();
-                foreach (Model_HistoryRemove item in _lastRemovedItems)
-                {
-                    sb.AppendLine(
-                        $"PartID: {item.PartId}, Location: {item.Location}, Operation: {item.Operation}, Quantity: {item.Quantity}");
+                            // Add to inv_transaction (OUT)
+                            var transaction = new Model_TransactionHistory
+                            {
+                                TransactionType = "OUT",
+                                PartId = item.PartId,
+                                FromLocation = item.Location,
+                                ToLocation = null,
+                                Operation = item.Operation,
+                                Quantity = item.Quantity,
+                                Notes = item.Notes,
+                                User = item.User,
+                                ItemType = item.ItemType,
+                                BatchNumber = item.BatchNumber,
+                                DateTime = item.ReceiveDate
+                            };
+                            await Data.Dao_History.AddTransactionHistoryAsync(transaction);
+                        }
+                    }
                 }
 
                 string summary = sb.ToString();
 
-                DialogResult confirmResult = MessageBox.Show(
-                    $@"The following items will be deleted:
-
-{summary}Are you sure?",
-                    @"Confirm Deletion",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Warning);
-
-                if (confirmResult != DialogResult.Yes)
+                if (_lastRemovedItems.Count == 0)
                 {
-                    LoggingUtility.Log("User cancelled deletion.");
-                    _lastRemovedItems.Clear();
+                    string reason = "No items were deleted. This may be because the selected items no longer exist in inventory, the data did not match exactly, or a database constraint prevented deletion.";
+                    if (attempted == 0)
+                        reason = "No items were deleted. No valid inventory rows were selected.";
+                    if (errorMessages.Count > 0)
+                        reason += "\n\n" + string.Join("\n", errorMessages);
+                    MessageBox.Show(reason, "Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(60, "Deleting items...");
-                int removedCount = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
+                DialogResult confirmResult = MessageBox.Show(
+                    $@"The following items were deleted and added to history:\n\n{summary}",
+                    @"Delete Complete",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
 
-                LoggingUtility.Log($"{removedCount} inventory items deleted.");
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(80, "Refreshing results...");
                 Control_RemoveTab_Button_Search_Click(null, null);
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Delete complete");
@@ -877,7 +891,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = true;
 
-                Control_RemoveTab_Button_Toggle_RightPanel.Text = "←";
+                Control_RemoveTab_Button_Toggle_RightPanel.Text = "⬅️";
                 Control_RemoveTab_Button_Toggle_RightPanel.ForeColor =
                     Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
             }
@@ -886,7 +900,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 if (MainFormInstance != null)
                 {
                     MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = false;
-                    Control_RemoveTab_Button_Toggle_RightPanel.Text = "→";
+                    Control_RemoveTab_Button_Toggle_RightPanel.Text = "➡️";
                     Control_RemoveTab_Button_Toggle_RightPanel.ForeColor =
                         Model_AppVariables.UserUiColors.SuccessColor ?? Color.Green;
                 }

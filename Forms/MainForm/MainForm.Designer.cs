@@ -36,8 +36,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
         public SplitContainer MainForm_SplitContainer_Middle;
         public TabControl MainForm_TabControl;
         private TabPage MainForm_TabPage_Inventory;
-        private TabPage MainForm_TabControl_Remove;
-        private TabPage MainForm_TabControl_Transfer;
+        private TabPage MainForm_TabPage_Remove;
+        private TabPage MainForm_TabPage_Transfer;
         public Control_RemoveTab MainForm_UserControl_RemoveTab;
         public Control_TransferTab MainForm_UserControl_TransferTab;
         public Control_InventoryTab MainForm_UserControl_InventoryTab;
@@ -89,10 +89,10 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_TabPage_Inventory = new TabPage();
             MainForm_UserControl_InventoryTab = new Control_InventoryTab();
             MainForm_UserControl_AdvancedInventory = new Control_AdvancedInventory();
-            MainForm_TabControl_Remove = new TabPage();
+            MainForm_TabPage_Remove = new TabPage();
             MainForm_UserControl_RemoveTab = new Control_RemoveTab();
             MainForm_UserControl_AdvancedRemove = new Control_AdvancedRemove();
-            MainForm_TabControl_Transfer = new TabPage();
+            MainForm_TabPage_Transfer = new TabPage();
             MainForm_UserControl_TransferTab = new Control_TransferTab();
             MainForm_UserControl_QuickButtons = new Control_QuickButtons();
             tableLayoutPanel1 = new TableLayoutPanel();
@@ -105,8 +105,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_SplitContainer_Middle.SuspendLayout();
             MainForm_TabControl.SuspendLayout();
             MainForm_TabPage_Inventory.SuspendLayout();
-            MainForm_TabControl_Remove.SuspendLayout();
-            MainForm_TabControl_Transfer.SuspendLayout();
+            MainForm_TabPage_Remove.SuspendLayout();
+            MainForm_TabPage_Transfer.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -259,8 +259,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // MainForm_TabControl
             // 
             MainForm_TabControl.Controls.Add(MainForm_TabPage_Inventory);
-            MainForm_TabControl.Controls.Add(MainForm_TabControl_Remove);
-            MainForm_TabControl.Controls.Add(MainForm_TabControl_Transfer);
+            MainForm_TabControl.Controls.Add(MainForm_TabPage_Remove);
+            MainForm_TabControl.Controls.Add(MainForm_TabPage_Transfer);
             MainForm_TabControl.Dock = DockStyle.Fill;
             MainForm_TabControl.HotTrack = true;
             MainForm_TabControl.Location = new Point(0, 0);
@@ -282,8 +282,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_TabPage_Inventory.Name = "MainForm_TabPage_Inventory";
             MainForm_TabPage_Inventory.Size = new Size(731, 372);
             MainForm_TabPage_Inventory.TabIndex = 0;
-            MainForm_TabPage_Inventory.Text = "New Transaction (Ctrl+1)";
-            MainForm_TabPage_Inventory.ToolTipText = "Shortcut: Ctrl+1";
+            MainForm_TabPage_Inventory.Text = "New";
             MainForm_TabPage_Inventory.UseVisualStyleBackColor = true;
             // 
             // MainForm_UserControl_InventoryTab
@@ -299,6 +298,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             // MainForm_UserControl_AdvancedInventory
             // 
+            MainForm_UserControl_AdvancedInventory.AutoSize = true;
             MainForm_UserControl_AdvancedInventory.Dock = DockStyle.Fill;
             MainForm_UserControl_AdvancedInventory.Location = new Point(0, 0);
             MainForm_UserControl_AdvancedInventory.Margin = new Padding(3, 4, 3, 4);
@@ -307,18 +307,17 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_UserControl_AdvancedInventory.TabIndex = 1;
             MainForm_UserControl_AdvancedInventory.Visible = false;
             // 
-            // MainForm_TabControl_Remove
+            // MainForm_TabPage_Remove
             // 
-            MainForm_TabControl_Remove.Controls.Add(MainForm_UserControl_RemoveTab);
-            MainForm_TabControl_Remove.Controls.Add(MainForm_UserControl_AdvancedRemove);
-            MainForm_TabControl_Remove.Location = new Point(4, 44);
-            MainForm_TabControl_Remove.Margin = new Padding(0);
-            MainForm_TabControl_Remove.Name = "MainForm_TabControl_Remove";
-            MainForm_TabControl_Remove.Size = new Size(192, 52);
-            MainForm_TabControl_Remove.TabIndex = 1;
-            MainForm_TabControl_Remove.Text = "Remove (Ctrl + 2)";
-            MainForm_TabControl_Remove.ToolTipText = "Shortcut: Ctrl+2";
-            MainForm_TabControl_Remove.UseVisualStyleBackColor = true;
+            MainForm_TabPage_Remove.Controls.Add(MainForm_UserControl_RemoveTab);
+            MainForm_TabPage_Remove.Controls.Add(MainForm_UserControl_AdvancedRemove);
+            MainForm_TabPage_Remove.Location = new Point(4, 24);
+            MainForm_TabPage_Remove.Margin = new Padding(0);
+            MainForm_TabPage_Remove.Name = "MainForm_TabPage_Remove";
+            MainForm_TabPage_Remove.Size = new Size(731, 372);
+            MainForm_TabPage_Remove.TabIndex = 1;
+            MainForm_TabPage_Remove.Text = "Remove";
+            MainForm_TabPage_Remove.UseVisualStyleBackColor = true;
             // 
             // MainForm_UserControl_RemoveTab
             // 
@@ -328,7 +327,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_UserControl_RemoveTab.Margin = new Padding(3, 4, 3, 4);
             MainForm_UserControl_RemoveTab.Name = "MainForm_UserControl_RemoveTab";
             MainForm_UserControl_RemoveTab.Padding = new Padding(3);
-            MainForm_UserControl_RemoveTab.Size = new Size(192, 52);
+            MainForm_UserControl_RemoveTab.Size = new Size(731, 372);
             MainForm_UserControl_RemoveTab.TabIndex = 0;
             // 
             // MainForm_UserControl_AdvancedRemove
@@ -338,31 +337,29 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_UserControl_AdvancedRemove.Location = new Point(0, 0);
             MainForm_UserControl_AdvancedRemove.Margin = new Padding(4);
             MainForm_UserControl_AdvancedRemove.Name = "MainForm_UserControl_AdvancedRemove";
-            MainForm_UserControl_AdvancedRemove.Size = new Size(192, 52);
+            MainForm_UserControl_AdvancedRemove.Size = new Size(731, 372);
             MainForm_UserControl_AdvancedRemove.TabIndex = 1;
             MainForm_UserControl_AdvancedRemove.Visible = false;
             // 
-            // MainForm_TabControl_Transfer
+            // MainForm_TabPage_Transfer
             // 
-            MainForm_TabControl_Transfer.Controls.Add(MainForm_UserControl_TransferTab);
-            MainForm_TabControl_Transfer.Location = new Point(4, 64);
-            MainForm_TabControl_Transfer.Margin = new Padding(0);
-            MainForm_TabControl_Transfer.Name = "MainForm_TabControl_Transfer";
-            MainForm_TabControl_Transfer.Size = new Size(192, 32);
-            MainForm_TabControl_Transfer.TabIndex = 2;
-            MainForm_TabControl_Transfer.Text = "Transfer (Ctrl+3)";
-            MainForm_TabControl_Transfer.ToolTipText = "Shortcut: Ctrl+3";
-            MainForm_TabControl_Transfer.UseVisualStyleBackColor = true;
+            MainForm_TabPage_Transfer.Controls.Add(MainForm_UserControl_TransferTab);
+            MainForm_TabPage_Transfer.Location = new Point(4, 24);
+            MainForm_TabPage_Transfer.Margin = new Padding(0);
+            MainForm_TabPage_Transfer.Name = "MainForm_TabPage_Transfer";
+            MainForm_TabPage_Transfer.Size = new Size(731, 372);
+            MainForm_TabPage_Transfer.TabIndex = 2;
+            MainForm_TabPage_Transfer.Text = "Transfer";
+            MainForm_TabPage_Transfer.UseVisualStyleBackColor = true;
             // 
             // MainForm_UserControl_TransferTab
             // 
             MainForm_UserControl_TransferTab.AutoSize = true;
-            MainForm_UserControl_TransferTab.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             MainForm_UserControl_TransferTab.Dock = DockStyle.Fill;
             MainForm_UserControl_TransferTab.Location = new Point(0, 0);
             MainForm_UserControl_TransferTab.Margin = new Padding(0);
             MainForm_UserControl_TransferTab.Name = "MainForm_UserControl_TransferTab";
-            MainForm_UserControl_TransferTab.Size = new Size(192, 32);
+            MainForm_UserControl_TransferTab.Size = new Size(731, 372);
             MainForm_UserControl_TransferTab.TabIndex = 0;
             // 
             // MainForm_UserControl_QuickButtons
@@ -419,10 +416,10 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_TabControl.ResumeLayout(false);
             MainForm_TabPage_Inventory.ResumeLayout(false);
             MainForm_TabPage_Inventory.PerformLayout();
-            MainForm_TabControl_Remove.ResumeLayout(false);
-            MainForm_TabControl_Remove.PerformLayout();
-            MainForm_TabControl_Transfer.ResumeLayout(false);
-            MainForm_TabControl_Transfer.PerformLayout();
+            MainForm_TabPage_Remove.ResumeLayout(false);
+            MainForm_TabPage_Remove.PerformLayout();
+            MainForm_TabPage_Transfer.ResumeLayout(false);
+            MainForm_TabPage_Transfer.PerformLayout();
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel1.PerformLayout();
             ResumeLayout(false);

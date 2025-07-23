@@ -772,7 +772,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Button_SidePanel.Name = "Transactions_Button_SidePanel";
             Transactions_Button_SidePanel.Size = new Size(80, 24);
             Transactions_Button_SidePanel.TabIndex = 11;
-            Transactions_Button_SidePanel.Text = "Collapse ◀";
+            Transactions_Button_SidePanel.Text = "Collapse ⬅️";
             Transactions_Button_SidePanel.UseVisualStyleBackColor = true;
             // 
             // Transactions

@@ -48,16 +48,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Control_QuickButtons_Button_Button10
             };
 
-            if (quickButtons.Count > 0)
-            {
-                int maxWidth = quickButtons.Max(b => b.Width);
-                int maxHeight = quickButtons.Max(b => b.Height);
-                foreach (Button btn in quickButtons)
-                {
-                    btn.Size = new Size(maxWidth, maxHeight);
-                    btn.Click += QuickButton_Click;
-                }
-            }
+
 
             LoadLast10Transactions(Model_AppVariables.User);
 
@@ -101,9 +92,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     quickButtons[i].UseMnemonic = false;
                     quickButtons[i].Padding = Padding.Empty;
                     quickButtons[i].Margin = Padding.Empty;
-                    quickButtons[i].AutoSize = false;
-                    quickButtons[i].AutoEllipsis = true;
-                    quickButtons[i].MaximumSize = quickButtons[i].Size;
 
                     // Tooltip: Part ID: {PartID}, Operation: {Operation}, Quantity: {Quantity}\nDate Added: {Date Added}
                     string tooltipText =

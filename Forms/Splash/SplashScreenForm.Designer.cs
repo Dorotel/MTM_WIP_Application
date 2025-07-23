@@ -53,7 +53,7 @@ namespace MTM_Inventory_Application.Forms.Splash
             int labelWidth = this.ClientSize.Width - labelX - margin;
 
             this._titleLabel.Text = "MTM WIP Application";
-            this._titleLabel.Font = new System.Drawing.Font("Segoe UI", 16, System.Drawing.FontStyle.Bold);
+            this._titleLabel.Font = new System.Drawing.Font("Segoe UI Emoji", 16, System.Drawing.FontStyle.Bold);
             this._titleLabel.ForeColor = System.Drawing.Color.White;
             this._titleLabel.BackColor = System.Drawing.Color.Transparent;
             this._titleLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -61,7 +61,7 @@ namespace MTM_Inventory_Application.Forms.Splash
             this._titleLabel.Location = new System.Drawing.Point(labelX, margin);
 
             this._versionLabel.Text = "Version 4.6.0.0";
-            this._versionLabel.Font = new System.Drawing.Font("Segoe UI", 10);
+            this._versionLabel.Font = new System.Drawing.Font("Segoe UI Emoji", 10);
             this._versionLabel.ForeColor = System.Drawing.Color.LightGray;
             this._versionLabel.BackColor = System.Drawing.Color.Transparent;
             this._versionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;

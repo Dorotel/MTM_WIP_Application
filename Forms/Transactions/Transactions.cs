@@ -157,12 +157,12 @@ namespace MTM_Inventory_Application.Forms.Transactions
             if (Transactions_SplitContainer_Main.Panel1Collapsed)
             {
                 Transactions_SplitContainer_Main.Panel1Collapsed = false;
-                Transactions_Button_SidePanel.Text = "Collapse ◀";
+                Transactions_Button_SidePanel.Text = "Collapse ⬅️";
             }
             else
             {
                 Transactions_SplitContainer_Main.Panel1Collapsed = true;
-                Transactions_Button_SidePanel.Text = "Expand ▶";
+                Transactions_Button_SidePanel.Text = "Expand ➡️";
             }
         }
 

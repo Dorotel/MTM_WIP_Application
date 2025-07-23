@@ -262,9 +262,10 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_RemoveTab_Button_Undo
             // 
-            Control_RemoveTab_Button_Undo.Dock = DockStyle.Right;
+            Control_RemoveTab_Button_Undo.AutoSize = true;
+            Control_RemoveTab_Button_Undo.Dock = DockStyle.Fill;
             Control_RemoveTab_Button_Undo.Enabled = false;
-            Control_RemoveTab_Button_Undo.Location = new Point(481, 3);
+            Control_RemoveTab_Button_Undo.Location = new Point(393, 3);
             Control_RemoveTab_Button_Undo.Name = "Control_RemoveTab_Button_Undo";
             Control_RemoveTab_Button_Undo.Size = new Size(90, 29);
             Control_RemoveTab_Button_Undo.TabIndex = 6;
@@ -275,19 +276,22 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_RemoveTab_Button_Toggle_RightPanel
             // 
-            Control_RemoveTab_Button_Toggle_RightPanel.Font = new Font("Segoe UI", 10F);
-            Control_RemoveTab_Button_Toggle_RightPanel.ForeColor = Color.Green;
-            Control_RemoveTab_Button_Toggle_RightPanel.Location = new Point(769, 3);
+            Control_RemoveTab_Button_Toggle_RightPanel.AutoSize = true;
+            Control_RemoveTab_Button_Toggle_RightPanel.Dock = DockStyle.Fill;
+            Control_RemoveTab_Button_Toggle_RightPanel.Font = new Font("Segoe UI Emoji", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            Control_RemoveTab_Button_Toggle_RightPanel.Location = new Point(681, 3);
             Control_RemoveTab_Button_Toggle_RightPanel.Name = "Control_RemoveTab_Button_Toggle_RightPanel";
-            Control_RemoveTab_Button_Toggle_RightPanel.Size = new Size(31, 29);
+            Control_RemoveTab_Button_Toggle_RightPanel.Size = new Size(119, 29);
             Control_RemoveTab_Button_Toggle_RightPanel.TabIndex = 9;
-            Control_RemoveTab_Button_Toggle_RightPanel.Text = "←";
+            Control_RemoveTab_Button_Toggle_RightPanel.Text = "Quick Buttons ➡";
             Control_RemoveTab_Button_Toggle_RightPanel.UseVisualStyleBackColor = true;
             Control_RemoveTab_Button_Toggle_RightPanel.Click += Control_RemoveTab_Button_Toggle_RightPanel_Click;
             // 
             // Control_RemoveTab_Button_Reset
             // 
-            Control_RemoveTab_Button_Reset.Location = new Point(673, 3);
+            Control_RemoveTab_Button_Reset.AutoSize = true;
+            Control_RemoveTab_Button_Reset.Dock = DockStyle.Fill;
+            Control_RemoveTab_Button_Reset.Location = new Point(585, 3);
             Control_RemoveTab_Button_Reset.Name = "Control_RemoveTab_Button_Reset";
             Control_RemoveTab_Button_Reset.Size = new Size(90, 29);
             Control_RemoveTab_Button_Reset.TabIndex = 8;
@@ -297,9 +301,10 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_RemoveTab_Button_Print
             // 
-            Control_RemoveTab_Button_Print.Dock = DockStyle.Right;
+            Control_RemoveTab_Button_Print.AutoSize = true;
+            Control_RemoveTab_Button_Print.Dock = DockStyle.Fill;
             Control_RemoveTab_Button_Print.Enabled = false;
-            Control_RemoveTab_Button_Print.Location = new Point(577, 3);
+            Control_RemoveTab_Button_Print.Location = new Point(489, 3);
             Control_RemoveTab_Button_Print.Name = "Control_RemoveTab_Button_Print";
             Control_RemoveTab_Button_Print.Size = new Size(90, 29);
             Control_RemoveTab_Button_Print.TabIndex = 7;
@@ -308,16 +313,20 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_RemoveTab_Button_AdvancedItemRemoval
             // 
+            Control_RemoveTab_Button_AdvancedItemRemoval.AutoSize = true;
+            Control_RemoveTab_Button_AdvancedItemRemoval.Dock = DockStyle.Fill;
             Control_RemoveTab_Button_AdvancedItemRemoval.ForeColor = Color.DarkRed;
             Control_RemoveTab_Button_AdvancedItemRemoval.Location = new Point(195, 3);
             Control_RemoveTab_Button_AdvancedItemRemoval.Name = "Control_RemoveTab_Button_AdvancedItemRemoval";
-            Control_RemoveTab_Button_AdvancedItemRemoval.Size = new Size(90, 28);
+            Control_RemoveTab_Button_AdvancedItemRemoval.Size = new Size(90, 29);
             Control_RemoveTab_Button_AdvancedItemRemoval.TabIndex = 5;
             Control_RemoveTab_Button_AdvancedItemRemoval.Text = "Advanced";
             Control_RemoveTab_Button_AdvancedItemRemoval.UseVisualStyleBackColor = true;
             // 
             // Control_RemoveTab_Button_Delete
             // 
+            Control_RemoveTab_Button_Delete.AutoSize = true;
+            Control_RemoveTab_Button_Delete.Dock = DockStyle.Fill;
             Control_RemoveTab_Button_Delete.Location = new Point(99, 3);
             Control_RemoveTab_Button_Delete.Name = "Control_RemoveTab_Button_Delete";
             Control_RemoveTab_Button_Delete.Size = new Size(90, 29);
@@ -327,6 +336,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_RemoveTab_Button_Search
             // 
+            Control_RemoveTab_Button_Search.AutoSize = true;
+            Control_RemoveTab_Button_Search.Dock = DockStyle.Fill;
             Control_RemoveTab_Button_Search.Location = new Point(3, 3);
             Control_RemoveTab_Button_Search.Name = "Control_RemoveTab_Button_Search";
             Control_RemoveTab_Button_Search.Size = new Size(90, 29);
@@ -354,6 +365,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_TableLayout_Top.ResumeLayout(false);
             Control_RemoveTab_TableLayout_Top.PerformLayout();
             Control_RemoveTab_TableLayout_Bottom.ResumeLayout(false);
+            Control_RemoveTab_TableLayout_Bottom.PerformLayout();
             ResumeLayout(false);
         }
         private Button Control_RemoveTab_Button_Print;

@@ -442,7 +442,7 @@
             // appNameLabel
             // 
             appNameLabel.AutoSize = true;
-            appNameLabel.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            appNameLabel.Font = new Font("Segoe UI Emoji", 12F, FontStyle.Bold);
             appNameLabel.Location = new Point(30, 20);
             appNameLabel.Name = "appNameLabel";
             appNameLabel.Size = new Size(177, 21);

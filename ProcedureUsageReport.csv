@@ -9,7 +9,7 @@
 "inv_inventory_Get_ByPartID","2","Dao_Inventory.cs","2"
 "inv_inventory_Get_ByPartIDandOperation","1","Dao_Inventory.cs","1"
 "inv_inventory_Get_ByUser","0","",""
-"inv_inventory_Remove_Item","1","Dao_Inventory.cs","1"
+"inv_inventory_Remove_Item_1_1","1","Dao_Inventory.cs","1"
 "inv_inventory_Transfer_Part","1","Dao_Inventory.cs","1"
 "inv_inventory_Transfer_Quantity","1","Dao_Inventory.cs","1"
 "inv_transaction_Add","1","Dao_History.cs","1"

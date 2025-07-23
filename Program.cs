@@ -127,13 +127,7 @@ namespace MTM_Inventory_Application
                 _splashScreen?.UpdateProgress(progress, "App data folders wiped.");
                 await Task.Delay(50);
 
-                // 4. Migrating saved locations from old WIP Application
-                progress = 35;
-                _splashScreen?.UpdateProgress(progress, "Migrating saved locations...");
-                await Dao_Inventory.MigrateSavedLocations();
-                progress = 40;
-                _splashScreen?.UpdateProgress(progress, "Saved locations migrated.");
-                await Task.Delay(50);
+
 
                 // 5. Setting up Data Tables
                 progress = 45;

@@ -612,7 +612,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = true;
 
-                Control_InventoryTab_Button_Toggle_RightPanel.Text = "←";
+                Control_InventoryTab_Button_Toggle_RightPanel.Text = "⬅️";
                 Control_InventoryTab_Button_Toggle_RightPanel.ForeColor =
                     Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
             }
@@ -621,7 +621,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 if (MainFormInstance != null)
                 {
                     MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = false;
-                    Control_InventoryTab_Button_Toggle_RightPanel.Text = "→";
+                    Control_InventoryTab_Button_Toggle_RightPanel.Text = "➡️";
                     Control_InventoryTab_Button_Toggle_RightPanel.ForeColor =
                         Model_AppVariables.UserUiColors.SuccessColor ?? Color.Green;
                 }

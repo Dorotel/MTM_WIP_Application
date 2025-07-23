@@ -999,7 +999,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
         }
 
-        private static void AdvancedInventory_Button_Normal_Click(object? sender, EventArgs e)
+        private void AdvancedInventory_Button_Normal_Click(object? sender, EventArgs e)
         {
             try
             {
