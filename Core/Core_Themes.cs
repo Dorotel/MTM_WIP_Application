@@ -1109,7 +1109,8 @@ namespace MTM_Inventory_Application.Core
                 {
                     quickButtons.BackColor = colors.CustomControlBackColor ?? colors.ControlBackColor ?? Color.White;
                     quickButtons.ForeColor = colors.CustomControlForeColor ?? colors.ControlForeColor ?? Color.Black;
-                    foreach (Button btn in Control_QuickButtons.quickButtons ?? Enumerable.Empty<Button>())
+
+                    foreach (Button btn in quickButtons.quickButtons ?? Enumerable.Empty<Button>())
                     {
                         btn.BackColor = colors.ButtonBackColor ?? Color.White;
                         btn.ForeColor = colors.ButtonForeColor ?? Color.Black;

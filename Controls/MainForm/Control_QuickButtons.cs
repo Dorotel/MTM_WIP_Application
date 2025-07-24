@@ -17,7 +17,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
     {
         #region Fields
 
-        internal static List<Button>? quickButtons;
+        internal List<Button>? quickButtons;
         public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
 
         #endregion
