@@ -139,7 +139,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Button_Toggle_RightPanel.Size = new Size(119, 27);
             Control_TransferTab_Button_Toggle_RightPanel.TabIndex = 999;
             Control_TransferTab_Button_Toggle_RightPanel.TabStop = false;
-            Control_TransferTab_Button_Toggle_RightPanel.Text = "Quick Buttons ➡️";
+            Control_TransferTab_Button_Toggle_RightPanel.Text = "➡️";
             Control_TransferTab_Button_Toggle_RightPanel.UseVisualStyleBackColor = true;
             Control_TransferTab_Button_Toggle_RightPanel.Click += Control_TransferTab_Button_Toggle_RightPanel_Click;
             // 

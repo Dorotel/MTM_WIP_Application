@@ -17,7 +17,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
     {
         #region Fields
 
-        internal List<Button>? quickButtons;
+        internal List<Button>? quickButtons; // Changed from static to instance
         public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
 
         #endregion
@@ -47,7 +47,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             };
             foreach (var btn in quickButtons)
             {
-                btn.Click += QuickButton_Click;
+                btn.Click += QuickButton_Click; // Now instance method
             }
             LoadLast10Transactions(Model_AppVariables.User);
             Core_Themes.ApplyDpiScaling(this);
@@ -74,34 +74,50 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 conn.Open();
                 using MySqlDataReader? reader = cmd.ExecuteReader();
                 int i = 0;
+                // Fill buttons with data from DB
                 while (reader.Read() && quickButtons != null && i < quickButtons.Count)
                 {
-                    string partId = reader["PartID"].ToString() ?? string.Empty;
-                    string operation = reader["Operation"].ToString() ?? string.Empty;
-                    int quantity = reader["Quantity"] is int q ? q : Convert.ToInt32(reader["Quantity"]);
-                    int position = reader["Position"] is int p ? p : Convert.ToInt32(reader["Position"]);
-                    // Ensure position is always 1-10 for UI
+                    string? partId = reader["PartID"] == DBNull.Value ? null : reader["PartID"].ToString();
+                    string? operation = reader["Operation"] == DBNull.Value ? null : reader["Operation"].ToString();
+                    int? quantity = reader["Quantity"] == DBNull.Value ? null : (reader["Quantity"] is int q ? q : Convert.ToInt32(reader["Quantity"]));
+                    // Always set position 1-10, no duplicates
                     int displayPosition = i + 1;
-                    string rawText = $"({operation}) - [{partId} x {quantity}]";
+                    string rawText = (partId != null && operation != null && quantity != null)
+                        ? $"({operation}) - [{partId} x {quantity}]"
+                        : string.Empty;
                     quickButtons[i].Text = TruncateTextToFitSingleLine(rawText, quickButtons[i]);
                     quickButtons[i].UseMnemonic = false;
                     quickButtons[i].Padding = Padding.Empty;
                     quickButtons[i].Margin = Padding.Empty;
-                    string tooltipText = $"Part ID: {partId}, Operation: {operation}, Quantity: {quantity}\nPosition: {displayPosition}";
+                    string tooltipText = (partId != null && operation != null && quantity != null)
+                        ? $"Part ID: {partId}, Operation: {operation}, Quantity: {quantity}\nPosition: {displayPosition}"
+                        : $"Position: {displayPosition}";
                     Control_QuickButtons_Tooltip.SetToolTip(quickButtons[i], tooltipText);
                     quickButtons[i].Tag = new { partId, operation, quantity, position = displayPosition };
-                    quickButtons[i].Visible = true;
+                    quickButtons[i].Visible = (partId != null && operation != null && quantity != null);
                     i++;
                 }
+                // Fill remaining buttons as empty but with unique position
                 if (quickButtons != null)
                 {
                     for (; i < quickButtons.Count; i++)
                     {
                         quickButtons[i].Text = string.Empty;
-                        Control_QuickButtons_Tooltip.SetToolTip(quickButtons[i], string.Empty);
-                        quickButtons[i].Tag = null;
+                        Control_QuickButtons_Tooltip.SetToolTip(quickButtons[i], $"Position: {i + 1}");
+                        quickButtons[i].Tag = new { partId = (string?)null, operation = (string?)null, quantity = (int?)null, position = i + 1 };
                         quickButtons[i].Visible = false;
                     }
+                    // Force UI refresh: clear and re-add only visible buttons
+                    Control_QuickButtons_TableLayoutPanel_Main.SuspendLayout();
+                    Control_QuickButtons_TableLayoutPanel_Main.Controls.Clear();
+                    for (int j = 0; j < quickButtons.Count; j++)
+                    {
+                        if (quickButtons[j].Visible)
+                        {
+                            Control_QuickButtons_TableLayoutPanel_Main.Controls.Add(quickButtons[j], 0, j);
+                        }
+                    }
+                    Control_QuickButtons_TableLayoutPanel_Main.ResumeLayout();
                 }
             }
             catch (Exception ex)
@@ -110,7 +126,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
         }
 
-        private static string TruncateTextToFitSingleLine(string text, Button btn)
+        private string TruncateTextToFitSingleLine(string text, Button btn) // Changed from static to instance
         {
             using Graphics g = btn.CreateGraphics();
             Font font = btn.Font;
@@ -143,7 +159,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
         }
 
-        private static void QuickButton_Click(object? sender, EventArgs? e)
+        private void QuickButton_Click(object? sender, EventArgs? e) // Changed from static to instance method
         {
             if (sender is not Button btn || btn.Tag is null) return;
             dynamic tag = btn.Tag;
@@ -248,6 +264,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 string oldOperation = tag.operation;
                 int oldQuantity = tag.quantity;
                 string user = Model_AppVariables.User;
+
                 using var dlg = new QuickButtonEditDialog(oldPartId, oldOperation, oldQuantity);
                 if (dlg.ShowDialog(this) == DialogResult.OK)
                 {
@@ -272,6 +289,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 if (idx >= 0 && btn.Tag is not null)
                 {
                     string user = Model_AppVariables.User;
+                    int prevVisibleCount = quickButtons.Count(b => b.Visible);
                     try
                     {
                         await Dao_QuickButtons.RemoveQuickButtonAndShiftAsync(user, idx);
@@ -281,6 +299,17 @@ namespace MTM_Inventory_Application.Controls.MainForm
                         LoggingUtility.LogDatabaseError(ex);
                     }
                     LoadLast10Transactions(user);
+                    // Fallback: check if removal succeeded visually
+                    int newVisibleCount = quickButtons.Count(b => b.Visible);
+                    if (newVisibleCount == prevVisibleCount)
+                    {
+                        LoggingUtility.Log($"QuickButton removal failed or did not update UI for index {idx}.");
+                        MessageBox.Show("Failed to remove the quick button. Please try again or restart the application.", "Remove Quick Button", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+                else
+                {
+                    LoggingUtility.Log($"MenuItemRemove_Click: Invalid button index or Tag is null. idx={idx}");
                 }
             }
         }
@@ -295,7 +324,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 string user = Model_AppVariables.User;
                 // Remove all quick buttons for the user from the server
                 await Dao_QuickButtons.DeleteAllQuickButtonsForUserAsync(user);
-                // Re-add them in the new order
+                // Re-add them in the exact order shown in ListView
                 for (int i = 0; i < newOrder.Count; i++)
                 {
                     var btn = newOrder[i];
@@ -303,7 +332,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     string partId = tag?.partId ?? string.Empty;
                     string operation = tag?.operation ?? string.Empty;
                     int quantity = tag?.quantity ?? 0;
-                    await Dao_QuickButtons.AddQuickButtonAsync(user, partId, operation, quantity, i);
+                    // Use the new method that doesn't shift - directly insert at position i+1
+                    await Dao_QuickButtons.AddQuickButtonAtPositionAsync(user, partId, operation, quantity, i + 1);
                 }
                 // Update UI
                 quickButtons = newOrder;
@@ -312,8 +342,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 {
                     Control_QuickButtons_TableLayoutPanel_Main.Controls.Add(quickButtons[i], 0, i);
                 }
-               LoadLast10Transactions(user);
-
+                LoadLast10Transactions(user);
             }
         }
 
@@ -559,7 +588,25 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 var result = new List<Button>();
                 for (int i = 0; i < listView.Items.Count; i++)
                 {
-                    result.Add(buttonOrder[listView.Items[i].Index]);
+                    // Find the button that corresponds to this ListView item
+                    var listViewItem = listView.Items[i];
+                    string partId = listViewItem.SubItems[1].Text;
+                    string operation = listViewItem.SubItems[2].Text;
+                    string quantity = listViewItem.SubItems[3].Text;
+                    
+                    // Find the button with matching data
+                    var matchingButton = buttonOrder.FirstOrDefault(btn =>
+                    {
+                        dynamic tag = btn.Tag;
+                        return tag?.partId == partId && 
+                               tag?.operation == operation && 
+                               tag?.quantity?.ToString() == quantity;
+                    });
+                    
+                    if (matchingButton != null)
+                    {
+                        result.Add(matchingButton);
+                    }
                 }
                 return result;
             }

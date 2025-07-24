@@ -950,7 +950,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 bool panelCollapsed = MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed;
                 MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = !panelCollapsed;
-                Control_TransferTab_Button_Toggle_RightPanel.Text = panelCollapsed ? "Quick Buttons ➡️" : "Quick Buttons ⬅️";
+                Control_TransferTab_Button_Toggle_RightPanel.Text = panelCollapsed ? "➡️" : "⬅️";
                 Control_TransferTab_Button_Toggle_RightPanel.ForeColor = panelCollapsed
                     ? Model_AppVariables.UserUiColors.SuccessColor ?? Color.Green
                     : Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;

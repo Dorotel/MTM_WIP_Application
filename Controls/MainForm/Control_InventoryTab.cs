@@ -569,43 +569,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
         private static async Task AddToLast10TransactionsIfUniqueAsync(string user, string partId, string operation,
             int quantity)
         {
-            string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
-            using MySqlConnection conn = new(connectionString);
-            await conn.OpenAsync();
-
-            MySqlCommand checkCmd = new(@"
-        SELECT COUNT(*) FROM (
-            SELECT *
-            FROM sys_last_10_transactions
-            WHERE User = @User
-            ORDER BY ReceiveDate DESC
-            LIMIT 10
-        ) AS last10
-        WHERE PartID = @PartID AND Operation = @Operation AND Quantity = @Quantity
-    ", conn);
-
-            checkCmd.Parameters.AddWithValue("@User", user);
-            checkCmd.Parameters.AddWithValue("@PartID", partId);
-            checkCmd.Parameters.AddWithValue("@Operation", operation);
-            checkCmd.Parameters.AddWithValue("@Quantity", quantity);
-
-            bool exists = Convert.ToInt32(await checkCmd.ExecuteScalarAsync()) > 0;
-            if (exists)
-            {
-                return;
-            }
-
-            MySqlCommand insertCmd = new(@"
-        INSERT INTO sys_last_10_transactions (User, PartID, Operation, Quantity)
-        VALUES (@User, @PartID, @Operation, @Quantity)
-    ", conn);
-
-            insertCmd.Parameters.AddWithValue("@User", user);
-            insertCmd.Parameters.AddWithValue("@PartID", partId);
-            insertCmd.Parameters.AddWithValue("@Operation", operation);
-            insertCmd.Parameters.AddWithValue("@Quantity", quantity);
-
-            await insertCmd.ExecuteNonQueryAsync();
+            // Use the proper Dao_QuickButtons method that handles positions correctly
+            await Dao_QuickButtons.AddOrShiftQuickButtonAsync(user, partId, operation, quantity);
         }
 
         private void Control_InventoryTab_Button_Toggle_RightPanel_Click(object sender, EventArgs e)
@@ -614,7 +579,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = true;
 
-                Control_InventoryTab_Button_Toggle_RightPanel.Text = "Quick Buttons ⬅️";
+                Control_InventoryTab_Button_Toggle_RightPanel.Text = "⬅️";
                 Control_InventoryTab_Button_Toggle_RightPanel.ForeColor =
                     Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
             }
@@ -623,7 +588,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 if (MainFormInstance != null)
                 {
                     MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = false;
-                    Control_InventoryTab_Button_Toggle_RightPanel.Text = "Quick Buttons ➡️";
+                    Control_InventoryTab_Button_Toggle_RightPanel.Text = "➡️";
                     Control_InventoryTab_Button_Toggle_RightPanel.ForeColor =
                         Model_AppVariables.UserUiColors.SuccessColor ?? Color.Green;
                 }

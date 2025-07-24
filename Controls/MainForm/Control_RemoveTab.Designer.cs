@@ -79,6 +79,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_RemoveTab_GroupBox_MainControl
             // 
+            Control_RemoveTab_GroupBox_MainControl.AutoSize = true;
             Control_RemoveTab_GroupBox_MainControl.Controls.Add(Control_RemoveTab_Panel_Main);
             Control_RemoveTab_GroupBox_MainControl.Dock = DockStyle.Fill;
             Control_RemoveTab_GroupBox_MainControl.FlatStyle = FlatStyle.Flat;
@@ -236,6 +237,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_RemoveTab_TableLayout_Bottom
             // 
+            Control_RemoveTab_TableLayout_Bottom.AutoSize = true;
             Control_RemoveTab_TableLayout_Bottom.ColumnCount = 9;
             Control_RemoveTab_TableLayout_Bottom.ColumnStyles.Add(new ColumnStyle());
             Control_RemoveTab_TableLayout_Bottom.ColumnStyles.Add(new ColumnStyle());
@@ -254,6 +256,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_TableLayout_Bottom.Controls.Add(Control_RemoveTab_Button_Reset, 7, 0);
             Control_RemoveTab_TableLayout_Bottom.Controls.Add(Control_RemoveTab_Button_Print, 6, 0);
             Control_RemoveTab_TableLayout_Bottom.Controls.Add(Control_RemoveTab_Button_Undo, 5, 0);
+            Control_RemoveTab_TableLayout_Bottom.Dock = DockStyle.Fill;
             Control_RemoveTab_TableLayout_Bottom.Location = new Point(3, 340);
             Control_RemoveTab_TableLayout_Bottom.Name = "Control_RemoveTab_TableLayout_Bottom";
             Control_RemoveTab_TableLayout_Bottom.RowCount = 1;
@@ -311,14 +314,13 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             // Control_RemoveTab_Button_Toggle_RightPanel
             // 
-            Control_RemoveTab_Button_Toggle_RightPanel.AutoSize = true;
             Control_RemoveTab_Button_Toggle_RightPanel.Dock = DockStyle.Fill;
             Control_RemoveTab_Button_Toggle_RightPanel.Font = new Font("Segoe UI Emoji", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            Control_RemoveTab_Button_Toggle_RightPanel.Location = new Point(681, 3);
+            Control_RemoveTab_Button_Toggle_RightPanel.Location = new Point(769, 3);
             Control_RemoveTab_Button_Toggle_RightPanel.Name = "Control_RemoveTab_Button_Toggle_RightPanel";
-            Control_RemoveTab_Button_Toggle_RightPanel.Size = new Size(119, 29);
+            Control_RemoveTab_Button_Toggle_RightPanel.Size = new Size(31, 29);
             Control_RemoveTab_Button_Toggle_RightPanel.TabIndex = 9;
-            Control_RemoveTab_Button_Toggle_RightPanel.Text = "Quick Buttons ➡";
+            Control_RemoveTab_Button_Toggle_RightPanel.Text = "➡";
             Control_RemoveTab_Button_Toggle_RightPanel.UseVisualStyleBackColor = true;
             Control_RemoveTab_Button_Toggle_RightPanel.Click += Control_RemoveTab_Button_Toggle_RightPanel_Click;
             // 
@@ -326,7 +328,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             // 
             Control_RemoveTab_Button_Reset.AutoSize = true;
             Control_RemoveTab_Button_Reset.Dock = DockStyle.Fill;
-            Control_RemoveTab_Button_Reset.Location = new Point(585, 3);
+            Control_RemoveTab_Button_Reset.Location = new Point(673, 3);
             Control_RemoveTab_Button_Reset.Name = "Control_RemoveTab_Button_Reset";
             Control_RemoveTab_Button_Reset.Size = new Size(90, 29);
             Control_RemoveTab_Button_Reset.TabIndex = 8;
@@ -339,7 +341,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_Button_Print.AutoSize = true;
             Control_RemoveTab_Button_Print.Dock = DockStyle.Fill;
             Control_RemoveTab_Button_Print.Enabled = false;
-            Control_RemoveTab_Button_Print.Location = new Point(489, 3);
+            Control_RemoveTab_Button_Print.Location = new Point(577, 3);
             Control_RemoveTab_Button_Print.Name = "Control_RemoveTab_Button_Print";
             Control_RemoveTab_Button_Print.Size = new Size(90, 29);
             Control_RemoveTab_Button_Print.TabIndex = 7;
@@ -351,7 +353,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_Button_Undo.AutoSize = true;
             Control_RemoveTab_Button_Undo.Dock = DockStyle.Fill;
             Control_RemoveTab_Button_Undo.Enabled = false;
-            Control_RemoveTab_Button_Undo.Location = new Point(393, 3);
+            Control_RemoveTab_Button_Undo.Location = new Point(481, 3);
             Control_RemoveTab_Button_Undo.Name = "Control_RemoveTab_Button_Undo";
             Control_RemoveTab_Button_Undo.Size = new Size(90, 29);
             Control_RemoveTab_Button_Undo.TabIndex = 6;
@@ -381,6 +383,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_TableLayout_Bottom.ResumeLayout(false);
             Control_RemoveTab_TableLayout_Bottom.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
         private Button Control_RemoveTab_Button_Print;
         private TableLayoutPanel Control_RemoveTab_TableLayout_Bottom;

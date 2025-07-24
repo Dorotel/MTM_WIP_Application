@@ -282,7 +282,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_InventoryTab_Button_Toggle_RightPanel.Name = "Control_InventoryTab_Button_Toggle_RightPanel";
             Control_InventoryTab_Button_Toggle_RightPanel.Size = new Size(38, 29);
             Control_InventoryTab_Button_Toggle_RightPanel.TabIndex = 9;
-            Control_InventoryTab_Button_Toggle_RightPanel.Text = "Quick Buttons ➡";
+            Control_InventoryTab_Button_Toggle_RightPanel.Text = "➡";
             Control_InventoryTab_Button_Toggle_RightPanel.UseVisualStyleBackColor = true;
             Control_InventoryTab_Button_Toggle_RightPanel.Click += Control_InventoryTab_Button_Toggle_RightPanel_Click;
             // 

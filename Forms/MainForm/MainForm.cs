@@ -153,7 +153,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
         private void UpdateQuickButtonsToggleTextForAllTabs()
         {
             bool isCollapsed = MainForm_SplitContainer_Middle.Panel2Collapsed;
-            string text = isCollapsed ? "Quick Buttons ⬅️" : "Quick Buttons ➡️";
+            string text = isCollapsed ? "⬅️" : "➡️";
 
             // Inventory Tab
             if (MainForm_UserControl_InventoryTab != null)

@@ -1860,6 +1860,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
         }
 
         #endregion
+
+        private void AdvancedInventory_MultiLoc_Label_Notes_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
 
