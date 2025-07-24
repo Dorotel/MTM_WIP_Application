@@ -25,6 +25,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
         public Button Control_QuickButtons_Button_Button2;
         public Button Control_QuickButtons_Button_Button1;
         private ToolTip Control_QuickButtons_Tooltip;
+        private ContextMenuStrip Control_QuickButtons_ContextMenu;
+        private ToolStripMenuItem menuItemRemove;
+        private ToolStripMenuItem menuItemEdit;
         
 
         
@@ -57,6 +60,13 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_QuickButtons_Button_Button2 = new Button();
             Control_QuickButtons_Button_Button1 = new Button();
             Control_QuickButtons_Tooltip = new ToolTip(components);
+            Control_QuickButtons_ContextMenu = new ContextMenuStrip();
+            menuItemRemove = new ToolStripMenuItem("Remove");
+            menuItemEdit = new ToolStripMenuItem("Edit");
+            Control_QuickButtons_ContextMenu.Items.AddRange(new ToolStripItem[] {
+                menuItemRemove,
+                menuItemEdit
+            });
             Control_QuickButtons_TableLayoutPanel_Main.SuspendLayout();
             SuspendLayout();
             // 
@@ -102,6 +112,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_QuickButtons_Button_Button10.TabIndex = 10;
             Control_QuickButtons_Button_Button10.Text = "Control_QuickButtons_Button_Button10";
             Control_QuickButtons_Button_Button10.UseVisualStyleBackColor = true;
+            Control_QuickButtons_Button_Button10.ContextMenuStrip = Control_QuickButtons_ContextMenu;
             // 
             // Control_QuickButtons_Button_Button9
             // 
@@ -113,6 +124,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_QuickButtons_Button_Button9.TabIndex = 9;
             Control_QuickButtons_Button_Button9.Text = "Control_QuickButtons_Button_Button9";
             Control_QuickButtons_Button_Button9.UseVisualStyleBackColor = true;
+            Control_QuickButtons_Button_Button9.ContextMenuStrip = Control_QuickButtons_ContextMenu;
             // 
             // Control_QuickButtons_Button_Button8
             // 
@@ -124,6 +136,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_QuickButtons_Button_Button8.TabIndex = 8;
             Control_QuickButtons_Button_Button8.Text = "Control_QuickButtons_Button_Button8";
             Control_QuickButtons_Button_Button8.UseVisualStyleBackColor = true;
+            Control_QuickButtons_Button_Button8.ContextMenuStrip = Control_QuickButtons_ContextMenu;
             // 
             // Control_QuickButtons_Button_Button7
             // 
@@ -135,6 +148,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_QuickButtons_Button_Button7.TabIndex = 7;
             Control_QuickButtons_Button_Button7.Text = "Control_QuickButtons_Button_Button7";
             Control_QuickButtons_Button_Button7.UseVisualStyleBackColor = true;
+            Control_QuickButtons_Button_Button7.ContextMenuStrip = Control_QuickButtons_ContextMenu;
             // 
             // Control_QuickButtons_Button_Button6
             // 
@@ -146,6 +160,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_QuickButtons_Button_Button6.TabIndex = 6;
             Control_QuickButtons_Button_Button6.Text = "Control_QuickButtons_Button_Button6";
             Control_QuickButtons_Button_Button6.UseVisualStyleBackColor = true;
+            Control_QuickButtons_Button_Button6.ContextMenuStrip = Control_QuickButtons_ContextMenu;
             // 
             // Control_QuickButtons_Button_Button5
             // 
@@ -157,6 +172,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_QuickButtons_Button_Button5.TabIndex = 5;
             Control_QuickButtons_Button_Button5.Text = "Control_QuickButtons_Button_Button5";
             Control_QuickButtons_Button_Button5.UseVisualStyleBackColor = true;
+            Control_QuickButtons_Button_Button5.ContextMenuStrip = Control_QuickButtons_ContextMenu;
             // 
             // Control_QuickButtons_Button_Button4
             // 
@@ -168,6 +184,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_QuickButtons_Button_Button4.TabIndex = 4;
             Control_QuickButtons_Button_Button4.Text = "Control_QuickButtons_Button_Button4";
             Control_QuickButtons_Button_Button4.UseVisualStyleBackColor = true;
+            Control_QuickButtons_Button_Button4.ContextMenuStrip = Control_QuickButtons_ContextMenu;
             // 
             // Control_QuickButtons_Button_Button3
             // 
@@ -179,6 +196,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_QuickButtons_Button_Button3.TabIndex = 3;
             Control_QuickButtons_Button_Button3.Text = "Control_QuickButtons_Button_Button3";
             Control_QuickButtons_Button_Button3.UseVisualStyleBackColor = true;
+            Control_QuickButtons_Button_Button3.ContextMenuStrip = Control_QuickButtons_ContextMenu;
             // 
             // Control_QuickButtons_Button_Button2
             // 
@@ -190,6 +208,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_QuickButtons_Button_Button2.TabIndex = 2;
             Control_QuickButtons_Button_Button2.Text = "Control_QuickButtons_Button_Button2";
             Control_QuickButtons_Button_Button2.UseVisualStyleBackColor = true;
+            Control_QuickButtons_Button_Button2.ContextMenuStrip = Control_QuickButtons_ContextMenu;
             // 
             // Control_QuickButtons_Button_Button1
             // 
@@ -202,6 +221,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_QuickButtons_Button_Button1.Text = "Control_QuickButtons_Button_Button1";
             Control_QuickButtons_Button_Button1.UseMnemonic = false;
             Control_QuickButtons_Button_Button1.UseVisualStyleBackColor = true;
+            Control_QuickButtons_Button_Button1.ContextMenuStrip = Control_QuickButtons_ContextMenu;
             // 
             // Control_QuickButtons
             // 
