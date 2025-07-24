@@ -430,6 +430,9 @@ public static class Dao_Inventory
     }
 
     #endregion
+
+    // Add a public static property to expose HelperDatabaseCore for use in other classes
+    public static Helper_Database_Core PublicHelperDatabaseCore => HelperDatabaseCore;
 }
 
 #endregion

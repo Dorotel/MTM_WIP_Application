@@ -67,23 +67,6 @@ namespace MTM_Inventory_Application.Services
                 LastCheckedDatabaseVersion = databaseVersion;
                 Debug.WriteLine(LastCheckedDatabaseVersion);
                 ControlInventoryInstance?.SetVersionLabel(Model_AppVariables.UserVersion, databaseVersion ?? "Unknown");
-                if (Model_AppVariables.UserVersion != databaseVersion)
-                {
-                    LoggingUtility.Log(
-                        $"Version mismatch detected. Current: {Model_AppVariables.UserVersion}, Expected: {databaseVersion}");
-                    Debug.WriteLine(
-                        $"Version mismatch detected. Current: {Model_AppVariables.UserVersion}, Expected: {databaseVersion}");
-                    await Task.Run(() =>
-                    {
-                        string message = "You are using an older version of the WIP Application.\n" +
-                                         "This normally means a newer version is just about to be released.\n" +
-                                         "The program will close in 30 seconds, or by clicking OK.";
-                        string caption =
-                            $"Version Conflict Error ({Model_AppVariables.UserVersion}/{databaseVersion})";
-                        MessageBox.Show(message, caption, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                        Application.Exit();
-                    });
-                }
             }
             catch (MySql.Data.MySqlClient.MySqlException ex)
             {

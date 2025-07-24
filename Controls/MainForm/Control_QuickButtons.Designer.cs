@@ -27,7 +27,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
         private ToolTip Control_QuickButtons_Tooltip;
         private ContextMenuStrip Control_QuickButtons_ContextMenu;
         private ToolStripMenuItem menuItemRemove;
-        private ToolStripMenuItem menuItemEdit;
+        private ToolStripMenuItem menuItemReorder;
         
 
         
@@ -62,10 +62,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_QuickButtons_Tooltip = new ToolTip(components);
             Control_QuickButtons_ContextMenu = new ContextMenuStrip();
             menuItemRemove = new ToolStripMenuItem("Remove");
-            menuItemEdit = new ToolStripMenuItem("Edit");
+            menuItemReorder = new ToolStripMenuItem("Change Order");
             Control_QuickButtons_ContextMenu.Items.AddRange(new ToolStripItem[] {
                 menuItemRemove,
-                menuItemEdit
+                new ToolStripSeparator(),
+                menuItemReorder
             });
             Control_QuickButtons_TableLayoutPanel_Main.SuspendLayout();
             SuspendLayout();

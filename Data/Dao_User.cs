@@ -310,33 +310,36 @@ internal static class Dao_User
     }
 
     // Add method to support saving named settings JSON for grid view settings
-    public static async Task SetGridViewSettingsJsonAsync(string userId, string settingsJson)
+    public static async Task SetGridViewSettingsJsonAsync(string userId, string dgvName, string settingsJson)
     {
         Debug.WriteLine($"[Dao_User] Entering SetGridViewSettingsJsonAsync(userId={userId})");
         try
         {
             using MySqlConnection conn = new(Model_AppVariables.ConnectionString);
-            await conn.OpenAsync(); 
-            using MySqlCommand cmd = new("usr_ui_settings_SetJsonSetting", conn)
+            await conn.OpenAsync();
+            using (MySqlCommand cmd = new("usr_ui_settings_SetJsonSetting", conn)
             {
                 CommandType = CommandType.StoredProcedure
-            };
-            cmd.Parameters.AddWithValue("p_UserId", userId);
-            cmd.Parameters.AddWithValue("p_SettingJson", settingsJson);
-            MySqlParameter statusParam = new("p_Status", MySqlDbType.Int32) { Direction = ParameterDirection.Output };
-            cmd.Parameters.Add(statusParam);
-            MySqlParameter errorMsgParam = new("p_ErrorMsg", MySqlDbType.VarChar, 255)
+            })
             {
-                Direction = ParameterDirection.Output
-            };
-            cmd.Parameters.Add(errorMsgParam);
-            await cmd.ExecuteNonQueryAsync();
-            int status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
-            string errorMsg = errorMsgParam.Value?.ToString() ?? "";
-            Debug.WriteLine($"[Dao_User] SetGridViewSettingsJsonAsync status: {status}, errorMsg: {errorMsg}");
-            if (status != 0)
-            {
-                throw new Exception(errorMsg);
+                cmd.Parameters.AddWithValue("p_UserId", userId);
+                cmd.Parameters.AddWithValue("p_DgvName", dgvName); // <-- ADD THIS LINE
+                cmd.Parameters.AddWithValue("p_SettingJson", settingsJson);
+                MySqlParameter statusParam = new("p_Status", MySqlDbType.Int32) { Direction = ParameterDirection.Output };
+                cmd.Parameters.Add(statusParam);
+                MySqlParameter errorMsgParam = new("p_ErrorMsg", MySqlDbType.VarChar, 255)
+                {
+                    Direction = ParameterDirection.Output
+                };
+                cmd.Parameters.Add(errorMsgParam);
+                await cmd.ExecuteNonQueryAsync();
+                int status = statusParam.Value is int s ? s : Convert.ToInt32(statusParam.Value ?? 0);
+                string errorMsg = errorMsgParam.Value?.ToString() ?? "";
+                Debug.WriteLine($"[Dao_User] SetGridViewSettingsJsonAsync status: {status}, errorMsg: {errorMsg}");
+                if (status != 0)
+                {
+                    throw new Exception(errorMsg);
+                }
             }
         }
         catch (Exception ex)

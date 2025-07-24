@@ -36,8 +36,10 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 InitializeComponent();
 
                 // Apply comprehensive DPI scaling and runtime layout adjustments
-                Core_Themes.ApplyDpiScaling(this);
-                Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+                // THEME POLICY: Only update theme on startup, in settings menu, or on DPI change.
+                // Do NOT call theme update methods from arbitrary event handlers or business logic.
+                Core_Themes.ApplyDpiScaling(this); // Allowed: Form initialization
+                Core_Themes.ApplyRuntimeLayoutAdjustments(this); // Allowed: Form initialization
 
                 ToolTip toolTip = new();
                 toolTip.SetToolTip(AdvancedInventory_Single_Button_Send,
@@ -823,6 +825,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 int savedCount = 0;
                 foreach (ListViewItem item in AdvancedInventory_Single_ListView.Items)
                 {
+                    // Always pass null/empty for batchNumber to ensure each transaction gets a unique batch number
                     string partId = item.SubItems.Count > 0 ? item.SubItems[0].Text : "";
                     string op = item.SubItems.Count > 1 ? item.SubItems[1].Text : "";
                     string loc = item.SubItems.Count > 2 ? item.SubItems[2].Text : "";
@@ -845,6 +848,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     Model_AppVariables.User ??= Environment.UserName;
                     Model_AppVariables.PartType ??= "";
 
+                    // Pass null/empty for batchNumber for unique batch per transaction
                     await Dao_Inventory.AddInventoryItemAsync(
                         partId,
                         loc,
@@ -852,7 +856,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                         qty,
                         Model_AppVariables.PartType ?? "",
                         Model_AppVariables.User,
-                        "",
+                        null, // <-- ensure unique batch number
                         notes,
                         true);
 
@@ -1298,6 +1302,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 foreach (ListViewItem item in AdvancedInventory_MultiLoc_ListView_Preview.Items)
                 {
+                    // Always pass null/empty for batchNumber to ensure each transaction gets a unique batch number
                     if (string.Equals(item.SubItems[0].Text, loc, StringComparison.OrdinalIgnoreCase))
                     {
                         MessageBox.Show(@"This location has already been added.", @"Duplicate Entry",
@@ -1374,6 +1379,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 int savedCount = 0;
                 foreach (ListViewItem item in AdvancedInventory_MultiLoc_ListView_Preview.Items)
                 {
+                    // Always pass null/empty for batchNumber to ensure each transaction gets a unique batch number
                     string loc = item.SubItems[0].Text;
                     string qtyText = item.SubItems[1].Text;
                     string notes = item.SubItems[2].Text;
@@ -1393,6 +1399,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     Model_AppVariables.User ??= Environment.UserName;
                     Model_AppVariables.PartType ??= "";
 
+                    // Pass null/empty for batchNumber for unique batch per transaction
                     await Dao_Inventory.AddInventoryItemAsync(
                         partId,
                         loc,
@@ -1400,7 +1407,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                         qty,
                         Model_AppVariables.PartType ?? "",
                         Model_AppVariables.User,
-                        "",
+                        null, // <-- ensure unique batch number
                         notes,
                         true);
 
@@ -1626,6 +1633,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     continue;
                 }
 
+                // Always pass null/empty for batchNumber to ensure each transaction gets a unique batch number
                 bool rowValid = true;
                 foreach (DataGridViewCell cell in row.Cells)
                 {
@@ -1671,25 +1679,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 {
                     try
                     {
+                        // Pass null/empty for batchNumber for unique batch per transaction
                         await Dao_Inventory.AddInventoryItemAsync(
-                            part, loc, op, qty, "", Model_AppVariables.User ?? Environment.UserName, "", notes, true);
-
-                        if (worksheet != null)
-                        {
-                            IXLRange? usedRange = worksheet.RangeUsed();
-                            if (usedRange != null)
-                            {
-                                int headerRow = usedRange.FirstRow().RowNumber();
-                                int lastRow = usedRange.LastRow().RowNumber();
-                                int excelRowIndex = headerRow + 1 + row.Index;
-                                if (excelRowIndex <= lastRow)
-                                {
-                                    excelRowsToDelete.Add(excelRowIndex);
-                                }
-                            }
-                        }
-
-                        rowsToRemove.Add(row);
+                            part, loc, op, qty, "", Model_AppVariables.User ?? Environment.UserName, null, notes, true);
                     }
                     catch (Exception ex)
                     {
@@ -1722,14 +1714,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 {
                     int headerRow = usedRange.FirstRow().RowNumber();
                     int lastRow = worksheet.LastRowUsed()?.RowNumber() ?? headerRow;
-                    for (int i = lastRow; i > headerRow; i--)
-                    {
-                        bool isEmpty = worksheet.Row(i).CellsUsed().All(c => string.IsNullOrWhiteSpace(c.GetString()));
-                        if (isEmpty)
-                        {
-                            worksheet.Row(i).Delete();
-                        }
-                    }
                 }
 
                 workbook?.Save();

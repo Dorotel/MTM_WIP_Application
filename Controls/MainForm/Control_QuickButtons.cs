@@ -9,6 +9,7 @@ using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Logging;
 using MySql.Data.MySqlClient;
+using MTM_Inventory_Application.Controls.Shared;
 
 namespace MTM_Inventory_Application.Controls.MainForm
 {
@@ -18,8 +19,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         internal static List<Button>? quickButtons;
         public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
-        private int dragSourceIndex = -1;
-        private Button? dragOverTargetButton = null;
 
         #endregion
 
@@ -49,17 +48,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
             foreach (var btn in quickButtons)
             {
                 btn.Click += QuickButton_Click;
-                btn.MouseDown += QuickButton_MouseDown;
-                btn.AllowDrop = true;
-                btn.DragOver += QuickButton_DragOver;
-                btn.DragDrop += QuickButton_DragDrop;
-                btn.DragLeave += QuickButton_DragLeave;
             }
             LoadLast10Transactions(Model_AppVariables.User);
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
             menuItemRemove.Click += MenuItemRemove_Click;
-            menuItemEdit.Click += MenuItemEdit_Click;
+            menuItemReorder.Click += MenuItemReorder_Click;
         }
 
         #endregion
@@ -86,14 +80,16 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     string operation = reader["Operation"].ToString() ?? string.Empty;
                     int quantity = reader["Quantity"] is int q ? q : Convert.ToInt32(reader["Quantity"]);
                     int position = reader["Position"] is int p ? p : Convert.ToInt32(reader["Position"]);
+                    // Ensure position is always 1-10 for UI
+                    int displayPosition = i + 1;
                     string rawText = $"({operation}) - [{partId} x {quantity}]";
                     quickButtons[i].Text = TruncateTextToFitSingleLine(rawText, quickButtons[i]);
                     quickButtons[i].UseMnemonic = false;
                     quickButtons[i].Padding = Padding.Empty;
                     quickButtons[i].Margin = Padding.Empty;
-                    string tooltipText = $"Part ID: {partId}, Operation: {operation}, Quantity: {quantity}\nPosition: {position}";
+                    string tooltipText = $"Part ID: {partId}, Operation: {operation}, Quantity: {quantity}\nPosition: {displayPosition}";
                     Control_QuickButtons_Tooltip.SetToolTip(quickButtons[i], tooltipText);
-                    quickButtons[i].Tag = new { partId, operation, quantity, position };
+                    quickButtons[i].Tag = new { partId, operation, quantity, position = displayPosition };
                     quickButtons[i].Visible = true;
                     i++;
                 }
@@ -145,75 +141,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 tb.Text = value;
                 tb.ForeColor = Model_AppVariables.UserUiColors.TextBoxForeColor ?? Color.Black;
             }
-        }
-
-        private void QuickButton_MouseDown(object? sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left && sender is Button btn && quickButtons != null)
-            {
-                dragSourceIndex = quickButtons.IndexOf(btn);
-                if (dragSourceIndex >= 0 && btn.Tag != null && !string.IsNullOrEmpty(btn.Text))
-                    btn.DoDragDrop(btn, DragDropEffects.Move);
-            }
-        }
-
-        private void QuickButton_DragOver(object? sender, DragEventArgs e)
-        {
-            if (e.Data?.GetDataPresent(typeof(Button)) == true && sender is Button targetBtn)
-            {
-                e.Effect = DragDropEffects.Move;
-                if (dragOverTargetButton != targetBtn)
-                {
-                    if (dragOverTargetButton != null)
-                        ResetQuickButtonHighlight(dragOverTargetButton);
-                    dragOverTargetButton = targetBtn;
-                    var theme = Core_Themes.Core_AppThemes.GetCurrentTheme();
-                    var highlightColor = theme.Colors.ButtonHoverBackColor ?? Color.LightBlue;
-                    dragOverTargetButton.BackColor = highlightColor;
-                }
-            }
-        }
-
-        private async void QuickButton_DragDrop(object? sender, DragEventArgs e)
-        {
-            int tgtIdx = -1;
-            if (dragOverTargetButton != null)
-            {
-                tgtIdx = quickButtons?.IndexOf(dragOverTargetButton) ?? -1;
-                ResetQuickButtonHighlight(dragOverTargetButton);
-                dragOverTargetButton = null;
-            }
-            if (quickButtons == null) return;
-            if (e.Data?.GetData(typeof(Button)) is Button srcBtn)
-            {
-                int srcIdx = quickButtons.IndexOf(srcBtn);
-                if (srcIdx == -1 || tgtIdx == -1 || srcIdx == tgtIdx) return;
-                string user = Model_AppVariables.User;
-                try
-                {
-                    await Dao_QuickButtons.MoveQuickButtonAsync(user, srcIdx, tgtIdx);
-                }
-                catch (MySqlException ex)
-                {
-                    LoggingUtility.LogDatabaseError(ex);
-                }
-                LoadLast10Transactions(user);
-            }
-        }
-
-        private void QuickButton_DragLeave(object? sender, EventArgs e)
-        {
-            if (dragOverTargetButton != null)
-            {
-                ResetQuickButtonHighlight(dragOverTargetButton);
-                dragOverTargetButton = null;
-            }
-        }
-
-        private void ResetQuickButtonHighlight(Button btn)
-        {
-            var theme = Core_Themes.Core_AppThemes.GetCurrentTheme();
-            btn.BackColor = theme.Colors.ButtonBackColor ?? SystemColors.Control;
         }
 
         private static void QuickButton_Click(object? sender, EventArgs? e)
@@ -358,6 +285,38 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
         }
 
+        private async void MenuItemReorder_Click(object? sender, EventArgs? e)
+        {
+            if (quickButtons == null) return;
+            using var dlg = new QuickButtonOrderDialog(quickButtons);
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                var newOrder = dlg.GetButtonOrder();
+                string user = Model_AppVariables.User;
+                // Remove all quick buttons for the user from the server
+                await Dao_QuickButtons.DeleteAllQuickButtonsForUserAsync(user);
+                // Re-add them in the new order
+                for (int i = 0; i < newOrder.Count; i++)
+                {
+                    var btn = newOrder[i];
+                    dynamic tag = btn.Tag;
+                    string partId = tag?.partId ?? string.Empty;
+                    string operation = tag?.operation ?? string.Empty;
+                    int quantity = tag?.quantity ?? 0;
+                    await Dao_QuickButtons.AddQuickButtonAsync(user, partId, operation, quantity, i);
+                }
+                // Update UI
+                quickButtons = newOrder;
+                Control_QuickButtons_TableLayoutPanel_Main.Controls.Clear();
+                for (int i = 0; i < quickButtons.Count; i++)
+                {
+                    Control_QuickButtons_TableLayoutPanel_Main.Controls.Add(quickButtons[i], 0, i);
+                }
+               LoadLast10Transactions(user);
+
+            }
+        }
+
         private class QuickButtonEditDialog : Form
         {
             public string PartId { get; private set; }
@@ -403,6 +362,206 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Controls.Add(numQuantity);
                 Controls.Add(btnOk);
                 Controls.Add(btnCancel);
+            }
+        }
+
+        private class QuickButtonOrderDialog : Form
+        {
+            private readonly ListView listView;
+            private readonly Button btnOK;
+            private readonly Button btnCancel;
+            private readonly Button btnEdit;
+            private readonly Label lblInstructions;
+            private readonly List<Button> buttonOrder;
+            private int dragIndex = -1;
+
+            public QuickButtonOrderDialog(List<Button> buttons)
+            {
+                Text = "Change Quick Button Order";
+                Size = new Size(500, 500);
+                FormBorderStyle = FormBorderStyle.FixedDialog;
+                StartPosition = FormStartPosition.CenterParent;
+                MinimizeBox = false;
+                MaximizeBox = false;
+                ShowInTaskbar = false;
+                buttonOrder = new List<Button>(buttons.Where(b => b.Visible));
+                listView = new ListView
+                {
+                    Dock = DockStyle.Top,
+                    Height = 250,
+                    View = View.Details,
+                    FullRowSelect = true,
+                    AllowDrop = true,
+                    HeaderStyle = ColumnHeaderStyle.Nonclickable
+                };
+                listView.Columns.Add("Position", 70, HorizontalAlignment.Center);
+                listView.Columns.Add("Part ID", 120, HorizontalAlignment.Left);
+                listView.Columns.Add("Operation", 120, HorizontalAlignment.Left);
+                listView.Columns.Add("Quantity", 80, HorizontalAlignment.Right);
+                for (int i = 0; i < buttonOrder.Count; i++)
+                {
+                    var btn = buttonOrder[i];
+                    dynamic tag = btn.Tag;
+                    string partId = tag?.partId ?? "";
+                    string op = tag?.operation ?? "";
+                    string qty = tag?.quantity?.ToString() ?? "";
+                    var lvi = new ListViewItem(new[]
+                    {
+                        (i+1).ToString(),
+                        partId,
+                        op,
+                        qty
+                    });
+                    listView.Items.Add(lvi);
+                }
+                listView.MouseDown += ListView_MouseDown;
+                listView.ItemDrag += ListView_ItemDrag;
+                listView.DragEnter += ListView_DragEnter;
+                listView.DragDrop += ListView_DragDrop;
+                listView.KeyDown += ListView_KeyDown;
+                listView.SelectedIndexChanged += ListView_SelectedIndexChanged;
+
+                btnEdit = new Button { Text = "Edit", Dock = DockStyle.Top, Enabled = false, Height = 32 };
+                btnEdit.Click += BtnEdit_Click;
+
+                lblInstructions = new Label
+                {
+                    Text = "How to use this form:\n\n- Drag and drop rows to change the order.\n- Use Shift+Up/Down to move a selected row.\n- Select a row and click 'Edit' to change its details.\n- Click OK to save your changes.",
+                    Dock = DockStyle.Top,
+                    Height = 90,
+                    TextAlign = ContentAlignment.MiddleLeft,
+                    Padding = new Padding(8),
+                    Font = new Font(Font.FontFamily, 10, FontStyle.Regular),
+                    AutoSize = false
+                };
+
+                btnOK = new Button { Text = "OK", DialogResult = DialogResult.OK, Dock = DockStyle.Bottom };
+                btnCancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, Dock = DockStyle.Bottom };
+
+                Controls.Add(btnOK);
+                Controls.Add(btnCancel);
+                Controls.Add(lblInstructions);
+                Controls.Add(btnEdit);
+                Controls.Add(listView);
+
+                AcceptButton = btnOK;
+                CancelButton = btnCancel;
+
+                // DPI scaling and layout adjustments
+                Core_Themes.ApplyDpiScaling(this);
+                Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+            }
+
+            private void ListView_SelectedIndexChanged(object? sender, EventArgs e)
+            {
+                btnEdit.Enabled = listView.SelectedIndices.Count > 0;
+            }
+
+            private void BtnEdit_Click(object? sender, EventArgs e)
+            {
+                if (listView.SelectedIndices.Count == 0) return;
+                int idx = listView.SelectedIndices[0];
+                var btn = buttonOrder[idx];
+                dynamic tag = btn.Tag;
+                string oldPartId = tag?.partId ?? "";
+                string oldOperation = tag?.operation ?? "";
+                int oldQuantity = tag?.quantity ?? 1;
+                using var dlg = new QuickButtonEditDialog(oldPartId, oldOperation, oldQuantity);
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    // Update button's tag and text
+                    btn.Tag = new { partId = dlg.PartId, operation = dlg.Operation, quantity = dlg.Quantity, position = idx + 1 };
+                    btn.Text = $"({dlg.Operation}) - [{dlg.PartId} x {dlg.Quantity}]";
+                    // Update ListView row
+                    var lvi = listView.Items[idx];
+                    lvi.SubItems[1].Text = dlg.PartId;
+                    lvi.SubItems[2].Text = dlg.Operation;
+                    lvi.SubItems[3].Text = dlg.Quantity.ToString();
+                }
+            }
+
+            private void ListView_MouseDown(object? sender, MouseEventArgs e)
+            {
+                dragIndex = listView.GetItemAt(e.X, e.Y)?.Index ?? -1;
+            }
+
+            private void ListView_ItemDrag(object? sender, ItemDragEventArgs e)
+            {
+                if (listView.SelectedItems.Count > 0)
+                    listView.DoDragDrop(listView.SelectedItems[0], DragDropEffects.Move);
+            }
+
+            private void ListView_DragEnter(object? sender, DragEventArgs e)
+            {
+                if (e.Data?.GetDataPresent(typeof(ListViewItem)) == true)
+                    e.Effect = DragDropEffects.Move;
+            }
+
+            private void ListView_DragDrop(object? sender, DragEventArgs e)
+            {
+                if (e.Data?.GetDataPresent(typeof(ListViewItem)) == true)
+                {
+                    Point cp = listView.PointToClient(new Point(e.X, e.Y));
+                    ListViewItem dragItem = (ListViewItem)e.Data.GetData(typeof(ListViewItem));
+                    int dropIndex = listView.GetItemAt(cp.X, cp.Y)?.Index ?? (listView.Items.Count - 1);
+                    if (dragItem.Index == dropIndex || dragItem.Index < 0) return;
+                    var btn = buttonOrder[dragItem.Index];
+                    buttonOrder.RemoveAt(dragItem.Index);
+                    listView.Items.RemoveAt(dragItem.Index);
+                    buttonOrder.Insert(dropIndex, btn);
+                    listView.Items.Insert(dropIndex, (ListViewItem)dragItem.Clone());
+                    listView.Items[dropIndex].Selected = true;
+                    // Update positions
+                    for (int i = 0; i < listView.Items.Count; i++)
+                        listView.Items[i].SubItems[0].Text = (i + 1).ToString();
+                }
+            }
+
+            private void ListView_KeyDown(object? sender, KeyEventArgs e)
+            {
+                if (e.Shift && listView.SelectedIndices.Count > 0)
+                {
+                    int idx = listView.SelectedIndices[0];
+                    if (e.KeyCode == Keys.Up && idx > 0)
+                    {
+                        var btn = buttonOrder[idx];
+                        buttonOrder.RemoveAt(idx);
+                        buttonOrder.Insert(idx - 1, btn);
+                        var lvi = (ListViewItem)listView.Items[idx].Clone();
+                        listView.Items.RemoveAt(idx);
+                        listView.Items.Insert(idx - 1, lvi);
+                        listView.Items[idx - 1].Selected = true;
+                        // Update positions
+                        for (int i = 0; i < listView.Items.Count; i++)
+                            listView.Items[i].SubItems[0].Text = (i + 1).ToString();
+                        e.Handled = true;
+                    }
+                    else if (e.KeyCode == Keys.Down && idx < listView.Items.Count - 1)
+                    {
+                        var btn = buttonOrder[idx];
+                        buttonOrder.RemoveAt(idx);
+                        buttonOrder.Insert(idx + 1, btn);
+                        var lvi = (ListViewItem)listView.Items[idx].Clone();
+                        listView.Items.RemoveAt(idx);
+                        listView.Items.Insert(idx + 1, lvi);
+                        listView.Items[idx + 1].Selected = true;
+                        // Update positions
+                        for (int i = 0; i < listView.Items.Count; i++)
+                            listView.Items[i].SubItems[0].Text = (i + 1).ToString();
+                        e.Handled = true;
+                    }
+                }
+            }
+
+            public List<Button> GetButtonOrder()
+            {
+                // Return the button order as currently shown in the ListView
+                var result = new List<Button>();
+                for (int i = 0; i < listView.Items.Count; i++)
+                {
+                    result.Add(buttonOrder[listView.Items[i].Index]);
+                }
+                return result;
             }
         }
         #endregion

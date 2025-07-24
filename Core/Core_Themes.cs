@@ -37,6 +37,16 @@ namespace MTM_Inventory_Application.Core
     /// </summary>
     public static class Core_Themes
     {
+        // THEME POLICY: Only allow theme updates on startup, in settings, or on DPI change.
+        // Do NOT call theme update methods from arbitrary event handlers or business logic.
+        // Allowed: ApplyTheme, ApplyDpiScaling, ApplyRuntimeLayoutAdjustments
+        //   - In Form/UserControl constructors or OnLoad
+        //   - In settings menu logic (after settings dialog)
+        //   - In DPI change event handlers
+        // Not allowed elsewhere.
+        //
+        // If you need to update the theme, ensure it is only in these locations.
+
         #region Public API
 
         public static void ApplyTheme(Form form)
@@ -199,7 +209,7 @@ namespace MTM_Inventory_Application.Core
             DataGridViewColumn? clickedColumn = null;
             int headerHeight = dgv.ColumnHeadersHeight;
 
-            // If click is on header row, find which column was clicked
+            // If click is on the header row, find which column was clicked
             if (location.Y <= headerHeight)
             {
                 int x = location.X;
@@ -254,9 +264,29 @@ namespace MTM_Inventory_Application.Core
                 menu.Items.Add(item);
             }
 
+            // Add "Change Column Order" option
+            menu.Items.Add(new ToolStripSeparator());
+            ToolStripMenuItem changeOrderItem = new("Change Column Order");
+            changeOrderItem.Click += (s, e) =>
+            {
+                using (var dlg = new MTM_Inventory_Application.Controls.Shared.ColumnOrderDialog(dgv))
+                {
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        // Apply new order
+                        var newOrder = dlg.GetColumnOrder();
+                        for (int i = 0; i < newOrder.Count; i++)
+                        {
+                            var col = dgv.Columns[newOrder[i]];
+                            col.DisplayIndex = i;
+                        }
+                    }
+                }
+            };
+            menu.Items.Add(changeOrderItem);
+
             // Add "Select All" and "Deselect All" options
             menu.Items.Add(new ToolStripSeparator());
-
             ToolStripMenuItem selectAllItem = new("Select All");
             selectAllItem.Click += (s, e) =>
             {
@@ -325,7 +355,9 @@ namespace MTM_Inventory_Application.Core
                     string json = JsonSerializer.Serialize(new { Columns = columns });
                     // Get userId (from Model_AppVariables.User)
                     string userId = MTM_Inventory_Application.Models.Model_AppVariables.User;
-                    await MTM_Inventory_Application.Data.Dao_User.SetGridViewSettingsJsonAsync(userId, json);
+                    string gridName = dgv.Name;
+                    await MTM_Inventory_Application.Data.Dao_User.SetGridViewSettingsJsonAsync(userId, gridName, json);
+
                     MessageBox.Show("Grid settings saved successfully.", "Grid Settings", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -334,65 +366,6 @@ namespace MTM_Inventory_Application.Core
                 }
             };
             menu.Items.Add(saveSettingsItem);
-
-            // Add column reordering options if a specific column was clicked
-            if (clickedColumn != null)
-            {
-                menu.Items.Add(new ToolStripSeparator());
-
-                ToolStripMenuItem columnOrderTitle = new("Column Order")
-                {
-                    Enabled = false,
-                    Font = new Font(menu.Font, FontStyle.Bold)
-                };
-                menu.Items.Add(columnOrderTitle);
-
-                // Move column left
-                ToolStripMenuItem moveLeftItem = new("Move Left")
-                {
-                    Enabled = clickedColumn.DisplayIndex > 0
-                };
-                moveLeftItem.Click += (s, e) =>
-                {
-                    int newIndex = clickedColumn.DisplayIndex - 1;
-                    if (newIndex >= 0)
-                    {
-                        clickedColumn.DisplayIndex = newIndex;
-                    }
-                };
-                menu.Items.Add(moveLeftItem);
-
-                // Move column right
-                ToolStripMenuItem moveRightItem = new("Move Right")
-                {
-                    Enabled = clickedColumn.DisplayIndex < dgv.Columns.Count - 1
-                };
-                moveRightItem.Click += (s, e) =>
-                {
-                    int newIndex = clickedColumn.DisplayIndex + 1;
-                    if (newIndex < dgv.Columns.Count)
-                    {
-                        clickedColumn.DisplayIndex = newIndex;
-                    }
-                };
-                menu.Items.Add(moveRightItem);
-
-                // Move to first position
-                ToolStripMenuItem moveFirstItem = new("Move to First")
-                {
-                    Enabled = clickedColumn.DisplayIndex > 0
-                };
-                moveFirstItem.Click += (s, e) => { clickedColumn.DisplayIndex = 0; };
-                menu.Items.Add(moveFirstItem);
-
-                // Move to last position
-                ToolStripMenuItem moveLastItem = new("Move to Last")
-                {
-                    Enabled = clickedColumn.DisplayIndex < dgv.Columns.Count - 1
-                };
-                moveLastItem.Click += (s, e) => { clickedColumn.DisplayIndex = dgv.Columns.Count - 1; };
-                menu.Items.Add(moveLastItem);
-            }
 
             // Show the menu
             menu.Show(dgv, location);

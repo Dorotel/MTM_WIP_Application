@@ -32,8 +32,10 @@ namespace MTM_Inventory_Application.Controls.MainForm
             InitializeComponent();
 
             // Apply comprehensive DPI scaling and runtime layout adjustments
-            Core_Themes.ApplyDpiScaling(this);
-            Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+            // THEME POLICY: Only update theme on startup, in settings menu, or on DPI change.
+            // Do NOT call theme update methods from arbitrary event handlers or business logic.
+            Core_Themes.ApplyDpiScaling(this); // Allowed: UserControl initialization
+            Core_Themes.ApplyRuntimeLayoutAdjustments(this); // Allowed: UserControl initialization
 
             Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Save,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Save)}");
@@ -612,7 +614,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = true;
 
-                Control_InventoryTab_Button_Toggle_RightPanel.Text = "⬅️";
+                Control_InventoryTab_Button_Toggle_RightPanel.Text = "Quick Buttons ⬅️";
                 Control_InventoryTab_Button_Toggle_RightPanel.ForeColor =
                     Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
             }
@@ -621,7 +623,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 if (MainFormInstance != null)
                 {
                     MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = false;
-                    Control_InventoryTab_Button_Toggle_RightPanel.Text = "➡️";
+                    Control_InventoryTab_Button_Toggle_RightPanel.Text = "Quick Buttons ➡️";
                     Control_InventoryTab_Button_Toggle_RightPanel.ForeColor =
                         Model_AppVariables.UserUiColors.SuccessColor ?? Color.Green;
                 }

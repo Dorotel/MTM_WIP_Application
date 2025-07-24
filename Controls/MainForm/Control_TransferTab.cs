@@ -34,8 +34,10 @@ namespace MTM_Inventory_Application.Controls.MainForm
             InitializeComponent();
 
             // Apply comprehensive DPI scaling and runtime layout adjustments
-            Core_Themes.ApplyDpiScaling(this);
-            Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+            // THEME POLICY: Only update theme on startup, in settings menu, or on DPI change.
+            // Do NOT call theme update methods from arbitrary event handlers or business logic.
+            Core_Themes.ApplyDpiScaling(this); // Allowed: UserControl initialization
+            Core_Themes.ApplyRuntimeLayoutAdjustments(this); // Allowed: UserControl initialization
 
             Control_TransferTab_Initialize();
             ApplyPrivileges();
@@ -948,7 +950,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 bool panelCollapsed = MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed;
                 MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = !panelCollapsed;
-                Control_TransferTab_Button_Toggle_RightPanel.Text = panelCollapsed ? "➡️" : "⬅️";
+                Control_TransferTab_Button_Toggle_RightPanel.Text = panelCollapsed ? "Quick Buttons ➡️" : "Quick Buttons ⬅️";
                 Control_TransferTab_Button_Toggle_RightPanel.ForeColor = panelCollapsed
                     ? Model_AppVariables.UserUiColors.SuccessColor ?? Color.Green
                     : Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;

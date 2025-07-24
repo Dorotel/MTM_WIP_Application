@@ -11,6 +11,8 @@ namespace MTM_Inventory_Application.Data
         {
             try
             {
+                // Ensure position is always 1-10 (never 0)
+                int safePosition = Math.Max(1, Math.Min(10, position + 1));
                 string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
                 using var conn = new MySqlConnection(connectionString);
                 await conn.OpenAsync();
@@ -19,7 +21,7 @@ namespace MTM_Inventory_Application.Data
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
                 cmd.Parameters.AddWithValue("p_User", user);
-                cmd.Parameters.AddWithValue("p_Position", position);
+                cmd.Parameters.AddWithValue("p_Position", safePosition);
                 cmd.Parameters.AddWithValue("p_PartID", partId);
                 cmd.Parameters.AddWithValue("p_Operation", operation);
                 cmd.Parameters.AddWithValue("p_Quantity", quantity);
@@ -36,6 +38,8 @@ namespace MTM_Inventory_Application.Data
         {
             try
             {
+                // Ensure position is always 1-10 (never 0)
+                int safePosition = Math.Max(1, Math.Min(10, position + 1));
                 string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
                 using var conn = new MySqlConnection(connectionString);
                 await conn.OpenAsync();
@@ -44,7 +48,7 @@ namespace MTM_Inventory_Application.Data
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
                 cmd.Parameters.AddWithValue("p_User", user);
-                cmd.Parameters.AddWithValue("p_Position", position);
+                cmd.Parameters.AddWithValue("p_Position", safePosition);
                 await cmd.ExecuteNonQueryAsync();
             }
             catch (MySqlException ex)
@@ -58,6 +62,8 @@ namespace MTM_Inventory_Application.Data
         {
             try
             {
+                // Ensure position is always 1-10 (never 0)
+                int safePosition = Math.Max(1, Math.Min(10, position + 1));
                 string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
                 using var conn = new MySqlConnection(connectionString);
                 await conn.OpenAsync();
@@ -69,7 +75,7 @@ namespace MTM_Inventory_Application.Data
                 cmd.Parameters.AddWithValue("p_PartID", partId);
                 cmd.Parameters.AddWithValue("p_Operation", operation);
                 cmd.Parameters.AddWithValue("p_Quantity", quantity);
-                cmd.Parameters.AddWithValue("p_Position", position);
+                cmd.Parameters.AddWithValue("p_Position", safePosition);
                 await cmd.ExecuteNonQueryAsync();
             }
             catch (MySqlException ex)
@@ -83,6 +89,9 @@ namespace MTM_Inventory_Application.Data
         {
             try
             {
+                // Ensure positions are always 1-10 (never 0)
+                int safeFrom = Math.Max(1, Math.Min(10, fromPosition + 1));
+                int safeTo = Math.Max(1, Math.Min(10, toPosition + 1));
                 string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
                 using var conn = new MySqlConnection(connectionString);
                 await conn.OpenAsync();
@@ -91,8 +100,8 @@ namespace MTM_Inventory_Application.Data
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
                 cmd.Parameters.AddWithValue("p_User", user);
-                cmd.Parameters.AddWithValue("p_FromPosition", fromPosition);
-                cmd.Parameters.AddWithValue("p_ToPosition", toPosition);
+                cmd.Parameters.AddWithValue("p_FromPosition", safeFrom);
+                cmd.Parameters.AddWithValue("p_ToPosition", safeTo);
                 await cmd.ExecuteNonQueryAsync();
             }
             catch (MySqlException ex)

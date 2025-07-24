@@ -38,8 +38,10 @@ namespace MTM_Inventory_Application.Controls.MainForm
             InitializeComponent();
 
             // Apply comprehensive DPI scaling and runtime layout adjustments
-            Core_Themes.ApplyDpiScaling(this);
-            Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+            // THEME POLICY: Only update theme on startup, in settings menu, or on DPI change.
+            // Do NOT call theme update methods from arbitrary event handlers or business logic.
+            Core_Themes.ApplyDpiScaling(this); // Allowed: UserControl initialization
+            Core_Themes.ApplyRuntimeLayoutAdjustments(this); // Allowed: UserControl initialization
 
             Control_RemoveTab_Initialize();
             Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Part);
@@ -891,7 +893,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = true;
 
-                Control_RemoveTab_Button_Toggle_RightPanel.Text = "⬅️";
+                Control_RemoveTab_Button_Toggle_RightPanel.Text = "Quick Buttons ⬅️";
                 Control_RemoveTab_Button_Toggle_RightPanel.ForeColor =
                     Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
             }
@@ -900,13 +902,57 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 if (MainFormInstance != null)
                 {
                     MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = false;
-                    Control_RemoveTab_Button_Toggle_RightPanel.Text = "➡️";
+                    Control_RemoveTab_Button_Toggle_RightPanel.Text = "Quick Buttons ➡️";
                     Control_RemoveTab_Button_Toggle_RightPanel.ForeColor =
                         Model_AppVariables.UserUiColors.SuccessColor ?? Color.Green;
                 }
             }
 
             Helper_UI_ComboBoxes.DeselectAllComboBoxText(this);
+        }
+
+        private async void Control_RemoveTab_Button_ShowAll_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                MainFormInstance?.TabLoadingControlProgress?.ShowProgress();
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(10, "Loading all inventory...");
+
+                // Query all inventory using Dao_Inventory's public property, sorted by Location
+                var dt = await MTM_Inventory_Application.Data.Dao_Inventory.PublicHelperDatabaseCore.ExecuteDataTable(
+                    "SELECT * FROM inv_inventory ORDER BY Location", null, true, CommandType.Text);
+
+                Control_RemoveTab_DataGridView_Main.DataSource = dt;
+                Control_RemoveTab_DataGridView_Main.ClearSelection();
+
+                // Only show columns in this order: Location, PartID, Operation, Quantity, Notes
+                string[] columnsToShow = { "Location", "PartID", "Operation", "Quantity", "Notes" };
+                foreach (DataGridViewColumn column in Control_RemoveTab_DataGridView_Main.Columns)
+                {
+                    column.Visible = columnsToShow.Contains(column.Name);
+                }
+                // Reorder columns
+                for (int i = 0; i < columnsToShow.Length; i++)
+                {
+                    if (Control_RemoveTab_DataGridView_Main.Columns.Contains(columnsToShow[i]))
+                    {
+                        Control_RemoveTab_DataGridView_Main.Columns[columnsToShow[i]].DisplayIndex = i;
+                    }
+                }
+                Core_Themes.ApplyThemeToDataGridView(Control_RemoveTab_DataGridView_Main);
+                Core_Themes.SizeDataGrid(Control_RemoveTab_DataGridView_Main);
+                Control_RemoveTab_Image_NothingFound.Visible = dt.Rows.Count == 0;
+                MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(100, "Show all complete");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                MessageBox.Show($"Show All failed: {ex.Message}", "Show All Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                MainFormInstance?.TabLoadingControlProgress?.HideProgress();
+            }
         }
 
         #endregion
