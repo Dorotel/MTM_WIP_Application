@@ -16,7 +16,6 @@ namespace MTM_Inventory_Application.Forms.Settings
 
         private bool _hasChanges = false;
         private readonly Dictionary<string, Panel> _settingsPanels;
-        private string? _originalThemeName;
         private Control_ProgressBarUserControl _loadingControlProgress = null!;
 
         #endregion
@@ -55,8 +54,6 @@ namespace MTM_Inventory_Application.Forms.Settings
                 ["About"] = SettingsForm_Panel_About
             };
 
-            _originalThemeName = Model_AppVariables.ThemeName;
-
             InitializeProgressControl();
 
             SettingsForm_DataGridView_Shortcuts.CellBeginEdit += ShortcutsDataGridView_CellBeginEdit;
@@ -64,7 +61,6 @@ namespace MTM_Inventory_Application.Forms.Settings
             InitializeUserControls();
 
             InitializeForm();
-            SettingsForm_Button_SwitchTheme.Click += SettingsForm_Button_SwitchTheme_Click;
         }
 
         #endregion
@@ -241,37 +237,7 @@ namespace MTM_Inventory_Application.Forms.Settings
 
             LoadSettings();
 
-            ApplyTheme();
             ApplyPrivileges();
-        }
-
-        private void ApplyTheme()
-        {
-            // Ensure theming is performed on the UI thread
-            if (InvokeRequired)
-            {
-                BeginInvoke((MethodInvoker)ApplyTheme);
-                return;
-            }
-
-            bool comboBoxWasEnabled = SettingsForm_ComboBox_Theme.Enabled;
-            SettingsForm_ComboBox_Theme.Enabled = false;
-
-            try
-            {
-                Core_Themes.ApplyTheme(this);
-                Core_Themes.ApplyThemeToDataGridView(SettingsForm_DataGridView_Shortcuts);
-                Core_Themes.SizeDataGrid(SettingsForm_DataGridView_Shortcuts);
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Warning: Could not apply theme - {ex.Message}");
-            }
-            finally
-            {
-                // Re-enable UI elements
-                SettingsForm_ComboBox_Theme.Enabled = comboBoxWasEnabled;
-            }
         }
 
         private void ApplyPrivileges()
@@ -363,9 +329,6 @@ namespace MTM_Inventory_Application.Forms.Settings
                 UpdateLoadingProgress(25, "Loading database settings...");
                 await LoadDatabaseSettings();
 
-                UpdateLoadingProgress(50, "Loading theme settings...");
-                await LoadThemeSettings();
-
                 UpdateLoadingProgress(75, "Loading shortcuts...");
                 await LoadShortcuts();
 
@@ -402,37 +365,6 @@ namespace MTM_Inventory_Application.Forms.Settings
             catch (Exception ex)
             {
                 UpdateStatus($"Error loading database settings: {ex.Message}");
-            }
-        }
-
-        private async Task LoadThemeSettings()
-        {
-            try
-            {
-                SettingsForm_ComboBox_Theme.Items.Clear();
-                string[] themeNames = Core_Themes.Core_AppThemes.GetThemeNames().ToArray();
-                SettingsForm_ComboBox_Theme.Items.AddRange(themeNames);
-
-                string user = Model_AppVariables.User;
-                string? themeName = await Dao_User.GetThemeNameAsync(user);
-                int fontSize = await Dao_User.GetThemeFontSizeAsync(user) ?? 9;
-
-                if (!string.IsNullOrEmpty(themeName) && SettingsForm_ComboBox_Theme.Items.Contains(themeName))
-                {
-                    SettingsForm_ComboBox_Theme.SelectedItem = themeName;
-                }
-                else if (SettingsForm_ComboBox_Theme.Items.Count > 0)
-                {
-                    SettingsForm_ComboBox_Theme.SelectedIndex = 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Error loading theme settings: {ex.Message}");
-                if (SettingsForm_ComboBox_Theme.Items.Count > 0)
-                {
-                    SettingsForm_ComboBox_Theme.SelectedIndex = 0;
-                }
             }
         }
 
@@ -838,11 +770,6 @@ namespace MTM_Inventory_Application.Forms.Settings
                     await LoadDatabaseSettings();
                     UpdateLoadingProgress(80, "Database settings loaded");
                     break;
-                case "Theme":
-                    UpdateLoadingProgress(20, "Loading theme settings...");
-                    await LoadThemeSettings();
-                    UpdateLoadingProgress(80, "Theme settings loaded");
-                    break;
                 case "Shortcuts":
                     UpdateLoadingProgress(20, "Loading shortcuts...");
                     await LoadShortcuts();
@@ -908,23 +835,6 @@ namespace MTM_Inventory_Application.Forms.Settings
                 UpdateLoadingProgress(90, "Applying theme changes...");
                 _hasChanges = false;
                 UpdateStatus("Settings saved successfully");
-
-                if (_originalThemeName != SettingsForm_ComboBox_Theme.Text)
-                {
-                    Model_AppVariables.ThemeName = SettingsForm_ComboBox_Theme.Text;
-                    foreach (Form openForm in Application.OpenForms)
-                    {
-                        Core_Themes.ApplyTheme(openForm);
-                    }
-                }
-
-                UpdateLoadingProgress(100, "Settings saved successfully");
-
-                await Task.Delay(500);
-                HideLoadingProgress();
-
-                MessageBox.Show(@"Settings saved successfully!", @"Settings", MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -946,12 +856,6 @@ namespace MTM_Inventory_Application.Forms.Settings
                 {
                     return;
                 }
-            }
-
-            if (_originalThemeName != Model_AppVariables.ThemeName)
-            {
-                Model_AppVariables.ThemeName = _originalThemeName;
-                Core_Themes.ApplyTheme(this);
             }
 
             DialogResult = DialogResult.Cancel;
@@ -981,13 +885,8 @@ namespace MTM_Inventory_Application.Forms.Settings
             try
             {
                 string user = Model_AppVariables.User;
-                string? themeName = SettingsForm_ComboBox_Theme.Text;
 
-                var themeObj = new { Theme_Name = themeName, Theme_FontSize = 9 };
-
-                string themeJson = JsonSerializer.Serialize(themeObj);
-
-                await Dao_User.SetSettingsJsonAsync(user, themeJson);
+                await Dao_User.SetSettingsJsonAsync(user, "{}");
 
                 UpdateStatus("Theme settings saved successfully");
             }
@@ -1035,38 +934,6 @@ namespace MTM_Inventory_Application.Forms.Settings
             }
         }
 
-        private async void SettingsForm_Button_SwitchTheme_Click(object? sender, EventArgs e)
-        {
-            if (SettingsForm_ComboBox_Theme.SelectedItem is not string themeName ||
-                string.IsNullOrWhiteSpace(themeName))
-            {
-                return;
-            }
-
-            SettingsForm_Button_SwitchTheme.Enabled = false;
-            ShowLoadingProgress($"Switching to theme '{themeName}'...");
-
-            try
-            {
-                string? originalThemeName = Model_AppVariables.ThemeName;
-                Model_AppVariables.ThemeName = themeName;
-                await Task.Delay(100); // Optional: allow UI update
-                Core_Themes.ApplyTheme(this);
-                Model_AppVariables.ThemeName = originalThemeName;
-                UpdateStatus($"Theme switched to '{themeName}'");
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Error switching theme: {ex.Message}");
-            }
-            finally
-            {
-                await Task.Delay(300);
-                HideLoadingProgress();
-                SettingsForm_Button_SwitchTheme.Enabled = true;
-            }
-        }
-
         private void resetDefaultsButton_Click(object? sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(
@@ -1087,12 +954,6 @@ namespace MTM_Inventory_Application.Forms.Settings
                 SettingsForm_TextBox_Database.Text = "mtm_wip_application";
                 SettingsForm_TextBox_Username.Text = "";
                 SettingsForm_TextBox_Password.Text = "";
-
-                string defaultTheme = Core_Themes.Core_AppThemes.GetThemeNames().FirstOrDefault() ?? "";
-                if (!string.IsNullOrEmpty(defaultTheme))
-                {
-                    SettingsForm_ComboBox_Theme.SelectedItem = defaultTheme;
-                }
 
                 Dictionary<string, Keys> shortcutDict = Helper_UI_Shortcuts.GetShortcutDictionary();
                 SettingsForm_DataGridView_Shortcuts.Rows.Clear();

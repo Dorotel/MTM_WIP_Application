@@ -33,6 +33,16 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             try
             {
                 await Helper_UI_ComboBoxes.FillItemTypeComboBoxesAsync(Control_Add_PartID_ComboBox_ItemType);
+
+                // Set default item to "WIP" if it exists
+                for (int i = 0; i < Control_Add_PartID_ComboBox_ItemType.Items.Count; i++)
+                {
+                    if (Control_Add_PartID_ComboBox_ItemType.Items[i]?.ToString()?.Equals("WIP", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        Control_Add_PartID_ComboBox_ItemType.SelectedIndex = i;
+                        break;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -40,7 +50,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                     MessageBoxIcon.Error);
             }
         }
-
 
         protected override void OnLoad(EventArgs e)
         {
@@ -67,21 +76,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(customerTextBox.Text))
-                {
-                    customerTextBox.Text = "[ No Customer ]";
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(descriptionTextBox.Text))
-                {
-                    MessageBox.Show("Description is required.", "Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    descriptionTextBox.Focus();
-                    return;
-                }
-
-                if (Control_Add_PartID_ComboBox_ItemType.SelectedIndex <= 0)
+                if (Control_Add_PartID_ComboBox_ItemType.SelectedIndex < 0)
                 {
                     MessageBox.Show("Please select a part type.", "Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
@@ -113,11 +108,10 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         private async Task AddPartAsync()
         {
             string itemNumber = itemNumberTextBox.Text.Trim();
-            string customer = customerTextBox.Text.Trim();
-            string description = descriptionTextBox.Text.Trim();
             string issuedBy = Model_AppVariables.User;
             string type = Control_Add_PartID_ComboBox_ItemType.Text ?? string.Empty;
-            await Dao_Part.AddPartWithStoredProcedure(itemNumber, customer, description, issuedBy, type);
+            // Removed customer and description parameters
+            await Dao_Part.AddPartWithStoredProcedure(itemNumber, null, null, issuedBy, type);
         }
 
         private void CancelButton_Click(object sender, EventArgs e) => ClearForm();
@@ -129,9 +123,16 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         private void ClearForm()
         {
             itemNumberTextBox.Clear();
-            customerTextBox.Clear();
-            descriptionTextBox.Clear();
-            Control_Add_PartID_ComboBox_ItemType.SelectedIndex = 0;
+
+            // Set ComboBox to "WIP" if it exists
+            for (int i = 0; i < Control_Add_PartID_ComboBox_ItemType.Items.Count; i++)
+            {
+                if (Control_Add_PartID_ComboBox_ItemType.Items[i]?.ToString()?.Equals("WIP", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    Control_Add_PartID_ComboBox_ItemType.SelectedIndex = i;
+                    break;
+                }
+            }
             itemNumberTextBox.Focus();
         }
 
