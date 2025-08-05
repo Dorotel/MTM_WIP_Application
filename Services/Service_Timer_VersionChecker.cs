@@ -63,7 +63,7 @@ namespace MTM_Inventory_Application.Services
                     return;
                 }
 
-                string? databaseVersion = dt.Rows[0]["Version"]?.ToString();
+                string? databaseVersion = dt.Rows[0]["Control_About_Label_Version"]?.ToString();
                 LastCheckedDatabaseVersion = databaseVersion;
                 Debug.WriteLine(LastCheckedDatabaseVersion);
                 ControlInventoryInstance?.SetVersionLabel(Model_AppVariables.UserVersion, databaseVersion ?? "Unknown");

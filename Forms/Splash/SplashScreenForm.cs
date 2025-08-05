@@ -23,7 +23,7 @@ public partial class SplashScreenForm : Form
         BackColor = Model_AppVariables.UserUiColors?.FormBackColor ?? BackColor;
         _titleLabel!.ForeColor = Model_AppVariables.UserUiColors?.LabelForeColor ?? _titleLabel.ForeColor;
         _versionLabel!.ForeColor = Model_AppVariables.UserUiColors?.LabelForeColor ?? _versionLabel.ForeColor;
-        _versionLabel.Text = $"Version {Model_AppVariables.Version ?? "4.6.0.0"}";
+        _versionLabel.Text = $"Control_About_Label_Version {Model_AppVariables.Version ?? "4.6.0.0"}";
 
         ApplyTheme();
         System.Diagnostics.Debug.WriteLine("[DEBUG] [SplashScreenForm.ctor] SplashScreenForm constructed.");

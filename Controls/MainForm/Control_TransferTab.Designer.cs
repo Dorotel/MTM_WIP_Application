@@ -100,7 +100,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Panel_Main.Size = new Size(961, 488);
             Control_TransferTab_Panel_Main.TabIndex = 0;
             // 
-            // tableLayoutPanel3
+            // Control_Database_TableLayout_Top
             // 
             tableLayoutPanel3.AutoSize = true;
             tableLayoutPanel3.ColumnCount = 3;
@@ -112,7 +112,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             tableLayoutPanel3.Controls.Add(Control_TransferTab_Button_Toggle_RightPanel, 2, 0);
             tableLayoutPanel3.Dock = DockStyle.Fill;
             tableLayoutPanel3.Location = new Point(3, 451);
-            tableLayoutPanel3.Name = "tableLayoutPanel3";
+            tableLayoutPanel3.Name = "Control_Database_TableLayout_Top";
             tableLayoutPanel3.RowCount = 1;
             tableLayoutPanel3.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tableLayoutPanel3.Size = new Size(955, 34);
@@ -161,7 +161,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_SplitContainer_Main.TabIndex = 0;
             Control_TransferTab_SplitContainer_Main.SplitterMoved += splitContainer1_SplitterMoved;
             // 
-            // tableLayoutPanel1
+            // Control_Shortcuts_TableLayout_Main
             // 
             tableLayoutPanel1.ColumnCount = 2;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
@@ -177,7 +177,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 0, 6);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(0, 0);
-            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.Name = "Control_Shortcuts_TableLayout_Main";
             tableLayoutPanel1.RowCount = 7;
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
@@ -279,7 +279,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Label_Quantity.Text = "Quantity:";
             Control_TransferTab_Label_Quantity.TextAlign = ContentAlignment.MiddleRight;
             // 
-            // tableLayoutPanel2
+            // Control_Shortcuts_TableLayout_Bottom
             // 
             tableLayoutPanel2.AutoSize = true;
             tableLayoutPanel2.ColumnCount = 2;
@@ -292,7 +292,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             tableLayoutPanel2.Controls.Add(Control_TransferTab_Button_Reset, 1, 1);
             tableLayoutPanel2.Dock = DockStyle.Fill;
             tableLayoutPanel2.Location = new Point(3, 373);
-            tableLayoutPanel2.Name = "tableLayoutPanel2";
+            tableLayoutPanel2.Name = "Control_Shortcuts_TableLayout_Bottom";
             tableLayoutPanel2.RowCount = 2;
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));

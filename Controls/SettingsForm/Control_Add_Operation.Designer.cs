@@ -106,19 +106,19 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             Control_Add_Operation_Button_Clear.UseVisualStyleBackColor = true;
             Control_Add_Operation_Button_Clear.Click += Control_Add_Operation_Button_Clear_Click;
             // 
-            // groupBox1
+            // Control_Shortcuts_GroupBox_Main
             // 
             groupBox1.AutoSize = true;
             groupBox1.Controls.Add(tableLayoutPanel1);
             groupBox1.Dock = DockStyle.Fill;
             groupBox1.Location = new Point(0, 0);
-            groupBox1.Name = "groupBox1";
+            groupBox1.Name = "Control_Shortcuts_GroupBox_Main";
             groupBox1.Size = new Size(600, 103);
             groupBox1.TabIndex = 7;
             groupBox1.TabStop = false;
             groupBox1.Text = "AddOperation";
             // 
-            // tableLayoutPanel1
+            // Control_Shortcuts_TableLayout_Main
             // 
             tableLayoutPanel1.ColumnCount = 2;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
@@ -131,7 +131,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             tableLayoutPanel1.Controls.Add(Control_Add_Operation_TextBox_Operation, 1, 0);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(3, 19);
-            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.Name = "Control_Shortcuts_TableLayout_Main";
             tableLayoutPanel1.RowCount = 4;
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
             tableLayoutPanel1.RowStyles.Add(new RowStyle());

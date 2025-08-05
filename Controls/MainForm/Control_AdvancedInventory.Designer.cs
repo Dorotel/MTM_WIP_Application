@@ -625,7 +625,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             AdvancedInventory_MultiLoc_GroupBox_Item.TabStop = false;
             AdvancedInventory_MultiLoc_GroupBox_Item.Text = "Item Entry";
             // 
-            // tableLayoutPanel1
+            // Control_Shortcuts_TableLayout_Main
             // 
             tableLayoutPanel1.AutoSize = true;
             tableLayoutPanel1.ColumnCount = 1;
@@ -634,7 +634,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             tableLayoutPanel1.Controls.Add(AdvancedInventory_Multi_TableLayout_Left, 0, 0);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(3, 19);
-            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.Name = "Control_Shortcuts_TableLayout_Main";
             tableLayoutPanel1.RowCount = 2;
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle());

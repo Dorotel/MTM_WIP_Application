@@ -372,7 +372,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_UserControl_QuickButtons.Size = new Size(141, 400);
             MainForm_UserControl_QuickButtons.TabIndex = 0;
             // 
-            // tableLayoutPanel1
+            // Control_Shortcuts_TableLayout_Main
             // 
             tableLayoutPanel1.AutoSize = true;
             tableLayoutPanel1.ColumnCount = 2;
@@ -382,7 +382,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             tableLayoutPanel1.Controls.Add(MainForm_UserControl_SignalStrength, 1, 0);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(3, 427);
-            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.Name = "Control_Shortcuts_TableLayout_Main";
             tableLayoutPanel1.RowCount = 1;
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.Size = new Size(878, 31);

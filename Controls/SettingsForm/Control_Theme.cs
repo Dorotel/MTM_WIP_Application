@@ -15,8 +15,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         public Control_Theme()
         {
             InitializeComponent();
-            SettingsForm_Button_SaveTheme.Click += SaveButton_Click;
-            SettingsForm_Button_SwitchTheme.Click += PreviewButton_Click;
+            Control_Shortcuts_Button_Save.Click += SaveButton_Click;
+            Control_Shortcuts_Button_Switch.Click += PreviewButton_Click;
             LoadThemeSettingsAsync();
         }
 
@@ -24,28 +24,28 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         {
             try
             {
-                SettingsForm_ComboBox_Theme.Items.Clear();
+                Control_Shortcuts_ComboBox_Theme.Items.Clear();
                 string[] themeNames = Core_Themes.Core_AppThemes.GetThemeNames().ToArray();
-                SettingsForm_ComboBox_Theme.Items.AddRange(themeNames);
+                Control_Shortcuts_ComboBox_Theme.Items.AddRange(themeNames);
 
                 string user = Model_AppVariables.User;
                 string? themeName = await Dao_User.GetThemeNameAsync(user);
 
-                if (!string.IsNullOrEmpty(themeName) && SettingsForm_ComboBox_Theme.Items.Contains(themeName))
+                if (!string.IsNullOrEmpty(themeName) && Control_Shortcuts_ComboBox_Theme.Items.Contains(themeName))
                 {
-                    SettingsForm_ComboBox_Theme.SelectedItem = themeName;
+                    Control_Shortcuts_ComboBox_Theme.SelectedItem = themeName;
                 }
-                else if (SettingsForm_ComboBox_Theme.Items.Count > 0)
+                else if (Control_Shortcuts_ComboBox_Theme.Items.Count > 0)
                 {
-                    SettingsForm_ComboBox_Theme.SelectedIndex = 0;
+                    Control_Shortcuts_ComboBox_Theme.SelectedIndex = 0;
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error loading theme settings: {ex.Message}", "Theme Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                if (SettingsForm_ComboBox_Theme.Items.Count > 0)
+                if (Control_Shortcuts_ComboBox_Theme.Items.Count > 0)
                 {
-                    SettingsForm_ComboBox_Theme.SelectedIndex = 0;
+                    Control_Shortcuts_ComboBox_Theme.SelectedIndex = 0;
                 }
             }
         }
@@ -54,8 +54,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         {
             try
             {
-                SettingsForm_Button_SaveTheme.Enabled = false;
-                string? selectedTheme = SettingsForm_ComboBox_Theme.SelectedItem?.ToString();
+                Control_Shortcuts_Button_Save.Enabled = false;
+                string? selectedTheme = Control_Shortcuts_ComboBox_Theme.SelectedItem?.ToString();
                 if (string.IsNullOrWhiteSpace(selectedTheme))
                 {
                     MessageBox.Show("Please select a theme.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -85,13 +85,13 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             finally
             {
-                SettingsForm_Button_SaveTheme.Enabled = true;
+                Control_Shortcuts_Button_Save.Enabled = true;
             }
         }
 
         private void PreviewButton_Click(object? sender, EventArgs e)
         {
-            string? selectedTheme = SettingsForm_ComboBox_Theme.SelectedItem?.ToString();
+            string? selectedTheme = Control_Shortcuts_ComboBox_Theme.SelectedItem?.ToString();
             if (string.IsNullOrWhiteSpace(selectedTheme))
                 return;
 

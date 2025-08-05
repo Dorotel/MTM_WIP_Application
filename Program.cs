@@ -142,7 +142,7 @@ namespace MTM_Inventory_Application
                 _splashScreen?.UpdateProgress(progress, "Initializing version checker...");
                 Service_Timer_VersionChecker.Initialize();
                 progress = 65;
-                _splashScreen?.UpdateProgress(progress, "Version checker initialized.");
+                _splashScreen?.UpdateProgress(progress, "Control_About_Label_Version checker initialized.");
                 await Task.Delay(50);
 
                 // 7. Initializing theme system

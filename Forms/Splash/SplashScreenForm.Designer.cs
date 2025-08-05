@@ -60,7 +60,7 @@ namespace MTM_Inventory_Application.Forms.Splash
             this._titleLabel.Size = new System.Drawing.Size(labelWidth, 40);
             this._titleLabel.Location = new System.Drawing.Point(labelX, margin);
 
-            this._versionLabel.Text = "Version 4.6.0.0";
+            this._versionLabel.Text = "Control_About_Label_Version 4.6.0.0";
             this._versionLabel.Font = new System.Drawing.Font("Segoe UI Emoji", 10);
             this._versionLabel.ForeColor = System.Drawing.Color.LightGray;
             this._versionLabel.BackColor = System.Drawing.Color.Transparent;

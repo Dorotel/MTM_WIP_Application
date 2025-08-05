@@ -840,7 +840,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
             bool isOutOfDate = currentVersion != serverVersion;
             Control_InventoryTab_Label_Version.Text =
-                $@"Client Version: {currentVersion} | Server Version: {serverVersion}";
+                $@"Client Control_About_Label_Version: {currentVersion} | Server Control_About_Label_Version: {serverVersion}";
             Control_InventoryTab_Label_Version.ForeColor = isOutOfDate
                 ? Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red
                 : Model_AppVariables.UserUiColors.LabelForeColor ?? SystemColors.ControlText;

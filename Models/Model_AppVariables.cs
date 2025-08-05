@@ -41,6 +41,7 @@ namespace MTM_Inventory_Application.Models
 
         #region Theme & Version
 
+        public static string? LastUpdated { get; set; } = "08/05/2025";
         public static string? ThemeName { get; set; } = "Default";
         public static float ThemeFontSize { get; set; } = 9f;
         public static string? WipDataGridTheme { get; set; } = "Default";

@@ -295,7 +295,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_InventoryTab_Label_Version.Name = "Control_InventoryTab_Label_Version";
             Control_InventoryTab_Label_Version.Size = new Size(869, 35);
             Control_InventoryTab_Label_Version.TabIndex = 8;
-            Control_InventoryTab_Label_Version.Text = "Version: ";
+            Control_InventoryTab_Label_Version.Text = "Control_About_Label_Version: ";
             Control_InventoryTab_Label_Version.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // Control_InventoryTab_Button_Save

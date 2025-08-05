@@ -837,7 +837,7 @@ namespace MTM_Inventory_Application.Core
                                 Math.Max(parent.MaximumSize.Height, newHeight)
                             );
                             Debug.WriteLine(
-                                $"[EnsureParentChainAccommodates] Updated parent.MaximumSize to ({parent.MaximumSize.Width}, {parent.MaximumSize.Height})");
+                                $"[EnsureParentChainAccommodates] Control_About_Label_LastUpdate parent.MaximumSize to ({parent.MaximumSize.Width}, {parent.MaximumSize.Height})");
                         }
 
                         parent.PerformLayout();

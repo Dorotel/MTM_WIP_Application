@@ -21,6 +21,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <None Remove="DATABASE_SCHEMA.sql" />
+	  <None Remove="Resources\CHANGELOG.pdf" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -28,6 +29,14 @@
 	</ItemGroup>
 	<PropertyGroup>
 		<PlantUmlGenerator_OutputDir>$(ProjectDir)generated-uml</PlantUmlGenerator_OutputDir>
+		<Title>Manitowoc Tool and Manufacturing WIP Application</Title>
+		<Authors>John Koll</Authors>
+		<Company>Manitowoc Tool and Manufacturing</Company>
+		<Product>Manitowoc Tool and Manufacturing WIP Application</Product>
+		<Copyright>Manitowoc Tool and Manufacturing</Copyright>
+		<PackageIcon>MTM Logo.png</PackageIcon>
+		<RepositoryUrl>https://github.com/Dorotel/MTM_WIP_Application</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
 	
 
@@ -36,12 +45,16 @@
 		<Content Include="MTMWIPApp.ico">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
+		<Content Include="Resources\CHANGELOG.pdf">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="Microsoft.TestPlatform" Version="17.14.1" />
-		<PackageReference Include="MySql.Data" Version="9.3.0" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3351.48" />
+		<PackageReference Include="MySql.Data" Version="9.4.0" />
 		<PackageReference Include="PlantUmlClassDiagramGenerator.SourceGenerator" Version="1.1.0">
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		  <PrivateAssets>all</PrivateAssets>
@@ -56,6 +69,10 @@
 
 	<ItemGroup>
 	  <None Include="Controls\SettingsForm\Control_Remove_User.cs" />
+	  <None Include="X:\Software Development\Images\MTM Logo.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 
 	<ItemGroup>

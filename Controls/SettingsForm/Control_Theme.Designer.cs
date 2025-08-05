@@ -31,95 +31,95 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         /// </summary>
         private void InitializeComponent()
         {
-            SettingsForm_GroupBox_Theme = new GroupBox();
-            SettingsForm_ComboBox_Theme = new ComboBox();
-            SettingsForm_Button_SwitchTheme = new Button();
-            tableLayoutPanel1 = new TableLayoutPanel();
-            SettingsForm_Button_SaveTheme = new Button();
-            SettingsForm_GroupBox_Theme.SuspendLayout();
-            tableLayoutPanel1.SuspendLayout();
+            Control_Themes_GroupBox_Main = new GroupBox();
+            Control_Shortcuts_TableLayout_Main = new TableLayoutPanel();
+            Control_Shortcuts_Button_Switch = new Button();
+            Control_Shortcuts_ComboBox_Theme = new ComboBox();
+            Control_Shortcuts_Button_Save = new Button();
+            Control_Themes_GroupBox_Main.SuspendLayout();
+            Control_Shortcuts_TableLayout_Main.SuspendLayout();
             SuspendLayout();
             // 
-            // SettingsForm_GroupBox_Theme
+            // Control_Themes_GroupBox_Main
             // 
-            SettingsForm_GroupBox_Theme.AutoSize = true;
-            SettingsForm_GroupBox_Theme.Controls.Add(tableLayoutPanel1);
-            SettingsForm_GroupBox_Theme.Dock = DockStyle.Fill;
-            SettingsForm_GroupBox_Theme.Location = new Point(0, 0);
-            SettingsForm_GroupBox_Theme.Name = "SettingsForm_GroupBox_Theme";
-            SettingsForm_GroupBox_Theme.Size = new Size(277, 80);
-            SettingsForm_GroupBox_Theme.TabIndex = 3;
-            SettingsForm_GroupBox_Theme.TabStop = false;
-            SettingsForm_GroupBox_Theme.Text = "Select A Theme";
+            Control_Themes_GroupBox_Main.AutoSize = true;
+            Control_Themes_GroupBox_Main.Controls.Add(Control_Shortcuts_TableLayout_Main);
+            Control_Themes_GroupBox_Main.Dock = DockStyle.Fill;
+            Control_Themes_GroupBox_Main.Location = new Point(0, 0);
+            Control_Themes_GroupBox_Main.Name = "Control_Themes_GroupBox_Main";
+            Control_Themes_GroupBox_Main.Size = new Size(277, 80);
+            Control_Themes_GroupBox_Main.TabIndex = 3;
+            Control_Themes_GroupBox_Main.TabStop = false;
+            Control_Themes_GroupBox_Main.Text = "Select A Theme";
             // 
-            // SettingsForm_ComboBox_Theme
+            // Control_Shortcuts_TableLayout_Main
             // 
-            SettingsForm_ComboBox_Theme.DropDownStyle = ComboBoxStyle.DropDownList;
-            SettingsForm_ComboBox_Theme.FormattingEnabled = true;
-            SettingsForm_ComboBox_Theme.Location = new Point(3, 3);
-            SettingsForm_ComboBox_Theme.Name = "SettingsForm_ComboBox_Theme";
-            SettingsForm_ComboBox_Theme.Size = new Size(184, 23);
-            SettingsForm_ComboBox_Theme.TabIndex = 1;
+            Control_Shortcuts_TableLayout_Main.AutoSize = true;
+            Control_Shortcuts_TableLayout_Main.ColumnCount = 2;
+            Control_Shortcuts_TableLayout_Main.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            Control_Shortcuts_TableLayout_Main.ColumnStyles.Add(new ColumnStyle());
+            Control_Shortcuts_TableLayout_Main.Controls.Add(Control_Shortcuts_Button_Switch, 1, 0);
+            Control_Shortcuts_TableLayout_Main.Controls.Add(Control_Shortcuts_ComboBox_Theme, 0, 0);
+            Control_Shortcuts_TableLayout_Main.Controls.Add(Control_Shortcuts_Button_Save, 1, 2);
+            Control_Shortcuts_TableLayout_Main.Dock = DockStyle.Fill;
+            Control_Shortcuts_TableLayout_Main.Location = new Point(3, 19);
+            Control_Shortcuts_TableLayout_Main.Name = "Control_Shortcuts_TableLayout_Main";
+            Control_Shortcuts_TableLayout_Main.RowCount = 3;
+            Control_Shortcuts_TableLayout_Main.RowStyles.Add(new RowStyle());
+            Control_Shortcuts_TableLayout_Main.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            Control_Shortcuts_TableLayout_Main.RowStyles.Add(new RowStyle());
+            Control_Shortcuts_TableLayout_Main.Size = new Size(271, 58);
+            Control_Shortcuts_TableLayout_Main.TabIndex = 3;
             // 
-            // SettingsForm_Button_SwitchTheme
+            // Control_Shortcuts_Button_Switch
             // 
-            SettingsForm_Button_SwitchTheme.Location = new Point(193, 3);
-            SettingsForm_Button_SwitchTheme.Name = "SettingsForm_Button_SwitchTheme";
-            SettingsForm_Button_SwitchTheme.Size = new Size(75, 23);
-            SettingsForm_Button_SwitchTheme.TabIndex = 2;
-            SettingsForm_Button_SwitchTheme.Text = "Preview";
-            SettingsForm_Button_SwitchTheme.UseVisualStyleBackColor = true;
+            Control_Shortcuts_Button_Switch.Location = new Point(193, 3);
+            Control_Shortcuts_Button_Switch.Name = "Control_Shortcuts_Button_Switch";
+            Control_Shortcuts_Button_Switch.Size = new Size(75, 23);
+            Control_Shortcuts_Button_Switch.TabIndex = 2;
+            Control_Shortcuts_Button_Switch.Text = "Preview";
+            Control_Shortcuts_Button_Switch.UseVisualStyleBackColor = true;
             // 
-            // tableLayoutPanel1
+            // Control_Shortcuts_ComboBox_Theme
             // 
-            tableLayoutPanel1.AutoSize = true;
-            tableLayoutPanel1.ColumnCount = 2;
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
-            tableLayoutPanel1.Controls.Add(SettingsForm_Button_SwitchTheme, 1, 0);
-            tableLayoutPanel1.Controls.Add(SettingsForm_ComboBox_Theme, 0, 0);
-            tableLayoutPanel1.Controls.Add(SettingsForm_Button_SaveTheme, 1, 2);
-            tableLayoutPanel1.Dock = DockStyle.Fill;
-            tableLayoutPanel1.Location = new Point(3, 19);
-            tableLayoutPanel1.Name = "tableLayoutPanel1";
-            tableLayoutPanel1.RowCount = 3;
-            tableLayoutPanel1.RowStyles.Add(new RowStyle());
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle());
-            tableLayoutPanel1.Size = new Size(271, 58);
-            tableLayoutPanel1.TabIndex = 3;
+            Control_Shortcuts_ComboBox_Theme.DropDownStyle = ComboBoxStyle.DropDownList;
+            Control_Shortcuts_ComboBox_Theme.FormattingEnabled = true;
+            Control_Shortcuts_ComboBox_Theme.Location = new Point(3, 3);
+            Control_Shortcuts_ComboBox_Theme.Name = "Control_Shortcuts_ComboBox_Theme";
+            Control_Shortcuts_ComboBox_Theme.Size = new Size(184, 23);
+            Control_Shortcuts_ComboBox_Theme.TabIndex = 1;
             // 
-            // SettingsForm_Button_SaveTheme
+            // Control_Shortcuts_Button_Save
             // 
-            SettingsForm_Button_SaveTheme.Location = new Point(193, 32);
-            SettingsForm_Button_SaveTheme.Name = "SettingsForm_Button_SaveTheme";
-            SettingsForm_Button_SaveTheme.Size = new Size(75, 23);
-            SettingsForm_Button_SaveTheme.TabIndex = 3;
-            SettingsForm_Button_SaveTheme.Text = "Save";
-            SettingsForm_Button_SaveTheme.UseVisualStyleBackColor = true;
+            Control_Shortcuts_Button_Save.Location = new Point(193, 32);
+            Control_Shortcuts_Button_Save.Name = "Control_Shortcuts_Button_Save";
+            Control_Shortcuts_Button_Save.Size = new Size(75, 23);
+            Control_Shortcuts_Button_Save.TabIndex = 3;
+            Control_Shortcuts_Button_Save.Text = "Save";
+            Control_Shortcuts_Button_Save.UseVisualStyleBackColor = true;
             // 
             // Control_Theme
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            Controls.Add(SettingsForm_GroupBox_Theme);
+            Controls.Add(Control_Themes_GroupBox_Main);
             Name = "Control_Theme";
             Size = new Size(277, 80);
-            SettingsForm_GroupBox_Theme.ResumeLayout(false);
-            SettingsForm_GroupBox_Theme.PerformLayout();
-            tableLayoutPanel1.ResumeLayout(false);
+            Control_Themes_GroupBox_Main.ResumeLayout(false);
+            Control_Themes_GroupBox_Main.PerformLayout();
+            Control_Shortcuts_TableLayout_Main.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
 
-        private GroupBox SettingsForm_GroupBox_Theme;
-        private TableLayoutPanel tableLayoutPanel1;
-        private Button SettingsForm_Button_SwitchTheme;
-        private ComboBox SettingsForm_ComboBox_Theme;
-        private Button SettingsForm_Button_SaveTheme;
+        private GroupBox Control_Themes_GroupBox_Main;
+        private TableLayoutPanel Control_Shortcuts_TableLayout_Main;
+        private Button Control_Shortcuts_Button_Switch;
+        private ComboBox Control_Shortcuts_ComboBox_Theme;
+        private Button Control_Shortcuts_Button_Save;
     }
 }
