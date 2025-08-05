@@ -119,6 +119,10 @@ namespace MTM_Inventory_Application.Forms.Settings
                 UpdateStatus("Shortcuts updated successfully.");
                 HasChanges = true;
             };
+            controlShortcuts.StatusMessageChanged += (s, message) =>
+            {
+                UpdateStatus(message);
+            };
             SettingsForm_Panel_Shortcuts.Controls.Add(controlShortcuts);
 
             var controlTheme = new Control_Theme

@@ -1,30 +1,28 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
+using MTM_Inventory_Application.Logging;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
     public partial class Control_Shortcuts : UserControl
     {
-
         public event EventHandler? ShortcutsUpdated;
+        public event EventHandler<string>? StatusMessageChanged;
 
         public Control_Shortcuts()
         {
             InitializeComponent();
+            
+            // Apply comprehensive DPI scaling and runtime layout adjustments
+            Core_Themes.ApplyDpiScaling(this);
+            Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+            
             _ = LoadShortcuts();
         }
 
@@ -60,7 +58,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                     }
                     catch (JsonException)
                     {
-                        MessageBox.Show("Warning: Shortcuts JSON is malformed. Using defaults.");
+                        StatusMessageChanged?.Invoke(this, "Warning: Shortcuts JSON is malformed. Using defaults.");
                     }
                 }
 
@@ -89,7 +87,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading shortcuts: {ex.Message}");
+                LoggingUtility.LogApplicationError(ex);
+                StatusMessageChanged?.Invoke(this, $"Error loading shortcuts: {ex.Message}");
             }
         }
 
@@ -110,17 +109,13 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                     if (keys == Keys.None && !string.IsNullOrWhiteSpace(shortcutString))
                     {
                         e.Cancel = true;
-                        MessageBox.Show(
-                            "Invalid shortcut format. Use combinations like 'CTRL + S' or 'ALT + F1'",
-                            "Shortcut Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        StatusMessageChanged?.Invoke(this, "Invalid shortcut format. Use combinations like 'CTRL + S' or 'ALT + F1'");
                     }
                 }
                 catch
                 {
                     e.Cancel = true;
-                    MessageBox.Show(
-                        "Invalid shortcut format. Use combinations like 'CTRL + S' or 'ALT + F1'",
-                        "Shortcut Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    StatusMessageChanged?.Invoke(this, "Invalid shortcut format. Use combinations like 'CTRL + S' or 'ALT + F1'");
                 }
             }
         }
@@ -143,7 +138,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error updating shortcut: {ex.Message}");
+                        LoggingUtility.LogApplicationError(ex);
+                        StatusMessageChanged?.Invoke(this, $"Error updating shortcut: {ex.Message}");
                     }
                 }
             }
