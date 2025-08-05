@@ -193,6 +193,10 @@ namespace MTM_Inventory_Application.Forms.Settings
                 UpdateStatus("User updated successfully.");
                 HasChanges = true;
             };
+            controlEditUser.StatusMessageChanged += (s, message) =>
+            {
+                UpdateStatus(message);
+            };
 
             var controlDeleteUser = new Control_Remove_User
             {

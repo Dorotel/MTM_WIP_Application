@@ -1,6 +1,11 @@
+using System;
 using System.Data;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
+using MTM_Inventory_Application.Logging;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
@@ -11,6 +16,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         #region Events
 
         public event EventHandler? UserEdited;
+        public event EventHandler<string>? StatusMessageChanged;
 
         #endregion
 
@@ -19,6 +25,11 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         public Control_Edit_User()
         {
             InitializeComponent();
+            
+            // Apply comprehensive DPI scaling and runtime layout adjustments
+            Core_Themes.ApplyDpiScaling(this);
+            Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+            
             Control_Edit_User_TextBox_FirstName.KeyPress += Control_Edit_User_TextBox_NoSpaces_KeyPress;
             Control_Edit_User_TextBox_LastName.KeyPress += Control_Edit_User_TextBox_NoSpaces_KeyPress;
             Control_Edit_User_TextBox_Pin.KeyPress += Control_Edit_User_TextBox_NoSpaces_KeyPress;
@@ -58,9 +69,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception e)
             {
-                Logging.LoggingUtility.LogApplicationError(e);
-                MessageBox.Show($"Error loading users: {e.Message}", "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                LoggingUtility.LogApplicationError(e);
+                StatusMessageChanged?.Invoke(this, $"Error loading users: {e.Message}");
             }
         }
 
@@ -125,39 +135,38 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         {
             try
             {
+                Control_Edit_User_Button_Save.Enabled = false;
+                
                 if (Control_Edit_User_ComboBox_Users.Text is not { } userName)
                 {
+                    StatusMessageChanged?.Invoke(this, "Please select a user to edit.");
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(Control_Edit_User_TextBox_FirstName.Text))
                 {
-                    MessageBox.Show("First name is required.", "Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    StatusMessageChanged?.Invoke(this, "First name is required.");
                     Control_Edit_User_TextBox_FirstName.Focus();
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(Control_Edit_User_TextBox_LastName.Text))
                 {
-                    MessageBox.Show("Last name is required.", "Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    StatusMessageChanged?.Invoke(this, "Last name is required.");
                     Control_Edit_User_TextBox_LastName.Focus();
                     return;
                 }
 
                 if (Control_Edit_User_ComboBox_Shift.SelectedIndex <= -1)
                 {
-                    MessageBox.Show("Please select a shift.", "Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    StatusMessageChanged?.Invoke(this, "Please select a shift.");
                     Control_Edit_User_ComboBox_Shift.Focus();
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(Control_Edit_User_TextBox_Pin.Text))
                 {
-                    MessageBox.Show("Pin is required.", "Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    StatusMessageChanged?.Invoke(this, "Pin is required.");
                     Control_Edit_User_TextBox_Pin.Focus();
                     return;
                 }
@@ -188,13 +197,16 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 }
 
                 UserEdited?.Invoke(this, EventArgs.Empty);
-                MessageBox.Show("User updated successfully!", "Success", MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                StatusMessageChanged?.Invoke(this, "User updated successfully!");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error updating user: {ex.Message}", "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                LoggingUtility.LogApplicationError(ex);
+                StatusMessageChanged?.Invoke(this, $"Error updating user: {ex.Message}");
+            }
+            finally
+            {
+                Control_Edit_User_Button_Save.Enabled = true;
             }
         }
 
