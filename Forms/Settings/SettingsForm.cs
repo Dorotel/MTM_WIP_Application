@@ -130,6 +130,10 @@ namespace MTM_Inventory_Application.Forms.Settings
                 UpdateStatus("Theme changed successfully.");
                 HasChanges = true;
             };
+            controlTheme.StatusMessageChanged += (s, message) =>
+            {
+                UpdateStatus(message);
+            };
             SettingsForm_Panel_Theme.Controls.Add(controlTheme);
 
             var controlDatabase = new Control_Database
@@ -141,6 +145,10 @@ namespace MTM_Inventory_Application.Forms.Settings
                 UpdateStatus("Database settings updated successfully.");
                 HasChanges = true;
             };
+            controlDatabase.StatusMessageChanged += (s, message) =>
+            {
+                UpdateStatus(message);
+            };
             SettingsForm_Panel_Database.Controls.Add(controlDatabase);
 
             //var controlAbout = new Control_About
@@ -148,6 +156,16 @@ namespace MTM_Inventory_Application.Forms.Settings
             //   Dock = DockStyle.Fill
             //};
             //SettingsForm_Panel_About.Controls.Add(controlAbout);
+
+            var controlAbout = new Control_About
+            {
+                Dock = DockStyle.Fill
+            };
+            controlAbout.StatusMessageChanged += (s, message) =>
+            {
+                UpdateStatus(message);
+            };
+            SettingsForm_Panel_About.Controls.Add(controlAbout);
 
             var controlAddUser = new Control_Add_User
             {
@@ -158,6 +176,10 @@ namespace MTM_Inventory_Application.Forms.Settings
             {
                 UpdateStatus("User added successfully.");
                 HasChanges = true;
+            };
+            controlAddUser.StatusMessageChanged += (s, message) =>
+            {
+                UpdateStatus(message);
             };
 
 

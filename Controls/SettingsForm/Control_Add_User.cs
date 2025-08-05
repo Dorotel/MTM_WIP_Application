@@ -1,7 +1,11 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
+using MTM_Inventory_Application.Logging;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
@@ -10,6 +14,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         #region Events
 
         public event EventHandler? UserAdded;
+        public event EventHandler<string>? StatusMessageChanged;
 
         #endregion
 
@@ -90,50 +95,46 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         {
             try
             {
+                Control_Add_User_Button_Save.Enabled = false;
+                
                 if (string.IsNullOrWhiteSpace(Control_Add_User_TextBox_FirstName.Text))
                 {
-                    MessageBox.Show("First name is required.", "Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    StatusMessageChanged?.Invoke(this, "First name is required.");
                     Control_Add_User_TextBox_FirstName.Focus();
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(Control_Add_User_TextBox_LastName.Text))
                 {
-                    MessageBox.Show("Last name is required.", "Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    StatusMessageChanged?.Invoke(this, "Last name is required.");
                     Control_Add_User_TextBox_LastName.Focus();
                     return;
                 }
 
                 if (Control_Add_User_ComboBox_Shift.SelectedIndex <= 0)
                 {
-                    MessageBox.Show("Please select a shift.", "Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    StatusMessageChanged?.Invoke(this, "Please select a shift.");
                     Control_Add_User_ComboBox_Shift.Focus();
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(Control_Add_User_TextBox_UserName.Text))
                 {
-                    MessageBox.Show("User name is required.", "Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    StatusMessageChanged?.Invoke(this, "User name is required.");
                     Control_Add_User_TextBox_UserName.Focus();
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(Control_Add_User_TextBox_Pin.Text))
                 {
-                    MessageBox.Show("Pin is required.", "Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    StatusMessageChanged?.Invoke(this, "Pin is required.");
                     Control_Add_User_TextBox_Pin.Focus();
                     return;
                 }
 
                 if (await Dao_User.UserExistsAsync(Control_Add_User_TextBox_UserName.Text.ToUpper()))
                 {
-                    MessageBox.Show("User already exists.", "Duplicate User", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    StatusMessageChanged?.Invoke(this, "User already exists.");
                     return;
                 }
 
@@ -158,8 +159,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                     await Dao_User.GetUserByUsernameAsync(Control_Add_User_TextBox_UserName.Text.ToUpper(), true);
                 if (userRow == null || !userRow.Table.Columns.Contains("ID"))
                 {
-                    MessageBox.Show("Could not retrieve new user ID.", "Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
+                    StatusMessageChanged?.Invoke(this, "Could not retrieve new user ID.");
                     return;
                 }
 
@@ -178,13 +178,16 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 ClearForm();
                 Control_Add_User_TextBox_UserName.Clear();
                 UserAdded?.Invoke(this, EventArgs.Empty);
-                MessageBox.Show("User added successfully!", "Success", MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                StatusMessageChanged?.Invoke(this, "User added successfully!");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error adding user: {ex.Message}", "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                LoggingUtility.LogApplicationError(ex);
+                StatusMessageChanged?.Invoke(this, $"Error adding user: {ex.Message}");
+            }
+            finally
+            {
+                Control_Add_User_Button_Save.Enabled = true;
             }
         }
 
