@@ -114,7 +114,6 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             Control_Shortcuts_Button_Save.TabIndex = 1;
             Control_Shortcuts_Button_Save.Text = "Save";
             Control_Shortcuts_Button_Save.UseVisualStyleBackColor = true;
-            Control_Shortcuts_Button_Save.Click += Control_Shortcuts_Button_Save_Click;
             // 
             // Control_Shortcuts
             // 

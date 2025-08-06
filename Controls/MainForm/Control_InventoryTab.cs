@@ -567,11 +567,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
         }
 
         private static async Task AddToLast10TransactionsIfUniqueAsync(string user, string partId, string operation,
-            int quantity)
-        {
+            int quantity) =>
             // Use the proper Dao_QuickButtons method that handles positions correctly
             await Dao_QuickButtons.AddOrShiftQuickButtonAsync(user, partId, operation, quantity);
-        }
 
         private void Control_InventoryTab_Button_Toggle_RightPanel_Click(object sender, EventArgs e)
         {
@@ -840,7 +838,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
             bool isOutOfDate = currentVersion != serverVersion;
             Control_InventoryTab_Label_Version.Text =
-                $@"Client Control_About_Label_Version: {currentVersion} | Server Control_About_Label_Version: {serverVersion}";
+                $@"Client Version: {currentVersion} | Server Version: {serverVersion}";
             Control_InventoryTab_Label_Version.ForeColor = isOutOfDate
                 ? Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red
                 : Model_AppVariables.UserUiColors.LabelForeColor ?? SystemColors.ControlText;

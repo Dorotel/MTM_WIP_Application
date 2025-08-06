@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Text.Json;
 using MTM_Inventory_Application.Controls.SettingsForm;
-using MTM_Inventory_Application.Controls.Shared;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
@@ -16,9 +15,6 @@ namespace MTM_Inventory_Application.Forms.Settings
 
         public bool HasChanges = false;
         private readonly Dictionary<string, Panel> _settingsPanels;
-        private Control_ProgressBarUserControl _loadingControlProgress = null!;
-
-
 
         #endregion
 
@@ -28,7 +24,6 @@ namespace MTM_Inventory_Application.Forms.Settings
         {
             InitializeComponent();
 
-         
             AutoScaleMode = AutoScaleMode.Dpi;
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
@@ -56,11 +51,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 ["About"] = SettingsForm_Panel_About
             };
 
-            InitializeProgressControl();
-
-
             InitializeUserControls();
-
             InitializeForm();
         }
 
@@ -110,113 +101,68 @@ namespace MTM_Inventory_Application.Forms.Settings
 
         private void InitializeUserControls()
         {
-            var controlShortcuts = new Control_Shortcuts
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Shortcuts controlShortcuts = new() { Dock = DockStyle.Fill };
             controlShortcuts.ShortcutsUpdated += (s, e) =>
             {
                 UpdateStatus("Shortcuts updated successfully.");
                 HasChanges = true;
             };
-            controlShortcuts.StatusMessageChanged += (s, message) =>
-            {
-                UpdateStatus(message);
-            };
+            controlShortcuts.StatusMessageChanged += (s, message) => { UpdateStatus(message); };
             SettingsForm_Panel_Shortcuts.Controls.Add(controlShortcuts);
 
-            var controlTheme = new Control_Theme
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Theme controlTheme = new() { Dock = DockStyle.Fill };
             controlTheme.ThemeChanged += (s, e) =>
             {
                 UpdateStatus("Theme changed successfully.");
                 HasChanges = true;
             };
-            controlTheme.StatusMessageChanged += (s, message) =>
-            {
-                UpdateStatus(message);
-            };
+            controlTheme.StatusMessageChanged += (s, message) => { UpdateStatus(message); };
             SettingsForm_Panel_Theme.Controls.Add(controlTheme);
 
-            var controlDatabase = new Control_Database
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Database controlDatabase = new() { Dock = DockStyle.Fill };
             controlDatabase.DatabaseSettingsUpdated += (s, e) =>
             {
                 UpdateStatus("Database settings updated successfully.");
                 HasChanges = true;
             };
-            controlDatabase.StatusMessageChanged += (s, message) =>
-            {
-                UpdateStatus(message);
-            };
+            controlDatabase.StatusMessageChanged += (s, message) => { UpdateStatus(message); };
             SettingsForm_Panel_Database.Controls.Add(controlDatabase);
 
-            //var controlAbout = new Control_About
-            //{
-            //   Dock = DockStyle.Fill
-            //};
-            //SettingsForm_Panel_About.Controls.Add(controlAbout);
-
-            var controlAbout = new Control_About
-            {
-                Dock = DockStyle.Fill
-            };
-            controlAbout.StatusMessageChanged += (s, message) =>
-            {
-                UpdateStatus(message);
-            };
+            Control_About controlAbout = new() { Dock = DockStyle.Fill };
+            controlAbout.StatusMessageChanged += (s, message) => { UpdateStatus(message); };
             SettingsForm_Panel_About.Controls.Add(controlAbout);
 
-            var controlAddUser = new Control_Add_User
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Add_User controlAddUser = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_AddUser.Controls.Add(controlAddUser);
             controlAddUser.UserAdded += (s, e) =>
             {
                 UpdateStatus("User added successfully.");
                 HasChanges = true;
             };
-            controlAddUser.StatusMessageChanged += (s, message) =>
-            {
-                UpdateStatus(message);
-            };
+            controlAddUser.StatusMessageChanged += (s, message) => { UpdateStatus(message); };
 
-
-            var controlEditUser = new Control_Edit_User
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Edit_User controlEditUser = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_EditUser.Controls.Add(controlEditUser);
             controlEditUser.UserEdited += (s, e) =>
             {
                 UpdateStatus("User updated successfully.");
                 HasChanges = true;
             };
-            controlEditUser.StatusMessageChanged += (s, message) =>
-            {
-                UpdateStatus(message);
-            };
+            controlEditUser.StatusMessageChanged += (s, message) => { UpdateStatus(message); };
 
-            var controlDeleteUser = new Control_Remove_User
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Remove_User controlDeleteUser = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_DeleteUser.Controls.Add(controlDeleteUser);
+
+            // Pass the ToolStrip progress controls
+            controlDeleteUser.SetProgressControls(SettingsForm_ProgressBar, SettingsForm_StatusText);
+
             controlDeleteUser.UserRemoved += (s, e) =>
             {
                 UpdateStatus("User deleted successfully.");
                 HasChanges = true;
             };
 
-            var controlAddPart = new Control_Add_PartID
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Add_PartID controlAddPart = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_AddPart.Controls.Add(controlAddPart);
             controlAddPart.PartAdded += (s, e) =>
             {
@@ -224,11 +170,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 HasChanges = true;
             };
 
-
-            var controlEditPartId = new Control_Edit_PartID
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Edit_PartID controlEditPartId = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_EditPart.Controls.Add(controlEditPartId);
             controlEditPartId.PartUpdated += (s, e) =>
             {
@@ -236,10 +178,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 HasChanges = true;
             };
 
-            var controlRemovePartId = new Control_Remove_PartID
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Remove_PartID controlRemovePartId = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_RemovePart.Controls.Add(controlRemovePartId);
             controlRemovePartId.PartRemoved += (s, e) =>
             {
@@ -247,10 +186,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 HasChanges = true;
             };
 
-            var controlAddOperation = new Control_Add_Operation
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Add_Operation controlAddOperation = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_AddOperation.Controls.Add(controlAddOperation);
             controlAddOperation.OperationAdded += (s, e) =>
             {
@@ -258,10 +194,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 HasChanges = true;
             };
 
-            var controlEditOperation = new Control_Edit_Operation
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Edit_Operation controlEditOperation = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_EditOperation.Controls.Add(controlEditOperation);
             controlEditOperation.OperationUpdated += (s, e) =>
             {
@@ -269,10 +202,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 HasChanges = true;
             };
 
-            var controlRemoveOperation = new Control_Remove_Operation
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Remove_Operation controlRemoveOperation = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_RemoveOperation.Controls.Add(controlRemoveOperation);
             controlRemoveOperation.OperationRemoved += (s, e) =>
             {
@@ -280,10 +210,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 HasChanges = true;
             };
 
-            var controlAddLocation = new Control_Add_Location
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Add_Location controlAddLocation = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_AddLocation.Controls.Add(controlAddLocation);
             controlAddLocation.LocationAdded += (s, e) =>
             {
@@ -291,10 +218,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 HasChanges = true;
             };
 
-            var controlEditLocation = new Control_Edit_Location
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Edit_Location controlEditLocation = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_EditLocation.Controls.Add(controlEditLocation);
             controlEditLocation.LocationUpdated += (s, e) =>
             {
@@ -302,10 +226,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 HasChanges = true;
             };
 
-            var controlRemoveLocation = new Control_Remove_Location
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Remove_Location controlRemoveLocation = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_RemoveLocation.Controls.Add(controlRemoveLocation);
             controlRemoveLocation.LocationRemoved += (s, e) =>
             {
@@ -313,10 +234,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 HasChanges = true;
             };
 
-            var controlAddItemType = new Control_Add_ItemType
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Add_ItemType controlAddItemType = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_AddItemType.Controls.Add(controlAddItemType);
             controlAddItemType.ItemTypeAdded += (s, e) =>
             {
@@ -324,10 +242,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 HasChanges = true;
             };
 
-            var controlEditItemType = new Control_Edit_ItemType
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Edit_ItemType controlEditItemType = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_EditItemType.Controls.Add(controlEditItemType);
             controlEditItemType.ItemTypeUpdated += (s, e) =>
             {
@@ -335,10 +250,7 @@ namespace MTM_Inventory_Application.Forms.Settings
                 HasChanges = true;
             };
 
-            var controlRemoveItemType = new Control_Remove_ItemType
-            {
-                Dock = DockStyle.Fill
-            };
+            Control_Remove_ItemType controlRemoveItemType = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_RemoveItemType.Controls.Add(controlRemoveItemType);
             controlRemoveItemType.ItemTypeRemoved += (s, e) =>
             {
@@ -362,7 +274,6 @@ namespace MTM_Inventory_Application.Forms.Settings
 
             InitializeCategoryTreeView();
             ShowPanel("Database");
-
 
             ApplyPrivileges();
         }
@@ -445,9 +356,6 @@ namespace MTM_Inventory_Application.Forms.Settings
             }
         }
 
-
-
-
         private async void CategoryTreeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
             if (e.Node == null || string.IsNullOrEmpty(e.Node.Name))
@@ -462,12 +370,12 @@ namespace MTM_Inventory_Application.Forms.Settings
                 return;
             }
 
-            ShowLoadingProgress($"Loading {selected} settings...");
-            UpdateLoadingProgress(0, $"Loading {selected} settings...");
+            ShowProgress($"Loading {selected} settings...");
+            UpdateProgress(0, $"Loading {selected} settings...");
 
-            UpdateLoadingProgress(100, $"{selected} loaded");
+            UpdateProgress(100, $"{selected} loaded");
             await Task.Delay(300);
-            HideLoadingProgress();
+            HideProgress();
             ShowPanel(selected);
 
             if (_settingsPanels.TryGetValue(selected, out Panel? panel) && panel.Controls.Count > 0)
@@ -500,86 +408,57 @@ namespace MTM_Inventory_Application.Forms.Settings
 
         private void UpdateStatus(string message) => SettingsForm_StatusText.Text = message;
 
-
-        private void CloseAndResetIfChanged()
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            if (HasChanges)
+            if (e.CloseReason == CloseReason.UserClosing)
             {
-                DialogResult result = MessageBox.Show(
-                    "You have changes that require a restart. Exit and reset the application?",
-                    "Unsaved Changes",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Warning);
-                if (result == DialogResult.Yes)
+                if (HasChanges)
                 {
-                    // Reset the application (restart)
-                    Application.Restart();
-                    Application.ExitThread();
+                    DialogResult result = MessageBox.Show(
+                        "You have changes that require a restart. Exit and reset the application?",
+                        "Unsaved Changes",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Warning);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        // Allow closing, then restart
+                        e.Cancel = false;
+                        Application.Restart();
+                        Application.ExitThread();
+                    }
+                    else
+                    {
+                        // Prevent closing
+                        e.Cancel = true;
+                    }
+                }
+                else
+                {
+                    // Allow closing
+                    e.Cancel = false;
                 }
             }
             else
             {
-                Application.Exit();
-                return;
-            }
-        }
-
-        // Update OnFormClosing to call the instance method
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            base.OnFormClosing(e);
-            if (e.CloseReason == CloseReason.UserClosing)
-            {
-                e.Cancel = true;
-                CloseAndResetIfChanged();
+                base.OnFormClosing(e);
             }
         }
 
         #endregion
 
-        #region Progress Control
+        #region Progress Control Methods
 
-        private void InitializeProgressControl()
+        private void ShowProgress(string status = "Loading...")
         {
             try
             {
-                _loadingControlProgress = new Control_ProgressBarUserControl
-                {
-                    Size = new Size(350, 120),
-                    Visible = false,
-                    Anchor = AnchorStyles.None,
-                    StatusText = "Loading settings..."
-                };
+                SettingsForm_ProgressBar.Visible = true;
+                SettingsForm_ProgressBar.Value = 0;
 
-                _loadingControlProgress.Location = new Point(
-                    (Width - _loadingControlProgress.Width) / 2,
-                    (Height - _loadingControlProgress.Height) / 2
-                );
-
-                Controls.Add(_loadingControlProgress);
-                _loadingControlProgress.BringToFront();
-            }
-            catch (Exception ex)
-            {
-                UpdateStatus($"Warning: Could not initialize progress control - {ex.Message}");
-            }
-        }
-
-        private void ShowLoadingProgress(string status = "Loading...")
-        {
-            try
-            {
-                if (_loadingControlProgress != null)
-                {
-                    _loadingControlProgress.Location = new Point(
-                        (Width - _loadingControlProgress.Width) / 2,
-                        (Height - _loadingControlProgress.Height) / 2
-                    );
-
-                    _loadingControlProgress.StatusText = status;
-                    _loadingControlProgress.ShowProgress();
-                    _loadingControlProgress.UpdateProgress(0, status);
-                }
+                // Ensure progress bar is updated first, then status text
+                Application.DoEvents(); // Force UI update
+                SettingsForm_StatusText.Text = status;
             }
             catch (Exception ex)
             {
@@ -587,11 +466,20 @@ namespace MTM_Inventory_Application.Forms.Settings
             }
         }
 
-        private void UpdateLoadingProgress(int progress, string status)
+        private void UpdateProgress(int progress, string status)
         {
             try
             {
-                _loadingControlProgress?.UpdateProgress(progress, status);
+                progress = Math.Max(0, Math.Min(100, progress)); // Clamp between 0-100
+
+                // Update progress bar first
+                SettingsForm_ProgressBar.Value = progress;
+
+                // Force the progress bar to render before updating status
+                Application.DoEvents();
+
+                // Then update status text with the new step-specific message
+                SettingsForm_StatusText.Text = $"{status} ({progress}%)";
             }
             catch (Exception ex)
             {
@@ -599,11 +487,15 @@ namespace MTM_Inventory_Application.Forms.Settings
             }
         }
 
-        private void HideLoadingProgress()
+        private void HideProgress()
         {
             try
             {
-                _loadingControlProgress?.HideProgress();
+                SettingsForm_ProgressBar.Visible = false;
+
+                // Ensure progress bar is hidden first, then update status
+                Application.DoEvents();
+                SettingsForm_StatusText.Text = "Ready";
             }
             catch (Exception ex)
             {
@@ -612,6 +504,5 @@ namespace MTM_Inventory_Application.Forms.Settings
         }
 
         #endregion
-
     }
 }

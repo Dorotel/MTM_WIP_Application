@@ -128,7 +128,6 @@ namespace MTM_Inventory_Application
                 await Task.Delay(50);
 
 
-
                 // 5. Setting up Data Tables
                 progress = 45;
                 _splashScreen?.UpdateProgress(progress, "Setting up Data Tables...");
@@ -142,7 +141,7 @@ namespace MTM_Inventory_Application
                 _splashScreen?.UpdateProgress(progress, "Initializing version checker...");
                 Service_Timer_VersionChecker.Initialize();
                 progress = 65;
-                _splashScreen?.UpdateProgress(progress, "Control_About_Label_Version checker initialized.");
+                _splashScreen?.UpdateProgress(progress, "Version checker initialized.");
                 await Task.Delay(50);
 
                 // 7. Initializing theme system
@@ -216,6 +215,7 @@ namespace MTM_Inventory_Application
                 {
                     _mainForm.Show();
                 }
+
                 if (_splashScreen != null)
                 {
                     _splashScreen.FormClosed -= SplashScreen_FormClosed;

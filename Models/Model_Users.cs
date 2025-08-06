@@ -18,7 +18,7 @@
         public bool VitsUser { get; set; } = false;
         public static string Database { get; set; } = "mtm_wip_application";
 
-        public static string WipServerAddress { get; set; } = "172.16.1.104"; //172.16.1.104
+        public static string WipServerAddress { get; set; } = "localhost"; //localhost
         public static string WipServerPort { get; set; } = "3306";
 
         #endregion

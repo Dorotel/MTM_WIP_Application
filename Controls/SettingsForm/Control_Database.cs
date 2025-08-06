@@ -16,11 +16,11 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         public Control_Database()
         {
             InitializeComponent();
-            
+
             // Apply comprehensive DPI scaling and runtime layout adjustments
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
-            
+
             // Wire up button events
             Control_Database_Button_Save.Click += SaveButton_Click;
             Control_Database_Button_Reset.Click += ResetButton_Click;
@@ -39,19 +39,19 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 string user = Model_AppVariables.User;
 
                 Control_Database_TextBox_Server.Text =
-                    await Dao_User.GetWipServerAddressAsync(user) ?? "172.16.1.104";
+                    await Dao_User.GetWipServerAddressAsync(user) ?? "localhost";
                 Control_Database_TextBox_Port.Text = await Dao_User.GetWipServerPortAsync(user) ?? "3306";
                 Control_Database_TextBox_Database.Text = await Dao_User.GetDatabaseAsync(user) ?? "mtm_wip_application";
-                
+
                 StatusMessageChanged?.Invoke(this, "Database settings loaded successfully.");
             }
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
                 StatusMessageChanged?.Invoke(this, $"Error loading database settings: {ex.Message}");
-                
+
                 // Set default values as fallback
-                Control_Database_TextBox_Server.Text = "172.16.1.104";
+                Control_Database_TextBox_Server.Text = "localhost";
                 Control_Database_TextBox_Port.Text = "3306";
                 Control_Database_TextBox_Database.Text = "mtm_wip_application";
             }
@@ -93,7 +93,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 await Dao_User.SetWipServerPortAsync(user, Control_Database_TextBox_Port.Text.Trim());
 
                 DatabaseSettingsUpdated?.Invoke(this, EventArgs.Empty);
-                StatusMessageChanged?.Invoke(this, "Database settings saved successfully. Restart application for changes to take effect.");
+                StatusMessageChanged?.Invoke(this,
+                    "Database settings saved successfully. Restart application for changes to take effect.");
             }
             catch (Exception ex)
             {
@@ -120,12 +121,12 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             try
             {
                 Control_Database_Button_Reset.Enabled = false;
-                
+
                 // Reset to default values
-                Control_Database_TextBox_Server.Text = "172.16.1.104";
+                Control_Database_TextBox_Server.Text = "localhost";
                 Control_Database_TextBox_Port.Text = "3306";
                 Control_Database_TextBox_Database.Text = "mtm_wip_application";
-                
+
                 StatusMessageChanged?.Invoke(this, "Database settings reset to defaults.");
             }
             catch (Exception ex)

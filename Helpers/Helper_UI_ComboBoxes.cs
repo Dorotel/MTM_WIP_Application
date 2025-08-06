@@ -288,15 +288,19 @@ namespace MTM_Inventory_Application.Helpers
                         $"Actual columns: {string.Join(", ", dataTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName))}");
                 }
 
-                bool hasPlaceholder = dataTable.Rows.Count > 0 &&
-                                      dataTable.Rows[0][displayMember]?.ToString() == placeholder;
+                // Create a copy of the DataTable to avoid shared reference issues
+                DataTable comboDataTable = dataTable.Copy();
+
+                // Check if placeholder already exists in the copy
+                bool hasPlaceholder = comboDataTable.Rows.Count > 0 &&
+                                      comboDataTable.Rows[0][displayMember]?.ToString() == placeholder;
 
                 if (!hasPlaceholder)
                 {
-                    DataRow row = dataTable.NewRow();
+                    DataRow row = comboDataTable.NewRow();
                     row[displayMember] = placeholder;
-                    if (dataTable.Columns[valueMember] != null &&
-                        dataTable.Columns[valueMember]!.DataType == typeof(int))
+                    if (comboDataTable.Columns[valueMember] != null &&
+                        comboDataTable.Columns[valueMember]!.DataType == typeof(int))
                     {
                         row[valueMember] = -1;
                     }
@@ -305,10 +309,10 @@ namespace MTM_Inventory_Application.Helpers
                         row[valueMember] = placeholder;
                     }
 
-                    dataTable.Rows.InsertAt(row, 0);
+                    comboDataTable.Rows.InsertAt(row, 0);
                 }
 
-                comboBox.DataSource = dataTable;
+                comboBox.DataSource = comboDataTable;
                 comboBox.DisplayMember = displayMember;
                 comboBox.ValueMember = valueMember;
                 comboBox.SelectedIndex = 0;
