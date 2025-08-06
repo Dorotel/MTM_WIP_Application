@@ -14,7 +14,7 @@ namespace MTM_Inventory_Application.Helpers
         {
             try
             {
-                server ??= Model_AppVariables.WipServerAddress ?? "localhost"; //localhost//localhost
+                server ??= Model_AppVariables.WipServerAddress ?? "172.16.1.104"; //172.16.1.104//172.16.1.104
                 database ??= Model_Users.Database;
                 uid ??= Model_AppVariables.User.ToUpper();
                 return $"SERVER={server};DATABASE={database};UID={uid};Allow User Variables=True ;";

@@ -39,7 +39,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 string user = Model_AppVariables.User;
 
                 Control_Database_TextBox_Server.Text =
-                    await Dao_User.GetWipServerAddressAsync(user) ?? "localhost";
+                    await Dao_User.GetWipServerAddressAsync(user) ?? "172.16.1.104";
                 Control_Database_TextBox_Port.Text = await Dao_User.GetWipServerPortAsync(user) ?? "3306";
                 Control_Database_TextBox_Database.Text = await Dao_User.GetDatabaseAsync(user) ?? "mtm_wip_application";
 
@@ -51,7 +51,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 StatusMessageChanged?.Invoke(this, $"Error loading database settings: {ex.Message}");
 
                 // Set default values as fallback
-                Control_Database_TextBox_Server.Text = "localhost";
+                Control_Database_TextBox_Server.Text = "172.16.1.104";
                 Control_Database_TextBox_Port.Text = "3306";
                 Control_Database_TextBox_Database.Text = "mtm_wip_application";
             }
@@ -123,7 +123,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 Control_Database_Button_Reset.Enabled = false;
 
                 // Reset to default values
-                Control_Database_TextBox_Server.Text = "localhost";
+                Control_Database_TextBox_Server.Text = "172.16.1.104";
                 Control_Database_TextBox_Port.Text = "3306";
                 Control_Database_TextBox_Database.Text = "mtm_wip_application";
 
