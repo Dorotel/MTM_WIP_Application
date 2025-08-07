@@ -457,15 +457,20 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     return;
                 }
 
-                var (removedCount, errorMessages) = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
+                (int removedCount, List<string> errorMessages) =
+                    await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv);
                 LoggingUtility.Log($"[ADVANCED REMOVE] {removedCount} inventory items deleted.");
 
                 if (removedCount == 0)
                 {
-                    string msg = "No items were deleted. This may be because the selected items no longer exist in inventory, the data did not match exactly, or a database constraint prevented deletion.";
+                    string msg =
+                        "No items were deleted. This may be because the selected items no longer exist in inventory, the data did not match exactly, or a database constraint prevented deletion.";
                     if (errorMessages.Count > 0)
+                    {
                         msg += "\n\n" + string.Join("\n", errorMessages);
-                    MessageBox.Show(msg, "Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+
+                    MessageBox.Show(msg, @"Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     Control_AdvancedRemove_Button_Undo.Enabled = false;
                 }
                 else
@@ -713,7 +718,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 if (Control_AdvancedRemove_DataGridView_Results.Rows.Count == 0)
                 {
-                    MessageBox.Show("No data to print.", "Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(@"No data to print.", @"Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -725,7 +730,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Print failed: {ex.Message}", @"Print Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }

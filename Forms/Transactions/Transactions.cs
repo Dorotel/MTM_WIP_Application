@@ -7,6 +7,7 @@ using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using System.Drawing.Printing;
+using MTM_Inventory_Application.Controls.Shared;
 
 namespace MTM_Inventory_Application.Forms.Transactions
 {
@@ -16,12 +17,12 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
         private BindingList<Model_Transactions> _displayedTransactions = null!;
         private int _currentPage = 1;
-        private const int _pageSize = 20;
-        private const bool _sortDescending = true;
+        private const int PageSize = 20;
+        private const bool SortDescending = true;
         private readonly string _currentUser;
-        private readonly bool isAdmin;
-        private ComboBox Transactions_ComboBox_SearchPartID;
-        private Dao_Transactions _dao;
+        private readonly bool _isAdmin;
+        private ComboBox _transactionsComboBoxSearchPartId = new();
+        private readonly Dao_Transactions _dao;
 
         #endregion
 
@@ -30,7 +31,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
         public Transactions(string connectionString, string currentUser)
         {
             InitializeComponent();
-            
+
             // Apply comprehensive DPI scaling and runtime layout adjustments
             AutoScaleMode = AutoScaleMode.Dpi;
             Core_Themes.ApplyDpiScaling(this);
@@ -38,7 +39,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
             _dao = new Dao_Transactions(connectionString);
             _currentUser = currentUser;
-            isAdmin = Model_AppVariables.UserTypeAdmin;
+            _isAdmin = Model_AppVariables.UserTypeAdmin;
 
             SetupSortCombo();
             SetupDataGrid();
@@ -76,7 +77,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Button_Print.Enabled = false; // Disable print button on load
             Transfer_Button_SelectionHistory.Enabled = false; // Disable selection history button on load
             await LoadUserCombosAsync();
-            await LoadBuildingComboAsync();
+            LoadBuildingCombo(); // Remove await since method is no longer async
             await LoadPartComboAsync();
             SetupDateRangeDefaults();
             WireUpEvents();
@@ -86,7 +87,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
         {
             await Helper_UI_ComboBoxes.FillUserComboBoxesAsync(Transactions_ComboBox_UserFullName);
             Transactions_ComboBox_UserFullName.SelectedIndex = 0;
-            if (!isAdmin)
+            if (!_isAdmin)
             {
                 Transactions_ComboBox_UserFullName.Text = Model_AppVariables.User;
 
@@ -98,7 +99,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
         }
 
-        private async Task LoadBuildingComboAsync()
+        private void LoadBuildingCombo()
         {
             // Set Building ComboBox to only 3 items: [ Enter Building ], Expo Drive, Vits Drive
             Transactions_ComboBox_Building.Items.Clear();
@@ -110,8 +111,8 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
         private async Task LoadPartComboAsync()
         {
-            await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(Transactions_ComboBox_SearchPartID);
-            Transactions_ComboBox_SearchPartID.SelectedIndex = 0;
+            await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(_transactionsComboBoxSearchPartId);
+            _transactionsComboBoxSearchPartId.SelectedIndex = 0;
         }
 
         private void SetupDateRangeDefaults()
@@ -137,128 +138,91 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transfer_Button_SelectionHistory.Click += Transfer_Button_BranchHistory_Click;
 
             // Enable/disable search button based on combo selection
-            Transactions_ComboBox_SearchPartID.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
+            _transactionsComboBoxSearchPartId.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
             Transactions_ComboBox_UserFullName.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
             Transactions_ComboBox_Building.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
-            Transactions_EnableSearchButtonIfValid(null, null);
+            Transactions_EnableSearchButtonIfValid(this, EventArgs.Empty);
         }
 
-        private void Transactions_EnableSearchButtonIfValid(object? sender, EventArgs? e)
+        private void Transactions_EnableSearchButtonIfValid(object? sender, EventArgs e)
         {
-            bool enable = Transactions_ComboBox_SearchPartID.SelectedIndex > 0
+            bool enable = _transactionsComboBoxSearchPartId.SelectedIndex > 0
                           || Transactions_ComboBox_UserFullName.SelectedIndex > 0
                           || Transactions_ComboBox_Building.SelectedIndex > 0;
             Transactions_Button_Search.Enabled = enable;
         }
 
-        private void Transactions_Button_SidePanel_Click(object? sender, EventArgs? e)
+        private void Transactions_Button_SidePanel_Click(object? sender, EventArgs e)
         {
             // Collapse/Expand the left panel (filters/inputs)
             if (Transactions_SplitContainer_Main.Panel1Collapsed)
             {
                 Transactions_SplitContainer_Main.Panel1Collapsed = false;
-                Transactions_Button_SidePanel.Text = "Collapse ⬅️";
+                Transactions_Button_SidePanel.Text = @"Collapse ⬅️";
             }
             else
             {
                 Transactions_SplitContainer_Main.Panel1Collapsed = true;
-                Transactions_Button_SidePanel.Text = "Expand ➡️";
+                Transactions_Button_SidePanel.Text = @"Expand ➡️";
             }
         }
 
-        private void SetupSortCombo()
+        private void Transactions_DataGridView_Transactions_SelectionChanged(object? sender, EventArgs e)
         {
-            Transactions_ComboBox_SortBy.Items.Clear();
-            Transactions_ComboBox_SortBy.Items.Add("Date");
-            Transactions_ComboBox_SortBy.Items.Add("Quantity");
-            Transactions_ComboBox_SortBy.Items.Add("User");
-            Transactions_ComboBox_SortBy.Items.Add("ItemType");
-            Transactions_ComboBox_SortBy.SelectedIndex = 0;
+            if (Transactions_DataGridView_Transactions.SelectedRows.Count == 1)
+            {
+                DataGridViewRow row = Transactions_DataGridView_Transactions.SelectedRows[0];
+                if (row.DataBoundItem is Model_Transactions tx)
+                {
+                    Transactions_TextBox_Report_BatchNumber.Text = tx.BatchNumber ?? "";
+                    Transactions_TextBox_Report_PartID.Text = tx.PartID ?? "";
+                    Transactions_TextBox_Report_FromLocation.Text = tx.FromLocation ?? "";
+                    Transactions_TextBox_Report_ToLocation.Text = tx.ToLocation ?? "";
+                    Transactions_TextBox_Report_Operation.Text = tx.Operation ?? "";
+                    Transactions_TextBox_Report_Quantity.Text = tx.Quantity.ToString();
+                    Transactions_TextBox_Notes.Text = tx.Notes ?? "";
+                    Transactions_TextBox_Report_User.Text = tx.User ?? "";
+                    Transactions_TextBox_Report_ItemType.Text = tx.ItemType ?? "";
+                    Transactions_TextBox_Report_ReceiveDate.Text = tx.DateTime.ToString("g");
+                }
+            }
+            else
+            {
+                Transactions_TextBox_Report_BatchNumber.Text = "";
+                Transactions_TextBox_Report_PartID.Text = "";
+                Transactions_TextBox_Report_FromLocation.Text = "";
+                Transactions_TextBox_Report_ToLocation.Text = "";
+                Transactions_TextBox_Report_Operation.Text = "";
+                Transactions_TextBox_Report_Quantity.Text = "";
+                Transactions_TextBox_Notes.Text = "";
+                Transactions_TextBox_Report_User.Text = "";
+                Transactions_TextBox_Report_ItemType.Text = "";
+                Transactions_TextBox_Report_ReceiveDate.Text = "";
+            }
         }
 
-        private void SetupDataGrid()
+        private void Transactions_Button_Print_Click(object? sender, EventArgs e)
         {
-            Transactions_DataGridView_Transactions.AutoGenerateColumns = false;
-            Transactions_DataGridView_Transactions.Columns.Clear();
+            try
+            {
+                Core_DgvPrinter printer = new();
+                List<string> visibleColumns = [];
+                foreach (DataGridViewColumn col in Transactions_DataGridView_Transactions.Columns)
+                {
+                    if (col.Visible)
+                    {
+                        visibleColumns.Add(col.Name);
+                    }
+                }
 
-            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+                printer.SetPrintVisibleColumns(visibleColumns);
+                printer.Print(Transactions_DataGridView_Transactions);
+            }
+            catch (Exception ex)
             {
-                HeaderText = "PartID",
-                DataPropertyName = "PartID",
-                Name = "colPartID",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-            });
-            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Quantity",
-                DataPropertyName = "Quantity",
-                Name = "colQuantity",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-            });
-            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Operation",
-                DataPropertyName = "Operation",
-                Name = "colOperation",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-            });
-            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "User",
-                DataPropertyName = "User",
-                Name = "colUser",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-            });
-            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "BatchNumber",
-                DataPropertyName = "BatchNumber",
-                Name = "colBatchNumber",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-            });
-            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "ReceiveDate",
-                DataPropertyName = "ReceiveDate",
-                Name = "colReceiveDate",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-            });
-            var descCol = new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Description",
-                DataPropertyName = "Description",
-                Name = "colDescription",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
-                DefaultCellStyle = new DataGridViewCellStyle { WrapMode = DataGridViewTriState.True }
-            };
-            Transactions_DataGridView_Transactions.Columns.Add(descCol);
-            Transactions_DataGridView_Transactions.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-
-            Transactions_DataGridView_Transactions.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            Transactions_DataGridView_Transactions.ReadOnly = true;
-            Transactions_DataGridView_Transactions.AllowUserToAddRows = false;
-            Transactions_DataGridView_Transactions.AllowUserToDeleteRows = false;
-            Transactions_DataGridView_Transactions.AllowUserToOrderColumns = false;
-            Transactions_DataGridView_Transactions.AllowUserToResizeRows = false;
-
-            Transactions_DataGridView_Transactions.DataSource = new BindingList<Model_Transactions>();
-        }
-
-        private void ResetFilters()
-        {
-            Transactions_ComboBox_SortBy.SelectedIndex = 0;
-            Transactions_ComboBox_SearchPartID.SelectedIndex = 0;
-            Transactions_ComboBox_UserFullName.SelectedIndex = 0;
-            Transactions_ComboBox_Building.SelectedIndex = 0;
-            Control_AdvancedRemove_CheckBox_Date.Checked = false;
-            SetupDateRangeDefaults();
-            _currentPage = 1;
-        }
-
-        private void UpdatePagingButtons(int resultCount)
-        {
-            Transfer_Button_Previous.Enabled = _currentPage > 1;
-            Transfer_Button_Next.Enabled = resultCount >= _pageSize;
+                MessageBox.Show($@"Error printing transactions: {ex.Message}", @"Print Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
 
         private async Task LoadTransactionsAsync()
@@ -268,19 +232,16 @@ namespace MTM_Inventory_Application.Forms.Transactions
             MySqlCommand cmd;
 
             bool hasLikeSearch = false;
-            string likeSearchText = null;
-            string likeSearchColumn = null;
-            int likeComboIndex = -1;
+            string? likeSearchText = null;
+            string? likeSearchColumn = null;
             if (Controls.ContainsKey("Transactions_ComboBox_Like") && Controls.ContainsKey("Transactions_TextBox_Like"))
             {
-                ComboBox? likeCombo = Controls["Transactions_ComboBox_Like"] as ComboBox;
-                TextBox? likeText = Controls["Transactions_TextBox_Like"] as TextBox;
-                if (likeCombo != null && likeText != null && likeCombo.SelectedIndex > 0 &&
+                if (Controls["Transactions_ComboBox_Like"] is ComboBox likeCombo &&
+                    Controls["Transactions_TextBox_Like"] is TextBox likeText && likeCombo.SelectedIndex > 0 &&
                     !string.IsNullOrWhiteSpace(likeText.Text))
                 {
                     hasLikeSearch = true;
                     likeSearchText = likeText.Text.Trim();
-                    likeComboIndex = likeCombo.SelectedIndex;
                     switch (likeCombo.Text)
                     {
                         case "Part ID":
@@ -299,13 +260,13 @@ namespace MTM_Inventory_Application.Forms.Transactions
             if (hasLikeSearch && !string.IsNullOrEmpty(likeSearchColumn))
             {
                 string query = $"SELECT * FROM inv_transaction WHERE {likeSearchColumn} LIKE @SearchPattern";
-                cmd = new MySqlCommand(query, null);
+                cmd = new MySqlCommand(query);
                 cmd.Parameters.AddWithValue("@SearchPattern", $"%{likeSearchText}%");
                 System.Diagnostics.Debug.WriteLine($"[DEBUG] LIKE Search: {query} with pattern '%{likeSearchText}%'");
             }
             else
             {
-                string part = Transactions_ComboBox_SearchPartID.Text;
+                string part = _transactionsComboBoxSearchPartId.Text;
                 string user = Transactions_ComboBox_UserFullName.Text;
                 string building = Transactions_ComboBox_Building.Text;
                 string notes = Transactions_TextBox_Notes.Text;
@@ -316,7 +277,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     ? Control_AdvancedRemove_DateTimePicker_To.Value.Date.AddDays(1).AddTicks(-1)
                     : (DateTime?)null;
 
-                bool partSelected = Transactions_ComboBox_SearchPartID.SelectedIndex > 0 &&
+                bool partSelected = _transactionsComboBoxSearchPartId.SelectedIndex > 0 &&
                                     !string.IsNullOrWhiteSpace(part);
                 bool userSelected = Transactions_ComboBox_UserFullName.SelectedIndex > 0 &&
                                     !string.IsNullOrWhiteSpace(user);
@@ -328,21 +289,21 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
                 if (!anyFieldFilled)
                 {
-                    MessageBox.Show("Please fill in at least one field to search.", "Validation Error",
+                    MessageBox.Show(@"Please fill in at least one field to search.", @"Validation Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
                 if (filterByDate && dateFrom > dateTo)
                 {
-                    MessageBox.Show("The 'From' date cannot be after the 'To' date.", "Validation Error",
+                    MessageBox.Show(@"The 'From' date cannot be after the 'To' date.", @"Validation Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
                 StringBuilder queryBuilder = new();
                 queryBuilder.Append("SELECT * FROM inv_transaction WHERE 1=1 ");
-                List<MySqlParameter> parameters = new();
+                List<MySqlParameter> parameters = [];
 
                 if (partSelected)
                 {
@@ -383,12 +344,12 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     "ItemType" => "TransactionType",
                     _ => "ReceiveDate"
                 };
-                queryBuilder.Append($"ORDER BY {orderBy} {(_sortDescending ? "DESC" : "ASC")} ");
+                queryBuilder.Append($"ORDER BY {orderBy} {(SortDescending ? "DESC" : "ASC")} ");
                 queryBuilder.Append("LIMIT @Offset, @PageSize ");
-                parameters.Add(new MySqlParameter("@Offset", (_currentPage - 1) * _pageSize));
-                parameters.Add(new MySqlParameter("@PageSize", _pageSize));
+                parameters.Add(new MySqlParameter("@Offset", (_currentPage - 1) * PageSize));
+                parameters.Add(new MySqlParameter("@PageSize", PageSize));
 
-                cmd = new MySqlCommand(queryBuilder.ToString(), null);
+                cmd = new MySqlCommand(queryBuilder.ToString());
                 foreach (MySqlParameter param in parameters)
                 {
                     cmd.Parameters.Add(param);
@@ -414,7 +375,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
             System.Diagnostics.Debug.WriteLine($"[DEBUG] Rows returned: {dt.Rows.Count}");
 
-            List<Model_Transactions> result = new();
+            List<Model_Transactions> result = [];
             foreach (DataRow row in dt.Rows)
             {
                 Model_Transactions tx = new()
@@ -495,91 +456,55 @@ namespace MTM_Inventory_Application.Forms.Transactions
             {
                 Transactions_DataGridView_Transactions.ClearSelection();
             }
+
             UpdatePagingButtons(result.Count);
             System.Diagnostics.Debug.WriteLine("[DEBUG] LoadTransactionsAsync finished");
         }
 
-        private void Transactions_DataGridView_Transactions_SelectionChanged(object? sender, EventArgs? e)
+        private void ResetFilters()
         {
-            if (Transactions_DataGridView_Transactions.SelectedRows.Count == 1)
-            {
-                DataGridViewRow row = Transactions_DataGridView_Transactions.SelectedRows[0];
-                if (row.DataBoundItem is Model_Transactions tx)
-                {
-                    Transactions_TextBox_Report_BatchNumber.Text = tx.BatchNumber ?? "";
-                    Transactions_TextBox_Report_PartID.Text = tx.PartID ?? "";
-                    Transactions_TextBox_Report_FromLocation.Text = tx.FromLocation ?? "";
-                    Transactions_TextBox_Report_ToLocation.Text = tx.ToLocation ?? "";
-                    Transactions_TextBox_Report_Operation.Text = tx.Operation ?? "";
-                    Transactions_TextBox_Report_Quantity.Text = tx.Quantity.ToString();
-                    Transactions_TextBox_Notes.Text = tx.Notes ?? "";
-                    Transactions_TextBox_Report_User.Text = tx.User ?? "";
-                    Transactions_TextBox_Report_ItemType.Text = tx.ItemType ?? "";
-                    Transactions_TextBox_Report_ReceiveDate.Text = tx.DateTime.ToString("g");
-                }
-            }
-            else
-            {
-                Transactions_TextBox_Report_BatchNumber.Text = "";
-                Transactions_TextBox_Report_PartID.Text = "";
-                Transactions_TextBox_Report_FromLocation.Text = "";
-                Transactions_TextBox_Report_ToLocation.Text = "";
-                Transactions_TextBox_Report_Operation.Text = "";
-                Transactions_TextBox_Report_Quantity.Text = "";
-                Transactions_TextBox_Notes.Text = "";
-                Transactions_TextBox_Report_User.Text = "";
-                Transactions_TextBox_Report_ItemType.Text = "";
-                Transactions_TextBox_Report_ReceiveDate.Text = "";
-            }
+            Transactions_ComboBox_SortBy.SelectedIndex = 0;
+            _transactionsComboBoxSearchPartId.SelectedIndex = 0;
+            Transactions_ComboBox_UserFullName.SelectedIndex = 0;
+            Transactions_ComboBox_Building.SelectedIndex = 0;
+            Control_AdvancedRemove_CheckBox_Date.Checked = false;
+            SetupDateRangeDefaults();
+            _currentPage = 1;
         }
 
-        private void Transactions_Button_Print_Click(object? sender, EventArgs? e)
+        private void UpdatePagingButtons(int resultCount)
         {
-            try
-            {
-                Core_DgvPrinter printer = new();
-                // Get visible column names for print
-                List<string> visibleColumns = new();
-                foreach (DataGridViewColumn col in Transactions_DataGridView_Transactions.Columns)
-                {
-                    if (col.Visible)
-                        visibleColumns.Add(col.Name);
-                }
-                
-                // Set visible columns for print
-                printer.SetPrintVisibleColumns(visibleColumns);
-                // Optionally set column widths/alignments here if needed
-                printer.Print(Transactions_DataGridView_Transactions);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error printing transactions: {ex.Message}", "Print Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
+            Transfer_Button_Previous.Enabled = _currentPage > 1;
+            Transfer_Button_Next.Enabled = resultCount >= PageSize;
         }
 
-        private async void Transfer_Button_BranchHistory_Click(object sender, EventArgs e)
+        private async void Transfer_Button_BranchHistory_Click(object? sender, EventArgs e)
         {
             if (Transactions_DataGridView_Transactions.SelectedRows.Count != 1)
-                return;
-            var selected = Transactions_DataGridView_Transactions.SelectedRows[0].DataBoundItem as Model_Transactions;
-            if (selected == null || string.IsNullOrWhiteSpace(selected.BatchNumber))
             {
-                MessageBox.Show("No Batch Number found for the selected transaction.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var progress = new Controls.Shared.Control_ProgressBarUserControl();
+            if (Transactions_DataGridView_Transactions.SelectedRows[0]
+                    .DataBoundItem is not Model_Transactions selected ||
+                string.IsNullOrWhiteSpace(selected.BatchNumber))
+            {
+                MessageBox.Show(@"No Batch Number found for the selected transaction.", @"Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            Control_ProgressBarUserControl progress = new();
             Controls.Add(progress);
             progress.BringToFront();
             progress.ShowProgress();
             progress.UpdateProgress(10, "Loading batch history...");
             await Task.Delay(100);
 
-            var batchNumber = selected.BatchNumber;
-            var results = await Task.Run(() => _dao.SearchTransactions(
-                userName: isAdmin ? string.Empty : _currentUser,
-                isAdmin: isAdmin,
+            string? batchNumber = selected.BatchNumber;
+            List<Model_Transactions> results = await Task.Run(() => _dao.SearchTransactions(
+                _isAdmin ? string.Empty : _currentUser,
+                _isAdmin,
                 batchNumber: batchNumber,
                 sortColumn: "ReceiveDate",
                 sortDescending: true,
@@ -590,10 +515,10 @@ namespace MTM_Inventory_Application.Forms.Transactions
             await Task.Delay(100);
 
             // Build description for each row
-            var describedResults = new List<dynamic>();
+            List<dynamic> describedResults = [];
             for (int i = 0; i < results.Count; i++)
             {
-                var curr = results[i];
+                Model_Transactions curr = results[i];
                 string desc = "";
                 if (i == results.Count - 1) // last row (oldest)
                 {
@@ -601,16 +526,26 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 }
                 else
                 {
-                    var prev = results[i + 1];
+                    Model_Transactions prev = results[i + 1];
                     if (curr.TransactionType == TransactionType.OUT)
+                    {
                         desc = "Removed From System";
+                    }
                     else if (curr.TransactionType == TransactionType.TRANSFER && prev.ToLocation != curr.FromLocation)
-                        desc = $"Part transferred from {prev.ToLocation ?? "Unknown"} to {curr.ToLocation ?? "Unknown"}";
+                    {
+                        desc =
+                            $"Part transferred from {prev.ToLocation ?? "Unknown"} to {curr.ToLocation ?? "Unknown"}";
+                    }
                     else if (curr.TransactionType == TransactionType.IN)
+                    {
                         desc = "Received Into System";
+                    }
                     else
+                    {
                         desc = "Transaction";
+                    }
                 }
+
                 describedResults.Add(new
                 {
                     curr.PartID,
@@ -683,7 +618,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 Name = "colReceiveDate",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
-            var descCol = new DataGridViewTextBoxColumn
+            DataGridViewTextBoxColumn descCol = new()
             {
                 HeaderText = "Description",
                 DataPropertyName = "Description",
@@ -703,10 +638,90 @@ namespace MTM_Inventory_Application.Forms.Transactions
             {
                 Transactions_DataGridView_Transactions.ClearSelection();
             }
+
             progress.UpdateProgress(100, "Complete");
             await Task.Delay(200);
             progress.HideProgress();
         }
+
+        private void SetupSortCombo()
+        {
+            Transactions_ComboBox_SortBy.Items.Clear();
+            Transactions_ComboBox_SortBy.Items.Add("Date");
+            Transactions_ComboBox_SortBy.Items.Add("Quantity");
+            Transactions_ComboBox_SortBy.Items.Add("User");
+            Transactions_ComboBox_SortBy.Items.Add("ItemType");
+            Transactions_ComboBox_SortBy.SelectedIndex = 0;
+        }
+
+        private void SetupDataGrid()
+        {
+            Transactions_DataGridView_Transactions.AutoGenerateColumns = false;
+            Transactions_DataGridView_Transactions.Columns.Clear();
+
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "PartID",
+                DataPropertyName = "PartID",
+                Name = "colPartID",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Quantity",
+                DataPropertyName = "Quantity",
+                Name = "colQuantity",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Operation",
+                DataPropertyName = "Operation",
+                Name = "colOperation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "User",
+                DataPropertyName = "User",
+                Name = "colUser",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "BatchNumber",
+                DataPropertyName = "BatchNumber",
+                Name = "colBatchNumber",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "ReceiveDate",
+                DataPropertyName = "ReceiveDate",
+                Name = "colReceiveDate",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            DataGridViewTextBoxColumn descCol = new()
+            {
+                HeaderText = "Description",
+                DataPropertyName = "Description",
+                Name = "colDescription",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                DefaultCellStyle = new DataGridViewCellStyle { WrapMode = DataGridViewTriState.True }
+            };
+            Transactions_DataGridView_Transactions.Columns.Add(descCol);
+            Transactions_DataGridView_Transactions.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+
+            Transactions_DataGridView_Transactions.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            Transactions_DataGridView_Transactions.ReadOnly = true;
+            Transactions_DataGridView_Transactions.AllowUserToAddRows = false;
+            Transactions_DataGridView_Transactions.AllowUserToDeleteRows = false;
+            Transactions_DataGridView_Transactions.AllowUserToOrderColumns = false;
+            Transactions_DataGridView_Transactions.AllowUserToResizeRows = false;
+
+            Transactions_DataGridView_Transactions.DataSource = new BindingList<Model_Transactions>();
+        }
+
         #endregion
     }
 }

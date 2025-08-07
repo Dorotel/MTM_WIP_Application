@@ -38,7 +38,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             {
                 if (string.IsNullOrWhiteSpace(Control_Add_Operation_TextBox_Operation.Text))
                 {
-                    MessageBox.Show("Operation number is required.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"Operation number is required.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     Control_Add_Operation_TextBox_Operation.Focus();
                     return;
@@ -48,7 +48,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
                 if (await Dao_Operation.OperationExists(operationNumber))
                 {
-                    MessageBox.Show($"Operation number '{operationNumber}' already exists.", "Duplicate Operation",
+                    MessageBox.Show($@"Operation number '{operationNumber}' already exists.", @"Duplicate Operation",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     Control_Add_Operation_TextBox_Operation.Focus();
                     return;
@@ -57,12 +57,12 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 await Dao_Operation.InsertOperation(operationNumber, Model_AppVariables.User ?? "Current User");
                 ClearForm();
                 OperationAdded?.Invoke(this, EventArgs.Empty);
-                MessageBox.Show("Operation added successfully!", "Success", MessageBoxButtons.OK,
+                MessageBox.Show(@"Operation added successfully!", @"Success", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error adding operation: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error adding operation: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }

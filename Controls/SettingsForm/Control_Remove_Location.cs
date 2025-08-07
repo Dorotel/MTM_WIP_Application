@@ -40,7 +40,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading part types: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading part types: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -73,7 +73,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading location details: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading location details: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -82,7 +82,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         {
             if (_currentLocation == null)
             {
-                MessageBox.Show("Please select a location to remove.", "Validation Error", MessageBoxButtons.OK,
+                MessageBox.Show(@"Please select a location to remove.", @"Validation Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
                 return;
             }
@@ -90,8 +90,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             string location = _currentLocation["Location"]?.ToString() ?? string.Empty;
             DialogResult result =
                 MessageBox.Show(
-                    $"Are you sure you want to remove the location '{location}'?{Environment.NewLine}{Environment.NewLine}This action cannot be undone.",
-                    "Confirm Removal", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    $@"Are you sure you want to remove the location '{location}'?{Environment.NewLine}{Environment.NewLine}This action cannot be undone.",
+                    @"Confirm Removal", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result != DialogResult.Yes)
             {
                 return;
@@ -104,12 +104,12 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 ClearForm();
                 EnableControls(false);
                 LocationRemoved?.Invoke(this, EventArgs.Empty);
-                MessageBox.Show("Location removed successfully!", "Success", MessageBoxButtons.OK,
+                MessageBox.Show(@"Location removed successfully!", @"Success", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error removing location: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error removing location: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }

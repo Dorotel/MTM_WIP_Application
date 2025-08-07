@@ -39,7 +39,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             {
                 if (string.IsNullOrWhiteSpace(Control_Add_ItemType_TextBox_ItemType.Text))
                 {
-                    MessageBox.Show("PartID is required.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"PartID is required.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     Control_Add_ItemType_TextBox_ItemType.Focus();
                     return;
@@ -49,7 +49,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
                 if (await Dao_ItemType.ItemTypeExists(itemType))
                 {
-                    MessageBox.Show($"PartID '{itemType}' already exists.", "Duplicate PartID", MessageBoxButtons.OK,
+                    MessageBox.Show($@"PartID '{itemType}' already exists.", @"Duplicate PartID", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     Control_Add_ItemType_TextBox_ItemType.Focus();
                     return;
@@ -58,12 +58,12 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 await Dao_ItemType.InsertItemType(itemType, Model_AppVariables.User ?? "Current User");
                 ClearForm();
                 ItemTypeAdded?.Invoke(this, EventArgs.Empty);
-                MessageBox.Show("PartID added successfully!", "Success", MessageBoxButtons.OK,
+                MessageBox.Show(@"PartID added successfully!", @"Success", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error adding PartID: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error adding PartID: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }

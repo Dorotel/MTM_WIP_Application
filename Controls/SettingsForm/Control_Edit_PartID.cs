@@ -50,7 +50,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading part types: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading part types: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -63,7 +63,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading parts: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading parts: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -106,7 +106,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 string? selectedText = Control_Edit_PartID_ComboBox_Part.Text;
                 if (string.IsNullOrEmpty(selectedText))
                 {
-                    MessageBox.Show("Invalid selection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(@"Invalid selection.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -119,7 +119,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading part data: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading part data: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -135,7 +135,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             {
                 if (string.IsNullOrWhiteSpace(itemNumberTextBox.Text))
                 {
-                    MessageBox.Show("Item Number is required.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"Item Number is required.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     itemNumberTextBox.Focus();
                     return;
@@ -149,7 +149,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
                 if (string.IsNullOrWhiteSpace(descriptionTextBox.Text))
                 {
-                    MessageBox.Show("Description is required.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"Description is required.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     descriptionTextBox.Focus();
                     return;
@@ -157,7 +157,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
                 if (Control_Edit_PartID_ComboBox_ItemType.SelectedIndex <= 0)
                 {
-                    MessageBox.Show("Please select a part type.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"Please select a part type.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     Control_Edit_PartID_ComboBox_ItemType.Focus();
                     return;
@@ -167,21 +167,21 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 string newItemNumber = itemNumberTextBox.Text.Trim();
                 if (originalItemNumber != newItemNumber && await Dao_Part.PartExists(newItemNumber))
                 {
-                    MessageBox.Show($"Part number '{newItemNumber}' already exists.", "Duplicate Part Number",
+                    MessageBox.Show($@"Part number '{newItemNumber}' already exists.", @"Duplicate Part Number",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     itemNumberTextBox.Focus();
                     return;
                 }
 
                 await UpdatePartAsync();
-                MessageBox.Show("Part updated successfully!", "Success", MessageBoxButtons.OK,
+                MessageBox.Show(@"Part updated successfully!", @"Success", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
                 LoadParts();
                 PartUpdated?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error updating part: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error updating part: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }

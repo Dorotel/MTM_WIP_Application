@@ -45,15 +45,13 @@
 		<Content Include="MTMWIPApp.ico">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
-		<Content Include="Resources\CHANGELOG.pdf">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
+		<EmbeddedResource Include="Resources\CHANGELOG.pdf" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="Microsoft.TestPlatform" Version="17.14.1" />
-		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3351.48" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
 		<PackageReference Include="MySql.Data" Version="9.4.0" />
 		<PackageReference Include="PlantUmlClassDiagramGenerator.SourceGenerator" Version="1.1.0">
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

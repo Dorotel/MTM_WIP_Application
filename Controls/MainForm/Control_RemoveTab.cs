@@ -241,31 +241,41 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 _lastRemovedItems.Clear();
                 StringBuilder sb = new();
                 int attempted = 0;
-                var (removedCount, errorMessages) = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv, true);
+                (int removedCount, List<string> errorMessages) =
+                    await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv, true);
                 foreach (DataGridViewRow row in dgv.SelectedRows)
                 {
                     if (row.DataBoundItem is DataRowView drv)
                     {
                         attempted++;
-                        var item = new Model_HistoryRemove
+                        Model_HistoryRemove item = new()
                         {
                             PartId = drv["PartID"]?.ToString() ?? "",
                             Location = drv["Location"]?.ToString() ?? "",
                             Operation = drv["Operation"]?.ToString() ?? "",
                             Quantity = TryParse(drv["Quantity"]?.ToString(), out int qty) ? qty : 0,
-                            ItemType = drv.Row.Table.Columns.Contains("ItemType") ? drv["ItemType"]?.ToString() ?? "" : "",
+                            ItemType =
+                                drv.Row.Table.Columns.Contains("ItemType") ? drv["ItemType"]?.ToString() ?? "" : "",
                             User = drv.Row.Table.Columns.Contains("User") ? drv["User"]?.ToString() ?? "" : "",
-                            BatchNumber = drv.Row.Table.Columns.Contains("BatchNumber") ? drv["BatchNumber"]?.ToString() ?? "" : "",
+                            BatchNumber =
+                                drv.Row.Table.Columns.Contains("BatchNumber")
+                                    ? drv["BatchNumber"]?.ToString() ?? ""
+                                    : "",
                             Notes = drv.Row.Table.Columns.Contains("Notes") ? drv["Notes"]?.ToString() ?? "" : "",
-                            ReceiveDate = drv.Row.Table.Columns.Contains("ReceiveDate") && DateTime.TryParse(drv["ReceiveDate"]?.ToString(), out var dt) ? dt : DateTime.Now
+                            ReceiveDate =
+                                drv.Row.Table.Columns.Contains("ReceiveDate") &&
+                                DateTime.TryParse(drv["ReceiveDate"]?.ToString(), out DateTime dt)
+                                    ? dt
+                                    : DateTime.Now
                         };
                         if (removedCount > 0)
                         {
                             _lastRemovedItems.Add(item);
-                            sb.AppendLine($"PartID: {item.PartId}, Location: {item.Location}, Operation: {item.Operation}, Quantity: {item.Quantity}");
+                            sb.AppendLine(
+                                $"PartID: {item.PartId}, Location: {item.Location}, Operation: {item.Operation}, Quantity: {item.Quantity}");
 
                             // Add to inv_transaction (OUT)
-                            var transaction = new Model_TransactionHistory
+                            Model_TransactionHistory transaction = new()
                             {
                                 TransactionType = "OUT",
                                 PartId = item.PartId,
@@ -279,7 +289,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                                 BatchNumber = item.BatchNumber,
                                 DateTime = item.ReceiveDate
                             };
-                            await Data.Dao_History.AddTransactionHistoryAsync(transaction);
+                            await Dao_History.AddTransactionHistoryAsync(transaction);
                         }
                     }
                 }
@@ -288,12 +298,19 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (_lastRemovedItems.Count == 0)
                 {
-                    string reason = "No items were deleted. This may be because the selected items no longer exist in inventory, the data did not match exactly, or a database constraint prevented deletion.";
+                    string reason =
+                        "No items were deleted. This may be because the selected items no longer exist in inventory, the data did not match exactly, or a database constraint prevented deletion.";
                     if (attempted == 0)
+                    {
                         reason = "No items were deleted. No valid inventory rows were selected.";
+                    }
+
                     if (errorMessages.Count > 0)
+                    {
                         reason += "\n\n" + string.Join("\n", errorMessages);
-                    MessageBox.Show(reason, "Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+
+                    MessageBox.Show(reason, @"Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -675,7 +692,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 if (Control_RemoveTab_DataGridView_Main.Rows.Count == 0)
                 {
-                    MessageBox.Show("No data to print.", "Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(@"No data to print.", @"Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -684,7 +701,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 foreach (DataGridViewColumn col in Control_RemoveTab_DataGridView_Main.Columns)
                 {
                     if (col.Visible)
+                    {
                         visibleColumns.Add(col.Name);
+                    }
                 }
 
                 Core_DgvPrinter printer = new();
@@ -698,7 +717,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Print failed: {ex.Message}", @"Print Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
             finally
@@ -919,7 +938,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 MainFormInstance?.TabLoadingControlProgress?.UpdateProgress(10, "Loading all inventory...");
 
                 // Query all inventory using Dao_Inventory's public property, sorted by Location
-                var dt = await MTM_Inventory_Application.Data.Dao_Inventory.PublicHelperDatabaseCore.ExecuteDataTable(
+                DataTable dt = await Dao_Inventory.PublicHelperDatabaseCore.ExecuteDataTable(
                     "SELECT * FROM inv_inventory ORDER BY Location", null, true, CommandType.Text);
 
                 Control_RemoveTab_DataGridView_Main.DataSource = dt;
@@ -931,6 +950,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 {
                     column.Visible = columnsToShow.Contains(column.Name);
                 }
+
                 // Reorder columns
                 for (int i = 0; i < columnsToShow.Length; i++)
                 {
@@ -939,6 +959,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                         Control_RemoveTab_DataGridView_Main.Columns[columnsToShow[i]].DisplayIndex = i;
                     }
                 }
+
                 Core_Themes.ApplyThemeToDataGridView(Control_RemoveTab_DataGridView_Main);
                 Core_Themes.SizeDataGrid(Control_RemoveTab_DataGridView_Main);
                 Control_RemoveTab_Image_NothingFound.Visible = dt.Rows.Count == 0;
@@ -947,7 +968,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($"Show All failed: {ex.Message}", "Show All Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($@"Show All failed: {ex.Message}", @"Show All Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
             finally
             {

@@ -66,7 +66,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading part types: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading part types: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -97,7 +97,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading part data: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading part data: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -113,15 +113,17 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             string? customer = _currentPart["Customer"]?.ToString();
             if (string.IsNullOrEmpty(itemNumber))
             {
-                MessageBox.Show("Item number is missing. Cannot remove part.", "Error", MessageBoxButtons.OK,
+                MessageBox.Show(@"Item number is missing. Cannot remove part.", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
                 return;
             }
 
             DialogResult result =
                 MessageBox.Show(
-                    $"Are you sure you want to remove part '{itemNumber}' for customer '{customer}'?\n\nThis action cannot be undone.",
-                    "Confirm Part Removal", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    $@"Are you sure you want to remove part '{itemNumber}' for customer '{customer}'?
+
+This action cannot be undone.",
+                    @"Confirm Part Removal", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result != DialogResult.Yes)
             {
                 return;
@@ -130,7 +132,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             try
             {
                 await Dao_Part.DeletePartByItemNumber(itemNumber);
-                MessageBox.Show("Part removed successfully!", "Success", MessageBoxButtons.OK,
+                MessageBox.Show(@"Part removed successfully!", @"Success", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
                 LoadParts();
                 ClearForm();
@@ -139,7 +141,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error removing part: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error removing part: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }

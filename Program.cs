@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using MTM_Inventory_Application.Controls.MainForm;
+using MTM_Inventory_Application.Controls.SettingsForm;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Forms.MainForm;
@@ -31,6 +32,11 @@ namespace MTM_Inventory_Application
                         LoggingUtility.LogApplicationError(ex);
                     }
                 };
+
+                // Register cleanup handler for application exit
+                AppDomain.CurrentDomain.ProcessExit += (sender, args) => PerformAppCleanup();
+                Application.ApplicationExit += (sender, args) => PerformAppCleanup();
+
                 Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
                 ApplicationConfiguration.Initialize();
                 Application.EnableVisualStyles();
@@ -53,6 +59,25 @@ namespace MTM_Inventory_Application
                 Console.WriteLine($"[Global Exception] Main catch: {ex}");
                 LoggingUtility.LogApplicationError(ex);
                 _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(Main));
+            }
+            finally
+            {
+                // Ensure cleanup runs even if exceptions occur
+                PerformAppCleanup();
+            }
+        }
+
+        private static void PerformAppCleanup()
+        {
+            try
+            {
+                // Clean up temporary files created by Control_About
+                Control_About.CleanupAllTempFiles();
+            }
+            catch (Exception ex)
+            {
+                // Don't let cleanup errors crash the application
+                Console.WriteLine($"[Cleanup Warning] Error during application cleanup: {ex.Message}");
             }
         }
     }

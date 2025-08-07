@@ -35,7 +35,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading Operations: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading Operations: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -77,7 +77,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading operation details: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading operation details: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -86,7 +86,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         {
             if (_currentOperation == null)
             {
-                MessageBox.Show("Please select an operation to edit.", "Validation Error", MessageBoxButtons.OK,
+                MessageBox.Show(@"Please select an operation to edit.", @"Validation Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
                 return;
             }
@@ -95,7 +95,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             {
                 if (string.IsNullOrWhiteSpace(operationTextBox.Text))
                 {
-                    MessageBox.Show("Operation number is required.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"Operation number is required.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     operationTextBox.Focus();
                     return;
@@ -106,7 +106,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 if (newOperationNumber != originalOperationNumber &&
                     await Dao_Operation.OperationExists(newOperationNumber))
                 {
-                    MessageBox.Show($"Operation number '{newOperationNumber}' already exists.", "Duplicate Operation",
+                    MessageBox.Show($@"Operation number '{newOperationNumber}' already exists.", @"Duplicate Operation",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     operationTextBox.Focus();
                     return;
@@ -118,12 +118,12 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 ClearForm();
                 EnableControls(false);
                 OperationUpdated?.Invoke(this, EventArgs.Empty);
-                MessageBox.Show("Operation updated successfully!", "Success", MessageBoxButtons.OK,
+                MessageBox.Show(@"Operation updated successfully!", @"Success", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error updating operation: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error updating operation: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }

@@ -1,6 +1,7 @@
 using System.Data;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
+using MTM_Inventory_Application.Logging;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
@@ -67,8 +68,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             catch (Exception e)
             {
                 HideProgress();
-                Logging.LoggingUtility.LogApplicationError(e);
-                MessageBox.Show($"Error loading users: {e.Message}", "Error", MessageBoxButtons.OK,
+                LoggingUtility.LogApplicationError(e);
+                MessageBox.Show($@"Error loading users: {e.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -131,7 +132,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             catch (Exception ex)
             {
                 HideProgress();
-                Logging.LoggingUtility.LogApplicationError(ex);
+                LoggingUtility.LogApplicationError(ex);
                 UpdateStatus("Error loading user details");
             }
         }
@@ -143,8 +144,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 return;
             }
 
-            DialogResult confirm = MessageBox.Show($"Are you sure you want to remove user '{userName}'?",
-                "Confirm Remove",
+            DialogResult confirm = MessageBox.Show($@"Are you sure you want to remove user '{userName}'?",
+                @"Confirm Remove",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (confirm != DialogResult.Yes)
             {
@@ -188,7 +189,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                     await Task.Delay(500);
                     HideProgress();
 
-                    MessageBox.Show("User removed successfully!", "Success", MessageBoxButtons.OK,
+                    MessageBox.Show(@"User removed successfully!", @"Success", MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
 
                     // Reinitialize the ComboBox with detailed progress
@@ -198,7 +199,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             catch (Exception ex)
             {
                 HideProgress();
-                MessageBox.Show($"Error removing user: {ex.Message}", "Error", MessageBoxButtons.OK,
+                LoggingUtility.LogApplicationError(ex);
+                MessageBox.Show($@"Error removing user: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }

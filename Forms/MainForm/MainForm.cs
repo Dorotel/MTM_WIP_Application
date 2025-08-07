@@ -158,25 +158,30 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // Inventory Tab
             if (MainForm_UserControl_InventoryTab != null)
             {
-                var field = MainForm_UserControl_InventoryTab.GetType().GetField("Control_InventoryTab_Button_Toggle_RightPanel", BindingFlags.NonPublic | BindingFlags.Instance);
+                FieldInfo? field = MainForm_UserControl_InventoryTab.GetType().GetField(
+                    "Control_InventoryTab_Button_Toggle_RightPanel", BindingFlags.NonPublic | BindingFlags.Instance);
                 if (field?.GetValue(MainForm_UserControl_InventoryTab) is Button btn)
                 {
                     btn.Text = text;
                 }
             }
+
             // Remove Tab
             if (MainForm_UserControl_RemoveTab != null)
             {
-                var field = MainForm_UserControl_RemoveTab.GetType().GetField("Control_RemoveTab_Button_Toggle_RightPanel", BindingFlags.NonPublic | BindingFlags.Instance);
+                FieldInfo? field = MainForm_UserControl_RemoveTab.GetType().GetField(
+                    "Control_RemoveTab_Button_Toggle_RightPanel", BindingFlags.NonPublic | BindingFlags.Instance);
                 if (field?.GetValue(MainForm_UserControl_RemoveTab) is Button btn)
                 {
                     btn.Text = text;
                 }
             }
+
             // Transfer Tab
             if (MainForm_UserControl_TransferTab != null)
             {
-                var field = MainForm_UserControl_TransferTab.GetType().GetField("Control_TransferTab_Button_Toggle_RightPanel", BindingFlags.NonPublic | BindingFlags.Instance);
+                FieldInfo? field = MainForm_UserControl_TransferTab.GetType().GetField(
+                    "Control_TransferTab_Button_Toggle_RightPanel", BindingFlags.NonPublic | BindingFlags.Instance);
                 if (field?.GetValue(MainForm_UserControl_TransferTab) is Button btn)
                 {
                     btn.Text = text;
@@ -489,16 +494,19 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 MainForm_TabControl.SelectedIndex = 0;
                 return true;
             }
+
             if (keyData == Core_WipAppVariables.Shortcut_MainForm_Tab2)
             {
                 MainForm_TabControl.SelectedIndex = 1;
                 return true;
             }
+
             if (keyData == Core_WipAppVariables.Shortcut_MainForm_Tab3)
             {
                 MainForm_TabControl.SelectedIndex = 2;
                 return true;
             }
+
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
@@ -539,8 +547,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
         private void MainForm_MenuStrip_Exit_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(
-                "Are you sure you want to exit?",
-                "Exit Application",
+                @"Are you sure you want to exit?",
+                @"Exit Application",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 

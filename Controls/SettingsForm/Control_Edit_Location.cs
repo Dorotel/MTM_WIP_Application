@@ -49,7 +49,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading part types: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading part types: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -101,7 +101,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading location details: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading location details: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -110,7 +110,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         {
             if (_currentLocation == null)
             {
-                MessageBox.Show("Please select a location to edit.", "Validation Error", MessageBoxButtons.OK,
+                MessageBox.Show(@"Please select a location to edit.", @"Validation Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
                 return;
             }
@@ -119,7 +119,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             {
                 if (string.IsNullOrWhiteSpace(locationTextBox.Text))
                 {
-                    MessageBox.Show("Location is required.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"Location is required.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     locationTextBox.Focus();
                     return;
@@ -128,7 +128,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 if (buildingComboBox.SelectedIndex <= 0 ||
                     buildingComboBox.Text == "Select Building")
                 {
-                    MessageBox.Show("Building is required.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"Building is required.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     buildingComboBox.Focus();
                     return;
@@ -139,7 +139,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 string updatedBy = Core_WipAppVariables.User;
                 if (newLocation != originalLocation && await Dao_Location.LocationExists(newLocation))
                 {
-                    MessageBox.Show($"Location '{newLocation}' already exists.", "Duplicate Location",
+                    MessageBox.Show($@"Location '{newLocation}' already exists.", @"Duplicate Location",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     locationTextBox.Focus();
@@ -151,12 +151,12 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 ClearForm();
                 EnableControls(false);
                 LocationUpdated?.Invoke(this, EventArgs.Empty);
-                MessageBox.Show("Location updated successfully!", "Success", MessageBoxButtons.OK,
+                MessageBox.Show(@"Location updated successfully!", @"Success", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error updating location: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error updating location: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }

@@ -16,9 +16,15 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                // Clean up temp files when control is disposed
+                CleanupTempFiles();
+                
+                if (components != null)
+                {
+                    components.Dispose();
+                }
             }
             base.Dispose(disposing);
         }

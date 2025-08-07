@@ -534,7 +534,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 if (Control_TransferTab_DataGridView_Main.Rows.Count == 0)
                 {
-                    MessageBox.Show("No data to print.", "Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(@"No data to print.", @"Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -543,7 +543,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 foreach (DataGridViewColumn col in Control_TransferTab_DataGridView_Main.Columns)
                 {
                     if (col.Visible)
+                    {
                         visibleColumns.Add(col.Name);
+                    }
                 }
 
                 Core_DgvPrinter printer = new();
@@ -557,7 +559,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($"Print failed: {ex.Message}", "Print Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Print failed: {ex.Message}", @"Print Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
             finally

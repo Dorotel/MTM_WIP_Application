@@ -78,7 +78,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 string? selectedType = itemTypesComboBox.Text;
                 if (string.IsNullOrEmpty(selectedType))
                 {
-                    MessageBox.Show("Invalid selection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(@"Invalid selection.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -91,7 +91,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading ItemType data: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading ItemType data: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -102,13 +102,13 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             {
                 if (_currentItemType == null)
                 {
-                    MessageBox.Show("No ItemType selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(@"No ItemType selected.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(itemTypeTextBox.Text))
                 {
-                    MessageBox.Show("ItemType is required.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"ItemType is required.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     itemTypeTextBox.Focus();
                     return;
@@ -120,7 +120,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 {
                     if (await Dao_ItemType.ItemTypeExists(newItemType))
                     {
-                        MessageBox.Show($"ItemType '{newItemType}' already exists.", "Duplicate ItemType",
+                        MessageBox.Show($@"ItemType '{newItemType}' already exists.", @"Duplicate ItemType",
                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         itemTypeTextBox.Focus();
                         return;
@@ -133,12 +133,12 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 ClearForm();
                 SetFormEnabled(false);
                 ItemTypeUpdated?.Invoke(this, EventArgs.Empty);
-                MessageBox.Show("ItemType updated successfully.", "Success", MessageBoxButtons.OK,
+                MessageBox.Show(@"ItemType updated successfully.", @"Success", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error updating ItemType: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error updating ItemType: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }

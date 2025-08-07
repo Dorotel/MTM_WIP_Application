@@ -134,6 +134,10 @@ namespace MTM_Inventory_Application.Forms.Settings
 
             Control_Add_User controlAddUser = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_AddUser.Controls.Add(controlAddUser);
+
+            // Pass the ToolStrip progress controls
+            controlAddUser.SetProgressControls(SettingsForm_ProgressBar, SettingsForm_StatusText);
+
             controlAddUser.UserAdded += (s, e) =>
             {
                 UpdateStatus("User added successfully.");
@@ -415,8 +419,8 @@ namespace MTM_Inventory_Application.Forms.Settings
                 if (HasChanges)
                 {
                     DialogResult result = MessageBox.Show(
-                        "You have changes that require a restart. Exit and reset the application?",
-                        "Unsaved Changes",
+                        @"You have changes that require a restart. Exit and reset the application?",
+                        @"Unsaved Changes",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Warning);
 

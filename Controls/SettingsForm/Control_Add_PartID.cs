@@ -37,7 +37,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 // Set default item to "WIP" if it exists
                 for (int i = 0; i < Control_Add_PartID_ComboBox_ItemType.Items.Count; i++)
                 {
-                    if (Control_Add_PartID_ComboBox_ItemType.Items[i]?.ToString()?.Equals("WIP", StringComparison.OrdinalIgnoreCase) == true)
+                    if (Control_Add_PartID_ComboBox_ItemType.Items[i]?.ToString()
+                            ?.Equals("WIP", StringComparison.OrdinalIgnoreCase) == true)
                     {
                         Control_Add_PartID_ComboBox_ItemType.SelectedIndex = i;
                         break;
@@ -46,7 +47,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading part types: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading part types: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -70,7 +71,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             {
                 if (string.IsNullOrWhiteSpace(itemNumberTextBox.Text))
                 {
-                    MessageBox.Show("Item Number is required.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"Item Number is required.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     itemNumberTextBox.Focus();
                     return;
@@ -78,7 +79,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
                 if (Control_Add_PartID_ComboBox_ItemType.SelectedIndex < 0)
                 {
-                    MessageBox.Show("Please select a part type.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"Please select a part type.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     Control_Add_PartID_ComboBox_ItemType.Focus();
                     return;
@@ -86,21 +87,21 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
                 if (await Dao_Part.PartExists(itemNumberTextBox.Text.Trim()))
                 {
-                    MessageBox.Show($"Part number '{itemNumberTextBox.Text.Trim()}' already exists.",
-                        "Duplicate Part Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show($@"Part number '{itemNumberTextBox.Text.Trim()}' already exists.",
+                        @"Duplicate Part Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     itemNumberTextBox.Focus();
                     return;
                 }
 
                 await AddPartAsync();
-                MessageBox.Show("Part added successfully!", "Success", MessageBoxButtons.OK,
+                MessageBox.Show(@"Part added successfully!", @"Success", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
                 ClearForm();
                 PartAdded?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error adding part: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error adding part: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -127,12 +128,14 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             // Set ComboBox to "WIP" if it exists
             for (int i = 0; i < Control_Add_PartID_ComboBox_ItemType.Items.Count; i++)
             {
-                if (Control_Add_PartID_ComboBox_ItemType.Items[i]?.ToString()?.Equals("WIP", StringComparison.OrdinalIgnoreCase) == true)
+                if (Control_Add_PartID_ComboBox_ItemType.Items[i]?.ToString()
+                        ?.Equals("WIP", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     Control_Add_PartID_ComboBox_ItemType.SelectedIndex = i;
                     break;
                 }
             }
+
             itemNumberTextBox.Focus();
         }
 

@@ -53,6 +53,19 @@ namespace MTM_Inventory_Application.Models
             Helper_Database_Variables.GetConnectionString(null, null, null, null);
 
         #endregion
+
+        #region About Variables
+
+        public static string ApplicationName { get; } = "Manitowoc Tool and Manufacturing WIP Application";
+
+        public static string ApplicationAuthor { get; } = @"John Koll";
+
+        public static string ApplicationCopyright { get; } = @"Manitowoc Tool and Manufacturing";
+
+        public static string ApplicationVersion { get; } =
+            Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
+
+        #endregion
     }
 
     #endregion

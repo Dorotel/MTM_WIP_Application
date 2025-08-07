@@ -63,7 +63,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_ComboBox_SortBy = new ComboBox();
             Transactions_Panel_Row_SearchPartID = new Panel();
             Transactions_Label_SearchPartID = new Label();
-            Transactions_ComboBox_SearchPartID = new ComboBox();
+            _transactionsComboBoxSearchPartId = new ComboBox();
             Transactions_Panel_Row_User = new Panel();
             Transactions_Label_User = new Label();
             Transactions_ComboBox_UserFullName = new ComboBox();
@@ -256,7 +256,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // Transactions_Panel_Row_SearchPartID
             // 
             Transactions_Panel_Row_SearchPartID.Controls.Add(Transactions_Label_SearchPartID);
-            Transactions_Panel_Row_SearchPartID.Controls.Add(Transactions_ComboBox_SearchPartID);
+            Transactions_Panel_Row_SearchPartID.Controls.Add(_transactionsComboBoxSearchPartId);
             Transactions_Panel_Row_SearchPartID.Location = new Point(3, 43);
             Transactions_Panel_Row_SearchPartID.Name = "Transactions_Panel_Row_SearchPartID";
             Transactions_Panel_Row_SearchPartID.Size = new Size(403, 34);
@@ -273,10 +273,10 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // 
             // Transactions_ComboBox_SearchPartID
             // 
-            Transactions_ComboBox_SearchPartID.Location = new Point(94, 5);
-            Transactions_ComboBox_SearchPartID.Name = "Transactions_ComboBox_SearchPartID";
-            Transactions_ComboBox_SearchPartID.Size = new Size(306, 23);
-            Transactions_ComboBox_SearchPartID.TabIndex = 1;
+            _transactionsComboBoxSearchPartId.Location = new Point(94, 5);
+            _transactionsComboBoxSearchPartId.Name = "_transactionsComboBoxSearchPartId";
+            _transactionsComboBoxSearchPartId.Size = new Size(306, 23);
+            _transactionsComboBoxSearchPartId.TabIndex = 1;
             // 
             // Transactions_Panel_Row_User
             // 

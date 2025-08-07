@@ -67,6 +67,7 @@ namespace MTM_Inventory_Application.Core
             {
                 Helper_UI_Shortcuts.UpdateMainFormTabShortcuts(mainForm);
             }
+
             form.ResumeLayout();
             LoggingUtility.Log($"Global theme '{themeName}' with DPI scaling applied to form '{form.Name}'.");
         }
@@ -187,10 +188,12 @@ namespace MTM_Inventory_Application.Core
             static void DataGridView_MouseDown(object? sender, MouseEventArgs e)
             {
                 if (sender is not DataGridView dgv || e.Button != MouseButtons.Right)
+                {
                     return;
+                }
 
                 // Check if click was on the column header area
-                var headerRect = dgv.DisplayRectangle;
+                Rectangle headerRect = dgv.DisplayRectangle;
                 headerRect.Height = dgv.ColumnHeadersHeight;
 
                 if (headerRect.Contains(e.Location))
@@ -216,7 +219,11 @@ namespace MTM_Inventory_Application.Core
                 int cumulativeWidth = 0;
                 foreach (DataGridViewColumn col in dgv.Columns)
                 {
-                    if (!col.Visible) continue;
+                    if (!col.Visible)
+                    {
+                        continue;
+                    }
+
                     cumulativeWidth += col.Width;
                     if (x < cumulativeWidth)
                     {
@@ -232,8 +239,7 @@ namespace MTM_Inventory_Application.Core
             // Add a title item
             ToolStripMenuItem titleItem = new("Column Visibility")
             {
-                Enabled = false,
-                Font = new Font(menu.Font, FontStyle.Bold)
+                Enabled = false, Font = new Font(menu.Font, FontStyle.Bold)
             };
             menu.Items.Add(titleItem);
             menu.Items.Add(new ToolStripSeparator());
@@ -241,11 +247,7 @@ namespace MTM_Inventory_Application.Core
             // Add each column as a checkbox menu item
             foreach (DataGridViewColumn col in dgv.Columns)
             {
-                ToolStripMenuItem item = new(col.HeaderText)
-                {
-                    Checked = col.Visible,
-                    Tag = col.Name
-                };
+                ToolStripMenuItem item = new(col.HeaderText) { Checked = col.Visible, Tag = col.Name };
 
                 item.Click += (s, e) =>
                 {
@@ -269,15 +271,15 @@ namespace MTM_Inventory_Application.Core
             ToolStripMenuItem changeOrderItem = new("Change Column Order");
             changeOrderItem.Click += (s, e) =>
             {
-                using (var dlg = new MTM_Inventory_Application.Controls.Shared.ColumnOrderDialog(dgv))
+                using (ColumnOrderDialog dlg = new(dgv))
                 {
                     if (dlg.ShowDialog() == DialogResult.OK)
                     {
                         // Apply new order
-                        var newOrder = dlg.GetColumnOrder();
+                        List<string> newOrder = dlg.GetColumnOrder();
                         for (int i = 0; i < newOrder.Count; i++)
                         {
-                            var col = dgv.Columns[newOrder[i]];
+                            DataGridViewColumn? col = dgv.Columns[newOrder[i]];
                             col.DisplayIndex = i;
                         }
                     }
@@ -346,23 +348,21 @@ namespace MTM_Inventory_Application.Core
                     // Serialize column visibility and order
                     var columns = dgv.Columns.Cast<DataGridViewColumn>()
                         .OrderBy(c => c.DisplayIndex)
-                        .Select(c => new
-                        {
-                            Name = c.Name,
-                            Visible = c.Visible,
-                            DisplayIndex = c.DisplayIndex
-                        }).ToList();
+                        .Select(c => new { Name = c.Name, Visible = c.Visible, DisplayIndex = c.DisplayIndex })
+                        .ToList();
                     string json = JsonSerializer.Serialize(new { Columns = columns });
                     // Get userId (from Model_AppVariables.User)
-                    string userId = MTM_Inventory_Application.Models.Model_AppVariables.User;
+                    string userId = Model_AppVariables.User;
                     string gridName = dgv.Name;
-                    await MTM_Inventory_Application.Data.Dao_User.SetGridViewSettingsJsonAsync(userId, gridName, json);
+                    await Dao_User.SetGridViewSettingsJsonAsync(userId, gridName, json);
 
-                    MessageBox.Show("Grid settings saved successfully.", "Grid Settings", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(@"Grid settings saved successfully.", @"Grid Settings", MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error saving grid settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($@"Error saving grid settings: {ex.Message}", @"Error", MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
                 }
             };
             menu.Items.Add(saveSettingsItem);
@@ -2655,7 +2655,10 @@ namespace MTM_Inventory_Application.Core
                                 {
                                     colors = JsonSerializer.Deserialize<Model_UserUiColors>(SettingsJson, options);
                                 }
-                                catch { }
+                                catch
+                                {
+                                }
+
                                 if (colors != null)
                                 {
                                     themes[themeName] = new AppTheme { Colors = colors, FormFont = null };
@@ -2665,7 +2668,7 @@ namespace MTM_Inventory_Application.Core
                                     // Try new simplified format
                                     try
                                     {
-                                        var st = JsonSerializer.Deserialize<SimplifiedTheme>(SettingsJson);
+                                        SimplifiedTheme? st = JsonSerializer.Deserialize<SimplifiedTheme>(SettingsJson);
                                         if (st != null)
                                         {
                                             colors = MapSimplifiedThemeToUserUiColors(st);
@@ -2812,7 +2815,8 @@ namespace MTM_Inventory_Application.Core
 
         #endregion
 
-        public static async Task ApplyThemeToDataGridViewWithUserSettingsAsync(DataGridView dataGridView, string gridName)
+        public static async Task ApplyThemeToDataGridViewWithUserSettingsAsync(DataGridView dataGridView,
+            string gridName)
         {
             // Apply theme as usual
             ApplyThemeToDataGridView(dataGridView);
@@ -2820,23 +2824,24 @@ namespace MTM_Inventory_Application.Core
             // Load and apply saved grid settings (column visibility/order)
             try
             {
-                string userId = MTM_Inventory_Application.Models.Model_AppVariables.User;
-                string json = await MTM_Inventory_Application.Data.Dao_User.GetGridViewSettingsJsonAsync(userId);
+                string userId = Model_AppVariables.User;
+                string json = await Dao_User.GetGridViewSettingsJsonAsync(userId);
                 if (!string.IsNullOrWhiteSpace(json))
                 {
-                    using var doc = JsonDocument.Parse(json);
-                    if (doc.RootElement.TryGetProperty("Columns", out var columnsElem) && columnsElem.ValueKind == JsonValueKind.Array)
+                    using JsonDocument doc = JsonDocument.Parse(json);
+                    if (doc.RootElement.TryGetProperty("Columns", out JsonElement columnsElem) &&
+                        columnsElem.ValueKind == JsonValueKind.Array)
                     {
-                        var columns = columnsElem.EnumerateArray().ToList();
+                        List<JsonElement> columns = columnsElem.EnumerateArray().ToList();
                         // Set visibility and order for each column
-                        foreach (var colElem in columns)
+                        foreach (JsonElement colElem in columns)
                         {
                             string? name = colElem.GetProperty("Name").GetString();
                             bool visible = colElem.GetProperty("Visible").GetBoolean();
                             int displayIndex = colElem.GetProperty("DisplayIndex").GetInt32();
                             if (!string.IsNullOrEmpty(name) && dataGridView.Columns.Contains(name))
                             {
-                                var col = dataGridView.Columns[name];
+                                DataGridViewColumn? col = dataGridView.Columns[name];
                                 col.Visible = visible;
                                 col.DisplayIndex = displayIndex;
                             }
@@ -2863,12 +2868,14 @@ namespace MTM_Inventory_Application.Core
                 public string? Foreground { get; set; }
                 public string? Border { get; set; }
             }
+
             public class AccentColors
             {
                 public string? Primary { get; set; }
                 public string? Secondary { get; set; }
                 public string? Dark { get; set; }
             }
+
             public class StateColors
             {
                 public string? Info { get; set; }
@@ -2876,6 +2883,7 @@ namespace MTM_Inventory_Application.Core
                 public string? Warning { get; set; }
                 public string? Error { get; set; }
             }
+
             public class ComponentColors
             {
                 public string? InputBackground { get; set; }
@@ -2890,7 +2898,7 @@ namespace MTM_Inventory_Application.Core
 
         private static Model_UserUiColors MapSimplifiedThemeToUserUiColors(SimplifiedTheme st)
         {
-            var colors = new Model_UserUiColors();
+            Model_UserUiColors colors = new();
             if (st.Base != null)
             {
                 colors.FormBackColor = ParseColor(st.Base.Background);
@@ -2901,6 +2909,7 @@ namespace MTM_Inventory_Application.Core
                 colors.PanelForeColor = ParseColor(st.Base.Foreground);
                 colors.PanelBorderColor = ParseColor(st.Base.Border);
             }
+
             if (st.Accent != null)
             {
                 colors.AccentColor = ParseColor(st.Accent.Primary);
@@ -2910,6 +2919,7 @@ namespace MTM_Inventory_Application.Core
                 colors.ButtonPressedBackColor = ParseColor(st.Accent.Dark);
                 colors.ButtonPressedForeColor = ParseColor(st.Base?.Foreground);
             }
+
             if (st.State != null)
             {
                 colors.InfoColor = ParseColor(st.State.Info);
@@ -2917,6 +2927,7 @@ namespace MTM_Inventory_Application.Core
                 colors.WarningColor = ParseColor(st.State.Warning);
                 colors.ErrorColor = ParseColor(st.State.Error);
             }
+
             if (st.Component != null)
             {
                 colors.TextBoxBackColor = ParseColor(st.Component.InputBackground);
@@ -2929,17 +2940,25 @@ namespace MTM_Inventory_Application.Core
                 colors.ToolTipBackColor = ParseColor(st.Component.ToolTipBackground);
                 colors.StatusStripBackColor = ParseColor(st.Component.StatusBackground);
             }
+
             return colors;
         }
 
         private static Color? ParseColor(string? hex)
         {
-            if (string.IsNullOrWhiteSpace(hex)) return null;
+            if (string.IsNullOrWhiteSpace(hex))
+            {
+                return null;
+            }
+
             try
             {
                 return ColorTranslator.FromHtml(hex);
             }
-            catch { return null; }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

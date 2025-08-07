@@ -51,7 +51,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             {
                 if (string.IsNullOrWhiteSpace(Control_Add_Location_TextBox_Location.Text))
                 {
-                    MessageBox.Show("Location is required.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"Location is required.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     Control_Add_Location_TextBox_Location.Focus();
                     return;
@@ -60,7 +60,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 if (Control_Add_Location_ComboBox_Building.SelectedIndex <= 0 ||
                     Control_Add_Location_ComboBox_Building.Text == "Select Building")
                 {
-                    MessageBox.Show("Building is required.", "Validation Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"Building is required.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     Control_Add_Location_ComboBox_Building.Focus();
                     return;
@@ -71,7 +71,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
                 if (await Dao_Location.LocationExists(location))
                 {
-                    MessageBox.Show($"Location '{location}' already exists.", "Duplicate Location",
+                    MessageBox.Show($@"Location '{location}' already exists.", @"Duplicate Location",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     Control_Add_Location_TextBox_Location.Focus();
@@ -81,12 +81,12 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 await Dao_Location.InsertLocation(location, building, true);
                 ClearForm();
                 LocationAdded?.Invoke(this, EventArgs.Empty);
-                MessageBox.Show("Location added successfully!", "Success", MessageBoxButtons.OK,
+                MessageBox.Show(@"Location added successfully!", @"Success", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error adding location: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error adding location: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }

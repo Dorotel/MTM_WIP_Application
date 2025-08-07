@@ -56,7 +56,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading part types: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading part types: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -86,7 +86,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading ItemType data: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error loading ItemType data: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
@@ -97,14 +97,15 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             {
                 if (_currentItemType == null)
                 {
-                    MessageBox.Show("No ItemType selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(@"No ItemType selected.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
                 string? itemType = _currentItemType["ItemType"]?.ToString();
                 if (string.IsNullOrEmpty(itemType))
                 {
-                    MessageBox.Show("Invalid ItemType selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(@"Invalid ItemType selected.", @"Error", MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
                     return;
                 }
 
@@ -119,13 +120,13 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                     ClearForm();
                     SetFormEnabled(false);
                     ItemTypeRemoved?.Invoke(this, EventArgs.Empty);
-                    MessageBox.Show("ItemType removed successfully.", "Success", MessageBoxButtons.OK,
+                    MessageBox.Show(@"ItemType removed successfully.", @"Success", MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error removing ItemType: {ex.Message}", "Error", MessageBoxButtons.OK,
+                MessageBox.Show($@"Error removing ItemType: {ex.Message}", @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
