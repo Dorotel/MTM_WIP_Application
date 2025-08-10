@@ -504,7 +504,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             try
             {
                 _progressHelper?.ShowProgress("Loading batch history...");
-                _progressHelper?.UpdateProgress(10, "Loading batch history...");
                 await Task.Delay(100);
 
                 string? batchNumber = selected.BatchNumber;

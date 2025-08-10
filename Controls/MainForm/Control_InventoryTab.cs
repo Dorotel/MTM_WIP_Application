@@ -138,7 +138,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
         public void SetProgressControls(ToolStripProgressBar progressBar, ToolStripStatusLabel statusLabel)
         {
             _progressHelper = Helper_StoredProcedureProgress.Create(progressBar, statusLabel, 
-                this.FindForm() ?? throw new InvalidOperationException("Control must be added to a form"));
+                this.FindForm() ?? throw new InvalidOperationException(
+                    $"Control of type '{this.GetType().FullName}' with name '{this.Name}' must be added to a Form before calling SetProgressControls. " +
+                    "Ensure this control is added to a Form and visible before invoking this method."));
         }
 
         #endregion

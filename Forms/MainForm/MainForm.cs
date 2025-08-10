@@ -470,7 +470,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
                     await Task.Delay(100);
                     
                     _progressHelper.UpdateProgress(100, "Ready");
-                    await Task.Delay(500);  // Brief pause to show completion
+                    await Task.Delay(TabLoadingCompletionDelayMs);  // Brief pause to show completion
                     
                     _progressHelper.HideProgress();
                 }
