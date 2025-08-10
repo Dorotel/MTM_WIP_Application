@@ -24,12 +24,12 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         private Timer? _connectionStrengthTimer;
         public Helper_Control_MySqlSignal ConnectionStrengthChecker = null!;
-        private Control_ProgressBarUserControl _tabLoadingControlProgress = null!;
+        private Helper_StoredProcedureProgress? _progressHelper;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Service_ConnectionRecoveryManager ConnectionRecoveryManager { get; private set; } = null!;
 
-        public Control_ProgressBarUserControl TabLoadingControlProgress => _tabLoadingControlProgress;
+        public Helper_StoredProcedureProgress? ProgressHelper => _progressHelper;
 
         private CancellationTokenSource? _batchCancelTokenSource;
 
@@ -127,21 +127,31 @@ namespace MTM_Inventory_Application.Forms.MainForm
         {
             try
             {
-                _tabLoadingControlProgress = new Control_ProgressBarUserControl
-                {
-                    Size = new Size(300, 120),
-                    Visible = false,
-                    Anchor = AnchorStyles.None,
-                    StatusText = "Loading tab..."
-                };
+                // Initialize progress helper using StatusStrip components
+                _progressHelper = Helper_StoredProcedureProgress.Create(
+                    MainForm_ProgressBar,
+                    MainForm_StatusText,
+                    this);
+                
+                // Initialize progress controls for all UserControls
+                InitializeUserControlsProgress();
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
 
-                _tabLoadingControlProgress.Location = new Point(
-                    (MainForm_TabControl.Width - _tabLoadingControlProgress.Width) / 2,
-                    (MainForm_TabControl.Height - _tabLoadingControlProgress.Height) / 2
-                );
-
-                Controls.Add(_tabLoadingControlProgress);
-                _tabLoadingControlProgress.BringToFront();
+        private void InitializeUserControlsProgress()
+        {
+            try
+            {
+                // Set progress controls for main tab UserControls
+                MainForm_UserControl_InventoryTab?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
+                MainForm_UserControl_RemoveTab?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
+                MainForm_UserControl_TransferTab?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
+                
+                Debug.WriteLine("[DEBUG] [MainForm] UserControl progress helpers initialized.");
             }
             catch (Exception ex)
             {
@@ -445,24 +455,19 @@ namespace MTM_Inventory_Application.Forms.MainForm
         {
             try
             {
-                if (_tabLoadingControlProgress != null)
+                if (_progressHelper != null)
                 {
-                    _tabLoadingControlProgress.Location = new Point(
-                        (MainForm_TabControl.Width - _tabLoadingControlProgress.Width) / 2,
-                        (MainForm_TabControl.Height - _tabLoadingControlProgress.Height) / 2
-                    );
-
-                    _tabLoadingControlProgress.ShowProgress();
-                    _tabLoadingControlProgress.UpdateProgress(25, "Switching tab...");
+                    _progressHelper.ShowProgress("Switching tab...");
+                    _progressHelper.UpdateProgress(25, "Loading controls...");
 
                     await Task.Delay(100);
-                    _tabLoadingControlProgress.UpdateProgress(50, "Loading controls...");
+                    _progressHelper.UpdateProgress(50, "Applying settings...");
 
                     await Task.Delay(100);
-                    _tabLoadingControlProgress.UpdateProgress(75, "Applying settings...");
+                    _progressHelper.UpdateProgress(75, "Ready");
 
                     await Task.Delay(100);
-                    _tabLoadingControlProgress.UpdateProgress(100, "Ready");
+                    _progressHelper.UpdateProgress(100, "Tab loaded");
                 }
             }
             catch (Exception ex)
@@ -475,7 +480,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
         {
             try
             {
-                _tabLoadingControlProgress?.HideProgress();
+                _progressHelper?.HideProgress();
             }
             catch (Exception ex)
             {
