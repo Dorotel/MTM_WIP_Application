@@ -15,8 +15,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         #region Fields
 
-        private ToolStripProgressBar? _progressBar;
-        private ToolStripStatusLabel? _statusLabel;
+        private Helper_StoredProcedureProgress? _progressHelper;
 
         #endregion
 
@@ -37,8 +36,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         public void SetProgressControls(ToolStripProgressBar progressBar, ToolStripStatusLabel statusLabel)
         {
-            _progressBar = progressBar;
-            _statusLabel = statusLabel;
+            _progressHelper = Helper_StoredProcedureProgress.Create(progressBar, statusLabel, 
+                this.FindForm() ?? throw new InvalidOperationException("Control must be added to a form"));
         }
 
         #endregion
@@ -67,10 +66,10 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception e)
             {
-                HideProgress();
+                ShowError($"Error loading users: {e.Message}");
                 LoggingUtility.LogApplicationError(e);
-                MessageBox.Show($@"Error loading users: {e.Message}", @"Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                await Task.Delay(2000);
+                HideProgress();
             }
         }
 
@@ -131,9 +130,10 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                HideProgress();
+                ShowError($"Error loading user details: {ex.Message}");
                 LoggingUtility.LogApplicationError(ex);
-                UpdateStatus("Error loading user details");
+                await Task.Delay(2000);
+                HideProgress();
             }
         }
 
@@ -198,10 +198,10 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                HideProgress();
+                ShowError($"Error removing user: {ex.Message}");
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($@"Error removing user: {ex.Message}", @"Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                await Task.Delay(2000);
+                HideProgress();
             }
         }
 
@@ -211,87 +211,27 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         private void ShowProgress(string status = "Loading...")
         {
-            if (_progressBar != null && _statusLabel != null)
-            {
-                if (_progressBar.Owner?.InvokeRequired == true)
-                {
-                    _progressBar.Owner.Invoke(new Action(() =>
-                    {
-                        _progressBar.Visible = true;
-                        _progressBar.Value = 0;
-                        Application.DoEvents();
-                        _statusLabel.Text = status;
-                    }));
-                }
-                else
-                {
-                    _progressBar.Visible = true;
-                    _progressBar.Value = 0;
-                    Application.DoEvents();
-                    _statusLabel.Text = status;
-                }
-            }
+            _progressHelper?.ShowProgress(status);
         }
 
         private void UpdateProgress(int progress, string status)
         {
-            if (_progressBar != null && _statusLabel != null)
-            {
-                progress = Math.Max(0, Math.Min(100, progress)); // Clamp between 0-100
-
-                if (_progressBar.Owner?.InvokeRequired == true)
-                {
-                    _progressBar.Owner.Invoke(new Action(() =>
-                    {
-                        _progressBar.Value = progress;
-                        Application.DoEvents();
-                        _statusLabel.Text = $"{status} ({progress}%)";
-                    }));
-                }
-                else
-                {
-                    _progressBar.Value = progress;
-                    Application.DoEvents();
-                    _statusLabel.Text = $"{status} ({progress}%)";
-                }
-            }
+            _progressHelper?.UpdateProgress(progress, status);
         }
 
         private void HideProgress()
         {
-            if (_progressBar != null && _statusLabel != null)
-            {
-                if (_progressBar.Owner?.InvokeRequired == true)
-                {
-                    _progressBar.Owner.Invoke(new Action(() =>
-                    {
-                        _progressBar.Visible = false;
-                        Application.DoEvents();
-                        _statusLabel.Text = "Ready";
-                    }));
-                }
-                else
-                {
-                    _progressBar.Visible = false;
-                    Application.DoEvents();
-                    _statusLabel.Text = "Ready";
-                }
-            }
+            _progressHelper?.HideProgress();
         }
 
         private void UpdateStatus(string message)
         {
-            if (_statusLabel != null)
-            {
-                if (_statusLabel.Owner?.InvokeRequired == true)
-                {
-                    _statusLabel.Owner.Invoke(new Action(() => _statusLabel.Text = message));
-                }
-                else
-                {
-                    _statusLabel.Text = message;
-                }
-            }
+            _progressHelper?.UpdateStatus(message);
+        }
+
+        private void ShowError(string errorMessage)
+        {
+            _progressHelper?.ShowError(errorMessage);
         }
 
         #endregion
