@@ -26,6 +26,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
         private StatusStrip MainForm_StatusStrip;
         public ToolStripStatusLabel MainForm_StatusStrip_SavedStatus;
         public ToolStripStatusLabel MainForm_StatusStrip_Disconnected;
+        private ToolStripProgressBar MainForm_ProgressBar;
+        private ToolStripStatusLabel MainForm_StatusText;
 
         private System.Drawing.Printing.PrintDocument MainForm_Inventory_PrintDocument;
         private PrintPreviewDialog MainForm_Inventory_PrintDialog;
@@ -78,6 +80,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_StatusStrip = new StatusStrip();
             MainForm_StatusStrip_SavedStatus = new ToolStripStatusLabel();
             MainForm_StatusStrip_Disconnected = new ToolStripStatusLabel();
+            MainForm_ProgressBar = new ToolStripProgressBar();
+            MainForm_StatusText = new ToolStripStatusLabel();
             MainForm_Inventory_PrintDocument = new System.Drawing.Printing.PrintDocument();
             MainForm_Inventory_PrintDialog = new PrintPreviewDialog();
             MainForm_ToolTip = new ToolTip(components);
@@ -169,7 +173,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_StatusStrip.BackColor = SystemColors.Control;
             MainForm_StatusStrip.Dock = DockStyle.Fill;
             MainForm_StatusStrip.ImageScalingSize = new Size(24, 24);
-            MainForm_StatusStrip.Items.AddRange(new ToolStripItem[] { MainForm_StatusStrip_SavedStatus, MainForm_StatusStrip_Disconnected });
+            MainForm_StatusStrip.Items.AddRange(new ToolStripItem[] { MainForm_StatusText, MainForm_ProgressBar, MainForm_StatusStrip_SavedStatus, MainForm_StatusStrip_Disconnected });
             MainForm_StatusStrip.LayoutStyle = ToolStripLayoutStyle.HorizontalStackWithOverflow;
             MainForm_StatusStrip.Location = new Point(0, 0);
             MainForm_StatusStrip.Name = "MainForm_StatusStrip";
@@ -189,6 +193,19 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_StatusStrip_Disconnected.Size = new Size(240, 26);
             MainForm_StatusStrip_Disconnected.Text = "Disconnected from Server, please standby...";
             MainForm_StatusStrip_Disconnected.Visible = false;
+            // 
+            // MainForm_ProgressBar
+            // 
+            MainForm_ProgressBar.Name = "MainForm_ProgressBar";
+            MainForm_ProgressBar.Size = new Size(100, 16);
+            MainForm_ProgressBar.Style = ProgressBarStyle.Continuous;
+            MainForm_ProgressBar.Visible = false;
+            // 
+            // MainForm_StatusText
+            // 
+            MainForm_StatusText.Name = "MainForm_StatusText";
+            MainForm_StatusText.Size = new Size(39, 26);
+            MainForm_StatusText.Text = "Ready";
             // 
             // MainForm_Inventory_PrintDialog
             // 
