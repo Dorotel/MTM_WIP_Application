@@ -151,6 +151,13 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 MainForm_UserControl_RemoveTab?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
                 MainForm_UserControl_TransferTab?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
                 
+                // Set progress controls for advanced UserControls
+                MainForm_UserControl_AdvancedInventory?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
+                MainForm_UserControl_AdvancedRemove?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
+                
+                // Set progress controls for QuickButtons
+                MainForm_UserControl_QuickButtons?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
+                
                 Debug.WriteLine("[DEBUG] [MainForm] UserControl progress helpers initialized.");
             }
             catch (Exception ex)

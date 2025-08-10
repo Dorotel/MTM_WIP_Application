@@ -18,6 +18,22 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         private readonly List<Model_HistoryRemove> _lastRemovedItems = [];
         public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
+        private Helper_StoredProcedureProgress? _progressHelper;
+
+        #endregion
+
+        #region Progress Control Methods
+
+        /// <summary>
+        /// Set progress controls for visual feedback during operations
+        /// </summary>
+        /// <param name="progressBar">Progress bar control</param>
+        /// <param name="statusLabel">Status label control</param>
+        public void SetProgressControls(ToolStripProgressBar progressBar, ToolStripStatusLabel statusLabel)
+        {
+            _progressHelper = Helper_StoredProcedureProgress.Create(progressBar, statusLabel, 
+                this.FindForm() ?? throw new InvalidOperationException("Control must be added to a form"));
+        }
 
         #endregion
 
