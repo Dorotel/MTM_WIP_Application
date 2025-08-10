@@ -1,11 +1,9 @@
 ﻿using System.Reflection;
-using System.Text.Json;
 using MTM_Inventory_Application.Controls.SettingsForm;
 using MTM_Inventory_Application.Core;
-using MTM_Inventory_Application.Data;
-using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
-using MethodInvoker = System.Windows.Forms.MethodInvoker;
+using MTM_Inventory_Application.Helpers;
+using MTM_Inventory_Application.Data;
 
 namespace MTM_Inventory_Application.Forms.Settings
 {
@@ -192,11 +190,16 @@ namespace MTM_Inventory_Application.Forms.Settings
 
             Control_Add_Operation controlAddOperation = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_AddOperation.Controls.Add(controlAddOperation);
+            
+            // Pass the ToolStrip progress controls
+            controlAddOperation.SetProgressControls(SettingsForm_ProgressBar, SettingsForm_StatusText);
+            
             controlAddOperation.OperationAdded += (s, e) =>
             {
                 UpdateStatus("Operation added successfully - lists refreshed");
                 HasChanges = true;
             };
+            controlAddOperation.StatusMessageChanged += (s, message) => { UpdateStatus(message); };
 
             Control_Edit_Operation controlEditOperation = new() { Dock = DockStyle.Fill };
             SettingsForm_Panel_EditOperation.Controls.Add(controlEditOperation);
@@ -453,16 +456,28 @@ namespace MTM_Inventory_Application.Forms.Settings
 
         #region Progress Control Methods
 
+        private Helper_StoredProcedureProgress? _progressHelper;
+
+        /// <summary>
+        /// Get or create progress helper instance
+        /// </summary>
+        private Helper_StoredProcedureProgress ProgressHelper
+        {
+            get
+            {
+                _progressHelper ??= Helper_StoredProcedureProgress.Create(
+                    SettingsForm_ProgressBar, 
+                    SettingsForm_StatusText, 
+                    this);
+                return _progressHelper;
+            }
+        }
+
         private void ShowProgress(string status = "Loading...")
         {
             try
             {
-                SettingsForm_ProgressBar.Visible = true;
-                SettingsForm_ProgressBar.Value = 0;
-
-                // Ensure progress bar is updated first, then status text
-                Application.DoEvents(); // Force UI update
-                SettingsForm_StatusText.Text = status;
+                ProgressHelper.ShowProgress(status);
             }
             catch (Exception ex)
             {
@@ -474,16 +489,7 @@ namespace MTM_Inventory_Application.Forms.Settings
         {
             try
             {
-                progress = Math.Max(0, Math.Min(100, progress)); // Clamp between 0-100
-
-                // Update progress bar first
-                SettingsForm_ProgressBar.Value = progress;
-
-                // Force the progress bar to render before updating status
-                Application.DoEvents();
-
-                // Then update status text with the new step-specific message
-                SettingsForm_StatusText.Text = $"{status} ({progress}%)";
+                ProgressHelper.UpdateProgress(progress, status);
             }
             catch (Exception ex)
             {
@@ -491,19 +497,88 @@ namespace MTM_Inventory_Application.Forms.Settings
             }
         }
 
+        private void ShowError(string errorMessage, int? progress = null)
+        {
+            try
+            {
+                ProgressHelper.ShowError(errorMessage, progress);
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Warning: Error display error - {ex.Message}");
+            }
+        }
+
+        private void ShowSuccess(string successMessage)
+        {
+            try
+            {
+                ProgressHelper.ShowSuccess(successMessage);
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Warning: Success display error - {ex.Message}");
+            }
+        }
+
         private void HideProgress()
         {
             try
             {
-                SettingsForm_ProgressBar.Visible = false;
-
-                // Ensure progress bar is hidden first, then update status
-                Application.DoEvents();
-                SettingsForm_StatusText.Text = "Ready";
+                ProgressHelper.HideProgress();
             }
             catch (Exception ex)
             {
                 UpdateStatus($"Warning: Progress hide error - {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Process stored procedure result and update progress accordingly
+        /// </summary>
+        /// <param name="result">Stored procedure result</param>
+        /// <param name="successMessage">Custom success message (optional)</param>
+        public void ProcessStoredProcedureResult(StoredProcedureResult result, string successMessage = null)
+        {
+            try
+            {
+                if (result.IsSuccess)
+                {
+                    ShowSuccess(successMessage ?? result.ErrorMessage);
+                }
+                else
+                {
+                    ShowError(result.ErrorMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Warning: Result processing error - {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Process generic stored procedure result and update progress accordingly
+        /// </summary>
+        /// <typeparam name="T">Result data type</typeparam>
+        /// <param name="result">Stored procedure result</param>
+        /// <param name="successMessage">Custom success message (optional)</param>
+        public void ProcessStoredProcedureResult<T>(StoredProcedureResult<T> result, string successMessage = null)
+        {
+            try
+            {
+                if (result.IsSuccess)
+                {
+                    ShowSuccess(successMessage ?? result.ErrorMessage);
+                }
+                else
+                {
+                    ShowError(result.ErrorMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Warning: Result processing error - {ex.Message}");
             }
         }
 

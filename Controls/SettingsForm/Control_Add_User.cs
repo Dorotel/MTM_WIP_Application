@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -6,6 +7,7 @@ using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Logging;
+using MTM_Inventory_Application.Helpers;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
@@ -20,8 +22,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         #region Fields
 
-        private ToolStripProgressBar? _progressBar;
-        private ToolStripStatusLabel? _statusLabel;
+        private Helper_StoredProcedureProgress? _progressHelper;
 
         #endregion
 
@@ -58,8 +59,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         public void SetProgressControls(ToolStripProgressBar progressBar, ToolStripStatusLabel statusLabel)
         {
-            _progressBar = progressBar;
-            _statusLabel = statusLabel;
+            _progressHelper = Helper_StoredProcedureProgress.Create(progressBar, statusLabel, 
+                this.FindForm() ?? throw new InvalidOperationException("Control must be added to a form"));
         }
 
         #endregion
@@ -122,40 +123,35 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
                 if (string.IsNullOrWhiteSpace(Control_Add_User_TextBox_FirstName.Text))
                 {
-                    HideProgress();
-                    UpdateStatus("First name is required.");
+                    ShowError("First name is required");
                     Control_Add_User_TextBox_FirstName.Focus();
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(Control_Add_User_TextBox_LastName.Text))
                 {
-                    HideProgress();
-                    UpdateStatus("Last name is required.");
+                    ShowError("Last name is required");
                     Control_Add_User_TextBox_LastName.Focus();
                     return;
                 }
 
                 if (Control_Add_User_ComboBox_Shift.SelectedIndex <= 0)
                 {
-                    HideProgress();
-                    UpdateStatus("Please select a shift.");
+                    ShowError("Please select a shift");
                     Control_Add_User_ComboBox_Shift.Focus();
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(Control_Add_User_TextBox_UserName.Text))
                 {
-                    HideProgress();
-                    UpdateStatus("User name is required.");
+                    ShowError("User name is required");
                     Control_Add_User_TextBox_UserName.Focus();
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(Control_Add_User_TextBox_Pin.Text))
                 {
-                    HideProgress();
-                    UpdateStatus("Pin is required.");
+                    ShowError("Pin is required");
                     Control_Add_User_TextBox_Pin.Focus();
                     return;
                 }
@@ -165,12 +161,30 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 UpdateProgress(20, "Checking for existing user...");
                 await Task.Delay(100);
 
-                if (await Dao_User.UserExistsAsync(userName))
+                // Use enhanced stored procedure call with status reporting
+                var userExistsResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
+                    Model_AppVariables.ConnectionString,
+                    "usr_users_Exists",
+                    new Dictionary<string, object> { ["User"] = userName },
+                    _progressHelper,
+                    true
+                );
+
+                if (!userExistsResult.IsSuccess)
                 {
-                    HideProgress();
-                    UpdateStatus("User already exists.");
-                    Control_Add_User_TextBox_UserName.Focus();
+                    ShowError($"Error checking user existence: {userExistsResult.ErrorMessage}");
                     return;
+                }
+
+                if (userExistsResult.Data != null && userExistsResult.Data.Rows.Count > 0)
+                {
+                    int userExists = Convert.ToInt32(userExistsResult.Data.Rows[0]["UserExists"]);
+                    if (userExists > 0)
+                    {
+                        ShowError("User already exists");
+                        Control_Add_User_TextBox_UserName.Focus();
+                        return;
+                    }
                 }
 
                 UpdateProgress(30, "Processing user information...");
@@ -179,39 +193,59 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 await Task.Delay(100);
 
                 UpdateProgress(40, "Creating user account...");
-                await Dao_User.InsertUserAsync(
-                    userName,
-                    fullName,
-                    Control_Add_User_ComboBox_Shift.Text,
-                    false,
-                    Control_Add_User_TextBox_Pin.Text,
-                    System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? string.Empty,
-                    "false",
-                    "Default",
-                    9,
-                    Control_Add_User_TextBox_VisualUserName.Text,
-                    Control_Add_User_TextBox_VisualPassword.Text,
-                    Model_Users.WipServerAddress,
-                    Model_Users.Database,
-                    Model_Users.WipServerPort,
+                
+                // Use enhanced stored procedure call with status reporting
+                var createUserResult = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
+                    Model_AppVariables.ConnectionString,
+                    "usr_users_Add_User",
+                    new Dictionary<string, object>
+                    {
+                        ["User"] = userName,
+                        ["FullName"] = fullName,
+                        ["Shift"] = Control_Add_User_ComboBox_Shift.Text,
+                        ["VitsUser"] = false,
+                        ["Pin"] = Control_Add_User_TextBox_Pin.Text,
+                        ["LastShownVersion"] = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? string.Empty,
+                        ["HideChangeLog"] = "false",
+                        ["Theme_Name"] = "Default",
+                        ["Theme_FontSize"] = 9,
+                        ["VisualUserName"] = Control_Add_User_TextBox_VisualUserName.Text,
+                        ["VisualPassword"] = Control_Add_User_TextBox_VisualPassword.Text,
+                        ["WipServerAddress"] = Model_Users.WipServerAddress,
+                        ["WIPDatabase"] = Model_Users.Database,
+                        ["WipServerPort"] = Model_Users.WipServerPort
+                    },
+                    _progressHelper,
                     true
                 );
 
-                UpdateProgress(60, "Retrieving user information...");
-                DataRow? userRow = await Dao_User.GetUserByUsernameAsync(userName, true);
-                if (userRow == null || !userRow.Table.Columns.Contains("ID"))
+                if (!createUserResult.IsSuccess)
                 {
-                    HideProgress();
-                    LoggingUtility.LogApplicationError(
-                        new InvalidOperationException("Could not retrieve new user ID after creation"));
-                    UpdateStatus("Could not retrieve new user ID.");
+                    ShowError($"Error creating user: {createUserResult.ErrorMessage}");
+                    return;
+                }
+
+                UpdateProgress(60, "Retrieving user information...");
+                
+                // Get the created user to retrieve the ID
+                var getUserResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
+                    Model_AppVariables.ConnectionString,
+                    "usr_users_Get_ByUser",
+                    new Dictionary<string, object> { ["User"] = userName },
+                    _progressHelper,
+                    true
+                );
+
+                if (!getUserResult.IsSuccess || getUserResult.Data == null || getUserResult.Data.Rows.Count == 0)
+                {
+                    ShowError("Could not retrieve new user ID after creation");
                     return;
                 }
 
                 UpdateProgress(70, "Processing user role assignment...");
                 await Task.Delay(100);
 
-                int userId = Convert.ToInt32(userRow["ID"]);
+                int userId = Convert.ToInt32(getUserResult.Data.Rows[0]["ID"]);
                 int roleId = 3; // Default to Normal User
                 if (Control_Add_User_RadioButton_Administrator.Checked)
                 {
@@ -223,7 +257,26 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 }
 
                 UpdateProgress(80, "Assigning user role...");
-                await Dao_User.AddUserRoleAsync(userId, roleId, Environment.UserName, true);
+                
+                // Add user role assignment
+                var addRoleResult = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
+                    Model_AppVariables.ConnectionString,
+                    "sys_user_roles_Add",
+                    new Dictionary<string, object>
+                    {
+                        ["UserID"] = userId,
+                        ["RoleID"] = roleId,
+                        ["AssignedBy"] = Environment.UserName
+                    },
+                    _progressHelper,
+                    true
+                );
+
+                if (!addRoleResult.IsSuccess)
+                {
+                    ShowError($"User created but role assignment failed: {addRoleResult.ErrorMessage}");
+                    // Note: User was created successfully, but role assignment failed
+                }
 
                 UpdateProgress(90, "Finalizing user setup...");
                 await Task.Delay(100);
@@ -232,7 +285,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 ClearForm();
                 Control_Add_User_TextBox_UserName.Clear();
 
-                UpdateProgress(100, $"User '{fullName}' created successfully!");
+                ShowSuccess($"User '{fullName}' created successfully!");
                 await Task.Delay(500);
                 HideProgress();
 
@@ -244,7 +297,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                HideProgress();
+                ShowError($"Unexpected error creating user: {ex.Message}");
                 LoggingUtility.LogApplicationError(ex);
                 UpdateStatus($"Error adding user: {ex.Message}");
                 MessageBox.Show($@"Error creating user: {ex.Message}", @"Error", MessageBoxButtons.OK,
@@ -285,87 +338,32 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         private void ShowProgress(string status = "Loading...")
         {
-            if (_progressBar != null && _statusLabel != null)
-            {
-                if (_progressBar.Owner?.InvokeRequired == true)
-                {
-                    _progressBar.Owner.Invoke(new Action(() =>
-                    {
-                        _progressBar.Visible = true;
-                        _progressBar.Value = 0;
-                        Application.DoEvents();
-                        _statusLabel.Text = status;
-                    }));
-                }
-                else
-                {
-                    _progressBar.Visible = true;
-                    _progressBar.Value = 0;
-                    Application.DoEvents();
-                    _statusLabel.Text = status;
-                }
-            }
+            _progressHelper?.ShowProgress(status);
         }
 
         private void UpdateProgress(int progress, string status)
         {
-            if (_progressBar != null && _statusLabel != null)
-            {
-                progress = Math.Max(0, Math.Min(100, progress)); // Clamp between 0-100
-
-                if (_progressBar.Owner?.InvokeRequired == true)
-                {
-                    _progressBar.Owner.Invoke(new Action(() =>
-                    {
-                        _progressBar.Value = progress;
-                        Application.DoEvents();
-                        _statusLabel.Text = $"{status} ({progress}%)";
-                    }));
-                }
-                else
-                {
-                    _progressBar.Value = progress;
-                    Application.DoEvents();
-                    _statusLabel.Text = $"{status} ({progress}%)";
-                }
-            }
+            _progressHelper?.UpdateProgress(progress, status);
         }
 
         private void HideProgress()
         {
-            if (_progressBar != null && _statusLabel != null)
-            {
-                if (_progressBar.Owner?.InvokeRequired == true)
-                {
-                    _progressBar.Owner.Invoke(new Action(() =>
-                    {
-                        _progressBar.Visible = false;
-                        Application.DoEvents();
-                        _statusLabel.Text = "Ready";
-                    }));
-                }
-                else
-                {
-                    _progressBar.Visible = false;
-                    Application.DoEvents();
-                    _statusLabel.Text = "Ready";
-                }
-            }
+            _progressHelper?.HideProgress();
         }
 
         private void UpdateStatus(string message)
         {
-            if (_statusLabel != null)
-            {
-                if (_statusLabel.Owner?.InvokeRequired == true)
-                {
-                    _statusLabel.Owner.Invoke(new Action(() => _statusLabel.Text = message));
-                }
-                else
-                {
-                    _statusLabel.Text = message;
-                }
-            }
+            _progressHelper?.UpdateStatus(message);
+        }
+
+        private void ShowError(string errorMessage)
+        {
+            _progressHelper?.ShowError(errorMessage);
+        }
+
+        private void ShowSuccess(string successMessage)
+        {
+            _progressHelper?.ShowSuccess(successMessage);
         }
 
         #endregion

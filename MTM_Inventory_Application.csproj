@@ -97,7 +97,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Stored Procedures\" />
+	  <Folder Include="Database\CurrentDatabase\" />
 	</ItemGroup>
 
 </Project>
