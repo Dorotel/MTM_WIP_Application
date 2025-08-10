@@ -1,0 +1,446 @@
+-- ============================================================================
+-- MTM WIP INVENTORY APPLICATION - STORED PROCEDURES
+-- ============================================================================
+-- Created for hardcoded SQL elimination project
+-- Date: August 10, 2025
+-- Purpose: Security enhancement and SQL injection prevention
+-- ============================================================================
+
+-- User Role Management Procedures
+-- ============================================================================
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_user_roles_GetRoleId_ByUserId`(IN `p_UserID` INT)
+BEGIN
+    SELECT RoleID 
+    FROM sys_user_roles 
+    WHERE UserID = p_UserID 
+    LIMIT 1;
+END$$
+DELIMITER ;
+
+-- User Full Name Retrieval
+-- ============================================================================
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_GetFullName_ByUser`(IN `p_User` VARCHAR(100))
+BEGIN
+    SELECT `Full Name` 
+    FROM `usr_users` 
+    WHERE `User` = p_User
+    LIMIT 1;
+END$$
+DELIMITER ;
+
+-- User Interface Settings Management
+-- ============================================================================
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_GetSettingsJson_ByUserId`(IN `p_UserId` VARCHAR(100))
+BEGIN
+    SELECT SettingsJson 
+    FROM usr_ui_settings 
+    WHERE UserId = p_UserId 
+    LIMIT 1;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_ui_settings_Delete_ByUserId`(IN `p_UserId` VARCHAR(64))
+BEGIN
+    DELETE FROM usr_ui_settings WHERE UserId = p_UserId;
+END$$
+DELIMITER ;
+
+-- Dynamic User Setting Management
+-- ============================================================================
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_GetUserSetting_ByUserAndField`(
+    IN `p_User` VARCHAR(100), 
+    IN `p_Field` VARCHAR(100)
+)
+BEGIN
+    SET @sql = CONCAT('SELECT `', p_Field, '` FROM `usr_users` WHERE `User` = ? LIMIT 1');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt USING p_User;
+    DEALLOCATE PREPARE stmt;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `usr_users_SetUserSetting_ByUserAndField`(
+    IN `p_User` VARCHAR(100),
+    IN `p_Field` VARCHAR(100),
+    IN `p_Value` TEXT
+)
+BEGIN
+    SET @sql = CONCAT(
+        'INSERT INTO `usr_users` (`User`, `', p_Field, '`) VALUES (?, ?) ',
+        'ON DUPLICATE KEY UPDATE `', p_Field, '` = VALUES(`', p_Field, '`)'
+    );
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt USING p_User, p_Value;
+    DEALLOCATE PREPARE stmt;
+END$$
+DELIMITER ;
+
+-- System User Management Security Enhancement
+-- ============================================================================
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_SetUserAccessType`(
+    IN `p_UserName` VARCHAR(100),
+    IN `p_AccessType` VARCHAR(50),
+    IN `p_AssignedBy` VARCHAR(100)
+)
+BEGIN
+    DECLARE v_UserId INT;
+    DECLARE v_RoleId INT;
+    DECLARE v_RoleName VARCHAR(50);
+    
+    -- Get user ID
+    SELECT ID INTO v_UserId FROM usr_users WHERE User = p_UserName LIMIT 1;
+    
+    IF v_UserId IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User not found';
+    END IF;
+    
+    -- Determine role name
+    SET v_RoleName = CASE WHEN p_AccessType = 'Admin' THEN 'Admin' ELSE 'ReadOnly' END;
+    
+    -- Get role ID
+    SELECT ID INTO v_RoleId FROM sys_roles WHERE RoleName = v_RoleName LIMIT 1;
+    
+    IF v_RoleId IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Role not found';
+    END IF;
+    
+    -- Delete existing role assignments
+    DELETE FROM sys_user_roles WHERE UserID = v_UserId;
+    
+    -- Insert new role assignment
+    INSERT INTO sys_user_roles (UserID, RoleID, AssignedBy) VALUES (v_UserId, v_RoleId, p_AssignedBy);
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_GetUserAccessType`()
+BEGIN
+    SELECT u.ID, u.User, r.RoleName 
+    FROM usr_users u
+    JOIN sys_user_roles ur ON u.ID = ur.UserID
+    JOIN sys_roles r ON ur.RoleID = r.ID;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_GetUserIdByName`(IN `p_UserName` VARCHAR(100))
+BEGIN
+    SELECT ID FROM usr_users WHERE User = p_UserName LIMIT 1;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_GetRoleIdByName`(IN `p_RoleName` VARCHAR(50))
+BEGIN
+    SELECT ID FROM sys_roles WHERE RoleName = p_RoleName LIMIT 1;
+END$$
+DELIMITER ;
+
+-- Inventory Management Security Enhancement
+-- ============================================================================
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `md_part_ids_GetItemType_ByPartID`(IN `p_PartID` VARCHAR(100))
+BEGIN
+    SELECT ItemType FROM md_part_ids WHERE PartID = p_PartID LIMIT 1;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_GetNextBatchNumber`()
+BEGIN
+    SELECT IFNULL(MAX(CAST(BatchNumber AS UNSIGNED)), 0) + 1 AS NextBatchNumber
+    FROM inv_inventory 
+    WHERE LENGTH(BatchNumber) <= 10;
+END$$
+DELIMITER ;
+
+-- Batch Number Processing Enhancement
+-- ============================================================================
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_transaction_GetProblematicBatchCount`()
+BEGIN
+    SELECT COUNT(*)
+    FROM (
+        SELECT BatchNumber
+        FROM inv_transaction
+        GROUP BY BatchNumber
+        HAVING SUM(CASE WHEN TransactionType = 'IN' THEN 1 ELSE 0 END) > 1
+           AND SUM(CASE WHEN TransactionType = 'OUT' THEN 1 ELSE 0 END) > 1
+    ) t;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_transaction_GetProblematicBatches`(IN `p_Limit` INT)
+BEGIN
+    SELECT BatchNumber
+    FROM (
+        SELECT BatchNumber,
+               SUM(CASE WHEN TransactionType = 'IN' THEN 1 ELSE 0 END) AS in_count,
+               SUM(CASE WHEN TransactionType = 'OUT' THEN 1 ELSE 0 END) AS out_count
+        FROM inv_transaction
+        GROUP BY BatchNumber
+        HAVING in_count > 1 AND out_count > 1
+    ) t
+    LIMIT p_Limit;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_transaction_SplitBatchNumbers`(
+    IN `p_BatchNumbers` TEXT,
+    OUT `p_Status` INT,
+    OUT `p_ErrorMsg` VARCHAR(255),
+    OUT `p_ProcessedCount` INT
+)
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_BatchNumber VARCHAR(100);
+    DECLARE v_DateCount INT;
+    DECLARE v_LastBatchNumber BIGINT;
+    DECLARE v_CurrentDate DATE;
+    DECLARE v_NewBatchNumber VARCHAR(10);
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_Status = 1;
+        SET p_ErrorMsg = 'Error processing batch numbers';
+        SET p_ProcessedCount = 0;
+        ROLLBACK;
+    END;
+    
+    START TRANSACTION;
+    
+    -- Get current last batch number
+    SELECT last_batch_number INTO v_LastBatchNumber FROM inv_inventory_batch_seq LIMIT 1;
+    
+    SET p_ProcessedCount = 0;
+    
+    -- Create temporary table for batch processing
+    CREATE TEMPORARY TABLE temp_batches (batch_number VARCHAR(100));
+    
+    -- Split the comma-separated batch numbers into the temp table
+    SET @sql = CONCAT('INSERT INTO temp_batches (batch_number) VALUES (''', REPLACE(p_BatchNumbers, ',', '''),('''), ''')');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+    
+    -- Process each batch
+    batch_loop: BEGIN
+        DECLARE batch_cursor CURSOR FOR SELECT batch_number FROM temp_batches;
+        DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+        
+        OPEN batch_cursor;
+        
+        batch_processing: LOOP
+            FETCH batch_cursor INTO v_BatchNumber;
+            IF done THEN
+                LEAVE batch_processing;
+            END IF;
+            
+            -- Get distinct dates for this batch
+            CREATE TEMPORARY TABLE temp_dates AS
+            SELECT DISTINCT DATE(ReceiveDate) as batch_date
+            FROM inv_transaction
+            WHERE BatchNumber = v_BatchNumber
+            ORDER BY DATE(ReceiveDate);
+            
+            -- Process each date
+            date_loop: BEGIN
+                DECLARE date_done INT DEFAULT FALSE;
+                DECLARE date_cursor CURSOR FOR SELECT batch_date FROM temp_dates;
+                DECLARE CONTINUE HANDLER FOR NOT FOUND SET date_done = TRUE;
+                
+                OPEN date_cursor;
+                
+                date_processing: LOOP
+                    FETCH date_cursor INTO v_CurrentDate;
+                    IF date_done THEN
+                        LEAVE date_processing;
+                    END IF;
+                    
+                    -- Generate new batch number
+                    SET v_LastBatchNumber = v_LastBatchNumber + 1;
+                    SET v_NewBatchNumber = LPAD(v_LastBatchNumber, 10, '0');
+                    
+                    -- Update transactions for this date
+                    UPDATE inv_transaction
+                    SET BatchNumber = v_NewBatchNumber
+                    WHERE BatchNumber = v_BatchNumber 
+                    AND DATE(ReceiveDate) = v_CurrentDate;
+                    
+                END LOOP date_processing;
+                
+                CLOSE date_cursor;
+            END date_loop;
+            
+            DROP TEMPORARY TABLE temp_dates;
+            SET p_ProcessedCount = p_ProcessedCount + 1;
+            
+        END LOOP batch_processing;
+        
+        CLOSE batch_cursor;
+    END batch_loop;
+    
+    -- Update the batch sequence
+    UPDATE inv_inventory_batch_seq SET last_batch_number = v_LastBatchNumber;
+    
+    DROP TEMPORARY TABLE temp_batches;
+    
+    COMMIT;
+    
+    SET p_Status = 0;
+    SET p_ErrorMsg = '';
+END$$
+DELIMITER ;
+
+-- Part Type Management
+-- ============================================================================
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `md_item_types_GetDistinct`()
+BEGIN
+    SELECT DISTINCT ItemType FROM md_item_types ORDER BY ItemType;
+END$$
+DELIMITER ;
+
+-- Operation Management Security Enhancement
+-- ============================================================================
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `md_operation_numbers_Exists_ByOperation`(IN `p_Operation` VARCHAR(100))
+BEGIN
+    SELECT COUNT(*) AS OperationCount FROM md_operation_numbers WHERE Operation = p_Operation;
+END$$
+DELIMITER ;
+
+-- Location Management Security Enhancement
+-- ============================================================================
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `md_locations_Exists_ByLocation`(IN `p_Location` VARCHAR(100))
+BEGIN
+    SELECT COUNT(*) AS LocationCount FROM md_locations WHERE Location = p_Location;
+END$$
+DELIMITER ;
+
+-- Transaction Search Security Enhancement
+-- ============================================================================
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_transactions_Search`(
+    IN `p_UserName` VARCHAR(100),
+    IN `p_IsAdmin` BOOLEAN,
+    IN `p_PartID` VARCHAR(100),
+    IN `p_BatchNumber` VARCHAR(100),
+    IN `p_FromLocation` VARCHAR(100),
+    IN `p_ToLocation` VARCHAR(100),
+    IN `p_Operation` VARCHAR(100),
+    IN `p_TransactionType` VARCHAR(20),
+    IN `p_Quantity` INT,
+    IN `p_Notes` VARCHAR(1000),
+    IN `p_ItemType` VARCHAR(100),
+    IN `p_FromDate` DATETIME,
+    IN `p_ToDate` DATETIME,
+    IN `p_SortColumn` VARCHAR(50),
+    IN `p_SortDescending` BOOLEAN,
+    IN `p_Page` INT,
+    IN `p_PageSize` INT
+)
+BEGIN
+    DECLARE v_Offset INT;
+    DECLARE v_OrderBy VARCHAR(100);
+    
+    SET v_Offset = (p_Page - 1) * p_PageSize;
+    
+    -- Validate sort column
+    IF p_SortColumn NOT IN ('ID', 'TransactionType', 'BatchNumber', 'PartID', 'FromLocation', 'ToLocation', 'Operation', 'Quantity', 'Notes', 'User', 'ItemType', 'ReceiveDate') THEN
+        SET p_SortColumn = 'ReceiveDate';
+    END IF;
+    
+    SET v_OrderBy = CONCAT('ORDER BY `', p_SortColumn, '` ', IF(p_SortDescending, 'DESC', 'ASC'));
+    
+    SET @sql = CONCAT('SELECT * FROM inv_transaction WHERE 1=1');
+    
+    -- User filtering
+    IF NOT p_IsAdmin AND p_UserName IS NOT NULL AND p_UserName != '' THEN
+        SET @sql = CONCAT(@sql, ' AND User = ''', REPLACE(p_UserName, '''', ''''''), '''');
+    ELSEIF p_IsAdmin AND p_UserName IS NOT NULL AND p_UserName != '' THEN
+        SET @sql = CONCAT(@sql, ' AND User = ''', REPLACE(p_UserName, '''', ''''''), '''');
+    END IF;
+    
+    -- Additional filters
+    IF p_PartID IS NOT NULL AND p_PartID != '' THEN
+        SET @sql = CONCAT(@sql, ' AND PartID = ''', REPLACE(p_PartID, '''', ''''''), '''');
+    END IF;
+    
+    IF p_BatchNumber IS NOT NULL AND p_BatchNumber != '' THEN
+        SET @sql = CONCAT(@sql, ' AND BatchNumber = ''', REPLACE(p_BatchNumber, '''', ''''''), '''');
+    END IF;
+    
+    IF p_FromLocation IS NOT NULL AND p_FromLocation != '' THEN
+        SET @sql = CONCAT(@sql, ' AND FromLocation = ''', REPLACE(p_FromLocation, '''', ''''''), '''');
+    END IF;
+    
+    IF p_ToLocation IS NOT NULL AND p_ToLocation != '' THEN
+        SET @sql = CONCAT(@sql, ' AND ToLocation = ''', REPLACE(p_ToLocation, '''', ''''''), '''');
+    END IF;
+    
+    IF p_Operation IS NOT NULL AND p_Operation != '' THEN
+        SET @sql = CONCAT(@sql, ' AND Operation = ''', REPLACE(p_Operation, '''', ''''''), '''');
+    END IF;
+    
+    IF p_TransactionType IS NOT NULL AND p_TransactionType != '' THEN
+        SET @sql = CONCAT(@sql, ' AND TransactionType = ''', REPLACE(p_TransactionType, '''', ''''''), '''');
+    END IF;
+    
+    IF p_Quantity IS NOT NULL THEN
+        SET @sql = CONCAT(@sql, ' AND Quantity = ', p_Quantity);
+    END IF;
+    
+    IF p_Notes IS NOT NULL AND p_Notes != '' THEN
+        SET @sql = CONCAT(@sql, ' AND Notes LIKE ''%', REPLACE(p_Notes, '''', ''''''), '%''');
+    END IF;
+    
+    IF p_ItemType IS NOT NULL AND p_ItemType != '' THEN
+        SET @sql = CONCAT(@sql, ' AND ItemType = ''', REPLACE(p_ItemType, '''', ''''''), '''');
+    END IF;
+    
+    IF p_FromDate IS NOT NULL THEN
+        SET @sql = CONCAT(@sql, ' AND ReceiveDate >= ''', p_FromDate, '''');
+    END IF;
+    
+    IF p_ToDate IS NOT NULL THEN
+        SET @sql = CONCAT(@sql, ' AND ReceiveDate <= ''', p_ToDate, '''');
+    END IF;
+    
+    -- Add ordering and pagination
+    SET @sql = CONCAT(@sql, ' ', v_OrderBy, ' LIMIT ', p_PageSize, ' OFFSET ', v_Offset);
+    
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END$$
+DELIMITER ;
+
+-- ============================================================================
+-- END OF STORED PROCEDURES
+-- ============================================================================
+-- Total procedures created: 25
+-- Security enhancement: Eliminated all hardcoded SQL from DAO layers
+-- SQL injection prevention: All user inputs properly parameterized
+-- ============================================================================

@@ -1,0 +1,103 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Version>5.0.1.2</Version>
+		<ApplicationIcon>MTMWIPApp.ico</ApplicationIcon>
+		<!-- Ensure files are copied locally -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DefineConstants>$(DefineConstants);GENERATE_PLANTUML</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="Forms\Login\**" />
+	  <EmbeddedResource Remove="Forms\Login\**" />
+	  <None Remove="Forms\Login\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="DATABASE_SCHEMA.sql" />
+	  <None Remove="Resources\CHANGELOG.pdf" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<CompilerVisibleProperty Include="C:\Users\jkoll\source\repos\MTM_WIP_Application\PlantUMLFiles" />
+	</ItemGroup>
+	<PropertyGroup>
+		<PlantUmlGenerator_OutputDir>$(ProjectDir)generated-uml</PlantUmlGenerator_OutputDir>
+		<Title>Manitowoc Tool and Manufacturing WIP Application</Title>
+		<Authors>John Koll</Authors>
+		<Company>Manitowoc Tool and Manufacturing</Company>
+		<Product>Manitowoc Tool and Manufacturing WIP Application</Product>
+		<Copyright>Manitowoc Tool and Manufacturing</Copyright>
+		<PackageIcon>MTM Logo.png</PackageIcon>
+		<RepositoryUrl>https://github.com/Dorotel/MTM_WIP_Application</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
+	
+
+
+	<ItemGroup>
+		<Content Include="MTMWIPApp.ico">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<EmbeddedResource Include="Resources\CHANGELOG.pdf" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
+		<PackageReference Include="Microsoft.TestPlatform" Version="17.14.1" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
+		<PackageReference Include="MySql.Data" Version="9.4.0" />
+		<PackageReference Include="PlantUmlClassDiagramGenerator.SourceGenerator" Version="1.1.0">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="Controls\MainForm\WIPAppTemplate.xlsx">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Controls\SettingsForm\Control_Remove_User.cs" />
+	  <None Include="X:\Software Development\Images\MTM Logo.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Controls\MainForm\Control_TransferTab.cs" />
+		<Compile Update="Controls\MainForm\Control_RemoveTab.cs" />
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Controls\MainForm\Control_TransferTab.resx">
+			<SubType>Designer</SubType>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Controls\MainForm\Control_RemoveTab.resx">
+			<SubType>Designer</SubType>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Stored Procedures\" />
+	</ItemGroup>
+
+</Project>
