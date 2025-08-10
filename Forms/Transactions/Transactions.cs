@@ -23,6 +23,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private readonly bool _isAdmin;
         private ComboBox _transactionsComboBoxSearchPartId = new();
         private readonly Dao_Transactions _dao;
+        private Helper_StoredProcedureProgress? _progressHelper;
 
         #endregion
 
@@ -66,6 +67,12 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // Print button logic
             Transactions_Button_Print.Click += Transactions_Button_Print_Click;
             Core_Themes.ApplyTheme(this);
+            
+            // Initialize progress helper
+            _progressHelper = Helper_StoredProcedureProgress.Create(
+                Transactions_ProgressBar,
+                Transactions_StatusText,
+                this);
         }
 
         #endregion
@@ -494,24 +501,23 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 return;
             }
 
-            Control_ProgressBarUserControl progress = new();
-            Controls.Add(progress);
-            progress.BringToFront();
-            progress.ShowProgress();
-            progress.UpdateProgress(10, "Loading batch history...");
-            await Task.Delay(100);
+            try
+            {
+                _progressHelper?.ShowProgress("Loading batch history...");
+                _progressHelper?.UpdateProgress(10, "Loading batch history...");
+                await Task.Delay(100);
 
-            string? batchNumber = selected.BatchNumber;
-            List<Model_Transactions> results = await Task.Run(() => _dao.SearchTransactions(
-                _isAdmin ? string.Empty : _currentUser,
-                _isAdmin,
-                batchNumber: batchNumber,
-                sortColumn: "ReceiveDate",
-                sortDescending: true,
-                page: 1,
-                pageSize: 1000
-            ));
-            progress.UpdateProgress(80, "Mapping results...");
+                string? batchNumber = selected.BatchNumber;
+                List<Model_Transactions> results = await Task.Run(() => _dao.SearchTransactions(
+                    _isAdmin ? string.Empty : _currentUser,
+                    _isAdmin,
+                    batchNumber: batchNumber,
+                    sortColumn: "ReceiveDate",
+                    sortDescending: true,
+                    page: 1,
+                    pageSize: 1000
+                ));
+                _progressHelper?.UpdateProgress(80, "Mapping results...");
             await Task.Delay(100);
 
             // Build description for each row
@@ -639,9 +645,16 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 Transactions_DataGridView_Transactions.ClearSelection();
             }
 
-            progress.UpdateProgress(100, "Complete");
+            _progressHelper?.UpdateProgress(100, "Complete");
             await Task.Delay(200);
-            progress.HideProgress();
+            _progressHelper?.HideProgress();
+        }
+        catch (Exception ex)
+        {
+            _progressHelper?.ShowError($"Error loading batch history: {ex.Message}");
+            await Task.Delay(2000);
+            _progressHelper?.HideProgress();
+        }
         }
 
         private void SetupSortCombo()

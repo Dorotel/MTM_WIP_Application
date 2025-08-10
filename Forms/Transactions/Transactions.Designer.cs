@@ -35,6 +35,11 @@ namespace MTM_Inventory_Application.Forms.Transactions
         // Bottom container
         private Panel Transactions_Panel_Bottom_Left;
         private Button Transactions_Button_Reset;
+        
+        // StatusStrip for progress and status feedback
+        private StatusStrip Transactions_StatusStrip;
+        private ToolStripProgressBar Transactions_ProgressBar;
+        private ToolStripStatusLabel Transactions_StatusText;
 
         #endregion
 
@@ -111,8 +116,12 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Panel_Bottom_Left = new Panel();
             Transactions_Button_Search = new Button();
             Transactions_Button_SidePanel = new Button();
+            Transactions_StatusStrip = new StatusStrip();
+            Transactions_ProgressBar = new ToolStripProgressBar();
+            Transactions_StatusText = new ToolStripStatusLabel();
             Transactions_GroupBox_Main.SuspendLayout();
             Transactions_TableLayout_Main.SuspendLayout();
+            Transactions_StatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)Transactions_SplitContainer_Main).BeginInit();
             Transactions_SplitContainer_Main.Panel1.SuspendLayout();
             Transactions_SplitContainer_Main.Panel2.SuspendLayout();
@@ -775,11 +784,33 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Button_SidePanel.Text = "Collapse ⬅️";
             Transactions_Button_SidePanel.UseVisualStyleBackColor = true;
             // 
+            // Transactions_StatusStrip
+            // 
+            Transactions_StatusStrip.Items.AddRange(new ToolStripItem[] { Transactions_StatusText, Transactions_ProgressBar });
+            Transactions_StatusStrip.Location = new Point(0, 570);
+            Transactions_StatusStrip.Name = "Transactions_StatusStrip";
+            Transactions_StatusStrip.Size = new Size(830, 22);
+            Transactions_StatusStrip.TabIndex = 1;
+            // 
+            // Transactions_ProgressBar
+            // 
+            Transactions_ProgressBar.Name = "Transactions_ProgressBar";
+            Transactions_ProgressBar.Size = new Size(100, 16);
+            Transactions_ProgressBar.Style = ProgressBarStyle.Continuous;
+            Transactions_ProgressBar.Visible = false;
+            // 
+            // Transactions_StatusText
+            // 
+            Transactions_StatusText.Name = "Transactions_StatusText";
+            Transactions_StatusText.Size = new Size(39, 17);
+            Transactions_StatusText.Text = "Ready";
+            // 
             // Transactions
             // 
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(830, 592);
             Controls.Add(Transactions_GroupBox_Main);
+            Controls.Add(Transactions_StatusStrip);
             Name = "Transactions";
             Text = "Transactions";
             Transactions_GroupBox_Main.ResumeLayout(false);
@@ -806,7 +837,10 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_TabelLayoutPanel_Bottom.ResumeLayout(false);
             Transactions_Panel_Bottom_Right.ResumeLayout(false);
             Transactions_Panel_Bottom_Left.ResumeLayout(false);
+            Transactions_StatusStrip.ResumeLayout(false);
+            Transactions_StatusStrip.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
