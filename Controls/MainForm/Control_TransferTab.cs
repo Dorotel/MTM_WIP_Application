@@ -25,6 +25,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
         // Cache ToolTip to avoid repeated instantiation
         private static readonly ToolTip SharedToolTip = new();
 
+        private Helper_StoredProcedureProgress? _progressHelper;
+
         #endregion
 
         #region Initialization
@@ -75,6 +77,17 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_TransferTab_Button_Reset.TabStop = false;
 
             Core_Themes.ApplyFocusHighlighting(this);
+        }
+
+        /// <summary>
+        /// Set the progress controls for this tab to provide visual feedback during operations
+        /// </summary>
+        /// <param name="progressBar">The progress bar control from the parent form</param>
+        /// <param name="statusLabel">The status label control from the parent form</param>
+        public void SetProgressControls(ToolStripProgressBar progressBar, ToolStripStatusLabel statusLabel)
+        {
+            _progressHelper = Helper_StoredProcedureProgress.Create(progressBar, statusLabel, 
+                this.FindForm() ?? throw new InvalidOperationException("Control must be added to a form"));
         }
 
         #endregion

@@ -22,6 +22,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public static Forms.MainForm.MainForm? MainFormInstance { get; set; }
 
+        private Helper_StoredProcedureProgress? _progressHelper;
+
         #endregion
 
         #region Constructors
@@ -603,6 +605,17 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     "Control_AdvancedInventory_ProcessCmdKey");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Set the progress controls for this advanced control to provide visual feedback during operations
+        /// </summary>
+        /// <param name="progressBar">The progress bar control from the parent form</param>
+        /// <param name="statusLabel">The status label control from the parent form</param>
+        public void SetProgressControls(ToolStripProgressBar progressBar, ToolStripStatusLabel statusLabel)
+        {
+            _progressHelper = Helper_StoredProcedureProgress.Create(progressBar, statusLabel, 
+                this.FindForm() ?? throw new InvalidOperationException("Control must be added to a form"));
         }
 
         #endregion

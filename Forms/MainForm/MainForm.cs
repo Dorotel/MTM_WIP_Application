@@ -73,6 +73,9 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 InitializeProgressControl();
                 Debug.WriteLine("[DEBUG] [MainForm.ctor] Progress control initialized.");
 
+                InitializeTabControlsProgressIntegration();
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] Tab controls progress integration initialized.");
+
                 ConnectionStrengthChecker = new Helper_Control_MySqlSignal();
                 Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthChecker initialized.");
 
@@ -130,6 +133,25 @@ namespace MTM_Inventory_Application.Forms.MainForm
                     MainForm_ProgressBar, 
                     MainForm_StatusText, 
                     this);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        private void InitializeTabControlsProgressIntegration()
+        {
+            try
+            {
+                // Set up progress integration for all tab controls
+                MainForm_UserControl_InventoryTab?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
+                MainForm_UserControl_TransferTab?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
+                MainForm_UserControl_RemoveTab?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
+                
+                // Set up progress integration for advanced controls
+                MainForm_UserControl_AdvancedInventory?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
+                MainForm_UserControl_AdvancedRemove?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
             }
             catch (Exception ex)
             {
