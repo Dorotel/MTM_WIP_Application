@@ -634,5 +634,63 @@ END $$
 DELIMITER ;
 
 -- ================================================================================
+-- INVENTORY SEARCH PROCEDURES (MySQL 5.7.24 Compatible)
+-- ================================================================================
+
+-- Advanced search for inventory items with flexible filtering using parameters
+DELIMITER $$
+CREATE PROCEDURE inv_inventory_Search_Advanced(
+    IN p_PartID VARCHAR(100),
+    IN p_Operation VARCHAR(100),
+    IN p_Location VARCHAR(100),
+    IN p_QtyMin INT,
+    IN p_QtyMax INT,
+    IN p_Notes TEXT,
+    IN p_User VARCHAR(100),
+    IN p_FilterByDate BOOLEAN,
+    IN p_DateFrom DATETIME,
+    IN p_DateTo DATETIME,
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE v_Count INT DEFAULT 0;
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_Status = -1;
+        SET p_ErrorMsg = 'Database error occurred while searching inventory';
+    END;
+    
+    -- Execute search with flexible filtering
+    SELECT * FROM inv_inventory 
+    WHERE (p_PartID IS NULL OR p_PartID = '' OR PartID LIKE CONCAT('%', p_PartID, '%'))
+      AND (p_Operation IS NULL OR p_Operation = '' OR Operation LIKE CONCAT('%', p_Operation, '%'))
+      AND (p_Location IS NULL OR p_Location = '' OR Location LIKE CONCAT('%', p_Location, '%'))
+      AND (p_QtyMin IS NULL OR p_QtyMin <= 0 OR Quantity >= p_QtyMin)
+      AND (p_QtyMax IS NULL OR p_QtyMax <= 0 OR Quantity <= p_QtyMax)
+      AND (p_Notes IS NULL OR p_Notes = '' OR Notes LIKE CONCAT('%', p_Notes, '%'))
+      AND (p_User IS NULL OR p_User = '' OR User = p_User)
+      AND (p_FilterByDate = FALSE OR p_DateFrom IS NULL OR p_DateTo IS NULL 
+           OR ReceiveDate BETWEEN p_DateFrom AND p_DateTo);
+    
+    -- Get count for status message
+    SELECT COUNT(*) INTO v_Count FROM inv_inventory 
+    WHERE (p_PartID IS NULL OR p_PartID = '' OR PartID LIKE CONCAT('%', p_PartID, '%'))
+      AND (p_Operation IS NULL OR p_Operation = '' OR Operation LIKE CONCAT('%', p_Operation, '%'))
+      AND (p_Location IS NULL OR p_Location = '' OR Location LIKE CONCAT('%', p_Location, '%'))
+      AND (p_QtyMin IS NULL OR p_QtyMin <= 0 OR Quantity >= p_QtyMin)
+      AND (p_QtyMax IS NULL OR p_QtyMax <= 0 OR Quantity <= p_QtyMax)
+      AND (p_Notes IS NULL OR p_Notes = '' OR Notes LIKE CONCAT('%', p_Notes, '%'))
+      AND (p_User IS NULL OR p_User = '' OR User = p_User)
+      AND (p_FilterByDate = FALSE OR p_DateFrom IS NULL OR p_DateTo IS NULL 
+           OR ReceiveDate BETWEEN p_DateFrom AND p_DateTo);
+    
+    SET p_Status = 0;
+    SET p_ErrorMsg = CONCAT('Search completed successfully, found ', v_Count, ' results');
+END $$
+DELIMITER ;
+
+-- ================================================================================
 -- END OF INVENTORY PROCEDURES
 -- ================================================================================

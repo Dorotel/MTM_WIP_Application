@@ -8,7 +8,6 @@ using MTM_Inventory_Application.Forms.MainForm.Classes;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
-using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Controls.MainForm
 {
@@ -238,9 +237,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
         {
             try
             {
-                DataTable dt = new();
-                MySqlCommand cmd;
-
                 // Gather search fields from textboxes and user combobox
                 string part = Control_AdvancedRemove_TextBox_Part.Text.Trim();
                 string op = Control_AdvancedRemove_TextBox_Operation.Text.Trim();
@@ -286,100 +282,46 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     return;
                 }
 
-                StringBuilder queryBuilder = new();
-                queryBuilder.Append("SELECT * ");
-                queryBuilder.Append("FROM inv_inventory WHERE 1=1 ");
-
-                List<MySqlParameter> parameters = new();
-
-                if (!string.IsNullOrWhiteSpace(part))
+                // FIXED: Use Helper_Database_StoredProcedure instead of hardcoded MySQL query
+                var searchParameters = new Dictionary<string, object>
                 {
-                    queryBuilder.Append("AND PartID LIKE @PartID ");
-                    parameters.Add(new MySqlParameter("@PartID", $"%{part}%"));
+                    { "PartID", string.IsNullOrWhiteSpace(part) ? (object)DBNull.Value : part },
+                    { "Operation", string.IsNullOrWhiteSpace(op) ? (object)DBNull.Value : op },
+                    { "Location", string.IsNullOrWhiteSpace(loc) ? (object)DBNull.Value : loc },
+                    { "QtyMin", qtyMin ?? (object)DBNull.Value },
+                    { "QtyMax", qtyMax ?? (object)DBNull.Value },
+                    { "Notes", string.IsNullOrWhiteSpace(notes) ? (object)DBNull.Value : notes },
+                    { "User", userSelected ? user : (object)DBNull.Value },
+                    { "FilterByDate", filterByDate },
+                    { "DateFrom", dateFrom ?? (object)DBNull.Value },
+                    { "DateTo", dateTo ?? (object)DBNull.Value }
+                };
+
+                LoggingUtility.Log($"[SEARCH DEBUG] Executing search with parameters: " +
+                    $"PartID='{part}', Operation='{op}', Location='{loc}', " +
+                    $"QtyMin={qtyMin}, QtyMax={qtyMax}, Notes='{notes}', " +
+                    $"User='{(userSelected ? user : "NULL")}', FilterByDate={filterByDate}, " +
+                    $"DateFrom={dateFrom}, DateTo={dateTo}");
+
+                var searchResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
+                    Model_AppVariables.ConnectionString,
+                    "inv_inventory_Search_Advanced",
+                    searchParameters,
+                    _progressHelper,
+                    true);
+
+                if (!searchResult.IsSuccess)
+                {
+                    string errorMsg = !string.IsNullOrEmpty(searchResult.ErrorMessage) 
+                        ? searchResult.ErrorMessage 
+                        : "Unknown error occurred during search";
+                    MessageBox.Show($"Search failed: {errorMsg}", @"Search Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
 
-                if (!string.IsNullOrWhiteSpace(op))
-                {
-                    queryBuilder.Append("AND Operation LIKE @Operation ");
-                    parameters.Add(new MySqlParameter("@Operation", $"%{op}%"));
-                }
-
-                if (!string.IsNullOrWhiteSpace(loc))
-                {
-                    queryBuilder.Append("AND Location LIKE @Location ");
-                    parameters.Add(new MySqlParameter("@Location", $"%{loc}%"));
-                }
-
-                if (qtyMin.HasValue)
-                {
-                    queryBuilder.Append("AND Quantity >= @QtyMin ");
-                    parameters.Add(new MySqlParameter("@QtyMin", qtyMin.Value));
-                }
-
-                if (qtyMax.HasValue)
-                {
-                    queryBuilder.Append("AND Quantity <= @QtyMax ");
-                    parameters.Add(new MySqlParameter("@QtyMax", qtyMax.Value));
-                }
-
-                if (!string.IsNullOrWhiteSpace(notes))
-                {
-                    queryBuilder.Append("AND Notes LIKE @Notes ");
-                    parameters.Add(new MySqlParameter("@Notes", $"%{notes}%"));
-                }
-
-                if (userSelected)
-                {
-                    queryBuilder.Append("AND User = @User ");
-                    parameters.Add(new MySqlParameter("@User", user));
-                }
-
-                if (filterByDate && dateFrom.HasValue && dateTo.HasValue)
-                {
-                    queryBuilder.Append("AND ReceiveDate BETWEEN @DateFrom AND @DateTo ");
-                    parameters.Add(new MySqlParameter("@DateFrom", dateFrom));
-                    parameters.Add(new MySqlParameter("@DateTo", dateTo));
-                }
-
-                cmd = new MySqlCommand(queryBuilder.ToString(), null);
-                foreach (MySqlParameter param in parameters)
-                {
-                    cmd.Parameters.Add(param);
-                }
-
-                string debugSql = queryBuilder.ToString();
-                foreach (MySqlParameter param in cmd.Parameters)
-                {
-                    debugSql = debugSql.Replace(param.ParameterName, $"'{param.Value}'");
-                }
-
-                LoggingUtility.Log("[SQL DEBUG] " + debugSql);
-                Debug.WriteLine("[SQL DEBUG] " + debugSql);
-
-                await using (MySqlConnection conn = new(Model_AppVariables.ConnectionString))
-                {
-                    cmd.Connection = conn;
-                    await conn.OpenAsync();
-
-                    using (MySqlDataAdapter adapter = new(cmd))
-                    {
-                        adapter.Fill(dt);
-                    }
-                }
-
-                if (cmd.CommandType == CommandType.StoredProcedure)
-                {
-                    string[] allowedColumns = new[]
-                    {
-                        "PartID", "Operation", "Location", "Quantity", "Notes", "User", "ReceiveDate",
-                        "LastUpdated", "BatchNumber"
-                    };
-                    foreach (DataColumn? col in dt.Columns.Cast<DataColumn>().ToList()
-                                 .Where(col => !allowedColumns.Contains(col.ColumnName)))
-                    {
-                        dt.Columns.Remove(col.ColumnName);
-                    }
-                }
+                DataTable dt = searchResult.Data ?? new DataTable();
+                LoggingUtility.Log($"[SEARCH DEBUG] Search completed. Status: {searchResult.StatusMessage}, Rows: {dt.Rows.Count}");
 
                 Control_AdvancedRemove_DataGridView_Results.DataSource = dt;
                 Control_AdvancedRemove_DataGridView_Results.ClearSelection();

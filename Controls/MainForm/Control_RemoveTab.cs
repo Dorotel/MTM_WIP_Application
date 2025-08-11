@@ -963,9 +963,26 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 _progressHelper?.ShowProgress();
                 _progressHelper?.UpdateProgress(10, "Loading all inventory...");
 
-                // Query all inventory using Dao_Inventory's public property, sorted by Location
-                DataTable dt = await Dao_Inventory.PublicHelperDatabaseCore.ExecuteDataTable(
-                    "SELECT * FROM inv_inventory ORDER BY Location", null, true, CommandType.Text);
+                // FIXED: Use inv_inventory_Get_All stored procedure instead of hardcoded SQL
+                var getAllResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
+                    Model_AppVariables.ConnectionString,
+                    "inv_inventory_Get_All",
+                    null,
+                    _progressHelper,
+                    true);
+
+                if (!getAllResult.IsSuccess)
+                {
+                    string errorMsg = !string.IsNullOrEmpty(getAllResult.ErrorMessage) 
+                        ? getAllResult.ErrorMessage 
+                        : "Unknown error occurred while loading inventory";
+                    MessageBox.Show($"Show All failed: {errorMsg}", @"Show All Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                DataTable dt = getAllResult.Data ?? new DataTable();
+                LoggingUtility.Log($"[SHOW ALL DEBUG] Retrieved {dt.Rows.Count} inventory records. Status: {getAllResult.StatusMessage}");
 
                 Control_RemoveTab_DataGridView_Main.DataSource = dt;
                 Control_RemoveTab_DataGridView_Main.ClearSelection();
