@@ -1,0 +1,70 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 735 >>
+stream
+BT
+/F1 18 Tf
+70 800 Td
+(Changelog) Tj
+/F1 11 Tf
+0 -30 Td
+(All notable changes to this project will be documented in this file.) Tj
+0 -30 Td
+([Unreleased]) Tj
+/F1 10 Tf
+0 -20 Td
+(- Initial planning and preparation for next release.) Tj
+/F1 11 Tf
+0 -40 Td
+([1.0.0] - YYYY-MM-DD) Tj
+/F1 10 Tf
+0 -20 Td
+(Added) Tj
+0 -15 Td
+(- Initial release of the application.) Tj
+0 -15 Td
+(- Core features implemented.) Tj
+0 -15 Td
+(- User interface and controls established.) Tj
+0 -15 Td
+(- Basic PDF viewing capability.) Tj
+0 -20 Td
+(Fixed) Tj
+0 -15 Td
+(- Initial bug fixes after internal testing.) Tj
+0 -20 Td
+(Changed) Tj
+0 -15 Td
+(- N/A) Tj
+/F1 9 Tf
+0 -40 Td
+(This changelog follows the Keep a Changelog format: https://keepachangelog.com/en/1.0.0/) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000010 00000 n 
+0000000061 00000 n 
+0000000111 00000 n 
+0000000285 00000 n 
+0000001071 00000 n 
+trailer
+<< /Root 1 0 R /Size 6 >>
+startxref
+1141
+%%EOF
