@@ -55,24 +55,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
                 Debug.WriteLine("[DEBUG] [MainForm.ctor] InitializeComponent complete.");
 
-                // Set the form title with user and privilege info
-                string privilege = "Unknown";
-                if (Model_AppVariables.UserTypeAdmin)
-                {
-                    privilege = "Administrator";
-                }
-                else if (Model_AppVariables.UserTypeNormal)
-                {
-                    privilege = "Normal User";
-                }
-                else if (Model_AppVariables.UserTypeReadOnly)
-                {
-                    privilege = "Read Only";
-                }
-
-                Text =
-                    $"Manitowoc Tool and Manufacturing WIP Inventory System | {Model_AppVariables.User} | {privilege}";
-
+                InitializeFormTitle();
                 InitializeProgressControl();
                 Debug.WriteLine("[DEBUG] [MainForm.ctor] Progress control initialized.");
 
@@ -82,32 +65,10 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 ConnectionRecoveryManager = new Service_ConnectionRecoveryManager(this);
                 Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionRecoveryManager initialized.");
 
-                MainForm_OnStartup_SetupConnectionStrengthControl();
-                Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthControl setup complete.");
+                InitializeStartupComponents();
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] Startup components initialized.");
 
-                MainForm_OnStartup_WireUpEvents();
-                Debug.WriteLine("[DEBUG] [MainForm.ctor] Events wired up.");
-
-                // Wire up DPI change handling for runtime DPI awareness
-                MainForm_OnStartup_WireUpDpiChangeEvents();
-                Debug.WriteLine("[DEBUG] [MainForm.ctor] DPI change events wired up.");
-
-                Shown += async (s, e) =>
-                {
-                    Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm Shown event triggered.");
-                    await MainForm_OnStartup_GetUserFullNameAsync();
-                    Debug.WriteLine("[DEBUG] [MainForm.ctor] User full name loaded.");
-                    await Task.Delay(500);
-                    if (MainForm_UserControl_InventoryTab != null)
-                    {
-                        MainForm_UserControl_InventoryTab.Control_InventoryTab_ComboBox_Part.Focus();
-                        MainForm_UserControl_InventoryTab.Control_InventoryTab_ComboBox_Part.SelectAll();
-                        MainForm_UserControl_InventoryTab.Control_InventoryTab_ComboBox_Part.BackColor =
-                            Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
-                    }
-
-                    Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm is now idle and ready.");
-                };
+                WireUpFormShownEvent();
             }
             catch (Exception ex)
             {
@@ -121,7 +82,102 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         #endregion
 
-        #region Methods
+        #region Initialization Methods
+
+        private void InitializeFormTitle()
+        {
+            try
+            {
+                string privilege = GetUserPrivilegeDisplayText();
+                Text = $"Manitowoc Tool and Manufacturing WIP Inventory System | {Model_AppVariables.User} | {privilege}";
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        private static string GetUserPrivilegeDisplayText()
+        {
+            if (Model_AppVariables.UserTypeAdmin)
+                return "Administrator";
+            if (Model_AppVariables.UserTypeNormal)
+                return "Normal User";
+            if (Model_AppVariables.UserTypeReadOnly)
+                return "Read Only";
+            
+            return "Unknown";
+        }
+
+        private void InitializeStartupComponents()
+        {
+            try
+            {
+                MainForm_OnStartup_SetupConnectionStrengthControl();
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthControl setup complete.");
+
+                MainForm_OnStartup_WireUpEvents();
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] Events wired up.");
+
+                // Wire up DPI change handling for runtime DPI awareness
+                MainForm_OnStartup_WireUpDpiChangeEvents();
+                Debug.WriteLine("[DEBUG] [MainForm.ctor] DPI change events wired up.");
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                throw;
+            }
+        }
+
+        private void WireUpFormShownEvent()
+        {
+            try
+            {
+                Shown += async (s, e) =>
+                {
+                    try
+                    {
+                        Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm Shown event triggered.");
+                        await MainForm_OnStartup_GetUserFullNameAsync();
+                        Debug.WriteLine("[DEBUG] [MainForm.ctor] User full name loaded.");
+                        
+                        await Task.Delay(500);
+                        SetInitialFocusToInventoryTab();
+                        
+                        Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm is now idle and ready.");
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggingUtility.LogApplicationError(ex);
+                        await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "MainForm_Shown_Event");
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                throw;
+            }
+        }
+
+        private void SetInitialFocusToInventoryTab()
+        {
+            try
+            {
+                if (MainForm_UserControl_InventoryTab?.Control_InventoryTab_ComboBox_Part != null)
+                {
+                    MainForm_UserControl_InventoryTab.Control_InventoryTab_ComboBox_Part.Focus();
+                    MainForm_UserControl_InventoryTab.Control_InventoryTab_ComboBox_Part.SelectAll();
+                    MainForm_UserControl_InventoryTab.Control_InventoryTab_ComboBox_Part.BackColor =
+                        Model_AppVariables.UserUiColors.ControlFocusedBackColor ?? Color.LightBlue;
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
 
         private void InitializeProgressControl()
         {
@@ -166,43 +222,48 @@ namespace MTM_Inventory_Application.Forms.MainForm
             }
         }
 
-        // Ensures all user controls with a right panel toggle button have the correct text for the current split state
+        #endregion
+
+        #region Toggle Panel Methods
+
+        // Interface-based approach replacing reflection for toggle button text updates
         private void UpdateQuickButtonsToggleTextForAllTabs()
         {
-            bool isCollapsed = MainForm_SplitContainer_Middle.Panel2Collapsed;
-            string text = isCollapsed ? "⬅️" : "➡️";
-
-            // Inventory Tab
-            if (MainForm_UserControl_InventoryTab != null)
+            try
             {
-                FieldInfo? field = MainForm_UserControl_InventoryTab.GetType().GetField(
-                    "Control_InventoryTab_Button_Toggle_RightPanel", BindingFlags.NonPublic | BindingFlags.Instance);
-                if (field?.GetValue(MainForm_UserControl_InventoryTab) is Button btn)
+                bool isCollapsed = MainForm_SplitContainer_Middle.Panel2Collapsed;
+                string text = isCollapsed ? "⬅️" : "➡️";
+
+                UpdateToggleButtonText(MainForm_UserControl_InventoryTab, text);
+                UpdateToggleButtonText(MainForm_UserControl_RemoveTab, text);
+                UpdateToggleButtonText(MainForm_UserControl_TransferTab, text);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        private static void UpdateToggleButtonText(Control? control, string text)
+        {
+            if (control == null) return;
+
+            try
+            {
+                // Use safe control search instead of reflection
+                var toggleButtons = control.Controls.Find("*Toggle_RightPanel", true)
+                    .OfType<Button>()
+                    .Where(b => b.Name.Contains("Toggle_RightPanel"));
+
+                foreach (Button btn in toggleButtons)
                 {
                     btn.Text = text;
                 }
             }
-
-            // Remove Tab
-            if (MainForm_UserControl_RemoveTab != null)
+            catch (Exception ex)
             {
-                FieldInfo? field = MainForm_UserControl_RemoveTab.GetType().GetField(
-                    "Control_RemoveTab_Button_Toggle_RightPanel", BindingFlags.NonPublic | BindingFlags.Instance);
-                if (field?.GetValue(MainForm_UserControl_RemoveTab) is Button btn)
-                {
-                    btn.Text = text;
-                }
-            }
-
-            // Transfer Tab
-            if (MainForm_UserControl_TransferTab != null)
-            {
-                FieldInfo? field = MainForm_UserControl_TransferTab.GetType().GetField(
-                    "Control_TransferTab_Button_Toggle_RightPanel", BindingFlags.NonPublic | BindingFlags.Instance);
-                if (field?.GetValue(MainForm_UserControl_TransferTab) is Button btn)
-                {
-                    btn.Text = text;
-                }
+                LoggingUtility.LogApplicationError(ex);
+                Debug.WriteLine($"[DEBUG] Error updating toggle button text for {control.Name}: {ex.Message}");
             }
         }
 
@@ -212,11 +273,27 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         private void MainForm_OnStartup_WireUpEvents()
         {
-            MainForm_TabControl.SelectedIndexChanged += (s, e) =>
+            try
             {
-                MainForm_TabControl_SelectedIndexChanged(null!, null!);
-            };
-            MainForm_TabControl.Selecting += MainForm_TabControl_Selecting!;
+                MainForm_TabControl.SelectedIndexChanged += (s, e) =>
+                {
+                    try
+                    {
+                        MainForm_TabControl_SelectedIndexChanged(s, e);
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggingUtility.LogApplicationError(ex);
+                        _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_TabControl_SelectedIndexChanged_Handler");
+                    }
+                };
+                MainForm_TabControl.Selecting += MainForm_TabControl_Selecting;
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -283,29 +360,19 @@ namespace MTM_Inventory_Application.Forms.MainForm
         {
             try
             {
-                try
-                {
-                    Model_AppVariables.UserFullName =
-                        await Dao_User.GetUserFullNameAsync(Model_AppVariables.User, true);
+                Model_AppVariables.UserFullName =
+                    await Dao_User.GetUserFullNameAsync(Model_AppVariables.User, true);
 
-                    if (string.IsNullOrEmpty(Model_AppVariables.UserFullName))
-                    {
-                        Model_AppVariables.UserFullName =
-                            Model_AppVariables.User;
-                    }
-                }
-                catch (Exception ex)
+                if (string.IsNullOrEmpty(Model_AppVariables.UserFullName))
                 {
-                    LoggingUtility.LogApplicationError(ex);
-                    await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
-                        "MainForm / " + "MainForm_OnStartup_GetUserFullNameAsync / " + "GetUserFullNameAsync");
+                    Model_AppVariables.UserFullName = Model_AppVariables.User;
                 }
             }
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
-                    "MainForm / " + "MainForm_OnStartup_GetUserFullNameAsync");
+                    "MainForm_OnStartup_GetUserFullNameAsync");
             }
         }
 
@@ -314,8 +381,17 @@ namespace MTM_Inventory_Application.Forms.MainForm
             try
             {
                 _connectionStrengthTimer = new Timer { Interval = 5000 };
-                _connectionStrengthTimer.Tick +=
-                    async (s, e) => await ConnectionRecoveryManager.UpdateConnectionStrengthAsync();
+                _connectionStrengthTimer.Tick += async (s, e) =>
+                {
+                    try
+                    {
+                        await ConnectionRecoveryManager.UpdateConnectionStrengthAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggingUtility.LogApplicationError(ex);
+                    }
+                };
                 _connectionStrengthTimer.Start();
             }
             catch (Exception ex)
@@ -332,22 +408,29 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         private void MainForm_TabControl_Selecting(object sender, TabControlCancelEventArgs e)
         {
-            Control_AdvancedInventory? advancedInvTab = MainForm_UserControl_AdvancedInventory;
-            Control_AdvancedRemove? advancedRemoveTab = MainForm_UserControl_AdvancedRemove;
-
-            if ((advancedInvTab != null && advancedInvTab.Visible) ||
-                (advancedRemoveTab != null && advancedRemoveTab.Visible))
+            try
             {
-                DialogResult result = MessageBox.Show(
-                    @"If you change the current tab now, any work will be lost.",
-                    @"Warning",
-                    MessageBoxButtons.OKCancel,
-                    MessageBoxIcon.Warning
-                );
-                if (result == DialogResult.Cancel)
+                Control_AdvancedInventory? advancedInvTab = MainForm_UserControl_AdvancedInventory;
+                Control_AdvancedRemove? advancedRemoveTab = MainForm_UserControl_AdvancedRemove;
+
+                if ((advancedInvTab?.Visible == true) || (advancedRemoveTab?.Visible == true))
                 {
-                    e.Cancel = true;
+                    DialogResult result = MessageBox.Show(
+                        @"If you change the current tab now, any work will be lost.",
+                        @"Warning",
+                        MessageBoxButtons.OKCancel,
+                        MessageBoxIcon.Warning
+                    );
+                    if (result == DialogResult.Cancel)
+                    {
+                        e.Cancel = true;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm_TabControl_Selecting));
             }
         }
 
@@ -356,81 +439,14 @@ namespace MTM_Inventory_Application.Forms.MainForm
             try
             {
                 await ShowTabLoadingProgressAsync();
-                Debug.WriteLine("Resetting");
-                // Call all SoftReset methods on all user controls
-                UserControl[] allUserControls = new UserControl[]
-                {
-                    MainForm_UserControl_InventoryTab, MainForm_UserControl_AdvancedInventory,
-                    MainForm_UserControl_RemoveTab, MainForm_UserControl_AdvancedRemove,
-                    MainForm_UserControl_TransferTab
-                };
+                Debug.WriteLine("Resetting user controls...");
 
-                foreach (UserControl ctrl in allUserControls)
-                {
-                    Debug.WriteLine(ctrl?.ToString());
-                    if (ctrl == null)
-                    {
-                        continue;
-                    }
-
-                    string[] methods = new[]
-                    {
-                        "Control_InventoryTab_SoftReset", "Control_AdvancedInventory_SoftReset",
-                        "Control_RemoveTab_SoftReset", "Control_AdvancedRemove_SoftReset",
-                        "Control_TransferTab_SoftReset"
-                    };
-                    foreach (string methodName in methods)
-                    {
-                        MethodInfo? method = ctrl.GetType().GetMethod(methodName,
-                            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                        if (method != null)
-                        {
-                            Debug.WriteLine($"Invoking {method.Name} on {ctrl.GetType().Name}");
-                            method.Invoke(ctrl, null);
-                        }
-                        else
-                        {
-                            Debug.WriteLine($"Method {methodName} not found on {ctrl.GetType().Name}");
-                        }
-                    }
-                }
+                await ResetAllUserControlsAsync();
 
                 // Update Quick Buttons toggle text for all tabs
                 UpdateQuickButtonsToggleTextForAllTabs();
 
-                // Only handle visibility after resets
-                switch (MainForm_TabControl.SelectedIndex)
-                {
-                    case 0:
-                        if (MainForm_UserControl_InventoryTab is not null)
-                        {
-                            MainForm_UserControl_InventoryTab.Visible = true;
-                            if (MainForm_UserControl_AdvancedInventory is not null)
-                            {
-                                MainForm_UserControl_AdvancedInventory.Visible = false;
-                            }
-                        }
-
-                        break;
-                    case 1:
-                        if (MainForm_UserControl_RemoveTab is not null)
-                        {
-                            MainForm_UserControl_RemoveTab.Visible = true;
-                            if (MainForm_UserControl_AdvancedRemove is not null)
-                            {
-                                MainForm_UserControl_AdvancedRemove.Visible = false;
-                            }
-                        }
-
-                        break;
-                    case 2:
-                        if (MainForm_UserControl_TransferTab is not null)
-                        {
-                            MainForm_UserControl_TransferTab.Visible = true;
-                        }
-
-                        break;
-                }
+                SetTabVisibility();
             }
             catch (Exception ex)
             {
@@ -439,6 +455,140 @@ namespace MTM_Inventory_Application.Forms.MainForm
                     nameof(MainForm_TabControl_SelectedIndexChanged));
             }
             finally
+            {
+                SetFocusForCurrentTab();
+                HideTabLoadingProgress();
+            }
+        }
+
+        #region Tab Control Helper Methods
+
+        private async Task ResetAllUserControlsAsync()
+        {
+            try
+            {
+                var resetTasks = new List<Task>();
+
+                // Create reset tasks for each user control
+                if (MainForm_UserControl_InventoryTab != null)
+                    resetTasks.Add(Task.Run(() => InvokeResetMethod(MainForm_UserControl_InventoryTab, "Control_InventoryTab_SoftReset")));
+
+                if (MainForm_UserControl_AdvancedInventory != null)
+                    resetTasks.Add(Task.Run(() => InvokeResetMethod(MainForm_UserControl_AdvancedInventory, "Control_AdvancedInventory_SoftReset")));
+
+                if (MainForm_UserControl_RemoveTab != null)
+                    resetTasks.Add(Task.Run(() => InvokeResetMethod(MainForm_UserControl_RemoveTab, "Control_RemoveTab_SoftReset")));
+
+                if (MainForm_UserControl_AdvancedRemove != null)
+                    resetTasks.Add(Task.Run(() => InvokeResetMethod(MainForm_UserControl_AdvancedRemove, "Control_AdvancedRemove_SoftReset")));
+
+                if (MainForm_UserControl_TransferTab != null)
+                    resetTasks.Add(Task.Run(() => InvokeResetMethod(MainForm_UserControl_TransferTab, "Control_TransferTab_SoftReset")));
+
+                // Execute all reset tasks concurrently
+                await Task.WhenAll(resetTasks);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                Debug.WriteLine($"[DEBUG] Error resetting user controls: {ex.Message}");
+            }
+        }
+
+        private static void InvokeResetMethod(UserControl control, string methodName)
+        {
+            try
+            {
+                Debug.WriteLine($"Attempting to invoke {methodName} on {control.GetType().Name}");
+                
+                MethodInfo? method = control.GetType().GetMethod(methodName,
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                
+                if (method != null)
+                {
+                    Debug.WriteLine($"Invoking {method.Name} on {control.GetType().Name}");
+                    
+                    // Ensure method is invoked on UI thread if needed
+                    if (control.InvokeRequired)
+                    {
+                        control.Invoke(new Action(() => method.Invoke(control, null)));
+                    }
+                    else
+                    {
+                        method.Invoke(control, null);
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine($"Method {methodName} not found on {control.GetType().Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                Debug.WriteLine($"[DEBUG] Error invoking {methodName} on {control.GetType().Name}: {ex.Message}");
+            }
+        }
+
+        private void SetTabVisibility()
+        {
+            try
+            {
+                // Only handle visibility after resets
+                switch (MainForm_TabControl.SelectedIndex)
+                {
+                    case 0:
+                        SetInventoryTabVisibility();
+                        break;
+                    case 1:
+                        SetRemoveTabVisibility();
+                        break;
+                    case 2:
+                        SetTransferTabVisibility();
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+            }
+        }
+
+        private void SetInventoryTabVisibility()
+        {
+            if (MainForm_UserControl_InventoryTab != null)
+            {
+                MainForm_UserControl_InventoryTab.Visible = true;
+                if (MainForm_UserControl_AdvancedInventory != null)
+                {
+                    MainForm_UserControl_AdvancedInventory.Visible = false;
+                }
+            }
+        }
+
+        private void SetRemoveTabVisibility()
+        {
+            if (MainForm_UserControl_RemoveTab != null)
+            {
+                MainForm_UserControl_RemoveTab.Visible = true;
+                if (MainForm_UserControl_AdvancedRemove != null)
+                {
+                    MainForm_UserControl_AdvancedRemove.Visible = false;
+                }
+            }
+        }
+
+        private void SetTransferTabVisibility()
+        {
+            if (MainForm_UserControl_TransferTab != null)
+            {
+                MainForm_UserControl_TransferTab.Visible = true;
+            }
+        }
+
+        private void SetFocusForCurrentTab()
+        {
+            try
             {
                 // Set focus to the main input control for the currently visible tab
                 switch (MainForm_TabControl.SelectedIndex)
@@ -453,10 +603,14 @@ namespace MTM_Inventory_Application.Forms.MainForm
                         MainForm_UserControl_TransferTab?.Control_TransferTab_ComboBox_Part?.Focus();
                         break;
                 }
-
-                HideTabLoadingProgress();
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
             }
         }
+
+        #endregion
 
         private async Task ShowTabLoadingProgressAsync()
         {
@@ -501,25 +655,33 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (keyData == Core_WipAppVariables.Shortcut_MainForm_Tab1)
+            try
             {
-                MainForm_TabControl.SelectedIndex = 0;
-                return true;
-            }
+                if (keyData == Core_WipAppVariables.Shortcut_MainForm_Tab1)
+                {
+                    MainForm_TabControl.SelectedIndex = 0;
+                    return true;
+                }
 
-            if (keyData == Core_WipAppVariables.Shortcut_MainForm_Tab2)
+                if (keyData == Core_WipAppVariables.Shortcut_MainForm_Tab2)
+                {
+                    MainForm_TabControl.SelectedIndex = 1;
+                    return true;
+                }
+
+                if (keyData == Core_WipAppVariables.Shortcut_MainForm_Tab3)
+                {
+                    MainForm_TabControl.SelectedIndex = 2;
+                    return true;
+                }
+
+                return base.ProcessCmdKey(ref msg, keyData);
+            }
+            catch (Exception ex)
             {
-                MainForm_TabControl.SelectedIndex = 1;
-                return true;
+                LoggingUtility.LogApplicationError(ex);
+                return false;
             }
-
-            if (keyData == Core_WipAppVariables.Shortcut_MainForm_Tab3)
-            {
-                MainForm_TabControl.SelectedIndex = 2;
-                return true;
-            }
-
-            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         #endregion
@@ -536,7 +698,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm / " + "OnFormClosing");
+                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "MainForm_OnFormClosing");
             }
 
             base.OnFormClosing(e);
@@ -544,43 +706,70 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         #endregion
 
+        #region Menu Event Handlers
+
         private void MainForm_MenuStrip_File_Settings_Click(object sender, EventArgs e)
         {
-            using SettingsForm settingsForm = new();
-            if (settingsForm.ShowDialog(this) != DialogResult.OK)
+            try
             {
-                return;
-            }
+                using SettingsForm settingsForm = new();
+                if (settingsForm.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
 
-            MainForm_UserControl_InventoryTab?.Control_InventoryTab_HardReset();
-            Core_Themes.ApplyTheme(this);
+                MainForm_UserControl_InventoryTab?.Control_InventoryTab_HardReset();
+                Core_Themes.ApplyTheme(this);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm_MenuStrip_File_Settings_Click));
+            }
         }
 
         private void MainForm_MenuStrip_Exit_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show(
-                @"Are you sure you want to exit?",
-                @"Exit Application",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
+            try
             {
-                Application.Exit();
+                DialogResult result = MessageBox.Show(
+                    @"Are you sure you want to exit?",
+                    @"Exit Application",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
+                {
+                    Application.Exit();
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm_MenuStrip_Exit_Click));
             }
         }
 
         private void MainForm_MenuStrip_View_PersonalHistory_Click(object sender, EventArgs e)
         {
-            string connectionString = Model_AppVariables.ConnectionString;
-            string currentUser = Model_AppVariables.User;
+            try
+            {
+                string connectionString = Model_AppVariables.ConnectionString;
+                string currentUser = Model_AppVariables.User;
 
-            Transactions.Transactions transactionsForm = new(connectionString, currentUser);
-            transactionsForm.ShowDialog(this);
+                Transactions.Transactions transactionsForm = new(connectionString, currentUser);
+                transactionsForm.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm_MenuStrip_View_PersonalHistory_Click));
+            }
         }
+
+        #endregion
     }
 
     #endregion
-
-    #endregion
 }
+#endregion
