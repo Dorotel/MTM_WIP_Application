@@ -4,8 +4,8 @@
 -- File: 04_Inventory_Procedures.sql
 -- Purpose: Inventory tracking, transactions, and batch number management
 -- Created: August 10, 2025
--- Updated: August 10, 2025 - UNIFORM PARAMETER NAMING (WITH p_ prefixes)
--- Target Database: mtm_wip_application
+-- Updated: August 12, 2025 - FIXED COLUMN NAMES TO MATCH DATABASE SCHEMA
+-- Target Database: mtm_wip_application_test
 -- MySQL Version: 5.7.24+ (MAMP Compatible)
 -- ================================================================================
 
@@ -68,15 +68,16 @@ BEGIN
         SET p_ErrorMsg = 'Quantity must be greater than zero';
         ROLLBACK;
     ELSE
+        -- FIXED: Use correct column names from actual database schema
         INSERT INTO inv_inventory (
             PartID, Location, Operation, Quantity, ItemType, 
-            User, BatchNumber, Notes, ReceiveDate, CreatedDate
+            User, BatchNumber, Notes, ReceiveDate, LastUpdated
         ) VALUES (
             p_PartID, p_Location, p_Operation, p_Quantity, p_ItemType,
             p_User, p_BatchNumber, p_Notes, NOW(), NOW()
         );
         
-        -- Also insert transaction record
+        -- Also insert transaction record (assuming inv_transaction table exists)
         INSERT INTO inv_transaction (
             PartID, Location, Operation, Quantity, ItemType,
             User, BatchNumber, Notes, TransactionType, TransactionDate
@@ -143,10 +144,10 @@ BEGIN
             SET p_ErrorMsg = CONCAT('Insufficient quantity. Available: ', v_CurrentQuantity, ', Requested: ', p_Quantity);
             ROLLBACK;
         ELSE
-            -- Update inventory quantity
+            -- FIXED: Use correct column name LastUpdated instead of ModifiedDate
             UPDATE inv_inventory 
             SET Quantity = Quantity - p_Quantity,
-                ModifiedDate = NOW()
+                LastUpdated = NOW()
             WHERE ID = v_InventoryId;
             
             -- Remove record if quantity becomes 0
@@ -210,10 +211,11 @@ BEGIN
         SET p_ErrorMsg = CONCAT('No inventory found for part: ', p_PartID, ', batch: ', p_BatchNumber);
         ROLLBACK;
     ELSE
+        -- FIXED: Use correct column name LastUpdated instead of ModifiedDate
         UPDATE inv_inventory 
         SET Location = p_NewLocation,
             User = p_User,
-            ModifiedDate = NOW()
+            LastUpdated = NOW()
         WHERE BatchNumber = p_BatchNumber 
           AND PartID = p_PartID 
           AND Operation = p_Operation;
@@ -289,10 +291,10 @@ BEGIN
             INTO v_NewBatchNumber
             FROM inv_inventory;
             
-            -- Reduce quantity in original location
+            -- FIXED: Use correct column name LastUpdated instead of ModifiedDate
             UPDATE inv_inventory 
             SET Quantity = Quantity - p_TransferQuantity,
-                ModifiedDate = NOW()
+                LastUpdated = NOW()
             WHERE BatchNumber = p_BatchNumber 
               AND PartID = p_PartID 
               AND Operation = p_Operation;
@@ -304,10 +306,10 @@ BEGIN
               AND Operation = p_Operation 
               AND Quantity <= 0;
             
-            -- Add transferred quantity to new location
+            -- FIXED: Use correct column names for INSERT
             INSERT INTO inv_inventory (
                 PartID, Location, Operation, Quantity, ItemType,
-                User, BatchNumber, ReceiveDate, CreatedDate
+                User, BatchNumber, ReceiveDate, LastUpdated
             ) VALUES (
                 p_PartID, p_NewLocation, p_Operation, p_TransferQuantity, v_ItemType,
                 p_User, v_NewBatchNumber, NOW(), NOW()
@@ -404,10 +406,10 @@ BEGIN
     -- Delete original records
     DELETE FROM inv_inventory;
     
-    -- Insert consolidated records
+    -- FIXED: Use correct column names for INSERT
     INSERT INTO inv_inventory (
         PartID, Location, Operation, Quantity, ItemType, User, 
-        BatchNumber, ReceiveDate, CreatedDate
+        BatchNumber, ReceiveDate, LastUpdated
     )
     SELECT 
         PartID, Location, Operation, TotalQuantity, ItemType, User,

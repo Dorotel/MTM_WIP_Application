@@ -5,7 +5,7 @@
 -- Purpose: Application version tracking and changelog management
 -- Created: August 10, 2025
 -- Updated: August 10, 2025 - UNIFORM PARAMETER NAMING (WITH p_ prefixes) - MySQL 5.7.24 COMPATIBLE
--- Target Database: mtm_wip_application
+-- Target Database: mtm_wip_application_test
 -- MySQL Version: 5.7.24+ (MAMP Compatible)
 -- ================================================================================
 

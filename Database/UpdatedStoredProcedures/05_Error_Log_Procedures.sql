@@ -3,7 +3,7 @@
 # =============================================================================
 # File: 05_Error_Log_Procedures.sql
 # Purpose: Stored procedures for error logging and management
-# Target Database: mtm_wip_application
+# Target Database: mtm_wip_application_test
 # MySQL Version: 5.7.24+ (MAMP Compatible)
 # Created: January 13, 2025
 # Updated: August 10, 2025 - UNIFORM PARAMETER NAMING (WITH p_ prefixes)

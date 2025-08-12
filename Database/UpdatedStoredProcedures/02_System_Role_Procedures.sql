@@ -5,7 +5,7 @@
 -- Purpose: System roles, user access control, and authorization procedures
 -- Created: August 10, 2025
 -- Updated: August 10, 2025 - UNIFORM PARAMETER NAMING (WITH p_ prefixes)
--- Target Database: mtm_wip_application
+-- Target Database: mtm_wip_application_test
 -- MySQL Version: 5.7.24+ (MAMP Compatible)
 -- ================================================================================
 
