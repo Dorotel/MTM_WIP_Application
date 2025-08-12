@@ -98,8 +98,4 @@
 		</EmbeddedResource>
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Database\CurrentDatabase\" />
-	</ItemGroup>
-
 </Project>
