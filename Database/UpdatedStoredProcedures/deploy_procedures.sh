@@ -5,15 +5,21 @@
 # File: deploy_procedures.sh
 # Purpose: Deploy all stored procedures to the MTM WIP Application database
 # Created: August 10, 2025
-# Updated: August 10, 2025 - UNIFORM PARAMETER NAMING (WITH p_ prefixes)
-# Target Database: mtm_wip_application
+# Updated: January 27, 2025 - Updated for new database/environment logic
+# Target Database: mtm_wip_application_test (development/test database)
 # MySQL Version: 5.7.24+ (MAMP Compatible)
+# 
+# ENVIRONMENT LOGIC:
+# - This script deploys to the TEST database (mtm_wip_application_test)
+# - For production deployment, use database name: mtm_wip_application
+# - Debug Mode (C#): Uses mtm_wip_application_test and localhost or 172.16.1.104
+# - Release Mode (C#): Uses mtm_wip_application and always 172.16.1.104
 # ================================================================================
 
-# Default MAMP configuration
+# Default MAMP configuration - UPDATED FOR TEST DATABASE
 DB_HOST=${DB_HOST:-"localhost"}
 DB_PORT=${DB_PORT:-"3306"}
-DB_NAME=${DB_NAME:-"mtm_wip_application"}
+DB_NAME=${DB_NAME:-"mtm_wip_application_test"}
 DB_USER=${DB_USER:-"root"}
 DB_PASSWORD=${DB_PASSWORD:-"root"}
 
@@ -261,7 +267,7 @@ show_usage() {
     echo "  -P, --port PORT        Database port (default: 3306)"
     echo "  -u, --user USER        Database username (default: root)"
     echo "  -p, --password PASS    Database password (default: root for MAMP)"
-    echo "  -d, --database DB      Database name (default: mtm_wip_application)"
+    echo "  -d, --database DB      Database name (default: mtm_wip_application_test)"
     echo "  --mysql-path PATH      Custom MySQL binary path"
     echo "  --help                 Show this help message"
     echo ""
@@ -279,7 +285,7 @@ show_usage() {
     echo "  08_Theme_Management_Procedures.sql    (8 procedures)"
     echo ""
     echo "MAMP Examples:"
-    echo "  $0 -h localhost -u root -p root -d mtm_wip_application"
+    echo "  $0 -h localhost -u root -p root -d mtm_wip_application_test"
     echo "  $0 --mysql-path /Applications/MAMP/Library/bin -p root"
     echo "  $0 -P 8889 -p root  # for older MAMP versions"
     echo ""
