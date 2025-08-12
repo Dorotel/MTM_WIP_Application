@@ -1,0 +1,186 @@
+name: Online Refactor Trigger
+
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  generate-prompt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate MASTER REFRACTOR PROMPT when "Online Refactor <FILE>" is detected
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const eventName = context.eventName;
+            const isBot =
+              (context.payload.sender && context.payload.sender.type === 'Bot') || false;
+            if (isBot) {
+              core.info('Skipping bot sender.');
+              return;
+            }
+
+            let text = '';
+            let issueNumber = null;
+
+            if (eventName === 'issue_comment') {
+              text = (context.payload.comment && context.payload.comment.body) || '';
+              issueNumber = context.payload.issue.number;
+            } else if (eventName === 'issues') {
+              const title = (context.payload.issue && context.payload.issue.title) || '';
+              const body = (context.payload.issue && context.payload.issue.body) || '';
+              text = `${title}\n${body}`;
+              issueNumber = context.payload.issue.number;
+            } else {
+              core.info(`Unsupported event: ${eventName}`);
+              return;
+            }
+
+            // Match "Online Refactor <FILE PATH>" on a single line, case-insensitive
+            const re = /^Online\s+Refactor\s+(.+)$/im;
+            const m = text.match(re);
+            if (!m) {
+              core.info('No Online Refactor trigger detected.');
+              return;
+            }
+
+            const filePathRaw = m[1].trim();
+            if (!filePathRaw) {
+              core.info('Online Refactor trigger found but file path is empty.');
+              return;
+            }
+
+            // Normalize path, derive file stem and date
+            const normPath = filePathRaw.replace(/\\/g, '/').trim();
+            const parts = normPath.split('/');
+            const fileName = parts[parts.length - 1] || 'target-file.cs';
+            const fileStem = fileName.replace(/\.[^.]+$/, '') || 'target-file';
+            const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+            const baseBranch = 'main';
+            const docsPath = 'Documentation/Copilot Files/21-refactoring-workflow.md';
+
+            const prompt = `
+\`\`\`markdown
+# MASTER REFRACTOR PROMPT (Online Mode)
+
+Refactor target file online with full dependency compliance.
+
+Meta
+- GeneratedFor: Dorotel
+- GeneratedAtUtc: ${new Date().toISOString().replace('T',' ').replace('Z','Z')}
+- RepoDocs: "${docsPath}"
+
+Target
+- File to refactor: ${normPath}
+- Base branch: ${baseBranch}
+- Desired feature branch name: refactor/${fileStem}/${date}
+
+Scope rules
+- Perform recursive dependency analysis:
+  - From the target file → methods it calls (upstream) and methods that call it (downstream)
+  - Recurse until closure or the threshold: MaxFiles=500, MaxMethods=500
+- Include: UI Controls, DAOs, Helpers, Core, Services, Models/DTOs, Extensions, Stored Procedures (map DAO → SP)
+- Exclude by default: third-party packages, BCL, generated *.Designer.cs (unless violating policy)
+
+Standards to enforce (see "${docsPath}")
+- Naming conventions for UI/DAO/constants
+- DAO pattern:
+  - Return types use DaoResult<T>
+  - Use Helper_Database_StoredProcedure exclusively (no inline SQL)
+  - Pass parameters in C# without p_ prefix (helper adds prefix)
+- Null safety: never dereference potentially null DataTable/DataRow/Object
+- Error handling: try/catch, LoggingUtility.Log*, user-friendly messages, early return on failure
+- Progress reporting: UI async DB ops use Helper_StoredProcedureProgress
+- Theme usage: only in constructors, settings-theme-change handlers, and DPI events
+- Privilege handling: ApplyPrivileges() in UI
+- Data binding safety: DataGridView and ComboBox standard patterns
+- Stored procedure contract: OUT p_Status, OUT p_ErrorMsg present and handled
+- Logging standards: context-rich, start/end markers where appropriate, avoid noisy logs
+- Quick Button logic: uniqueness rules and graceful failures (where relevant)
+- Performance: async for I/O, avoid redundant calls, use caching if indicated
+- Undo/reversibility: ensure mutating ops have a documented or implemented reversal path when required
+
+Before any code changes — produce and post a Pre-Refactor Report
+- Title: REFRACTOR_PREVIEW_REPORT
+- Contents:
+  - TargetFile, GeneratedAtUtc (ISO UTC), TraversalLimits (MaxFiles, MaxMethods, ReachedLimit)
+  - Summary: TotalFilesInScope, TotalMethodsInScope, NonCompliantMethods, HighRiskItems, StoredProcedures
+  - DependencyGraph: Level 0..N with upstream/downstream edges
+  - ComplianceMatrix: Per symbol PASS/PARTIAL/FAIL with reasons (mapped to the checklist above)
+  - StoredProceduresReferenced: names, locations, verification that OUT params exist
+  - PlannedRefactorActions: ordered and atomic
+  - Risks: categorized (Critical/Medium/Low) with mitigations
+  - RegressionTestPlan: concrete scenarios
+  - RollbackPlan: strategy (feature branch isolation, revert plan)
+- Output: Provide both Markdown and a JSON block (refactorReportVersion: 1)
+- IMPORTANT: Pause and WAIT for explicit “Proceed” approval.
+
+Implementation plan (after approval)
+- Create feature branch: refactor/${fileStem}/${date}
+- Apply atomic commits:
+  1) DAO signatures/parameter normalization; remove p_ prefix usage in C#
+  2) Logging and error handling harmonization
+  3) UI progress integration and null safety for dependent call sites
+  4) Stored procedure call alignment and verification
+- Do not change behavior beyond compliance unless explicitly requested
+- Update docs only if behavior meaningfully changes; reference Section 21 if updated
+
+Deliverables
+- Pre-Refactor Report (Markdown + JSON) posted before any change
+- Pull Request with:
+  - Description referencing “Section 21: Refactoring Workflow”
+  - Diff summary: Added/Removed/Renamed methods; any behavior changes
+  - Compliance delta: e.g., NonCompliantMethods: X → 0
+  - Evidence: test notes, screenshots (optional), logs of success and error paths
+- Rollback instructions (how to revert the feature branch)
+
+Assumptions/Inputs
+- Application: WinForms, .NET 8, MySQL 5.7.24+ (stored procedures only)
+- Version context: 5.0.1.2
+- If any stored procedure is missing required OUT params, propose the SQL changes but do not apply without approval
+
+Constraints
+- No inline SQL — must use Helper_Database_StoredProcedure
+- No theme calls outside allowed locations
+- No breaking public API unless explicitly stated and approved
+
+Optional exclusions
+- Exclude files/namespaces/globs: Controls/**/*.Designer.cs, **/obj/**, **/bin/**
+
+Acceptance criteria
+- All touched methods pass the compliance checklist
+- Build succeeds; smoke tests for impacted flows pass (as per RegressionTestPlan)
+- DaoResult<T> usage ensures non-null data payloads (empty table/collection allowed)
+
+Please acknowledge by posting the Pre-Refactor Report first, then pause for approval.
+\`\`\`
+`;
+
+            // Post the prompt as a comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: prompt
+            });
+
+            // Try to add a label (ignore failures if it doesn't exist)
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                labels: ['online-refactor']
+              });
+            } catch (e) {
+              core.info('Could not add label (might not exist).');
+            }
+
+            core.info(`Posted MASTER REFRACTOR PROMPT for path: ${normPath}`);

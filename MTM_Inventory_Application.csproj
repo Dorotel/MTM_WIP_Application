@@ -66,6 +66,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include=".github\ISSUE_TEMPLATE\online-refactor.yml" />
 	  <None Include="Controls\SettingsForm\Control_Remove_User.cs" />
 	  <None Include="X:\Software Development\Images\MTM Logo.png">
 	    <Pack>True</Pack>

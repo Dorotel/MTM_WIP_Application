@@ -1,0 +1,20 @@
+name: Online Refactor (Trigger)
+description: Type "Online Refactor <relative/path/FileName.cs>" in the title to auto-generate the MASTER REFRACTOR PROMPT.
+title: "Online Refactor Data/Inventory/Dao_Inventory.cs"
+labels:
+  - online-refactor
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Enter the file path in the title after "Online Refactor". Example:
+        Online Refactor Data/Inventory/Dao_Inventory.cs
+
+        You can add optional notes below; the workflow will still trigger from the title or any comment containing the phrase.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes/constraints (optional)
+      placeholder: e.g., "Compliance-only; no behavior changes"
+    validations:
+      required: false
