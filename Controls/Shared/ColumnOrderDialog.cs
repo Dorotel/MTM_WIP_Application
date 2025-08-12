@@ -7,8 +7,13 @@ using MTM_Inventory_Application.Core;
 
 namespace MTM_Inventory_Application.Controls.Shared
 {
+    /// <summary>
+    /// Dialog for reordering DataGridView columns via drag-and-drop
+    /// </summary>
     public class ColumnOrderDialog : Form
     {
+        #region Fields
+
         private readonly ListBox listBox;
         private readonly Button btnOK;
         private readonly Button btnCancel;
@@ -19,7 +24,31 @@ namespace MTM_Inventory_Application.Controls.Shared
         private readonly List<string> hiddenColumnNames; // only hidden columns, in display order
         private int dragIndex = -1;
 
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the ColumnOrderDialog
+        /// </summary>
+        /// <param name="dgv">DataGridView to configure column order for</param>
         public ColumnOrderDialog(DataGridView dgv)
+        {
+            InitializeDialog();
+            InitializeColumnData(dgv);
+            InitializeControls(dgv);
+            SetupEventHandlers();
+            ApplyTheming();
+        }
+
+        #endregion
+
+        #region Initialization Methods
+
+        /// <summary>
+        /// Initialize dialog properties
+        /// </summary>
+        private void InitializeDialog()
         {
             Text = "Change Column Order";
             Size = new Size(400, 540);
@@ -28,38 +57,53 @@ namespace MTM_Inventory_Application.Controls.Shared
             MinimizeBox = false;
             MaximizeBox = false;
             ShowInTaskbar = false;
+        }
+
+        /// <summary>
+        /// Initialize column data collections
+        /// </summary>
+        /// <param name="dgv">DataGridView to analyze</param>
+        private void InitializeColumnData(DataGridView dgv)
+        {
             columnNames = dgv.Columns.Cast<DataGridViewColumn>()
                 .OrderBy(c => c.DisplayIndex)
                 .Select(c => c.Name)
                 .ToList();
+            
             visibleColumnNames = dgv.Columns.Cast<DataGridViewColumn>()
                 .Where(c => c.Visible)
                 .OrderBy(c => c.DisplayIndex)
                 .Select(c => c.Name)
                 .ToList();
+            
             hiddenColumnNames = dgv.Columns.Cast<DataGridViewColumn>()
                 .Where(c => !c.Visible)
                 .OrderBy(c => c.DisplayIndex)
                 .Select(c => c.Name)
                 .ToList();
+        }
 
+        /// <summary>
+        /// Initialize form controls
+        /// </summary>
+        /// <param name="dgv">DataGridView to populate from</param>
+        private void InitializeControls(DataGridView dgv)
+        {
+            // Initialize ListBox
             listBox = new ListBox
             {
                 Dock = DockStyle.Top,
                 Height = 320,
                 AllowDrop = true
             };
+            
             foreach (var col in visibleColumnNames)
             {
                 var gridCol = dgv.Columns[col];
                 listBox.Items.Add(gridCol.HeaderText);
             }
-            listBox.MouseDown += ListBox_MouseDown;
-            listBox.MouseMove += ListBox_MouseMove;
-            listBox.DragOver += ListBox_DragOver;
-            listBox.DragDrop += ListBox_DragDrop;
-            listBox.KeyDown += ListBox_KeyDown;
 
+            // Initialize Labels
             infoLabel = new Label
             {
                 Text = "Drag and drop columns to reorder.\r\nUse Shift+Up/Down to move the selected column.\r\nOnly visible columns are shown. Hidden columns will always appear to the right.",
@@ -84,9 +128,11 @@ namespace MTM_Inventory_Application.Controls.Shared
                 AutoSize = false
             };
 
+            // Initialize Buttons
             btnOK = new Button { Text = "OK", DialogResult = DialogResult.OK, Dock = DockStyle.Bottom };
             btnCancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, Dock = DockStyle.Bottom };
 
+            // Add controls to form
             Controls.Add(btnOK);
             Controls.Add(btnCancel);
             Controls.Add(lblInstructions);
@@ -95,17 +141,45 @@ namespace MTM_Inventory_Application.Controls.Shared
 
             AcceptButton = btnOK;
             CancelButton = btnCancel;
+        }
 
+        /// <summary>
+        /// Setup event handlers for drag-and-drop functionality
+        /// </summary>
+        private void SetupEventHandlers()
+        {
+            listBox.MouseDown += ListBox_MouseDown;
+            listBox.MouseMove += ListBox_MouseMove;
+            listBox.DragOver += ListBox_DragOver;
+            listBox.DragDrop += ListBox_DragDrop;
+            listBox.KeyDown += ListBox_KeyDown;
+        }
+
+        /// <summary>
+        /// Apply theming and DPI scaling
+        /// </summary>
+        private void ApplyTheming()
+        {
             // DPI scaling and layout adjustments
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
         }
 
+        #endregion
+
+        #region Event Handlers
+
+        /// <summary>
+        /// Handle mouse down event for drag operation initiation
+        /// </summary>
         private void ListBox_MouseDown(object? sender, MouseEventArgs e)
         {
             dragIndex = listBox.IndexFromPoint(e.Location);
         }
 
+        /// <summary>
+        /// Handle mouse move event for drag operation
+        /// </summary>
         private void ListBox_MouseMove(object? sender, MouseEventArgs e)
         {
             if (dragIndex >= 0 && e.Button == MouseButtons.Left)
@@ -114,11 +188,17 @@ namespace MTM_Inventory_Application.Controls.Shared
             }
         }
 
+        /// <summary>
+        /// Handle drag over event
+        /// </summary>
         private void ListBox_DragOver(object? sender, DragEventArgs e)
         {
             e.Effect = DragDropEffects.Move;
         }
 
+        /// <summary>
+        /// Handle drag drop event to reorder items
+        /// </summary>
         private void ListBox_DragDrop(object? sender, DragEventArgs e)
         {
             Point point = listBox.PointToClient(new Point(e.X, e.Y));
@@ -134,6 +214,9 @@ namespace MTM_Inventory_Application.Controls.Shared
             }
         }
 
+        /// <summary>
+        /// Handle key down events for Shift+Up/Down reordering
+        /// </summary>
         private void ListBox_KeyDown(object? sender, KeyEventArgs e)
         {
             if (e.Shift && listBox.SelectedIndex >= 0)
@@ -158,6 +241,14 @@ namespace MTM_Inventory_Application.Controls.Shared
             }
         }
 
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Get the new column order as configured by the user
+        /// </summary>
+        /// <returns>List of column names in the new order</returns>
         public List<string> GetColumnOrder()
         {
             // Map header text back to column names for visible columns
@@ -184,10 +275,13 @@ namespace MTM_Inventory_Application.Controls.Shared
                 }
                 visibleOrder.Add(colName);
             }
+            
             // Append hidden columns in their original order
             var finalOrder = new List<string>(visibleOrder);
             finalOrder.AddRange(hiddenColumnNames);
             return finalOrder;
         }
+
+        #endregion
     }
 }
