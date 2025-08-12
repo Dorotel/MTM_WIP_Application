@@ -14,14 +14,14 @@ namespace MTM_Inventory_Application.Controls.Shared
     {
         #region Fields
 
-        private readonly ListBox listBox;
-        private readonly Button btnOK;
-        private readonly Button btnCancel;
-        private readonly Label infoLabel;
-        private readonly Label lblInstructions;
-        private readonly List<string> columnNames; // all columns, visible+hidden, in display order
-        private readonly List<string> visibleColumnNames; // only visible columns, in display order
-        private readonly List<string> hiddenColumnNames; // only hidden columns, in display order
+        private  ListBox listBox;
+        private  Button btnOK;
+        private  Button btnCancel;
+        private  Label infoLabel;
+        private  Label lblInstructions;
+        private  List<string> columnNames; // all columns, visible+hidden, in display order
+        private  List<string> visibleColumnNames; // only visible columns, in display order
+        private  List<string> hiddenColumnNames; // only hidden columns, in display order
         private int dragIndex = -1;
 
         #endregion
