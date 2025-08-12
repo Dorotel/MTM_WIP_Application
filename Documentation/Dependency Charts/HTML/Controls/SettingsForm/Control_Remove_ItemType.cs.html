@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dependency Chart: Control_Remove_ItemType.cs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .overview-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            transition: transform 0.3s ease;
+        }
+        
+        .overview-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .overview-card h3 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .overview-card .value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .dependency-flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .dependency-item {
+            background: #ecf0f1;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border-left: 4px solid #27ae60;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .dependency-item:hover {
+            background: #d5dbdb;
+            transform: scale(1.05);
+        }
+        
+        .dependency-item.external {
+            border-left-color: #e74c3c;
+            background: #fdf2f2;
+        }
+        
+        .dependency-item.external:hover {
+            background: #f8d7da;
+        }
+        
+        .dependency-item .icon {
+            margin-right: 8px;
+        }
+        
+        .compliance-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .status-item {
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-item.pass {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        
+        .status-item.fail {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .status-item.analyze {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .status-icon {
+            font-size: 1.2em;
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+        }
+        
+        .priority-high {
+            background: #ff4757;
+            color: white;
+        }
+        
+        .priority-medium {
+            background: #ffa502;
+            color: white;
+        }
+        
+        .priority-low {
+            background: #2ed573;
+            color: white;
+        }
+        
+        .methods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .method-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .method-card h4 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        
+        .method-list {
+            list-style: none;
+        }
+        
+        .method-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .method-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .overview-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Control_Remove_ItemType.cs</h1>
+            <div class="subtitle">Controls/SettingsForm/Control_Remove_ItemType.cs • Generated 2025-08-12 03:53:23 UTC</div>
+        </div>
+        
+        <div class="content">
+            <!-- File Overview Section -->
+            <div class="section">
+                <h2>📊 File Overview</h2>
+                <div class="overview-grid">
+                    <div class="overview-card">
+                        <h3>File Type</h3>
+                        <div class="value">UserControl</div>
+                    </div>
+                    <div class="overview-card">
+                        <h3>Complexity</h3>
+                        <div class="value">Low</div>
+                    </div>
+                    <div class="overview-card">
+                        <h3>Priority</h3>
+                        <div class="value">
+                            <span class="priority-badge priority-high">HIGH</span>
+                        </div>
+                    </div>
+                    <div class="overview-card">
+                        <h3>Dependencies</h3>
+                        <div class="value">6</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dependencies Section -->
+            <div class="section">
+                <h2>🔗 Dependencies (Upstream)</h2>
+                <h3 style="margin-bottom: 15px;">Internal Dependencies</h3>
+                <div class="dependency-flow">
+                    <div class="dependency-item"><span class="icon">✅</span>MTM_Inventory_Application.Data</div>
+<div class="dependency-item"><span class="icon">✅</span>MTM_Inventory_Application.Helpers</div>
+<div class="dependency-item"><span class="icon">✅</span>MTM_Inventory_Application.Logging</div>
+<div class="dependency-item"><span class="icon">✅</span>MTM_Inventory_Application.Models</div>
+
+                </div>
+                
+                <h3 style="margin-bottom: 15px; margin-top: 30px;">External Dependencies</h3>
+                <div class="dependency-flow">
+                    <div class="dependency-item external"><span class="icon">📦</span>.NET Framework</div>
+<div class="dependency-item external"><span class="icon">📦</span>MySql.Data</div>
+
+                </div>
+            </div>
+            
+            <!-- Compliance Status Section -->
+            <div class="section">
+                <h2>✅ Compliance Status</h2>
+                <div class="compliance-status">
+                    
+            <div class="status-item fail">
+                <span class="status-icon">❌</span>
+                <div>
+                    <strong>Region Organization</strong><br>
+                    <small>Non-standard region organization</small>
+                </div>
+            </div>
+            
+            <div class="status-item analyze">
+                <span class="status-icon">⚠️</span>
+                <div>
+                    <strong>Method Ordering</strong><br>
+                    <small>Requires detailed code review</small>
+                </div>
+            </div>
+            
+            <div class="status-item analyze">
+                <span class="status-icon">⚠️</span>
+                <div>
+                    <strong>DAO Pattern</strong><br>
+                    <small>For applicable files</small>
+                </div>
+            </div>
+            
+            <div class="status-item analyze">
+                <span class="status-icon">⚠️</span>
+                <div>
+                    <strong>Error Handling</strong><br>
+                    <small>Requires detailed code review</small>
+                </div>
+            </div>
+            
+            <div class="status-item analyze">
+                <span class="status-icon">⚠️</span>
+                <div>
+                    <strong>Progress Reporting</strong><br>
+                    <small>For UI components</small>
+                </div>
+            </div>
+            
+                </div>
+            </div>
+            
+            <!-- Refactor Requirements Section -->
+            <div class="section">
+                <h2>🔧 Refactor Requirements</h2>
+                <div class="method-card">
+                    <h4>Actions Required</h4>
+                    <ul class="method-list">
+                        <li>Reorganize into proper regions following standard order</li>
+<li>Verify proper event handler organization</li>
+<li>Check progress reporting implementation</li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>MTM Inventory Application - Dependency Analysis Tool</p>
+            <p>Generated on 2025-08-12 03:53:23 UTC • Region Compliance Analysis</p>
+        </div>
+    </div>
+</body>
+</html>

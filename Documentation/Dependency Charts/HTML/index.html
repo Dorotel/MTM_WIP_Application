@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM Inventory Application - Professional Dependency Charts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            font-weight: 300;
+            letter-spacing: -1px;
+        }
+        
+        .header .subtitle {
+            font-size: 1.3em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat .label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+        
+        .chart-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chart-card .description {
+            color: #6c757d;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .chart-card .metrics {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .metric {
+            text-align: center;
+        }
+        
+        .metric .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .metric .label {
+            font-size: 0.8em;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .priority-high {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .priority-medium {
+            background: #feca57;
+            color: white;
+        }
+        
+        .priority-low {
+            background: #48dbfb;
+            color: white;
+        }
+        
+        .view-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .view-button:hover {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .features {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .features h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+        }
+        
+        .features-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .features-list li {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #27ae60;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .features-list li .icon {
+            font-size: 1.2em;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .footer p {
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 MTM Inventory Application</h1>
+            <div class="subtitle">Professional Dependency Chart Visualization System</div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="number">75</div>
+                    <div class="label">HTML Charts</div>
+                </div>
+                <div class="stat">
+                    <div class="number">74</div>
+                    <div class="label">Files Analyzed</div>
+                </div>
+                <div class="stat">
+                    <div class="number">98.7%</div>
+                    <div class="label">Coverage</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Features Section -->
+            <div class="features">
+                <h3>🚀 Enhanced Visual Features</h3>
+                <ul class="features-list">
+                    <li><span class="icon">✨</span>Professional gradient backgrounds and modern typography</li>
+                    <li><span class="icon">🎨</span>Color-coded priority badges and status indicators</li>
+                    <li><span class="icon">📊</span>Interactive dependency flow visualization</li>
+                    <li><span class="icon">🔍</span>Detailed compliance status analysis</li>
+                    <li><span class="icon">📱</span>Responsive design for all screen sizes</li>
+                    <li><span class="icon">⚡</span>Smooth animations and hover effects</li>
+                </ul>
+            </div>
+            
+            <!-- Key Charts Section -->
+            <div class="section">
+                <h2>🔗 Key Dependency Charts</h2>
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>🏁 Program.cs</h3>
+                        <div class="description">
+                            Entry point of the application. Shows the main dependency tree starting from application initialization.
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <div class="value">10</div>
+                                <div class="label">Dependencies</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value">Medium</div>
+                                <div class="label">Complexity</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value"><span class="priority-badge priority-high">HIGH</span></div>
+                                <div class="label">Priority</div>
+                            </div>
+                        </div>
+                        <a href="./Program.cs.html" class="view-button">View Chart 📊</a>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3>🔄 Service_ConnectionRecoveryManager.cs</h3>
+                        <div class="description">
+                            Critical database recovery service managing connection resilience and error recovery patterns.
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <div class="value">4</div>
+                                <div class="label">Dependencies</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value">Low</div>
+                                <div class="label">Complexity</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value"><span class="priority-badge priority-high">HIGH</span></div>
+                                <div class="label">Priority</div>
+                            </div>
+                        </div>
+                        <a href="./Services/Service_ConnectionRecoveryManager.cs.html" class="view-button">View Chart 📊</a>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3>🗄️ Dao_Transactions.cs</h3>
+                        <div class="description">
+                            Transaction data access object implementing database operations with DAO pattern compliance.
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <div class="value">8</div>
+                                <div class="label">Dependencies</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value">Medium</div>
+                                <div class="label">Complexity</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value"><span class="priority-badge priority-high">HIGH</span></div>
+                                <div class="label">Priority</div>
+                            </div>
+                        </div>
+                        <a href="./Data/Dao_Transactions.cs.html" class="view-button">View Chart 📊</a>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3>🎨 Model_UserUiColors.cs</h3>
+                        <div class="description">
+                            User interface color configuration model with comprehensive theming support and customization options.
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <div class="value">2</div>
+                                <div class="label">Dependencies</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value">High</div>
+                                <div class="label">Complexity</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value"><span class="priority-badge priority-medium">MEDIUM</span></div>
+                                <div class="label">Priority</div>
+                            </div>
+                        </div>
+                        <a href="./Models/Model_UserUiColors.cs.html" class="view-button">View Chart 📊</a>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3>📋 ColumnOrderDialog.cs</h3>
+                        <div class="description">
+                            Interactive dialog for column reordering with drag-and-drop functionality and user preferences.
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <div class="value">6</div>
+                                <div class="label">Dependencies</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value">High</div>
+                                <div class="label">Complexity</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value"><span class="priority-badge priority-medium">MEDIUM</span></div>
+                                <div class="label">Priority</div>
+                            </div>
+                        </div>
+                        <a href="./Controls/Shared/ColumnOrderDialog.cs.html" class="view-button">View Chart 📊</a>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3>🔧 Core_JsonColorConverter.cs</h3>
+                        <div class="description">
+                            JSON serialization utility for color conversion with comprehensive error handling and validation.
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <div class="value">3</div>
+                                <div class="label">Dependencies</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value">Low</div>
+                                <div class="label">Complexity</div>
+                            </div>
+                            <div class="metric">
+                                <div class="value"><span class="priority-badge priority-low">LOW</span></div>
+                                <div class="label">Priority</div>
+                            </div>
+                        </div>
+                        <a href="./Core/Core_JsonColorConverter.cs.html" class="view-button">View Chart 📊</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>MTM Inventory Application - Professional Dependency Charts</strong></p>
+            <p>HTML visualization system with enhanced styling and professional presentation</p>
+            <p>Generated on 2025-08-12 • Region Compliance Analysis & Refactoring System</p>
+        </div>
+    </div>
+</body>
+</html>

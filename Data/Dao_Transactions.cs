@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
@@ -7,8 +7,34 @@ using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Data;
 
+/// <summary>
+/// Data access object for transaction operations
+/// </summary>
 internal class Dao_Transactions
 {
+    #region Search Methods
+
+    /// <summary>
+    /// Asynchronously search for transactions based on criteria
+    /// </summary>
+    /// <param name="userName">User performing the search</param>
+    /// <param name="isAdmin">Whether user has admin privileges</param>
+    /// <param name="partID">Part ID filter</param>
+    /// <param name="batchNumber">Batch number filter</param>
+    /// <param name="fromLocation">From location filter</param>
+    /// <param name="toLocation">To location filter</param>
+    /// <param name="operation">Operation filter</param>
+    /// <param name="transactionType">Transaction type filter</param>
+    /// <param name="quantity">Quantity filter</param>
+    /// <param name="notes">Notes filter</param>
+    /// <param name="itemType">Item type filter</param>
+    /// <param name="fromDate">From date filter</param>
+    /// <param name="toDate">To date filter</param>
+    /// <param name="sortColumn">Column to sort by</param>
+    /// <param name="sortDescending">Sort direction</param>
+    /// <param name="page">Page number for pagination</param>
+    /// <param name="pageSize">Number of items per page</param>
+    /// <returns>DaoResult containing list of transactions</returns>
     public async Task<DaoResult<List<Model_Transactions>>> SearchTransactionsAsync(
         string userName,
         bool isAdmin,
@@ -81,6 +107,27 @@ internal class Dao_Transactions
         }
     }
 
+    /// <summary>
+    /// Synchronously search for transactions based on criteria (backward compatibility)
+    /// </summary>
+    /// <param name="userName">User performing the search</param>
+    /// <param name="isAdmin">Whether user has admin privileges</param>
+    /// <param name="partID">Part ID filter</param>
+    /// <param name="batchNumber">Batch number filter</param>
+    /// <param name="fromLocation">From location filter</param>
+    /// <param name="toLocation">To location filter</param>
+    /// <param name="operation">Operation filter</param>
+    /// <param name="transactionType">Transaction type filter</param>
+    /// <param name="quantity">Quantity filter</param>
+    /// <param name="notes">Notes filter</param>
+    /// <param name="itemType">Item type filter</param>
+    /// <param name="fromDate">From date filter</param>
+    /// <param name="toDate">To date filter</param>
+    /// <param name="sortColumn">Column to sort by</param>
+    /// <param name="sortDescending">Sort direction</param>
+    /// <param name="page">Page number for pagination</param>
+    /// <param name="pageSize">Number of items per page</param>
+    /// <returns>DaoResult containing list of transactions</returns>
     public DaoResult<List<Model_Transactions>> SearchTransactions(
         string userName,
         bool isAdmin,
@@ -120,6 +167,15 @@ internal class Dao_Transactions
         }
     }
 
+    #endregion
+
+    #region Private Methods
+
+    /// <summary>
+    /// Maps MySqlDataReader row to Model_Transactions object
+    /// </summary>
+    /// <param name="reader">MySqlDataReader instance</param>
+    /// <returns>Mapped Model_Transactions object</returns>
     private Model_Transactions MapTransaction(MySqlDataReader reader) =>
         new()
         {
@@ -141,4 +197,6 @@ internal class Dao_Transactions
                 ? DateTime.MinValue
                 : Convert.ToDateTime(reader["ReceiveDate"])
         };
+
+    #endregion
 }
