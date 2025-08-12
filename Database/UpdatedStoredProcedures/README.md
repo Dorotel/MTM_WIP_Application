@@ -4,14 +4,81 @@
 # File: README.md
 # Purpose: Comprehensive guide for deploying stored procedures
 # Created: August 10, 2025
-# Updated: For MySQL 5.7.24 and MAMP compatibility
-# Target Database: mtm_wip_application
+# Updated: January 27, 2025 - Updated for new database/environment structure and logic
+# Target Database: mtm_wip_application_test (development/test database)
 # MySQL Version: 5.7.24+ (MAMP Compatible)
 # ================================================================================
 
 # MTM Inventory Application - Stored Procedures Deployment
 
 This directory contains all the stored procedures required for the MTM Inventory Application, along with deployment scripts and documentation optimized for MySQL 5.7.24 and MAMP environments.
+
+## Database File Structure and Environment Logic
+
+### **IMPORTANT: Database File Structure**
+
+The MTM_WIP_Application repository uses a specific file structure to separate reference files from active development files:
+
+```
+Database/
+├── CurrentDatabase/            # ⚠️  REFERENCE ONLY - DO NOT ALTER
+│   └── CurrentDatabase.sql     # Live production database snapshot
+├── CurrentServer/              # ⚠️  REFERENCE ONLY - DO NOT ALTER  
+│   └── (server configuration)  # Live production server config
+├── CurrentStoredProcedures/    # ⚠️  REFERENCE ONLY - DO NOT ALTER
+│   └── (procedures)            # Live production procedures snapshot
+├── UpdatedDatabase/            # ✅ ACTIVE DEVELOPMENT - USE FOR CHANGES
+│   └── LiveDatabase.sql        # Development/test database structure
+└── UpdatedStoredProcedures/    # ✅ ACTIVE DEVELOPMENT - USE FOR CHANGES
+    ├── 01_User_Management_Procedures.sql
+    ├── 02_System_Role_Procedures.sql
+    ├── deploy_procedures.bat
+    ├── deploy_procedures.sh
+    └── README.md (this file)
+```
+
+### **Environment-Specific Database and Server Logic**
+
+The application now uses conditional compilation and runtime logic to select appropriate database and server configurations:
+
+#### **Database Name Selection**
+- **Debug Mode**: `mtm_wip_application_test` (for development and testing)
+- **Release Mode**: `mtm_wip_application` (for production)
+
+#### **Server Address Selection**
+- **Release Mode**: Always uses `172.16.1.104` (production server)
+- **Debug Mode**: Uses IP detection logic:
+  - If current machine IP is `172.16.1.104` → use `172.16.1.104`
+  - Otherwise → use `localhost` (for development)
+
+#### **Implementation Details**
+```csharp
+// Model_Users.cs - Database property
+public static string Database 
+{ 
+    get
+    {
+#if DEBUG
+        return "mtm_wip_application_test";
+#else
+        return "mtm_wip_application";
+#endif
+    }
+}
+
+// Model_Users.cs - Server address property
+public static string WipServerAddress 
+{ 
+    get
+    {
+#if DEBUG
+        return GetLocalIpAddress() == "172.16.1.104" ? "172.16.1.104" : "localhost";
+#else
+        return "172.16.1.104";  // Always production server in Release
+#endif
+    }
+}
+```
 
 ## Overview
 
@@ -50,7 +117,8 @@ Database/StoredProcedures/
 - Target database created via phpMyAdmin or MySQL client
 
 ### Database Requirements
-- Target database `mtm_wip_application` must exist
+- **Development/Test Environment**: Target database `mtm_wip_application_test` must exist
+- **Production Environment**: Target database `mtm_wip_application` must exist
 - User account with sufficient privileges:
   - `CREATE ROUTINE` privilege
   - `ALTER ROUTINE` privilege
@@ -61,6 +129,30 @@ Database/StoredProcedures/
 - MTM Inventory Application (.NET 8)
 - All application DAO classes must be using the stored procedure architecture
 - Connection string properly configured for stored procedure calls
+
+## Environment-Aware Deployment
+
+### **Default Deployment (Development/Test)**
+The deployment scripts in this folder default to the **test database** (`mtm_wip_application_test`) for safe development:
+
+```cmd
+# Windows - deploys to TEST database by default
+deploy_procedures.bat -h localhost -u root -p root
+
+# Linux/Mac - deploys to TEST database by default  
+./deploy_procedures.sh -h localhost -u root -p root
+```
+
+### **Production Deployment**
+For production deployment, explicitly specify the production database:
+
+```cmd
+# Windows - explicit production deployment
+deploy_procedures.bat -h 172.16.1.104 -u root -p root -d mtm_wip_application
+
+# Linux/Mac - explicit production deployment
+./deploy_procedures.sh -h 172.16.1.104 -u root -p root -d mtm_wip_application
+```
 
 ## MySQL 5.7.24 Compatibility Notes
 

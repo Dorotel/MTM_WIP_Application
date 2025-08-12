@@ -1,11 +1,32 @@
 # Copilot Instructions for this repository
 
 Always consult the root README.md and the docs under Documentation/Copilot Files/ before answering.
-Key rules:
+
+## Key Rules
 - WinForms (.NET 8), MySQL stored procedures only
 - Use DaoResult<T>, no inline SQL, C# params without p_ prefix (helper adds it)
 - Follow UI progress, theming, and null-safety patterns
 - **MANDATORY: All code must use proper #region organization and method ordering**
+
+## Environment and Database Rules
+
+### **Database File Structure** (CRITICAL)
+- **Current\*** folders: Reference only - **DO NOT ALTER** (CurrentDatabase, CurrentServer, CurrentStoredProcedures)
+- **Updated\*** folders: Active development - **USE FOR ALL CHANGES** (UpdatedDatabase, UpdatedStoredProcedures)
+
+### **Environment-Specific Logic**
+**Database Names:**
+- Debug Mode: `mtm_wip_application_test`
+- Release Mode: `mtm_wip_application`
+
+**Server Addresses:**
+- Release Mode: Always `172.16.1.104`
+- Debug Mode: `172.16.1.104` if current IP matches, otherwise `localhost`
+
+**Implementation:**
+- Use `Model_Users.Database` and `Model_Users.WipServerAddress` properties
+- These properties automatically handle environment detection
+- Connection strings use `Helper_Database_Variables.GetConnectionString()`
 
 ## Code Organization Requirements (MANDATORY)
 
