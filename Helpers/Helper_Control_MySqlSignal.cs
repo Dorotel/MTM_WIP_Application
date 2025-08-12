@@ -5,7 +5,12 @@ namespace MTM_Inventory_Application.Helpers;
 
 public class Helper_Control_MySqlSignal
 {
+    #region Public Methods
 
+    /// <summary>
+    /// Get network strength and ping time to MySQL server
+    /// </summary>
+    /// <returns>Tuple containing strength (0-5) and ping time in milliseconds</returns>
     public static async Task<(int strength, int pingMs)> GetStrengthAsync()
     {
         string host;
@@ -46,10 +51,22 @@ public class Helper_Control_MySqlSignal
 
         return (strength, pingMs);
     }
+
+    #endregion
 }
 
+/// <summary>
+/// Database configuration helper class
+/// </summary>
 public static class DatabaseConfig
 {
+    #region Properties
+
+    /// <summary>
+    /// Gets or sets the database connection string
+    /// </summary>
     public static string ConnectionString { get; set; } =
         Helper_Database_Variables.GetConnectionString(null, null, null, null);
+
+    #endregion
 }

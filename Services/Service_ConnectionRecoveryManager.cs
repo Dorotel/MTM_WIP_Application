@@ -8,13 +8,34 @@ using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Services
 {
+    /// <summary>
+    /// Service for managing database connection recovery and monitoring
+    /// </summary>
     public class Service_ConnectionRecoveryManager
     {
+        #region Fields
+
         private readonly MainForm _mainForm;
         private readonly Timer _reconnectTimer;
 
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets a value indicating whether the disconnect timer is currently active
+        /// </summary>
         public bool IsDisconnectTimerActive => _reconnectTimer.Enabled;
 
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the Service_ConnectionRecoveryManager class
+        /// </summary>
+        /// <param name="mainForm">Reference to the main form</param>
+        /// <exception cref="ArgumentNullException">Thrown when mainForm is null</exception>
         public Service_ConnectionRecoveryManager(MainForm mainForm)
         {
             _mainForm = mainForm ?? throw new ArgumentNullException(nameof(mainForm));
@@ -22,6 +43,13 @@ namespace MTM_Inventory_Application.Services
             _reconnectTimer.Tick += async (s, e) => await TryReconnectAsync();
         }
 
+        #endregion
+
+        #region Connection Management Methods
+
+        /// <summary>
+        /// Handles when database connection is lost
+        /// </summary>
         public void HandleConnectionLost()
         {
             if (_mainForm.InvokeRequired)
@@ -37,6 +65,9 @@ namespace MTM_Inventory_Application.Services
             _reconnectTimer.Start();
         }
 
+        /// <summary>
+        /// Handles when database connection is restored
+        /// </summary>
         public void HandleConnectionRestored()
         {
             if (_mainForm.InvokeRequired)
@@ -51,19 +82,9 @@ namespace MTM_Inventory_Application.Services
             _reconnectTimer.Stop();
         }
 
-        private async Task TryReconnectAsync()
-        {
-            try
-            {
-                using MySqlConnection conn = new(Core_WipAppVariables.ReConnectionString);
-                await conn.OpenAsync();
-                HandleConnectionRestored();
-            }
-            catch
-            {
-            }
-        }
-
+        /// <summary>
+        /// Updates the connection strength indicator on the main form
+        /// </summary>
         public async Task UpdateConnectionStrengthAsync()
         {
             Control_ConnectionStrengthControl? signalStrength = _mainForm.MainForm_UserControl_SignalStrength;
@@ -92,5 +113,28 @@ namespace MTM_Inventory_Application.Services
                 HandleConnectionLost();
             }
         }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Attempts to reconnect to the database
+        /// </summary>
+        private async Task TryReconnectAsync()
+        {
+            try
+            {
+                using MySqlConnection conn = new(Core_WipAppVariables.ReConnectionString);
+                await conn.OpenAsync();
+                HandleConnectionRestored();
+            }
+            catch
+            {
+                // Reconnection failed, timer will try again
+            }
+        }
+
+        #endregion
     }
 }
