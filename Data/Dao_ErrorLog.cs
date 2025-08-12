@@ -12,17 +12,7 @@ namespace MTM_Inventory_Application.Data;
 
 internal static class Dao_ErrorLog
 {
-    #region Fields
 
-    public static Helper_Database_Core HelperDatabaseCore =
-        new(Helper_Database_Variables.GetConnectionString(
-            Model_AppVariables.WipServerAddress,
-            "mtm_wip_application",
-            Model_AppVariables.User,
-            Model_AppVariables.UserPin
-        ));
-
-    #endregion
 
     #region Query Methods
 

@@ -69,16 +69,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_Image_NothingFound.Visible = false;
             _ = Control_RemoveTab_OnStartup_LoadComboBoxesAsync();
 
-            Button undoButton = new()
-            {
-                Name = "Control_RemoveTab_Button_Undo",
-                Text = "Undo",
-                Enabled = false,
-                AutoSize = true,
-                Anchor = AnchorStyles.Right
-            };
-            undoButton.Click += Control_RemoveTab_Button_Undo_Click;
-
             Control_RemoveTab_Button_Print.Click -= Control_RemoveTab_Button_Print_Click;
             Control_RemoveTab_Button_Print.Click += Control_RemoveTab_Button_Print_Click;
             // Tooltip for printButton intentionally omitted to avoid variable conflict
@@ -258,7 +248,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 StringBuilder sb = new();
                 int attempted = 0;
                 var removeResult = await Dao_Inventory.RemoveInventoryItemsFromDataGridViewAsync(dgv, true);
-                LoggingUtility.Log($"Remove operation result: Success={removeResult.IsSuccess}, Status={removeResult.StatusMessage}");
+                LoggingUtility.Log($"Remove operation result: Success={removeResult.IsSuccess}, StatusMessage={removeResult.StatusMessage}");
                 
                 int removedCount = 0;
                 List<string> errorMessages = new();
@@ -646,29 +636,45 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 LoggingUtility.Log("RemoveTab Search button clicked.");
 
-                string partId = Control_RemoveTab_ComboBox_Part.Text;
-                string op = Control_RemoveTab_ComboBox_Operation.Text;
+                string partId = Control_RemoveTab_ComboBox_Part?.Text ?? "";
+                string op = Control_RemoveTab_ComboBox_Operation?.Text ?? "";
 
-                if (string.IsNullOrWhiteSpace(partId) || Control_RemoveTab_ComboBox_Part.SelectedIndex <= 0)
+                if (string.IsNullOrWhiteSpace(partId) || (Control_RemoveTab_ComboBox_Part?.SelectedIndex ?? -1) <= 0)
                 {
                     MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
-                    Control_RemoveTab_ComboBox_Part.Focus();
+                    Control_RemoveTab_ComboBox_Part?.Focus();
                     return;
                 }
 
                 DataTable results;
 
-                if (!string.IsNullOrWhiteSpace(op) && Control_RemoveTab_ComboBox_Operation.SelectedIndex > 0)
+                if (!string.IsNullOrWhiteSpace(op) && (Control_RemoveTab_ComboBox_Operation?.SelectedIndex ?? -1) > 0)
                 {
                     _progressHelper?.UpdateProgress(40,
                         "Querying by part and operation...");
-                    results = await Dao_Inventory.GetInventoryByPartIdAndOperationAsync(partId, op, true);
+                    var partOpResult = await Dao_Inventory.GetInventoryByPartIdAndOperationAsync(partId, op, true);
+                    if (partOpResult.IsSuccess)
+                    {
+                        results = partOpResult.Data;
+                    }
+                    else
+                    {
+                        throw new Exception(partOpResult.ErrorMessage ?? "Failed to retrieve inventory by part and operation");
+                    }
                 }
                 else
                 {
                     _progressHelper?.UpdateProgress(40, "Querying by part...");
-                    results = await Dao_Inventory.GetInventoryByPartIdAsync(partId, true);
+                    var partResult = await Dao_Inventory.GetInventoryByPartIdAsync(partId, true);
+                    if (partResult.IsSuccess)
+                    {
+                        results = partResult.Data;
+                    }
+                    else
+                    {
+                        throw new Exception(partResult.ErrorMessage ?? "Failed to retrieve inventory by part");
+                    }
                 }
 
                 _progressHelper?.UpdateProgress(70, "Updating results...");
@@ -716,9 +722,14 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
             try
             {
-                if (Control_RemoveTab_DataGridView_Main.Rows.Count == 0)
+                if (Control_RemoveTab_DataGridView_Main?.Rows.Count == 0)
                 {
                     MessageBox.Show(@"No data to print.", @"Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                if (Control_RemoveTab_DataGridView_Main == null)
+                {
                     return;
                 }
 
@@ -733,7 +744,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 }
 
                 Core_DgvPrinter printer = new();
-                Control_RemoveTab_DataGridView_Main.Tag = Control_RemoveTab_ComboBox_Part.Text;
+                Control_RemoveTab_DataGridView_Main.Tag = Control_RemoveTab_ComboBox_Part?.Text ?? "";
                 // Set visible columns for print
                 printer.SetPrintVisibleColumns(visibleColumns);
                 _progressHelper?.UpdateProgress(60, "Printing...");
@@ -826,9 +837,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
         {
             try
             {
-                Control_RemoveTab_Button_Search.Enabled = Control_RemoveTab_ComboBox_Part.SelectedIndex > 0;
-                bool hasData = Control_RemoveTab_DataGridView_Main.Rows.Count > 0;
-                bool hasSelection = Control_RemoveTab_DataGridView_Main.SelectedRows.Count > 0;
+                Control_RemoveTab_Button_Search.Enabled = (Control_RemoveTab_ComboBox_Part?.SelectedIndex ?? -1) > 0;
+                bool hasData = Control_RemoveTab_DataGridView_Main?.Rows.Count > 0;
+                bool hasSelection = Control_RemoveTab_DataGridView_Main?.SelectedRows.Count > 0;
                 Control_RemoveTab_Button_Delete.Enabled = hasData && hasSelection;
                 // Print button enable/disable
                 if (Control_RemoveTab_Button_Print != null)
@@ -982,7 +993,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 }
 
                 DataTable dt = getAllResult.Data ?? new DataTable();
-                LoggingUtility.Log($"[SHOW ALL DEBUG] Retrieved {dt.Rows.Count} inventory records. Status: {getAllResult.StatusMessage}");
+                LoggingUtility.Log($"[SHOW ALL DEBUG] Retrieved {dt.Rows.Count} inventory records. Status: {getAllResult.Status}");
 
                 Control_RemoveTab_DataGridView_Main.DataSource = dt;
                 Control_RemoveTab_DataGridView_Main.ClearSelection();

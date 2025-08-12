@@ -164,7 +164,7 @@ if errorlevel 1 (
 
 REM Deploy procedures - UPDATED FOR UNIFORM PARAMETER NAMING
 set success_count=0
-set total_count=7
+set total_count=8
 
 REM User Management Procedures
 echo [INFO] Executing User Management Procedures ^(UNIFORM p_ prefixes^)...
@@ -264,6 +264,20 @@ if exist "07_Changelog_Version_Procedures.sql" (
     echo [ERROR] File not found: 07_Changelog_Version_Procedures.sql
 )
 
+REM Theme Management Procedures - NEW
+echo [INFO] Executing Theme Management Procedures ^(UNIFORM p_ prefixes^)...
+if exist "08_Theme_Management_Procedures.sql" (
+    !MYSQL_CMD! -h%DB_HOST% -P%DB_PORT% -u%DB_USER% -p%DB_PASSWORD% %DB_NAME% < "08_Theme_Management_Procedures.sql"
+    if errorlevel 1 (
+        echo [ERROR] Theme Management Procedures failed
+    ) else (
+        echo [SUCCESS] Theme Management Procedures completed successfully
+        set /a success_count+=1
+    )
+) else (
+    echo [ERROR] File not found: 08_Theme_Management_Procedures.sql
+)
+
 REM MySQL 5.7.24 Compatibility Check
 echo [INFO] Checking MySQL version compatibility...
 !MYSQL_CMD! -h%DB_HOST% -P%DB_PORT% -u%DB_USER% -p%DB_PASSWORD% -e "SELECT VERSION();" %DB_NAME% 2>nul
@@ -291,7 +305,8 @@ if %success_count% == %total_count% (
     echo [INFO]   - Error Logging ^(6 procedures^) with p_ prefixes
     echo [INFO]   - Quick Buttons ^(7 procedures^) with p_ prefixes
     echo [INFO]   - Changelog/Version ^(3 procedures^) with p_ prefixes
-    echo [INFO] Total: ~74 procedures with uniform p_ parameter naming
+    echo [INFO]   - Theme Management ^(8 procedures^) with p_ prefixes
+    echo [INFO] Total: ~82 procedures with uniform p_ parameter naming
     echo [INFO] Deployment completed for MySQL 5.7.24 ^(MAMP Compatible^)
     exit /b 0
 ) else (
@@ -301,7 +316,7 @@ if %success_count% == %total_count% (
     echo [INFO]   2. Check that the database '%DB_NAME%' exists
     echo [INFO]   3. Verify user '%DB_USER%' has CREATE ROUTINE privileges
     echo [INFO]   4. Confirm MAMP MySQL version is 5.7.24 or higher
-    echo [INFO]   5. Ensure all 7 SQL files are present in current directory
+    echo [INFO]   5. Ensure all 8 SQL files are present in current directory
     exit /b 1
 )
 
@@ -323,7 +338,7 @@ echo.
 echo Environment variables:
 echo   DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 echo.
-echo Files deployed ^(7 total^):
+echo Files deployed ^(8 total^):
 echo   01_User_Management_Procedures.sql     ^(17 procedures^)
 echo   02_System_Role_Procedures.sql         ^(8 procedures^)
 echo   03_Master_Data_Procedures.sql         ^(21 procedures^)
@@ -331,6 +346,7 @@ echo   04_Inventory_Procedures.sql           ^(12 procedures^)
 echo   05_Error_Log_Procedures.sql           ^(6 procedures^)
 echo   06_Quick_Button_Procedures.sql        ^(7 procedures^)
 echo   07_Changelog_Version_Procedures.sql   ^(3 procedures^)
+echo   08_Theme_Management_Procedures.sql    ^(8 procedures^)
 echo.
 echo MAMP Examples:
 echo   %0 -h localhost -u root -p root -d mtm_wip_application
@@ -342,6 +358,6 @@ echo   1. Start MAMP and ensure Apache/MySQL services are running
 echo   2. Check MAMP control panel for correct port ^(usually 3306^)
 echo   3. Default MAMP credentials are usually root/root
 echo   4. Ensure target database exists in phpMyAdmin
-echo   5. Verify all 7 SQL files are present in current directory
+echo   5. Verify all 8 SQL files are present in current directory
 echo.
 exit /b 0

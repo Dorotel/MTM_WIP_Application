@@ -2,7 +2,6 @@
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
-using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Data;
 
@@ -10,43 +9,35 @@ namespace MTM_Inventory_Application.Data;
 
 internal static class Dao_Part
 {
-    #region Fields
-
-    public static Helper_Database_Core HelperDatabaseCore =
-        new(Helper_Database_Variables.GetConnectionString(
-            Model_AppVariables.WipServerAddress,
-            "mtm_wip_application",
-            Model_AppVariables.User,
-            Model_AppVariables.UserPin
-        ));
-
-    #endregion
-
     #region Delete
 
     internal static async Task<DaoResult> DeletePart(string partNumber, bool useAsync = false)
     {
         try
         {
-            Dictionary<string, object> parameters = new() { ["p_ItemNumber"] = partNumber };
-            int rowsAffected = await HelperDatabaseCore.ExecuteNonQuery(
-                "md_part_ids_Delete_ByItemNumber",
-                parameters, useAsync, CommandType.StoredProcedure);
+            Dictionary<string, object> parameters = new() { ["ItemNumber"] = partNumber }; // p_ prefix added automatically
 
-            return rowsAffected > 0 
-                ? DaoResult.Success($"Part {partNumber} deleted successfully", rowsAffected)
-                : DaoResult.Failure($"Part {partNumber} not found or could not be deleted");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult.Failure($"Database error deleting part {partNumber}", ex);
+            var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
+                Model_AppVariables.ConnectionString,
+                "md_part_ids_Delete_ByItemNumber",
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
+
+            if (result.IsSuccess)
+            {
+                return DaoResult.Success($"Part {partNumber} deleted successfully");
+            }
+            else
+            {
+                return DaoResult.Failure($"Failed to delete part {partNumber}: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "DeletePart");
             return DaoResult.Failure($"Error deleting part {partNumber}", ex);
         }
     }
@@ -61,31 +52,34 @@ internal static class Dao_Part
         {
             Dictionary<string, object> parameters = new()
             {
-                ["p_ItemNumber"] = partNumber, 
-                ["p_Customer"] = "", 
-                ["p_Description"] = "", 
-                ["p_IssuedBy"] = user, 
-                ["p_ItemType"] = partType
+                ["ItemNumber"] = partNumber,     // p_ prefix added automatically
+                ["Customer"] = "", 
+                ["Description"] = "", 
+                ["IssuedBy"] = user, 
+                ["ItemType"] = partType
             };
             
-            int rowsAffected = await HelperDatabaseCore.ExecuteNonQuery(
+            var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
+                Model_AppVariables.ConnectionString,
                 "md_part_ids_Add_Part",
-                parameters, useAsync, CommandType.StoredProcedure);
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
 
-            return rowsAffected > 0 
-                ? DaoResult.Success($"Part {partNumber} created successfully", rowsAffected)
-                : DaoResult.Failure($"Failed to create part {partNumber}");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult.Failure($"Database error creating part {partNumber}", ex);
+            if (result.IsSuccess)
+            {
+                return DaoResult.Success($"Part {partNumber} created successfully");
+            }
+            else
+            {
+                return DaoResult.Failure($"Failed to create part {partNumber}: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "InsertPart");
             return DaoResult.Failure($"Error creating part {partNumber}", ex);
         }
     }
@@ -107,32 +101,35 @@ internal static class Dao_Part
 
             Dictionary<string, object> parameters = new()
             {
-                ["p_ID"] = existingPart.Data["ID"],
-                ["p_ItemNumber"] = partNumber,
-                ["p_Customer"] = existingPart.Data["Customer"]?.ToString() ?? "",
-                ["p_Description"] = existingPart.Data["Description"]?.ToString() ?? "",
-                ["p_IssuedBy"] = user,
-                ["p_ItemType"] = partType
+                ["ID"] = existingPart.Data["ID"],                                   // p_ prefix added automatically
+                ["ItemNumber"] = partNumber,
+                ["Customer"] = existingPart.Data["Customer"]?.ToString() ?? "",
+                ["Description"] = existingPart.Data["Description"]?.ToString() ?? "",
+                ["IssuedBy"] = user,
+                ["ItemType"] = partType
             };
 
-            int rowsAffected = await HelperDatabaseCore.ExecuteNonQuery(
+            var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
+                Model_AppVariables.ConnectionString,
                 "md_part_ids_Update_Part",
-                parameters, useAsync, CommandType.StoredProcedure);
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
 
-            return rowsAffected > 0 
-                ? DaoResult.Success($"Part {partNumber} updated successfully", rowsAffected)
-                : DaoResult.Failure($"Failed to update part {partNumber}");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult.Failure($"Database error updating part {partNumber}", ex);
+            if (result.IsSuccess)
+            {
+                return DaoResult.Success($"Part {partNumber} updated successfully");
+            }
+            else
+            {
+                return DaoResult.Failure($"Failed to update part {partNumber}: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "UpdatePart");
             return DaoResult.Failure($"Error updating part {partNumber}", ex);
         }
     }
@@ -145,22 +142,27 @@ internal static class Dao_Part
     {
         try
         {
-            DataTable result = await HelperDatabaseCore.ExecuteDataTable(
+            var result = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
+                Model_AppVariables.ConnectionString,
                 "md_part_ids_Get_All",
-                null, useAsync, CommandType.StoredProcedure);
+                null, // No parameters needed
+                null, // No progress helper for this method
+                useAsync
+            );
             
-            return DaoResult<DataTable>.Success(result, $"Retrieved {result.Rows.Count} parts");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult<DataTable>.Failure("Database error retrieving parts", ex);
+            if (result.IsSuccess && result.Data != null)
+            {
+                return DaoResult<DataTable>.Success(result.Data, $"Retrieved {result.Data.Rows.Count} parts");
+            }
+            else
+            {
+                return DaoResult<DataTable>.Failure($"Failed to retrieve parts: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "GetAllParts");
             return DaoResult<DataTable>.Failure("Error retrieving parts", ex);
         }
     }
@@ -169,28 +171,29 @@ internal static class Dao_Part
     {
         try
         {
-            Dictionary<string, object> parameters = new() { ["p_ItemNumber"] = partNumber };
-            DataTable table = await HelperDatabaseCore.ExecuteDataTable(
+            Dictionary<string, object> parameters = new() { ["ItemNumber"] = partNumber }; // p_ prefix added automatically
+
+            var result = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
+                Model_AppVariables.ConnectionString,
                 "md_part_ids_Get_ByItemNumber",
-                parameters, useAsync, CommandType.StoredProcedure);
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
 
-            if (table.Rows.Count > 0)
+            if (result.IsSuccess && result.Data != null && result.Data.Rows.Count > 0)
             {
-                return DaoResult<DataRow>.Success(table.Rows[0], $"Found part {partNumber}");
+                return DaoResult<DataRow>.Success(result.Data.Rows[0], $"Found part {partNumber}");
             }
-
-            return DaoResult<DataRow>.Failure($"Part {partNumber} not found");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult<DataRow>.Failure($"Database error retrieving part {partNumber}", ex);
+            else
+            {
+                return DaoResult<DataRow>.Failure($"Part {partNumber} not found");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "GetPartByNumber");
             return DaoResult<DataRow>.Failure($"Error retrieving part {partNumber}", ex);
         }
     }
@@ -213,22 +216,27 @@ internal static class Dao_Part
     {
         try
         {
-            DataTable result = await HelperDatabaseCore.ExecuteDataTable(
+            var result = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
+                Model_AppVariables.ConnectionString,
                 "md_item_types_GetDistinct",
-                null, useAsync, CommandType.StoredProcedure);
+                null, // No parameters needed
+                null, // No progress helper for this method
+                useAsync
+            );
                 
-            return DaoResult<DataTable>.Success(result, $"Retrieved {result.Rows.Count} part types");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult<DataTable>.Failure("Database error retrieving part types", ex);
+            if (result.IsSuccess && result.Data != null)
+            {
+                return DaoResult<DataTable>.Success(result.Data, $"Retrieved {result.Data.Rows.Count} part types");
+            }
+            else
+            {
+                return DaoResult<DataTable>.Failure($"Failed to retrieve part types: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "GetPartTypes");
             return DaoResult<DataTable>.Failure("Error retrieving part types", ex);
         }
     }
@@ -244,30 +252,34 @@ internal static class Dao_Part
         {
             Dictionary<string, object> parameters = new()
             {
-                ["p_ItemNumber"] = itemNumber,
-                ["p_Customer"] = customer,
-                ["p_Description"] = description,
-                ["p_IssuedBy"] = issuedBy,
-                ["p_ItemType"] = type
+                ["ItemNumber"] = itemNumber,     // p_ prefix added automatically
+                ["Customer"] = customer,
+                ["Description"] = description,
+                ["IssuedBy"] = issuedBy,
+                ["ItemType"] = type
             };
 
-            int rowsAffected = await HelperDatabaseCore.ExecuteNonQuery("md_part_ids_Add_Part", parameters, useAsync,
-                CommandType.StoredProcedure);
+            var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
+                Model_AppVariables.ConnectionString,
+                "md_part_ids_Add_Part",
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
                 
-            return rowsAffected > 0 
-                ? DaoResult.Success($"Part {itemNumber} added successfully", rowsAffected)
-                : DaoResult.Failure($"Failed to add part {itemNumber}");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult.Failure($"Database error adding part {itemNumber}", ex);
+            if (result.IsSuccess)
+            {
+                return DaoResult.Success($"Part {itemNumber} added successfully");
+            }
+            else
+            {
+                return DaoResult.Failure($"Failed to add part {itemNumber}: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "AddPartWithStoredProcedure");
             return DaoResult.Failure($"Error adding part {itemNumber}", ex);
         }
     }
@@ -279,31 +291,35 @@ internal static class Dao_Part
         {
             Dictionary<string, object> parameters = new()
             {
-                ["p_ID"] = id,
-                ["p_ItemNumber"] = itemNumber,
-                ["p_Customer"] = customer,
-                ["p_Description"] = description,
-                ["p_IssuedBy"] = issuedBy,
-                ["p_ItemType"] = type
+                ["ID"] = id,                     // p_ prefix added automatically
+                ["ItemNumber"] = itemNumber,
+                ["Customer"] = customer,
+                ["Description"] = description,
+                ["IssuedBy"] = issuedBy,
+                ["ItemType"] = type
             };
 
-            int rowsAffected = await HelperDatabaseCore.ExecuteNonQuery("md_part_ids_Update_Part", parameters, useAsync,
-                CommandType.StoredProcedure);
+            var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
+                Model_AppVariables.ConnectionString,
+                "md_part_ids_Update_Part",
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
                 
-            return rowsAffected > 0 
-                ? DaoResult.Success($"Part {itemNumber} updated successfully", rowsAffected)
-                : DaoResult.Failure($"Failed to update part {itemNumber}");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult.Failure($"Database error updating part {itemNumber}", ex);
+            if (result.IsSuccess)
+            {
+                return DaoResult.Success($"Part {itemNumber} updated successfully");
+            }
+            else
+            {
+                return DaoResult.Failure($"Failed to update part {itemNumber}: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "UpdatePartWithStoredProcedure");
             return DaoResult.Failure($"Error updating part {itemNumber}", ex);
         }
     }

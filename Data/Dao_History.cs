@@ -2,7 +2,6 @@
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Logging;
-using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Data;
 
@@ -10,45 +9,40 @@ namespace MTM_Inventory_Application.Data;
 
 internal class Dao_History
 {
-    #region Fields
-
-    public static Helper_Database_Core HelperDatabaseCore =
-        new(Helper_Database_Variables.GetConnectionString(
-            Model_AppVariables.WipServerAddress,
-            "mtm_wip_application",
-            Model_AppVariables.User,
-            Model_AppVariables.UserPin
-        ));
-
-    #endregion
-
     #region History Methods
 
     public static async Task AddTransactionHistoryAsync(Model_TransactionHistory history)
     {
         try
         {
-            // FIXED: Use Helper_Database_Core instead of direct MySqlConnection and correct parameter naming
+            // MIGRATED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
             Dictionary<string, object> parameters = new()
             {
-                ["p_TransactionType"] = history.TransactionType,
-                ["p_PartID"] = history.PartId,
-                ["p_FromLocation"] = history.FromLocation ?? (object)DBNull.Value,
-                ["p_ToLocation"] = history.ToLocation ?? (object)DBNull.Value,
-                ["p_Operation"] = history.Operation ?? (object)DBNull.Value,
-                ["p_Quantity"] = history.Quantity,
-                ["p_Notes"] = history.Notes ?? (object)DBNull.Value,
-                ["p_User"] = history.User,
-                ["p_ItemType"] = history.ItemType ?? (object)DBNull.Value,
-                ["p_BatchNumber"] = history.BatchNumber ?? (object)DBNull.Value,
-                ["p_ReceiveDate"] = history.DateTime
+                ["TransactionType"] = history.TransactionType,         // p_ prefix added automatically
+                ["PartID"] = history.PartId,
+                ["FromLocation"] = history.FromLocation ?? (object)DBNull.Value,
+                ["ToLocation"] = history.ToLocation ?? (object)DBNull.Value,
+                ["Operation"] = history.Operation ?? (object)DBNull.Value,
+                ["Quantity"] = history.Quantity,
+                ["Notes"] = history.Notes ?? (object)DBNull.Value,
+                ["User"] = history.User,
+                ["ItemType"] = history.ItemType ?? (object)DBNull.Value,
+                ["BatchNumber"] = history.BatchNumber ?? (object)DBNull.Value,
+                ["ReceiveDate"] = history.DateTime
             };
 
-            await HelperDatabaseCore.ExecuteNonQuery(
+            var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
+                Model_AppVariables.ConnectionString,
                 "inv_transaction_Add",
-                parameters, 
-                true, // Use async
-                CommandType.StoredProcedure);
+                parameters,
+                null, // No progress helper for this method
+                true  // Use async
+            );
+
+            if (!result.IsSuccess)
+            {
+                LoggingUtility.Log($"AddTransactionHistoryAsync failed: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {

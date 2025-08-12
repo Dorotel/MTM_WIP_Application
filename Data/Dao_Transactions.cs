@@ -2,20 +2,13 @@
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
-using MySql.Data.MySqlClient;
 using System.Data;
+using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Data;
 
 internal class Dao_Transactions
 {
-    private readonly Helper_Database_Core _helperDatabaseCore;
-
-    public Dao_Transactions(string connectionString) 
-    {
-        _helperDatabaseCore = new Helper_Database_Core(connectionString);
-    }
-
     public async Task<DaoResult<List<Model_Transactions>>> SearchTransactionsAsync(
         string userName,
         bool isAdmin,
@@ -40,26 +33,28 @@ internal class Dao_Transactions
         {
             var parameters = new Dictionary<string, object>
             {
-                ["p_UserName"] = userName ?? "",
-                ["p_IsAdmin"] = isAdmin,
-                ["p_PartID"] = partID ?? "",
-                ["p_BatchNumber"] = batchNumber ?? "",
-                ["p_FromLocation"] = fromLocation ?? "",
-                ["p_ToLocation"] = toLocation ?? "",
-                ["p_Operation"] = operation ?? "",
-                ["p_TransactionType"] = transactionType?.ToString() ?? "",
-                ["p_Quantity"] = quantity,
-                ["p_Notes"] = notes ?? "",
-                ["p_ItemType"] = itemType ?? "",
-                ["p_FromDate"] = fromDate,
-                ["p_ToDate"] = toDate,
-                ["p_SortColumn"] = sortColumn,
-                ["p_SortDescending"] = sortDescending,
-                ["p_Page"] = page,
-                ["p_PageSize"] = pageSize
+                ["UserName"] = userName ?? "",                           // p_ prefix added automatically
+                ["IsAdmin"] = isAdmin,
+                ["PartID"] = partID ?? "",
+                ["BatchNumber"] = batchNumber ?? "",
+                ["FromLocation"] = fromLocation ?? "",
+                ["ToLocation"] = toLocation ?? "",
+                ["Operation"] = operation ?? "",
+                ["TransactionType"] = transactionType?.ToString() ?? "",
+                ["Quantity"] = quantity,
+                ["Notes"] = notes ?? "",
+                ["ItemType"] = itemType ?? "",
+                ["FromDate"] = fromDate,
+                ["ToDate"] = toDate,
+                ["SortColumn"] = sortColumn,
+                ["SortDescending"] = sortDescending,
+                ["Page"] = page,
+                ["PageSize"] = pageSize
             };
 
-            using var reader = await _helperDatabaseCore.ExecuteReader(
+            // MIGRATED: Use Helper_Database_StoredProcedure.ExecuteReader for better integration
+            using var reader = await Helper_Database_StoredProcedure.ExecuteReader(
+                Model_AppVariables.ConnectionString,
                 "inv_transactions_Search", 
                 parameters, 
                 true, 
@@ -79,6 +74,7 @@ internal class Dao_Transactions
         catch (Exception ex)
         {
             LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "SearchTransactionsAsync");
             return DaoResult<List<Model_Transactions>>.Failure(
                 "Failed to search transactions", ex
             );
@@ -117,6 +113,7 @@ internal class Dao_Transactions
         catch (Exception ex)
         {
             LoggingUtility.LogDatabaseError(ex);
+            _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, "SearchTransactions");
             return DaoResult<List<Model_Transactions>>.Failure(
                 "Failed to search transactions (sync)", ex
             );

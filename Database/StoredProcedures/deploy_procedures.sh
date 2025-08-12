@@ -203,6 +203,7 @@ deploy_procedures() {
         "05_Error_Log_Procedures.sql:Error Log Procedures (UNIFORM p_ prefixes)"
         "06_Quick_Button_Procedures.sql:Quick Button Procedures (UNIFORM p_ prefixes)"
         "07_Changelog_Version_Procedures.sql:Changelog/Version Procedures (UNIFORM p_ prefixes)"
+        "08_Theme_Management_Procedures.sql:Theme Management Procedures (UNIFORM p_ prefixes)"
     )
     
     local success_count=0
@@ -232,7 +233,8 @@ deploy_procedures() {
         print_status "  - Error Logging (6 procedures) with p_ prefixes"
         print_status "  - Quick Buttons (7 procedures) with p_ prefixes"
         print_status "  - Changelog/Version (3 procedures) with p_ prefixes"
-        print_status "Total: ~74 procedures with uniform p_ parameter naming"
+        print_status "  - Theme Management (8 procedures) with p_ prefixes"
+        print_status "Total: ~82 procedures with uniform p_ parameter naming"
         print_success "Deployment completed for MySQL 5.7.24 (MAMP Compatible)"
         exit 0
     else
@@ -242,7 +244,7 @@ deploy_procedures() {
         print_status "  2. Check that the database '$DB_NAME' exists"
         print_status "  3. Verify user '$DB_USER' has CREATE ROUTINE privileges"
         print_status "  4. Confirm MAMP MySQL version is 5.7.24 or higher"
-        print_status "  5. Ensure all 7 SQL files are present in current directory"
+        print_status "  5. Ensure all 8 SQL files are present in current directory"
         exit 1
     fi
 }
@@ -266,7 +268,7 @@ show_usage() {
     echo "Environment variables:"
     echo "  DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME"
     echo ""
-    echo "Files deployed (7 total):"
+    echo "Files deployed (8 total):"
     echo "  01_User_Management_Procedures.sql     (17 procedures)"
     echo "  02_System_Role_Procedures.sql         (8 procedures)"
     echo "  03_Master_Data_Procedures.sql         (21 procedures)"
@@ -274,6 +276,7 @@ show_usage() {
     echo "  05_Error_Log_Procedures.sql           (6 procedures)"
     echo "  06_Quick_Button_Procedures.sql        (7 procedures)"
     echo "  07_Changelog_Version_Procedures.sql   (3 procedures)"
+    echo "  08_Theme_Management_Procedures.sql    (8 procedures)"
     echo ""
     echo "MAMP Examples:"
     echo "  $0 -h localhost -u root -p root -d mtm_wip_application"
@@ -285,7 +288,7 @@ show_usage() {
     echo "  2. Check MAMP control panel for correct port (usually 3306)"
     echo "  3. Default MAMP credentials are usually root/root"
     echo "  4. Ensure target database exists in phpMyAdmin"
-    echo "  5. Verify all 7 SQL files are present in current directory"
+    echo "  5. Verify all 8 SQL files are present in current directory"
     echo ""
 }
 

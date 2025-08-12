@@ -22,6 +22,7 @@ DROP PROCEDURE IF EXISTS inv_inventory_Get_All;
 DROP PROCEDURE IF EXISTS inv_transaction_GetProblematicBatchCount;
 DROP PROCEDURE IF EXISTS inv_transaction_GetProblematicBatches;
 DROP PROCEDURE IF EXISTS inv_transaction_SplitBatchNumbers;
+DROP PROCEDURE IF EXISTS inv_inventory_Search_Advanced;
 
 -- ================================================================================
 -- INVENTORY ITEM MANAGEMENT PROCEDURES (MySQL 5.7.24 Compatible)

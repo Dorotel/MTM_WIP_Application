@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using System.Data;
-using MySql.Data.MySqlClient;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
@@ -18,10 +17,10 @@ namespace MTM_Inventory_Application.Data
                 // Ensure position is always 1-10 (never 0)
                 int safePosition = Math.Max(1, Math.Min(10, position + 1));
                 
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
+                // MIGRATED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
                 Dictionary<string, object> parameters = new()
                 {
-                    ["User"] = user,
+                    ["User"] = user,               // p_ prefix added automatically
                     ["Position"] = safePosition,
                     ["PartID"] = partId,
                     ["Operation"] = operation,
@@ -41,14 +40,9 @@ namespace MTM_Inventory_Application.Data
                     LoggingUtility.Log($"UpdateQuickButtonAsync failed: {result.ErrorMessage}");
                 }
             }
-            catch (MySqlException ex)
-            {
-                LoggingUtility.LogDatabaseError(ex);
-                await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, true, "UpdateQuickButtonAsync");
-            }
             catch (Exception ex)
             {
-                LoggingUtility.LogApplicationError(ex);
+                LoggingUtility.LogDatabaseError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "UpdateQuickButtonAsync");
             }
         }
@@ -60,10 +54,10 @@ namespace MTM_Inventory_Application.Data
                 // Ensure position is always 1-10 (never 0)
                 int safePosition = Math.Max(1, Math.Min(10, position + 1));
                 
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
+                // MIGRATED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
                 Dictionary<string, object> parameters = new()
                 {
-                    ["User"] = user,
+                    ["User"] = user,               // p_ prefix added automatically
                     ["Position"] = safePosition
                 };
 
@@ -80,14 +74,9 @@ namespace MTM_Inventory_Application.Data
                     LoggingUtility.Log($"RemoveQuickButtonAndShiftAsync failed: {result.ErrorMessage}");
                 }
             }
-            catch (MySqlException ex)
-            {
-                LoggingUtility.LogDatabaseError(ex);
-                await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, true, "RemoveQuickButtonAndShiftAsync");
-            }
             catch (Exception ex)
             {
-                LoggingUtility.LogApplicationError(ex);
+                LoggingUtility.LogDatabaseError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "RemoveQuickButtonAndShiftAsync");
             }
         }
@@ -96,10 +85,10 @@ namespace MTM_Inventory_Application.Data
         {
             try
             {
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
+                // MIGRATED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
                 Dictionary<string, object> parameters = new()
                 {
-                    ["User"] = user,
+                    ["User"] = user,               // p_ prefix added automatically
                     ["PartID"] = partId,
                     ["Operation"] = operation,
                     ["Quantity"] = quantity,
@@ -119,14 +108,9 @@ namespace MTM_Inventory_Application.Data
                     LoggingUtility.Log($"AddQuickButtonAsync failed: {result.ErrorMessage}");
                 }
             }
-            catch (MySqlException ex)
-            {
-                LoggingUtility.LogDatabaseError(ex);
-                await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, true, "AddQuickButtonAsync");
-            }
             catch (Exception ex)
             {
-                LoggingUtility.LogApplicationError(ex);
+                LoggingUtility.LogDatabaseError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "AddQuickButtonAsync");
             }
         }
@@ -139,10 +123,10 @@ namespace MTM_Inventory_Application.Data
                 int safeFrom = Math.Max(1, Math.Min(10, fromPosition + 1));
                 int safeTo = Math.Max(1, Math.Min(10, toPosition + 1));
                 
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
+                // MIGRATED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
                 Dictionary<string, object> parameters = new()
                 {
-                    ["User"] = user,
+                    ["User"] = user,               // p_ prefix added automatically
                     ["FromPosition"] = safeFrom,
                     ["ToPosition"] = safeTo
                 };
@@ -160,14 +144,9 @@ namespace MTM_Inventory_Application.Data
                     LoggingUtility.Log($"MoveQuickButtonAsync failed: {result.ErrorMessage}");
                 }
             }
-            catch (MySqlException ex)
-            {
-                LoggingUtility.LogDatabaseError(ex);
-                await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, true, "MoveQuickButtonAsync");
-            }
             catch (Exception ex)
             {
-                LoggingUtility.LogApplicationError(ex);
+                LoggingUtility.LogDatabaseError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "MoveQuickButtonAsync");
             }
         }
@@ -176,10 +155,10 @@ namespace MTM_Inventory_Application.Data
         {
             try
             {
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
+                // MIGRATED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
                 Dictionary<string, object> parameters = new()
                 {
-                    ["User"] = user
+                    ["User"] = user                // p_ prefix added automatically
                 };
 
                 var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
@@ -195,14 +174,9 @@ namespace MTM_Inventory_Application.Data
                     LoggingUtility.Log($"DeleteAllQuickButtonsForUserAsync failed: {result.ErrorMessage}");
                 }
             }
-            catch (MySqlException ex)
-            {
-                LoggingUtility.LogDatabaseError(ex);
-                await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, true, "DeleteAllQuickButtonsForUserAsync");
-            }
             catch (Exception ex)
             {
-                LoggingUtility.LogApplicationError(ex);
+                LoggingUtility.LogDatabaseError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "DeleteAllQuickButtonsForUserAsync");
             }
         }
@@ -211,10 +185,10 @@ namespace MTM_Inventory_Application.Data
         {
             try
             {
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
+                // MIGRATED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
                 Dictionary<string, object> parameters = new()
                 {
-                    ["User"] = user,
+                    ["User"] = user,               // p_ prefix added automatically
                     ["PartID"] = partId,
                     ["Operation"] = operation,
                     ["Quantity"] = quantity
@@ -233,14 +207,9 @@ namespace MTM_Inventory_Application.Data
                     LoggingUtility.Log($"AddOrShiftQuickButtonAsync failed: {result.ErrorMessage}");
                 }
             }
-            catch (MySqlException ex)
-            {
-                LoggingUtility.LogDatabaseError(ex);
-                await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, true, "AddOrShiftQuickButtonAsync");
-            }
             catch (Exception ex)
             {
-                LoggingUtility.LogApplicationError(ex);
+                LoggingUtility.LogDatabaseError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "AddOrShiftQuickButtonAsync");
             }
         }
@@ -251,10 +220,10 @@ namespace MTM_Inventory_Application.Data
             {
                 int safePosition = Math.Max(1, Math.Min(10, position + 1));
                 
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
+                // MIGRATED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
                 Dictionary<string, object> parameters = new()
                 {
-                    ["User"] = user,
+                    ["User"] = user,               // p_ prefix added automatically
                     ["Position"] = safePosition
                 };
 
@@ -271,14 +240,9 @@ namespace MTM_Inventory_Application.Data
                     LoggingUtility.Log($"RemoveAndShiftQuickButtonAsync failed: {result.ErrorMessage}");
                 }
             }
-            catch (MySqlException ex)
-            {
-                LoggingUtility.LogDatabaseError(ex);
-                await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, true, "RemoveAndShiftQuickButtonAsync");
-            }
             catch (Exception ex)
             {
-                LoggingUtility.LogApplicationError(ex);
+                LoggingUtility.LogDatabaseError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "RemoveAndShiftQuickButtonAsync");
             }
         }
@@ -287,10 +251,10 @@ namespace MTM_Inventory_Application.Data
         {
             try
             {
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
+                // MIGRATED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core
                 Dictionary<string, object> parameters = new()
                 {
-                    ["User"] = user,
+                    ["User"] = user,               // p_ prefix added automatically
                     ["PartID"] = partId,
                     ["Operation"] = operation,
                     ["Quantity"] = quantity,
@@ -310,14 +274,9 @@ namespace MTM_Inventory_Application.Data
                     LoggingUtility.Log($"AddQuickButtonAtPositionAsync failed: {result.ErrorMessage}");
                 }
             }
-            catch (MySqlException ex)
-            {
-                LoggingUtility.LogDatabaseError(ex);
-                await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, true, "AddQuickButtonAtPositionAsync");
-            }
             catch (Exception ex)
             {
-                LoggingUtility.LogApplicationError(ex);
+                LoggingUtility.LogDatabaseError(ex);
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "AddQuickButtonAtPositionAsync");
             }
         }

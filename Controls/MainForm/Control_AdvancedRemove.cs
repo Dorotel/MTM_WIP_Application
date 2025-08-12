@@ -321,7 +321,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 }
 
                 DataTable dt = searchResult.Data ?? new DataTable();
-                LoggingUtility.Log($"[SEARCH DEBUG] Search completed. Status: {searchResult.StatusMessage}, Rows: {dt.Rows.Count}");
+                LoggingUtility.Log($"[SEARCH DEBUG] Search completed. Status: {searchResult.Status}, Rows: {dt.Rows.Count}");
 
                 Control_AdvancedRemove_DataGridView_Results.DataSource = dt;
                 Control_AdvancedRemove_DataGridView_Results.ClearSelection();

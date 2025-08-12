@@ -117,6 +117,58 @@ namespace MTM_Inventory_Application.Data
         }
 
         /// <summary>
+        /// Execute stored procedure and return MySqlDataReader for streaming large result sets
+        /// </summary>
+        /// <param name="connectionString">Database connection string</param>
+        /// <param name="procedureName">Stored procedure name</param>
+        /// <param name="parameters">Input parameters (p_ prefixes added automatically)</param>
+        /// <param name="useAsync">Execute asynchronously</param>
+        /// <param name="commandType">Command type (usually StoredProcedure)</param>
+        /// <returns>MySqlDataReader for reading results</returns>
+        public static async Task<MySqlDataReader> ExecuteReader(
+            string connectionString,
+            string procedureName,
+            Dictionary<string, object>? parameters = null,
+            bool useAsync = false,
+            CommandType commandType = CommandType.StoredProcedure)
+        {
+            var connection = new MySqlConnection(connectionString);
+            
+            try
+            {
+                if (useAsync)
+                    await connection.OpenAsync();
+                else
+                    connection.Open();
+
+                using var command = new MySqlCommand(procedureName, connection)
+                {
+                    CommandType = commandType
+                };
+
+                // Add input parameters (WITH automatic p_ prefix addition)
+                if (parameters != null)
+                {
+                    foreach (var param in parameters)
+                    {
+                        string paramName = param.Key.StartsWith("p_") ? param.Key : $"p_{param.Key}";
+                        command.Parameters.AddWithValue(paramName, param.Value ?? DBNull.Value);
+                    }
+                }
+
+                if (useAsync)
+                    return await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+                else
+                    return command.ExecuteReader(CommandBehavior.CloseConnection);
+            }
+            catch
+            {
+                connection.Dispose();
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Execute stored procedure that returns a scalar value with status reporting
         /// </summary>
         public static async Task<StoredProcedureResult<object>> ExecuteScalarWithStatus(

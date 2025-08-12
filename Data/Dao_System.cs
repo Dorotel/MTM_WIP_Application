@@ -3,7 +3,6 @@ using System.Security.Principal;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
-using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Data;
 
@@ -11,18 +10,6 @@ namespace MTM_Inventory_Application.Data;
 
 internal static class Dao_System
 {
-    #region Fields
-
-    public static Helper_Database_Core HelperDatabaseCore =
-        new(Helper_Database_Variables.GetConnectionString(
-            Model_AppVariables.WipServerAddress,
-            "mtm_wip_application",
-            Model_AppVariables.User,
-            Model_AppVariables.UserPin
-        ));
-
-    #endregion
-
     #region User Roles / Access
 
     internal static async Task<DaoResult> SetUserAccessTypeAsync(string userName, string accessType, bool useAsync = false)
@@ -31,22 +18,32 @@ internal static class Dao_System
         {
             Dictionary<string, object> parameters = new()
             {
-                ["p_UserName"] = userName,
-                ["p_AccessType"] = accessType,
-                ["p_AssignedBy"] = Model_AppVariables.User ?? "System"
+                ["UserName"] = userName,                     // p_ prefix added automatically
+                ["AccessType"] = accessType,
+                ["AssignedBy"] = Model_AppVariables.User ?? "System"
             };
 
-            int rowsAffected = await HelperDatabaseCore.ExecuteNonQuery(
+            var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
+                Model_AppVariables.ConnectionString,
                 "sys_SetUserAccessType",
-                parameters, useAsync, CommandType.StoredProcedure);
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
 
-            if (Model_AppVariables.User == userName)
+            if (result.IsSuccess)
             {
-                Model_AppVariables.UserTypeAdmin = accessType == "Admin";
-                Model_AppVariables.UserTypeReadOnly = accessType == "ReadOnly";
+                if (Model_AppVariables.User == userName)
+                {
+                    Model_AppVariables.UserTypeAdmin = accessType == "Admin";
+                    Model_AppVariables.UserTypeReadOnly = accessType == "ReadOnly";
+                }
+                return DaoResult.Success($"User access type set to {accessType} for {userName}");
             }
-
-            return DaoResult.Success($"User access type set to {accessType} for {userName}", rowsAffected);
+            else
+            {
+                return DaoResult.Failure($"Failed to set user access type for {userName}: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
@@ -79,7 +76,7 @@ internal static class Dao_System
 
             var result = new List<Model_Users>();
 
-            // FIXED: Use Helper_Database_StoredProcedure for proper status handling
+            // MIGRATED: Use Helper_Database_StoredProcedure for proper status handling
             // This handles the case where stored procedures may not exist yet or have parameter issues
             var dataResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
                 Model_AppVariables.ConnectionString,
@@ -174,17 +171,24 @@ internal static class Dao_System
     {
         try
         {
-            Dictionary<string, object> parameters = new() { ["p_UserName"] = userName };
-            object? result = await HelperDatabaseCore.ExecuteScalar(
-                "sys_GetUserIdByName",
-                parameters, useAsync, CommandType.StoredProcedure);
+            Dictionary<string, object> parameters = new() { ["UserName"] = userName }; // p_ prefix added automatically
 
-            if (result != null && int.TryParse(result.ToString(), out int userId))
+            var result = await Helper_Database_StoredProcedure.ExecuteScalarWithStatus(
+                Model_AppVariables.ConnectionString,
+                "sys_GetUserIdByName",
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
+
+            if (result.IsSuccess && result.Data != null && int.TryParse(result.Data.ToString(), out int userId))
             {
                 return DaoResult<int>.Success(userId, $"Found user ID {userId} for {userName}");
             }
-
-            return DaoResult<int>.Failure($"User '{userName}' not found");
+            else
+            {
+                return DaoResult<int>.Failure($"User '{userName}' not found");
+            }
         }
         catch (Exception ex)
         {
@@ -198,17 +202,24 @@ internal static class Dao_System
     {
         try
         {
-            Dictionary<string, object> parameters = new() { ["p_RoleName"] = roleName };
-            object? result = await HelperDatabaseCore.ExecuteScalar(
-                "sys_GetRoleIdByName",
-                parameters, useAsync, CommandType.StoredProcedure);
+            Dictionary<string, object> parameters = new() { ["RoleName"] = roleName }; // p_ prefix added automatically
 
-            if (result != null && int.TryParse(result.ToString(), out int roleId))
+            var result = await Helper_Database_StoredProcedure.ExecuteScalarWithStatus(
+                Model_AppVariables.ConnectionString,
+                "sys_GetRoleIdByName",
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
+
+            if (result.IsSuccess && result.Data != null && int.TryParse(result.Data.ToString(), out int roleId))
             {
                 return DaoResult<int>.Success(roleId, $"Found role ID {roleId} for {roleName}");
             }
-
-            return DaoResult<int>.Failure($"Role '{roleName}' not found");
+            else
+            {
+                return DaoResult<int>.Failure($"Role '{roleName}' not found");
+            }
         }
         catch (Exception ex)
         {
@@ -227,10 +238,7 @@ internal static class Dao_System
         LoggingUtility.LogApplicationError(new Exception($"Error in {method}: {ex.Message}", ex));
         
         // ENHANCED: Pass method name to error handlers for better debugging
-        if (ex is MySqlException)
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync, method);
-        else
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, method);
+        await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, method);
     }
 
     #endregion

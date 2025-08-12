@@ -5,7 +5,7 @@ using MTM_Inventory_Application.Logging;
 
 namespace MTM_Inventory_Application.Services;
 
-internal static class Service_OnEvent_ExceptionHandler
+internal static class Service_ErrorHandler
 {
     #region Public Methods
 

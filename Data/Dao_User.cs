@@ -12,18 +12,6 @@ namespace MTM_Inventory_Application.Data
 
     internal static class Dao_User
     {
-        #region Fields
-
-        public static Helper_Database_Core HelperDatabaseCore =
-            new(Helper_Database_Variables.GetConnectionString(
-                Model_AppVariables.WipServerAddress,
-                "mtm_wip_application",
-                Model_AppVariables.User,
-                Model_AppVariables.UserPin
-            ));
-
-        #endregion
-
         #region User Settings Getters/Setters
 
         internal static async Task<string> GetLastShownVersionAsync(string user, bool useAsync = false)
@@ -344,9 +332,9 @@ namespace MTM_Inventory_Application.Data
                 // FIXED: Use Helper_Database_StoredProcedure for proper status handling
                 Dictionary<string, object> parameters = new()
                 {
-                    ["UserId"] = userId,        // FIXED: Remove p_ prefix - added automatically
-                    ["DgvName"] = dgvName,      // FIXED: Remove p_ prefix - added automatically
-                    ["SettingJson"] = settingsJson // FIXED: Remove p_ prefix - added automatically
+                    ["UserId"] = userId,        // FIXED: Remove p_ prefix - added автоматически
+                    ["DgvName"] = dgvName,      // FIXED: Remove p_ prefix - added автоматически
+                    ["SettingJson"] = settingsJson // FIXED: Remove p_ prefix - added автоматически
                 };
 
                 var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
@@ -548,7 +536,7 @@ namespace MTM_Inventory_Application.Data
                 $"[Dao_User] Entering UpdateUserAsync(user={user}, fullName={fullName}, shift={shift}, pin={pin}, visualUserName={visualUserName}, visualPassword={visualPassword}, useAsync={useAsync})");
             try
             {
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core to avoid p_Status parameter errors
+                // FIXED: Use Helper_Database_StoredProcedure вместо Helper_Database_Core для избежания ошибок параметра p_Status
                 var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
                     Model_AppVariables.ConnectionString,
                     "usr_users_Update_User",
@@ -585,11 +573,11 @@ namespace MTM_Inventory_Application.Data
             Debug.WriteLine($"[Dao_User] Entering DeleteUserAsync(user={user}, useAsync={useAsync})");
             try
             {
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core to avoid p_Status parameter errors
+                // FIXED: Use Helper_Database_StoredProcedure вместо Helper_Database_Core для избежания ошибок параметра p_Status
                 var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
                     Model_AppVariables.ConnectionString,
                     "usr_users_Delete_User",
-                    new Dictionary<string, object> { ["User"] = user }, // Remove p_ prefix - added automatically
+                    new Dictionary<string, object> { ["User"] = user }, // Remove p_ prefix - добавлено автоматически
                     null, // No progress helper for this method
                     useAsync
                 );
@@ -618,7 +606,7 @@ namespace MTM_Inventory_Application.Data
             Debug.WriteLine($"[Dao_User] Entering GetAllUsersAsync(useAsync={useAsync})");
             try
             {
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core to avoid p_Status parameter errors
+                // FIXED: Use Helper_Database_StoredProcedure вместо Helper_Database_Core для избежания ошибок параметра p_Status
                 var dataResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
                     Model_AppVariables.ConnectionString,
                     "usr_users_Get_All",
@@ -653,11 +641,11 @@ namespace MTM_Inventory_Application.Data
             Debug.WriteLine($"[Dao_User] Entering GetUserByUsernameAsync(user={user}, useAsync={useAsync})");
             try
             {
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core to avoid p_Status parameter errors
+                // FIXED: Use Helper_Database_StoredProcedure вместо Helper_Database_Core для избежания ошибок параметра p_Status
                 var dataResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
                     Model_AppVariables.ConnectionString,
                     "usr_users_Get_ByUser",
-                    new Dictionary<string, object> { ["User"] = user }, // Remove p_ prefix - added automatically
+                    new Dictionary<string, object> { ["User"] = user }, // Remove p_ prefix - добавлено автоматически
                     null, // No progress helper for this method
                     useAsync
                 );
@@ -688,11 +676,11 @@ namespace MTM_Inventory_Application.Data
             Debug.WriteLine($"[Dao_User] Entering UserExistsAsync(user={user}, useAsync={useAsync})");
             try
             {
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core to avoid p_Status parameter errors
+                // FIXED: Use Helper_Database_StoredProcedure вместо Helper_Database_Core для избежания ошибок параметра p_Status
                 var dataResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
                     Model_AppVariables.ConnectionString,
                     "usr_users_Exists",
-                    new Dictionary<string, object> { ["User"] = user }, // Remove p_ prefix - added automatically
+                    new Dictionary<string, object> { ["User"] = user }, // Remove p_ prefix - добавлено автоматически
                     null, // No progress helper for this method
                     useAsync
                 );
@@ -728,11 +716,11 @@ namespace MTM_Inventory_Application.Data
             Debug.WriteLine($"[Dao_User] Entering GetShortcutsJsonAsync(userId={userId})");
             try
             {
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core to avoid p_Status parameter errors
+                // FIXED: Use Helper_Database_StoredProcedure вместо Helper_Database_Core для избежания ошибок параметра p_Status
                 var dataResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
                     Model_AppVariables.ConnectionString,
                     "usr_ui_settings_GetShortcutsJson",
-                    new Dictionary<string, object> { ["UserId"] = userId }, // Remove p_ prefix - added automatically
+                    new Dictionary<string, object> { ["UserId"] = userId }, // Remove p_ prefix - добавлено автоматически
                     null, // No progress helper for this method
                     true
                 );
@@ -765,8 +753,8 @@ namespace MTM_Inventory_Application.Data
                 // FIXED: Use Helper_Database_StoredProcedure for proper status handling
                 Dictionary<string, object> parameters = new()
                 {
-                    ["UserId"] = userId,              // FIXED: Remove p_ prefix - added automatically
-                    ["ShortcutsJson"] = shortcutsJson // FIXED: Remove p_ prefix - added automatically
+                    ["UserId"] = userId,              // FIXED: Remove p_ prefix - добавлено автоматически
+                    ["ShortcutsJson"] = shortcutsJson // FIXED: Remove p_ prefix - добавлено автоматически
                 };
 
                 var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
@@ -793,6 +781,25 @@ namespace MTM_Inventory_Application.Data
             }
         }
 
+        internal static async Task SetThemeNameAsync(string user, string themeName, bool useAsync = false)
+        {
+            Debug.WriteLine($"[Dao_User] Entering SetThemeNameAsync(user={user}, themeName={themeName}, useAsync={useAsync})");
+            try
+            {
+                // FIXED: Use the existing SetUserSettingAsync method instead of non-existent app_themes_Set_UserTheme
+                // This calls usr_users_SetUserSetting_ByUserAndField which updates the Theme_Name field in usr_users table
+                await SetUserSettingAsync("Theme_Name", user, themeName, useAsync);
+                Debug.WriteLine($"[Dao_User] SetThemeNameAsync completed successfully for user {user}, theme {themeName}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[Dao_User] Exception in SetThemeNameAsync: {ex}");
+                LoggingUtility.LogDatabaseError(ex);
+                LoggingUtility.Log($"SetThemeNameAsync failed with exception: {ex.Message}");
+                throw; // Re-throw to let the UI handle the error
+            }
+        }
+
         #endregion
 
         #region User Roles
@@ -803,13 +810,13 @@ namespace MTM_Inventory_Application.Data
                 $"[Dao_User] Entering AddUserRoleAsync(userId={userId}, roleId={roleId}, assignedBy={assignedBy}, useAsync={useAsync})");
             try
             {
-                // FIXED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core to avoid p_Status parameter errors
+                // FIXED: Use Helper_Database_StoredProcedure вместо Helper_Database_Core для избежания ошибок параметра p_Status
                 var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
                     Model_AppVariables.ConnectionString,
                     "sys_user_roles_Add",
                     new Dictionary<string, object>
                     {
-                        ["UserID"] = userId,       // Remove p_ prefix - added automatically
+                        ["UserID"] = userId,       // Remove p_ prefix - добавлено автоматически
                         ["RoleID"] = roleId,
                         ["AssignedBy"] = assignedBy
                     },
@@ -841,7 +848,7 @@ namespace MTM_Inventory_Application.Data
                 var dataResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
                     Model_AppVariables.ConnectionString,
                     "usr_user_roles_GetRoleId_ByUserId",
-                    new Dictionary<string, object> { ["UserID"] = userId }, // Remove p_ prefix - added автоматически
+                    new Dictionary<string, object> { ["UserID"] = userId }, // Remove p_ prefix - добавлено автоматически
                     null, // No progress helper for this method
                     useAsync
                 );
@@ -854,7 +861,7 @@ namespace MTM_Inventory_Application.Data
                         var roleResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
                             Model_AppVariables.ConnectionString,
                             "sys_roles_Get_ById",
-                            new Dictionary<string, object> { ["ID"] = roleId }, // Remove p_ prefix - added автоматически
+                            new Dictionary<string, object> { ["ID"] = roleId }, // Remove p_ prefix - добавлено автоматически
                             null, // No progress helper for this method
                             useAsync
                         );
@@ -887,7 +894,7 @@ namespace MTM_Inventory_Application.Data
                     "sys_user_roles_Update",
                     new Dictionary<string, object>
                     {
-                        ["UserID"] = userId,          // Remove p_ prefix - added автоматически
+                        ["UserID"] = userId,          // Remove p_ prefix - добавлено автоматически
                         ["NewRoleID"] = newRoleId,
                         ["AssignedBy"] = assignedBy
                     },

@@ -22,7 +22,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private readonly string _currentUser;
         private readonly bool _isAdmin;
         private ComboBox _transactionsComboBoxSearchPartId = new();
-        private readonly Dao_Transactions _dao;
 
         #endregion
 
@@ -37,7 +36,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
 
-            _dao = new Dao_Transactions(connectionString);
             _currentUser = currentUser;
             _isAdmin = Model_AppVariables.UserTypeAdmin;
 
@@ -502,7 +500,8 @@ namespace MTM_Inventory_Application.Forms.Transactions
             await Task.Delay(100);
 
             string? batchNumber = selected.BatchNumber;
-            List<Model_Transactions> results = await Task.Run(() => _dao.SearchTransactions(
+            var dao = new Dao_Transactions();
+            var searchResult = await dao.SearchTransactionsAsync(
                 _isAdmin ? string.Empty : _currentUser,
                 _isAdmin,
                 batchNumber: batchNumber,
@@ -510,9 +509,14 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 sortDescending: true,
                 page: 1,
                 pageSize: 1000
-            ));
+            );
+
             progress.UpdateProgress(80, "Mapping results...");
             await Task.Delay(100);
+
+            List<Model_Transactions> results = searchResult.IsSuccess && searchResult.Data != null 
+                ? searchResult.Data 
+                : new List<Model_Transactions>();
 
             // Build description for each row
             List<dynamic> describedResults = [];

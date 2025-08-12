@@ -2,7 +2,6 @@
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Logging;
-using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Data;
 
@@ -10,42 +9,35 @@ namespace MTM_Inventory_Application.Data;
 
 internal static class Dao_Location
 {
-    #region Fields
-
-    public static Helper_Database_Core HelperDatabaseCore =
-        new(Helper_Database_Variables.GetConnectionString(
-            Model_AppVariables.WipServerAddress,
-            "mtm_wip_application",
-            Model_AppVariables.User,
-            Model_AppVariables.UserPin
-        ));
-
-    #endregion
-
     #region Delete
 
     internal static async Task<DaoResult> DeleteLocation(string location, bool useAsync = false)
     {
         try
         {
-            var parameters = new Dictionary<string, object> { ["p_Location"] = location };
-            int rowsAffected = await HelperDatabaseCore.ExecuteNonQuery("md_locations_Delete_ByLocation", parameters, useAsync,
-                CommandType.StoredProcedure);
+            var parameters = new Dictionary<string, object> { ["Location"] = location }; // p_ prefix added automatically
 
-            return rowsAffected > 0 
-                ? DaoResult.Success($"Location {location} deleted successfully", rowsAffected)
-                : DaoResult.Failure($"Location {location} not found or could not be deleted");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult.Failure($"Database error deleting location {location}", ex);
+            var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
+                Model_AppVariables.ConnectionString,
+                "md_locations_Delete_ByLocation",
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
+
+            if (result.IsSuccess)
+            {
+                return DaoResult.Success($"Location {location} deleted successfully");
+            }
+            else
+            {
+                return DaoResult.Failure($"Failed to delete location {location}: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "DeleteLocation");
             return DaoResult.Failure($"Error deleting location {location}", ex);
         }
     }
@@ -60,28 +52,32 @@ internal static class Dao_Location
         {
             var parameters = new Dictionary<string, object>
             {
-                ["p_Location"] = location,
-                ["p_IssuedBy"] = Model_AppVariables.User ?? "System",
-                ["p_Building"] = building
+                ["Location"] = location,                         // p_ prefix added automatically
+                ["IssuedBy"] = Model_AppVariables.User ?? "System",
+                ["Building"] = building
             };
             
-            int rowsAffected = await HelperDatabaseCore.ExecuteNonQuery("md_locations_Add_Location", parameters, useAsync,
-                CommandType.StoredProcedure);
+            var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
+                Model_AppVariables.ConnectionString,
+                "md_locations_Add_Location",
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
 
-            return rowsAffected > 0 
-                ? DaoResult.Success($"Location {location} created successfully", rowsAffected)
-                : DaoResult.Failure($"Failed to create location {location}");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult.Failure($"Database error creating location {location}", ex);
+            if (result.IsSuccess)
+            {
+                return DaoResult.Success($"Location {location} created successfully");
+            }
+            else
+            {
+                return DaoResult.Failure($"Failed to create location {location}: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "InsertLocation");
             return DaoResult.Failure($"Error creating location {location}", ex);
         }
     }
@@ -97,29 +93,33 @@ internal static class Dao_Location
         {
             var parameters = new Dictionary<string, object>
             {
-                ["p_OldLocation"] = oldLocation,
-                ["p_Location"] = newLocation,
-                ["p_IssuedBy"] = Model_AppVariables.User ?? "System",
-                ["p_Building"] = building
+                ["OldLocation"] = oldLocation,                   // p_ prefix added automatically
+                ["Location"] = newLocation,
+                ["IssuedBy"] = Model_AppVariables.User ?? "System",
+                ["Building"] = building
             };
             
-            int rowsAffected = await HelperDatabaseCore.ExecuteNonQuery("md_locations_Update_Location", parameters, useAsync,
-                CommandType.StoredProcedure);
+            var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
+                Model_AppVariables.ConnectionString,
+                "md_locations_Update_Location",
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
 
-            return rowsAffected > 0 
-                ? DaoResult.Success($"Location updated from {oldLocation} to {newLocation}", rowsAffected)
-                : DaoResult.Failure($"Location {oldLocation} not found or could not be updated");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult.Failure($"Database error updating location {oldLocation}", ex);
+            if (result.IsSuccess)
+            {
+                return DaoResult.Success($"Location updated from {oldLocation} to {newLocation}");
+            }
+            else
+            {
+                return DaoResult.Failure($"Failed to update location {oldLocation}: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "UpdateLocation");
             return DaoResult.Failure($"Error updating location {oldLocation}", ex);
         }
     }
@@ -128,21 +128,27 @@ internal static class Dao_Location
     {
         try
         {
-            DataTable result = await HelperDatabaseCore.ExecuteDataTable("md_locations_Get_All", null, useAsync,
-                CommandType.StoredProcedure);
+            var result = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
+                Model_AppVariables.ConnectionString,
+                "md_locations_Get_All",
+                null, // No parameters needed
+                null, // No progress helper for this method
+                useAsync
+            );
                 
-            return DaoResult<DataTable>.Success(result, $"Retrieved {result.Rows.Count} locations");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult<DataTable>.Failure("Database error retrieving locations", ex);
+            if (result.IsSuccess && result.Data != null)
+            {
+                return DaoResult<DataTable>.Success(result.Data, $"Retrieved {result.Data.Rows.Count} locations");
+            }
+            else
+            {
+                return DaoResult<DataTable>.Failure($"Failed to retrieve locations: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "GetAllLocations");
             return DaoResult<DataTable>.Failure("Error retrieving locations", ex);
         }
     }
@@ -182,24 +188,30 @@ internal static class Dao_Location
     {
         try
         {
-            var parameters = new Dictionary<string, object> { ["p_Location"] = location };
-            var result = await HelperDatabaseCore.ExecuteScalar(
+            var parameters = new Dictionary<string, object> { ["Location"] = location }; // p_ prefix added automatically
+
+            var result = await Helper_Database_StoredProcedure.ExecuteScalarWithStatus(
+                Model_AppVariables.ConnectionString,
                 "md_locations_Exists_ByLocation",
-                parameters, useAsync, CommandType.StoredProcedure);
+                parameters,
+                null, // No progress helper for this method
+                useAsync
+            );
                 
-            bool exists = Convert.ToInt32(result) > 0;
-            return DaoResult<bool>.Success(exists, exists ? $"Location {location} exists" : $"Location {location} does not exist");
-        }
-        catch (MySqlException ex)
-        {
-            LoggingUtility.LogDatabaseError(ex);
-            await Dao_ErrorLog.HandleException_SQLError_CloseApp(ex, useAsync);
-            return DaoResult<bool>.Failure($"Database error checking location {location}", ex);
+            if (result.IsSuccess && result.Data != null)
+            {
+                bool exists = Convert.ToInt32(result.Data) > 0;
+                return DaoResult<bool>.Success(exists, exists ? $"Location {location} exists" : $"Location {location} does not exist");
+            }
+            else
+            {
+                return DaoResult<bool>.Failure($"Failed to check location {location}: {result.ErrorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            LoggingUtility.LogApplicationError(ex);
-            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync);
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "LocationExists");
             return DaoResult<bool>.Failure($"Error checking location {location}", ex);
         }
     }

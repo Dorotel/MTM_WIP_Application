@@ -1388,6 +1388,7 @@ namespace MTM_Inventory_Application.Core
                     }
 
                     if (control.Text.Contains("["))
+
                     {
                         if (colors.TextBoxErrorForeColor.HasValue)
                         {
@@ -1456,6 +1457,7 @@ namespace MTM_Inventory_Application.Core
                     }
 
                     if (control.Text.Contains("["))
+
                     {
                         if (colors.ComboBoxErrorForeColor.HasValue)
                         {
@@ -1489,6 +1491,7 @@ namespace MTM_Inventory_Application.Core
                 {
                     // If the first item is a placeholder like [ Enter ... ]
                     if (cb.Text.Contains("["))
+
                     {
                         cb.ForeColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
                     }
@@ -2620,13 +2623,33 @@ namespace MTM_Inventory_Application.Core
             {
                 try
                 {
-                    LoggingUtility.Log($"Loaded user theme name for user: {userId} = {Model_AppVariables.ThemeName}");
-                    return await Dao_User.GetSettingsJsonAsync("Theme_Name", userId, true);
+                    // Get the user's saved theme preference
+                    string? themeName = await Dao_User.GetSettingsJsonAsync("Theme_Name", userId, true);
+                    
+                    // If no theme preference is saved, or it's null, set to "Default"
+                    if (string.IsNullOrWhiteSpace(themeName))
+                    {
+                        themeName = "Default";
+                        LoggingUtility.Log($"No theme preference found for user {userId}, using Default theme");
+                    }
+                    else
+                    {
+                        LoggingUtility.Log($"Loaded theme preference for user {userId}: {themeName}");
+                    }
+                    
+                    // Set the theme name in Model_AppVariables
+                    Model_AppVariables.ThemeName = themeName;
+                    
+                    LoggingUtility.Log($"Set Model_AppVariables.ThemeName to: {themeName}");
+                    return themeName;
                 }
                 catch (Exception ex)
                 {
                     LoggingUtility.LogApplicationError(ex);
-                    throw;
+                    // On error, default to "Default" theme
+                    Model_AppVariables.ThemeName = "Default";
+                    LoggingUtility.Log("Error loading user theme preference, defaulting to Default theme");
+                    return "Default";
                 }
             }
 
@@ -2635,66 +2658,88 @@ namespace MTM_Inventory_Application.Core
                 try
                 {
                     Dictionary<string, AppTheme> themes = new();
-                    Helper_Database_Core helper = new(Model_AppVariables.ConnectionString);
-                    DataTable dt = await helper.ExecuteDataTable("SELECT * FROM app_themes", null,
-                        true,
-                        CommandType.Text);
-                    foreach (DataRow row in dt.Rows)
+                    
+                    try
                     {
-                        string? themeName = row["ThemeName"]?.ToString();
-                        string? SettingsJson = row["SettingsJson"]?.ToString();
-                        if (!string.IsNullOrWhiteSpace(themeName) && !string.IsNullOrWhiteSpace(SettingsJson))
+                        LoggingUtility.Log("Attempting to load themes from database using app_themes_Get_All stored procedure...");
+                        
+                        var dataResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
+                            Model_AppVariables.ConnectionString,
+                            "app_themes_Get_All",
+                            null,
+                            null,
+                            true
+                        );
+                        
+                        if (dataResult.IsSuccess && dataResult.Data != null)
                         {
-                            try
+                            DataTable dt = dataResult.Data;
+                            LoggingUtility.Log($"Successfully loaded {dt.Rows.Count} themes from database");
+                            
+                            foreach (DataRow row in dt.Rows)
                             {
-                                JsonSerializerOptions options = new();
-                                options.Converters.Add(new JsonColorConverter());
-                                // Try legacy format first
-                                Model_UserUiColors? colors = null;
-                                try
+                                string? themeName = row["ThemeName"]?.ToString();
+                                string? settingsJson = row["SettingsJson"]?.ToString();
+                                if (!string.IsNullOrWhiteSpace(themeName) && !string.IsNullOrWhiteSpace(settingsJson))
                                 {
-                                    colors = JsonSerializer.Deserialize<Model_UserUiColors>(SettingsJson, options);
-                                }
-                                catch
-                                {
-                                }
-
-                                if (colors != null)
-                                {
-                                    themes[themeName] = new AppTheme { Colors = colors, FormFont = null };
-                                }
-                                else
-                                {
-                                    // Try new simplified format
                                     try
                                     {
-                                        SimplifiedTheme? st = JsonSerializer.Deserialize<SimplifiedTheme>(SettingsJson);
-                                        if (st != null)
+                                        JsonSerializerOptions options = new();
+                                        options.Converters.Add(new JsonColorConverter());
+                                        
+                                        // Directly deserialize the complete Model_UserUiColors from database
+                                        // The database should contain the full JSON with all color properties
+                                        Model_UserUiColors? colors = JsonSerializer.Deserialize<Model_UserUiColors>(settingsJson, options);
+                                        
+                                        if (colors != null)
                                         {
-                                            colors = MapSimplifiedThemeToUserUiColors(st);
                                             themes[themeName] = new AppTheme { Colors = colors, FormFont = null };
+                                            LoggingUtility.Log($"Successfully loaded theme '{themeName}' directly from database JSON");
+                                        }
+                                        else
+                                        {
+                                            LoggingUtility.Log($"Failed to deserialize theme '{themeName}' - JSON returned null");
                                         }
                                     }
-                                    catch (Exception ex2)
+                                    catch (JsonException jsonEx)
                                     {
-                                        LoggingUtility.LogApplicationError(ex2);
+                                        LoggingUtility.LogApplicationError(jsonEx);
+                                        LoggingUtility.Log($"JSON parsing error for theme '{themeName}': {jsonEx.Message}");
                                     }
                                 }
                             }
-                            catch (JsonException jsonEx)
-                            {
-                                LoggingUtility.LogApplicationError(jsonEx);
-                            }
+                        }
+                        else
+                        {
+                            LoggingUtility.Log($"Database theme loading failed: {dataResult.ErrorMessage}. Creating fallback themes.");
+                            themes = CreateDefaultThemes();
                         }
                     }
+                    catch (Exception dbEx)
+                    {
+                        LoggingUtility.Log($"Exception during database theme loading: {dbEx.Message}. Creating fallback themes.");
+                        LoggingUtility.LogApplicationError(dbEx);
+                        themes = CreateDefaultThemes();
+                    }
+
+                    // Ensure we always have at least default themes
+                    if (themes.Count == 0)
+                    {
+                        LoggingUtility.Log("No themes loaded, creating fallback default themes");
+                        themes = CreateDefaultThemes();
+                    }
+
+                    // Log which themes were loaded
+                    string themeList = string.Join(", ", themes.Keys);
+                    LoggingUtility.Log($"Final theme collection contains: {themeList}");
 
                     Themes = themes;
-                    LoggingUtility.Log("Loaded themes from database.");
+                    LoggingUtility.Log($"Theme system initialized with {themes.Count} themes available: {themeList}");
                 }
                 catch (Exception ex)
                 {
                     LoggingUtility.LogApplicationError(ex);
-                    throw;
+                    Themes = CreateDefaultThemes();
                 }
             }
 
@@ -2783,9 +2828,41 @@ namespace MTM_Inventory_Application.Core
             {
                 try
                 {
-                    await LoadAndSetUserThemeNameAsync(userId);
+                    // First load all available themes from database
                     await LoadThemesFromDatabaseAsync();
+                    
+                    // Then try to get the user's theme preference
+                    string? userThemeName = await LoadAndSetUserThemeNameAsync(userId);
+                    
+                    // Check if the user's preferred theme actually exists in our loaded themes
+                    if (!string.IsNullOrWhiteSpace(userThemeName) && !Themes.ContainsKey(userThemeName))
+                    {
+                        LoggingUtility.Log($"User {userId} has theme preference '{userThemeName}' but this theme doesn't exist in database. Available themes: {string.Join(", ", Themes.Keys)}");
+                        
+                        // Try to find a suitable fallback theme from available database themes
+                        string fallbackTheme = "Default";
+                        if (Themes.ContainsKey("Default"))
+                        {
+                            fallbackTheme = "Default";
+                        }
+                        else if (Themes.ContainsKey("Dark"))
+                        {
+                            fallbackTheme = "Dark";
+                        }
+                        else if (Themes.ContainsKey("Blue"))
+                        {
+                            fallbackTheme = "Blue";
+                        }
+                        else if (Themes.Count > 0)
+                        {
+                            fallbackTheme = Themes.Keys.First();
+                        }
+                        
+                        LoggingUtility.Log($"Using fallback theme '{fallbackTheme}' for user {userId}");
+                        Model_AppVariables.ThemeName = fallbackTheme;
+                    }
 
+                    // Apply font settings to all themes
                     foreach (AppTheme theme in Themes.Values)
                     {
                         if (theme.FormFont == null)
@@ -2799,18 +2876,120 @@ namespace MTM_Inventory_Application.Core
                         }
                     }
 
-                    Debug.WriteLine(
-                        $"Themes count: {Themes.Count}, using font size: {Model_AppVariables.ThemeFontSize}");
-                    LoggingUtility.Log($"Theme system initialized with font size: {Model_AppVariables.ThemeFontSize}");
+                    string finalTheme = Model_AppVariables.ThemeName ?? "Default";
+                    LoggingUtility.Log($"Theme system initialized for user {userId}. Final theme: {finalTheme}, Available themes: {string.Join(", ", Themes.Keys)}, Font size: {Model_AppVariables.ThemeFontSize}");
                 }
                 catch (Exception ex)
                 {
                     LoggingUtility.LogApplicationError(ex);
+                    // Ensure we have fallback themes even on error
+                    if (Themes.Count == 0)
+                    {
+                        Themes = CreateDefaultThemes();
+                    }
+                    Model_AppVariables.ThemeName = Themes.Keys.FirstOrDefault() ?? "Default";
+                    LoggingUtility.Log($"Error initializing theme system, using fallback theme: {Model_AppVariables.ThemeName}");
                     throw;
                 }
             }
 
             #endregion
+
+            /// <summary>
+            /// Creates a comprehensive set of default themes when database access fails
+            /// </summary>
+            private static Dictionary<string, AppTheme> CreateDefaultThemes()
+            {
+                var themes = new Dictionary<string, AppTheme>();
+                
+                // Default Light Theme
+                var defaultColors = new Model_UserUiColors
+                {
+                    FormBackColor = Color.White,
+                    FormForeColor = Color.Black,
+                    ControlBackColor = Color.White,
+                    ControlForeColor = Color.Black,
+                    ButtonBackColor = SystemColors.Control,
+                    ButtonForeColor = SystemColors.ControlText,
+                    ButtonHoverBackColor = SystemColors.ControlLight,
+                    ButtonPressedBackColor = SystemColors.ControlDark,
+                    TextBoxBackColor = Color.White,
+                    TextBoxForeColor = Color.Black,
+                    ComboBoxBackColor = Color.White,
+                    ComboBoxForeColor = Color.Black,
+                    ComboBoxErrorForeColor = Color.Red,
+                    DataGridBackColor = Color.White,
+                    DataGridForeColor = Color.Black,
+                    DataGridHeaderBackColor = SystemColors.Control,
+                    DataGridHeaderForeColor = SystemColors.ControlText,
+                    DataGridRowBackColor = Color.White,
+                    DataGridAltRowBackColor = Color.AliceBlue,
+                    DataGridSelectionBackColor = SystemColors.Highlight,
+                    DataGridSelectionForeColor = SystemColors.HighlightText
+                };
+                
+                themes["Default"] = new AppTheme { Colors = defaultColors, FormFont = null };
+                
+                // Dark Theme
+                var darkColors = new Model_UserUiColors
+                {
+                    FormBackColor = Color.FromArgb(45, 45, 48),
+                    FormForeColor = Color.White,
+                    ControlBackColor = Color.FromArgb(45, 45, 48),
+                    ControlForeColor = Color.White,
+                    ButtonBackColor = Color.FromArgb(60, 60, 60),
+                    ButtonForeColor = Color.White,
+                    ButtonHoverBackColor = Color.FromArgb(80, 80, 80),
+                    ButtonPressedBackColor = Color.FromArgb(40, 40, 40),
+                    TextBoxBackColor = Color.FromArgb(30, 30, 30),
+                    TextBoxForeColor = Color.White,
+                    ComboBoxBackColor = Color.FromArgb(30, 30, 30),
+                    ComboBoxForeColor = Color.White,
+                    ComboBoxErrorForeColor = Color.FromArgb(255, 100, 100),
+                    DataGridBackColor = Color.FromArgb(45, 45, 48),
+                    DataGridForeColor = Color.White,
+                    DataGridHeaderBackColor = Color.FromArgb(60, 60, 60),
+                    DataGridHeaderForeColor = Color.White,
+                    DataGridRowBackColor = Color.FromArgb(45, 45, 48),
+                    DataGridAltRowBackColor = Color.FromArgb(55, 55, 58),
+                    DataGridSelectionBackColor = Color.FromArgb(51, 153, 255),
+                    DataGridSelectionForeColor = Color.White
+                };
+                
+                themes["Dark"] = new AppTheme { Colors = darkColors, FormFont = null };
+                
+                // Blue Theme
+                var blueColors = new Model_UserUiColors
+                {
+                    FormBackColor = Color.FromArgb(240, 248, 255),
+                    FormForeColor = Color.FromArgb(25, 25, 25),
+                    ControlBackColor = Color.FromArgb(240, 248, 255),
+                    ControlForeColor = Color.FromArgb(25, 25, 25),
+                    ButtonBackColor = Color.FromArgb(70, 130, 180),
+                    ButtonForeColor = Color.White,
+                    ButtonHoverBackColor = Color.FromArgb(100, 149, 237),
+                    ButtonPressedBackColor = Color.FromArgb(30, 90, 140),
+                    TextBoxBackColor = Color.White,
+                    TextBoxForeColor = Color.Black,
+                    ComboBoxBackColor = Color.White,
+                    ComboBoxForeColor = Color.Black,
+                    ComboBoxErrorForeColor = Color.Red,
+                    DataGridBackColor = Color.White,
+                    DataGridForeColor = Color.Black,
+                    DataGridHeaderBackColor = Color.FromArgb(70, 130, 180),
+                    DataGridHeaderForeColor = Color.White,
+                    DataGridRowBackColor = Color.White,
+                    DataGridAltRowBackColor = Color.FromArgb(230, 240, 255),
+                    DataGridSelectionBackColor = Color.FromArgb(70, 130, 180),
+                    DataGridSelectionForeColor = Color.White
+                };
+                
+                themes["Blue"] = new AppTheme { Colors = blueColors, FormFont = null };
+
+                LoggingUtility.Log("Created fallback theme collection with Default, Dark, and Blue themes.");
+                return themes;
+            }
+
         }
 
         #endregion
@@ -2893,71 +3072,6 @@ namespace MTM_Inventory_Application.Core
                 public string? TabUnselected { get; set; }
                 public string? ToolTipBackground { get; set; }
                 public string? StatusBackground { get; set; }
-            }
-        }
-
-        private static Model_UserUiColors MapSimplifiedThemeToUserUiColors(SimplifiedTheme st)
-        {
-            Model_UserUiColors colors = new();
-            if (st.Base != null)
-            {
-                colors.FormBackColor = ParseColor(st.Base.Background);
-                colors.FormForeColor = ParseColor(st.Base.Foreground);
-                colors.ControlBackColor = ParseColor(st.Base.Background);
-                colors.ControlForeColor = ParseColor(st.Base.Foreground);
-                colors.PanelBackColor = ParseColor(st.Base.Background);
-                colors.PanelForeColor = ParseColor(st.Base.Foreground);
-                colors.PanelBorderColor = ParseColor(st.Base.Border);
-            }
-
-            if (st.Accent != null)
-            {
-                colors.AccentColor = ParseColor(st.Accent.Primary);
-                colors.SecondaryAccentColor = ParseColor(st.Accent.Secondary);
-                colors.ButtonHoverBackColor = ParseColor(st.Accent.Primary);
-                colors.ButtonHoverForeColor = ParseColor(st.Base?.Foreground);
-                colors.ButtonPressedBackColor = ParseColor(st.Accent.Dark);
-                colors.ButtonPressedForeColor = ParseColor(st.Base?.Foreground);
-            }
-
-            if (st.State != null)
-            {
-                colors.InfoColor = ParseColor(st.State.Info);
-                colors.SuccessColor = ParseColor(st.State.Success);
-                colors.WarningColor = ParseColor(st.State.Warning);
-                colors.ErrorColor = ParseColor(st.State.Error);
-            }
-
-            if (st.Component != null)
-            {
-                colors.TextBoxBackColor = ParseColor(st.Component.InputBackground);
-                colors.TextBoxForeColor = ParseColor(st.Base?.Foreground);
-                colors.ButtonBackColor = ParseColor(st.Component.ButtonBackground);
-                colors.ButtonForeColor = ParseColor(st.Base?.Foreground);
-                colors.DataGridHeaderBackColor = ParseColor(st.Component.HeaderBackground);
-                colors.DataGridAltRowBackColor = ParseColor(st.Component.AltRowBackground);
-                colors.TabUnselectedBackColor = ParseColor(st.Component.TabUnselected);
-                colors.ToolTipBackColor = ParseColor(st.Component.ToolTipBackground);
-                colors.StatusStripBackColor = ParseColor(st.Component.StatusBackground);
-            }
-
-            return colors;
-        }
-
-        private static Color? ParseColor(string? hex)
-        {
-            if (string.IsNullOrWhiteSpace(hex))
-            {
-                return null;
-            }
-
-            try
-            {
-                return ColorTranslator.FromHtml(hex);
-            }
-            catch
-            {
-                return null;
             }
         }
     }

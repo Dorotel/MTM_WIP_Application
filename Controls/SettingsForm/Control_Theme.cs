@@ -70,10 +70,9 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 }
 
                 string user = Model_AppVariables.User;
-                var themeObj = new { Theme_Name = selectedTheme, Theme_FontSize = 9 };
-                string themeJson = System.Text.Json.JsonSerializer.Serialize(themeObj);
 
-                await Dao_User.SetSettingsJsonAsync(user, themeJson);
+                // FIXED: Use the proper theme setter that works with existing database structure
+                await Dao_User.SetThemeNameAsync(user, selectedTheme, true);
 
                 // Update the current theme in the app variables and apply to all open forms
                 Model_AppVariables.ThemeName = selectedTheme;
