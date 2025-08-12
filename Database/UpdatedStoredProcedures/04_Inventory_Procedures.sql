@@ -80,7 +80,7 @@ BEGIN
         -- Also insert transaction record (assuming inv_transaction table exists)
         INSERT INTO inv_transaction (
             PartID, Location, Operation, Quantity, ItemType,
-            User, BatchNumber, Notes, TransactionType, TransactionDate
+            User, BatchNumber, Notes, TransactionType, ReceiveDate
         ) VALUES (
             p_PartID, p_Location, p_Operation, p_Quantity, p_ItemType,
             p_User, p_BatchNumber, p_Notes, 'IN', NOW()
@@ -156,7 +156,7 @@ BEGIN
             -- Insert transaction record
             INSERT INTO inv_transaction (
                 PartID, Location, Operation, Quantity, ItemType,
-                User, BatchNumber, Notes, TransactionType, TransactionDate
+                User, BatchNumber, Notes, TransactionType, ReceiveDate
             ) VALUES (
                 p_PartID, p_Location, p_Operation, p_Quantity, p_ItemType,
                 p_User, p_BatchNumber, p_Notes, 'OUT', NOW()
@@ -318,7 +318,7 @@ BEGIN
             -- Record transfer transactions
             INSERT INTO inv_transaction (
                 PartID, Location, Operation, Quantity, ItemType,
-                User, BatchNumber, TransactionType, TransactionDate
+                User, BatchNumber, TransactionType, ReceiveDate
             ) VALUES 
             (p_PartID, v_OriginalLocation, p_Operation, p_TransferQuantity, v_ItemType,
              p_User, p_BatchNumber, 'OUT', NOW()),
@@ -532,7 +532,7 @@ BEGIN
     WHERE EXISTS (
         SELECT 1 FROM inv_transaction t2
         WHERE t1.BatchNumber = t2.BatchNumber
-          AND DATE(t1.TransactionDate) = DATE(t2.TransactionDate)
+          AND DATE(t1.ReceiveDate) = DATE(t2.ReceiveDate)
           AND t1.TransactionType != t2.TransactionType
     );
     
@@ -570,7 +570,7 @@ BEGIN
     WHERE EXISTS (
         SELECT 1 FROM inv_transaction t2
         WHERE t1.BatchNumber = t2.BatchNumber
-          AND DATE(t1.TransactionDate) = DATE(t2.TransactionDate)
+          AND DATE(t1.ReceiveDate) = DATE(t2.ReceiveDate)
           AND t1.TransactionType != t2.TransactionType
     )
     ORDER BY t1.BatchNumber
@@ -581,7 +581,7 @@ BEGIN
     WHERE EXISTS (
         SELECT 1 FROM inv_transaction t2
         WHERE t1.BatchNumber = t2.BatchNumber
-          AND DATE(t1.TransactionDate) = DATE(t2.TransactionDate)
+          AND DATE(t1.ReceiveDate) = DATE(t2.ReceiveDate)
           AND t1.TransactionType != t2.TransactionType
     );
     

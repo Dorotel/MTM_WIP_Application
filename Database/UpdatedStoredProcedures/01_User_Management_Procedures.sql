@@ -80,7 +80,7 @@ BEGIN
         SET p_Status = 1;
         SET p_ErrorMsg = CONCAT('User not found: ', p_User);
     ELSE
-        SELECT FullName FROM usr_users WHERE User = p_User LIMIT 1;
+        SELECT `Full Name` FROM usr_users WHERE User = p_User LIMIT 1;
         SET p_Status = 0;
         SET p_ErrorMsg = CONCAT('Full name retrieved successfully for user: ', p_User);
     END IF;
@@ -154,7 +154,7 @@ BEGIN
             WHEN 'WipServerAddress' THEN SELECT WipServerAddress INTO v_FieldValue FROM usr_users WHERE User = p_User LIMIT 1;
             WHEN 'WIPDatabase' THEN SELECT WIPDatabase INTO v_FieldValue FROM usr_users WHERE User = p_User LIMIT 1;
             WHEN 'WipServerPort' THEN SELECT WipServerPort INTO v_FieldValue FROM usr_users WHERE User = p_User LIMIT 1;
-            WHEN 'FullName' THEN SELECT FullName INTO v_FieldValue FROM usr_users WHERE User = p_User LIMIT 1;
+            WHEN 'FullName' THEN SELECT `Full Name` INTO v_FieldValue FROM usr_users WHERE User = p_User LIMIT 1;
             WHEN 'Shift' THEN SELECT Shift INTO v_FieldValue FROM usr_users WHERE User = p_User LIMIT 1;
             WHEN 'Pin' THEN SELECT Pin INTO v_FieldValue FROM usr_users WHERE User = p_User LIMIT 1;
             ELSE SET v_FieldValue = NULL;
@@ -194,8 +194,8 @@ BEGIN
     
     IF v_Count = 0 THEN
         -- Create basic user record with required fields
-        INSERT INTO usr_users (User, FullName, CreatedDate) 
-        VALUES (p_User, p_User, NOW());
+        INSERT INTO usr_users (User, `Full Name`) 
+        VALUES (p_User, p_User);
     END IF;
     
     -- Use fixed field names instead of dynamic SQL for MySQL 5.7.24 compatibility
@@ -219,7 +219,7 @@ BEGIN
         WHEN 'WipServerPort' THEN 
             UPDATE usr_users SET WipServerPort = p_Value, ModifiedDate = NOW() WHERE User = p_User;
         WHEN 'FullName' THEN 
-            UPDATE usr_users SET FullName = p_Value, ModifiedDate = NOW() WHERE User = p_User;
+            UPDATE usr_users SET `Full Name` = p_Value WHERE User = p_User;
         WHEN 'Shift' THEN 
             UPDATE usr_users SET Shift = p_Value, ModifiedDate = NOW() WHERE User = p_User;
         WHEN 'Pin' THEN 
@@ -318,15 +318,15 @@ BEGIN
         ROLLBACK;
     ELSE
         INSERT INTO usr_users (
-            User, FullName, Shift, VitsUser, Pin,
+            User, `Full Name`, Shift, VitsUser, Pin,
             LastShownVersion, HideChangeLog, Theme_Name, Theme_FontSize,
             VisualUserName, VisualPassword, WipServerAddress, 
-            WIPDatabase, WipServerPort, CreatedDate
+            WIPDatabase, WipServerPort
         ) VALUES (
             p_User, p_FullName, p_Shift, p_VitsUser, p_Pin,
             p_LastShownVersion, p_HideChangeLog, p_Theme_Name, p_Theme_FontSize,
             p_VisualUserName, p_VisualPassword, p_WipServerAddress,
-            p_WIPDatabase, p_WipServerPort, NOW()
+            p_WIPDatabase, p_WipServerPort
         );
         
         SET p_Status = 0;
@@ -370,12 +370,11 @@ BEGIN
         ROLLBACK;
     ELSE
         UPDATE usr_users 
-        SET FullName = p_FullName,
+        SET `Full Name` = p_FullName,
             Shift = p_Shift,
             Pin = p_Pin,
             VisualUserName = p_VisualUserName,
-            VisualPassword = p_VisualPassword,
-            ModifiedDate = NOW()
+            VisualPassword = p_VisualPassword
         WHERE User = p_User;
         
         SET v_RowsAffected = ROW_COUNT();
@@ -453,7 +452,7 @@ BEGIN
     END;
     
     SELECT COUNT(*) INTO v_Count FROM usr_users;
-    SELECT * FROM usr_users ORDER BY FullName;
+    SELECT * FROM usr_users ORDER BY `Full Name`;
     
     SET p_Status = 0;
     SET p_ErrorMsg = CONCAT('Retrieved ', v_Count, ' users successfully');
@@ -481,7 +480,7 @@ BEGIN
     IF v_Count = 0 THEN
         SET p_Status = 1;
         SET p_ErrorMsg = CONCAT('User not found: ', p_User);
-        SELECT NULL as User, NULL as FullName; -- Return empty result set with structure
+        SELECT NULL as User, NULL as `Full Name`; -- Return empty result set with structure
     ELSE
         SELECT * FROM usr_users WHERE User = p_User LIMIT 1;
         SET p_Status = 0;
