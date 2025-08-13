@@ -36,6 +36,13 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private Panel Transactions_Panel_Bottom_Left;
         private Button Transactions_Button_Reset;
 
+        // Smart Search Controls
+        private Panel Transactions_Panel_SmartSearch;
+        private Label Transactions_Label_SmartSearch;
+        private TextBox Transactions_TextBox_SmartSearch;
+        private Button Transactions_Button_SmartSearch;
+        private Label Transactions_Label_SmartSearchHelp;
+
         #endregion
 
         #region Methods

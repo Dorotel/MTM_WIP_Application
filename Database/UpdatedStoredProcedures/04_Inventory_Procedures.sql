@@ -695,5 +695,191 @@ END $$
 DELIMITER ;
 
 -- ================================================================================
+-- TRANSACTION SMART SEARCH PROCEDURES (MySQL 5.7.24 Compatible)
+-- ================================================================================
+
+-- Smart search procedure for transactions with advanced filtering
+DELIMITER $$
+CREATE PROCEDURE inv_transactions_SmartSearch(
+    IN p_UserName VARCHAR(100),
+    IN p_IsAdmin BOOLEAN,
+    IN p_PartID VARCHAR(300),
+    IN p_BatchNumber VARCHAR(300),
+    IN p_Operation VARCHAR(100),
+    IN p_Notes VARCHAR(1000),
+    IN p_User VARCHAR(100),
+    IN p_ItemType VARCHAR(100),
+    IN p_Quantity INT,
+    IN p_TransactionTypes VARCHAR(500),
+    IN p_FromDate DATETIME,
+    IN p_ToDate DATETIME,
+    IN p_Locations VARCHAR(500),
+    IN p_GeneralSearch VARCHAR(500),
+    IN p_Page INT,
+    IN p_PageSize INT,
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE v_Offset INT DEFAULT 0;
+    DECLARE v_Count INT DEFAULT 0;
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_Status = -1;
+        SET p_ErrorMsg = 'Database error occurred during smart search';
+        ROLLBACK;
+    END;
+    
+    -- Calculate offset for pagination
+    SET v_Offset = (p_Page - 1) * p_PageSize;
+    
+    -- Build dynamic WHERE clause based on provided parameters
+    SELECT 
+        ID,
+        TransactionType,
+        BatchNumber,
+        PartID,
+        FromLocation,
+        ToLocation,
+        Operation,
+        Quantity,
+        Notes,
+        User,
+        ItemType,
+        ReceiveDate
+    FROM inv_transaction t
+    WHERE 
+        -- Admin check: non-admin users only see their own transactions
+        (p_IsAdmin = TRUE OR t.User = p_UserName)
+        
+        -- Part ID search (exact or partial match)
+        AND (p_PartID IS NULL OR p_PartID = '' OR t.PartID LIKE CONCAT('%', p_PartID, '%'))
+        
+        -- Batch number search
+        AND (p_BatchNumber IS NULL OR p_BatchNumber = '' OR t.BatchNumber LIKE CONCAT('%', p_BatchNumber, '%'))
+        
+        -- Operation search
+        AND (p_Operation IS NULL OR p_Operation = '' OR t.Operation LIKE CONCAT('%', p_Operation, '%'))
+        
+        -- Notes search
+        AND (p_Notes IS NULL OR p_Notes = '' OR t.Notes LIKE CONCAT('%', p_Notes, '%'))
+        
+        -- User search
+        AND (p_User IS NULL OR p_User = '' OR t.User LIKE CONCAT('%', p_User, '%'))
+        
+        -- Item type search
+        AND (p_ItemType IS NULL OR p_ItemType = '' OR t.ItemType = p_ItemType)
+        
+        -- Quantity search
+        AND (p_Quantity IS NULL OR p_Quantity <= 0 OR t.Quantity = p_Quantity)
+        
+        -- Transaction type filter (comma-separated list)
+        AND (p_TransactionTypes IS NULL OR p_TransactionTypes = '' 
+             OR FIND_IN_SET(t.TransactionType, p_TransactionTypes) > 0)
+        
+        -- Date range filter
+        AND (p_FromDate IS NULL OR t.ReceiveDate >= p_FromDate)
+        AND (p_ToDate IS NULL OR t.ReceiveDate <= p_ToDate)
+        
+        -- Location filter (searches both FromLocation and ToLocation)
+        AND (p_Locations IS NULL OR p_Locations = '' 
+             OR FIND_IN_SET(t.FromLocation, p_Locations) > 0
+             OR FIND_IN_SET(t.ToLocation, p_Locations) > 0)
+        
+        -- General search (searches across multiple text fields)
+        AND (p_GeneralSearch IS NULL OR p_GeneralSearch = ''
+             OR t.PartID LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.BatchNumber LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.Notes LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.User LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.FromLocation LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.ToLocation LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.Operation LIKE CONCAT('%', p_GeneralSearch, '%'))
+    
+    ORDER BY t.ReceiveDate DESC
+    LIMIT p_PageSize OFFSET v_Offset;
+    
+    -- Get count for analytics
+    SELECT COUNT(*) INTO v_Count 
+    FROM inv_transaction t
+    WHERE 
+        (p_IsAdmin = TRUE OR t.User = p_UserName)
+        AND (p_PartID IS NULL OR p_PartID = '' OR t.PartID LIKE CONCAT('%', p_PartID, '%'))
+        AND (p_BatchNumber IS NULL OR p_BatchNumber = '' OR t.BatchNumber LIKE CONCAT('%', p_BatchNumber, '%'))
+        AND (p_Operation IS NULL OR p_Operation = '' OR t.Operation LIKE CONCAT('%', p_Operation, '%'))
+        AND (p_Notes IS NULL OR p_Notes = '' OR t.Notes LIKE CONCAT('%', p_Notes, '%'))
+        AND (p_User IS NULL OR p_User = '' OR t.User LIKE CONCAT('%', p_User, '%'))
+        AND (p_ItemType IS NULL OR p_ItemType = '' OR t.ItemType = p_ItemType)
+        AND (p_Quantity IS NULL OR p_Quantity <= 0 OR t.Quantity = p_Quantity)
+        AND (p_TransactionTypes IS NULL OR p_TransactionTypes = '' 
+             OR FIND_IN_SET(t.TransactionType, p_TransactionTypes) > 0)
+        AND (p_FromDate IS NULL OR t.ReceiveDate >= p_FromDate)
+        AND (p_ToDate IS NULL OR t.ReceiveDate <= p_ToDate)
+        AND (p_Locations IS NULL OR p_Locations = '' 
+             OR FIND_IN_SET(t.FromLocation, p_Locations) > 0
+             OR FIND_IN_SET(t.ToLocation, p_Locations) > 0)
+        AND (p_GeneralSearch IS NULL OR p_GeneralSearch = ''
+             OR t.PartID LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.BatchNumber LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.Notes LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.User LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.FromLocation LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.ToLocation LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.Operation LIKE CONCAT('%', p_GeneralSearch, '%'));
+    
+    SET p_Status = 0;
+    SET p_ErrorMsg = CONCAT('Smart search completed, found ', v_Count, ' matching transactions');
+END $$
+DELIMITER ;
+
+-- Transaction analytics procedure for dashboard
+DELIMITER $$
+CREATE PROCEDURE inv_transactions_GetAnalytics(
+    IN p_UserName VARCHAR(100),
+    IN p_IsAdmin BOOLEAN,
+    IN p_FromDate DATETIME,
+    IN p_ToDate DATETIME,
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_Status = -1;
+        SET p_ErrorMsg = 'Database error occurred while retrieving analytics';
+        ROLLBACK;
+    END;
+    
+    SELECT 
+        COUNT(*) as TotalTransactions,
+        SUM(CASE WHEN TransactionType = 'IN' THEN 1 ELSE 0 END) as InTransactions,
+        SUM(CASE WHEN TransactionType = 'OUT' THEN 1 ELSE 0 END) as OutTransactions,
+        SUM(CASE WHEN TransactionType = 'TRANSFER' THEN 1 ELSE 0 END) as TransferTransactions,
+        SUM(Quantity) as TotalQuantity,
+        COUNT(DISTINCT PartID) as UniquePartIds,
+        COUNT(DISTINCT User) as ActiveUsers,
+        (SELECT PartID FROM inv_transaction t2 
+         WHERE (p_IsAdmin = TRUE OR t2.User = p_UserName)
+         AND (p_FromDate IS NULL OR t2.ReceiveDate >= p_FromDate)
+         AND (p_ToDate IS NULL OR t2.ReceiveDate <= p_ToDate)
+         GROUP BY PartID ORDER BY COUNT(*) DESC LIMIT 1) as TopPartId,
+        (SELECT User FROM inv_transaction t3 
+         WHERE (p_IsAdmin = TRUE OR t3.User = p_UserName)
+         AND (p_FromDate IS NULL OR t3.ReceiveDate >= p_FromDate)
+         AND (p_ToDate IS NULL OR t3.ReceiveDate <= p_ToDate)
+         GROUP BY User ORDER BY COUNT(*) DESC LIMIT 1) as TopUser
+    FROM inv_transaction t
+    WHERE 
+        (p_IsAdmin = TRUE OR t.User = p_UserName)
+        AND (p_FromDate IS NULL OR t.ReceiveDate >= p_FromDate)
+        AND (p_ToDate IS NULL OR t.ReceiveDate <= p_ToDate);
+    
+    SET p_Status = 0;
+    SET p_ErrorMsg = 'Analytics retrieved successfully';
+END $$
+DELIMITER ;
+
+-- ================================================================================
 -- END OF INVENTORY PROCEDURES
 -- ================================================================================

@@ -8,6 +8,8 @@ using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using System.Drawing.Printing;
 using MTM_Inventory_Application.Controls.Shared;
+using MTM_Inventory_Application.Services;
+using MTM_Inventory_Application.Logging;
 
 namespace MTM_Inventory_Application.Forms.Transactions
 {
@@ -41,6 +43,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
             SetupSortCombo();
             SetupDataGrid();
+            InitializeSmartSearchControls();
 
             Load += async (s, e) => await OnFormLoadAsync();
 
@@ -724,6 +727,525 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_DataGridView_Transactions.AllowUserToResizeRows = false;
 
             Transactions_DataGridView_Transactions.DataSource = new BindingList<Model_Transactions>();
+        }
+
+        /// <summary>
+        /// Initializes smart search controls and adds them to the form
+        /// </summary>
+        private void InitializeSmartSearchControls()
+        {
+            try
+            {
+                // Create smart search panel
+                Transactions_Panel_SmartSearch = new Panel
+                {
+                    Height = 35,
+                    Dock = DockStyle.None,
+                    Margin = new Padding(3),
+                    BackColor = SystemColors.Control
+                };
+
+                // Create smart search label
+                Transactions_Label_SmartSearch = new Label
+                {
+                    Text = "Smart Search:",
+                    Location = new Point(5, 8),
+                    Size = new Size(80, 20),
+                    TextAlign = ContentAlignment.MiddleLeft
+                };
+
+                // Create smart search textbox
+                Transactions_TextBox_SmartSearch = new TextBox
+                {
+                    Location = new Point(90, 6),
+                    Size = new Size(200, 23),
+                    PlaceholderText = "e.g., partid:A123, user:JSMITH, #urgent"
+                };
+
+                // Create smart search button
+                Transactions_Button_SmartSearch = new Button
+                {
+                    Text = "Search",
+                    Location = new Point(295, 5),
+                    Size = new Size(60, 25),
+                    UseVisualStyleBackColor = true
+                };
+
+                // Create help label
+                Transactions_Label_SmartSearchHelp = new Label
+                {
+                    Text = "Use: partid:value, batch:value, user:value, qty:value, notes:text",
+                    Location = new Point(90, 28),
+                    Size = new Size(270, 15),
+                    Font = new Font(Font.FontFamily, 7.5f, FontStyle.Italic),
+                    ForeColor = SystemColors.GrayText
+                };
+
+                // Add controls to panel
+                Transactions_Panel_SmartSearch.Controls.AddRange(new Control[]
+                {
+                    Transactions_Label_SmartSearch,
+                    Transactions_TextBox_SmartSearch,
+                    Transactions_Button_SmartSearch,
+                    Transactions_Label_SmartSearchHelp
+                });
+
+                // Wire up events
+                Transactions_Button_SmartSearch.Click += async (s, e) => 
+                    await HandleSmartSearchAsync(Transactions_TextBox_SmartSearch.Text);
+                
+                Transactions_TextBox_SmartSearch.KeyPress += async (s, e) =>
+                {
+                    if (e.KeyChar == (char)Keys.Enter)
+                    {
+                        e.Handled = true;
+                        await HandleSmartSearchAsync(Transactions_TextBox_SmartSearch.Text);
+                    }
+                };
+
+                // Add panel to the input table layout at the top (row 0, shifting others down)
+                if (Transactions_TableLayout_Inputs != null)
+                {
+                    // Insert at the beginning (row 0)
+                    Transactions_TableLayout_Inputs.RowCount++;
+                    Transactions_TableLayout_Inputs.RowStyles.Insert(0, new RowStyle(SizeType.Absolute, 50F));
+                    
+                    // Shift existing controls down by 1 row
+                    for (int i = Transactions_TableLayout_Inputs.Controls.Count - 1; i >= 0; i--)
+                    {
+                        var control = Transactions_TableLayout_Inputs.Controls[i];
+                        var position = Transactions_TableLayout_Inputs.GetPositionFromControl(control);
+                        Transactions_TableLayout_Inputs.SetRow(control, position.Row + 1);
+                    }
+                    
+                    // Add smart search panel at row 0
+                    Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_SmartSearch, 0, 0);
+                }
+
+                // Apply theme
+                Core_Themes.ApplyTheme(Transactions_Panel_SmartSearch);
+
+                LoggingUtility.LogApplicationInfo("Smart search controls initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex,
+                    ErrorSeverity.Medium,
+                    controlName: "InitializeSmartSearchControls");
+            }
+        }
+
+        #endregion
+
+        #region Smart Search Methods
+
+        /// <summary>
+        /// Handles smart search input with intelligent parsing
+        /// </summary>
+        /// <param name="searchText">Raw search input from user</param>
+        private async Task HandleSmartSearchAsync(string searchText)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(searchText))
+                {
+                    await LoadTransactionsAsync();
+                    return;
+                }
+
+                // Parse search terms and build search criteria
+                var searchCriteria = ParseSearchInput(searchText);
+                
+                var dao = new Dao_Transactions();
+                var searchResult = await dao.SmartSearchAsync(
+                    searchCriteria.SearchTerms,
+                    GetSelectedTransactionTypes(),
+                    GetSelectedTimeRange(),
+                    GetSelectedLocations(),
+                    _isAdmin ? string.Empty : _currentUser,
+                    _isAdmin,
+                    _currentPage,
+                    PageSize
+                );
+
+                if (searchResult.IsSuccess && searchResult.Data != null)
+                {
+                    await DisplaySearchResultsAsync(searchResult.Data);
+                    await UpdateAnalyticsDashboardAsync(searchResult.Data);
+                }
+                else
+                {
+                    Service_ErrorHandler.HandleException(
+                        new Exception($"Smart search failed: {searchResult.ErrorMessage}"),
+                        ErrorSeverity.Medium,
+                        controlName: "Transactions_SmartSearch"
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleDatabaseError(ex, 
+                    controlName: nameof(Transactions));
+            }
+        }
+
+        /// <summary>
+        /// Parses user search input into structured search criteria
+        /// </summary>
+        /// <param name="searchText">Raw search input</param>
+        /// <returns>Parsed search criteria</returns>
+        private (Dictionary<string, string> SearchTerms, List<string> Tags, SearchType Type) ParseSearchInput(string searchText)
+        {
+            var searchTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var tags = new List<string>();
+            var searchType = SearchType.General;
+
+            if (string.IsNullOrWhiteSpace(searchText))
+                return (searchTerms, tags, searchType);
+
+            // Split by spaces but preserve quoted strings
+            var terms = SplitSearchTerms(searchText.Trim());
+
+            foreach (var term in terms)
+            {
+                if (string.IsNullOrWhiteSpace(term))
+                    continue;
+
+                // Check for field-specific searches (field:value)
+                if (term.Contains(':'))
+                {
+                    var parts = term.Split(':', 2);
+                    if (parts.Length == 2)
+                    {
+                        var field = parts[0].ToLowerInvariant();
+                        var value = parts[1].Trim('"', '\'');
+
+                        switch (field)
+                        {
+                            case "part":
+                            case "partid":
+                                searchTerms["partid"] = value;
+                                searchType = SearchType.Specific;
+                                break;
+                            case "batch":
+                            case "batchnumber":
+                                searchTerms["batch"] = value;
+                                searchType = SearchType.Specific;
+                                break;
+                            case "op":
+                            case "operation":
+                                searchTerms["operation"] = value;
+                                searchType = SearchType.Specific;
+                                break;
+                            case "user":
+                                searchTerms["user"] = value;
+                                searchType = SearchType.Specific;
+                                break;
+                            case "qty":
+                            case "quantity":
+                                searchTerms["quantity"] = value;
+                                searchType = SearchType.Specific;
+                                break;
+                            case "notes":
+                                searchTerms["notes"] = value;
+                                searchType = SearchType.Specific;
+                                break;
+                            case "type":
+                            case "itemtype":
+                                searchTerms["itemtype"] = value;
+                                searchType = SearchType.Specific;
+                                break;
+                        }
+                        continue;
+                    }
+                }
+
+                // Check for tags (words starting with #)
+                if (term.StartsWith("#"))
+                {
+                    tags.Add(term.Substring(1));
+                    continue;
+                }
+
+                // General search term
+                if (!searchTerms.ContainsKey("general"))
+                    searchTerms["general"] = term;
+                else
+                    searchTerms["general"] += " " + term;
+            }
+
+            return (searchTerms, tags, searchType);
+        }
+
+        /// <summary>
+        /// Splits search terms while preserving quoted strings
+        /// </summary>
+        /// <param name="searchText">Search text to split</param>
+        /// <returns>Array of search terms</returns>
+        private string[] SplitSearchTerms(string searchText)
+        {
+            var terms = new List<string>();
+            var currentTerm = new StringBuilder();
+            var inQuotes = false;
+            var quoteChar = '\0';
+
+            for (int i = 0; i < searchText.Length; i++)
+            {
+                var c = searchText[i];
+
+                if (!inQuotes && (c == '"' || c == '\''))
+                {
+                    inQuotes = true;
+                    quoteChar = c;
+                    continue;
+                }
+
+                if (inQuotes && c == quoteChar)
+                {
+                    inQuotes = false;
+                    continue;
+                }
+
+                if (!inQuotes && char.IsWhiteSpace(c))
+                {
+                    if (currentTerm.Length > 0)
+                    {
+                        terms.Add(currentTerm.ToString());
+                        currentTerm.Clear();
+                    }
+                    continue;
+                }
+
+                currentTerm.Append(c);
+            }
+
+            if (currentTerm.Length > 0)
+                terms.Add(currentTerm.ToString());
+
+            return terms.ToArray();
+        }
+
+        /// <summary>
+        /// Gets selected transaction types from UI controls
+        /// </summary>
+        /// <returns>List of selected transaction types</returns>
+        private List<TransactionType> GetSelectedTransactionTypes()
+        {
+            var types = new List<TransactionType>();
+
+            // Add logic to read from UI checkboxes/filters
+            // For now, return all types (this would be customized based on UI controls)
+            types.AddRange(Enum.GetValues<TransactionType>());
+
+            return types;
+        }
+
+        /// <summary>
+        /// Gets selected time range from UI controls
+        /// </summary>
+        /// <returns>Time range tuple</returns>
+        private (DateTime? from, DateTime? to) GetSelectedTimeRange()
+        {
+            DateTime? fromDate = null;
+            DateTime? toDate = null;
+
+            // Read from date picker controls
+            if (Control_AdvancedRemove_CheckBox_Date.Checked)
+            {
+                fromDate = Control_AdvancedRemove_DateTimePicker_From.Value.Date;
+                toDate = Control_AdvancedRemove_DateTimePicker_To.Value.Date.AddDays(1).AddSeconds(-1);
+            }
+
+            return (fromDate, toDate);
+        }
+
+        /// <summary>
+        /// Gets selected locations from UI controls
+        /// </summary>
+        /// <returns>List of selected locations</returns>
+        private List<string> GetSelectedLocations()
+        {
+            var locations = new List<string>();
+
+            // Add logic to read from location filters
+            // This would be customized based on UI location controls
+            if (!string.IsNullOrEmpty(Transactions_ComboBox_Building.Text))
+            {
+                locations.Add(Transactions_ComboBox_Building.Text);
+            }
+
+            return locations;
+        }
+
+        /// <summary>
+        /// Displays search results in the data grid
+        /// </summary>
+        /// <param name="transactions">Search results</param>
+        private async Task DisplaySearchResultsAsync(List<Model_Transactions> transactions)
+        {
+            await Task.Run(() =>
+            {
+                if (InvokeRequired)
+                {
+                    Invoke(new Action(() => DisplaySearchResults(transactions)));
+                }
+                else
+                {
+                    DisplaySearchResults(transactions);
+                }
+            });
+        }
+
+        /// <summary>
+        /// Synchronous version of DisplaySearchResultsAsync for UI thread
+        /// </summary>
+        /// <param name="transactions">Search results</param>
+        private void DisplaySearchResults(List<Model_Transactions> transactions)
+        {
+            try
+            {
+                _displayedTransactions = new BindingList<Model_Transactions>(transactions);
+                Transactions_DataGridView_Transactions.DataSource = _displayedTransactions;
+
+                // Update pagination controls
+                Transfer_Button_Previous.Enabled = _currentPage > 1;
+                Transfer_Button_Next.Enabled = transactions.Count == PageSize;
+
+                // Update selection-related controls
+                UpdateSelectionControls();
+
+                // Enable/disable buttons based on results
+                Transactions_Button_Print.Enabled = transactions.Count > 0;
+                Transfer_Button_SelectionHistory.Enabled = transactions.Count > 0;
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex,
+                    ErrorSeverity.Medium,
+                    controlName: "DisplaySearchResults");
+            }
+        }
+
+        /// <summary>
+        /// Updates analytics dashboard with search results
+        /// </summary>
+        /// <param name="transactions">Transaction data for analytics</param>
+        private async Task UpdateAnalyticsDashboardAsync(List<Model_Transactions> transactions)
+        {
+            try
+            {
+                // Get comprehensive analytics from database
+                var dao = new Dao_Transactions();
+                var analyticsResult = await dao.GetTransactionAnalyticsAsync(
+                    _currentUser,
+                    _isAdmin,
+                    GetSelectedTimeRange()
+                );
+
+                if (analyticsResult.IsSuccess && analyticsResult.Data != null)
+                {
+                    var analytics = analyticsResult.Data;
+
+                    // Update analytics display (would need UI controls for this)
+                    await UpdateAnalyticsDisplay(analytics);
+                }
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex,
+                    ErrorSeverity.Low,
+                    controlName: "UpdateAnalyticsDashboard");
+            }
+        }
+
+        /// <summary>
+        /// Updates the analytics display with calculated metrics
+        /// </summary>
+        /// <param name="analytics">Analytics data dictionary</param>
+        private async Task UpdateAnalyticsDisplay(Dictionary<string, object> analytics)
+        {
+            await Task.Run(() =>
+            {
+                if (InvokeRequired)
+                {
+                    Invoke(new Action(() =>
+                    {
+                        // Update analytics controls
+                        // This would be implemented when analytics UI controls are added
+                        LoggingUtility.LogApplicationInfo($"Analytics updated: {analytics.Count} metrics");
+                    }));
+                }
+            });
+        }
+
+        /// <summary>
+        /// Updates selection-related controls based on current data
+        /// </summary>
+        private void UpdateSelectionControls()
+        {
+            try
+            {
+                if (Transactions_DataGridView_Transactions.SelectedRows.Count > 0)
+                {
+                    var selectedTransaction = (Model_Transactions)Transactions_DataGridView_Transactions.SelectedRows[0].DataBoundItem;
+                    
+                    // Update selection report controls
+                    Transactions_TextBox_Report_PartID.Text = selectedTransaction.PartID ?? "";
+                    Transactions_TextBox_Report_BatchNumber.Text = selectedTransaction.BatchNumber ?? "";
+                    Transactions_TextBox_Report_FromLocation.Text = selectedTransaction.FromLocation ?? "";
+                    Transactions_TextBox_Report_ToLocation.Text = selectedTransaction.ToLocation ?? "";
+                    Transactions_TextBox_Report_Operation.Text = selectedTransaction.Operation ?? "";
+                    Transactions_TextBox_Report_Quantity.Text = selectedTransaction.Quantity.ToString();
+                    Transactions_TextBox_Notes.Text = selectedTransaction.Notes ?? "";
+                    Transactions_TextBox_Report_User.Text = selectedTransaction.User ?? "";
+                    Transactions_TextBox_Report_ItemType.Text = selectedTransaction.ItemType ?? "";
+                    Transactions_TextBox_Report_ReceiveDate.Text = selectedTransaction.DateTime.ToString("yyyy-MM-dd HH:mm:ss");
+                    Transactions_TextBox_Report_TransactionType.Text = selectedTransaction.TransactionType.ToString();
+                }
+                else
+                {
+                    // Clear selection report controls
+                    ClearSelectionReportControls();
+                }
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex,
+                    ErrorSeverity.Low,
+                    controlName: "UpdateSelectionControls");
+            }
+        }
+
+        /// <summary>
+        /// Clears all selection report controls
+        /// </summary>
+        private void ClearSelectionReportControls()
+        {
+            Transactions_TextBox_Report_PartID.Text = "";
+            Transactions_TextBox_Report_BatchNumber.Text = "";
+            Transactions_TextBox_Report_FromLocation.Text = "";
+            Transactions_TextBox_Report_ToLocation.Text = "";
+            Transactions_TextBox_Report_Operation.Text = "";
+            Transactions_TextBox_Report_Quantity.Text = "";
+            Transactions_TextBox_Notes.Text = "";
+            Transactions_TextBox_Report_User.Text = "";
+            Transactions_TextBox_Report_ItemType.Text = "";
+            Transactions_TextBox_Report_ReceiveDate.Text = "";
+            Transactions_TextBox_Report_TransactionType.Text = "";
+        }
+
+        #endregion
+
+        #region Search Type Enumeration
+
+        /// <summary>
+        /// Enumeration for different types of search operations
+        /// </summary>
+        private enum SearchType
+        {
+            General,    // General keyword search across multiple fields
+            Specific,   // Field-specific search with exact criteria
+            Advanced    // Complex search with multiple criteria and filters
         }
 
         #endregion
