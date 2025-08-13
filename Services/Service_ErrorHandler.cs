@@ -203,6 +203,44 @@ internal static class Service_ErrorHandler
         }
     }
 
+    /// <summary>
+    /// Show a confirmation dialog (not an error - just a user confirmation)
+    /// </summary>
+    public static DialogResult ShowConfirmation(string message, string title = "Confirmation",
+        MessageBoxButtons buttons = MessageBoxButtons.YesNo,
+        MessageBoxIcon icon = MessageBoxIcon.Question)
+    {
+        try
+        {
+            LoggingUtility.Log($"Confirmation dialog shown: {title} - {message}");
+            return MessageBox.Show(message, title, buttons, icon);
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            return DialogResult.Cancel;
+        }
+    }
+
+    /// <summary>
+    /// Show a warning dialog (not an error - just a user warning)
+    /// </summary>
+    public static DialogResult ShowWarning(string message, string title = "Warning", 
+        MessageBoxButtons buttons = MessageBoxButtons.OKCancel,
+        MessageBoxIcon icon = MessageBoxIcon.Warning)
+    {
+        try
+        {
+            LoggingUtility.Log($"Warning dialog shown: {title} - {message}");
+            return MessageBox.Show(message, title, buttons, icon);
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            return DialogResult.Cancel;
+        }
+    }
+
     #endregion
 
     #region Legacy Compatibility Methods

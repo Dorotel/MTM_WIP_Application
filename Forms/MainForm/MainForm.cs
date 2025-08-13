@@ -6,6 +6,7 @@ using MTM_Inventory_Application.Controls.MainForm;
 using MTM_Inventory_Application.Controls.Shared;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
+using MTM_Inventory_Application.Forms.ErrorDialog;
 using MTM_Inventory_Application.Forms.Settings;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
@@ -415,7 +416,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
                 if ((advancedInvTab?.Visible == true) || (advancedRemoveTab?.Visible == true))
                 {
-                    DialogResult result = MessageBox.Show(
+                    DialogResult result = Service_ErrorHandler.ShowWarning(
                         @"If you change the current tab now, any work will be lost.",
                         @"Warning",
                         MessageBoxButtons.OKCancel,
@@ -429,8 +430,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
             }
             catch (Exception ex)
             {
-                LoggingUtility.LogApplicationError(ex);
-                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm_TabControl_Selecting));
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
+                    controlName: nameof(MainForm));
             }
         }
 
@@ -450,9 +451,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
             }
             catch (Exception ex)
             {
-                LoggingUtility.LogApplicationError(ex);
-                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
-                    nameof(MainForm_TabControl_SelectedIndexChanged));
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
+                    controlName: nameof(MainForm));
             }
             finally
             {
@@ -732,7 +732,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
         {
             try
             {
-                DialogResult result = MessageBox.Show(
+                DialogResult result = Service_ErrorHandler.ShowConfirmation(
                     @"Are you sure you want to exit?",
                     @"Exit Application",
                     MessageBoxButtons.YesNo,
@@ -745,8 +745,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
             }
             catch (Exception ex)
             {
-                LoggingUtility.LogApplicationError(ex);
-                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm_MenuStrip_Exit_Click));
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
+                    controlName: nameof(MainForm));
             }
         }
 

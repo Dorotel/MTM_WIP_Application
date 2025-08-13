@@ -289,9 +289,77 @@ When refactoring ANY file in this repository, ensure:
 
 **Non-compliance with region organization or environment logic will require rework.**
 
+## Help System Integration
+
+### **Accessing Help**
+The application includes a comprehensive help system accessible via:
+- **F1** - Context-sensitive help for current operation
+- **Ctrl+F1** - Getting Started guide  
+- **Menu → Help** - Complete help system with search functionality
+- **Ctrl+Shift+K** - Keyboard shortcuts reference
+
+### **Help System Structure**
+- **Main Help**: `/Documentation/Help/index.html` - Modern UI help system
+- **User Guides**: Comprehensive guides for all forms and operations
+- **Technical Documentation**: Developer guides and dependency charts
+- **Search Functionality**: Full-text search across all help content
+- **Responsive Design**: Works in WebView2 control and external browsers
+
+## Service_ErrorHandler Implementation Standards
+
+### **Error Handling Requirements**
+ALL methods MUST use the centralized `Service_ErrorHandler` system:
+
+```csharp
+// Replace ALL MessageBox.Show() calls with:
+Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
+    retryAction: () => RetryOperation(),
+    contextData: new Dictionary<string, object> { ["UserId"] = userId },
+    controlName: nameof(CurrentControl));
+
+// For user confirmations:
+var result = Service_ErrorHandler.ShowConfirmation("Are you sure?", "Confirmation");
+
+// For validation warnings:
+Service_ErrorHandler.HandleValidationError("Invalid input", "FieldName");
+```
+
+### **Error Severity Levels**
+- **Low**: Information/Warning - application continues normally
+- **Medium**: Recoverable Error - operation failed but can be retried  
+- **High**: Critical Error - data integrity or major functionality affected
+- **Fatal**: Application Termination - unrecoverable error
+
+### **Enhanced Error Dialog Features**
+- **Tabbed Interface**: Summary, Technical Details, Call Stack views
+- **Color-Coded Call Stack**: Visual hierarchy with component icons (🎯🔍⚙️📊)
+- **Plain English Explanations**: Severity-based user-friendly messaging
+- **Action Buttons**: Retry, Copy Details, Report Issue, View Logs, Close
+- **Automatic Logging**: Every error automatically logged with rich context
+
 ---
 
 ## Recent Updates (January 27, 2025)
+
+### Comprehensive Error Handling System Implementation
+- ✅ **Service_ErrorHandler**: Complete centralized error handling system  
+- ✅ **EnhancedErrorDialog**: UML-compliant error dialog with tabbed interface
+- ✅ **MessageBox Replacement**: Systematic replacement of all MessageBox.Show calls
+- ✅ **Automatic Logging**: Every error logged with caller context and rich debugging info
+- ✅ **Connection Recovery**: Automatic database connection recovery for errors
+
+### Help System Integration  
+- ✅ **Modern Help System**: Responsive HTML help system with search functionality
+- ✅ **MainForm Integration**: Help menu with keyboard shortcuts (F1, Ctrl+F1, Ctrl+Shift+K)
+- ✅ **Comprehensive Guides**: User guides for all forms, controls, and operations
+- ✅ **Technical Documentation**: Developer guides, dependency charts, and troubleshooting
+- ✅ **Search Functionality**: Full-text search across all documentation
+
+### Development Forms Compliance
+- ✅ **Region Organization**: All Development forms meet mandatory #region standards
+- ✅ **Error Handling**: Development forms use centralized Service_ErrorHandler system
+- ✅ **Theme Integration**: Core_Themes.ApplyDpiScaling() and theme compliance
+- ✅ **Progress Integration**: Helper_StoredProcedureProgress for database operations
 
 ### Environment-Specific Database and Server Logic Implementation
 - ✅ **Database Selection**: Automatic Debug/Release mode database name selection

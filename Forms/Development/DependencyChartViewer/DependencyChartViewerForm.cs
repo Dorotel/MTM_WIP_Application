@@ -278,7 +278,7 @@ namespace MTM_Inventory_Application.Forms.Development.DependencyChartConverter
                 // Basic security check for potentially malicious content
                 if (ContainsPotentiallyMaliciousContent(content))
                 {
-                    var result = MessageBox.Show(
+                    var result = Service_ErrorHandler.ShowWarning(
                         "This HTML file may contain potentially unsafe content. Do you want to continue loading it?",
                         "Security Warning", 
                         MessageBoxButtons.YesNo, 

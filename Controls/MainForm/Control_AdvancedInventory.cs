@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using ClosedXML.Excel;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
+using MTM_Inventory_Application.Forms.ErrorDialog;
 using MTM_Inventory_Application.Forms.MainForm.Classes;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
@@ -829,8 +830,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (AdvancedInventory_Single_ListView.Items.Count == 0)
                 {
-                    MessageBox.Show(@"No items to inventory. Please add at least one item to the list.", @"No Items",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Service_ErrorHandler.ShowWarning(@"No items to inventory. Please add at least one item to the list.", @"No Items");
                     return;
                 }
 

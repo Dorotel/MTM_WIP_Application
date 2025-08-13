@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Started - MTM Inventory Application Help</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <div class="help-container">
+        <div class="help-header">
+            <h1>🚀 Getting Started</h1>
+            <p>Welcome to the MTM Inventory Application - Your complete WIP inventory management solution</p>
+        </div>
+        
+        <div class="help-nav">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Help Home</a></li>
+                    <li class="breadcrumb-item active">Getting Started</li>
+                </ol>
+            </nav>
+            <input type="text" class="search-box" placeholder="Search help topics..." id="searchBox">
+        </div>
+        
+        <div class="help-content">
+            <div class="alert alert-info">
+                <strong>New User?</strong> This guide will get you up and running with the MTM Inventory Application in just a few minutes.
+            </div>
+            
+            <div class="help-section">
+                <h2>Application Overview</h2>
+                <p>The MTM Inventory Application is a comprehensive Work-In-Progress (WIP) inventory management system built with Windows Forms (.NET 8) and MySQL database backend. It provides:</p>
+                
+                <div class="help-card">
+                    <h4>🎯 Core Features</h4>
+                    <ul class="help-list">
+                        <li><strong>Inventory Management</strong> - Add, track, and manage inventory items with parts, operations, and locations</li>
+                        <li><strong>Remove Operations</strong> - Single and batch removal of inventory items with full audit trail</li>
+                        <li><strong>Transfer Operations</strong> - Move items between locations with validation and tracking</li>
+                        <li><strong>QuickButtons</strong> - One-click access to your most recent operations</li>
+                        <li><strong>Advanced Features</strong> - Bulk operations, Excel import/export, and advanced filtering</li>
+                        <li><strong>Transaction History</strong> - Complete audit trail with modern search and filtering</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>First Time Setup</h2>
+                
+                <div class="help-card">
+                    <h4>1. System Requirements</h4>
+                    <p>Before starting, ensure your system meets the requirements:</p>
+                    <ul class="help-list">
+                        <li><strong>Operating System:</strong> Windows 10/11 (64-bit recommended)</li>
+                        <li><strong>Framework:</strong> .NET 8 Runtime (installed automatically)</li>
+                        <li><strong>Database:</strong> MySQL 5.7.24+ or MAMP environment</li>
+                        <li><strong>Memory:</strong> 4GB RAM minimum, 8GB recommended</li>
+                        <li><strong>Storage:</strong> 100MB for application, additional space for database</li>
+                    </ul>
+                    <p><a href="system-requirements.html" class="help-btn help-btn-outline-primary">View Detailed Requirements</a></p>
+                </div>
+                
+                <div class="help-card">
+                    <h4>2. Database Configuration</h4>
+                    <p>The application automatically detects your environment and configures the database connection:</p>
+                    
+                    <div class="alert alert-info">
+                        <strong>Environment Detection:</strong> The application uses <span class="inline-code">Model_Users.Database</span> and <span class="inline-code">Model_Users.WipServerAddress</span> properties to automatically determine whether to use Release Mode (<span class="inline-code">mtm_wip_application</span>) or Debug Mode (<span class="inline-code">mtm_wip_application_test</span>) database.
+                    </div>
+                    
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Mode</th>
+                                <th>Database</th>
+                                <th>Server Address</th>
+                                <th>When Used</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Release Mode</td>
+                                <td><span class="inline-code">mtm_wip_application</span></td>
+                                <td><span class="inline-code">172.16.1.104</span></td>
+                                <td>Production environment</td>
+                            </tr>
+                            <tr>
+                                <td>Debug Mode</td>
+                                <td><span class="inline-code">mtm_wip_application_test</span></td>
+                                <td><span class="inline-code">172.16.1.104</span> or <span class="inline-code">localhost</span></td>
+                                <td>Development and testing</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p><a href="database-configuration.html" class="help-btn help-btn-outline-primary">Complete Database Setup Guide</a></p>
+                </div>
+                
+                <div class="help-card">
+                    <h4>3. First Launch</h4>
+                    <p>When you first launch the application:</p>
+                    <ol class="help-list">
+                        <li><strong>Splash Screen</strong> - The application will show a loading screen while initializing</li>
+                        <li><strong>Database Connection</strong> - Automatic connection to the appropriate database based on environment</li>
+                        <li><strong>User Authentication</strong> - Select or create your user profile</li>
+                        <li><strong>Theme Selection</strong> - Choose from available themes (Arctic, Default, Fire Storm, Forest, Lavender, Midnight, Mystic, Ocean, Sunset, Urban Bloom)</li>
+                        <li><strong>Main Interface</strong> - The tabbed interface will appear with your available operations</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Main Interface Overview</h2>
+                
+                <div class="help-card">
+                    <h4>🖥️ Main Window Layout</h4>
+                    <p>The main window consists of several key areas:</p>
+                    
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                        <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 0.875rem;">
+┌─ Menu Bar ──────────────────────────────────────────────────┐
+│ File    View    Development    Help                         │
+├─ Tab Control ──────────────────────────────────────────────┤
+│ │Inventory│ │Remove│ │Transfer│ │Advanced│ │QuickButtons│  │
+├─ Main Content Area ────────────────────────────────────────┤
+│                                                             │
+│  [Selected Tab Content - Forms and Controls]               │
+│                                                             │
+├─ Status Bar ───────────────────────────────────────────────┤
+│ Ready │ Connection: ● │ User: [Name] │ Version: 5.0.1.2     │
+└─────────────────────────────────────────────────────────────┘</pre>
+                    </div>
+                </div>
+                
+                <div class="help-card">
+                    <h4>📋 Primary Tabs</h4>
+                    <ul class="help-list">
+                        <li><strong>Inventory Tab</strong> - Add new inventory items with parts, operations, quantities, and locations</li>
+                        <li><strong>Remove Tab</strong> - Remove individual items or batch operations with search functionality</li>
+                        <li><strong>Transfer Tab</strong> - Move inventory between locations with validation and tracking</li>
+                        <li><strong>Advanced Tabs</strong> - Advanced inventory and remove operations with additional features</li>
+                        <li><strong>QuickButtons</strong> - Recent operations for one-click repeat actions</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Essential Keyboard Shortcuts</h2>
+                
+                <div class="help-card">
+                    <h4>⌨️ Most Important Shortcuts</h4>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Shortcut</th>
+                                <th>Action</th>
+                                <th>Available In</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><kbd>Ctrl</kbd> + <kbd>S</kbd></td>
+                                <td>Save current operation</td>
+                                <td>All tabs</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>Ctrl</kbd> + <kbd>R</kbd></td>
+                                <td>Reset/Clear current form</td>
+                                <td>All tabs</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>F1</kbd></td>
+                                <td>Show context help</td>
+                                <td>Anywhere</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>Alt</kbd> + <kbd>←</kbd>/<kbd>→</kbd></td>
+                                <td>Switch between tabs</td>
+                                <td>Main window</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>↑</kbd>/<kbd>↓</kbd></td>
+                                <td>Adjust quantity (±1000)</td>
+                                <td>Inventory tab</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>Shift</kbd> + <kbd>↑</kbd>/<kbd>↓</kbd></td>
+                                <td>Adjust quantity (±100)</td>
+                                <td>Inventory tab</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p><a href="keyboard-shortcuts.html" class="help-btn help-btn-outline-primary">Complete Shortcuts Reference</a></p>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Your First Operations</h2>
+                
+                <div class="help-card">
+                    <h4>1. Adding Inventory (Inventory Tab)</h4>
+                    <ol class="help-list">
+                        <li>Click the <strong>Inventory</strong> tab</li>
+                        <li>Select a <strong>Part ID</strong> from the dropdown (or type to search)</li>
+                        <li>Choose an <strong>Operation</strong> from the list</li>
+                        <li>Select a <strong>Location</strong> where the inventory will be stored</li>
+                        <li>Enter the <strong>Quantity</strong> (use arrow keys for quick adjustments)</li>
+                        <li>Add any <strong>Notes</strong> or descriptions if needed</li>
+                        <li>Click <strong>Save</strong> or press <kbd>Ctrl</kbd> + <kbd>S</kbd></li>
+                    </ol>
+                    
+                    <div class="alert alert-success">
+                        <strong>Success!</strong> Your first inventory item has been added. You'll see confirmation in the status bar and the operation will appear in QuickButtons for easy repeat.
+                    </div>
+                    
+                    <p><a href="inventory-operations.html" class="help-btn help-btn-primary">Complete Inventory Guide</a></p>
+                </div>
+                
+                <div class="help-card">
+                    <h4>2. Viewing Recent Operations (QuickButtons)</h4>
+                    <ol class="help-list">
+                        <li>Click the <strong>QuickButtons</strong> tab</li>
+                        <li>See your last 10 operations displayed as clickable buttons</li>
+                        <li>Click any button to repeat that exact operation</li>
+                        <li>Modify quantities or details as needed</li>
+                        <li>Save to complete the repeat operation</li>
+                    </ol>
+                    
+                    <p><a href="quickbuttons.html" class="help-btn help-btn-primary">QuickButtons Guide</a></p>
+                </div>
+                
+                <div class="help-card">
+                    <h4>3. Removing Inventory (Remove Tab)</h4>
+                    <ol class="help-list">
+                        <li>Click the <strong>Remove</strong> tab</li>
+                        <li>Use <strong>Show All</strong> to see available inventory</li>
+                        <li>Select items by clicking on rows</li>
+                        <li>Use <kbd>Ctrl</kbd> + click for multiple selections</li>
+                        <li>Click <strong>Remove Selected</strong> and confirm</li>
+                        <li>View transaction history for audit trail</li>
+                    </ol>
+                    
+                    <p><a href="remove-operations.html" class="help-btn help-btn-primary">Remove Operations Guide</a></p>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Next Steps</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div class="help-card">
+                        <h4>📚 Learn Core Operations</h4>
+                        <ul class="help-list-unstyled">
+                            <li><a href="inventory-operations.html">• Inventory Management</a></li>
+                            <li><a href="remove-operations.html">• Remove Operations</a></li>
+                            <li><a href="transfer-operations.html">• Transfer Operations</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-card">
+                        <h4>⚡ Explore Advanced Features</h4>
+                        <ul class="help-list-unstyled">
+                            <li><a href="quickbuttons.html">• QuickButtons</a></li>
+                            <li><a href="advanced-features.html">• Advanced Operations</a></li>
+                            <li><a href="transaction-history.html">• Transaction History</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-card">
+                        <h4>⚙️ Customize Your Experience</h4>
+                        <ul class="help-list-unstyled">
+                            <li><a href="settings-management.html">• Settings Management</a></li>
+                            <li><a href="keyboard-shortcuts.html">• Keyboard Shortcuts</a></li>
+                            <li><a href="database-configuration.html">• Database Configuration</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-card">
+                        <h4>🔧 Get Support</h4>
+                        <ul class="help-list-unstyled">
+                            <li><a href="troubleshooting.html">• Troubleshooting</a></li>
+                            <li><a href="error-handling.html">• Error Messages</a></li>
+                            <li><a href="system-requirements.html">• System Requirements</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Quick Tips</h2>
+                
+                <div class="alert alert-info">
+                    <h5>💡 Pro Tips for New Users</h5>
+                    <ul class="help-list">
+                        <li><strong>Use Tab Navigation:</strong> Press <kbd>Tab</kbd> to move between form fields quickly</li>
+                        <li><strong>Quick Quantity Changes:</strong> Use arrow keys in quantity fields for fast adjustments</li>
+                        <li><strong>Reset Shortcuts:</strong> Regular click = soft reset, Shift+click = hard reset with database refresh</li>
+                        <li><strong>Color Coding:</strong> Red text indicates validation errors, black text indicates valid input</li>
+                        <li><strong>Progress Feedback:</strong> Watch the status bar for operation progress and connection status</li>
+                        <li><strong>Context Help:</strong> Press <kbd>F1</kbd> anywhere for context-sensitive help</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="help-footer">
+            <p>MTM Inventory Application v5.0.1.2 | Getting Started Guide</p>
+            <p>Need more help? <a href="troubleshooting.html" style="color: #fff;">View Troubleshooting</a> | <a href="index.html" style="color: #fff;">Back to Help Home</a></p>
+        </div>
+    </div>
+    
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>
