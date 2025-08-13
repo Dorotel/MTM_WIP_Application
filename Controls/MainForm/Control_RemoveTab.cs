@@ -327,11 +327,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
                         reason += "\n\n" + string.Join("\n", errorMessages);
                     }
 
-                    MessageBox.Show(reason, @"Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Service_ErrorHandler.ShowConfirmation(reason, @"Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                DialogResult confirmResult = MessageBox.Show(
+                DialogResult confirmResult = Service_ErrorHandler.ShowConfirmation(
                     $@"The following items were deleted and added to history:\n\n{summary}",
                     @"Delete Complete",
                     MessageBoxButtons.OK,
@@ -387,8 +387,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 }
 
                 _progressHelper?.UpdateProgress(80, "Refreshing results...");
-                MessageBox.Show(@"Undo successful. Removed items have been restored.", @"Undo", MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                Service_ErrorHandler.ShowConfirmation(@"Undo successful. Removed items have been restored.", @"Undo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoggingUtility.Log("Undo: Removed items restored.");
 
                 _lastRemovedItems.Clear();
