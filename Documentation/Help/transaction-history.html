@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM Inventory - Transaction History</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <nav class="help-nav">
+        <div class="nav-brand">
+            <h1>🏭 MTM Inventory Application</h1>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">🏠 Home</a>
+            <a href="getting-started.html">🚀 Getting Started</a>
+            <a href="inventory-operations.html">📦 Inventory</a>
+        </div>
+    </nav>
+
+    <main class="help-content">
+        <header class="page-header">
+            <h1>📊 Transaction History</h1>
+            <p class="lead">Complete guide to viewing, analyzing, and managing transaction history in MTM Inventory Application</p>
+        </header>
+
+        <section class="content-section">
+            <h2>🎯 Transactions Form Overview</h2>
+            <div class="transactions-overview">
+                <p>The Transactions form provides comprehensive access to all inventory activities with modern search, filtering, and analysis capabilities. This powerful tool helps you track inventory changes, analyze patterns, and generate reports.</p>
+                
+                <div class="key-features">
+                    <h3>✨ Key Features</h3>
+                    <ul class="feature-list">
+                        <li>🔍 <strong>Smart Search:</strong> Universal search with auto-complete and suggestions</li>
+                        <li>📅 <strong>Advanced Filters:</strong> Date range, location, user, and transaction type filtering</li>
+                        <li>📊 <strong>Multiple Views:</strong> Grid view, chart view, and timeline visualization</li>
+                        <li>📈 <strong>Real-time Analysis:</strong> Transaction summaries and performance metrics</li>
+                        <li>📋 <strong>Export Options:</strong> Bulk export, filtered exports, and print functionality</li>
+                        <li>⚡ <strong>Modern UI:</strong> Responsive design with header bar and intuitive navigation</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🚀 Accessing Transaction History</h2>
+            <div class="access-guide">
+                <h3>📱 Opening the Transactions Form</h3>
+                <ol class="access-steps">
+                    <li><strong>From MainForm:</strong> Click the "View Transactions" button on the main interface</li>
+                    <li><strong>From Menu:</strong> Navigate to View → Transaction History</li>
+                    <li><strong>Keyboard Shortcut:</strong> Press <kbd>Ctrl+T</kbd> from anywhere in the application</li>
+                    <li><strong>From Settings:</strong> Access through Settings → Database → View Transactions</li>
+                </ol>
+
+                <h3>🔐 Permission Requirements</h3>
+                <div class="permission-info">
+                    <div class="permission-item user">
+                        <h4>👤 Regular Users</h4>
+                        <ul>
+                            <li>✅ View own transactions</li>
+                            <li>✅ Basic filtering and search</li>
+                            <li>✅ Export own data</li>
+                            <li>❌ Cannot view other users' transactions</li>
+                        </ul>
+                    </div>
+                    <div class="permission-item admin">
+                        <h4>👑 Administrator Users</h4>
+                        <ul>
+                            <li>✅ View all transactions system-wide</li>
+                            <li>✅ Advanced filtering by any user</li>
+                            <li>✅ Full export capabilities</li>
+                            <li>✅ Access to analytics and reporting</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🔍 Modern Search Interface</h2>
+            <div class="search-interface">
+                <h3>🌐 Universal Search Box</h3>
+                <div class="search-features">
+                    <p>The smart search system provides powerful search capabilities with real-time suggestions:</p>
+                    <ul class="search-capabilities">
+                        <li>🔤 <strong>Text Search:</strong> Search across part numbers, descriptions, and notes</li>
+                        <li>📅 <strong>Date Recognition:</strong> Enter dates in multiple formats (MM/DD/YYYY, relative dates)</li>
+                        <li>👤 <strong>User Search:</strong> Search by username or full name</li>
+                        <li>🏢 <strong>Location Search:</strong> Find transactions by storage location</li>
+                        <li>⚙️ <strong>Operation Search:</strong> Filter by specific operation types</li>
+                        <li>🔢 <strong>Quantity Range:</strong> Search by quantity ranges (e.g., ">100", "50-200")</li>
+                    </ul>
+                </div>
+
+                <h3>💡 Search Examples</h3>
+                <div class="search-examples">
+                    <div class="example-grid">
+                        <div class="example-item">
+                            <h4>🔤 Text Examples</h4>
+                            <ul>
+                                <li><code>PART-123</code> - Find specific part</li>
+                                <li><code>bearing</code> - Search descriptions</li>
+                                <li><code>urgent</code> - Find urgent transactions</li>
+                            </ul>
+                        </div>
+                        <div class="example-item">
+                            <h4>📅 Date Examples</h4>
+                            <ul>
+                                <li><code>today</code> - Today's transactions</li>
+                                <li><code>last week</code> - Previous 7 days</li>
+                                <li><code>01/15/2025</code> - Specific date</li>
+                            </ul>
+                        </div>
+                        <div class="example-item">
+                            <h4>🔢 Quantity Examples</h4>
+                            <ul>
+                                <li><code>>100</code> - More than 100 units</li>
+                                <li><code>50-200</code> - Between 50 and 200</li>
+                                <li><code>=25</code> - Exactly 25 units</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>🎯 Auto-Complete Features</h3>
+                <div class="autocomplete-info">
+                    <p>As you type, the search system provides intelligent suggestions:</p>
+                    <ul class="autocomplete-features">
+                        <li>📋 <strong>Recent Searches:</strong> Quick access to your recent search terms</li>
+                        <li>📦 <strong>Part Suggestions:</strong> Auto-complete part numbers and descriptions</li>
+                        <li>👤 <strong>User Suggestions:</strong> Quick selection of usernames</li>
+                        <li>🏢 <strong>Location Suggestions:</strong> Available storage locations</li>
+                        <li>⚙️ <strong>Operation Suggestions:</strong> Valid operation types</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🎛️ Advanced Filtering System</h2>
+            <div class="filtering-system">
+                <h3>📅 Date Range Filtering</h3>
+                <div class="date-filtering">
+                    <h4>Quick Date Presets:</h4>
+                    <div class="preset-grid">
+                        <div class="preset-item">
+                            <h5>⚡ Quick Options</h5>
+                            <ul>
+                                <li><strong>Today:</strong> Current day transactions</li>
+                                <li><strong>Yesterday:</strong> Previous day</li>
+                                <li><strong>This Week:</strong> Current week (Mon-Sun)</li>
+                                <li><strong>Last Week:</strong> Previous complete week</li>
+                            </ul>
+                        </div>
+                        <div class="preset-item">
+                            <h5>📅 Monthly Options</h5>
+                            <ul>
+                                <li><strong>This Month:</strong> Current month to date</li>
+                                <li><strong>Last Month:</strong> Previous complete month</li>
+                                <li><strong>Last 30 Days:</strong> Rolling 30-day window</li>
+                                <li><strong>Last 90 Days:</strong> Rolling quarterly view</li>
+                            </ul>
+                        </div>
+                        <div class="preset-item">
+                            <h5>🗓️ Custom Range</h5>
+                            <ul>
+                                <li><strong>From Date:</strong> Specify start date</li>
+                                <li><strong>To Date:</strong> Specify end date</li>
+                                <li><strong>Date Picker:</strong> Visual calendar selection</li>
+                                <li><strong>Time Inclusion:</strong> Include time in range filtering</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>🏢 Location Filtering</h3>
+                <div class="location-filtering">
+                    <ul class="location-options">
+                        <li>🏭 <strong>All Locations:</strong> Show transactions from all storage locations</li>
+                        <li>📍 <strong>Specific Location:</strong> Filter by individual storage areas</li>
+                        <li>🗂️ <strong>Location Groups:</strong> Group related locations (e.g., all warehouse locations)</li>
+                        <li>🔄 <strong>Transfer Tracking:</strong> Show only location transfer transactions</li>
+                    </ul>
+                </div>
+
+                <h3>⚙️ Transaction Type Filtering</h3>
+                <div class="type-filtering">
+                    <div class="type-grid">
+                        <div class="type-item add">
+                            <h4>➕ Add Operations</h4>
+                            <ul>
+                                <li>New inventory additions</li>
+                                <li>Receiving transactions</li>
+                                <li>Stock adjustments (positive)</li>
+                            </ul>
+                        </div>
+                        <div class="type-item remove">
+                            <h4>➖ Remove Operations</h4>
+                            <ul>
+                                <li>Item removals</li>
+                                <li>Consumption transactions</li>
+                                <li>Stock adjustments (negative)</li>
+                            </ul>
+                        </div>
+                        <div class="type-item transfer">
+                            <h4>🔄 Transfer Operations</h4>
+                            <ul>
+                                <li>Location transfers</li>
+                                <li>Internal moves</li>
+                                <li>Cross-location transactions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>👤 User Filtering (Admin Only)</h3>
+                <div class="user-filtering">
+                    <p>Administrators can filter transactions by user activity:</p>
+                    <ul class="user-options">
+                        <li>👤 <strong>Specific User:</strong> View transactions by individual user</li>
+                        <li>👥 <strong>User Groups:</strong> Filter by user roles or departments</li>
+                        <li>⏰ <strong>User Activity Patterns:</strong> Analyze user behavior over time</li>
+                        <li>📊 <strong>Performance Metrics:</strong> User productivity and accuracy</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>📊 Display Views and Analysis</h2>
+            <div class="display-views">
+                <h3>📋 Grid View</h3>
+                <div class="grid-view">
+                    <h4>Column Information:</h4>
+                    <ul class="column-list">
+                        <li>📅 <strong>Date/Time:</strong> Transaction timestamp with time zone</li>
+                        <li>👤 <strong>User:</strong> User who performed the transaction</li>
+                        <li>📦 <strong>Part:</strong> Part number and description</li>
+                        <li>⚙️ <strong>Operation:</strong> Type of operation performed</li>
+                        <li>🏢 <strong>Location:</strong> Storage location involved</li>
+                        <li>🔢 <strong>Quantity:</strong> Number of items affected</li>
+                        <li>💭 <strong>Notes:</strong> Additional transaction details</li>
+                        <li>📊 <strong>Status:</strong> Transaction status and validation</li>
+                    </ul>
+
+                    <h4>🎛️ Grid Features:</h4>
+                    <ul class="grid-features">
+                        <li>🔄 <strong>Sorting:</strong> Click column headers to sort data</li>
+                        <li>📏 <strong>Column Resizing:</strong> Adjust column widths as needed</li>
+                        <li>👁️ <strong>Column Visibility:</strong> Show/hide columns based on needs</li>
+                        <li>📑 <strong>Row Selection:</strong> Select multiple rows for batch operations</li>
+                        <li>🔍 <strong>Quick Filter:</strong> Filter within visible results</li>
+                    </ul>
+                </div>
+
+                <h3>📈 Chart View</h3>
+                <div class="chart-view">
+                    <h4>Available Chart Types:</h4>
+                    <div class="chart-grid">
+                        <div class="chart-item">
+                            <h5>📊 Bar Charts</h5>
+                            <ul>
+                                <li>Transaction volume by day/week/month</li>
+                                <li>Activity by user or location</li>
+                                <li>Operation type distribution</li>
+                            </ul>
+                        </div>
+                        <div class="chart-item">
+                            <h5>📈 Line Charts</h5>
+                            <ul>
+                                <li>Transaction trends over time</li>
+                                <li>Inventory level changes</li>
+                                <li>Performance metrics tracking</li>
+                            </ul>
+                        </div>
+                        <div class="chart-item">
+                            <h5>🥧 Pie Charts</h5>
+                            <ul>
+                                <li>Operation type breakdown</li>
+                                <li>Location usage distribution</li>
+                                <li>User activity proportions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>📅 Timeline View</h3>
+                <div class="timeline-view">
+                    <p>The timeline view provides a chronological visualization of transactions:</p>
+                    <ul class="timeline-features">
+                        <li>🕐 <strong>Chronological Display:</strong> Transactions arranged by time</li>
+                        <li>🏷️ <strong>Event Grouping:</strong> Related transactions grouped together</li>
+                        <li>🔍 <strong>Zoom Controls:</strong> Focus on specific time periods</li>
+                        <li>📊 <strong>Volume Indicators:</strong> Visual representation of transaction volume</li>
+                        <li>🎯 <strong>Event Details:</strong> Click events for detailed information</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>📊 Transaction Analysis Features</h2>
+            <div class="analysis-features">
+                <h3>📈 Result Summary Panel</h3>
+                <div class="summary-panel">
+                    <h4>Key Metrics Displayed:</h4>
+                    <ul class="metrics-list">
+                        <li>🔢 <strong>Total Transactions:</strong> Count of transactions in current view</li>
+                        <li>📦 <strong>Unique Parts:</strong> Number of different parts involved</li>
+                        <li>👥 <strong>Active Users:</strong> Count of users who performed transactions</li>
+                        <li>🏢 <strong>Locations Used:</strong> Number of different storage locations</li>
+                        <li>➕ <strong>Add Operations:</strong> Count and total quantity of additions</li>
+                        <li>➖ <strong>Remove Operations:</strong> Count and total quantity of removals</li>
+                        <li>🔄 <strong>Transfer Operations:</strong> Count of location transfers</li>
+                        <li>📊 <strong>Net Change:</strong> Overall inventory impact</li>
+                    </ul>
+                </div>
+
+                <h3>🎯 Detailed Analysis Dashboard</h3>
+                <div class="dashboard-features">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-item">
+                            <h4>⏰ Time Analysis</h4>
+                            <ul>
+                                <li>Peak activity hours</li>
+                                <li>Daily/weekly patterns</li>
+                                <li>Seasonal trends</li>
+                                <li>Response time metrics</li>
+                            </ul>
+                        </div>
+                        <div class="dashboard-item">
+                            <h4>👤 User Performance</h4>
+                            <ul>
+                                <li>Transaction volume per user</li>
+                                <li>Accuracy rates</li>
+                                <li>Error frequency analysis</li>
+                                <li>Productivity trends</li>
+                            </ul>
+                        </div>
+                        <div class="dashboard-item">
+                            <h4>📦 Inventory Impact</h4>
+                            <ul>
+                                <li>Most active parts</li>
+                                <li>Inventory turnover rates</li>
+                                <li>Stock level changes</li>
+                                <li>Location utilization</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>🚨 Exception Analysis</h3>
+                <div class="exception-analysis">
+                    <p>The system automatically identifies and highlights unusual transaction patterns:</p>
+                    <ul class="exception-types">
+                        <li>⚠️ <strong>Large Quantity Transactions:</strong> Unusually high quantities</li>
+                        <li>🕐 <strong>Off-Hours Activity:</strong> Transactions outside normal hours</li>
+                        <li>🔄 <strong>Rapid Transactions:</strong> Multiple transactions in short time</li>
+                        <li>❌ <strong>Failed Operations:</strong> Transactions with errors or reversals</li>
+                        <li>📊 <strong>Pattern Deviations:</strong> Unusual user or location activity</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>📤 Export and Reporting</h2>
+            <div class="export-system">
+                <h3>📋 Export Options</h3>
+                <div class="export-options">
+                    <div class="export-grid">
+                        <div class="export-item">
+                            <h4>📊 Excel Export</h4>
+                            <ul>
+                                <li>Complete transaction data</li>
+                                <li>Formatted spreadsheet with charts</li>
+                                <li>Multiple worksheets for different views</li>
+                                <li>Pivot table ready format</li>
+                            </ul>
+                        </div>
+                        <div class="export-item">
+                            <h4>📄 PDF Reports</h4>
+                            <ul>
+                                <li>Professional report formatting</li>
+                                <li>Charts and graphs included</li>
+                                <li>Summary and detailed sections</li>
+                                <li>Print-ready layout</li>
+                            </ul>
+                        </div>
+                        <div class="export-item">
+                            <h4>📑 CSV Data</h4>
+                            <ul>
+                                <li>Raw data for external analysis</li>
+                                <li>Customizable field selection</li>
+                                <li>Compatible with other systems</li>
+                                <li>Bulk data processing ready</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>🎯 Filtered Exports</h3>
+                <div class="filtered-exports">
+                    <p>Export only the data you need:</p>
+                    <ul class="filter-export-options">
+                        <li>📅 <strong>Date Range Exports:</strong> Export specific time periods</li>
+                        <li>👤 <strong>User-Specific Exports:</strong> Individual user activity reports</li>
+                        <li>📦 <strong>Part-Based Exports:</strong> Focus on specific parts or categories</li>
+                        <li>🏢 <strong>Location-Based Exports:</strong> Export by storage location</li>
+                        <li>⚙️ <strong>Operation-Type Exports:</strong> Filter by transaction type</li>
+                        <li>🎯 <strong>Custom Filters:</strong> Combine multiple criteria</li>
+                    </ul>
+                </div>
+
+                <h3>🖨️ Print Functionality</h3>
+                <div class="print-features">
+                    <h4>Print Options:</h4>
+                    <ul class="print-options">
+                        <li>📋 <strong>Current View:</strong> Print exactly what's shown on screen</li>
+                        <li>📊 <strong>Summary Report:</strong> Print analysis summary with key metrics</li>
+                        <li>📈 <strong>Charts Only:</strong> Print just the graphical analysis</li>
+                        <li>📑 <strong>Detailed Listing:</strong> Complete transaction listing</li>
+                        <li>🎯 <strong>Custom Layout:</strong> Choose specific fields and formatting</li>
+                    </ul>
+
+                    <h4>📐 Print Settings:</h4>
+                    <ul class="print-settings">
+                        <li>📄 <strong>Page Orientation:</strong> Portrait or landscape</li>
+                        <li>📏 <strong>Scaling Options:</strong> Fit to page or maintain size</li>
+                        <li>🖼️ <strong>Header/Footer:</strong> Include titles, dates, page numbers</li>
+                        <li>🎨 <strong>Color Options:</strong> Color or black and white</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>⚡ Real-time Features</h2>
+            <div class="realtime-features">
+                <h3>🔄 Live Updates</h3>
+                <div class="live-updates">
+                    <p>The transaction system provides real-time information:</p>
+                    <ul class="update-features">
+                        <li>⚡ <strong>Auto-Refresh:</strong> Automatically updates with new transactions</li>
+                        <li>🔔 <strong>Change Notifications:</strong> Visual indicators for new data</li>
+                        <li>📊 <strong>Live Metrics:</strong> Real-time summary statistics</li>
+                        <li>🎯 <strong>Filter Persistence:</strong> Maintains filters while updating</li>
+                    </ul>
+                </div>
+
+                <h3>📊 Status Indicators</h3>
+                <div class="status-indicators">
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <h4>🌐 Connection Status</h4>
+                            <ul>
+                                <li>🟢 <strong>Connected:</strong> Real-time data available</li>
+                                <li>🟡 <strong>Slow Connection:</strong> Delayed updates</li>
+                                <li>🔴 <strong>Disconnected:</strong> Using cached data</li>
+                            </ul>
+                        </div>
+                        <div class="status-item">
+                            <h4>👥 Active Users</h4>
+                            <ul>
+                                <li>Current users in the system</li>
+                                <li>Recent activity indicators</li>
+                                <li>Concurrent transaction warnings</li>
+                            </ul>
+                        </div>
+                        <div class="status-item">
+                            <h4>🔄 System Performance</h4>
+                            <ul>
+                                <li>Query response times</li>
+                                <li>Database load indicators</li>
+                                <li>Update frequency status</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>⌨️ Keyboard Shortcuts</h2>
+            <div class="shortcuts-section">
+                <div class="shortcuts-grid">
+                    <div class="shortcut-category">
+                        <h3>🔍 Search and Navigation</h3>
+                        <ul class="shortcut-list">
+                            <li><kbd>Ctrl+F</kbd> - Focus search box</li>
+                            <li><kbd>Ctrl+G</kbd> - Toggle grid view</li>
+                            <li><kbd>Ctrl+H</kbd> - Toggle chart view</li>
+                            <li><kbd>Ctrl+L</kbd> - Toggle timeline view</li>
+                            <li><kbd>F5</kbd> - Refresh data</li>
+                            <li><kbd>Ctrl+R</kbd> - Reset all filters</li>
+                        </ul>
+                    </div>
+                    <div class="shortcut-category">
+                        <h3>📊 Analysis and Export</h3>
+                        <ul class="shortcut-list">
+                            <li><kbd>Ctrl+E</kbd> - Export to Excel</li>
+                            <li><kbd>Ctrl+P</kbd> - Print current view</li>
+                            <li><kbd>Ctrl+S</kbd> - Save current filters</li>
+                            <li><kbd>Ctrl+D</kbd> - Show detailed analysis</li>
+                            <li><kbd>Ctrl+M</kbd> - Show summary metrics</li>
+                            <li><kbd>Alt+Enter</kbd> - Full screen mode</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="troubleshooting-tip">
+            <h3>💡 Pro Tips</h3>
+            <ul class="pro-tips">
+                <li>🔍 <strong>Use Quick Filters:</strong> Combine search terms for powerful filtering</li>
+                <li>📊 <strong>Save Common Views:</strong> Bookmark frequently used filter combinations</li>
+                <li>📈 <strong>Monitor Trends:</strong> Use chart view to identify patterns over time</li>
+                <li>⚡ <strong>Batch Operations:</strong> Select multiple transactions for bulk actions</li>
+                <li>📋 <strong>Export Regularly:</strong> Keep historical data backups for analysis</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer class="help-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>📊 Transaction Tools</h4>
+                <ul>
+                    <li><a href="inventory-operations.html">Inventory Operations</a></li>
+                    <li><a href="remove-operations.html">Remove Operations</a></li>
+                    <li><a href="transfer-operations.html">Transfer Operations</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>🛠️ Analysis</h4>
+                <ul>
+                    <li><a href="advanced-features.html">Advanced Features</a></li>
+                    <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                    <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                </ul>
+            </div>
+            <div class="footer-info">
+                <p>&copy; 2025 MTM Inventory Application. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>

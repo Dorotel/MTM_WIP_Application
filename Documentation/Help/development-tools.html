@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM Inventory - Development Tools</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <nav class="help-nav">
+        <div class="nav-brand">
+            <h1>🏭 MTM Inventory Application</h1>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">🏠 Home</a>
+            <a href="getting-started.html">🚀 Getting Started</a>
+            <a href="error-handling.html">🛡️ Error Handling</a>
+        </div>
+    </nav>
+
+    <main class="help-content">
+        <header class="page-header">
+            <h1>🛠️ Development Tools</h1>
+            <p class="lead">Advanced development and diagnostic tools for MTM Inventory Application</p>
+        </header>
+
+        <section class="content-section">
+            <h2>🎯 Development Tools Overview</h2>
+            <div class="tools-overview">
+                <p>MTM Inventory Application includes specialized development tools accessible through the MainForm <strong>Development</strong> menu. These tools are designed for developers, system administrators, and advanced users who need to analyze application structure and dependencies.</p>
+                
+                <div class="tools-grid">
+                    <div class="tool-item">
+                        <h3>📊 Dependency Chart Converter</h3>
+                        <p>Converts markdown dependency charts to interactive HTML format</p>
+                    </div>
+                    <div class="tool-item">
+                        <h3>🔍 Dependency Chart Viewer</h3>
+                        <p>Views and navigates through generated HTML dependency charts</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>📊 Dependency Chart Converter</h2>
+            <div class="converter-tool">
+                <h3>🚀 Accessing the Tool</h3>
+                <ol class="access-steps">
+                    <li>Open MTM Inventory Application</li>
+                    <li>Click on the <strong>Development</strong> menu in the menu bar</li>
+                    <li>Select <strong>"Dependency Chart Converter"</strong></li>
+                    <li>The converter window will open</li>
+                </ol>
+
+                <h3>⚙️ Tool Interface</h3>
+                <div class="interface-description">
+                    <h4>Main Controls:</h4>
+                    <ul>
+                        <li><strong>Base Path Selection:</strong> Choose the root directory containing Documentation folder</li>
+                        <li><strong>Convert Charts Button:</strong> Process all markdown files to HTML</li>
+                        <li><strong>Progress Indicator:</strong> Shows conversion progress</li>
+                        <li><strong>Status Display:</strong> Reports current operation status</li>
+                    </ul>
+                </div>
+
+                <h3>📁 File Structure Requirements</h3>
+                <div class="file-structure">
+                    <p>The converter expects the following directory structure:</p>
+                    <div class="code-block">
+                        <pre><code>Selected Base Path/
+├── Documentation/
+│   └── Dependency Charts/
+│       ├── Templates/
+│       │   └── chart-template.html
+│       ├── Forms/
+│       ├── Controls/
+│       ├── Services/
+│       ├── Helpers/
+│       └── HTML/ (output directory)
+</code></pre>
+                    </div>
+                </div>
+
+                <h3>🔄 Conversion Process</h3>
+                <div class="conversion-process">
+                    <ol class="process-steps">
+                        <li><strong>Select Base Path:</strong> Click "Select Base Path" and choose the project root directory</li>
+                        <li><strong>Validation:</strong> Tool automatically validates directory structure and template presence</li>
+                        <li><strong>Start Conversion:</strong> Click "Convert Charts" to begin processing</li>
+                        <li><strong>Progress Monitoring:</strong> Watch progress bar and status messages</li>
+                        <li><strong>Completion:</strong> HTML files will be generated in the HTML output directory</li>
+                    </ol>
+
+                    <h4>⚠️ Requirements:</h4>
+                    <ul class="requirements">
+                        <li>✅ chart-template.html must exist in Templates folder</li>
+                        <li>✅ Valid markdown dependency chart files (*.md)</li>
+                        <li>✅ Write permissions to HTML output directory</li>
+                        <li>✅ Proper file structure as shown above</li>
+                    </ul>
+                </div>
+
+                <h3>📝 Supported Markdown Features</h3>
+                <div class="markdown-features">
+                    <h4>The converter processes these markdown elements:</h4>
+                    <ul class="feature-list">
+                        <li>✅ <strong>File Headers:</strong> # Dependency Chart: FileName.cs</li>
+                        <li>✅ <strong>File Information:</strong> Path, Type, Complexity, Priority</li>
+                        <li>✅ <strong>Dependencies:</strong> Internal and External dependency lists</li>
+                        <li>✅ <strong>Compliance Status:</strong> Region organization compliance</li>
+                        <li>✅ <strong>Refactoring Actions:</strong> Recommended improvements</li>
+                        <li>✅ <strong>Code Snippets:</strong> Example code blocks</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🔍 Dependency Chart Viewer</h2>
+            <div class="viewer-tool">
+                <h3>🚀 Accessing the Tool</h3>
+                <ol class="access-steps">
+                    <li>Open MTM Inventory Application</li>
+                    <li>Click on the <strong>Development</strong> menu in the menu bar</li>
+                    <li>Select <strong>"Dependency Chart Viewer"</strong></li>
+                    <li>The viewer window will open</li>
+                </ol>
+
+                <h3>🎮 Viewer Interface</h3>
+                <div class="viewer-interface">
+                    <h4>Main Components:</h4>
+                    <ul>
+                        <li><strong>HTML Directory Selection:</strong> Choose folder containing HTML dependency charts</li>
+                        <li><strong>File List:</strong> Shows all available HTML files for viewing</li>
+                        <li><strong>Web Browser Panel:</strong> Displays selected dependency chart</li>
+                        <li><strong>Navigation Controls:</strong> Forward, back, refresh, and home buttons</li>
+                        <li><strong>Status Bar:</strong> Shows current file and load status</li>
+                    </ul>
+                </div>
+
+                <h3>🔄 Using the Viewer</h3>
+                <div class="viewer-usage">
+                    <ol class="usage-steps">
+                        <li><strong>Select HTML Directory:</strong> Click "Select HTML Directory" button</li>
+                        <li><strong>Choose Directory:</strong> Navigate to Documentation/Dependency Charts/HTML/</li>
+                        <li><strong>Load Files:</strong> Tool automatically scans for HTML files</li>
+                        <li><strong>Select File:</strong> Click on any file in the list to view it</li>
+                        <li><strong>Navigate:</strong> Use browser controls to explore the dependency chart</li>
+                    </ol>
+
+                    <h4>🎯 Navigation Features:</h4>
+                    <ul class="navigation-features">
+                        <li>🔙 <strong>Back Button:</strong> Return to previous chart</li>
+                        <li>🔜 <strong>Forward Button:</strong> Go to next chart</li>
+                        <li>🔄 <strong>Refresh Button:</strong> Reload current chart</li>
+                        <li>🏠 <strong>Home Button:</strong> Return to first/default chart</li>
+                        <li>⌨️ <strong>Keyboard Shortcuts:</strong> F5 (refresh), Alt+Left (back), Alt+Right (forward)</li>
+                    </ul>
+                </div>
+
+                <h3>📊 Chart Information Display</h3>
+                <div class="chart-display">
+                    <h4>Each HTML dependency chart contains:</h4>
+                    <ul class="chart-contents">
+                        <li>📁 <strong>File Information:</strong> Path, type, complexity rating</li>
+                        <li>🔗 <strong>Dependency Lists:</strong> Internal and external dependencies with status</li>
+                        <li>📊 <strong>Compliance Report:</strong> Region organization and method ordering status</li>
+                        <li>🔧 <strong>Refactoring Actions:</strong> Recommended improvements and fixes</li>
+                        <li>💡 <strong>Code Examples:</strong> Sample code snippets and patterns</li>
+                        <li>🎯 <strong>Priority Indicators:</strong> Visual priority levels for improvements</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>⌨️ Keyboard Shortcuts</h2>
+            <div class="shortcuts-section">
+                <h3>🎮 Development Tools Shortcuts</h3>
+                <div class="shortcuts-grid">
+                    <div class="shortcut-category">
+                        <h4>📊 Dependency Chart Converter</h4>
+                        <ul class="shortcut-list">
+                            <li><strong>Ctrl+O:</strong> Select base path</li>
+                            <li><strong>Ctrl+Enter:</strong> Start conversion</li>
+                            <li><strong>Escape:</strong> Close converter</li>
+                            <li><strong>F1:</strong> Help for converter</li>
+                        </ul>
+                    </div>
+
+                    <div class="shortcut-category">
+                        <h4>🔍 Dependency Chart Viewer</h4>
+                        <ul class="shortcut-list">
+                            <li><strong>Ctrl+O:</strong> Select HTML directory</li>
+                            <li><strong>F5:</strong> Refresh current chart</li>
+                            <li><strong>Alt+Left:</strong> Navigate back</li>
+                            <li><strong>Alt+Right:</strong> Navigate forward</li>
+                            <li><strong>Home:</strong> Go to first chart</li>
+                            <li><strong>Escape:</strong> Close viewer</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🔧 Technical Implementation</h2>
+            <div class="technical-details">
+                <h3>🏗️ Architecture Compliance</h3>
+                <p>Both development tools follow MTM Inventory Application's architectural standards:</p>
+                
+                <div class="compliance-features">
+                    <ul class="compliance-list">
+                        <li>✅ <strong>Region Organization:</strong> Proper #region structure following README guidelines</li>
+                        <li>✅ <strong>Error Handling:</strong> Centralized Service_ErrorHandler integration</li>
+                        <li>✅ <strong>Theme Integration:</strong> Core_Themes.ApplyDpiScaling() and layout adjustments</li>
+                        <li>✅ <strong>Method Ordering:</strong> Public → Protected → Private → Static organization</li>
+                        <li>✅ <strong>Input Validation:</strong> Comprehensive validation with centralized error messaging</li>
+                    </ul>
+                </div>
+
+                <h3>🛡️ Security Features</h3>
+                <div class="security-features">
+                    <ul class="security-list">
+                        <li>🔒 <strong>Path Validation:</strong> Prevents directory traversal attacks</li>
+                        <li>🛡️ <strong>File Type Restrictions:</strong> Only processes expected file types</li>
+                        <li>📝 <strong>Permission Checking:</strong> Validates read/write permissions before operations</li>
+                        <li>⚠️ <strong>Error Boundary:</strong> Graceful handling of malformed input files</li>
+                    </ul>
+                </div>
+
+                <h3>📊 Performance Considerations</h3>
+                <div class="performance-info">
+                    <ul class="performance-list">
+                        <li>⚡ <strong>Batch Processing:</strong> Efficient conversion of multiple files</li>
+                        <li>🔄 <strong>Progress Reporting:</strong> Real-time progress updates</li>
+                        <li>💾 <strong>Memory Management:</strong> Proper disposal of resources</li>
+                        <li>🚀 <strong>Async Operations:</strong> Non-blocking UI during processing</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🚨 Troubleshooting</h2>
+            <div class="troubleshooting-section">
+                <h3>❌ Common Issues</h3>
+                <div class="issues-grid">
+                    <div class="issue-item">
+                        <h4>🚫 "Template file not found" Error</h4>
+                        <div class="issue-solution">
+                            <p><strong>Cause:</strong> chart-template.html is missing from Templates folder</p>
+                            <p><strong>Solution:</strong></p>
+                            <ol>
+                                <li>Verify Templates folder exists in Documentation/Dependency Charts/</li>
+                                <li>Ensure chart-template.html file is present</li>
+                                <li>Check file permissions for read access</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="issue-item">
+                        <h4>📁 "Directory structure invalid" Error</h4>
+                        <div class="issue-solution">
+                            <p><strong>Cause:</strong> Required directory structure is not found</p>
+                            <p><strong>Solution:</strong></p>
+                            <ol>
+                                <li>Select the correct base path (project root)</li>
+                                <li>Ensure Documentation/Dependency Charts/ folders exist</li>
+                                <li>Create missing directories if necessary</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="issue-item">
+                        <h4>🌐 Browser not loading charts</h4>
+                        <div class="issue-solution">
+                            <p><strong>Cause:</strong> Browser control or file access issues</p>
+                            <p><strong>Solution:</strong></p>
+                            <ol>
+                                <li>Ensure HTML files were successfully generated</li>
+                                <li>Check Windows Defender or antivirus isn't blocking files</li>
+                                <li>Try refreshing the browser with F5</li>
+                                <li>Restart the viewer tool if necessary</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="issue-item">
+                        <h4>🔒 Permission denied errors</h4>
+                        <div class="issue-solution">
+                            <p><strong>Cause:</strong> Insufficient file system permissions</p>
+                            <p><strong>Solution:</strong></p>
+                            <ol>
+                                <li>Run application as administrator if necessary</li>
+                                <li>Check folder permissions for read/write access</li>
+                                <li>Ensure files aren't locked by other applications</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🎯 Best Practices</h2>
+            <div class="best-practices">
+                <h3>📊 For Chart Generation</h3>
+                <ul class="practice-list">
+                    <li>📁 <strong>Organize Files:</strong> Keep markdown files properly organized in subdirectories</li>
+                    <li>🔄 <strong>Regular Updates:</strong> Regenerate HTML charts when markdown files change</li>
+                    <li>✅ <strong>Validate Templates:</strong> Ensure chart-template.html is current and valid</li>
+                    <li>💾 <strong>Backup Outputs:</strong> Keep backup copies of generated HTML files</li>
+                </ul>
+
+                <h3>🔍 For Chart Viewing</h3>
+                <ul class="practice-list">
+                    <li>🗂️ <strong>Directory Organization:</strong> Keep HTML files in dedicated HTML subfolder</li>
+                    <li>🔄 <strong>Refresh Regularly:</strong> Use F5 to reload charts after updates</li>
+                    <li>📊 <strong>Follow Links:</strong> Use internal links within charts for navigation</li>
+                    <li>💡 <strong>Note Action Items:</strong> Track refactoring actions from dependency analysis</li>
+                </ul>
+
+                <h3>🛠️ For Development Teams</h3>
+                <ul class="practice-list">
+                    <li>📋 <strong>Document Dependencies:</strong> Keep dependency charts current with code changes</li>
+                    <li>🔍 <strong>Regular Reviews:</strong> Use charts for code review and architecture discussions</li>
+                    <li>🎯 <strong>Prioritize Actions:</strong> Focus on high-priority refactoring recommendations</li>
+                    <li>📊 <strong>Monitor Compliance:</strong> Use charts to track architectural compliance over time</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🔗 Integration with Main Application</h2>
+            <div class="integration-info">
+                <h3>🎮 Menu Access</h3>
+                <p>Development tools are integrated into the main application through:</p>
+                <ul>
+                    <li><strong>MainForm MenuStrip:</strong> Development → Tool Name</li>
+                    <li><strong>Keyboard Shortcuts:</strong> Quick access via key combinations</li>
+                    <li><strong>Context Integration:</strong> Tools respect main application theme and DPI settings</li>
+                </ul>
+
+                <h3>🎨 Theme Integration</h3>
+                <div class="theme-info">
+                    <p>Development tools automatically inherit:</p>
+                    <ul>
+                        <li>🎨 <strong>Application Theme:</strong> Consistent visual styling</li>
+                        <li>📐 <strong>DPI Scaling:</strong> Proper high-DPI display support</li>
+                        <li>⚙️ <strong>Runtime Adjustments:</strong> Dynamic layout adjustments</li>
+                    </ul>
+                </div>
+
+                <h3>🛡️ Error Handling Integration</h3>
+                <div class="error-integration">
+                    <p>All development tools use the centralized Service_ErrorHandler system:</p>
+                    <ul>
+                        <li>🎯 <strong>Consistent Error Experience:</strong> Same error dialogs as main application</li>
+                        <li>📊 <strong>Automatic Logging:</strong> All errors logged to main application logs</li>
+                        <li>🔄 <strong>Recovery Options:</strong> Retry and recovery options where applicable</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <div class="troubleshooting-tip">
+            <h3>🆘 Need Additional Support?</h3>
+            <p>For more help with development tools:</p>
+            <ul>
+                <li>📋 Check the <a href="troubleshooting.html">Troubleshooting Guide</a></li>
+                <li>🛡️ Review <a href="error-handling.html">Error Handling System</a></li>
+                <li>⌨️ Reference <a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                <li>📞 Contact development team for technical issues</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer class="help-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>🛠️ Development</h4>
+                <ul>
+                    <li><a href="error-handling.html">Error Handling</a></li>
+                    <li><a href="database-configuration.html">Database Config</a></li>
+                    <li><a href="system-requirements.html">System Requirements</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>📚 Documentation</h4>
+                <ul>
+                    <li><a href="getting-started.html">Getting Started</a></li>
+                    <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                    <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                </ul>
+            </div>
+            <div class="footer-info">
+                <p>&copy; 2025 MTM Inventory Application. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>

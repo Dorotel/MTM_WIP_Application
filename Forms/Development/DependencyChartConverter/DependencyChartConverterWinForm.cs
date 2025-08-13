@@ -48,6 +48,13 @@ namespace MTM_Inventory_Application.Forms.Development.DependencyChartConverter
 
         #endregion
 
+        #region Progress Control Methods
+
+        // Progress control methods would go here if needed for this form
+        // Currently not required for DependencyChartConverter functionality
+
+        #endregion
+
         #region Initialization
 
         private void InitializeForm()
@@ -63,6 +70,13 @@ namespace MTM_Inventory_Application.Forms.Development.DependencyChartConverter
                     controlName: nameof(DependencyChartConverterForm));
             }
         }
+
+        #endregion
+
+        #region Key Processing
+
+        // Keyboard shortcut processing would go here if needed
+        // Currently not implemented for this development tool
 
         #endregion
 
@@ -123,6 +137,13 @@ namespace MTM_Inventory_Application.Forms.Development.DependencyChartConverter
                     controlName: nameof(DependencyChartConverterForm));
             }
         }
+
+        #endregion
+
+        #region ComboBox & UI Events
+
+        // UI event handlers would go here if needed
+        // Currently not implemented for this development tool
 
         #endregion
 
@@ -509,6 +530,27 @@ namespace MTM_Inventory_Application.Forms.Development.DependencyChartConverter
                 actionsHtml += $"<li>{act}</li>\n";
             html = html.Replace("{{REFACTOR_ACTIONS}}", actionsHtml);
             return html;
+        }
+
+        #endregion
+
+        #region Cleanup
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    // Dispose managed resources if any
+                }
+                base.Dispose(disposing);
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, 
+                    controlName: nameof(DependencyChartConverterForm));
+            }
         }
 
         #endregion

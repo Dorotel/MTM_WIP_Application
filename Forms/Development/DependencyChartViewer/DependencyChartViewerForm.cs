@@ -48,6 +48,13 @@ namespace MTM_Inventory_Application.Forms.Development.DependencyChartConverter
 
         #endregion
 
+        #region Progress Control Methods
+
+        // Progress control methods would go here if needed for this form
+        // Currently not required for DependencyChartViewer functionality
+
+        #endregion
+
         #region Initialization
 
         private void InitializeForm()
@@ -83,6 +90,13 @@ namespace MTM_Inventory_Application.Forms.Development.DependencyChartConverter
                     controlName: nameof(DependencyChartViewerForm));
             }
         }
+
+        #endregion
+
+        #region Key Processing
+
+        // Keyboard shortcut processing would go here if needed
+        // Currently not implemented for this development tool
 
         #endregion
 
@@ -133,6 +147,13 @@ namespace MTM_Inventory_Application.Forms.Development.DependencyChartConverter
                     controlName: nameof(DependencyChartViewerForm));
             }
         }
+
+        #endregion
+
+        #region ComboBox & UI Events
+
+        // UI event handlers would go here if needed
+        // Currently handled in other specific regions
 
         #endregion
 
@@ -381,6 +402,27 @@ namespace MTM_Inventory_Application.Forms.Development.DependencyChartConverter
                 Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, 
                     controlName: nameof(DependencyChartViewerForm));
                 return base.ProcessCmdKey(ref msg, keyData);
+            }
+        }
+
+        #endregion
+
+        #region Cleanup
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    _htmlFiles?.Clear();
+                }
+                base.Dispose(disposing);
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, 
+                    controlName: nameof(DependencyChartViewerForm));
             }
         }
 

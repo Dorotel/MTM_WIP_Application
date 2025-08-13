@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM Inventory - Database Configuration</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <nav class="help-nav">
+        <div class="nav-brand">
+            <h1>🏭 MTM Inventory Application</h1>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">🏠 Home</a>
+            <a href="getting-started.html">🚀 Getting Started</a>
+            <a href="system-requirements.html">⚙️ System Requirements</a>
+        </div>
+    </nav>
+
+    <main class="help-content">
+        <header class="page-header">
+            <h1>🗄️ Database Configuration</h1>
+            <p class="lead">Complete guide to setting up and configuring MySQL database for MTM Inventory Application</p>
+        </header>
+
+        <section class="content-section">
+            <h2>🎯 Environment Overview</h2>
+            <div class="environment-info">
+                <p>MTM Inventory Application uses <strong>environment-specific database logic</strong> to automatically select the correct database and server based on your build configuration.</p>
+                
+                <div class="env-grid">
+                    <div class="env-item production">
+                        <h3>🚀 Production Environment</h3>
+                        <ul>
+                            <li><strong>Database:</strong> <code>mtm_wip_application</code></li>
+                            <li><strong>Server:</strong> <code>172.16.1.104</code></li>
+                            <li><strong>Port:</strong> <code>3306</code></li>
+                            <li><strong>Auto-Detection:</strong> Release mode builds</li>
+                        </ul>
+                    </div>
+                    <div class="env-item development">
+                        <h3>🔧 Development Environment</h3>
+                        <ul>
+                            <li><strong>Database:</strong> <code>mtm_wip_application_test</code></li>
+                            <li><strong>Server:</strong> <code>localhost</code> or <code>172.16.1.104</code></li>
+                            <li><strong>Port:</strong> <code>3306</code></li>
+                            <li><strong>Auto-Detection:</strong> Debug mode builds</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>📊 Database Setup Process</h2>
+            <div class="setup-process">
+                <h3>Step 1: MySQL Installation</h3>
+                <ol class="setup-steps">
+                    <li><strong>Download MySQL:</strong> Get MySQL Community Server 5.7.24 or later</li>
+                    <li><strong>Install Server:</strong> Follow standard installation process</li>
+                    <li><strong>Configure Root Password:</strong> Set secure root password</li>
+                    <li><strong>Enable TCP/IP:</strong> Ensure port 3306 is accessible</li>
+                    <li><strong>Start Service:</strong> Verify MySQL service is running</li>
+                </ol>
+
+                <h3>Step 2: Database Creation</h3>
+                <div class="code-block">
+                    <h4>🔵 Production Database</h4>
+                    <pre><code>CREATE DATABASE mtm_wip_application
+CHARACTER SET utf8mb4 
+COLLATE utf8mb4_unicode_ci;</code></pre>
+                </div>
+
+                <div class="code-block">
+                    <h4>🟡 Development Database</h4>
+                    <pre><code>CREATE DATABASE mtm_wip_application_test
+CHARACTER SET utf8mb4 
+COLLATE utf8mb4_unicode_ci;</code></pre>
+                </div>
+
+                <h3>Step 3: User Account Setup</h3>
+                <div class="user-setup">
+                    <h4>Create Application User</h4>
+                    <div class="code-block">
+                        <pre><code>-- Create user for application
+CREATE USER 'mtm_user'@'%' IDENTIFIED BY 'secure_password_here';
+
+-- Grant necessary privileges
+GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON mtm_wip_application.* TO 'mtm_user'@'%';
+GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON mtm_wip_application_test.* TO 'mtm_user'@'%';
+
+-- Flush privileges
+FLUSH PRIVILEGES;</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🏗️ Database Structure</h2>
+            <div class="database-structure">
+                <h3>📋 Core Tables</h3>
+                <div class="table-grid">
+                    <div class="table-item">
+                        <h4>👥 User Management</h4>
+                        <ul>
+                            <li><code>users</code> - User accounts and authentication</li>
+                            <li><code>user_ui_colors</code> - Theme preferences</li>
+                            <li><code>user_based_shortcut_bar</code> - Quick buttons</li>
+                        </ul>
+                    </div>
+                    <div class="table-item">
+                        <h4>📦 Inventory Data</h4>
+                        <ul>
+                            <li><code>current_inventory</code> - Active inventory items</li>
+                            <li><code>parts</code> - Part definitions</li>
+                            <li><code>locations</code> - Storage locations</li>
+                            <li><code>operations</code> - Operation types</li>
+                            <li><code>item_types</code> - Item classifications</li>
+                        </ul>
+                    </div>
+                    <div class="table-item">
+                        <h4>📊 Transaction History</h4>
+                        <ul>
+                            <li><code>history_inventory</code> - Inventory changes</li>
+                            <li><code>history_remove</code> - Removal transactions</li>
+                            <li><code>history_transfer</code> - Transfer operations</li>
+                            <li><code>transaction_history</code> - Complete audit trail</li>
+                        </ul>
+                    </div>
+                    <div class="table-item">
+                        <h4>⚙️ System Tables</h4>
+                        <ul>
+                            <li><code>version_history</code> - Application versioning</li>
+                            <li><code>error_log</code> - Error tracking</li>
+                            <li><code>system_settings</code> - Configuration data</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🔧 Stored Procedures</h2>
+            <div class="stored-procedures">
+                <div class="warning-box">
+                    <h3>⚠️ Critical: Stored Procedure Compliance</h3>
+                    <p>MTM Inventory Application uses <strong>stored procedures exclusively</strong> for all database operations. No inline SQL is allowed.</p>
+                </div>
+
+                <h3>📁 Procedure Categories</h3>
+                <div class="procedure-grid">
+                    <div class="proc-category">
+                        <h4>🔍 Inventory Procedures</h4>
+                        <ul>
+                            <li><code>inv_inventory_Add_Item_1_1</code></li>
+                            <li><code>inv_inventory_Remove_Item_1_1</code></li>
+                            <li><code>inv_inventory_Transfer_Item_1_1</code></li>
+                            <li><code>inv_inventory_Search_*</code></li>
+                        </ul>
+                    </div>
+                    <div class="proc-category">
+                        <h4>👥 User Management</h4>
+                        <ul>
+                            <li><code>user_*_procedures</code></li>
+                            <li><code>theme_*_procedures</code></li>
+                            <li><code>shortcut_*_procedures</code></li>
+                        </ul>
+                    </div>
+                    <div class="proc-category">
+                        <h4>📊 Reporting</h4>
+                        <ul>
+                            <li><code>report_*_procedures</code></li>
+                            <li><code>transaction_*_procedures</code></li>
+                            <li><code>history_*_procedures</code></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🛡️ Error Handling Standard</h3>
+                <div class="error-standard">
+                    <p>All stored procedures follow the <code>inv_inventory_Remove_Item_1_1</code> error reporting pattern:</p>
+                    <div class="code-block">
+                        <pre><code>-- Standard OUT parameters for all procedures
+OUT p_Status VARCHAR(50),
+OUT p_ErrorMsg TEXT
+
+-- Error handling pattern
+IF error_condition THEN
+    SET p_Status = 'ERROR';
+    SET p_ErrorMsg = 'Descriptive error message';
+ELSE
+    SET p_Status = 'SUCCESS';
+    SET p_ErrorMsg = '';
+END IF;</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🔌 Connection Configuration</h2>
+            <div class="connection-config">
+                <h3>🎯 Automatic Environment Detection</h3>
+                <p>The application automatically determines the correct database environment using:</p>
+                <ul>
+                    <li><strong>Model_Users.Database</strong> - Returns appropriate database name</li>
+                    <li><strong>Model_Users.WipServerAddress</strong> - Returns correct server address</li>
+                    <li><strong>Helper_Database_Variables.GetConnectionString()</strong> - Builds connection string</li>
+                </ul>
+
+                <h3>⚙️ Manual Configuration</h3>
+                <p>For custom environments, you can override the automatic detection:</p>
+                <div class="config-options">
+                    <div class="config-item">
+                        <h4>🔧 Debug Mode Logic</h4>
+                        <ul>
+                            <li>If current IP matches 172.16.1.104 → use 172.16.1.104</li>
+                            <li>Otherwise → use localhost</li>
+                            <li>Database: mtm_wip_application_test</li>
+                        </ul>
+                    </div>
+                    <div class="config-item">
+                        <h4>🚀 Release Mode Logic</h4>
+                        <ul>
+                            <li>Always use 172.16.1.104</li>
+                            <li>Database: mtm_wip_application</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🧪 MAMP Development Setup</h2>
+            <div class="mamp-setup">
+                <h3>📦 MAMP Configuration</h3>
+                <p>For local development using MAMP (Mac/Windows Apache MySQL PHP):</p>
+                
+                <ol class="setup-steps">
+                    <li><strong>Install MAMP:</strong> Download from mamp.info</li>
+                    <li><strong>Start Services:</strong> Apache and MySQL</li>
+                    <li><strong>Create Database:</strong> Use phpMyAdmin or command line</li>
+                    <li><strong>Import Structure:</strong> Run database creation scripts</li>
+                    <li><strong>Configure Connection:</strong> Update localhost settings</li>
+                </ol>
+
+                <div class="mamp-settings">
+                    <h4>Default MAMP Settings</h4>
+                    <ul>
+                        <li><strong>MySQL Port:</strong> 3306 (or 8889)</li>
+                        <li><strong>Username:</strong> root</li>
+                        <li><strong>Password:</strong> root (default)</li>
+                        <li><strong>Host:</strong> localhost</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🔍 Testing Database Connection</h2>
+            <div class="connection-testing">
+                <h3>🧪 Connection Test Procedure</h3>
+                <ol class="test-steps">
+                    <li><strong>Settings Form:</strong> Open Settings → Database tab</li>
+                    <li><strong>Test Connection:</strong> Click "Test Database Connection" button</li>
+                    <li><strong>Verify Status:</strong> Check connection status indicator</li>
+                    <li><strong>Review Logs:</strong> Check application logs for errors</li>
+                </ol>
+
+                <h3>🚨 Common Connection Issues</h3>
+                <div class="troubleshooting-grid">
+                    <div class="issue-item">
+                        <h4>❌ Connection Refused</h4>
+                        <ul>
+                            <li>Check MySQL service is running</li>
+                            <li>Verify port 3306 is not blocked</li>
+                            <li>Confirm server address is correct</li>
+                        </ul>
+                    </div>
+                    <div class="issue-item">
+                        <h4>🔐 Access Denied</h4>
+                        <ul>
+                            <li>Verify username and password</li>
+                            <li>Check user privileges</li>
+                            <li>Confirm host permissions (% vs localhost)</li>
+                        </ul>
+                    </div>
+                    <div class="issue-item">
+                        <h4>🗄️ Database Not Found</h4>
+                        <ul>
+                            <li>Create missing database</li>
+                            <li>Run database creation scripts</li>
+                            <li>Check database name spelling</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🛡️ Security Best Practices</h2>
+            <div class="security-practices">
+                <h3>🔐 Database Security</h3>
+                <ul class="security-checklist">
+                    <li>✅ Use strong passwords for database users</li>
+                    <li>✅ Limit user privileges to minimum required</li>
+                    <li>✅ Enable SSL/TLS for remote connections</li>
+                    <li>✅ Regular security updates for MySQL</li>
+                    <li>✅ Monitor database access logs</li>
+                    <li>✅ Backup database regularly</li>
+                </ul>
+
+                <h3>🔒 Network Security</h3>
+                <ul class="security-checklist">
+                    <li>✅ Firewall rules for database ports</li>
+                    <li>✅ VPN for remote database access</li>
+                    <li>✅ Network segmentation for database servers</li>
+                    <li>✅ Regular security assessments</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>📋 Maintenance Tasks</h2>
+            <div class="maintenance-tasks">
+                <h3>🔄 Regular Maintenance</h3>
+                <ul class="maintenance-list">
+                    <li><strong>Daily:</strong> Monitor error logs and connection status</li>
+                    <li><strong>Weekly:</strong> Check database performance and optimize queries</li>
+                    <li><strong>Monthly:</strong> Update statistics and rebuild indexes</li>
+                    <li><strong>Quarterly:</strong> Review and archive old transaction data</li>
+                </ul>
+
+                <h3>💾 Backup Strategy</h3>
+                <div class="backup-info">
+                    <h4>Recommended Backup Schedule</h4>
+                    <ul>
+                        <li><strong>Full Backup:</strong> Daily during off-hours</li>
+                        <li><strong>Transaction Log:</strong> Every 15 minutes</li>
+                        <li><strong>Off-site Copy:</strong> Weekly</li>
+                        <li><strong>Test Restore:</strong> Monthly verification</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <div class="troubleshooting-tip">
+            <h3>🆘 Need Additional Help?</h3>
+            <p>For more assistance with database configuration:</p>
+            <ul>
+                <li>📋 Check the <a href="troubleshooting.html">Troubleshooting Guide</a></li>
+                <li>⚙️ Review <a href="system-requirements.html">System Requirements</a></li>
+                <li>📞 Contact your database administrator</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer class="help-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>📚 Documentation</h4>
+                <ul>
+                    <li><a href="getting-started.html">Getting Started</a></li>
+                    <li><a href="system-requirements.html">System Requirements</a></li>
+                    <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>🛠️ Configuration</h4>
+                <ul>
+                    <li><a href="error-handling.html">Error Handling</a></li>
+                    <li><a href="development-tools.html">Development Tools</a></li>
+                    <li><a href="settings-management.html">Settings Management</a></li>
+                </ul>
+            </div>
+            <div class="footer-info">
+                <p>&copy; 2025 MTM Inventory Application. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>
