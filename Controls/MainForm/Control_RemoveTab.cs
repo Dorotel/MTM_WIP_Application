@@ -5,6 +5,7 @@ using System.Drawing.Printing;
 using System.Text;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
+using MTM_Inventory_Application.Forms.ErrorDialog;
 using MTM_Inventory_Application.Forms.MainForm.Classes;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;

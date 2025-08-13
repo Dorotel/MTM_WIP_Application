@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using MTM_Inventory_Application.Controls.SettingsForm;
 using MTM_Inventory_Application.Data;
+using MTM_Inventory_Application.Forms.ErrorDialog;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Services;
@@ -72,9 +73,9 @@ namespace MTM_Inventory_Application
                     ShowFatalError("Windows Forms Initialization Error",
                         $"Failed to initialize Windows Forms:\n\n{ex.Message}\n\n" +
                         "This may be caused by:\n" +
-                        "• Missing .NET runtime components\n" +
-                        "• System display configuration issues\n" +
-                        "• Insufficient system permissions\n\n" +
+                        "ï¿½ Missing .NET runtime components\n" +
+                        "ï¿½ System display configuration issues\n" +
+                        "ï¿½ Insufficient system permissions\n\n" +
                         "Please contact your system administrator.");
                     return;
                 }
@@ -153,9 +154,9 @@ namespace MTM_Inventory_Application
                     ShowDatabaseError("User Access Timeout",
                         "The request to load user access permissions timed out.\n\n" +
                         "This usually means:\n" +
-                        "• The database server is responding slowly\n" +
-                        "• Network connectivity issues\n" +
-                        "• The server is overloaded\n\n" +
+                        "ï¿½ The database server is responding slowly\n" +
+                        "ï¿½ Network connectivity issues\n" +
+                        "ï¿½ The server is overloaded\n\n" +
                         "Please try starting the application again.");
                     return;
                 }
@@ -165,8 +166,8 @@ namespace MTM_Inventory_Application
                     ShowSecurityError("Access Denied",
                         $"Access denied while loading user permissions:\n\n{ex.Message}\n\n" +
                         "This usually means:\n" +
-                        "• Your account doesn't have sufficient database permissions\n" +
-                        "• The user account configuration is incorrect\n\n" +
+                        "ï¿½ Your account doesn't have sufficient database permissions\n" +
+                        "ï¿½ The user account configuration is incorrect\n\n" +
                         "Please contact your system administrator.");
                     return;
                 }
@@ -208,9 +209,9 @@ namespace MTM_Inventory_Application
                     ShowFatalError("Application Startup Error",
                         "Failed to start the main application interface.\n\n" +
                         "This usually means:\n" +
-                        "• Another instance may already be running\n" +
-                        "• System resources are insufficient\n" +
-                        "• Display configuration issues\n\n" +
+                        "ï¿½ Another instance may already be running\n" +
+                        "ï¿½ System resources are insufficient\n" +
+                        "ï¿½ Display configuration issues\n\n" +
                         "Please restart your computer and try again.");
                 }
                 catch (Exception ex)
@@ -229,16 +230,16 @@ namespace MTM_Inventory_Application
                 Console.WriteLine($"[Critical] Out of memory: {ex.Message}");
                 try
                 {
-                    MessageBox.Show(
-                        "The application has run out of available memory and must close.\n\n" +
-                        "This usually means:\n" +
-                        "• Insufficient system RAM\n" +
-                        "• Memory leak in application or system\n" +
-                        "• Too many applications running\n\n" +
-                        "Please restart your computer and close unnecessary applications.",
-                        "Critical Memory Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Stop);
+                    Service_ErrorHandler.HandleException(
+                        new OutOfMemoryException(
+                            "The application has run out of available memory and must close.\n\n" +
+                            "This usually means:\n" +
+                            "â€¢ Insufficient system RAM\n" +
+                            "â€¢ Memory leak in application or system\n" +
+                            "â€¢ Too many applications running\n\n" +
+                            "Please restart your computer and close unnecessary applications."),
+                        ErrorSeverity.Fatal,
+                        controlName: "Program_Main");
                 }
                 catch
                 {
@@ -260,9 +261,9 @@ namespace MTM_Inventory_Application
                     MessageBox.Show(
                         "A critical system error occurred (Access Violation).\n\n" +
                         "This usually indicates:\n" +
-                        "• Memory corruption\n" +
-                        "• System instability\n" +
-                        "• Hardware issues\n\n" +
+                        "ï¿½ Memory corruption\n" +
+                        "ï¿½ System instability\n" +
+                        "ï¿½ Hardware issues\n\n" +
                         "Please restart your computer immediately.",
                         "Critical System Error",
                         MessageBoxButtons.OK,
@@ -334,9 +335,9 @@ namespace MTM_Inventory_Application
                     ShowSecurityError("Access Denied",
                         $"Access was denied:\n\n{accessEx.Message}\n\n" +
                         "This usually means:\n" +
-                        "• Insufficient file system permissions\n" +
-                        "• Security software is blocking the application\n" +
-                        "• User account restrictions\n\n" +
+                        "ï¿½ Insufficient file system permissions\n" +
+                        "ï¿½ Security software is blocking the application\n" +
+                        "ï¿½ User account restrictions\n\n" +
                         "Please contact your system administrator.");
                 }
                 else if (ex is SecurityException secEx)
@@ -344,9 +345,9 @@ namespace MTM_Inventory_Application
                     ShowSecurityError("Security Error",
                         $"A security error occurred:\n\n{secEx.Message}\n\n" +
                         "This usually means:\n" +
-                        "• Application lacks required permissions\n" +
-                        "• Security policy restrictions\n" +
-                        "• Certificate or signature issues\n\n" +
+                        "ï¿½ Application lacks required permissions\n" +
+                        "ï¿½ Security policy restrictions\n" +
+                        "ï¿½ Certificate or signature issues\n\n" +
                         "Please contact your system administrator.");
                 }
                 else if (ex is COMException comEx)
@@ -355,9 +356,9 @@ namespace MTM_Inventory_Application
                         $"A system component error occurred:\n\n{comEx.Message}\n\n" +
                         $"Error Code: 0x{comEx.HResult:X8}\n\n" +
                         "This usually means:\n" +
-                        "• Missing system components\n" +
-                        "• Corrupted system files\n" +
-                        "• Compatibility issues\n\n" +
+                        "ï¿½ Missing system components\n" +
+                        "ï¿½ Corrupted system files\n" +
+                        "ï¿½ Compatibility issues\n\n" +
                         "Please contact your system administrator.");
                 }
                 else if (ex is ExternalException extEx)
@@ -372,9 +373,9 @@ namespace MTM_Inventory_Application
                     ShowTimeoutError("Operation Timeout",
                         $"An operation timed out:\n\n{ex.Message}\n\n" +
                         "This usually means:\n" +
-                        "• Network connectivity issues\n" +
-                        "• Server is overloaded or unresponsive\n" +
-                        "• System performance issues\n\n" +
+                        "ï¿½ Network connectivity issues\n" +
+                        "ï¿½ Server is overloaded or unresponsive\n" +
+                        "ï¿½ System performance issues\n\n" +
                         "Please try again or contact your system administrator.");
                 }
                 else
@@ -481,9 +482,9 @@ namespace MTM_Inventory_Application
             {
                 string userMessage = "Database connection timed out during health check.\n\n" +
                                    "This usually means:\n" +
-                                   "• The database server is responding slowly\n" +
-                                   "• Network connectivity issues\n" +
-                                   "• Server is overloaded\n\n" +
+                                   "ï¿½ The database server is responding slowly\n" +
+                                   "ï¿½ Network connectivity issues\n" +
+                                   "ï¿½ Server is overloaded\n\n" +
                                    "Please try again or contact your system administrator.";
                 ShowTimeoutError("Database Timeout", userMessage);
                 return DaoResult.Failure(userMessage, ex);
@@ -663,16 +664,16 @@ namespace MTM_Inventory_Application
                 return $"The test database '{dbName}' does not exist on server '{serverAddress}'.\n\n" +
                        "This is a DEBUG build that requires the test database.\n\n" +
                        "Please:\n" +
-                       "• Create the test database '{dbName}' on MySQL server\n" +
-                       "• Or run the application in RELEASE mode to use the production database\n" +
-                       "• Contact your system administrator for database setup assistance\n\n" +
+                       "ï¿½ Create the test database '{dbName}' on MySQL server\n" +
+                       "ï¿½ Or run the application in RELEASE mode to use the production database\n" +
+                       "ï¿½ Contact your system administrator for database setup assistance\n\n" +
                        "The application cannot start without a valid database connection.";
 #else
                 return $"The database '{dbName}' does not exist on server '{serverAddress}'.\n\n" +
                        "Please contact your system administrator to:\n" +
-                       "• Verify the database server is running\n" +
-                       "• Ensure the database '{dbName}' exists and is accessible\n" +
-                       "• Check database permissions for your user account\n\n" +
+                       "ï¿½ Verify the database server is running\n" +
+                       "ï¿½ Ensure the database '{dbName}' exists and is accessible\n" +
+                       "ï¿½ Check database permissions for your user account\n\n" +
                        "The application cannot start without a valid database connection.";
 #endif
             }
@@ -680,9 +681,9 @@ namespace MTM_Inventory_Application
             {
                 return "Cannot connect to the database server.\n\n" +
                        "This usually means:\n" +
-                       "• The database server is not running\n" +
-                       "• The server address or port is incorrect\n" +
-                       "• A firewall is blocking the connection\n\n" +
+                       "ï¿½ The database server is not running\n" +
+                       "ï¿½ The server address or port is incorrect\n" +
+                       "ï¿½ A firewall is blocking the connection\n\n" +
                        "Please check with your system administrator or verify the server is running.\n\n" +
                        "The application cannot start without a database connection.";
             }
@@ -690,8 +691,8 @@ namespace MTM_Inventory_Application
             {
                 return "Access denied when connecting to the database.\n\n" +
                        "This usually means:\n" +
-                       "• Your username or password is incorrect\n" +
-                       "• Your account doesn't have permission to access the database\n\n" +
+                       "ï¿½ Your username or password is incorrect\n" +
+                       "ï¿½ Your account doesn't have permission to access the database\n\n" +
                        "Please check your credentials with your system administrator.\n\n" +
                        "The application cannot start without proper database access.";
             }
@@ -699,9 +700,9 @@ namespace MTM_Inventory_Application
             {
                 return "Connection to the database timed out.\n\n" +
                        "This usually means:\n" +
-                       "• The database server is responding slowly\n" +
-                       "• Network connectivity issues\n" +
-                       "• The server is overloaded\n\n" +
+                       "ï¿½ The database server is responding slowly\n" +
+                       "ï¿½ Network connectivity issues\n" +
+                       "ï¿½ The server is overloaded\n\n" +
                        "Please try starting the application again in a few moments.\n" +
                        "If the problem persists, contact your system administrator.";
             }

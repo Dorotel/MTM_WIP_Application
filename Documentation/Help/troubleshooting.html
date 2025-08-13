@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troubleshooting - MTM Inventory Application Help</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <div class="help-container">
+        <div class="help-header">
+            <h1>🔧 Troubleshooting</h1>
+            <p>Common issues and solutions for the MTM Inventory Application</p>
+        </div>
+        
+        <div class="help-nav">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Help Home</a></li>
+                    <li class="breadcrumb-item active">Troubleshooting</li>
+                </ol>
+            </nav>
+            <input type="text" class="search-box" placeholder="Search issues..." id="searchBox">
+        </div>
+        
+        <div class="help-content">
+            <div class="alert alert-info">
+                <strong>Quick Help:</strong> Try pressing <kbd>F1</kbd> for context-specific help, or check the <a href="error-handling.html">Error Handling Guide</a> for detailed error message explanations.
+            </div>
+            
+            <div class="help-section">
+                <h2>Database Connection Issues</h2>
+                
+                <div class="help-card">
+                    <h4>❌ Cannot Connect to Database</h4>
+                    <div class="alert alert-danger">
+                        <strong>Symptoms:</strong> Red connection indicator, "Database connection failed" errors, forms not loading data.
+                    </div>
+                    
+                    <h5>Possible Causes & Solutions:</h5>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Cause</th>
+                                <th>Solution</th>
+                                <th>How to Check</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Database server is offline</td>
+                                <td>Contact system administrator or restart MAMP/MySQL service</td>
+                                <td>Check if other users can connect; verify MySQL service in Windows Services</td>
+                            </tr>
+                            <tr>
+                                <td>Incorrect server address</td>
+                                <td>Verify server address in application settings</td>
+                                <td>Environment should auto-detect 172.16.1.104 for production</td>
+                            </tr>
+                            <tr>
+                                <td>Firewall blocking connection</td>
+                                <td>Allow MTM application through Windows Firewall</td>
+                                <td>Try connecting from command line: <span class="inline-code">telnet 172.16.1.104 3306</span></td>
+                            </tr>
+                            <tr>
+                                <td>Database credentials incorrect</td>
+                                <td>Verify username/password with administrator</td>
+                                <td>Connection string uses environment-specific credentials</td>
+                            </tr>
+                            <tr>
+                                <td>Wrong database name</td>
+                                <td>Check if using correct database for environment</td>
+                                <td>Release: mtm_wip_application, Debug: mtm_wip_application_test</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="help-card">
+                    <h4>🐌 Slow Database Performance</h4>
+                    <div class="alert alert-warning">
+                        <strong>Symptoms:</strong> Long loading times, timeouts, progress bars stuck, operations taking minutes instead of seconds.
+                    </div>
+                    
+                    <h5>Performance Solutions:</h5>
+                    <ol class="help-list">
+                        <li><strong>Check Network Connection:</strong> Slow or unstable network can cause delays</li>
+                        <li><strong>Restart Application:</strong> Memory leaks or connection pooling issues may resolve</li>
+                        <li><strong>Database Maintenance:</strong> Contact administrator about optimization/indexing</li>
+                        <li><strong>Reduce Data Load:</strong> Use date ranges or filters to limit query size</li>
+                        <li><strong>Check System Resources:</strong> Ensure adequate RAM and CPU availability</li>
+                    </ol>
+                </div>
+                
+                <div class="help-card">
+                    <h4>🔌 Intermittent Connection Drops</h4>
+                    <div class="alert alert-warning">
+                        <strong>Symptoms:</strong> Connection works sometimes, then fails unpredictably.
+                    </div>
+                    
+                    <p>The application includes automatic connection recovery. When connection drops:</p>
+                    <ol class="help-list">
+                        <li>Application detects the disconnection</li>
+                        <li>Shows enhanced error dialog with connection status</li>
+                        <li>Attempts automatic reconnection</li>
+                        <li>Provides retry options for failed operations</li>
+                        <li>Logs all connection events for analysis</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Application Performance Issues</h2>
+                
+                <div class="help-card">
+                    <h4>🐌 Application Running Slowly</h4>
+                    <h5>System Resource Issues:</h5>
+                    <ul class="help-list">
+                        <li><strong>Check RAM Usage:</strong> Application requires 4GB minimum, 8GB recommended</li>
+                        <li><strong>Close Unnecessary Programs:</strong> Free up system memory</li>
+                        <li><strong>Restart Application:</strong> Clear memory leaks and reset connections</li>
+                        <li><strong>Check Disk Space:</strong> Ensure adequate free space on system drive</li>
+                    </ul>
+                    
+                    <h5>Application-Specific Solutions:</h5>
+                    <ul class="help-list">
+                        <li><strong>Clear Temporary Data:</strong> Application auto-cleans on startup</li>
+                        <li><strong>Reset User Preferences:</strong> Try with default settings</li>
+                        <li><strong>Update Display Drivers:</strong> DPI scaling issues can cause performance problems</li>
+                    </ul>
+                </div>
+                
+                <div class="help-card">
+                    <h4>💾 High Memory Usage</h4>
+                    <div class="alert alert-danger">
+                        <strong>Critical:</strong> If memory usage exceeds available RAM, the application will display a fatal error and terminate to prevent system instability.
+                    </div>
+                    
+                    <h5>Memory Management:</h5>
+                    <ul class="help-list">
+                        <li><strong>Monitor Task Manager:</strong> Watch MTM_Inventory_Application.exe memory usage</li>
+                        <li><strong>Limit Large Operations:</strong> Process data in smaller batches</li>
+                        <li><strong>Close Unnecessary Tabs:</strong> Some tabs cache data in memory</li>
+                        <li><strong>Restart Periodically:</strong> Long-running sessions may accumulate memory usage</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>User Interface Issues</h2>
+                
+                <div class="help-card">
+                    <h4>🖥️ Display and Scaling Issues</h4>
+                    <div class="alert alert-info">
+                        <strong>Modern Solution:</strong> The application includes automatic DPI scaling support through Core_Themes.ApplyDpiScaling().
+                    </div>
+                    
+                    <h5>Common Display Problems:</h5>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Issue</th>
+                                <th>Cause</th>
+                                <th>Solution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Text too small/large</td>
+                                <td>Windows scaling settings</td>
+                                <td>Application auto-adjusts; try restarting if issues persist</td>
+                            </tr>
+                            <tr>
+                                <td>Controls overlapping</td>
+                                <td>DPI scaling mismatch</td>
+                                <td>Core_Themes.ApplyRuntimeLayoutAdjustments() handles this automatically</td>
+                            </tr>
+                            <tr>
+                                <td>Blurry text</td>
+                                <td>DPI awareness issues</td>
+                                <td>Check Windows Display Settings, ensure application DPI awareness is enabled</td>
+                            </tr>
+                            <tr>
+                                <td>Theme not applying</td>
+                                <td>Theme system error</td>
+                                <td>Reset to Default theme in Settings, restart application</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="help-card">
+                    <h4>🎨 Theme and Color Issues</h4>
+                    <h5>Available Themes:</h5>
+                    <ul class="help-list">
+                        <li>Arctic, Default, Fire Storm, Forest, Lavender</li>
+                        <li>Midnight, Mystic, Ocean, Sunset, Urban Bloom</li>
+                    </ul>
+                    
+                    <h5>Theme Troubleshooting:</h5>
+                    <ol class="help-list">
+                        <li>Open <strong>File</strong> → <strong>Settings</strong></li>
+                        <li>Go to <strong>Theme Settings</strong></li>
+                        <li>Select <strong>Default</strong> theme</li>
+                        <li>Click <strong>Apply</strong> and restart application</li>
+                        <li>If issues persist, contact support</li>
+                    </ol>
+                </div>
+                
+                <div class="help-card">
+                    <h4>⌨️ Keyboard Shortcuts Not Working</h4>
+                    <h5>Common Issues:</h5>
+                    <ul class="help-list">
+                        <li><strong>Focus Issues:</strong> Ensure correct control has focus</li>
+                        <li><strong>Conflicting Software:</strong> Other applications may capture shortcuts</li>
+                        <li><strong>Custom Shortcuts:</strong> Check Settings → Shortcuts for conflicts</li>
+                        <li><strong>Windows Shortcuts:</strong> Some shortcuts are reserved by Windows</li>
+                    </ul>
+                    
+                    <p><a href="keyboard-shortcuts.html" class="help-btn help-btn-outline-primary">View Complete Shortcuts Reference</a></p>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Data and Validation Issues</h2>
+                
+                <div class="help-card">
+                    <h4>❌ Validation Errors</h4>
+                    <div class="alert alert-info">
+                        <strong>Enhanced Error Handling:</strong> The application now provides detailed validation errors with plain English explanations and suggested corrections.
+                    </div>
+                    
+                    <h5>Common Validation Issues:</h5>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Error Type</th>
+                                <th>Common Causes</th>
+                                <th>Solutions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Invalid Part Selection</td>
+                                <td>Part not selected or doesn't exist</td>
+                                <td>Select valid part from dropdown; check if part exists in system</td>
+                            </tr>
+                            <tr>
+                                <td>Invalid Operation</td>
+                                <td>Operation not selected</td>
+                                <td>Choose operation from dropdown list</td>
+                            </tr>
+                            <tr>
+                                <td>Invalid Location</td>
+                                <td>Location not selected or invalid</td>
+                                <td>Select valid location; check if location is active</td>
+                            </tr>
+                            <tr>
+                                <td>Invalid Quantity</td>
+                                <td>Negative, zero, or non-numeric values</td>
+                                <td>Enter positive whole numbers only</td>
+                            </tr>
+                            <tr>
+                                <td>Duplicate Entries</td>
+                                <td>Same part/operation/location combination</td>
+                                <td>Check existing entries; use different location if needed</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="help-card">
+                    <h4>🔄 Data Synchronization Issues</h4>
+                    <h5>Out-of-Sync Data:</h5>
+                    <ul class="help-list">
+                        <li><strong>Hard Reset:</strong> Shift+Click reset buttons to refresh from database</li>
+                        <li><strong>Refresh Lists:</strong> F5 to refresh dropdowns and data grids</li>
+                        <li><strong>Check Other Users:</strong> Ensure no one else is modifying same data</li>
+                        <li><strong>Database Timing:</strong> Allow time for database updates to propagate</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Error Messages and Logging</h2>
+                
+                <div class="help-card">
+                    <h4>🔍 Understanding Error Messages</h4>
+                    <div class="alert alert-success">
+                        <strong>Enhanced Error System:</strong> The application now provides comprehensive error dialogs with tabbed interface, call stack information, and suggested actions.
+                    </div>
+                    
+                    <h5>Error Dialog Tabs:</h5>
+                    <ul class="help-list">
+                        <li><strong>Summary:</strong> Plain English explanation of what went wrong</li>
+                        <li><strong>Technical Details:</strong> Complete error information for troubleshooting</li>
+                        <li><strong>Call Stack:</strong> Color-coded method hierarchy showing where error occurred</li>
+                    </ul>
+                    
+                    <h5>Error Actions:</h5>
+                    <ul class="help-list">
+                        <li><strong>Retry:</strong> Attempt the operation again</li>
+                        <li><strong>Copy Details:</strong> Copy technical information to clipboard</li>
+                        <li><strong>Report Issue:</strong> Create issue report</li>
+                        <li><strong>View Logs:</strong> Open log files for analysis</li>
+                    </ul>
+                </div>
+                
+                <div class="help-card">
+                    <h4>📋 Log File Locations</h4>
+                    <p>Application logs are stored in:</p>
+                    <div class="code-block">
+%APPDATA%\MTM_Inventory_Application\Logs\
+├── Application_YYYYMMDD.log     (General application events)
+├── Database_YYYYMMDD.log        (Database operations)
+├── Error_YYYYMMDD.log           (Error details and stack traces)
+└── Debug_YYYYMMDD.log           (Debug information)
+                    </div>
+                    
+                    <p>Log files contain:</p>
+                    <ul class="help-list">
+                        <li>Detailed error information with context</li>
+                        <li>Database operation timing and results</li>
+                        <li>User actions and application state</li>
+                        <li>Performance metrics and resource usage</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Advanced Troubleshooting</h2>
+                
+                <div class="help-card">
+                    <h4>🛠️ Diagnostic Tools</h4>
+                    <h5>Built-in Diagnostics:</h5>
+                    <ul class="help-list">
+                        <li><strong>Connection Test:</strong> Settings → Database → Test Connection</li>
+                        <li><strong>Version Check:</strong> Help → About to verify application version</li>
+                        <li><strong>Log Viewer:</strong> Enhanced error dialogs include log viewing</li>
+                        <li><strong>Debug Mode:</strong> Uses test database for troubleshooting</li>
+                    </ul>
+                </div>
+                
+                <div class="help-card">
+                    <h4>📞 Getting Support</h4>
+                    <h5>Before Contacting Support:</h5>
+                    <ol class="help-list">
+                        <li>Note the exact error message from enhanced error dialog</li>
+                        <li>Use "Copy Details" button to get technical information</li>
+                        <li>Check log files for additional context</li>
+                        <li>Document steps to reproduce the issue</li>
+                        <li>Note your application version (Help → About)</li>
+                    </ol>
+                    
+                    <h5>Information to Include:</h5>
+                    <ul class="help-list">
+                        <li>Application version and environment (Debug/Release)</li>
+                        <li>Operating system and version</li>
+                        <li>Error details from enhanced error dialog</li>
+                        <li>Log file excerpts (if relevant)</li>
+                        <li>Screenshots of the issue</li>
+                        <li>Steps to reproduce the problem</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Recovery Procedures</h2>
+                
+                <div class="help-card">
+                    <h4>🔄 Application Recovery</h4>
+                    <h5>If Application Won't Start:</h5>
+                    <ol class="help-list">
+                        <li>Check Task Manager for existing instances</li>
+                        <li>End any hung MTM_Inventory_Application.exe processes</li>
+                        <li>Delete temporary files (app auto-cleans on startup)</li>
+                        <li>Restart computer if issues persist</li>
+                        <li>Run as administrator if access issues occur</li>
+                    </ol>
+                </div>
+                
+                <div class="help-card">
+                    <h4>💾 Data Recovery</h4>
+                    <h5>For Lost or Corrupted Data:</h5>
+                    <ul class="help-list">
+                        <li><strong>Transaction History:</strong> Check transaction log for recent operations</li>
+                        <li><strong>Backup Restoration:</strong> Contact database administrator for backups</li>
+                        <li><strong>Manual Verification:</strong> Cross-check with physical inventory if needed</li>
+                        <li><strong>Re-entry:</strong> Use Excel import for bulk data restoration</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Important:</strong> All operations are logged in the database transaction history. Data is rarely truly lost, but may require administrator assistance to recover.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Quick Solutions Summary</h2>
+                
+                <div class="help-card">
+                    <h4>🚀 First Steps for Any Issue</h4>
+                    <ol class="help-list">
+                        <li><strong>Check Connection Status:</strong> Look at status bar (● = connected, ● = disconnected)</li>
+                        <li><strong>Try F5:</strong> Refresh current data</li>
+                        <li><strong>Hard Reset:</strong> Shift+Click any reset button to refresh from database</li>
+                        <li><strong>Restart Application:</strong> Close and reopen to clear temporary issues</li>
+                        <li><strong>Check Enhanced Error Dialog:</strong> Read Summary tab for plain English explanation</li>
+                        <li><strong>Use Retry:</strong> Many operations can be retried automatically</li>
+                        <li><strong>Check Logs:</strong> Use "View Logs" button in error dialogs</li>
+                        <li><strong>Contact Support:</strong> Use "Report Issue" button if problem persists</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <div class="help-footer">
+            <p>MTM Inventory Application v5.0.1.2 | Troubleshooting Guide</p>
+            <p>Still having issues? <a href="error-handling.html" style="color: #fff;">Check Error Handling Guide</a> | <a href="index.html" style="color: #fff;">Back to Help Home</a></p>
+        </div>
+    </div>
+    
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>
