@@ -401,8 +401,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show(@"Undo failed: " + ex.Message, @"Undo Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
+                    controlName: nameof(Control_RemoveTab));
             }
             finally
             {
@@ -641,8 +641,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (string.IsNullOrWhiteSpace(partId) || (Control_RemoveTab_ComboBox_Part?.SelectedIndex ?? -1) <= 0)
                 {
-                    MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError("Please select a valid Part.", "Part Selection");
                     Control_RemoveTab_ComboBox_Part?.Focus();
                     return;
                 }
@@ -724,7 +723,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 if (Control_RemoveTab_DataGridView_Main?.Rows.Count == 0)
                 {
-                    MessageBox.Show(@"No data to print.", @"Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Service_ErrorHandler.ShowWarning(@"No data to print.", @"Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -754,8 +753,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($@"Print failed: {ex.Message}", @"Print Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
+                    controlName: nameof(Control_RemoveTab));
             }
             finally
             {
@@ -987,8 +986,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     string errorMsg = !string.IsNullOrEmpty(getAllResult.ErrorMessage) 
                         ? getAllResult.ErrorMessage 
                         : "Unknown error occurred while loading inventory";
-                    MessageBox.Show($"Show All failed: {errorMsg}", @"Show All Error", 
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    var dbException = new Exception($"Show All failed: {errorMsg}");
+                    Service_ErrorHandler.HandleDatabaseError(dbException, 
+                        controlName: nameof(Control_RemoveTab));
                     return;
                 }
 
@@ -1022,8 +1022,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($@"Show All failed: {ex.Message}", @"Show All Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Service_ErrorHandler.HandleDatabaseError(ex, 
+                    controlName: nameof(Control_RemoveTab));
             }
             finally
             {

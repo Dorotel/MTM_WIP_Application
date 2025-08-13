@@ -941,32 +941,28 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (string.IsNullOrWhiteSpace(partId) || AdvancedInventory_Single_ComboBox_Part.SelectedIndex <= 0)
                 {
-                    MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError("Please select a valid Part.", "Part");
                     AdvancedInventory_Single_ComboBox_Part.Focus();
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(op) || AdvancedInventory_Single_ComboBox_Op.SelectedIndex <= 0)
                 {
-                    MessageBox.Show(@"Please select a valid Operation.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError("Please select a valid Operation.", "Operation");
                     AdvancedInventory_Single_ComboBox_Op.Focus();
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(loc) || AdvancedInventory_Single_ComboBox_Loc.SelectedIndex <= 0)
                 {
-                    MessageBox.Show(@"Please select a valid Location.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError("Please select a valid Location.", "Location");
                     AdvancedInventory_Single_ComboBox_Loc.Focus();
                     return;
                 }
 
                 if (!int.TryParse(qtyText, out int qty) || qty <= 0)
                 {
-                    MessageBox.Show(@"Please enter a valid quantity.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError("Please enter a valid quantity.", "Quantity");
                     AdvancedInventory_Single_TextBox_Qty.Focus();
                     return;
                 }
