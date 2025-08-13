@@ -241,6 +241,25 @@ internal static class Service_ErrorHandler
         }
     }
 
+    /// <summary>
+    /// Show an information dialog (not an error - just informational message)
+    /// </summary>
+    public static DialogResult ShowInformation(string title, string message, 
+        MessageBoxButtons buttons = MessageBoxButtons.OK,
+        MessageBoxIcon icon = MessageBoxIcon.Information)
+    {
+        try
+        {
+            LoggingUtility.Log($"Information dialog shown: {title} - {message}");
+            return MessageBox.Show(message, title, buttons, icon);
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogApplicationError(ex);
+            return DialogResult.Cancel;
+        }
+    }
+
     #endregion
 
     #region Legacy Compatibility Methods

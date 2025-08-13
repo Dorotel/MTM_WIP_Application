@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM Inventory Application - Transfer Operations</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>🔄 Transfer Operations Guide</h1>
+                <p class="subtitle">Complete guide for transferring inventory items between locations</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="content-section">
+                <h2>📋 Overview</h2>
+                <p>The Transfer Tab enables you to move inventory items between locations while maintaining accurate quantity tracking and audit trails. The system supports both single-item and bulk transfer operations.</p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📦</div>
+                        <h3>Single Item Transfer</h3>
+                        <p>Transfer individual items with full quantity control and validation</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🚚</div>
+                        <h3>Bulk Transfers</h3>
+                        <p>Move multiple items at once with intelligent batch processing</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Partial Quantities</h3>
+                        <p>Split inventory by transferring partial quantities to new locations</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3>Smart Search</h3>
+                        <p>Find items by part number, operation, or current location</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🚀 Basic Transfer Workflow</h2>
+
+                <div class="step-guide">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Search and Select Source Items</h3>
+                            <p>Use the search panel to locate items for transfer:</p>
+                            <ul>
+                                <li><strong>Part Search:</strong> Enter part number or description</li>
+                                <li><strong>Operation Filter:</strong> Select specific operation (Machining, Assembly, etc.)</li>
+                                <li><strong>Location Filter:</strong> Show items from specific locations</li>
+                                <li><strong>Show All:</strong> Display complete inventory for bulk operations</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Select Items to Transfer</h3>
+                            <p>Choose items from the search results grid:</p>
+                            <ul>
+                                <li><strong>Single Selection:</strong> Click on one row for individual transfer</li>
+                                <li><strong>Multiple Selection:</strong> Hold Ctrl and click multiple rows</li>
+                                <li><strong>Row Highlighting:</strong> Selected rows show transfer status</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Configure Transfer Details</h3>
+                            <p>Set up the transfer parameters in the transfer panel:</p>
+                            <ul>
+                                <li><strong>Destination Location:</strong> Select target location from dropdown</li>
+                                <li><strong>Quantity Control:</strong> Specify full or partial quantity transfer</li>
+                                <li><strong>Validation:</strong> System prevents same-location transfers</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>Execute Transfer</h3>
+                            <p>Complete the transfer operation:</p>
+                            <ul>
+                                <li><strong>Transfer Validation:</strong> System checks quantity limits and business rules</li>
+                                <li><strong>Confirmation Dialog:</strong> Review transfer details before execution</li>
+                                <li><strong>Transaction Log:</strong> Automatic audit trail creation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>📊 Transfer Panel Features</h2>
+
+                <div class="info-box info">
+                    <h4>Split Panel Layout</h4>
+                    <p>The Transfer Tab uses a split-panel design with search results on the left and transfer controls on the right.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>🔍 Left Panel - Search Results</h4>
+                        <p>Displays inventory items available for transfer with current location and quantity information.</p>
+                        <ul>
+                            <li>Sortable columns (Part, Operation, Location, Quantity)</li>
+                            <li>Multi-select capability with visual indicators</li>
+                            <li>Real-time filtering based on search criteria</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📋 Right Panel - Transfer Controls</h4>
+                        <p>Contains transfer configuration and execution controls.</p>
+                        <ul>
+                            <li>Destination location selection</li>
+                            <li>Quantity adjustment controls (NumericUpDown)</li>
+                            <li>Transfer validation and execution buttons</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🔢 Quantity Management</h2>
+
+                <div class="info-box warning">
+                    <h4>Quantity Transfer Rules</h4>
+                    <p>The system enforces strict quantity controls to prevent inventory inconsistencies.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>📦 Full Quantity Transfer</h4>
+                        <p>Transfer entire inventory quantity to new location:</p>
+                        <ul>
+                            <li>Original location inventory is completely moved</li>
+                            <li>Single transaction with complete audit trail</li>
+                            <li>Fastest transfer method for complete relocations</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>⚖️ Partial Quantity Transfer</h4>
+                        <p>Split inventory by transferring only part of the total quantity:</p>
+                        <ul>
+                            <li>Use NumericUpDown to specify exact quantity</li>
+                            <li>Original location retains remaining quantity</li>
+                            <li>Creates new inventory record at destination</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🔢 Quantity Limits</h4>
+                        <p>System enforces maximum quantity bounds:</p>
+                        <ul>
+                            <li>Cannot exceed available inventory quantity</li>
+                            <li>Minimum transfer quantity of 1 unit</li>
+                            <li>Real-time validation during quantity entry</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🚚 Multi-Row Transfer Operations</h2>
+
+                <div class="step-guide">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Select Multiple Rows</h3>
+                            <p>Use multi-selection techniques for batch transfers:</p>
+                            <ul>
+                                <li><strong>Ctrl+Click:</strong> Add individual rows to selection</li>
+                                <li><strong>Shift+Click:</strong> Select range of consecutive rows</li>
+                                <li><strong>Visual Confirmation:</strong> Selected rows highlighted in transfer color</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Configure Batch Transfer</h3>
+                            <p>Set parameters for multiple-item transfer:</p>
+                            <ul>
+                                <li><strong>Common Destination:</strong> All selected items move to same location</li>
+                                <li><strong>Quantity Handling:</strong> Each item transfers full quantity by default</li>
+                                <li><strong>Business Rule Validation:</strong> System checks each item individually</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Batch Execution</h3>
+                            <p>Process multiple transfers as single operation:</p>
+                            <ul>
+                                <li><strong>Progress Tracking:</strong> Real-time progress bar showing transfer status</li>
+                                <li><strong>Error Handling:</strong> Individual item failures don't stop batch</li>
+                                <li><strong>Success Summary:</strong> Report showing completed and failed transfers</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>✅ Transfer Validation</h2>
+
+                <div class="info-box error">
+                    <h4>Critical Validation Rules</h4>
+                    <p>The system enforces several business rules to prevent invalid transfers.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>🚫 Same-Location Prevention</h4>
+                        <p>Cannot transfer items to their current location:</p>
+                        <ul>
+                            <li>Real-time validation during destination selection</li>
+                            <li>Clear error message with current location display</li>
+                            <li>Transfer button disabled for same-location attempts</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🔢 Quantity Bounds Checking</h4>
+                        <p>Ensures transfer quantities are valid:</p>
+                        <ul>
+                            <li>Cannot exceed available inventory quantity</li>
+                            <li>Minimum transfer quantity of 1 unit required</li>
+                            <li>Real-time validation with visual feedback</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🏢 Location Access Control</h4>
+                        <p>Verifies user permissions for destination locations:</p>
+                        <ul>
+                            <li>User privilege checking for restricted areas</li>
+                            <li>Location-specific transfer permissions</li>
+                            <li>Clear messaging for access denied scenarios</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>📊 Transfer Reporting</h2>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>📋 Transfer Reports</h4>
+                        <p>Generate detailed transfer documentation:</p>
+                        <ul>
+                            <li>Print transfer summaries with before/after quantities</li>
+                            <li>Export transfer data to Excel or CSV formats</li>
+                            <li>Custom report layouts with date and user filtering</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📈 Transfer Analytics</h4>
+                        <p>View transfer patterns and operational metrics:</p>
+                        <ul>
+                            <li>Transfer frequency analysis by location</li>
+                            <li>User activity tracking and productivity metrics</li>
+                            <li>Location utilization and movement patterns</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🔍 Audit Trail Access</h4>
+                        <p>Complete transfer history and tracking:</p>
+                        <ul>
+                            <li>View complete transfer history through Transactions form</li>
+                            <li>User accountability with timestamp and reason codes</li>
+                            <li>Reversibility tracking and undo capabilities</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>⌨️ Keyboard Shortcuts</h2>
+                
+                <div class="keyboard-shortcuts">
+                    <div class="shortcut-category">
+                        <h4>Transfer Operations</h4>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>T</kbd>
+                            <span>Execute transfer</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>R</kbd>
+                            <span>Reset transfer form</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Tab</kbd>
+                            <span>Navigate between panels</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Enter</kbd>
+                            <span>Confirm quantity entry</span>
+                        </div>
+                    </div>
+
+                    <div class="shortcut-category">
+                        <h4>Selection and Navigation</h4>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>A</kbd>
+                            <span>Select all visible items</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>Click</kbd>
+                            <span>Multi-select items</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Shift</kbd> + <kbd>Click</kbd>
+                            <span>Select range of items</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>F5</kbd>
+                            <span>Refresh inventory data</span>
+                        </div>
+                    </div>
+
+                    <div class="shortcut-category">
+                        <h4>Quantity Adjustments</h4>
+                        <div class="shortcut-item">
+                            <kbd>↑</kbd> / <kbd>↓</kbd>
+                            <span>Adjust quantity by 1</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Page Up</kbd> / <kbd>Page Down</kbd>
+                            <span>Adjust quantity by 10</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>↑</kbd> / <kbd>↓</kbd>
+                            <span>Adjust quantity by 100</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>❓ Troubleshooting</h2>
+
+                <div class="faq-item">
+                    <h4>Transfer button is disabled</h4>
+                    <p>Check that you have:</p>
+                    <ul>
+                        <li>Selected at least one item in the left panel</li>
+                        <li>Chosen a different destination location</li>
+                        <li>Set a valid quantity (between 1 and available quantity)</li>
+                        <li>Proper permissions for the destination location</li>
+                    </ul>
+                </div>
+
+                <div class="faq-item">
+                    <h4>"Cannot transfer to same location" error</h4>
+                    <p>The destination location cannot be the same as the current location. Select a different destination location from the dropdown.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Quantity exceeds available inventory</h4>
+                    <p>The transfer quantity cannot be more than what's currently available. Check the available quantity in the source location and adjust accordingly.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>No items appear in search results</h4>
+                    <p>Try these solutions:</p>
+                    <ul>
+                        <li>Use "Show All" to display complete inventory</li>
+                        <li>Clear search filters and try again</li>
+                        <li>Verify the part number or operation spelling</li>
+                        <li>Check if items exist at the filtered location</li>
+                    </ul>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Partial transfer creates duplicate entries</h4>
+                    <p>This is expected behavior. Partial transfers create a new inventory record at the destination while maintaining the remaining quantity at the source location.</p>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🔗 Related Topics</h2>
+                <div class="related-links">
+                    <a href="inventory-operations.html" class="related-link">
+                        <div class="related-icon">📦</div>
+                        <div class="related-content">
+                            <h4>Inventory Operations</h4>
+                            <p>Learn about adding inventory items</p>
+                        </div>
+                    </a>
+                    <a href="remove-operations.html" class="related-link">
+                        <div class="related-icon">🗑️</div>
+                        <div class="related-content">
+                            <h4>Remove Operations</h4>
+                            <p>Guide for removing inventory items</p>
+                        </div>
+                    </a>
+                    <a href="advanced-features.html" class="related-link">
+                        <div class="related-icon">⚙️</div>
+                        <div class="related-content">
+                            <h4>Advanced Features</h4>
+                            <p>Advanced transfer operations and bulk processing</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+                <p>&copy; 2025 Manitowoc Tool and Manufacturing - MTM Inventory Application Help System</p>
+                <div class="footer-links">
+                    <a href="index.html">Help Home</a> | 
+                    <a href="getting-started.html">Getting Started</a> | 
+                    <a href="keyboard-shortcuts.html">Keyboard Shortcuts</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>

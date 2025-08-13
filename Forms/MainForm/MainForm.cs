@@ -782,6 +782,115 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm_MenuStrip_Development_Conversion_Click));
             }
         }
+
+        #region Help Menu Event Handlers
+
+        private void MainForm_MenuStrip_Help_GettingStarted_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                OpenHelpFile("getting-started.html");
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
+                    controlName: nameof(MainForm), 
+                    contextData: new Dictionary<string, object> { ["HelpFile"] = "getting-started.html" });
+            }
+        }
+
+        private void MainForm_MenuStrip_Help_UserGuide_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                OpenHelpFile("index.html");
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
+                    controlName: nameof(MainForm),
+                    contextData: new Dictionary<string, object> { ["HelpFile"] = "index.html" });
+            }
+        }
+
+        private void MainForm_MenuStrip_Help_KeyboardShortcuts_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                OpenHelpFile("keyboard-shortcuts.html");
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
+                    controlName: nameof(MainForm),
+                    contextData: new Dictionary<string, object> { ["HelpFile"] = "keyboard-shortcuts.html" });
+            }
+        }
+
+        private void MainForm_MenuStrip_Help_About_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var aboutMessage = $"MTM Inventory Application\n" +
+                                  $"Version: {Assembly.GetExecutingAssembly().GetName().Version}\n" +
+                                  $"© 2025 Manitowoc Tool and Manufacturing\n\n" +
+                                  $"Built with .NET 8 and Windows Forms\n" +
+                                  $"Database: MySQL with stored procedures\n" +
+                                  $"Environment: {(Model_Users.Database == "mtm_wip_application" ? "Release" : "Debug")}";
+                
+                Service_ErrorHandler.ShowInformation("About MTM Inventory", aboutMessage);
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, controlName: nameof(MainForm));
+            }
+        }
+
+        #endregion
+
+        #region Help System Methods
+
+        /// <summary>
+        /// Opens a help file using the default browser
+        /// </summary>
+        /// <param name="fileName">Name of the help file (e.g., "getting-started.html")</param>
+        private void OpenHelpFile(string fileName)
+        {
+            try
+            {
+                var helpPath = Path.Combine(Application.StartupPath, "Documentation", "Help", fileName);
+                
+                if (!File.Exists(helpPath))
+                {
+                    // If file doesn't exist locally, create a basic error message
+                    var errorMessage = $"Help file not found: {fileName}\n\n" +
+                                     $"Expected location: {helpPath}\n\n" +
+                                     $"Please ensure the Documentation/Help folder exists and contains the help files.";
+                    Service_ErrorHandler.ShowWarning("Help File Missing", errorMessage);
+                    return;
+                }
+
+                // Try to open with default browser
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = helpPath,
+                    UseShellExecute = true,
+                    Verb = "open"
+                };
+
+                Process.Start(startInfo);
+                LoggingUtility.LogApplicationInfo($"Opened help file: {fileName}");
+            }
+            catch (Exception ex)
+            {
+                var fallbackMessage = $"Unable to open help file: {fileName}\n\n" +
+                                    $"Error: {ex.Message}\n\n" +
+                                    $"Please check that you have a web browser installed and configured as default.";
+                Service_ErrorHandler.ShowWarning("Cannot Open Help", fallbackMessage);
+            }
+        }
+
+        #endregion
     }
 
     #endregion

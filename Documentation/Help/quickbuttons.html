@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM Inventory Application - QuickButtons Guide</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>⚡ QuickButtons Guide</h1>
+                <p class="subtitle">Streamline repetitive inventory tasks with personalized shortcuts</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="content-section">
+                <h2>📋 Overview</h2>
+                <p>QuickButtons provide instant access to your most recently used inventory operations. The system automatically creates buttons for your last 10 transactions, enabling one-click repeat operations with the same part numbers, operations, and locations.</p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>One-Click Operations</h3>
+                        <p>Repeat recent inventory additions with a single button click</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔄</div>
+                        <h3>Auto-Population</h3>
+                        <p>Automatically populate inventory form with transaction data</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">👤</div>
+                        <h3>User-Specific</h3>
+                        <p>Personalized buttons based on your individual transaction history</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔄</div>
+                        <h3>Dynamic Updates</h3>
+                        <p>Button list automatically refreshes with each new transaction</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🚀 Using QuickButtons</h2>
+
+                <div class="info-box info">
+                    <h4>Location and Layout</h4>
+                    <p>QuickButtons appear in the right panel of the MainForm, positioned below the main inventory controls for easy access during data entry.</p>
+                </div>
+
+                <div class="step-guide">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Identify Your Recent Operations</h3>
+                            <p>QuickButtons display your recent transactions in order:</p>
+                            <ul>
+                                <li><strong>Button 1:</strong> Most recent transaction (top position)</li>
+                                <li><strong>Buttons 2-10:</strong> Previous transactions in chronological order</li>
+                                <li><strong>Button Text:</strong> Shows part number, operation, and location summary</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Click to Auto-Fill</h3>
+                            <p>Single-click any QuickButton to automatically populate the inventory form:</p>
+                            <ul>
+                                <li><strong>Part Selection:</strong> Automatically selects the correct part number</li>
+                                <li><strong>Operation:</strong> Sets the operation (Machining, Assembly, etc.)</li>
+                                <li><strong>Location:</strong> Chooses the appropriate location</li>
+                                <li><strong>Quantity:</strong> Uses the same quantity from the original transaction</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Modify and Save</h3>
+                            <p>Adjust any fields as needed and save:</p>
+                            <ul>
+                                <li><strong>Quantity Adjustment:</strong> Change quantity using keyboard shortcuts or direct entry</li>
+                                <li><strong>Location Override:</strong> Select different location if needed</li>
+                                <li><strong>Notes Addition:</strong> Add specific notes for this transaction</li>
+                                <li><strong>Save Operation:</strong> Complete the transaction normally (Ctrl+S)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🔄 Button Management</h2>
+
+                <div class="info-box warning">
+                    <h4>Automatic Management</h4>
+                    <p>QuickButtons are automatically managed by the system. Manual reordering or deletion is not available - buttons update based on your actual transaction activity.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>📍 Position Management</h4>
+                        <p>Button positions shift automatically with each new transaction:</p>
+                        <ul>
+                            <li>New transactions move to position 1 (top)</li>
+                            <li>Existing buttons shift down one position</li>
+                            <li>Button 11+ are automatically removed</li>
+                            <li>Position 10 becomes the "oldest" transaction</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🧹 Automatic Cleanup</h4>
+                        <p>System maintains optimal performance through intelligent cleanup:</p>
+                        <ul>
+                            <li>Only the last 10 transactions are kept</li>
+                            <li>Duplicate transactions may be consolidated</li>
+                            <li>Invalid or corrupted entries are automatically removed</li>
+                            <li>Performance optimization runs during startup</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>👤 User-Specific Storage</h4>
+                        <p>Each user maintains their own QuickButtons list:</p>
+                        <ul>
+                            <li>Buttons are unique to each user account</li>
+                            <li>No interference with other users' QuickButtons</li>
+                            <li>Persistent across application sessions</li>
+                            <li>Database synchronization ensures consistency</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🎨 Button Appearance and Information</h2>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>📝 Button Text Display</h4>
+                        <p>Each button shows key transaction information:</p>
+                        <ul>
+                            <li><strong>Part Number:</strong> Primary identifier for the inventory item</li>
+                            <li><strong>Operation:</strong> Manufacturing operation (abbreviated)</li>
+                            <li><strong>Location:</strong> Work center or storage location</li>
+                            <li><strong>Quantity:</strong> Number of units from original transaction</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🎨 Visual Indicators</h4>
+                        <p>Button appearance provides additional context:</p>
+                        <ul>
+                            <li><strong>Button Color:</strong> Matches application theme</li>
+                            <li><strong>Hover Effect:</strong> Highlights on mouse over for better UX</li>
+                            <li><strong>Click Feedback:</strong> Visual confirmation of button activation</li>
+                            <li><strong>Text Sizing:</strong> Optimized for readability at all DPI settings</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📊 Ordering Logic</h4>
+                        <p>Buttons are arranged by transaction recency:</p>
+                        <ul>
+                            <li><strong>Position 1:</strong> Most recent successful transaction</li>
+                            <li><strong>Positions 2-10:</strong> Earlier transactions in reverse chronological order</li>
+                            <li><strong>Empty Positions:</strong> Hidden if fewer than 10 transactions exist</li>
+                            <li><strong>Duplicate Handling:</strong> Similar transactions may be consolidated</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>⚡ Performance and Optimization</h2>
+
+                <div class="info-box success">
+                    <h4>Background Processing</h4>
+                    <p>QuickButtons are loaded and updated in the background to minimize impact on main application performance.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>🚀 Background Loading</h4>
+                        <p>Efficient data loading without blocking main operations:</p>
+                        <ul>
+                            <li>Asynchronous database queries for transaction history</li>
+                            <li>Non-blocking UI updates when new buttons are created</li>
+                            <li>Cached data reduces database load for repeat access</li>
+                            <li>Progressive loading during application startup</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🔧 Error Recovery</h4>
+                        <p>Robust error handling ensures reliable operation:</p>
+                        <ul>
+                            <li>Database connection recovery for button updates</li>
+                            <li>Graceful degradation if transaction history is unavailable</li>
+                            <li>Automatic retry for failed button creation operations</li>
+                            <li>Error logging for troubleshooting without user interruption</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🗃️ Database Optimization</h4>
+                        <p>Efficient database operations for QuickButton management:</p>
+                        <ul>
+                            <li>Indexed queries for fast transaction history retrieval</li>
+                            <li>Batch operations for button list updates</li>
+                            <li>Automatic cleanup of old transaction data</li>
+                            <li>Optimized storage format for button data</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🔧 Customization Options</h2>
+
+                <div class="info-box info">
+                    <h4>Limited Customization</h4>
+                    <p>QuickButtons are designed for automatic operation with minimal user configuration to maintain simplicity and reliability.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>⚙️ Available Settings</h4>
+                        <p>Basic customization through application settings:</p>
+                        <ul>
+                            <li><strong>Button Count:</strong> Fixed at 10 buttons for optimal performance</li>
+                            <li><strong>Update Frequency:</strong> Immediate updates after each transaction</li>
+                            <li><strong>Display Format:</strong> Follows system theme and DPI settings</li>
+                            <li><strong>User Preferences:</strong> Inherits from general application preferences</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🎨 Theme Integration</h4>
+                        <p>QuickButtons adapt to application themes:</p>
+                        <ul>
+                            <li><strong>Color Schemes:</strong> Automatically match selected theme colors</li>
+                            <li><strong>Font Settings:</strong> Use system and application font preferences</li>
+                            <li><strong>DPI Scaling:</strong> Proper scaling for high-DPI displays</li>
+                            <li><strong>Accessibility:</strong> Support for high-contrast and accessibility themes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>⌨️ Keyboard Shortcuts</h2>
+                
+                <div class="keyboard-shortcuts">
+                    <div class="shortcut-category">
+                        <h4>QuickButton Access</h4>
+                        <div class="shortcut-item">
+                            <kbd>F1</kbd> - <kbd>F10</kbd>
+                            <span>Activate QuickButtons 1-10 directly</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>1</kbd> - <kbd>0</kbd>
+                            <span>Alternative activation for buttons 1-10</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Alt</kbd> + <kbd>Q</kbd>
+                            <span>Focus QuickButtons panel</span>
+                        </div>
+                    </div>
+
+                    <div class="shortcut-category">
+                        <h4>After QuickButton Activation</h4>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>S</kbd>
+                            <span>Save with auto-filled data</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Tab</kbd>
+                            <span>Navigate to quantity field for modification</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Esc</kbd>
+                            <span>Clear auto-filled data and reset form</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>❓ Troubleshooting</h2>
+
+                <div class="faq-item">
+                    <h4>QuickButtons are not appearing</h4>
+                    <p>Possible solutions:</p>
+                    <ul>
+                        <li>Perform at least one successful inventory transaction to generate buttons</li>
+                        <li>Check database connectivity - buttons require database access</li>
+                        <li>Verify user privileges for accessing transaction history</li>
+                        <li>Restart the application to refresh button loading</li>
+                    </ul>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Buttons show outdated information</h4>
+                    <p>This typically indicates a database synchronization issue:</p>
+                    <ul>
+                        <li>Wait a few seconds for background updates to complete</li>
+                        <li>Try refreshing the main form (F5)</li>
+                        <li>Check network connectivity to the database server</li>
+                        <li>Contact IT support if problem persists</li>
+                    </ul>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Clicking QuickButton doesn't fill form</h4>
+                    <p>Check these common issues:</p>
+                    <ul>
+                        <li>Ensure the inventory form tab is active and visible</li>
+                        <li>Verify that referenced parts/operations still exist in the database</li>
+                        <li>Check for form validation errors preventing auto-fill</li>
+                        <li>Try manually entering one field first to activate the form</li>
+                    </ul>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Only showing fewer than 10 buttons</h4>
+                    <p>This is normal behavior if:</p>
+                    <ul>
+                        <li>You have performed fewer than 10 total transactions</li>
+                        <li>Some transactions were invalid or corrupted and removed</li>
+                        <li>You're a new user with limited transaction history</li>
+                        <li>Recent database cleanup removed older transaction data</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>💡 Best Practices</h2>
+
+                <div class="info-box success">
+                    <h4>Maximize QuickButton Efficiency</h4>
+                    <p>Follow these practices to get the most benefit from QuickButtons.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>🎯 Strategic Usage</h4>
+                        <ul>
+                            <li>Use for repetitive tasks with the same part/operation combinations</li>
+                            <li>Most effective for parts you work with frequently</li>
+                            <li>Combine with keyboard shortcuts for maximum speed</li>
+                            <li>Review and adjust quantities before saving auto-filled data</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>⚡ Workflow Integration</h4>
+                        <ul>
+                            <li>Position QuickButtons panel for easy access during data entry</li>
+                            <li>Use F-keys (F1-F10) for hands-free QuickButton activation</li>
+                            <li>Combine with batch processing for high-volume operations</li>
+                            <li>Take advantage of automatic form population for consistency</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🔗 Related Topics</h2>
+                <div class="related-links">
+                    <a href="inventory-operations.html" class="related-link">
+                        <div class="related-icon">📦</div>
+                        <div class="related-content">
+                            <h4>Inventory Operations</h4>
+                            <p>Basic inventory management and data entry</p>
+                        </div>
+                    </a>
+                    <a href="keyboard-shortcuts.html" class="related-link">
+                        <div class="related-icon">⌨️</div>
+                        <div class="related-content">
+                            <h4>Keyboard Shortcuts</h4>
+                            <p>Complete keyboard shortcuts reference</p>
+                        </div>
+                    </a>
+                    <a href="advanced-features.html" class="related-link">
+                        <div class="related-icon">⚙️</div>
+                        <div class="related-content">
+                            <h4>Advanced Features</h4>
+                            <p>Advanced inventory features and batch processing</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+                <p>&copy; 2025 Manitowoc Tool and Manufacturing - MTM Inventory Application Help System</p>
+                <div class="footer-links">
+                    <a href="index.html">Help Home</a> | 
+                    <a href="getting-started.html">Getting Started</a> | 
+                    <a href="keyboard-shortcuts.html">Keyboard Shortcuts</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>
