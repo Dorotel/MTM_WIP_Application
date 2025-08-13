@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using MTM_Inventory_Application.Core;
+using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Forms.Development.DependencyChartConverter
