@@ -98,4 +98,8 @@
 		</EmbeddedResource>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Documentation\PlantUML Files\" />
+	</ItemGroup>
+
 </Project>

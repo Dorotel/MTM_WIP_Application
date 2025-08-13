@@ -1,0 +1,257 @@
+﻿@startuml Enhanced_Error_Dialog_UI_Mockup
+!theme plain
+skinparam backgroundColor #f8f9fa
+skinparam handwritten false
+skinparam shadowing false
+
+' Define the main dialog window
+rectangle "MTM Inventory Application - Enhanced Error Dialog" as dialog {
+    
+    ' Title bar
+    rectangle "🚨 Application Error - Critical Database Issue" as titlebar {
+        skinparam titlebar {
+            BackgroundColor #dc3545
+            FontColor #ffffff
+            FontStyle bold
+        }
+    }
+    
+    ' Main content area
+    rectangle "Main Content Area" as content {
+        
+        ' Error icon and summary
+        rectangle "Error Summary Section" as summary {
+            circle "⚠️" as errorIcon
+            rectangle "Plain English Summary" as plaintext {
+                note as plainEnglish
+                **What Happened:**
+                The application lost connection to the MySQL database 
+                while trying to save inventory data. This usually means 
+                the database server is down or network issues occurred.
+                
+                **Impact:**
+                Your recent inventory changes may not have been saved.
+                The application will attempt to reconnect automatically.
+                
+                **What You Should Do:**
+                • Check your network connection
+                • Contact IT support if this persists
+                • Try the operation again in a few minutes
+                end note
+            }
+        }
+        
+        ' Technical details section
+        rectangle "Technical Details (Collapsible)" as technical {
+            rectangle "Error Information" as errorInfo {
+                note as techDetails
+                **Error Type:** MySqlException
+                **Severity:** High (🔴 Critical)
+                **Error Code:** 2013
+                **Timestamp:** 2025-01-27 14:30:45.123
+                **User:** john.doe
+                **Machine:** WORKSTATION-01
+                
+                **Original Message:**
+                Lost connection to MySQL server during query
+                
+                **Location:**
+                Form: MainForm
+                Control: Control_InventoryTab
+                Method: SaveInventoryData()
+                end note
+            }
+        }
+        
+        ' Dependency call tree
+        rectangle "Call Stack Tree" as callTree {
+            rectangle "Dependency Tree View" as treeView {
+                
+                ' Tree structure representation
+                rectangle "📋 MainForm" as form1 {
+                    skinparam form1 {
+                        BackgroundColor #e3f2fd
+                        BorderColor #1976d2
+                    }
+                    
+                    rectangle "└── 🎯 Control_InventoryTab_Button_Save_Click" as event1 {
+                        skinparam event1 {
+                            BackgroundColor #f3e5f5
+                            BorderColor #7b1fa2
+                        }
+                        
+                        rectangle "    └── 💾 SaveInventoryDataAsync()" as method1 {
+                            skinparam method1 {
+                                BackgroundColor #e8f5e8
+                                BorderColor #388e3c
+                            }
+                            
+                            rectangle "        └── 🔍 Dao_Inventory.AddInventoryAsync()" as method2 {
+                                skinparam method2 {
+                                    BackgroundColor #fff3e0
+                                    BorderColor #f57c00
+                                }
+                                
+                                rectangle "            └── 🗄️ Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus()" as method3 {
+                                    skinparam method3 {
+                                        BackgroundColor #ffebee
+                                        BorderColor #d32f2f
+                                    }
+                                    
+                                    rectangle "                └── ⚡ MySqlCommand.ExecuteNonQueryAsync()" as method4 {
+                                        skinparam method4 {
+                                            BackgroundColor #fce4ec
+                                            BorderColor #c2185b
+                                        }
+                                        
+                                        rectangle "                    └── 💥 **EXCEPTION THROWN**" as exception {
+                                            skinparam exception {
+                                                BackgroundColor #ffcdd2
+                                                BorderColor #f44336
+                                                FontStyle bold
+                                            }
+                                            
+                                            note as exceptionDetails
+                                            **MySqlException**
+                                            "Lost connection to MySQL server during query"
+                                            
+                                            **Stack Trace:**
+                                            at MySql.Data.MySqlClient.MySqlCommand.ExecuteNonQueryAsync()
+                                            at Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus()
+                                            at Dao_Inventory.AddInventoryAsync()
+                                            at Control_InventoryTab.SaveInventoryDataAsync()
+                                            at Control_InventoryTab_Button_Save_Click()
+                                            end note
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        ' Action buttons section
+        rectangle "Action Buttons" as actions {
+            rectangle "Primary Actions" as primaryActions {
+                rectangle "🔄 Retry Operation" as retryBtn {
+                    skinparam retryBtn {
+                        BackgroundColor #4caf50
+                        FontColor #ffffff
+                        FontStyle bold
+                    }
+                }
+                
+                rectangle "📋 Copy Details" as copyBtn {
+                    skinparam copyBtn {
+                        BackgroundColor #2196f3
+                        FontColor #ffffff
+                    }
+                }
+                
+                rectangle "📧 Report Issue" as reportBtn {
+                    skinparam reportBtn {
+                        BackgroundColor #ff9800
+                        FontColor #ffffff
+                    }
+                }
+            }
+            
+            rectangle "Secondary Actions" as secondaryActions {
+                rectangle "🔍 View Logs" as logsBtn {
+                    skinparam logsBtn {
+                        BackgroundColor #607d8b
+                        FontColor #ffffff
+                    }
+                }
+                
+                rectangle "❌ Close" as closeBtn {
+                    skinparam closeBtn {
+                        BackgroundColor #9e9e9e
+                        FontColor #ffffff
+                    }
+                }
+            }
+        }
+        
+        ' Status bar
+        rectangle "Status Information" as statusBar {
+            note as statusInfo
+            🔴 Connection Status: Disconnected | 🕐 Last Success: 14:29:32 | 🔄 Retry Attempt: 2/5
+            end note
+            skinparam statusBar {
+                BackgroundColor #f5f5f5
+                BorderColor #e0e0e0
+            }
+        }
+    }
+    
+    ' Side panel for additional context
+    rectangle "Context Panel (Optional)" as contextPanel {
+        rectangle "Recent Operations" as recentOps {
+            note as recentOperations
+            **Last Successful Operations:**
+            • 14:29:32 - Saved Part ABC123
+            • 14:28:15 - Updated Location A1-B2
+            • 14:27:43 - Added Quantity +50
+            
+            **Affected Data:**
+            • Part ID: DEF456
+            • Operation: Add Inventory
+            • Quantity: +25
+            • Location: B3-C4
+            end note
+        }
+        
+        rectangle "Recovery Options" as recoveryOpts {
+            note as recoveryOptions
+            **Auto-Recovery Actions:**
+            ✅ Error logged to database
+            ✅ User notified via email
+            🔄 Attempting reconnection...
+            ⏳ Data cached locally
+            
+            **Manual Actions Available:**
+            • Switch to offline mode
+            • Export unsaved changes
+            • Contact database administrator
+            end note
+        }
+    }
+}
+
+' Add relationships between components
+errorIcon --> plaintext
+plaintext --> technical
+technical --> callTree
+callTree --> actions
+actions --> statusBar
+
+' Add notes for different criticality levels
+note right of dialog
+**Error Criticality Levels:**
+
+🟢 **Low** - Information/Warning
+  Minor issues, application continues normally
+
+🟡 **Medium** - Recoverable Error  
+  Operation failed but can be retried
+
+🔴 **High** - Critical Error
+  Data integrity or major functionality affected
+
+⚫ **Fatal** - Application Termination
+  Unrecoverable error, application must close
+end note
+
+note left of treeView
+**Tree View Features:**
+• Expandable/Collapsible nodes
+• Color-coded by component type
+• Icons for quick identification
+• Click to see method details
+• Right-click for more options
+end note
+
+@enduml
