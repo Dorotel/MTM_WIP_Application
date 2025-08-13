@@ -65,7 +65,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             catch (Exception ex)
             {
                 Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
-                    controlName: nameof(Control_Edit_PartID), methodName: nameof(LoadPartTypes));
+                    controlName: nameof(Control_Edit_PartID));
             }
         }
 
@@ -147,8 +147,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                Service_ErrorHandler.HandleDatabaseError(ex, controlName: nameof(Control_Edit_PartID), 
-                    methodName: nameof(Control_Edit_PartID_ComboBox_Part_SelectedIndexChanged));
+                Service_ErrorHandler.HandleDatabaseError(ex, controlName: nameof(Control_Edit_PartID));
             }
         }
 
@@ -214,8 +213,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                Service_ErrorHandler.HandleDatabaseError(ex, controlName: nameof(Control_Edit_PartID), 
-                    methodName: nameof(SaveButton_Click));
+                Service_ErrorHandler.HandleDatabaseError(ex, controlName: nameof(Control_Edit_PartID));
             }
         }
 

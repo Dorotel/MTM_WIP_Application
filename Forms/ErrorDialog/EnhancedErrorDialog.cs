@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Logging;
-using MTM_Inventory_Application.Forms.ErrorDialog;
+using MTM_Inventory_Application.Models;
 
 namespace MTM_Inventory_Application.Forms.ErrorDialog
 {
@@ -326,7 +326,8 @@ namespace MTM_Inventory_Application.Forms.ErrorDialog
         {
             buttonRetry.Visible = _retryAction != null && _severity != ErrorSeverity.Fatal;
             buttonReportIssue.Visible = _severity >= ErrorSeverity.Medium;
-            buttonViewLogs.Enabled = !string.IsNullOrEmpty(LoggingUtility.ToString()); // Assuming we can check if logging is available
+            // Enable view logs if logging system is initialized
+            buttonViewLogs.Enabled = true; // Always enabled for now - logging system is always initialized
         }
 
         private void UpdateStatusBar()
@@ -506,18 +507,6 @@ namespace MTM_Inventory_Application.Forms.ErrorDialog
         }
 
         #endregion
-    }
-
-    #endregion
-
-    #region ErrorSeverity Enum
-
-    public enum ErrorSeverity
-    {
-        Low = 0,    // Information/Warning - application continues normally
-        Medium = 1, // Recoverable Error - operation failed but can be retried
-        High = 2,   // Critical Error - data integrity or major functionality affected
-        Fatal = 3   // Application Termination - unrecoverable error
     }
 
     #endregion

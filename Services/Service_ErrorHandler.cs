@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using MTM_Inventory_Application.Forms.ErrorDialog;
 using MTM_Inventory_Application.Forms.MainForm;
 using MTM_Inventory_Application.Logging;
+using MTM_Inventory_Application.Models;
 
 namespace MTM_Inventory_Application.Services;
 
@@ -86,7 +87,8 @@ internal static class Service_ErrorHandler
         Func<bool>? retryAction = null,
         Dictionary<string, object>? contextData = null,
         [CallerMemberName] string callerName = "",
-        string controlName = "")
+        string controlName = "",
+        string methodName = "")
     {
         // Add database-specific context
         var dbContextData = contextData ?? new Dictionary<string, object>();
@@ -95,7 +97,10 @@ internal static class Service_ErrorHandler
         
         LoggingUtility.LogDatabaseError(ex);
         
-        return HandleException(ex, ErrorSeverity.High, retryAction, dbContextData, callerName, controlName);
+        // Use methodName if provided, otherwise use callerName
+        var effectiveCallerName = !string.IsNullOrEmpty(methodName) ? methodName : callerName;
+        
+        return HandleException(ex, ErrorSeverity.High, retryAction, dbContextData, effectiveCallerName, controlName);
     }
 
     /// <summary>
@@ -244,13 +249,19 @@ internal static class Service_ErrorHandler
     /// <summary>
     /// Show an information dialog (not an error - just informational message)
     /// </summary>
-    public static DialogResult ShowInformation(string title, string message, 
+    public static DialogResult ShowInformation(string message, string title = "Information", 
         MessageBoxButtons buttons = MessageBoxButtons.OK,
-        MessageBoxIcon icon = MessageBoxIcon.Information)
+        MessageBoxIcon icon = MessageBoxIcon.Information,
+        string controlName = "")
     {
         try
         {
-            LoggingUtility.Log($"Information dialog shown: {title} - {message}");
+            var logMessage = $"Information dialog shown: {title} - {message}";
+            if (!string.IsNullOrEmpty(controlName))
+            {
+                logMessage += $" (Control: {controlName})";
+            }
+            LoggingUtility.Log(logMessage);
             return MessageBox.Show(message, title, buttons, icon);
         }
         catch (Exception ex)

@@ -244,6 +244,15 @@ internal static class LoggingUtility
         }
     }
 
+    public static void LogApplicationInfo(string message)
+    {
+        var infoEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - Application Info - {message}";
+        lock (LogLock)
+        {
+            FlushLogEntryToDisk(_normalLogFile, infoEntry);
+        }
+    }
+
     #endregion
 
     #region Shutdown
