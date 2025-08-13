@@ -3,6 +3,7 @@ using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
+using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
@@ -10,15 +11,19 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
     {
         #region Fields
 
-        #region Events
-
-        public event EventHandler? PartUpdated;
+        private DataRow? _currentPart;
 
         #endregion
 
-        #region Fields
+        #region Properties
 
-        private DataRow? _currentPart;
+        // Public properties would go here if needed
+
+        #endregion
+
+        #region Progress Control Methods
+
+        // Progress control methods would go here if needed for this control
 
         #endregion
 
@@ -26,21 +31,30 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         public Control_Edit_PartID()
         {
-            InitializeComponent();
-            Control_Edit_PartID_ComboBox_Part.SelectedIndexChanged +=
-                Control_Edit_PartID_ComboBox_Part_SelectedIndexChanged;
-            saveButton.Click += SaveButton_Click;
-            cancelButton.Click += CancelButton_Click;
-            LoadPartTypes();
+            try
+            {
+                InitializeComponent();
+                Control_Edit_PartID_ComboBox_Part.SelectedIndexChanged +=
+                    Control_Edit_PartID_ComboBox_Part_SelectedIndexChanged;
+                saveButton.Click += SaveButton_Click;
+                cancelButton.Click += CancelButton_Click;
+                LoadPartTypes();
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, 
+                    controlName: nameof(Control_Edit_PartID));
+            }
         }
 
         #endregion
 
-        #region Methods
-
-        #endregion
-
         #region Initialization
+
+        /// <summary>
+        /// Event for notifying when a part has been updated
+        /// </summary>
+        public event EventHandler? PartUpdated;
 
         private async void LoadPartTypes()
         {
@@ -50,8 +64,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($@"Error loading part types: {ex.Message}", @"Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
+                    controlName: nameof(Control_Edit_PartID), methodName: nameof(LoadPartTypes));
             }
         }
 
@@ -63,8 +77,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($@"Error loading parts: {ex.Message}", @"Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
+                    controlName: nameof(Control_Edit_PartID), methodName: nameof(LoadParts));
             }
         }
 
@@ -82,15 +96,27 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                LoggingUtility.LogApplicationError(ex);
-                await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true,
-                    "SettingsForm / EditPartControl_OnLoadOverRide");
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, 
+                    controlName: nameof(Control_Edit_PartID), methodName: nameof(OnLoad));
             }
         }
 
         #endregion
 
-        #region Event Handlers
+        #region Key Processing
+
+        // Keyboard shortcut processing would go here if needed
+        // Currently not implemented for this settings control
+
+        #endregion
+
+        #region Button Clicks
+
+        // Button click event handlers will be moved here
+
+        #endregion
+
+        #region ComboBox & UI Events
 
         private async void Control_Edit_PartID_ComboBox_Part_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -106,7 +132,9 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 string? selectedText = Control_Edit_PartID_ComboBox_Part.Text;
                 if (string.IsNullOrEmpty(selectedText))
                 {
-                    MessageBox.Show(@"Invalid selection.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Service_ErrorHandler.HandleValidationError(
+                        "Please select a valid part from the dropdown list.",
+                        "Part Selection", controlName: nameof(Control_Edit_PartID));
                     return;
                 }
 
@@ -119,8 +147,8 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show($@"Error loading part data: {ex.Message}", @"Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Service_ErrorHandler.HandleDatabaseError(ex, controlName: nameof(Control_Edit_PartID), 
+                    methodName: nameof(Control_Edit_PartID_ComboBox_Part_SelectedIndexChanged));
             }
         }
 
@@ -135,8 +163,9 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             {
                 if (string.IsNullOrWhiteSpace(itemNumberTextBox.Text))
                 {
-                    MessageBox.Show(@"Item Number is required.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError(
+                        "Item Number is required to save the part.",
+                        "Item Number", controlName: nameof(Control_Edit_PartID));
                     itemNumberTextBox.Focus();
                     return;
                 }
@@ -149,16 +178,18 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
                 if (string.IsNullOrWhiteSpace(descriptionTextBox.Text))
                 {
-                    MessageBox.Show(@"Description is required.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError(
+                        "Description is required to save the part.",
+                        "Description", controlName: nameof(Control_Edit_PartID));
                     descriptionTextBox.Focus();
                     return;
                 }
 
                 if (Control_Edit_PartID_ComboBox_ItemType.SelectedIndex <= 0)
                 {
-                    MessageBox.Show(@"Please select a part type.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError(
+                        "Please select a part type from the dropdown list.",
+                        "Part Type", controlName: nameof(Control_Edit_PartID));
                     Control_Edit_PartID_ComboBox_ItemType.Focus();
                     return;
                 }
@@ -167,22 +198,24 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 string newItemNumber = itemNumberTextBox.Text.Trim();
                 if (originalItemNumber != newItemNumber && await Dao_Part.PartExists(newItemNumber))
                 {
-                    MessageBox.Show($@"Part number '{newItemNumber}' already exists.", @"Duplicate Part Number",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError(
+                        $"Part number '{newItemNumber}' already exists. Please use a different part number.",
+                        "Duplicate Part Number", controlName: nameof(Control_Edit_PartID));
                     itemNumberTextBox.Focus();
                     return;
                 }
 
                 await UpdatePartAsync();
-                MessageBox.Show(@"Part updated successfully!", @"Success", MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                Service_ErrorHandler.ShowInformation(
+                    "Part has been updated successfully!",
+                    "Update Complete", controlName: nameof(Control_Edit_PartID));
                 LoadParts();
                 PartUpdated?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($@"Error updating part: {ex.Message}", @"Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Service_ErrorHandler.HandleDatabaseError(ex, controlName: nameof(Control_Edit_PartID), 
+                    methodName: nameof(SaveButton_Click));
             }
         }
 
@@ -230,6 +263,10 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             issuedByValueLabel.Text = _currentPart["IssuedBy"].ToString();
         }
 
+        #endregion
+
+        #region Helpers
+
         private void SetFormEnabled(bool enabled)
         {
             itemNumberTextBox.Enabled = enabled;
@@ -266,6 +303,25 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         }
 
         #endregion
+
+        #region Cleanup
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    // Dispose managed resources if any
+                }
+                base.Dispose(disposing);
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, 
+                    controlName: nameof(Control_Edit_PartID));
+            }
+        }
 
         #endregion
     }
