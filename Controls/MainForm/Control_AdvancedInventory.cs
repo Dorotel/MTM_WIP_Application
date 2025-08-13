@@ -1458,11 +1458,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         #region Excel Export/Import Helpers
 
-        private static string GetWipAppExcelUserFolder()
+        private static async Task<string> GetWipAppExcelUserFolderAsync()
         {
             string? server = new MySqlConnectionStringBuilder(Model_AppVariables.ConnectionString).Server;
             string userName = Model_AppVariables.User ?? Environment.UserName;
-            string logFilePath = Helper_Database_Variables.GetLogFilePath(server, userName);
+            string logFilePath = await Helper_Database_Variables.GetLogFilePathAsync(server, userName);
             string logDir = Directory.GetParent(logFilePath)?.Parent?.FullName ?? "";
             string excelRoot = Path.Combine(logDir, "WIP App Excel Files");
             string userFolder = Path.Combine(excelRoot, userName);
@@ -1474,22 +1474,28 @@ namespace MTM_Inventory_Application.Controls.MainForm
             return userFolder;
         }
 
-        private static string GetUserExcelFilePath()
+        private static async Task<string> GetUserExcelFilePathAsync()
         {
-            string userFolder = GetWipAppExcelUserFolder();
+            string userFolder = await GetWipAppExcelUserFolderAsync();
             string fileName = $"{Model_AppVariables.User ?? Environment.UserName}_import.xlsx";
             return Path.Combine(userFolder, fileName);
         }
 
-        private void AdvancedInventory_Import_Button_OpenExcel_Click(object? sender, EventArgs e)
+        // Fix for CS8600: Converting null literal or possible null value to non-nullable type.
+        // The problematic line is:
+        // string excelPath = GetUserExcelFilePathAsync().ToString();
+        // GetUserExcelFilePathAsync() returns a Task<string>, so .ToString() does not return the path, but the type name.
+        // The correct way is to await the Task and ensure the result is not null.
+
+        private async void AdvancedInventory_Import_Button_OpenExcel_Click(object? sender, EventArgs e)
         {
             try
             {
-                string excelPath = GetUserExcelFilePath();
+                string excelPath = await GetUserExcelFilePathAsync();
                 if (!File.Exists(excelPath))
                 {
                     string? userFolder = Path.GetDirectoryName(excelPath);
-                    if (!Directory.Exists(userFolder))
+                    if (!string.IsNullOrEmpty(userFolder) && !Directory.Exists(userFolder))
                     {
                         Directory.CreateDirectory(userFolder!);
                     }
@@ -1518,15 +1524,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
         }
 
-        #endregion
-
-        #region Excel Import/Export Actions
-
-        private void AdvancedInventory_Import_Button_ImportExcel_Click(object? sender, EventArgs e)
+        // Fix for CS8600 in AdvancedInventory_Import_Button_ImportExcel_Click and other usages
+        private async void AdvancedInventory_Import_Button_ImportExcel_Click(object? sender, EventArgs e)
         {
             try
             {
-                string excelPath = GetUserExcelFilePath();
+                string excelPath = await GetUserExcelFilePathAsync();
                 if (!File.Exists(excelPath))
                 {
                     MessageBox.Show(@"Excel file not found. Please create or open the Excel file first.",
@@ -1598,6 +1601,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
         }
 
+        // Fix for CS8600 in AdvancedInventory_Import_Button_Save_Click and RefreshImportDataGridView
         private async void AdvancedInventory_Import_Button_Save_Click(object? sender, EventArgs e)
         {
             if (AdvancedInventory_Import_DataGridView.DataSource == null)
@@ -1626,7 +1630,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
 
-            string excelPath = GetUserExcelFilePath();
+            string excelPath = await GetUserExcelFilePathAsync();
             XLWorkbook? workbook = null;
             IXLWorksheet? worksheet = null;
             if (File.Exists(excelPath))
@@ -1758,9 +1762,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
         }
 
-        private void RefreshImportDataGridView()
+        private async void RefreshImportDataGridView()
         {
-            string excelPath = GetUserExcelFilePath();
+            string excelPath = await GetUserExcelFilePathAsync();
             if (!File.Exists(excelPath))
             {
                 return;

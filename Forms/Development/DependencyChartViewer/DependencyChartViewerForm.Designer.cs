@@ -11,12 +11,7 @@
         private System.Windows.Forms.Label lblFile;
         private System.Windows.Forms.Button btnOpenExternal;
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-                components.Dispose();
-            base.Dispose(disposing);
-        }
+
 
         private void InitializeComponent()
         {

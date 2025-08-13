@@ -36,7 +36,7 @@ namespace MTM_Inventory_Application
                     }
                     HandleGlobalException(args.Exception);
                 };
-                
+
                 AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
                 {
                     if (args.ExceptionObject is Exception ex)
@@ -73,9 +73,9 @@ namespace MTM_Inventory_Application
                     ShowFatalError("Windows Forms Initialization Error",
                         $"Failed to initialize Windows Forms:\n\n{ex.Message}\n\n" +
                         "This may be caused by:\n" +
-                        "� Missing .NET runtime components\n" +
-                        "� System display configuration issues\n" +
-                        "� Insufficient system permissions\n\n" +
+                        "• Missing .NET runtime components\n" +
+                        "• System display configuration issues\n" +
+                        "• Insufficient system permissions\n\n" +
                         "Please contact your system administrator.");
                     return;
                 }
@@ -104,13 +104,13 @@ namespace MTM_Inventory_Application
                 {
                     Console.WriteLine($"[Startup Error] User identification failed: {ex.Message}");
                     LoggingUtility.LogApplicationError(ex);
-                    
+
                     // Use fallback user identification
                     try
                     {
                         Model_AppVariables.User = Environment.UserName ?? "Unknown";
                         LoggingUtility.Log($"[Startup] Using fallback user identification: {Model_AppVariables.User}");
-                        
+
                         ShowNonCriticalError("User Identification Warning",
                             $"Could not identify user through normal methods:\n\n{ex.Message}\n\n" +
                             $"Using system username '{Model_AppVariables.User}' as fallback.\n" +
@@ -131,7 +131,55 @@ namespace MTM_Inventory_Application
                 if (!connectivityResult.IsSuccess)
                 {
                     LoggingUtility.Log($"[Startup] Database connectivity validation failed: {connectivityResult.StatusMessage}");
-                    return;
+
+                    // DEBUG: Output exactly what's in the status message
+                    Console.WriteLine($"[DEBUG] connectivityResult.StatusMessage: '{connectivityResult.StatusMessage}'");
+                    Console.WriteLine($"[DEBUG] connectivityResult.ErrorMessage: '{connectivityResult.ErrorMessage}'");
+
+                    // Use ErrorMessage if StatusMessage is generic
+                    string errorMessage = !string.IsNullOrEmpty(connectivityResult.StatusMessage) && 
+                                        connectivityResult.StatusMessage != "Database connectivity validation failed"
+                                        ? connectivityResult.StatusMessage 
+                                        : connectivityResult.ErrorMessage;
+
+                    // FIXED: Use a more specific title based on the error type
+                    string dialogTitle = "Database Connection Failed";
+                    if (errorMessage.Contains("does not exist"))
+                    {
+                        dialogTitle = "Database Does Not Exist";
+                    }
+                    else if (errorMessage.Contains("Cannot connect"))
+                    {
+                        dialogTitle = "Database Server Unavailable";
+                    }
+                    else if (errorMessage.Contains("Access denied"))
+                    {
+                        dialogTitle = "Database Access Denied";
+                    }
+                    else if (errorMessage.Contains("timeout"))
+                    {
+                        dialogTitle = "Database Connection Timeout";
+                    }
+
+                    var dialogResult = MessageBox.Show(
+                        errorMessage + "\n\n" +
+                        "Click 'Retry' to try connecting again, or 'Cancel' to exit the application.",
+                        dialogTitle,
+                        MessageBoxButtons.RetryCancel,
+                        MessageBoxIcon.Error);
+
+                    if (dialogResult == DialogResult.Retry)
+                    {
+                        // Recursive call to try again
+                        Main();
+                        return;
+                    }
+                    else
+                    {
+                        // User chose to exit
+                        LoggingUtility.Log("[Startup] User chose to exit after database connection failure");
+                        return;
+                    }
                 }
 
                 LoggingUtility.Log("[Startup] Database connectivity validated successfully");
@@ -144,21 +192,50 @@ namespace MTM_Inventory_Application
                 catch (MySqlException ex)
                 {
                     LoggingUtility.LogDatabaseError(ex);
-                    ShowDatabaseConnectionError("User Access Loading Failed",
-                        GetDatabaseConnectionErrorMessage(ex));
-                    return;
+                    string userMessage = GetDatabaseConnectionErrorMessage(ex);
+
+                    // FIXED: Show error with retry option instead of immediate exit
+                    var dialogResult = MessageBox.Show(
+                        userMessage + "\n\n" +
+                        "Click 'Retry' to try again, or 'Cancel' to exit the application.",
+                        "User Access Loading Failed",
+                        MessageBoxButtons.RetryCancel,
+                        MessageBoxIcon.Error);
+
+                    if (dialogResult == DialogResult.Retry)
+                    {
+                        Main();
+                        return;
+                    }
+                    else
+                    {
+                        LoggingUtility.Log("[Startup] User chose to exit after user access loading failure");
+                        return;
+                    }
                 }
                 catch (TimeoutException ex)
                 {
                     LoggingUtility.LogApplicationError(ex);
-                    ShowDatabaseError("User Access Timeout",
+                    var dialogResult = MessageBox.Show(
                         "The request to load user access permissions timed out.\n\n" +
                         "This usually means:\n" +
-                        "� The database server is responding slowly\n" +
-                        "� Network connectivity issues\n" +
-                        "� The server is overloaded\n\n" +
-                        "Please try starting the application again.");
-                    return;
+                        "• The database server is responding slowly\n" +
+                        "• Network connectivity issues\n" +
+                        "• The server is overloaded\n\n" +
+                        "Click 'Retry' to try again, or 'Cancel' to exit the application.",
+                        "User Access Timeout",
+                        MessageBoxButtons.RetryCancel,
+                        MessageBoxIcon.Exclamation);
+
+                    if (dialogResult == DialogResult.Retry)
+                    {
+                        Main();
+                        return;
+                    }
+                    else
+                    {
+                        return;
+                    }
                 }
                 catch (UnauthorizedAccessException ex)
                 {
@@ -166,9 +243,10 @@ namespace MTM_Inventory_Application
                     ShowSecurityError("Access Denied",
                         $"Access denied while loading user permissions:\n\n{ex.Message}\n\n" +
                         "This usually means:\n" +
-                        "� Your account doesn't have sufficient database permissions\n" +
-                        "� The user account configuration is incorrect\n\n" +
-                        "Please contact your system administrator.");
+                        "• Your account doesn't have sufficient database permissions\n" +
+                        "• The user account configuration is incorrect\n\n" +
+                        "Please contact your system administrator.\n\n" +
+                        "The application will now exit.");
                     return;
                 }
                 catch (Exception ex)
@@ -178,7 +256,8 @@ namespace MTM_Inventory_Application
                         $"Unable to load user access permissions:\n\n{ex.Message}\n\n" +
                         "Error Type: {ex.GetType().Name}\n\n" +
                         "This is required for application security and cannot be bypassed.\n" +
-                        "Please contact your system administrator if this problem persists.");
+                        "Please contact your system administrator if this problem persists.\n\n" +
+                        "The application will now exit.");
                     return;
                 }
 
@@ -209,9 +288,9 @@ namespace MTM_Inventory_Application
                     ShowFatalError("Application Startup Error",
                         "Failed to start the main application interface.\n\n" +
                         "This usually means:\n" +
-                        "� Another instance may already be running\n" +
-                        "� System resources are insufficient\n" +
-                        "� Display configuration issues\n\n" +
+                        "• Another instance may already be running\n" +
+                        "• System resources are insufficient\n" +
+                        "• Display configuration issues\n\n" +
                         "Please restart your computer and try again.");
                 }
                 catch (Exception ex)
@@ -261,9 +340,9 @@ namespace MTM_Inventory_Application
                     MessageBox.Show(
                         "A critical system error occurred (Access Violation).\n\n" +
                         "This usually indicates:\n" +
-                        "� Memory corruption\n" +
-                        "� System instability\n" +
-                        "� Hardware issues\n\n" +
+                        "• Memory corruption\n" +
+                        "• System instability\n" +
+                        "• Hardware issues\n\n" +
                         "Please restart your computer immediately.",
                         "Critical System Error",
                         MessageBoxButtons.OK,
@@ -309,7 +388,18 @@ namespace MTM_Inventory_Application
                 if (ex is MySqlException mysqlEx)
                 {
                     string userMessage = GetDatabaseConnectionErrorMessage(mysqlEx);
-                    ShowDatabaseConnectionError("Database Error", userMessage);
+
+                    var dialogResult = MessageBox.Show(
+                        userMessage + "\n\n" +
+                        "Click 'Retry' to try connecting again, or 'OK' to exit the application.",
+                        "Database Error",
+                        MessageBoxButtons.RetryCancel,
+                        MessageBoxIcon.Error);
+
+                    if (dialogResult == DialogResult.Retry)
+                    {
+                        Main();
+                    }
                 }
                 else if (ex is InvalidOperationException && ex.Message.Contains("database"))
                 {
@@ -335,9 +425,9 @@ namespace MTM_Inventory_Application
                     ShowSecurityError("Access Denied",
                         $"Access was denied:\n\n{accessEx.Message}\n\n" +
                         "This usually means:\n" +
-                        "� Insufficient file system permissions\n" +
-                        "� Security software is blocking the application\n" +
-                        "� User account restrictions\n\n" +
+                        "• Insufficient file system permissions\n" +
+                        "• Security software is blocking the application\n" +
+                        "• User account restrictions\n\n" +
                         "Please contact your system administrator.");
                 }
                 else if (ex is SecurityException secEx)
@@ -345,9 +435,9 @@ namespace MTM_Inventory_Application
                     ShowSecurityError("Security Error",
                         $"A security error occurred:\n\n{secEx.Message}\n\n" +
                         "This usually means:\n" +
-                        "� Application lacks required permissions\n" +
-                        "� Security policy restrictions\n" +
-                        "� Certificate or signature issues\n\n" +
+                        "• Application lacks required permissions\n" +
+                        "• Security policy restrictions\n" +
+                        "• Certificate or signature issues\n\n" +
                         "Please contact your system administrator.");
                 }
                 else if (ex is COMException comEx)
@@ -356,9 +446,9 @@ namespace MTM_Inventory_Application
                         $"A system component error occurred:\n\n{comEx.Message}\n\n" +
                         $"Error Code: 0x{comEx.HResult:X8}\n\n" +
                         "This usually means:\n" +
-                        "� Missing system components\n" +
-                        "� Corrupted system files\n" +
-                        "� Compatibility issues\n\n" +
+                        "• Missing system components\n" +
+                        "• Corrupted system files\n" +
+                        "• Compatibility issues\n\n" +
                         "Please contact your system administrator.");
                 }
                 else if (ex is ExternalException extEx)
@@ -373,9 +463,9 @@ namespace MTM_Inventory_Application
                     ShowTimeoutError("Operation Timeout",
                         $"An operation timed out:\n\n{ex.Message}\n\n" +
                         "This usually means:\n" +
-                        "� Network connectivity issues\n" +
-                        "� Server is overloaded or unresponsive\n" +
-                        "� System performance issues\n\n" +
+                        "• Network connectivity issues\n" +
+                        "• Server is overloaded or unresponsive\n" +
+                        "• System performance issues\n\n" +
                         "Please try again or contact your system administrator.");
                 }
                 else
@@ -440,15 +530,19 @@ namespace MTM_Inventory_Application
                 LoggingUtility.Log("[Startup] Database connectivity validation completed successfully");
                 return DaoResult.Success("Database connectivity validated successfully");
             }
+            catch (MySqlException ex)
+            {
+                string errorMsg = GetDatabaseConnectionErrorMessage(ex);
+                Console.WriteLine($"[Startup] MySQL Error: {errorMsg}");
+                LoggingUtility.LogDatabaseError(ex);
+
+                return DaoResult.Failure(errorMsg, ex);
+            }
             catch (Exception ex)
             {
-                string errorMsg = $"Critical error during database validation: {ex.Message}";
+                string errorMsg = $"Database connectivity validation failed: {ex.Message}";
                 Console.WriteLine($"[Startup] {errorMsg}");
                 LoggingUtility.LogApplicationError(ex);
-
-                ShowDatabaseError("Database Validation Error",
-                    $"Unable to validate database connectivity:\n\n{ex.Message}\n\n" +
-                    "Please check your network connection and database server status.");
 
                 return DaoResult.Failure(errorMsg, ex);
             }
@@ -475,18 +569,18 @@ namespace MTM_Inventory_Application
             catch (MySqlException ex)
             {
                 string userMessage = GetDatabaseConnectionErrorMessage(ex);
-                ShowDatabaseConnectionError("Database Connection Failed", userMessage);
+                LoggingUtility.LogDatabaseError(ex);
                 return DaoResult.Failure(userMessage, ex);
             }
             catch (TimeoutException ex)
             {
                 string userMessage = "Database connection timed out during health check.\n\n" +
                                    "This usually means:\n" +
-                                   "� The database server is responding slowly\n" +
-                                   "� Network connectivity issues\n" +
-                                   "� Server is overloaded\n\n" +
+                                   "• The database server is responding slowly\n" +
+                                   "• Network connectivity issues\n" +
+                                   "• Server is overloaded\n\n" +
                                    "Please try again or contact your system administrator.";
-                ShowTimeoutError("Database Timeout", userMessage);
+                LoggingUtility.LogApplicationError(ex);
                 return DaoResult.Failure(userMessage, ex);
             }
             catch (Exception ex)
@@ -608,26 +702,18 @@ namespace MTM_Inventory_Application
 
                 if (string.IsNullOrEmpty(connectionString))
                 {
-                    const string errorMsg = "Database connection string is not configured";
+                    const string errorMsg = "Database connection string is not configured.\n\n" +
+                                          "Please contact your system administrator to configure the database connection.";
                     LoggingUtility.Log($"[Startup] {errorMsg}");
-
-                    ShowDatabaseError("Configuration Error",
-                        "Database connection string is not configured.\n\n" +
-                        "Please contact your system administrator to configure the database connection.");
-
                     return DaoResult.Failure(errorMsg);
                 }
 
                 // Basic connection string validation
                 if (!connectionString.Contains("SERVER=") || !connectionString.Contains("DATABASE="))
                 {
-                    const string errorMsg = "Database connection string is invalid or incomplete";
+                    const string errorMsg = "Database connection string is invalid.\n\n" +
+                                          "Please contact your system administrator to verify the database configuration.";
                     LoggingUtility.Log($"[Startup] {errorMsg}");
-
-                    ShowDatabaseError("Configuration Error",
-                        "Database connection string is invalid.\n\n" +
-                        "Please contact your system administrator to verify the database configuration.");
-
                     return DaoResult.Failure(errorMsg);
                 }
 
@@ -636,11 +722,9 @@ namespace MTM_Inventory_Application
             }
             catch (Exception ex)
             {
+                string errorMsg = $"Error validating database configuration:\n\n{ex.Message}";
                 LoggingUtility.LogApplicationError(ex);
-                ShowDatabaseError("Configuration Error",
-                    $"Error validating database configuration:\n\n{ex.Message}");
-
-                return DaoResult.Failure($"Connection string validation error: {ex.Message}", ex);
+                return DaoResult.Failure(errorMsg, ex);
             }
         }
 
@@ -664,53 +748,48 @@ namespace MTM_Inventory_Application
                 return $"The test database '{dbName}' does not exist on server '{serverAddress}'.\n\n" +
                        "This is a DEBUG build that requires the test database.\n\n" +
                        "Please:\n" +
-                       "� Create the test database '{dbName}' on MySQL server\n" +
-                       "� Or run the application in RELEASE mode to use the production database\n" +
-                       "� Contact your system administrator for database setup assistance\n\n" +
-                       "The application cannot start without a valid database connection.";
+                       "• Create the test database '{dbName}' on MySQL server\n" +
+                       "• Or run the application in RELEASE mode to use the production database\n" +
+                       "• Contact your system administrator for database setup assistance";
 #else
                 return $"The database '{dbName}' does not exist on server '{serverAddress}'.\n\n" +
                        "Please contact your system administrator to:\n" +
-                       "� Verify the database server is running\n" +
-                       "� Ensure the database '{dbName}' exists and is accessible\n" +
-                       "� Check database permissions for your user account\n\n" +
-                       "The application cannot start without a valid database connection.";
+                       "• Verify the database server is running\n" +
+                       "• Ensure the database '{dbName}' exists and is accessible\n" +
+                       "• Check database permissions for your user account";
 #endif
             }
             else if (ex.Message.Contains("Unable to connect to any of the specified MySQL hosts"))
             {
                 return "Cannot connect to the database server.\n\n" +
                        "This usually means:\n" +
-                       "� The database server is not running\n" +
-                       "� The server address or port is incorrect\n" +
-                       "� A firewall is blocking the connection\n\n" +
-                       "Please check with your system administrator or verify the server is running.\n\n" +
-                       "The application cannot start without a database connection.";
+                       "• The database server is not running\n" +
+                       "• The server address or port is incorrect\n" +
+                       "• A firewall is blocking the connection\n\n" +
+                       "Please check with your system administrator or verify the server is running.";
             }
             else if (ex.Message.Contains("Access denied"))
             {
                 return "Access denied when connecting to the database.\n\n" +
                        "This usually means:\n" +
-                       "� Your username or password is incorrect\n" +
-                       "� Your account doesn't have permission to access the database\n\n" +
-                       "Please check your credentials with your system administrator.\n\n" +
-                       "The application cannot start without proper database access.";
+                       "• Your username or password is incorrect\n" +
+                       "• Your account doesn't have permission to access the database\n\n" +
+                       "Please check your credentials with your system administrator.";
             }
             else if (ex.Message.Contains("timeout") || ex.Message.Contains("Connection timeout"))
             {
                 return "Connection to the database timed out.\n\n" +
                        "This usually means:\n" +
-                       "� The database server is responding slowly\n" +
-                       "� Network connectivity issues\n" +
-                       "� The server is overloaded\n\n" +
+                       "• The database server is responding slowly\n" +
+                       "• Network connectivity issues\n" +
+                       "• The server is overloaded\n\n" +
                        "Please try starting the application again in a few moments.\n" +
                        "If the problem persists, contact your system administrator.";
             }
             else
             {
                 return $"Database connection failed with the following error:\n\n{ex.Message}\n\n" +
-                       "Please contact your system administrator for assistance.\n\n" +
-                       "The application cannot start without a database connection.";
+                       "Please contact your system administrator for assistance.";
             }
         }
 

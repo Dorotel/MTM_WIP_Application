@@ -78,7 +78,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             catch (Exception ex)
             {
                 Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
-                    controlName: nameof(Control_Edit_PartID), methodName: nameof(LoadParts));
+                    controlName: nameof(Control_Edit_PartID), callerName: nameof(LoadParts));
             }
         }
 
@@ -97,7 +97,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             catch (Exception ex)
             {
                 Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, 
-                    controlName: nameof(Control_Edit_PartID), methodName: nameof(OnLoad));
+                    controlName: nameof(Control_Edit_PartID), callerName: nameof(OnLoad));
             }
         }
 
