@@ -1,9 +1,4 @@
-﻿using System.Diagnostics;
-using MTM_Inventory_Application.Core;
-using MTM_Inventory_Application.Data;
-using MTM_Inventory_Application.Helpers;
-using MTM_Inventory_Application.Logging;
-using MTM_Inventory_Application.Models;
+﻿using MTM_Inventory_Application.Logging;
 
 namespace MTM_Inventory_Application.Services
 {

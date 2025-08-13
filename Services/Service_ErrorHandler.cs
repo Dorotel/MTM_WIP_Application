@@ -1,6 +1,4 @@
-﻿
-
-using MTM_Inventory_Application.Forms.MainForm;
+﻿using MTM_Inventory_Application.Forms.MainForm;
 using MTM_Inventory_Application.Logging;
 
 namespace MTM_Inventory_Application.Services;

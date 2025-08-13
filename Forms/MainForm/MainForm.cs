@@ -105,7 +105,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 return "Normal User";
             if (Model_AppVariables.UserTypeReadOnly)
                 return "Read Only";
-            
+
             return "Unknown";
         }
 
@@ -141,10 +141,10 @@ namespace MTM_Inventory_Application.Forms.MainForm
                         Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm Shown event triggered.");
                         await MainForm_OnStartup_GetUserFullNameAsync();
                         Debug.WriteLine("[DEBUG] [MainForm.ctor] User full name loaded.");
-                        
+
                         await Task.Delay(500);
                         SetInitialFocusToInventoryTab();
-                        
+
                         Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm is now idle and ready.");
                     }
                     catch (Exception ex)
@@ -188,7 +188,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
                     MainForm_ProgressBar,
                     MainForm_StatusText,
                     this);
-                
+
                 // Initialize progress controls for all UserControls
                 InitializeUserControlsProgress();
             }
@@ -206,14 +206,14 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 MainForm_UserControl_InventoryTab?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
                 MainForm_UserControl_RemoveTab?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
                 MainForm_UserControl_TransferTab?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
-                
+
                 // Set progress controls for advanced UserControls
                 MainForm_UserControl_AdvancedInventory?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
                 MainForm_UserControl_AdvancedRemove?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
-                
+
                 // Set progress controls for QuickButtons
                 MainForm_UserControl_QuickButtons?.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
-                
+
                 Debug.WriteLine("[DEBUG] [MainForm] UserControl progress helpers initialized.");
             }
             catch (Exception ex)
@@ -500,14 +500,14 @@ namespace MTM_Inventory_Application.Forms.MainForm
             try
             {
                 Debug.WriteLine($"Attempting to invoke {methodName} on {control.GetType().Name}");
-                
+
                 MethodInfo? method = control.GetType().GetMethod(methodName,
                     BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                
+
                 if (method != null)
                 {
                     Debug.WriteLine($"Invoking {method.Name} on {control.GetType().Name}");
-                    
+
                     // Ensure method is invoked on UI thread if needed
                     if (control.InvokeRequired)
                     {
@@ -768,6 +768,20 @@ namespace MTM_Inventory_Application.Forms.MainForm
         }
 
         #endregion
+
+        private void MainForm_MenuStrip_Development_Conversion_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using var converterForm = new Forms.Development.DependencyChartConverter.DependencyChartConverterForm();
+                converterForm.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm_MenuStrip_Development_Conversion_Click));
+            }
+        }
     }
 
     #endregion
