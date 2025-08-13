@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM Inventory Application - Settings Management</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>⚙️ Settings Management Guide</h1>
+                <p class="subtitle">Configure and customize your MTM Inventory Application experience</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="content-section">
+                <h2>📋 Overview</h2>
+                <p>The Settings form provides comprehensive configuration options for the MTM Inventory Application. Access varies by user privileges, with administrators having full access and normal users limited to personal preferences.</p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🗄️</div>
+                        <h3>Database Settings</h3>
+                        <p>Connection configuration and environment selection</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">👥</div>
+                        <h3>User Management</h3>
+                        <p>Add, edit, and manage user accounts and privileges</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Master Data</h3>
+                        <p>Manage parts, operations, locations, and item types</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Themes & UI</h3>
+                        <p>Customize appearance, themes, and accessibility options</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🚀 Accessing Settings</h2>
+
+                <div class="info-box info">
+                    <h4>Settings Access Methods</h4>
+                    <p>Multiple ways to open the Settings form with automatic privilege detection.</p>
+                </div>
+
+                <div class="step-guide">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Menu Access</h3>
+                            <p>Use the main menu to access settings:</p>
+                            <ul>
+                                <li><strong>File Menu:</strong> File → Settings</li>
+                                <li><strong>Keyboard Shortcut:</strong> Ctrl+Shift+S</li>
+                                <li><strong>Quick Access:</strong> Settings toolbar button (if available)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Privilege-Based Interface</h3>
+                            <p>Settings interface adapts to your user privileges:</p>
+                            <ul>
+                                <li><strong>Administrator:</strong> Full access to all settings categories</li>
+                                <li><strong>Normal User:</strong> Limited to personal preferences and themes</li>
+                                <li><strong>Read-Only:</strong> View-only access, no modification capabilities</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🗄️ Database Settings</h2>
+
+                <div class="info-box warning">
+                    <h4>Administrator Only</h4>
+                    <p>Database settings require administrator privileges and may affect all users.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>🔗 Connection Configuration</h4>
+                        <p>Configure database connection parameters:</p>
+                        <ul>
+                            <li><strong>Server Address:</strong> MySQL server hostname or IP address</li>
+                            <li><strong>Port Settings:</strong> Database port configuration (default: 3306)</li>
+                            <li><strong>Database Name:</strong> Target database name (mtm_wip_application or mtm_wip_application_test)</li>
+                            <li><strong>Authentication:</strong> Username and password configuration</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🌐 Environment Selection</h4>
+                        <p>Switch between development and production environments:</p>
+                        <ul>
+                            <li><strong>Production (Release):</strong> mtm_wip_application database with 172.16.1.104 server</li>
+                            <li><strong>Development (Debug):</strong> mtm_wip_application_test with localhost/172.16.1.104 detection</li>
+                            <li><strong>Automatic Detection:</strong> Environment selection based on IP address matching</li>
+                            <li><strong>Override Options:</strong> Manual environment selection for testing</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🧪 Test Connections</h4>
+                        <p>Verify database connectivity:</p>
+                        <ul>
+                            <li><strong>Connection Test:</strong> Verify database server accessibility</li>
+                            <li><strong>Authentication Test:</strong> Validate username and password</li>
+                            <li><strong>Performance Test:</strong> Check connection speed and latency</li>
+                            <li><strong>Stored Procedure Test:</strong> Verify stored procedure availability</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>👥 User Management</h2>
+
+                <div class="step-guide">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Add New Users</h3>
+                            <p>Create new user accounts:</p>
+                            <ul>
+                                <li><strong>User Information:</strong> Username, full name, email address</li>
+                                <li><strong>Password Setup:</strong> Initial password assignment with change requirement</li>
+                                <li><strong>Privilege Assignment:</strong> Administrator, Normal User, or Read-Only access</li>
+                                <li><strong>Department Assignment:</strong> Link users to specific departments or work centers</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Edit Existing Users</h3>
+                            <p>Modify user account settings:</p>
+                            <ul>
+                                <li><strong>Profile Updates:</strong> Change name, email, or department information</li>
+                                <li><strong>Privilege Changes:</strong> Modify user access levels and permissions</li>
+                                <li><strong>Password Reset:</strong> Reset forgotten passwords or force password changes</li>
+                                <li><strong>Account Status:</strong> Enable, disable, or suspend user accounts</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div name="step-number">3</div>
+                        <div class="step-content">
+                            <h3>User Activity Monitoring</h3>
+                            <p>Track and monitor user activity:</p>
+                            <ul>
+                                <li><strong>Login History:</strong> View user login times and locations</li>
+                                <li><strong>Activity Logs:</strong> Monitor inventory operations and changes</li>
+                                <li><strong>Permission Audits:</strong> Track privilege changes and administrative actions</li>
+                                <li><strong>Performance Metrics:</strong> User productivity and system usage statistics</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>📊 Master Data Management</h2>
+
+                <div class="info-box success">
+                    <h4>Centralized Data Management</h4>
+                    <p>Master Data settings provide centralized management of all reference data used throughout the application.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>🔧 Parts Management</h4>
+                        <p>Manage inventory parts and components:</p>
+                        <ul>
+                            <li><strong>Part Creation:</strong> Add new parts with descriptions and specifications</li>
+                            <li><strong>Part Categories:</strong> Organize parts by type, family, or usage</li>
+                            <li><strong>Part Status:</strong> Active, inactive, or discontinued part management</li>
+                            <li><strong>Cross-References:</strong> Link parts to supplier codes or internal references</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>⚙️ Operations Management</h4>
+                        <p>Configure manufacturing operations:</p>
+                        <ul>
+                            <li><strong>Operation Types:</strong> Machining, Assembly, QC, Packing, etc.</li>
+                            <li><strong>Operation Codes:</strong> Standardized operation identification codes</li>
+                            <li><strong>Work Centers:</strong> Link operations to specific work centers</li>
+                            <li><strong>Process Flow:</strong> Define operation sequences and dependencies</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📍 Locations Management</h4>
+                        <p>Define and organize storage locations:</p>
+                        <ul>
+                            <li><strong>Location Hierarchy:</strong> Organize locations by area, department, or function</li>
+                            <li><strong>Location Codes:</strong> Standardized location identification system</li>
+                            <li><strong>Capacity Planning:</strong> Define location storage capacities and limits</li>
+                            <li><strong>Access Control:</strong> Restrict location access by user or role</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📋 Item Types Management</h4>
+                        <p>Configure inventory item classifications:</p>
+                        <ul>
+                            <li><strong>Item Categories:</strong> Raw materials, work-in-progress, finished goods</li>
+                            <li><strong>Classification Rules:</strong> Automatic item type assignment based on criteria</li>
+                            <li><strong>Handling Instructions:</strong> Special handling requirements per item type</li>
+                            <li><strong>Reporting Groups:</strong> Group item types for reporting and analysis</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🎨 Themes and UI Settings</h2>
+
+                <div class="info-box info">
+                    <h4>Personal Preferences</h4>
+                    <p>Theme and UI settings are available to all users and affect individual user experience only.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>🌈 Color Themes</h4>
+                        <p>Choose from available color themes:</p>
+                        <ul>
+                            <li><strong>Arctic:</strong> Cool blue and white color scheme</li>
+                            <li><strong>Default:</strong> Standard Windows application colors</li>
+                            <li><strong>Fire Storm:</strong> Warm red and orange tones</li>
+                            <li><strong>Forest:</strong> Natural green color palette</li>
+                            <li><strong>Lavender:</strong> Soft purple and lavender tones</li>
+                            <li><strong>Midnight:</strong> Dark theme with high contrast</li>
+                            <li><strong>Mystic:</strong> Deep purple and blue mystical theme</li>
+                            <li><strong>Ocean:</strong> Deep blue oceanic color scheme</li>
+                            <li><strong>Sunset:</strong> Warm orange and yellow gradients</li>
+                            <li><strong>Urban Bloom:</strong> Modern urban color palette</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📱 DPI and Scaling</h4>
+                        <p>Optimize display for your screen:</p>
+                        <ul>
+                            <li><strong>Automatic DPI Detection:</strong> System-based DPI scaling</li>
+                            <li><strong>Manual Scaling:</strong> Override automatic scaling for custom displays</li>
+                            <li><strong>High-DPI Support:</strong> Optimized for 4K and high-resolution displays</li>
+                            <li><strong>Font Scaling:</strong> Adjust font sizes independently</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>♿ Accessibility Options</h4>
+                        <p>Enhance accessibility and usability:</p>
+                        <ul>
+                            <li><strong>High Contrast Mode:</strong> Enhanced contrast for better visibility</li>
+                            <li><strong>Large Font Options:</strong> Increased font sizes for readability</li>
+                            <li><strong>Color Blind Support:</strong> Alternative color schemes for color vision deficiencies</li>
+                            <li><strong>Keyboard Navigation:</strong> Enhanced keyboard shortcuts and navigation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>⌨️ Keyboard Shortcuts</h2>
+
+                <div class="info-box success">
+                    <h4>Customizable Shortcuts</h4>
+                    <p>Many keyboard shortcuts can be customized to match your workflow preferences.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>🎹 Shortcut Customization</h4>
+                        <p>Personalize keyboard shortcuts:</p>
+                        <ul>
+                            <li><strong>Custom Assignments:</strong> Assign shortcuts to frequently used functions</li>
+                            <li><strong>Conflict Detection:</strong> System prevents duplicate shortcut assignments</li>
+                            <li><strong>Context-Sensitive:</strong> Different shortcuts for different forms or modes</li>
+                            <li><strong>Reset Options:</strong> Restore default shortcuts if needed</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📋 Quick Access Setup</h4>
+                        <p>Configure shortcuts for common operations:</p>
+                        <ul>
+                            <li><strong>Function Keys:</strong> Assign F1-F12 to specific operations</li>
+                            <li><strong>Modifier Combinations:</strong> Ctrl, Alt, and Shift key combinations</li>
+                            <li><strong>Number Pad:</strong> Utilize number pad for quick data entry</li>
+                            <li><strong>Global Shortcuts:</strong> System-wide shortcuts that work in any form</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>💾 Settings Workflows</h2>
+
+                <div class="step-guide">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Navigate Categories</h3>
+                            <p>Use TreeView navigation to access settings categories:</p>
+                            <ul>
+                                <li><strong>Category Expansion:</strong> Click to expand/collapse category groups</li>
+                                <li><strong>Panel Switching:</strong> Categories display relevant settings panels</li>
+                                <li><strong>Change Tracking:</strong> Modified settings highlighted with visual indicators</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Data Validation</h3>
+                            <p>Real-time validation ensures setting integrity:</p>
+                            <ul>
+                                <li><strong>Input Validation:</strong> Immediate feedback for invalid entries</li>
+                                <li><strong>Constraint Checking:</strong> Verify business rule compliance</li>
+                                <li><strong>Dependency Validation:</strong> Check related setting dependencies</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Save and Apply Changes</h3>
+                            <p>Manage setting changes and apply updates:</p>
+                            <ul>
+                                <li><strong>Save Changes:</strong> Commit modifications to database</li>
+                                <li><strong>Cancel Changes:</strong> Discard modifications and revert to saved values</li>
+                                <li><strong>Apply Immediately:</strong> Some settings take effect immediately</li>
+                                <li><strong>Restart Required:</strong> Other settings require application restart</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>❓ Troubleshooting Settings</h2>
+
+                <div class="faq-item">
+                    <h4>Cannot access certain settings categories</h4>
+                    <p>This is likely a privilege issue. Contact your administrator to verify your user permissions and access levels.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Database connection test fails</h4>
+                    <p>Check these common issues:</p>
+                    <ul>
+                        <li>Verify server address and port settings are correct</li>
+                        <li>Ensure database server is running and accessible</li>
+                        <li>Check username and password credentials</li>
+                        <li>Verify network connectivity to database server</li>
+                    </ul>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Theme changes don't apply immediately</h4>
+                    <p>Some theme changes require application restart to take full effect. Try closing and reopening the application to see all theme updates.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Settings changes are lost after restart</h4>
+                    <p>This indicates a permission or configuration issue:</p>
+                    <ul>
+                        <li>Ensure you clicked "Save" before closing Settings form</li>
+                        <li>Check database write permissions for your user account</li>
+                        <li>Verify the application can write to the user settings database table</li>
+                        <li>Contact IT support if problem persists</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🔗 Related Topics</h2>
+                <div class="related-links">
+                    <a href="getting-started.html" class="related-link">
+                        <div class="related-icon">🚀</div>
+                        <div class="related-content">
+                            <h4>Getting Started</h4>
+                            <p>Initial setup and configuration</p>
+                        </div>
+                    </a>
+                    <a href="troubleshooting.html" class="related-link">
+                        <div class="related-icon">🔧</div>
+                        <div class="related-content">
+                            <h4>Troubleshooting</h4>
+                            <p>Common issues and solutions</p>
+                        </div>
+                    </a>
+                    <a href="advanced-features.html" class="related-link">
+                        <div class="related-icon">⚙️</div>
+                        <div class="related-content">
+                            <h4>Advanced Features</h4>
+                            <p>Configure advanced functionality</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+                <p>&copy; 2025 Manitowoc Tool and Manufacturing - MTM Inventory Application Help System</p>
+                <div class="footer-links">
+                    <a href="index.html">Help Home</a> | 
+                    <a href="getting-started.html">Getting Started</a> | 
+                    <a href="keyboard-shortcuts.html">Keyboard Shortcuts</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>

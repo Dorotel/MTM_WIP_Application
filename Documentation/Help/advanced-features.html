@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM Inventory Application - Advanced Features</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>⚙️ Advanced Features Guide</h1>
+                <p class="subtitle">Unlock the full potential of the MTM Inventory system with advanced operations</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="content-section">
+                <h2>📋 Overview</h2>
+                <p>Advanced Features provide power users with sophisticated tools for complex inventory management scenarios. These features include bulk processing, advanced search capabilities, multi-location operations, and enhanced data import/export functionality.</p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Advanced Inventory</h3>
+                        <p>Multi-location entry, batch processing, and Excel import capabilities</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3>Advanced Remove</h3>
+                        <p>Date-range filtering, bulk operations, and advanced selection tools</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📁</div>
+                        <h3>Batch Processing</h3>
+                        <p>Process multiple operations efficiently with progress tracking</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📤</div>
+                        <h3>Data Import/Export</h3>
+                        <p>Excel integration, custom templates, and bulk data operations</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>📊 Advanced Inventory Features</h2>
+
+                <div class="info-box info">
+                    <h4>Multi-Location Entry</h4>
+                    <p>Advanced Inventory mode allows simultaneous inventory entry across multiple locations with intelligent validation.</p>
+                </div>
+
+                <div class="step-guide">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Enable Advanced Mode</h3>
+                            <p>Switch to Advanced Inventory for enhanced capabilities:</p>
+                            <ul>
+                                <li><strong>Single Location Mode:</strong> Enhanced standard entry with additional options</li>
+                                <li><strong>Multi-Location Mode:</strong> Simultaneous entry across multiple work centers</li>
+                                <li><strong>Batch Generation:</strong> Automatic batch number assignment</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Configure Location Settings</h3>
+                            <p>Set up multi-location entry parameters:</p>
+                            <ul>
+                                <li><strong>Location Selection:</strong> Choose target locations from checklist</li>
+                                <li><strong>Quantity Distribution:</strong> Equal or custom quantity per location</li>
+                                <li><strong>Validation Rules:</strong> Location-specific business rule enforcement</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Execute Multi-Location Entry</h3>
+                            <p>Process inventory across selected locations:</p>
+                            <ul>
+                                <li><strong>Batch Processing:</strong> All locations processed in single transaction</li>
+                                <li><strong>Progress Tracking:</strong> Visual progress bar with location status</li>
+                                <li><strong>Error Handling:</strong> Individual location failures don't stop batch</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>📝 Enhanced Validation</h4>
+                        <p>Advanced business rules and cross-field validation:</p>
+                        <ul>
+                            <li>Complex validation scenarios with multi-field dependencies</li>
+                            <li>Location-specific validation rules and constraints</li>
+                            <li>Real-time validation feedback during data entry</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📊 Batch Number Generation</h4>
+                        <p>Intelligent batch tracking and numbering:</p>
+                        <ul>
+                            <li>Automatic batch number assignment based on patterns</li>
+                            <li>Custom batch numbering schemes per operation</li>
+                            <li>Batch consolidation and splitting capabilities</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🔍 Advanced Remove Operations</h2>
+
+                <div class="info-box warning">
+                    <h4>Date Range Filtering</h4>
+                    <p>Advanced Remove mode provides sophisticated filtering options for bulk removal operations.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>📅 Date Range Filtering</h4>
+                        <p>Filter items by various date criteria:</p>
+                        <ul>
+                            <li><strong>Creation Date:</strong> Items created within specific date range</li>
+                            <li><strong>Modified Date:</strong> Recently updated inventory items</li>
+                            <li><strong>Transaction Date:</strong> Items from specific transaction periods</li>
+                            <li><strong>Preset Ranges:</strong> Today, This Week, This Month, Custom</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>👤 User-Specific Filtering</h4>
+                        <p>Filter by user activity and ownership:</p>
+                        <ul>
+                            <li><strong>Created By:</strong> Items created by specific users</li>
+                            <li><strong>Modified By:</strong> Items last modified by specific users</li>
+                            <li><strong>Shift-Based:</strong> Items from specific shift periods</li>
+                            <li><strong>Team Filtering:</strong> Items from specific work teams</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🎯 Advanced Selection Tools</h4>
+                        <p>Sophisticated selection and filtering capabilities:</p>
+                        <ul>
+                            <li><strong>Filter-Based Selection:</strong> Select items matching filter criteria</li>
+                            <li><strong>Inverse Selection:</strong> Select all items NOT matching criteria</li>
+                            <li><strong>Selection Memory:</strong> Save and recall selection sets</li>
+                            <li><strong>Conditional Selection:</strong> Complex multi-criteria selection</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>📤 Data Import/Export Features</h2>
+
+                <div class="step-guide">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Excel Import Preparation</h3>
+                            <p>Prepare Excel files for batch import:</p>
+                            <ul>
+                                <li><strong>Template Download:</strong> Get standardized Excel template</li>
+                                <li><strong>Column Mapping:</strong> Ensure correct column headers and order</li>
+                                <li><strong>Data Validation:</strong> Pre-validate data before import</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Import Process</h3>
+                            <p>Execute bulk import with validation:</p>
+                            <ul>
+                                <li><strong>File Selection:</strong> Choose Excel file for import</li>
+                                <li><strong>Preview Mode:</strong> Review data before committing changes</li>
+                                <li><strong>Error Checking:</strong> Identify and resolve data issues</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Quality Control</h3>
+                            <p>Ensure data integrity during import:</p>
+                            <ul>
+                                <li><strong>Duplicate Detection:</strong> Identify and handle duplicate entries</li>
+                                <li><strong>Consistency Checks:</strong> Verify data relationships and constraints</li>
+                                <li><strong>Rollback Capability:</strong> Undo import if issues are discovered</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>📊 Batch Processing</h2>
+
+                <div class="info-box success">
+                    <h4>Progress Tracking</h4>
+                    <p>All batch operations provide real-time progress feedback with detailed status information.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>⚡ Performance Optimization</h4>
+                        <p>Efficient processing for large data sets:</p>
+                        <ul>
+                            <li><strong>Chunked Processing:</strong> Process large datasets in manageable chunks</li>
+                            <li><strong>Background Operations:</strong> Non-blocking batch processing</li>
+                            <li><strong>Memory Management:</strong> Efficient memory usage for large operations</li>
+                            <li><strong>Cancellation Support:</strong> Ability to cancel long-running operations</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📈 Progress Monitoring</h4>
+                        <p>Comprehensive progress tracking and reporting:</p>
+                        <ul>
+                            <li><strong>Real-time Progress:</strong> Live progress bars and status updates</li>
+                            <li><strong>Error Summary:</strong> Detailed error reporting during batch operations</li>
+                            <li><strong>Success Metrics:</strong> Statistics on successful vs failed operations</li>
+                            <li><strong>Performance Metrics:</strong> Processing speed and efficiency tracking</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🛡️ Error Resilience</h4>
+                        <p>Robust error handling for batch operations:</p>
+                        <ul>
+                            <li><strong>Partial Success:</strong> Continue processing despite individual failures</li>
+                            <li><strong>Error Logging:</strong> Detailed logging of all errors and warnings</li>
+                            <li><strong>Recovery Options:</strong> Retry failed operations or rollback changes</li>
+                            <li><strong>Transaction Safety:</strong> Database consistency during batch processing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🔧 Advanced Configuration</h2>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>⚙️ Performance Tuning</h4>
+                        <p>Optimize performance for your specific environment:</p>
+                        <ul>
+                            <li><strong>Batch Size Settings:</strong> Adjust processing chunk sizes</li>
+                            <li><strong>Connection Pooling:</strong> Database connection optimization</li>
+                            <li><strong>Memory Limits:</strong> Configure memory usage for large operations</li>
+                            <li><strong>Timeout Settings:</strong> Customize timeout values for operations</li>
+                        </ul>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🎨 UI Customization</h4>
+                        <p>Customize advanced features interface:</p>
+                        <ul>
+                            <li><strong>Column Configuration:</strong> Show/hide columns in advanced grids</li>
+                            <li><strong>Filter Presets:</strong> Save commonly used filter combinations</li>
+                            <li><strong>Layout Preferences:</strong> Customize panel sizes and positions</li>
+                            <li><strong>Theme Integration:</strong> Advanced features match application theme</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>⌨️ Advanced Keyboard Shortcuts</h2>
+                
+                <div class="keyboard-shortcuts">
+                    <div class="shortcut-category">
+                        <h4>Advanced Inventory</h4>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd>
+                            <span>Switch to Advanced mode</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>M</kbd>
+                            <span>Multi-location mode toggle</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>I</kbd>
+                            <span>Import from Excel</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>E</kbd>
+                            <span>Export to Excel</span>
+                        </div>
+                    </div>
+
+                    <div class="shortcut-category">
+                        <h4>Advanced Remove</h4>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd>
+                            <span>Switch to Advanced Remove mode</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>D</kbd>
+                            <span>Date range filter</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>U</kbd>
+                            <span>User-specific filter</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd>
+                            <span>Select all filtered items</span>
+                        </div>
+                    </div>
+
+                    <div class="shortcut-category">
+                        <h4>Batch Operations</h4>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>B</kbd>
+                            <span>Start batch processing</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Esc</kbd>
+                            <span>Cancel batch operation</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>F9</kbd>
+                            <span>View batch progress details</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>❓ Troubleshooting Advanced Features</h2>
+
+                <div class="faq-item">
+                    <h4>Excel import fails with format error</h4>
+                    <p>Common solutions:</p>
+                    <ul>
+                        <li>Download and use the official Excel template</li>
+                        <li>Ensure column headers exactly match template requirements</li>
+                        <li>Check for special characters or formatting issues in data</li>
+                        <li>Verify Excel file is saved as .xlsx format</li>
+                    </ul>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Multi-location entry creates duplicate items</h4>
+                    <p>This is expected behavior when using multi-location mode. Each location gets a separate inventory record with the specified quantity.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Batch operation runs very slowly</h4>
+                    <p>Performance optimization steps:</p>
+                    <ul>
+                        <li>Reduce batch size in advanced settings</li>
+                        <li>Close other applications to free system resources</li>
+                        <li>Check database server performance and connectivity</li>
+                        <li>Consider processing during off-peak hours</li>
+                    </ul>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Advanced Remove filters return no results</h4>
+                    <p>Check filter settings:</p>
+                    <ul>
+                        <li>Verify date range includes expected transactions</li>
+                        <li>Check user filter includes correct usernames</li>
+                        <li>Try clearing all filters and start with basic criteria</li>
+                        <li>Ensure you have appropriate permissions for filtered data</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🔗 Related Topics</h2>
+                <div class="related-links">
+                    <a href="inventory-operations.html" class="related-link">
+                        <div class="related-icon">📦</div>
+                        <div class="related-content">
+                            <h4>Basic Inventory Operations</h4>
+                            <p>Start with basic inventory management</p>
+                        </div>
+                    </a>
+                    <a href="settings-management.html" class="related-link">
+                        <div class="related-icon">⚙️</div>
+                        <div class="related-content">
+                            <h4>Settings Management</h4>
+                            <p>Configure advanced feature settings</p>
+                        </div>
+                    </a>
+                    <a href="troubleshooting.html" class="related-link">
+                        <div class="related-icon">🔧</div>
+                        <div class="related-content">
+                            <h4>Troubleshooting</h4>
+                            <p>Resolve advanced feature issues</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+                <p>&copy; 2025 Manitowoc Tool and Manufacturing - MTM Inventory Application Help System</p>
+                <div class="footer-links">
+                    <a href="index.html">Help Home</a> | 
+                    <a href="getting-started.html">Getting Started</a> | 
+                    <a href="keyboard-shortcuts.html">Keyboard Shortcuts</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>
