@@ -99,7 +99,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     ["PageSize"] = PageSize
                 });
             // Enhanced paging logic with smart search support
-            Transfer_Button_Next.Click += async (s, e) =>
+            Transactions_Button_NextPage.Click += async (s, e) =>
             {
                 Service_DebugTracer.TraceUIAction("NEXT_PAGE_CLICKED", nameof(Transactions),
                     new Dictionary<string, object>
@@ -121,7 +121,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     await LoadTransactionsAsync();
                 }
             };
-            Transfer_Button_Previous.Click += async (s, e) =>
+            Transactions_Button_PreviousPage.Click += async (s, e) =>
             {
                 Service_DebugTracer.TraceUIAction("PREVIOUS_PAGE_CLICKED", nameof(Transactions),
                     new Dictionary<string, object>
@@ -174,7 +174,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private async Task OnFormLoadAsync()
         {
             Transactions_Button_Print.Enabled = false; // Disable print button on load
-            Transfer_Button_SelectionHistory.Enabled = false; // Disable selection history button on load
+            Transactions_Button_Help.Enabled = false; // Disable selection history button on load
             await LoadUserCombosAsync();
             LoadBuildingCombo(); // Remove await since method is no longer async
             await LoadPartComboAsync();
@@ -226,7 +226,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private void WireUpEvents()
         {
             // Standard search functionality
-            Transactions_Button_Search.Click += async (s, e) => await LoadTransactionsAsync();
+            Transactions_Button_SmartSearch.Click += async (s, e) => await LoadTransactionsAsync();
             
             // Enhanced smart search functionality
             if (Controls.ContainsKey("Transactions_Button_SmartSearch"))
@@ -259,7 +259,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 Control_AdvancedRemove_DateTimePicker_To.Enabled = Control_AdvancedRemove_CheckBox_Date.Checked;
             };
             Transactions_Button_SidePanel.Click += Transactions_Button_SidePanel_Click;
-            Transfer_Button_SelectionHistory.Click += Transfer_Button_BranchHistory_Click;
+            Transactions_Button_Help.Click += Transactions_Button_Help_Click;
 
             // Enable/disable search button based on combo selection
             _transactionsComboBoxSearchPartId.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
@@ -333,7 +333,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             bool enable = _transactionsComboBoxSearchPartId.SelectedIndex > 0
                           || Transactions_ComboBox_UserFullName.SelectedIndex > 0
                           || Transactions_ComboBox_Building.SelectedIndex > 0;
-            Transactions_Button_Search.Enabled = enable;
+            Transactions_Button_SmartSearch.Enabled = enable;
         }
 
         private void Transactions_Button_SidePanel_Click(object? sender, EventArgs e)
@@ -389,7 +389,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     Transactions_TextBox_Report_ReceiveDate.Text = tx.DateTime.ToString("g");
 
                     // Enable history and print buttons when a transaction is selected
-                    Transfer_Button_SelectionHistory.Enabled = true;
+                    Transactions_Button_Help.Enabled = true;
                     Transactions_Button_Print.Enabled = true;
 
                     Service_DebugTracer.TraceUIAction("TRANSACTION_DETAILS_POPULATED", nameof(Transactions),
@@ -406,7 +406,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 ClearSelectionReportControls();
                 
                 // Disable action buttons
-                Transfer_Button_SelectionHistory.Enabled = false;
+                Transactions_Button_Help.Enabled = false;
                 Transactions_Button_Print.Enabled = false;
 
                 Service_DebugTracer.TraceUIAction("SELECTION_REPORT_CLEARED", nameof(Transactions),
@@ -674,7 +674,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Image_NothingFound.Visible = result.Count == 0;
             Transactions_DataGridView_Transactions.Visible = result.Count > 0;
             Transactions_Button_Print.Enabled = result.Count > 0;
-            Transfer_Button_SelectionHistory.Enabled = result.Count > 0;
+            Transactions_Button_Help.Enabled = result.Count > 0;
             if (_displayedTransactions.Count > 0)
             {
                 Transactions_DataGridView_Transactions.ClearSelection();
@@ -732,11 +732,11 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
         private void UpdatePagingButtons(int resultCount)
         {
-            Transfer_Button_Previous.Enabled = _currentPage > 1;
-            Transfer_Button_Next.Enabled = resultCount >= PageSize;
+            Transactions_Button_PreviousPage.Enabled = _currentPage > 1;
+            Transactions_Button_NextPage.Enabled = resultCount >= PageSize;
         }
 
-        private async void Transfer_Button_BranchHistory_Click(object? sender, EventArgs e)
+        private async void Transactions_Button_Help_Click(object? sender, EventArgs e)
         {
             if (Transactions_DataGridView_Transactions.SelectedRows.Count != 1)
             {
@@ -897,7 +897,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Image_NothingFound.Visible = describedResults.Count == 0;
             Transactions_DataGridView_Transactions.Visible = describedResults.Count > 0;
             Transactions_Button_Print.Enabled = describedResults.Count > 0;
-            Transfer_Button_SelectionHistory.Enabled = describedResults.Count > 0;
+            Transactions_Button_Help.Enabled = describedResults.Count > 0;
             if (describedResults.Count > 0)
             {
                 Transactions_DataGridView_Transactions.ClearSelection();
@@ -1383,15 +1383,15 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 Transactions_DataGridView_Transactions.DataSource = _displayedTransactions;
 
                 // Update pagination controls
-                Transfer_Button_Previous.Enabled = _currentPage > 1;
-                Transfer_Button_Next.Enabled = transactions.Count == PageSize;
+                Transactions_Button_PreviousPage.Enabled = _currentPage > 1;
+                Transactions_Button_NextPage.Enabled = transactions.Count == PageSize;
 
                 // Update selection-related controls
                 UpdateSelectionControls();
 
                 // Enable/disable buttons based on results
                 Transactions_Button_Print.Enabled = transactions.Count > 0;
-                Transfer_Button_SelectionHistory.Enabled = transactions.Count > 0;
+                Transactions_Button_Help.Enabled = transactions.Count > 0;
             }
             catch (Exception ex)
             {
@@ -1845,15 +1845,15 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private void UpdatePaginationControls(int resultCount)
         {
             // Enable Previous button if not on first page
-            if (Controls.ContainsKey("Transfer_Button_Previous"))
+            if (Controls.ContainsKey("Transactions_Button_PreviousPage"))
             {
-                Controls["Transfer_Button_Previous"].Enabled = _currentPage > 1;
+                Controls["Transactions_Button_PreviousPage"].Enabled = _currentPage > 1;
             }
 
             // Enable Next button if we got a full page of results
-            if (Controls.ContainsKey("Transfer_Button_Next"))
+            if (Controls.ContainsKey("Transactions_Button_NextPage"))
             {
-                Controls["Transfer_Button_Next"].Enabled = resultCount == PageSize;
+                Controls["Transactions_Button_NextPage"].Enabled = resultCount == PageSize;
             }
         }
 
