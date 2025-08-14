@@ -50,6 +50,13 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private RadioButton Transactions_Radio_ThisMonth;
         private RadioButton Transactions_Radio_CustomRange;
 
+        // View mode controls
+        private Panel Transactions_Panel_ViewMode;
+        private Label Transactions_Label_ViewMode;
+        private RadioButton Transactions_Radio_GridView;
+        private RadioButton Transactions_Radio_ChartView;
+        private RadioButton Transactions_Radio_TimelineView;
+
         #endregion
 
         #region Methods
@@ -101,6 +108,13 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Radio_ThisWeek = new RadioButton();
             Transactions_Radio_ThisMonth = new RadioButton();
             Transactions_Radio_CustomRange = new RadioButton();
+            
+            // View mode controls
+            Transactions_Panel_ViewMode = new Panel();
+            Transactions_Label_ViewMode = new Label();
+            Transactions_Radio_GridView = new RadioButton();
+            Transactions_Radio_ChartView = new RadioButton();
+            Transactions_Radio_TimelineView = new RadioButton();
             
             Transactions_TableLayout_SelectionReport = new TableLayoutPanel();
             Transactions_Label_Report_BatchNumber = new Label();
@@ -157,6 +171,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Panel_Row_Shift.SuspendLayout();
             Transactions_Panel_Row_DateRange.SuspendLayout();
             Transactions_TableLayout_SelectionReport.SuspendLayout();
+            Transactions_Panel_ViewMode.SuspendLayout();
             Transfer_TableLayout_Right.SuspendLayout();
             Transactions_Panel_DataGridView.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)Transactions_Image_NothingFound).BeginInit();
@@ -656,14 +671,16 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // 
             Transfer_TableLayout_Right.ColumnCount = 1;
             Transfer_TableLayout_Right.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            Transfer_TableLayout_Right.Controls.Add(Transactions_Panel_DataGridView, 0, 0);
-            Transfer_TableLayout_Right.Controls.Add(Transfer_Panel_PageButtons, 0, 1);
+            Transfer_TableLayout_Right.Controls.Add(Transactions_Panel_ViewMode, 0, 0);
+            Transfer_TableLayout_Right.Controls.Add(Transactions_Panel_DataGridView, 0, 1);
+            Transfer_TableLayout_Right.Controls.Add(Transfer_Panel_PageButtons, 0, 2);
             Transfer_TableLayout_Right.Dock = DockStyle.Fill;
             Transfer_TableLayout_Right.Location = new Point(0, 0);
             Transfer_TableLayout_Right.Name = "Transfer_TableLayout_Right";
-            Transfer_TableLayout_Right.RowCount = 2;
-            Transfer_TableLayout_Right.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            Transfer_TableLayout_Right.RowStyles.Add(new RowStyle());
+            Transfer_TableLayout_Right.RowCount = 3;
+            Transfer_TableLayout_Right.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // View Mode
+            Transfer_TableLayout_Right.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // DataGrid
+            Transfer_TableLayout_Right.RowStyles.Add(new RowStyle()); // Page Buttons
             Transfer_TableLayout_Right.Size = new Size(405, 524);
             Transfer_TableLayout_Right.TabIndex = 6;
             // 
@@ -927,6 +944,54 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Radio_CustomRange.Text = "Custom";
             Transactions_Radio_CustomRange.UseVisualStyleBackColor = true;
             // 
+            // Transactions_Panel_ViewMode
+            // 
+            Transactions_Panel_ViewMode.Controls.Add(Transactions_Label_ViewMode);
+            Transactions_Panel_ViewMode.Controls.Add(Transactions_Radio_GridView);
+            Transactions_Panel_ViewMode.Controls.Add(Transactions_Radio_ChartView);
+            Transactions_Panel_ViewMode.Controls.Add(Transactions_Radio_TimelineView);
+            Transactions_Panel_ViewMode.Location = new Point(3, 3);
+            Transactions_Panel_ViewMode.Name = "Transactions_Panel_ViewMode";
+            Transactions_Panel_ViewMode.Size = new Size(399, 34);
+            Transactions_Panel_ViewMode.TabIndex = 0;
+            // 
+            // Transactions_Label_ViewMode
+            // 
+            Transactions_Label_ViewMode.Location = new Point(6, 6);
+            Transactions_Label_ViewMode.Name = "Transactions_Label_ViewMode";
+            Transactions_Label_ViewMode.Size = new Size(60, 23);
+            Transactions_Label_ViewMode.TabIndex = 0;
+            Transactions_Label_ViewMode.Text = "View:";
+            Transactions_Label_ViewMode.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // Transactions_Radio_GridView
+            // 
+            Transactions_Radio_GridView.Location = new Point(72, 6);
+            Transactions_Radio_GridView.Name = "Transactions_Radio_GridView";
+            Transactions_Radio_GridView.Size = new Size(60, 23);
+            Transactions_Radio_GridView.TabIndex = 1;
+            Transactions_Radio_GridView.Text = "📊 Grid";
+            Transactions_Radio_GridView.UseVisualStyleBackColor = true;
+            Transactions_Radio_GridView.Checked = true;
+            // 
+            // Transactions_Radio_ChartView
+            // 
+            Transactions_Radio_ChartView.Location = new Point(138, 6);
+            Transactions_Radio_ChartView.Name = "Transactions_Radio_ChartView";
+            Transactions_Radio_ChartView.Size = new Size(70, 23);
+            Transactions_Radio_ChartView.TabIndex = 2;
+            Transactions_Radio_ChartView.Text = "📈 Chart";
+            Transactions_Radio_ChartView.UseVisualStyleBackColor = true;
+            // 
+            // Transactions_Radio_TimelineView
+            // 
+            Transactions_Radio_TimelineView.Location = new Point(214, 6);
+            Transactions_Radio_TimelineView.Name = "Transactions_Radio_TimelineView";
+            Transactions_Radio_TimelineView.Size = new Size(90, 23);
+            Transactions_Radio_TimelineView.TabIndex = 3;
+            Transactions_Radio_TimelineView.Text = "🕐 Timeline";
+            Transactions_Radio_TimelineView.UseVisualStyleBackColor = true;
+            // 
             // Transactions
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -952,6 +1017,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Panel_Row_DateRange.ResumeLayout(false);
             Transactions_TableLayout_SelectionReport.ResumeLayout(false);
             Transactions_TableLayout_SelectionReport.PerformLayout();
+            Transactions_Panel_ViewMode.ResumeLayout(false);
             Transfer_TableLayout_Right.ResumeLayout(false);
             Transfer_TableLayout_Right.PerformLayout();
             Transactions_Panel_DataGridView.ResumeLayout(false);

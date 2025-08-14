@@ -143,6 +143,11 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 Transactions_Radio_ThisWeek.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
                 Transactions_Radio_ThisMonth.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
                 Transactions_Radio_CustomRange.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
+                
+                // View mode change events
+                Transactions_Radio_GridView.CheckedChanged += async (s, e) => await HandleViewModeChangeAsync();
+                Transactions_Radio_ChartView.CheckedChanged += async (s, e) => await HandleViewModeChangeAsync();
+                Transactions_Radio_TimelineView.CheckedChanged += async (s, e) => await HandleViewModeChangeAsync();
             }
             catch (Exception ex)
             {
@@ -442,21 +447,225 @@ namespace MTM_Inventory_Application.Forms.Transactions
         }
 
         /// <summary>
-        /// Placeholder for chart view implementation
+        /// Displays results in chart view
         /// </summary>
         private async Task DisplayChartViewAsync(List<Model_Transactions> transactions)
         {
-            // TODO: Implement chart view
-            await Task.CompletedTask;
+            await Task.Run(() =>
+            {
+                this.Invoke(() =>
+                {
+                    // TODO: Implement chart visualization
+                    // For now, display a message indicating chart view
+                    Transactions_Image_NothingFound.Visible = false;
+                    Transactions_DataGridView_Transactions.Visible = true;
+                    
+                    // Create a simple chart representation in the DataGridView
+                    CreateChartViewInDataGrid(transactions);
+                });
+            });
         }
 
         /// <summary>
-        /// Placeholder for timeline view implementation
+        /// Displays results in timeline view
         /// </summary>
         private async Task DisplayTimelineViewAsync(List<Model_Transactions> transactions)
         {
-            // TODO: Implement timeline view
-            await Task.CompletedTask;
+            await Task.Run(() =>
+            {
+                this.Invoke(() =>
+                {
+                    // TODO: Implement timeline visualization
+                    // For now, display chronological view in DataGridView
+                    Transactions_Image_NothingFound.Visible = false;
+                    Transactions_DataGridView_Transactions.Visible = true;
+                    
+                    // Create a timeline representation
+                    CreateTimelineViewInDataGrid(transactions);
+                });
+            });
+        }
+
+        /// <summary>
+        /// Creates a simple chart representation in the DataGridView
+        /// </summary>
+        private void CreateChartViewInDataGrid(List<Model_Transactions> transactions)
+        {
+            try
+            {
+                // Group transactions by type for chart display
+                var chartData = transactions.GroupBy(t => t.TransactionType)
+                    .Select(g => new
+                    {
+                        TransactionType = g.Key.ToString(),
+                        Count = g.Count(),
+                        TotalQuantity = g.Sum(t => t.Quantity),
+                        Percentage = Math.Round((double)g.Count() / transactions.Count * 100, 1)
+                    })
+                    .OrderByDescending(x => x.Count)
+                    .ToList();
+
+                // Setup chart columns
+                Transactions_DataGridView_Transactions.AutoGenerateColumns = false;
+                Transactions_DataGridView_Transactions.Columns.Clear();
+                
+                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Transaction Type",
+                    DataPropertyName = "TransactionType",
+                    Name = "colChartType",
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+                });
+                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Count",
+                    DataPropertyName = "Count", 
+                    Name = "colChartCount",
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+                });
+                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Total Quantity",
+                    DataPropertyName = "TotalQuantity",
+                    Name = "colChartQuantity",
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+                });
+                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Percentage",
+                    DataPropertyName = "Percentage", 
+                    Name = "colChartPercentage",
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+                });
+
+                Transactions_DataGridView_Transactions.DataSource = new BindingList<dynamic>(chartData.Cast<dynamic>().ToList());
+                
+                // Apply color coding for chart view
+                foreach (DataGridViewRow row in Transactions_DataGridView_Transactions.Rows)
+                {
+                    if (row.Cells["colChartType"].Value?.ToString() is string transactionType)
+                    {
+                        switch (transactionType)
+                        {
+                            case "IN":
+                                row.DefaultCellStyle.BackColor = Color.FromArgb(212, 237, 218);
+                                row.DefaultCellStyle.ForeColor = Color.FromArgb(21, 87, 36);
+                                break;
+                            case "OUT":
+                                row.DefaultCellStyle.BackColor = Color.FromArgb(248, 215, 218);
+                                row.DefaultCellStyle.ForeColor = Color.FromArgb(132, 32, 41);
+                                break;
+                            case "TRANSFER":
+                                row.DefaultCellStyle.BackColor = Color.FromArgb(255, 243, 205);
+                                row.DefaultCellStyle.ForeColor = Color.FromArgb(133, 100, 4);
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low,
+                    controlName: "CreateChartViewInDataGrid");
+            }
+        }
+
+        /// <summary>
+        /// Creates a timeline representation in the DataGridView
+        /// </summary>
+        private void CreateTimelineViewInDataGrid(List<Model_Transactions> transactions)
+        {
+            try
+            {
+                // Sort transactions chronologically for timeline view
+                var timelineData = transactions.OrderByDescending(t => t.DateTime)
+                    .Select(t => new
+                    {
+                        DateTime = t.DateTime.ToString("yyyy-MM-dd HH:mm"),
+                        Type = GetTransactionTypeIcon(t.TransactionType),
+                        PartID = t.PartID ?? "",
+                        Quantity = t.Quantity,
+                        Operation = t.Operation ?? "",
+                        User = t.User ?? "",
+                        Notes = t.Notes ?? ""
+                    })
+                    .ToList();
+
+                // Setup timeline columns
+                Transactions_DataGridView_Transactions.AutoGenerateColumns = false;
+                Transactions_DataGridView_Transactions.Columns.Clear();
+                
+                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Time",
+                    DataPropertyName = "DateTime",
+                    Name = "colTimelineTime",
+                    Width = 120
+                });
+                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Type",
+                    DataPropertyName = "Type",
+                    Name = "colTimelineType",
+                    Width = 60
+                });
+                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Part ID",
+                    DataPropertyName = "PartID",
+                    Name = "colTimelinePartID",
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+                });
+                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Qty",
+                    DataPropertyName = "Quantity",
+                    Name = "colTimelineQuantity",
+                    Width = 60
+                });
+                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Operation",
+                    DataPropertyName = "Operation",
+                    Name = "colTimelineOperation",
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+                });
+                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "User",
+                    DataPropertyName = "User",
+                    Name = "colTimelineUser",
+                    Width = 80
+                });
+                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+                {
+                    HeaderText = "Notes",
+                    DataPropertyName = "Notes",
+                    Name = "colTimelineNotes",
+                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+                });
+
+                Transactions_DataGridView_Transactions.DataSource = new BindingList<dynamic>(timelineData.Cast<dynamic>().ToList());
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low,
+                    controlName: "CreateTimelineViewInDataGrid");
+            }
+        }
+
+        /// <summary>
+        /// Gets the appropriate icon for transaction type
+        /// </summary>
+        private string GetTransactionTypeIcon(TransactionType transactionType)
+        {
+            return transactionType switch
+            {
+                TransactionType.IN => "📥",
+                TransactionType.OUT => "📤", 
+                TransactionType.TRANSFER => "🔄",
+                _ => "❓"
+            };
         }
 
         #endregion
@@ -825,6 +1034,10 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 Transactions_CheckBox_OUT.Checked = true;
                 Transactions_CheckBox_TRANSFER.Checked = true;
                 Transactions_Radio_Today.Checked = true;
+                
+                // Reset view mode to Grid
+                Transactions_Radio_GridView.Checked = true;
+                _currentViewMode = TransactionViewMode.Grid;
             }
             catch (Exception ex)
             {
@@ -942,15 +1155,68 @@ namespace MTM_Inventory_Application.Forms.Transactions
         {
             try
             {
-                // TODO: Implement analytics dashboard updates
+                if (transactions.Count == 0) return;
+
+                // Calculate analytics from current transaction data
+                var analytics = CalculateTransactionAnalytics(transactions);
+                
+                // Update the form title with analytics summary
+                var summaryText = $"Transactions - {analytics["TotalTransactions"]} total | " +
+                                $"📥 {analytics["InTransactions"]} IN | " +
+                                $"📤 {analytics["OutTransactions"]} OUT | " +
+                                $"🔄 {analytics["TransferTransactions"]} TRANSFER";
+                
+                this.Text = summaryText;
+                
+                // Log analytics for debugging
+                System.Diagnostics.Debug.WriteLine($"[ANALYTICS] {summaryText}");
+                System.Diagnostics.Debug.WriteLine($"[ANALYTICS] Top Part: {analytics["TopPartId"]}, Top User: {analytics["TopUser"]}");
+                System.Diagnostics.Debug.WriteLine($"[ANALYTICS] Total Quantity: {analytics["TotalQuantity"]}, Unique Parts: {analytics["UniquePartIds"]}");
+                
+                // TODO: Update visual dashboard components when implemented
                 await Task.CompletedTask;
-                System.Diagnostics.Debug.WriteLine($"[ANALYTICS] Processing {transactions.Count} transactions for dashboard");
             }
             catch (Exception ex)
             {
                 Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low,
                     controlName: "UpdateAnalyticsDashboardAsync");
             }
+        }
+
+        /// <summary>
+        /// Calculates analytics from transaction data
+        /// </summary>
+        /// <param name="transactions">Transaction data to analyze</param>
+        /// <returns>Dictionary containing calculated analytics</returns>
+        private Dictionary<string, object> CalculateTransactionAnalytics(List<Model_Transactions> transactions)
+        {
+            var analytics = new Dictionary<string, object>();
+            
+            // Basic counts
+            analytics["TotalTransactions"] = transactions.Count;
+            analytics["InTransactions"] = transactions.Count(t => t.TransactionType == TransactionType.IN);
+            analytics["OutTransactions"] = transactions.Count(t => t.TransactionType == TransactionType.OUT);
+            analytics["TransferTransactions"] = transactions.Count(t => t.TransactionType == TransactionType.TRANSFER);
+            
+            // Quantity analysis
+            analytics["TotalQuantity"] = transactions.Sum(t => t.Quantity);
+            
+            // Unique counts
+            analytics["UniquePartIds"] = transactions.Select(t => t.PartID).Distinct().Count();
+            analytics["ActiveUsers"] = transactions.Select(t => t.User).Distinct().Count();
+            
+            // Top items
+            var topPartGroup = transactions.GroupBy(t => t.PartID)
+                .OrderByDescending(g => g.Sum(t => t.Quantity))
+                .FirstOrDefault();
+            analytics["TopPartId"] = topPartGroup?.Key ?? "";
+            
+            var topUserGroup = transactions.GroupBy(t => t.User)
+                .OrderByDescending(g => g.Count())
+                .FirstOrDefault();
+            analytics["TopUser"] = topUserGroup?.Key ?? "";
+            
+            return analytics;
         }
 
         /// <summary>
@@ -1172,6 +1438,34 @@ namespace MTM_Inventory_Application.Forms.Transactions
             if (!string.IsNullOrWhiteSpace(Transactions_TextBox_SmartSearch.Text))
             {
                 await HandleSmartSearchAsync(Transactions_TextBox_SmartSearch.Text);
+            }
+        }
+
+        /// <summary>
+        /// Handles view mode change events
+        /// </summary>
+        private async Task HandleViewModeChangeAsync()
+        {
+            try
+            {
+                // Update current view mode based on selected radio button
+                if (Transactions_Radio_GridView.Checked)
+                    _currentViewMode = TransactionViewMode.Grid;
+                else if (Transactions_Radio_ChartView.Checked)
+                    _currentViewMode = TransactionViewMode.Chart;
+                else if (Transactions_Radio_TimelineView.Checked)
+                    _currentViewMode = TransactionViewMode.Timeline;
+
+                // Refresh the current display with the new view mode
+                if (_displayedTransactions != null && _displayedTransactions.Count > 0)
+                {
+                    await DisplaySearchResultsAsync(_displayedTransactions.ToList());
+                }
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low,
+                    controlName: "HandleViewModeChangeAsync");
             }
         }
 
