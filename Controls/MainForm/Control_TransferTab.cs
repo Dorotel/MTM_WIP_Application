@@ -10,6 +10,7 @@ using MTM_Inventory_Application.Forms.MainForm.Classes;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
+using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Controls.MainForm
 {
@@ -47,6 +48,20 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         public Control_TransferTab()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_TransferTab),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_TransferTab), nameof(Control_TransferTab));
+
+            Service_DebugTracer.TraceUIAction("TRANSFER_TAB_INITIALIZATION", nameof(Control_TransferTab),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "UserControl"
+                });
+
             InitializeComponent();
 
             // Apply comprehensive DPI scaling and runtime layout adjustments

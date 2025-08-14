@@ -6,6 +6,7 @@ using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
+using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
@@ -24,17 +25,51 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         public Control_Edit_User()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_Edit_User),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_Edit_User), nameof(Control_Edit_User));
+
+            Service_DebugTracer.TraceUIAction("EDIT_USER_INITIALIZATION", nameof(Control_Edit_User),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "UserControl"
+                });
+
             InitializeComponent();
             
+            Service_DebugTracer.TraceUIAction("THEME_APPLICATION", nameof(Control_Edit_User),
+                new Dictionary<string, object>
+                {
+                    ["DpiScaling"] = "APPLIED",
+                    ["LayoutAdjustments"] = "APPLIED"
+                });
             // Apply comprehensive DPI scaling and runtime layout adjustments
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
-            
+
+            Service_DebugTracer.TraceUIAction("KEYPRESS_EVENTS_SETUP", nameof(Control_Edit_User),
+                new Dictionary<string, object>
+                {
+                    ["TextBoxes"] = new[] { "FirstName", "LastName", "Pin", "VisualUserName", "VisualPassword" },
+                    ["KeyPressHandler"] = "NoSpaces"
+                });
             Control_Edit_User_TextBox_FirstName.KeyPress += Control_Edit_User_TextBox_NoSpaces_KeyPress;
             Control_Edit_User_TextBox_LastName.KeyPress += Control_Edit_User_TextBox_NoSpaces_KeyPress;
             Control_Edit_User_TextBox_Pin.KeyPress += Control_Edit_User_TextBox_NoSpaces_KeyPress;
             Control_Edit_User_TextBox_VisualUserName.KeyPress += Control_Edit_User_TextBox_NoSpaces_KeyPress;
             Control_Edit_User_TextBox_VisualPassword.KeyPress += Control_Edit_User_TextBox_NoSpaces_KeyPress;
+
+            Service_DebugTracer.TraceUIAction("PASSWORD_FIELDS_SETUP", nameof(Control_Edit_User),
+                new Dictionary<string, object>
+                {
+                    ["PasswordFields"] = new[] { "Pin", "VisualPassword" },
+                    ["UseSystemPasswordChar"] = true,
+                    ["VisualUserNameEnabled"] = false
+                });
             Control_Edit_User_TextBox_Pin.UseSystemPasswordChar = true;
             Control_Edit_User_TextBox_VisualPassword.UseSystemPasswordChar = true;
             Control_Edit_User_TextBox_VisualUserName.Enabled = false;
