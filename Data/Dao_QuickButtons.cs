@@ -29,7 +29,7 @@ namespace MTM_Inventory_Application.Data
 
                 var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
                     Model_AppVariables.ConnectionString,
-                    "sys_last_10_transactions_Update_ByUserAndPosition_1",
+                    "sys_last_10_transactions_Update_ByUserAndPosition",
                     parameters,
                     null, // No progress helper for this method
                     true  // Use async
@@ -63,7 +63,7 @@ namespace MTM_Inventory_Application.Data
 
                 var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
                     Model_AppVariables.ConnectionString,
-                    "sys_last_10_transactions_RemoveAndShift_ByUser_1",
+                    "sys_last_10_transactions_RemoveAndShift_ByUser",
                     parameters,
                     null, // No progress helper for this method
                     true  // Use async
@@ -97,7 +97,7 @@ namespace MTM_Inventory_Application.Data
 
                 var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
                     Model_AppVariables.ConnectionString,
-                    "sys_last_10_transactions_Add_AtPosition_1",
+                    "sys_last_10_transactions_Add_AtPosition",
                     parameters,
                     null, // No progress helper for this method
                     true  // Use async
@@ -133,7 +133,7 @@ namespace MTM_Inventory_Application.Data
 
                 var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
                     Model_AppVariables.ConnectionString,
-                    "sys_last_10_transactions_Move_1",
+                    "sys_last_10_transactions_Move",
                     parameters,
                     null, // No progress helper for this method
                     true  // Use async
@@ -229,7 +229,7 @@ namespace MTM_Inventory_Application.Data
 
                 var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
                     Model_AppVariables.ConnectionString,
-                    "sys_last_10_transactions_RemoveAndShift_ByUser_1",
+                    "sys_last_10_transactions_RemoveAndShift_ByUser",
                     parameters,
                     null, // No progress helper for this method
                     true  // Use async
@@ -263,7 +263,7 @@ namespace MTM_Inventory_Application.Data
 
                 var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
                     Model_AppVariables.ConnectionString,
-                    "sys_last_10_transactions_Add_AtPosition_1",
+                    "sys_last_10_transactions_Add_AtPosition",
                     parameters,
                     null, // No progress helper for this method
                     true  // Use async

@@ -543,7 +543,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 Model_AppVariables.User ??= Environment.UserName;
 
                 _progressHelper?.UpdateProgress(40, "Adding inventory item...");
-                await Dao_Inventory.AddInventoryItemAsync(
+                
+                // Verify the transaction succeeded before proceeding
+                var inventoryResult = await Dao_Inventory.AddInventoryItemAsync(
                     partId,
                     loc,
                     op,
@@ -554,9 +556,28 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     notes,
                     true);
 
+                // Check if the inventory transaction was successful
+                if (!inventoryResult.IsSuccess)
+                {
+                    LoggingUtility.LogApplicationError(new Exception($"Inventory transaction failed: {inventoryResult.ErrorMessage}"));
+                    MessageBox.Show($@"Failed to save inventory item: {inventoryResult.ErrorMessage}", @"Save Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    
+                    // Update status to show failure
+                    if (MainFormInstance != null)
+                    {
+                        MainFormInstance.MainForm_StatusStrip_SavedStatus.Text = 
+                            $@"Failed to save inventory transaction @ {DateTime.Now:hh:mm tt}";
+                    }
+                    return;
+                }
+
+                LoggingUtility.Log($"Inventory transaction verified successful: {inventoryResult.StatusMessage}");
+                
                 _progressHelper?.UpdateProgress(70, "Updating recent transactions...");
                 await AddToLast10TransactionsIfUniqueAsync(Model_AppVariables.User, partId, op, qty);
 
+                // Only update status after verifying transaction success
                 if (MainFormInstance != null)
                 {
                     MainFormInstance.MainForm_StatusStrip_SavedStatus.Text =
@@ -571,10 +592,19 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 }
 
                 _progressHelper?.UpdateProgress(100, "Save complete");
+                LoggingUtility.Log("Inventory Save operation completed successfully.");
             }
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
+                
+                // Update status to show error occurred
+                if (MainFormInstance != null)
+                {
+                    MainFormInstance.MainForm_StatusStrip_SavedStatus.Text = 
+                        $@"Error occurred during save operation @ {DateTime.Now:hh:mm tt}";
+                }
+                
                 await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "MainForm_Inventory_Button_Save");
             }
             finally

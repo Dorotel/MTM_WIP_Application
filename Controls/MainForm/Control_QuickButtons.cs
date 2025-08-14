@@ -102,7 +102,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 // because the stored procedure has p_Status and p_ErrorMsg parameters
                 var dataResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
                     Model_AppVariables.ConnectionString,
-                    "sys_last_10_transactions_Get_ByUser_1",
+                    "sys_last_10_transactions_Get_ByUser",
                     new Dictionary<string, object> { ["User"] = currentUser },
                     null, // No progress helper for this method
                     true  // Use async

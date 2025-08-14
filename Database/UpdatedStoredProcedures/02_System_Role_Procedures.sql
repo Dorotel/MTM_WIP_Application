@@ -299,13 +299,13 @@ BEGIN
     SELECT 
         ID,
         User,
-        FullName,
+        `Full Name`,
         AccessType,
         VitsUser,
         CreatedDate,
         ModifiedDate
     FROM usr_users 
-    ORDER BY FullName;
+    ORDER BY `Full Name`;
     
     SET p_Status = 0;
     SET p_ErrorMsg = CONCAT('Retrieved user access information for ', v_Count, ' users');

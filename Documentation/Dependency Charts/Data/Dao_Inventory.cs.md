@@ -29,7 +29,7 @@
 - 🗄️ `inv_inventory_transfer_quantity` - Purpose TBD - Status: TO_VERIFY
 - 🗄️ `inv_inventory_Get_ByPartID` - Purpose TBD - Status: TO_VERIFY
 - 🗄️ `inv_inventory_Transfer_Part` - Purpose TBD - Status: TO_VERIFY
-- 🗄️ `inv_inventory_Remove_Item_1_1` - Purpose TBD - Status: TO_VERIFY
+- 🗄️ `inv_inventory_Remove_Item` - Purpose TBD - Status: TO_VERIFY
 - 🗄️ `inv_inventory_GetNextBatchNumber` - Purpose TBD - Status: TO_VERIFY
 - 🗄️ `BatchNumber` - Purpose TBD - Status: TO_VERIFY
 - 🗄️ `inv_inventory_Get_ByPartIDAndOperation` - Purpose TBD - Status: TO_VERIFY

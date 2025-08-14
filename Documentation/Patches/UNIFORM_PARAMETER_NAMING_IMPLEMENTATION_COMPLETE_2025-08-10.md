@@ -134,7 +134,7 @@ usr_users_GetUserSetting_ByUserAndField(IN p_User, IN p_Field, OUT p_Status, OUT
 ```sql
 -- Examples of standardized procedures:
 inv_inventory_Add_Item(IN p_PartID, IN p_Location, ..., OUT p_Status, OUT p_ErrorMsg)
-inv_inventory_Remove_Item_1_1(IN p_PartID, IN p_Quantity, ..., OUT p_Status, OUT p_ErrorMsg)
+inv_inventory_Remove_Item(IN p_PartID, IN p_Quantity, ..., OUT p_Status, OUT p_ErrorMsg)
 inv_inventory_Transfer_Part(IN p_BatchNumber, IN p_PartID, ..., OUT p_Status, OUT p_ErrorMsg)
 ```
 

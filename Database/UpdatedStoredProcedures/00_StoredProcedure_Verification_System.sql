@@ -8,6 +8,13 @@
 -- MySQL Version: 5.7.24+ (MAMP Compatible)
 -- ================================================================================
 
+DROP PROCEDURE IF EXISTS sys_VerifyDatabaseSchema;
+DROP PROCEDURE IF EXISTS sys_VerifyTableColumns;
+DROP PROCEDURE IF EXISTS sys_GetStoredProcedureInventory;
+DROP PROCEDURE IF EXISTS test_InventoryProcedures;
+DROP PROCEDURE IF EXISTS sys_RunCompleteVerification;
+
+
 -- ================================================================================
 -- PHASE 1: DATABASE SCHEMA VALIDATION
 -- ================================================================================
@@ -30,7 +37,7 @@ BEGIN
     END;
     
     -- Expected core tables from LiveDatabase.sql analysis
-    SET v_Expected = 11;
+    SET v_Expected = 17;
     
     -- Check for each required table
     SELECT COUNT(*) INTO v_TableCount
@@ -45,9 +52,15 @@ BEGIN
         'usr_users',
         'usr_ui_settings', 
         'sys_user_roles',
+        'sys_roles',
         'md_part_ids',
         'md_locations', 
-        'md_operation_numbers'
+        'md_operation_numbers',
+        'md_item_types',
+        'log_error_log',
+        'log_changelog',
+        'sys_quick_buttons',
+        'sys_last_10_transactions'
     );
     
     IF v_TableCount < v_Expected THEN
@@ -104,6 +117,16 @@ BEGIN
             SET v_ExpectedColumns = 'ThemeName,SettingsJson';
         WHEN 'debug_matching' THEN
             SET v_ExpectedColumns = 'id,in_id,in_part,in_loc,in_batch,out_id,out_part,out_loc,out_batch,matched_at';
+        WHEN 'usr_users' THEN
+            SET v_ExpectedColumns = 'UserID,User,Full Name,Shift,VitsUser,Pin,LastShownVersion,HideChangeLog,Theme_Name,Theme_FontSize';
+        WHEN 'md_part_ids' THEN
+            SET v_ExpectedColumns = 'PartID,Description,CreatedDate';
+        WHEN 'md_locations' THEN
+            SET v_ExpectedColumns = 'LocationID,Location,Description,IsActive';
+        WHEN 'md_operation_numbers' THEN
+            SET v_ExpectedColumns = 'OperationID,OperationNumber,Description,IsActive';
+        WHEN 'sys_last_10_transactions' THEN
+            SET v_ExpectedColumns = 'Position,User,PartID,Operation,Quantity,ReceiveDate';
         ELSE
             SET p_Status = 1;
             SET p_ErrorMsg = CONCAT('Unknown table for verification: ', p_TableName);
@@ -189,15 +212,15 @@ BEGIN
     DECLARE v_Message VARCHAR(255) DEFAULT '';
     DECLARE v_TestResult BOOLEAN DEFAULT FALSE;
     
-    SET p_TestsPassed = 0;
-    SET p_TestsFailed = 0;
-    SET p_ErrorMsg = '';
-    
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET p_TestsFailed = p_TestsFailed + 1;
         SET p_ErrorMsg = CONCAT(p_ErrorMsg, 'CRITICAL ERROR in inventory procedure testing; ');
     END;
+    
+    SET p_TestsPassed = 0;
+    SET p_TestsFailed = 0;
+    SET p_ErrorMsg = '';
     
     -- Test 1: inv_inventory_Add_Item procedure
     BEGIN
@@ -218,13 +241,14 @@ BEGIN
         END IF;
     END;
     
-    -- Test 2: inv_inventory_Remove_Item_1_1 procedure  
+    -- Test 2: inv_inventory_Remove_Item procedure  
     BEGIN
         DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET v_TestResult = FALSE;
         SET v_TestResult = TRUE;
         
-        CALL inv_inventory_Remove_Item_1_1(
-            'TEST_PART_001', 'TEST_LOC', '99', 1, 'TEST_USER', 'Test removal',
+        CALL inv_inventory_Remove_Item(
+            'TEST_PART_001', 'TEST_LOC', '99', 1, 'WIP',
+            'TEST_USER', NULL, 'Test removal',
             v_Status, v_Message
         );
         
@@ -232,7 +256,7 @@ BEGIN
             SET p_TestsPassed = p_TestsPassed + 1;
         ELSE
             SET p_TestsFailed = p_TestsFailed + 1;
-            SET p_ErrorMsg = CONCAT(p_ErrorMsg, 'inv_inventory_Remove_Item_1_1: ', v_Message, '; ');
+            SET p_ErrorMsg = CONCAT(p_ErrorMsg, 'inv_inventory_Remove_Item: ', v_Message, '; ');
         END IF;
     END;
     

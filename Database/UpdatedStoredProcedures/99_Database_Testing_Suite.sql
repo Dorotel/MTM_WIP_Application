@@ -132,7 +132,7 @@ BEGIN
         SET v_TestResult = TRUE;
         SET v_TestName = 'Remove Inventory Item';
         
-        CALL inv_inventory_Remove_Item_1_1(
+        CALL inv_inventory_Remove_Item(
             'TEST_VERIFICATION_PART', 'TEST_LOC', '99', 1, 'SYSTEM_TEST', 
             'Comprehensive verification test removal',
             v_Status, v_Message

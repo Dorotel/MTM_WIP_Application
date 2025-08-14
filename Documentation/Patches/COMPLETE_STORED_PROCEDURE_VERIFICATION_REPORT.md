@@ -182,11 +182,11 @@ I have conducted a **comprehensive verification** of all stored procedure calls 
 
 ### **Quick Button Procedures** (06_Quick_Button_Procedures.sql)
 ? **ALL PROCEDURES CORRECTLY USED**:
-- `sys_last_10_transactions_Get_ByUser_1` - Used in Control_QuickButtons, Dao_QuickButtons
-- `sys_last_10_transactions_Update_ByUserAndPosition_1` - Used in Dao_QuickButtons
-- `sys_last_10_transactions_RemoveAndShift_ByUser_1` - Used in Dao_QuickButtons
-- `sys_last_10_transactions_Add_AtPosition_1` - Used in Dao_QuickButtons
-- `sys_last_10_transactions_Move_1` - Used in Dao_QuickButtons
+- `sys_last_10_transactions_Get_ByUser` - Used in Control_QuickButtons, Dao_QuickButtons
+- `sys_last_10_transactions_Update_ByUserAndPosition` - Used in Dao_QuickButtons
+- `sys_last_10_transactions_RemoveAndShift_ByUser` - Used in Dao_QuickButtons
+- `sys_last_10_transactions_Add_AtPosition` - Used in Dao_QuickButtons
+- `sys_last_10_transactions_Move` - Used in Dao_QuickButtons
 - `sys_last_10_transactions_DeleteAll_ByUser` - Used in Dao_QuickButtons
 - `sys_last_10_transactions_AddOrShift_ByUser` - Used in Dao_QuickButtons
 

@@ -32,7 +32,7 @@ These are the different sections within the main window:
 #### Remove Tab (`Controls/MainForm/Control_RemoveTab.cs`) 
 **What it does**: Lets users remove parts from inventory
 **Database Connection**:
-- Calls stored procedures like `inv_inventory_Remove_Item_1_1` 
+- Calls stored procedures like `inv_inventory_Remove_Item` 
 - Shows progress while removing items
 - Updates transaction history
 
@@ -68,7 +68,7 @@ These files handle specific database operations:
 **What it does**: All inventory-related database operations
 **Stored Procedures Used**:
 - `inv_inventory_Add_Item`: Add new inventory
-- `inv_inventory_Remove_Item_1_1`: Remove inventory items
+- `inv_inventory_Remove_Item`: Remove inventory items
 - `inv_inventory_Transfer_Part`: Transfer between locations
 - `inv_inventory_Get_ByPartID`: Get inventory details
 

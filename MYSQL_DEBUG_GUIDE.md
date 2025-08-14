@@ -346,7 +346,7 @@ SELECT @status AS 'Status', @error AS 'Message';
 -- ? Expected: Status=0, quantity updated
 
 -- Test 5: Remove Inventory Item (Your Original Issue)
-CALL inv_inventory_Remove_Item_1_1(
+CALL inv_inventory_Remove_Item(
     'TEST_PART_001', 'TEST_LOCATION', '100', 25, 'WIP',
     'TEST_USER', '', 'Test removal', @status, @error
 );

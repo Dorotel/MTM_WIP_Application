@@ -155,7 +155,7 @@ FLUSH PRIVILEGES;</code></pre>
                         <h4>🔍 Inventory Procedures</h4>
                         <ul>
                             <li><code>inv_inventory_Add_Item_1_1</code></li>
-                            <li><code>inv_inventory_Remove_Item_1_1</code></li>
+                            <li><code>inv_inventory_Remove_Item</code></li>
                             <li><code>inv_inventory_Transfer_Item_1_1</code></li>
                             <li><code>inv_inventory_Search_*</code></li>
                         </ul>
@@ -180,7 +180,7 @@ FLUSH PRIVILEGES;</code></pre>
 
                 <h3>🛡️ Error Handling Standard</h3>
                 <div class="error-standard">
-                    <p>All stored procedures follow the <code>inv_inventory_Remove_Item_1_1</code> error reporting pattern:</p>
+                    <p>All stored procedures follow the <code>inv_inventory_Remove_Item</code> error reporting pattern:</p>
                     <div class="code-block">
                         <pre><code>-- Standard OUT parameters for all procedures
 OUT p_Status VARCHAR(50),

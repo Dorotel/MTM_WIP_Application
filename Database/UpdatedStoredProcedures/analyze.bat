@@ -245,7 +245,7 @@ echo 2. ERROR HANDLING STANDARDIZATION: >> "%REPORT_FILE%"
 echo    - All procedures should have 'DECLARE EXIT HANDLER FOR SQLEXCEPTION' >> "%REPORT_FILE%"
 echo    - All procedures should have 'OUT p_Status INT' parameter >> "%REPORT_FILE%"
 echo    - All procedures should have 'OUT p_ErrorMsg VARCHAR(255)' parameter >> "%REPORT_FILE%"
-echo    - Follow the pattern used in inv_inventory_Remove_Item_1_1 >> "%REPORT_FILE%"
+echo    - Follow the pattern used in inv_inventory_Remove_Item >> "%REPORT_FILE%"
 echo. >> "%REPORT_FILE%"
 
 echo 3. MYSQL 5.7.24 COMPATIBILITY: >> "%REPORT_FILE%"

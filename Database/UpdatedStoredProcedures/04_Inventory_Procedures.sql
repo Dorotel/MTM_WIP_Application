@@ -2,16 +2,16 @@
 -- MTM INVENTORY APPLICATION - INVENTORY MANAGEMENT STORED PROCEDURES
 -- ================================================================================
 -- File: 04_Inventory_Procedures.sql
--- Purpose: Inventory tracking, transactions, and batch number management
+-- Purpose: Inventory tracking, transactions, and batch number management with error logging
 -- Created: August 10, 2025
--- Updated: August 12, 2025 - FIXED COLUMN NAMES TO MATCH DATABASE SCHEMA
+-- Updated: January 27, 2025 - ADDED ERROR LOGGING TO ALL PROCEDURES
 -- Target Database: mtm_wip_application_test
 -- MySQL Version: 5.7.24+ (MAMP Compatible)
 -- ================================================================================
 
 -- Drop procedures if they exist (for clean deployment)
 DROP PROCEDURE IF EXISTS inv_inventory_Add_Item;
-DROP PROCEDURE IF EXISTS inv_inventory_Remove_Item_1_1;
+DROP PROCEDURE IF EXISTS inv_inventory_Remove_Item;
 DROP PROCEDURE IF EXISTS inv_inventory_Transfer_Part;
 DROP PROCEDURE IF EXISTS inv_inventory_transfer_quantity;
 DROP PROCEDURE IF EXISTS inv_inventory_GetNextBatchNumber;
@@ -23,12 +23,14 @@ DROP PROCEDURE IF EXISTS inv_transaction_GetProblematicBatchCount;
 DROP PROCEDURE IF EXISTS inv_transaction_GetProblematicBatches;
 DROP PROCEDURE IF EXISTS inv_transaction_SplitBatchNumbers;
 DROP PROCEDURE IF EXISTS inv_inventory_Search_Advanced;
+DROP PROCEDURE IF EXISTS inv_transactions_SmartSearch;
+DROP PROCEDURE IF EXISTS inv_transactions_GetAnalytics;
 
 -- ================================================================================
 -- INVENTORY ITEM MANAGEMENT PROCEDURES (MySQL 5.7.24 Compatible)
 -- ================================================================================
 
--- Add inventory item with status reporting
+-- Add inventory item with status reporting and error logging
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_Add_Item(
     IN p_PartID VARCHAR(100),
@@ -44,11 +46,30 @@ CREATE PROCEDURE inv_inventory_Add_Item(
 )
 BEGIN
     DECLARE v_NextBatchNumber VARCHAR(20);
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = CONCAT('Database error occurred while adding inventory item for part: ', p_PartID);
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace, 
+            ModuleName, MethodName, AdditionalInfo, MachineName, 
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            COALESCE(p_User, 'SYSTEM'), 'Error', 'DatabaseError',
+            CONCAT('inv_inventory_Add_Item failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_inventory_Add_Item', 'Add_Item',
+            CONCAT('PartID: ', p_PartID, ', Location: ', p_Location, ', Operation: ', p_Operation, ', Quantity: ', p_Quantity),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     END;
     
@@ -66,6 +87,21 @@ BEGIN
     IF p_Quantity <= 0 THEN
         SET p_Status = 1;
         SET p_ErrorMsg = 'Quantity must be greater than zero';
+        
+        -- Log validation error
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            COALESCE(p_User, 'SYSTEM'), 'Warning', 'ValidationError',
+            'inv_inventory_Add_Item validation failed: Quantity must be greater than zero',
+            'Validation Error',
+            'inv_inventory_Add_Item', 'Add_Item',
+            CONCAT('PartID: ', p_PartID, ', Quantity: ', p_Quantity),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     ELSE
         -- FIXED: Use correct column names from actual database schema
@@ -93,9 +129,9 @@ BEGIN
 END $$
 DELIMITER ;
 
--- Remove inventory item with detailed status reporting
+-- Remove inventory item with detailed status reporting and error logging
 DELIMITER $$
-CREATE PROCEDURE inv_inventory_Remove_Item_1_1(
+CREATE PROCEDURE inv_inventory_Remove_Item(
     IN p_PartID VARCHAR(100),
     IN p_Location VARCHAR(100),
     IN p_Operation VARCHAR(100),
@@ -110,11 +146,30 @@ CREATE PROCEDURE inv_inventory_Remove_Item_1_1(
 BEGIN
     DECLARE v_CurrentQuantity INT DEFAULT 0;
     DECLARE v_InventoryId INT DEFAULT NULL;
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = CONCAT('Database error occurred while removing inventory item for part: ', p_PartID);
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            COALESCE(p_User, 'SYSTEM'), 'Error', 'DatabaseError',
+            CONCAT('inv_inventory_Remove_Item failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_inventory_Remove_Item', 'Remove_Item_1_1',
+            CONCAT('PartID: ', p_PartID, ', Location: ', p_Location, ', Operation: ', p_Operation, ', Quantity: ', p_Quantity, ', BatchNumber: ', p_BatchNumber),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     END;
     
@@ -124,6 +179,21 @@ BEGIN
     IF p_Quantity <= 0 THEN
         SET p_Status = 1;
         SET p_ErrorMsg = 'Quantity must be greater than zero';
+        
+        -- Log validation error
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            COALESCE(p_User, 'SYSTEM'), 'Warning', 'ValidationError',
+            'inv_inventory_Remove_Item validation failed: Quantity must be greater than zero',
+            'Validation Error',
+            'inv_inventory_Remove_Item', 'Remove_Item_1_1',
+            CONCAT('PartID: ', p_PartID, ', Quantity: ', p_Quantity),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     ELSE
         -- Find matching inventory item
@@ -138,10 +208,40 @@ BEGIN
         IF v_InventoryId IS NULL THEN
             SET p_Status = 1;
             SET p_ErrorMsg = CONCAT('No matching inventory item found for part: ', p_PartID, ', batch: ', p_BatchNumber);
+            
+            -- Log business logic error
+            INSERT INTO log_error (
+                User, Severity, ErrorType, ErrorMessage, StackTrace,
+                ModuleName, MethodName, AdditionalInfo, MachineName,
+                OSVersion, AppVersion, ErrorTime
+            ) VALUES (
+                COALESCE(p_User, 'SYSTEM'), 'Warning', 'BusinessLogicError',
+                'inv_inventory_Remove_Item business logic failed: No matching inventory item found',
+                'No matching inventory item found',
+                'inv_inventory_Remove_Item', 'Remove_Item_1_1',
+                CONCAT('PartID: ', p_PartID, ', Location: ', p_Location, ', Operation: ', p_Operation, ', BatchNumber: ', p_BatchNumber),
+                'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+            );
+            
             ROLLBACK;
         ELSEIF v_CurrentQuantity < p_Quantity THEN
             SET p_Status = 1;
             SET p_ErrorMsg = CONCAT('Insufficient quantity. Available: ', v_CurrentQuantity, ', Requested: ', p_Quantity);
+            
+            -- Log insufficient quantity error
+            INSERT INTO log_error (
+                User, Severity, ErrorType, ErrorMessage, StackTrace,
+                ModuleName, MethodName, AdditionalInfo, MachineName,
+                OSVersion, AppVersion, ErrorTime
+            ) VALUES (
+                COALESCE(p_User, 'SYSTEM'), 'Warning', 'BusinessLogicError',
+                'inv_inventory_Remove_Item business logic failed: Insufficient quantity',
+                'Insufficient quantity available',
+                'inv_inventory_Remove_Item', 'Remove_Item_1_1',
+                CONCAT('PartID: ', p_PartID, ', Available: ', v_CurrentQuantity, ', Requested: ', p_Quantity),
+                'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+            );
+            
             ROLLBACK;
         ELSE
             -- FIXED: Use correct column name LastUpdated instead of ModifiedDate
@@ -174,7 +274,7 @@ DELIMITER ;
 -- INVENTORY TRANSFER PROCEDURES (MySQL 5.7.24 Compatible)
 -- ================================================================================
 
--- Transfer part to new location (simple transfer) with status reporting
+-- Transfer part to new location (simple transfer) with status reporting and error logging
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_Transfer_Part(
     IN p_BatchNumber VARCHAR(20),
@@ -189,11 +289,30 @@ BEGIN
     DECLARE v_Count INT DEFAULT 0;
     DECLARE v_RowsAffected INT DEFAULT 0;
     DECLARE v_OldLocation VARCHAR(100);
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = CONCAT('Database error occurred while transferring part: ', p_PartID);
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            COALESCE(p_User, 'SYSTEM'), 'Error', 'DatabaseError',
+            CONCAT('inv_inventory_Transfer_Part failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_inventory_Transfer_Part', 'Transfer_Part',
+            CONCAT('PartID: ', p_PartID, ', BatchNumber: ', p_BatchNumber, ', Operation: ', p_Operation, ', NewLocation: ', p_NewLocation),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     END;
     
@@ -209,6 +328,21 @@ BEGIN
     IF v_Count = 0 THEN
         SET p_Status = 1;
         SET p_ErrorMsg = CONCAT('No inventory found for part: ', p_PartID, ', batch: ', p_BatchNumber);
+        
+        -- Log business logic error
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            COALESCE(p_User, 'SYSTEM'), 'Warning', 'BusinessLogicError',
+            'inv_inventory_Transfer_Part business logic failed: No inventory found',
+            'No inventory found for transfer',
+            'inv_inventory_Transfer_Part', 'Transfer_Part',
+            CONCAT('PartID: ', p_PartID, ', BatchNumber: ', p_BatchNumber, ', Operation: ', p_Operation),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     ELSE
         -- FIXED: Use correct column name LastUpdated instead of ModifiedDate
@@ -228,6 +362,20 @@ BEGIN
         ELSE
             SET p_Status = 2;
             SET p_ErrorMsg = CONCAT('No transfer occurred for part: ', p_PartID);
+            
+            -- Log unexpected result
+            INSERT INTO log_error (
+                User, Severity, ErrorType, ErrorMessage, StackTrace,
+                ModuleName, MethodName, AdditionalInfo, MachineName,
+                OSVersion, AppVersion, ErrorTime
+            ) VALUES (
+                COALESCE(p_User, 'SYSTEM'), 'Warning', 'BusinessLogicError',
+                'inv_inventory_Transfer_Part business logic warning: No rows affected during transfer',
+                'No rows affected during transfer operation',
+                'inv_inventory_Transfer_Part', 'Transfer_Part',
+                CONCAT('PartID: ', p_PartID, ', BatchNumber: ', p_BatchNumber, ', RowsAffected: ', v_RowsAffected),
+                'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+            );
         END IF;
         
         COMMIT;
@@ -235,7 +383,7 @@ BEGIN
 END $$
 DELIMITER ;
 
--- Transfer specific quantity to new location with status reporting
+-- Transfer specific quantity to new location with status reporting and error logging
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_transfer_quantity(
     IN p_BatchNumber VARCHAR(20),
@@ -253,11 +401,30 @@ BEGIN
     DECLARE v_OriginalLocation VARCHAR(100);
     DECLARE v_CurrentQuantity INT DEFAULT 0;
     DECLARE v_Count INT DEFAULT 0;
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = CONCAT('Database error occurred while transferring quantity for part: ', p_PartID);
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            COALESCE(p_User, 'SYSTEM'), 'Error', 'DatabaseError',
+            CONCAT('inv_inventory_transfer_quantity failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_inventory_transfer_quantity', 'transfer_quantity',
+            CONCAT('PartID: ', p_PartID, ', BatchNumber: ', p_BatchNumber, ', TransferQuantity: ', p_TransferQuantity, ', NewLocation: ', p_NewLocation),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     END;
     
@@ -267,6 +434,21 @@ BEGIN
     IF p_TransferQuantity <= 0 THEN
         SET p_Status = 1;
         SET p_ErrorMsg = 'Transfer quantity must be greater than zero';
+        
+        -- Log validation error
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            COALESCE(p_User, 'SYSTEM'), 'Warning', 'ValidationError',
+            'inv_inventory_transfer_quantity validation failed: Transfer quantity must be greater than zero',
+            'Validation Error',
+            'inv_inventory_transfer_quantity', 'transfer_quantity',
+            CONCAT('PartID: ', p_PartID, ', TransferQuantity: ', p_TransferQuantity),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     ELSE
         -- Get original location, item type, and current quantity
@@ -280,10 +462,40 @@ BEGIN
         IF v_Count = 0 THEN
             SET p_Status = 1;
             SET p_ErrorMsg = CONCAT('No inventory found for part: ', p_PartID, ', batch: ', p_BatchNumber);
+            
+            -- Log business logic error
+            INSERT INTO log_error (
+                User, Severity, ErrorType, ErrorMessage, StackTrace,
+                ModuleName, MethodName, AdditionalInfo, MachineName,
+                OSVersion, AppVersion, ErrorTime
+            ) VALUES (
+                COALESCE(p_User, 'SYSTEM'), 'Warning', 'BusinessLogicError',
+                'inv_inventory_transfer_quantity business logic failed: No inventory found',
+                'No inventory found for quantity transfer',
+                'inv_inventory_transfer_quantity', 'transfer_quantity',
+                CONCAT('PartID: ', p_PartID, ', BatchNumber: ', p_BatchNumber, ', Operation: ', p_Operation),
+                'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+            );
+            
             ROLLBACK;
         ELSEIF v_CurrentQuantity < p_TransferQuantity THEN
             SET p_Status = 1;
             SET p_ErrorMsg = CONCAT('Insufficient quantity for transfer. Available: ', v_CurrentQuantity, ', Requested: ', p_TransferQuantity);
+            
+            -- Log insufficient quantity error
+            INSERT INTO log_error (
+                User, Severity, ErrorType, ErrorMessage, StackTrace,
+                ModuleName, MethodName, AdditionalInfo, MachineName,
+                OSVersion, AppVersion, ErrorTime
+            ) VALUES (
+                COALESCE(p_User, 'SYSTEM'), 'Warning', 'BusinessLogicError',
+                'inv_inventory_transfer_quantity business logic failed: Insufficient quantity for transfer',
+                'Insufficient quantity available for transfer',
+                'inv_inventory_transfer_quantity', 'transfer_quantity',
+                CONCAT('PartID: ', p_PartID, ', Available: ', v_CurrentQuantity, ', Requested: ', p_TransferQuantity),
+                'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+            );
+            
             ROLLBACK;
         ELSE
             -- Generate new batch number for transferred quantity
@@ -337,17 +549,36 @@ DELIMITER ;
 -- BATCH NUMBER MANAGEMENT PROCEDURES (MySQL 5.7.24 Compatible)
 -- ================================================================================
 
--- Get next available batch number with status reporting
+-- Get next available batch number with status reporting and error logging
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_GetNextBatchNumber(
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
 )
 BEGIN
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
+    
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = 'Database error occurred while generating next batch number';
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            'SYSTEM', 'Error', 'DatabaseError',
+            CONCAT('inv_inventory_GetNextBatchNumber failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_inventory_GetNextBatchNumber', 'GetNextBatchNumber',
+            'Error generating next batch number',
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
     END;
     
     SELECT LPAD(COALESCE(MAX(CAST(BatchNumber AS UNSIGNED)), 0) + 1, 10, '0') as NextBatchNumber
@@ -358,7 +589,7 @@ BEGIN
 END $$
 DELIMITER ;
 
--- Fix batch numbers (consolidate and clean up)
+-- Fix batch numbers (consolidate and clean up) with error logging
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_Fix_BatchNumbers(
     OUT p_Status INT,
@@ -366,11 +597,30 @@ CREATE PROCEDURE inv_inventory_Fix_BatchNumbers(
 )
 BEGIN
     DECLARE v_ProcessedRecords INT DEFAULT 0;
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = 'Database error occurred while fixing batch numbers';
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            'SYSTEM', 'Error', 'DatabaseError',
+            CONCAT('inv_inventory_Fix_BatchNumbers failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_inventory_Fix_BatchNumbers', 'Fix_BatchNumbers',
+            'Error during batch number consolidation',
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     END;
     
@@ -430,7 +680,7 @@ DELIMITER ;
 -- INVENTORY QUERY PROCEDURES (MySQL 5.7.24 Compatible)
 -- ================================================================================
 
--- Get inventory by part ID with status reporting
+-- Get inventory by part ID with status reporting and error logging
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_Get_ByPartID(
     IN p_PartID VARCHAR(100),
@@ -439,11 +689,29 @@ CREATE PROCEDURE inv_inventory_Get_ByPartID(
 )
 BEGIN
     DECLARE v_Count INT DEFAULT 0;
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = CONCAT('Database error occurred while retrieving inventory for part: ', p_PartID);
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            'SYSTEM', 'Error', 'DatabaseError',
+            CONCAT('inv_inventory_Get_ByPartID failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_inventory_Get_ByPartID', 'Get_ByPartID',
+            CONCAT('PartID: ', p_PartID),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
     END;
     
     SELECT COUNT(*) INTO v_Count FROM inv_inventory WHERE PartID = p_PartID;
@@ -454,7 +722,7 @@ BEGIN
 END $$
 DELIMITER ;
 
--- Get inventory by part ID and operation with status reporting
+-- Get inventory by part ID and operation with status reporting and error logging
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_Get_ByPartIDAndOperation(
     IN p_PartID VARCHAR(100),
@@ -464,11 +732,29 @@ CREATE PROCEDURE inv_inventory_Get_ByPartIDAndOperation(
 )
 BEGIN
     DECLARE v_Count INT DEFAULT 0;
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = CONCAT('Database error occurred while retrieving inventory for part: ', p_PartID, ', operation: ', p_Operation);
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            'SYSTEM', 'Error', 'DatabaseError',
+            CONCAT('inv_inventory_Get_ByPartIDAndOperation failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_inventory_Get_ByPartIDAndOperation', 'Get_ByPartIDAndOperation',
+            CONCAT('PartID: ', p_PartID, ', Operation: ', p_Operation),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
     END;
     
     SELECT COUNT(*) INTO v_Count 
@@ -484,7 +770,7 @@ BEGIN
 END $$
 DELIMITER ;
 
--- Get all inventory with status reporting
+-- Get all inventory with status reporting and error logging
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_Get_All(
     OUT p_Status INT,
@@ -492,11 +778,29 @@ CREATE PROCEDURE inv_inventory_Get_All(
 )
 BEGIN
     DECLARE v_Count INT DEFAULT 0;
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = 'Database error occurred while retrieving all inventory';
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            'SYSTEM', 'Error', 'DatabaseError',
+            CONCAT('inv_inventory_Get_All failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_inventory_Get_All', 'Get_All',
+            'Error retrieving all inventory records',
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
     END;
     
     SELECT COUNT(*) INTO v_Count FROM inv_inventory;
@@ -511,7 +815,7 @@ DELIMITER ;
 -- BATCH ANALYSIS AND CLEANUP PROCEDURES (MySQL 5.7.24 Compatible)
 -- ================================================================================
 
--- Get count of problematic batch numbers with status reporting
+-- Get count of problematic batch numbers with status reporting and error logging
 DELIMITER $$
 CREATE PROCEDURE inv_transaction_GetProblematicBatchCount(
     OUT p_Status INT,
@@ -519,11 +823,29 @@ CREATE PROCEDURE inv_transaction_GetProblematicBatchCount(
 )
 BEGIN
     DECLARE v_Count INT DEFAULT 0;
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = 'Database error occurred while counting problematic batch numbers';
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            'SYSTEM', 'Error', 'DatabaseError',
+            CONCAT('inv_transaction_GetProblematicBatchCount failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_transaction_GetProblematicBatchCount', 'GetProblematicBatchCount',
+            'Error counting problematic batch numbers',
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
     END;
     
     -- MySQL 5.7 compatible approach for counting problematic batches
@@ -543,7 +865,7 @@ BEGIN
 END $$
 DELIMITER ;
 
--- Get list of problematic batch numbers (limited) with status reporting
+-- Get list of problematic batch numbers (limited) with status reporting and error logging
 DELIMITER $$
 CREATE PROCEDURE inv_transaction_GetProblematicBatches(
     IN p_Limit INT,
@@ -552,11 +874,29 @@ CREATE PROCEDURE inv_transaction_GetProblematicBatches(
 )
 BEGIN
     DECLARE v_Count INT DEFAULT 0;
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = 'Database error occurred while retrieving problematic batch numbers';
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            'SYSTEM', 'Error', 'DatabaseError',
+            CONCAT('inv_transaction_GetProblematicBatches failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_transaction_GetProblematicBatches', 'GetProblematicBatches',
+            CONCAT('Limit: ', p_Limit),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
     END;
     
     -- Validate limit parameter
@@ -590,7 +930,7 @@ BEGIN
 END $$
 DELIMITER ;
 
--- Split problematic batch numbers with enhanced status reporting
+-- Split problematic batch numbers with enhanced status reporting and error logging
 DELIMITER $$
 CREATE PROCEDURE inv_transaction_SplitBatchNumbers(
     IN p_BatchNumbers TEXT,
@@ -601,12 +941,31 @@ CREATE PROCEDURE inv_transaction_SplitBatchNumbers(
 BEGIN
     DECLARE v_Counter INT DEFAULT 0;
     DECLARE v_BatchCount INT DEFAULT 0;
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = 'Database error occurred while splitting batch numbers';
         SET p_ProcessedCount = v_Counter;
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            'SYSTEM', 'Error', 'DatabaseError',
+            CONCAT('inv_transaction_SplitBatchNumbers failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_transaction_SplitBatchNumbers', 'SplitBatchNumbers',
+            CONCAT('BatchNumbers: ', SUBSTRING(p_BatchNumbers, 1, 100), '...'),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     END;
     
@@ -619,6 +978,21 @@ BEGIN
         SET p_Status = 1;
         SET p_ErrorMsg = 'No batch numbers provided for splitting';
         SET p_ProcessedCount = 0;
+        
+        -- Log validation error
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            'SYSTEM', 'Warning', 'ValidationError',
+            'inv_transaction_SplitBatchNumbers validation failed: No batch numbers provided',
+            'Validation Error',
+            'inv_transaction_SplitBatchNumbers', 'SplitBatchNumbers',
+            'Empty or null batch numbers parameter',
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     END IF;
     
@@ -640,7 +1014,7 @@ DELIMITER ;
 -- INVENTORY SEARCH PROCEDURES (MySQL 5.7.24 Compatible)
 -- ================================================================================
 
--- Advanced search for inventory items with flexible filtering using parameters
+-- Advanced search for inventory items with flexible filtering using parameters and error logging
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_Search_Advanced(
     IN p_PartID VARCHAR(100),
@@ -658,11 +1032,29 @@ CREATE PROCEDURE inv_inventory_Search_Advanced(
 )
 BEGIN
     DECLARE v_Count INT DEFAULT 0;
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = 'Database error occurred while searching inventory';
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            COALESCE(p_User, 'SYSTEM'), 'Error', 'DatabaseError',
+            CONCAT('inv_inventory_Search_Advanced failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_inventory_Search_Advanced', 'Search_Advanced',
+            CONCAT('PartID: ', COALESCE(p_PartID, 'NULL'), ', Operation: ', COALESCE(p_Operation, 'NULL'), ', Location: ', COALESCE(p_Location, 'NULL')),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
     END;
     
     -- Execute search with flexible filtering
@@ -698,7 +1090,7 @@ DELIMITER ;
 -- TRANSACTION SMART SEARCH PROCEDURES (MySQL 5.7.24 Compatible)
 -- ================================================================================
 
--- Smart search procedure for transactions with advanced filtering
+-- Smart search procedure for transactions with advanced filtering and error logging
 DELIMITER $$
 CREATE PROCEDURE inv_transactions_SmartSearch(
     IN p_UserName VARCHAR(100),
@@ -723,11 +1115,30 @@ CREATE PROCEDURE inv_transactions_SmartSearch(
 BEGIN
     DECLARE v_Offset INT DEFAULT 0;
     DECLARE v_Count INT DEFAULT 0;
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = 'Database error occurred during smart search';
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            COALESCE(p_UserName, 'SYSTEM'), 'Error', 'DatabaseError',
+            CONCAT('inv_transactions_SmartSearch failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_transactions_SmartSearch', 'SmartSearch',
+            CONCAT('UserName: ', COALESCE(p_UserName, 'NULL'), ', IsAdmin: ', p_IsAdmin, ', Page: ', p_Page, ', PageSize: ', p_PageSize),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     END;
     
@@ -822,7 +1233,7 @@ BEGIN
         AND (p_GeneralSearch IS NULL OR p_GeneralSearch = ''
              OR t.PartID LIKE CONCAT('%', p_GeneralSearch, '%')
              OR t.BatchNumber LIKE CONCAT('%', p_GeneralSearch, '%')
-             OR t.Notes LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.Notes LIKE CONCAT('%', p_Notes, '%')
              OR t.User LIKE CONCAT('%', p_GeneralSearch, '%')
              OR t.FromLocation LIKE CONCAT('%', p_GeneralSearch, '%')
              OR t.ToLocation LIKE CONCAT('%', p_GeneralSearch, '%')
@@ -833,7 +1244,7 @@ BEGIN
 END $$
 DELIMITER ;
 
--- Transaction analytics procedure for dashboard
+-- Transaction analytics procedure for dashboard with error logging
 DELIMITER $$
 CREATE PROCEDURE inv_transactions_GetAnalytics(
     IN p_UserName VARCHAR(100),
@@ -844,10 +1255,30 @@ CREATE PROCEDURE inv_transactions_GetAnalytics(
     OUT p_ErrorMsg VARCHAR(255)
 )
 BEGIN
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
+    
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
         SET p_Status = -1;
         SET p_ErrorMsg = 'Database error occurred while retrieving analytics';
+        
+        -- Log error to log_error table
+        INSERT INTO log_error (
+            User, Severity, ErrorType, ErrorMessage, StackTrace,
+            ModuleName, MethodName, AdditionalInfo, MachineName,
+            OSVersion, AppVersion, ErrorTime
+        ) VALUES (
+            COALESCE(p_UserName, 'SYSTEM'), 'Error', 'DatabaseError',
+            CONCAT('inv_transactions_GetAnalytics failed: ', v_ErrorMessage),
+            v_ErrorMessage,
+            'inv_transactions_GetAnalytics', 'GetAnalytics',
+            CONCAT('UserName: ', COALESCE(p_UserName, 'NULL'), ', IsAdmin: ', p_IsAdmin, ', DateRange: ', COALESCE(p_FromDate, 'NULL'), ' to ', COALESCE(p_ToDate, 'NULL')),
+            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
+        );
+        
         ROLLBACK;
     END;
     

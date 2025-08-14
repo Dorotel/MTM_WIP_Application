@@ -26,13 +26,13 @@
 - To be determined through reverse dependency analysis
 
 ## Stored Procedures Referenced (If Applicable)
-- 🗄️ `sys_last_10_transactions_Add_AtPosition_1` - Purpose TBD - Status: TO_VERIFY
+- 🗄️ `sys_last_10_transactions_Add_AtPosition` - Purpose TBD - Status: TO_VERIFY
 - 🗄️ `sys_last_` - Purpose TBD - Status: TO_VERIFY
 - 🗄️ `sys_last_10_transactions_DeleteAll_ByUser` - Purpose TBD - Status: TO_VERIFY
-- 🗄️ `sys_last_10_transactions_Move_1` - Purpose TBD - Status: TO_VERIFY
-- 🗄️ `sys_last_10_transactions_Update_ByUserAndPosition_1` - Purpose TBD - Status: TO_VERIFY
+- 🗄️ `sys_last_10_transactions_Move` - Purpose TBD - Status: TO_VERIFY
+- 🗄️ `sys_last_10_transactions_Update_ByUserAndPosition` - Purpose TBD - Status: TO_VERIFY
 - 🗄️ `User` - Purpose TBD - Status: TO_VERIFY
-- 🗄️ `sys_last_10_transactions_RemoveAndShift_ByUser_1` - Purpose TBD - Status: TO_VERIFY
+- 🗄️ `sys_last_10_transactions_RemoveAndShift_ByUser` - Purpose TBD - Status: TO_VERIFY
 - 🗄️ `sys_last_10_transactions_AddOrShift_ByUser` - Purpose TBD - Status: TO_VERIFY
 
 ## Method Dependencies (Key Methods Only)

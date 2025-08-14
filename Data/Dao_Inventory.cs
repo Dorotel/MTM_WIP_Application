@@ -290,7 +290,7 @@ public static class Dao_Inventory
 
             var result = await Helper_Database_StoredProcedure.ExecuteNonQueryWithStatus(
                 Model_AppVariables.ConnectionString,
-                "inv_inventory_Remove_Item_1_1",
+                "inv_inventory_Remove_Item",
                 parameters,
                 null, // No progress helper for this method
                 useAsync

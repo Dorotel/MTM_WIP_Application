@@ -10,11 +10,11 @@
 -- ================================================================================
 
 -- Drop procedures if they exist (for clean deployment)
-DROP PROCEDURE IF EXISTS sys_last_10_transactions_Get_ByUser_1;
-DROP PROCEDURE IF EXISTS sys_last_10_transactions_Update_ByUserAndPosition_1;
-DROP PROCEDURE IF EXISTS sys_last_10_transactions_RemoveAndShift_ByUser_1;
-DROP PROCEDURE IF EXISTS sys_last_10_transactions_Add_AtPosition_1;
-DROP PROCEDURE IF EXISTS sys_last_10_transactions_Move_1;
+DROP PROCEDURE IF EXISTS sys_last_10_transactions_Get_ByUser;
+DROP PROCEDURE IF EXISTS sys_last_10_transactions_Update_ByUserAndPosition;
+DROP PROCEDURE IF EXISTS sys_last_10_transactions_RemoveAndShift_ByUser;
+DROP PROCEDURE IF EXISTS sys_last_10_transactions_Add_AtPosition;
+DROP PROCEDURE IF EXISTS sys_last_10_transactions_Move;
 DROP PROCEDURE IF EXISTS sys_last_10_transactions_DeleteAll_ByUser;
 DROP PROCEDURE IF EXISTS sys_last_10_transactions_AddOrShift_ByUser;
 
@@ -24,7 +24,7 @@ DROP PROCEDURE IF EXISTS sys_last_10_transactions_AddOrShift_ByUser;
 
 -- Get user's last 10 transactions with status reporting
 DELIMITER $$
-CREATE PROCEDURE sys_last_10_transactions_Get_ByUser_1(
+CREATE PROCEDURE sys_last_10_transactions_Get_ByUser(
     IN p_User VARCHAR(100),
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
@@ -58,7 +58,7 @@ DELIMITER ;
 
 -- Update quick button at specific position
 DELIMITER $$
-CREATE PROCEDURE sys_last_10_transactions_Update_ByUserAndPosition_1(
+CREATE PROCEDURE sys_last_10_transactions_Update_ByUserAndPosition(
     IN p_User VARCHAR(100),
     IN p_Position INT,
     IN p_PartID VARCHAR(300),
@@ -122,7 +122,7 @@ DELIMITER ;
 
 -- Remove quick button and shift remaining positions up
 DELIMITER $$
-CREATE PROCEDURE sys_last_10_transactions_RemoveAndShift_ByUser_1(
+CREATE PROCEDURE sys_last_10_transactions_RemoveAndShift_ByUser(
     IN p_User VARCHAR(100),
     IN p_Position INT,
     OUT p_Status INT,
@@ -174,7 +174,7 @@ DELIMITER ;
 
 -- Add quick button at specific position (shifts existing positions down)
 DELIMITER $$
-CREATE PROCEDURE sys_last_10_transactions_Add_AtPosition_1(
+CREATE PROCEDURE sys_last_10_transactions_Add_AtPosition(
     IN p_User VARCHAR(100),
     IN p_Position INT,
     IN p_PartID VARCHAR(300),
@@ -222,7 +222,7 @@ DELIMITER ;
 
 -- Move quick button from one position to another
 DELIMITER $$
-CREATE PROCEDURE sys_last_10_transactions_Move_1(
+CREATE PROCEDURE sys_last_10_transactions_Move(
     IN p_User VARCHAR(100),
     IN p_FromPosition INT,
     IN p_ToPosition INT,
@@ -368,14 +368,14 @@ BEGIN
         
         -- Move existing to position 1 (if not already there)
         IF v_ExistingPosition != 1 THEN
-            CALL sys_last_10_transactions_Move_1(p_User, v_ExistingPosition, 1, @move_status, @move_msg);
+            CALL sys_last_10_transactions_Move(p_User, v_ExistingPosition, 1, @move_status, @move_msg);
         END IF;
         
         SET p_Status = 0;
         SET p_ErrorMsg = CONCAT('Updated existing quick button quantity and moved to position 1 for user: ', p_User);
     ELSE
         -- Add new at position 1 (shifts others down)
-        CALL sys_last_10_transactions_Add_AtPosition_1(p_User, 1, p_PartID, p_Operation, p_Quantity, @add_status, @add_msg);
+        CALL sys_last_10_transactions_Add_AtPosition(p_User, 1, p_PartID, p_Operation, p_Quantity, @add_status, @add_msg);
         SET p_Status = 0;
         SET p_ErrorMsg = CONCAT('Added new quick button at position 1 for user: ', p_User);
     END IF;
