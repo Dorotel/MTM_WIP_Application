@@ -3,28 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MTM Inventory - Database Configuration</title>
+    <title>Database Configuration - MTM Inventory Application Help</title>
     <link rel="stylesheet" href="css/help-styles.css">
 </head>
 <body>
-    <nav class="help-nav">
-        <div class="nav-brand">
-            <h1>🏭 MTM Inventory Application</h1>
-        </div>
-        <div class="nav-links">
-            <a href="index.html">🏠 Home</a>
-            <a href="getting-started.html">🚀 Getting Started</a>
-            <a href="system-requirements.html">⚙️ System Requirements</a>
-        </div>
-    </nav>
-
-    <main class="help-content">
-        <header class="page-header">
+    <div class="help-container">
+        <div class="help-header">
             <h1>🗄️ Database Configuration</h1>
-            <p class="lead">Complete guide to setting up and configuring MySQL database for MTM Inventory Application</p>
-        </header>
+            <p>Complete guide to setting up and configuring MySQL database for MTM Inventory Application</p>
+        </div>
+        
+        <div class="help-nav">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Help Home</a></li>
+                    <li class="breadcrumb-item active">Database Configuration</li>
+                </ol>
+            </nav>
+            <input type="text" class="search-box" placeholder="Search database help..." id="searchBox">
+        </div>
+        
+        <div class="help-content">
+            <div class="alert alert-info">
+                <strong>Environment Detection:</strong> MTM Inventory Application uses environment-specific database logic to automatically select the correct database and server based on your build configuration.
+            </div>
 
-        <section class="content-section">
+        <div class="help-section">
             <h2>🎯 Environment Overview</h2>
             <div class="environment-info">
                 <p>MTM Inventory Application uses <strong>environment-specific database logic</strong> to automatically select the correct database and server based on your build configuration.</p>
@@ -50,9 +54,9 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section class="content-section">
+        <div class="help-section">
             <h2>📊 Database Setup Process</h2>
             <div class="setup-process">
                 <h3>Step 1: MySQL Installation</h3>
@@ -95,9 +99,9 @@ FLUSH PRIVILEGES;</code></pre>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section class="content-section">
+        <div class="help-section">
             <h2>🏗️ Database Structure</h2>
             <div class="database-structure">
                 <h3>📋 Core Tables</h3>
@@ -139,9 +143,9 @@ FLUSH PRIVILEGES;</code></pre>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section class="content-section">
+        <div class="help-section">
             <h2>🔧 Stored Procedures</h2>
             <div class="stored-procedures">
                 <div class="warning-box">
@@ -197,9 +201,9 @@ END IF;</code></pre>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section class="content-section">
+        <div class="help-section">
             <h2>🔌 Connection Configuration</h2>
             <div class="connection-config">
                 <h3>🎯 Automatic Environment Detection</h3>
@@ -230,9 +234,9 @@ END IF;</code></pre>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section class="content-section">
+        <div class="help-section">
             <h2>🧪 MAMP Development Setup</h2>
             <div class="mamp-setup">
                 <h3>📦 MAMP Configuration</h3>
@@ -256,9 +260,9 @@ END IF;</code></pre>
                     </ul>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section class="content-section">
+        <div class="help-section">
             <h2>🔍 Testing Database Connection</h2>
             <div class="connection-testing">
                 <h3>🧪 Connection Test Procedure</h3>
@@ -297,9 +301,9 @@ END IF;</code></pre>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section class="content-section">
+        <div class="help-section">
             <h2>🛡️ Security Best Practices</h2>
             <div class="security-practices">
                 <h3>🔐 Database Security</h3>
@@ -320,9 +324,9 @@ END IF;</code></pre>
                     <li>✅ Regular security assessments</li>
                 </ul>
             </div>
-        </section>
+        </div>
 
-        <section class="content-section">
+        <div class="help-section">
             <h2>📋 Maintenance Tasks</h2>
             <div class="maintenance-tasks">
                 <h3>🔄 Regular Maintenance</h3>
@@ -344,43 +348,25 @@ END IF;</code></pre>
                     </ul>
                 </div>
             </div>
-        </section>
-
-        <div class="troubleshooting-tip">
-            <h3>🆘 Need Additional Help?</h3>
-            <p>For more assistance with database configuration:</p>
-            <ul>
-                <li>📋 Check the <a href="troubleshooting.html">Troubleshooting Guide</a></li>
-                <li>⚙️ Review <a href="system-requirements.html">System Requirements</a></li>
-                <li>📞 Contact your database administrator</li>
-            </ul>
         </div>
-    </main>
 
-    <footer class="help-footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>📚 Documentation</h4>
-                <ul>
-                    <li><a href="getting-started.html">Getting Started</a></li>
-                    <li><a href="system-requirements.html">System Requirements</a></li>
-                    <li><a href="troubleshooting.html">Troubleshooting</a></li>
+            <div class="alert alert-success">
+                <h5>🆘 Need Additional Help?</h5>
+                <p>For more assistance with database configuration:</p>
+                <ul class="help-list">
+                    <li>📋 Check the <a href="troubleshooting.html">Troubleshooting Guide</a></li>
+                    <li>⚙️ Review <a href="system-requirements.html">System Requirements</a></li>
+                    <li>📞 Contact your database administrator</li>
                 </ul>
             </div>
-            <div class="footer-section">
-                <h4>🛠️ Configuration</h4>
-                <ul>
-                    <li><a href="error-handling.html">Error Handling</a></li>
-                    <li><a href="development-tools.html">Development Tools</a></li>
-                    <li><a href="settings-management.html">Settings Management</a></li>
-                </ul>
-            </div>
-            <div class="footer-info">
-                <p>&copy; 2025 MTM Inventory Application. All rights reserved.</p>
-            </div>
         </div>
-    </footer>
 
+        <div class="help-footer">
+            <p>MTM Inventory Application v5.0.1.2 | Database Configuration Guide</p>
+            <p>Need more help? <a href="troubleshooting.html" style="color: #fff;">View Troubleshooting</a> | <a href="index.html" style="color: #fff;">Back to Help Home</a></p>
+        </div>
+    </div>
+    
     <script src="js/help-navigation.js"></script>
 </body>
 </html>
