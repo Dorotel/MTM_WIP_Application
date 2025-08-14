@@ -11,6 +11,7 @@
 
 -- Drop procedures if they exist (for clean deployment)
 DROP PROCEDURE IF EXISTS inv_inventory_Add_Item;
+DROP PROCEDURE IF EXISTS inv_inventory_GetNextBatchNumber;
 DROP PROCEDURE IF EXISTS inv_inventory_Remove_Item;
 DROP PROCEDURE IF EXISTS inv_inventory_Transfer_Part;
 DROP PROCEDURE IF EXISTS inv_inventory_transfer_quantity;
@@ -24,6 +25,7 @@ DROP PROCEDURE IF EXISTS inv_transaction_GetProblematicBatches;
 DROP PROCEDURE IF EXISTS inv_transaction_SplitBatchNumbers;
 DROP PROCEDURE IF EXISTS inv_inventory_Search_Advanced;
 DROP PROCEDURE IF EXISTS inv_transactions_SmartSearch;
+DROP PROCEDURE IF EXISTS inv_transactions_Search;
 DROP PROCEDURE IF EXISTS inv_transactions_GetAnalytics;
 DROP PROCEDURE IF EXISTS inv_transaction_Add;
 
@@ -125,6 +127,53 @@ BEGIN
         SET p_ErrorMsg = CONCAT('New inventory batch created successfully for part: ', p_PartID, ' with batch: ', v_NextBatchNumber, ', quantity: ', p_Quantity);
         COMMIT;
     END IF;
+END$$
+DELIMITER ;
+
+-- Get next batch number for inventory operations
+DELIMITER $$
+CREATE PROCEDURE inv_inventory_GetNextBatchNumber(
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE v_NextBatchNumber INT DEFAULT 0;
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
+        SET p_Status = -1;
+        SET p_ErrorMsg = 'Database error occurred while getting next batch number';
+        
+        ROLLBACK;
+    END;
+    
+    START TRANSACTION;
+    
+    -- ROBUST: Ensure the batch sequence table exists
+    CREATE TABLE IF NOT EXISTS inv_inventory_batch_seq (
+        last_batch_number INT(11) NOT NULL DEFAULT 0,
+        created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    
+    -- Initialize sequence table if empty
+    IF (SELECT COUNT(*) FROM inv_inventory_batch_seq) = 0 THEN
+        INSERT INTO inv_inventory_batch_seq (last_batch_number) VALUES (0);
+    END IF;
+    
+    -- Get the next batch number (but don't increment it yet)
+    SELECT last_batch_number + 1 INTO v_NextBatchNumber FROM inv_inventory_batch_seq LIMIT 1;
+    
+    -- Return the next batch number as a result set
+    SELECT v_NextBatchNumber as NextBatchNumber;
+    
+    SET p_Status = 0;
+    SET p_ErrorMsg = 'Next batch number retrieved successfully';
+    COMMIT;
 END$$
 DELIMITER ;
 
@@ -1208,6 +1257,66 @@ BEGIN
     
     SET p_Status = 0;
     SET p_ErrorMsg = 'Transaction added successfully';
+    
+    COMMIT;
+END $$
+DELIMITER ;
+
+-- Search transactions with flexible filtering
+DELIMITER $$
+CREATE PROCEDURE inv_transactions_Search(
+    IN p_PartID VARCHAR(300),
+    IN p_BatchNumber VARCHAR(300),
+    IN p_User VARCHAR(100),
+    IN p_TransactionType VARCHAR(20),
+    IN p_DateFrom DATETIME,
+    IN p_DateTo DATETIME,
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
+        SET p_Status = -1;
+        SET p_ErrorMsg = 'Database error occurred while searching transactions';
+        ROLLBACK;
+    END;
+    
+    START TRANSACTION;
+    
+    -- Build and execute dynamic search query
+    SELECT 
+        ID,
+        TransactionType,
+        BatchNumber,
+        PartID,
+        FromLocation,
+        ToLocation,
+        Operation,
+        Quantity,
+        Notes,
+        User,
+        ItemType,
+        ReceiveDate,
+        TransactionDate
+    FROM inv_transaction
+    WHERE 1=1
+        AND (p_PartID IS NULL OR p_PartID = '' OR PartID LIKE CONCAT('%', p_PartID, '%'))
+        AND (p_BatchNumber IS NULL OR p_BatchNumber = '' OR BatchNumber LIKE CONCAT('%', p_BatchNumber, '%'))
+        AND (p_User IS NULL OR p_User = '' OR User LIKE CONCAT('%', p_User, '%'))
+        AND (p_TransactionType IS NULL OR p_TransactionType = '' OR TransactionType = p_TransactionType)
+        AND (p_DateFrom IS NULL OR ReceiveDate >= p_DateFrom)
+        AND (p_DateTo IS NULL OR ReceiveDate <= p_DateTo)
+    ORDER BY ReceiveDate DESC, TransactionDate DESC
+    LIMIT 1000; -- Limit to prevent excessive results
+    
+    SET p_Status = 0;
+    SET p_ErrorMsg = 'Transaction search completed successfully';
     
     COMMIT;
 END $$

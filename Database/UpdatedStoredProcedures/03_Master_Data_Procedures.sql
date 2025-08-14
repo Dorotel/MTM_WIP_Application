@@ -29,7 +29,7 @@ DROP PROCEDURE IF EXISTS md_locations_Update_Location;
 DROP PROCEDURE IF EXISTS md_locations_Delete_ByLocation;
 DROP PROCEDURE IF EXISTS md_item_types_Get_All;
 DROP PROCEDURE IF EXISTS md_item_types_GetDistinct;
-DROP PROCEDURE IF EXISTS md_item_types_Exists_ByItemType;
+DROP PROCEDURE IF EXISTS md_item_types_Exists_ByType;
 DROP PROCEDURE IF EXISTS md_item_types_Add_ItemType;
 DROP PROCEDURE IF EXISTS md_item_types_Update_ItemType;
 DROP PROCEDURE IF EXISTS md_item_types_Delete_ByType;
@@ -707,7 +707,7 @@ DELIMITER ;
 
 -- Check if item type exists
 DELIMITER $$
-CREATE PROCEDURE md_item_types_Exists_ByItemType(
+CREATE PROCEDURE md_item_types_Exists_ByType(
     IN p_ItemType VARCHAR(50),
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
