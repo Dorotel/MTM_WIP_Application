@@ -333,6 +333,51 @@ var result = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
 );
 ```
 
+## 🧪 Testing and Validation Requirements
+
+### **MANDATORY: All stored procedures MUST be tested against LiveDatabase.sql**
+
+Starting from this update, all stored procedures must be validated against the actual database schema before deployment:
+
+1. **Schema Compatibility**: Procedures must work with the table structures defined in `Database/UpdatedDatabase/LiveDatabase.sql`
+2. **Parameter Validation**: All IN/OUT parameters must match what the C# application expects
+3. **Error Handling**: All procedures must include proper error handling with `OUT p_Status INT, OUT p_ErrorMsg VARCHAR(255)` parameters
+
+### **Testing Workflow**:
+
+#### **Before Creating/Modifying Procedures**:
+```bash
+# 1. Validate current database schema
+mysql -h localhost -u root -p < Database/UpdatedDatabase/LiveDatabase.sql
+
+# 2. Test your changes
+mysql -h localhost -u root -p -e "CALL your_new_procedure(test_params, @status, @error); SELECT @status, @error;"
+```
+
+#### **After Creating/Modifying Procedures**:
+```bash
+# 1. Deploy and verify
+deploy.bat
+run_verification.bat
+
+# 2. Test critical Settings Form procedures
+mysql -h localhost -u root -p -e "
+CALL usr_users_Add_User('TESTUSER', 'Test User', 'First', 0, '1234', '1.0.0', 'false', 'Default', 9, '', '', 'localhost', 'mtm_wip_application_test', '3306', @status, @msg);
+SELECT @status as Status, @msg as Message;
+"
+```
+
+### **Settings Form Critical Procedures**:
+These procedures are essential for Settings Form functionality and MUST be tested:
+
+- `usr_users_Add_User` - Adding new users
+- `usr_users_Update_User` - Updating existing users  
+- `usr_users_Delete_User` - Removing users
+- `md_part_ids_Add_Part` - Adding new part IDs
+- `md_locations_Add_Location` - Adding new locations
+- `md_operation_numbers_Add_Operation` - Adding new operations
+- `md_item_types_Add_ItemType` - Adding new item types
+
 ## 📋 Maintenance Workflow
 
 ### **Regular Development Workflow**:

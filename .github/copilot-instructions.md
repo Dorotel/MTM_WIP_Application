@@ -28,6 +28,46 @@ Always consult the root README.md and the docs under Documentation/Copilot Files
 - These properties automatically handle environment detection
 - Connection strings use `Helper_Database_Variables.GetConnectionString()`
 
+## Stored Procedures Development Rules (MANDATORY)
+
+### **Testing Requirements (Critical for Settings Forms)**
+All stored procedures MUST be tested against `Database/UpdatedDatabase/LiveDatabase.sql` before deployment:
+
+1. **Schema Validation**: Test against actual table structures in LiveDatabase.sql
+2. **Parameter Matching**: Ensure parameters match exactly what C# code expects
+3. **Error Handling**: All procedures MUST include `OUT p_Status INT, OUT p_ErrorMsg VARCHAR(255)`
+
+### **Settings Form Procedure Standards**
+When creating/modifying stored procedures for Settings Forms:
+
+```sql
+-- Standard error handling pattern
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+    SET p_Status = -1;
+    SET p_ErrorMsg = 'Database error occurred during operation';
+    ROLLBACK;
+END;
+
+START TRANSACTION;
+-- Procedure logic here
+SET p_Status = 0;
+SET p_ErrorMsg = 'Operation completed successfully';
+COMMIT;
+```
+
+### **Critical Procedures for Settings Forms**:
+- `usr_users_*` - User management procedures
+- `md_part_ids_*` - Part ID management procedures  
+- `md_locations_*` - Location management procedures
+- `md_operation_numbers_*` - Operation management procedures
+- `md_item_types_*` - Item type management procedures
+
+**Testing Command Example**:
+```bash
+mysql -h localhost -u root -p -e "CALL usr_users_Add_User('TEST', 'Test User', 'First', 0, '1234', '1.0.0', 'false', 'Default', 9, '', '', 'localhost', 'mtm_wip_application_test', '3306', @status, @msg); SELECT @status, @msg;"
+```
+
 ## Code Organization Requirements (MANDATORY)
 
 When refactoring or creating ANY C# file, MUST follow:
