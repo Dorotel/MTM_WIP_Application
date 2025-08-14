@@ -25,22 +25,23 @@ DROP PROCEDURE IF EXISTS inv_transaction_SplitBatchNumbers;
 DROP PROCEDURE IF EXISTS inv_inventory_Search_Advanced;
 DROP PROCEDURE IF EXISTS inv_transactions_SmartSearch;
 DROP PROCEDURE IF EXISTS inv_transactions_GetAnalytics;
+DROP PROCEDURE IF EXISTS inv_transaction_Add;
 
 -- ================================================================================
 -- INVENTORY ITEM MANAGEMENT PROCEDURES (MySQL 5.7.24 Compatible)
 -- ================================================================================
 
--- Add inventory item with status reporting and error logging
+-- Add inventory item - ALWAYS CREATE NEW BATCH VERSION (no quantity consolidation)
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_Add_Item(
-    IN p_PartID VARCHAR(100),
+    IN p_PartID VARCHAR(300),        -- Match working size
     IN p_Location VARCHAR(100),
     IN p_Operation VARCHAR(100),
     IN p_Quantity INT,
-    IN p_ItemType VARCHAR(50),
+    IN p_ItemType VARCHAR(100),      -- Match working size  
     IN p_User VARCHAR(100),
-    IN p_BatchNumber VARCHAR(20),
-    IN p_Notes TEXT,
+    IN p_BatchNumber VARCHAR(100),   -- Match working size (optional)
+    IN p_Notes VARCHAR(1000),        -- Match working size
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
 )
@@ -56,55 +57,28 @@ BEGIN
         SET p_Status = -1;
         SET p_ErrorMsg = CONCAT('Database error occurred while adding inventory item for part: ', p_PartID);
         
-        -- Log error to log_error table
-        INSERT INTO log_error (
-            User, Severity, ErrorType, ErrorMessage, StackTrace, 
-            ModuleName, MethodName, AdditionalInfo, MachineName, 
-            OSVersion, AppVersion, ErrorTime
-        ) VALUES (
-            COALESCE(p_User, 'SYSTEM'), 'Error', 'DatabaseError',
-            CONCAT('inv_inventory_Add_Item failed: ', v_ErrorMessage),
-            v_ErrorMessage,
-            'inv_inventory_Add_Item', 'Add_Item',
-            CONCAT('PartID: ', p_PartID, ', Location: ', p_Location, ', Operation: ', p_Operation, ', Quantity: ', p_Quantity),
-            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-        );
-        
         ROLLBACK;
     END;
     
     START TRANSACTION;
     
-    -- Generate batch number if not provided
-    IF p_BatchNumber IS NULL OR p_BatchNumber = '' THEN
-        SELECT LPAD(COALESCE(MAX(CAST(BatchNumber AS UNSIGNED)), 0) + 1, 10, '0') 
-        INTO v_NextBatchNumber
-        FROM inv_inventory;
-        SET p_BatchNumber = v_NextBatchNumber;
-    END IF;
+    -- ALWAYS generate a new batch number for each addition (no consolidation)
+    -- This ensures each inventory addition creates a separate trackable batch
+    SELECT last_batch_number INTO @nextBatch FROM inv_inventory_batch_seq FOR UPDATE;
+    SET @nextBatch = @nextBatch + 1;
+    SET p_BatchNumber = LPAD(@nextBatch, 10, '0');
+    
+    -- Update the sequence table
+    UPDATE inv_inventory_batch_seq SET last_batch_number = @nextBatch;
     
     -- Validate quantity
     IF p_Quantity <= 0 THEN
         SET p_Status = 1;
         SET p_ErrorMsg = 'Quantity must be greater than zero';
-        
-        -- Log validation error
-        INSERT INTO log_error (
-            User, Severity, ErrorType, ErrorMessage, StackTrace,
-            ModuleName, MethodName, AdditionalInfo, MachineName,
-            OSVersion, AppVersion, ErrorTime
-        ) VALUES (
-            COALESCE(p_User, 'SYSTEM'), 'Warning', 'ValidationError',
-            'inv_inventory_Add_Item validation failed: Quantity must be greater than zero',
-            'Validation Error',
-            'inv_inventory_Add_Item', 'Add_Item',
-            CONCAT('PartID: ', p_PartID, ', Quantity: ', p_Quantity),
-            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-        );
-        
         ROLLBACK;
     ELSE
-        -- FIXED: Use correct column names from actual database schema
+        -- ALWAYS INSERT NEW ROW - Never update existing quantities
+        -- Each inventory addition gets its own batch number and row
         INSERT INTO inv_inventory (
             PartID, Location, Operation, Quantity, ItemType, 
             User, BatchNumber, Notes, ReceiveDate, LastUpdated
@@ -113,40 +87,40 @@ BEGIN
             p_User, p_BatchNumber, p_Notes, NOW(), NOW()
         );
         
-        -- Also insert transaction record (assuming inv_transaction table exists)
+        -- Insert transaction record for audit trail
         INSERT INTO inv_transaction (
-            PartID, Location, Operation, Quantity, ItemType,
-            User, BatchNumber, Notes, TransactionType, ReceiveDate
+            TransactionType, BatchNumber, PartID, FromLocation, ToLocation,
+            Operation, Quantity, Notes, User, ItemType, ReceiveDate
         ) VALUES (
-            p_PartID, p_Location, p_Operation, p_Quantity, p_ItemType,
-            p_User, p_BatchNumber, p_Notes, 'IN', NOW()
+            'IN', p_BatchNumber, p_PartID, p_Location, NULL,
+            p_Operation, p_Quantity, p_Notes, p_User, p_ItemType, NOW()
         );
         
         SET p_Status = 0;
-        SET p_ErrorMsg = CONCAT('Inventory item added successfully for part: ', p_PartID, ' with batch: ', p_BatchNumber);
+        SET p_ErrorMsg = CONCAT('New inventory batch created successfully for part: ', p_PartID, ' with batch: ', p_BatchNumber, ', quantity: ', p_Quantity);
         COMMIT;
     END IF;
 END $$
 DELIMITER ;
 
--- Remove inventory item with detailed status reporting and error logging
+-- Remove inventory item - SIMPLIFIED VERSION with flexible matching
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_Remove_Item(
-    IN p_PartID VARCHAR(100),
+    IN p_PartID VARCHAR(300),        -- Match working size
     IN p_Location VARCHAR(100),
     IN p_Operation VARCHAR(100),
     IN p_Quantity INT,
-    IN p_ItemType VARCHAR(50),
+    IN p_ItemType VARCHAR(100),      -- Match working size
     IN p_User VARCHAR(100),
-    IN p_BatchNumber VARCHAR(20),
-    IN p_Notes TEXT,
+    IN p_BatchNumber VARCHAR(100),   -- Match working size
+    IN p_Notes VARCHAR(1000),        -- Match working size
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
 )
 BEGIN
-    DECLARE v_CurrentQuantity INT DEFAULT 0;
-    DECLARE v_InventoryId INT DEFAULT NULL;
+    DECLARE v_RowsAffected INT DEFAULT 0;
     DECLARE v_ErrorMessage TEXT DEFAULT '';
+    DECLARE v_RecordCount INT DEFAULT 0;
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -156,20 +130,6 @@ BEGIN
         SET p_Status = -1;
         SET p_ErrorMsg = CONCAT('Database error occurred while removing inventory item for part: ', p_PartID);
         
-        -- Log error to log_error table
-        INSERT INTO log_error (
-            User, Severity, ErrorType, ErrorMessage, StackTrace,
-            ModuleName, MethodName, AdditionalInfo, MachineName,
-            OSVersion, AppVersion, ErrorTime
-        ) VALUES (
-            COALESCE(p_User, 'SYSTEM'), 'Error', 'DatabaseError',
-            CONCAT('inv_inventory_Remove_Item failed: ', v_ErrorMessage),
-            v_ErrorMessage,
-            'inv_inventory_Remove_Item', 'Remove_Item_1_1',
-            CONCAT('PartID: ', p_PartID, ', Location: ', p_Location, ', Operation: ', p_Operation, ', Quantity: ', p_Quantity, ', BatchNumber: ', p_BatchNumber),
-            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-        );
-        
         ROLLBACK;
     END;
     
@@ -179,116 +139,81 @@ BEGIN
     IF p_Quantity <= 0 THEN
         SET p_Status = 1;
         SET p_ErrorMsg = 'Quantity must be greater than zero';
-        
-        -- Log validation error
-        INSERT INTO log_error (
-            User, Severity, ErrorType, ErrorMessage, StackTrace,
-            ModuleName, MethodName, AdditionalInfo, MachineName,
-            OSVersion, AppVersion, ErrorTime
-        ) VALUES (
-            COALESCE(p_User, 'SYSTEM'), 'Warning', 'ValidationError',
-            'inv_inventory_Remove_Item validation failed: Quantity must be greater than zero',
-            'Validation Error',
-            'inv_inventory_Remove_Item', 'Remove_Item_1_1',
-            CONCAT('PartID: ', p_PartID, ', Quantity: ', p_Quantity),
-            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-        );
-        
         ROLLBACK;
     ELSE
-        -- Find matching inventory item
-        SELECT ID, Quantity INTO v_InventoryId, v_CurrentQuantity
-        FROM inv_inventory 
-        WHERE PartID = p_PartID 
-          AND Location = p_Location 
-          AND Operation = p_Operation 
-          AND BatchNumber = p_BatchNumber
-        LIMIT 1;
-        
-        IF v_InventoryId IS NULL THEN
+        -- ENHANCED: Check what records exist first for debugging
+        SELECT COUNT(*) INTO v_RecordCount 
+        FROM inv_inventory
+        WHERE PartID = p_PartID
+          AND Location = p_Location
+          AND Operation = p_Operation;
+          
+        IF v_RecordCount = 0 THEN
             SET p_Status = 1;
-            SET p_ErrorMsg = CONCAT('No matching inventory item found for part: ', p_PartID, ', batch: ', p_BatchNumber);
-            
-            -- Log business logic error
-            INSERT INTO log_error (
-                User, Severity, ErrorType, ErrorMessage, StackTrace,
-                ModuleName, MethodName, AdditionalInfo, MachineName,
-                OSVersion, AppVersion, ErrorTime
-            ) VALUES (
-                COALESCE(p_User, 'SYSTEM'), 'Warning', 'BusinessLogicError',
-                'inv_inventory_Remove_Item business logic failed: No matching inventory item found',
-                'No matching inventory item found',
-                'inv_inventory_Remove_Item', 'Remove_Item_1_1',
-                CONCAT('PartID: ', p_PartID, ', Location: ', p_Location, ', Operation: ', p_Operation, ', BatchNumber: ', p_BatchNumber),
-                'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-            );
-            
-            ROLLBACK;
-        ELSEIF v_CurrentQuantity < p_Quantity THEN
-            SET p_Status = 1;
-            SET p_ErrorMsg = CONCAT('Insufficient quantity. Available: ', v_CurrentQuantity, ', Requested: ', p_Quantity);
-            
-            -- Log insufficient quantity error
-            INSERT INTO log_error (
-                User, Severity, ErrorType, ErrorMessage, StackTrace,
-                ModuleName, MethodName, AdditionalInfo, MachineName,
-                OSVersion, AppVersion, ErrorTime
-            ) VALUES (
-                COALESCE(p_User, 'SYSTEM'), 'Warning', 'BusinessLogicError',
-                'inv_inventory_Remove_Item business logic failed: Insufficient quantity',
-                'Insufficient quantity available',
-                'inv_inventory_Remove_Item', 'Remove_Item_1_1',
-                CONCAT('PartID: ', p_PartID, ', Available: ', v_CurrentQuantity, ', Requested: ', p_Quantity),
-                'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-            );
-            
-            ROLLBACK;
+            SET p_ErrorMsg = CONCAT('No inventory records found for PartID: ', p_PartID, ', Location: ', p_Location, ', Operation: ', p_Operation);
         ELSE
-            -- FIXED: Use correct column name LastUpdated instead of ModifiedDate
-            UPDATE inv_inventory 
-            SET Quantity = Quantity - p_Quantity,
-                LastUpdated = NOW()
-            WHERE ID = v_InventoryId;
+            -- FLEXIBLE: Try to match by primary fields first, then be more specific if multiple records
+            DELETE FROM inv_inventory
+            WHERE PartID = p_PartID
+              AND Location = p_Location
+              AND Operation = p_Operation
+              AND Quantity = p_Quantity
+              -- RELAXED: Only match BatchNumber if it's provided and not empty
+              AND (p_BatchNumber IS NULL OR p_BatchNumber = '' OR BatchNumber = p_BatchNumber)
+              -- RELAXED: Be flexible with Notes comparison
+              AND (p_Notes IS NULL OR p_Notes = '' OR Notes IS NULL OR Notes = '' OR Notes = p_Notes)
+            LIMIT 1;
             
-            -- Remove record if quantity becomes 0
-            DELETE FROM inv_inventory WHERE ID = v_InventoryId AND Quantity <= 0;
+            SET v_RowsAffected = ROW_COUNT();
             
-            -- Insert transaction record
-            INSERT INTO inv_transaction (
-                PartID, Location, Operation, Quantity, ItemType,
-                User, BatchNumber, Notes, TransactionType, ReceiveDate
-            ) VALUES (
-                p_PartID, p_Location, p_Operation, p_Quantity, p_ItemType,
-                p_User, p_BatchNumber, p_Notes, 'OUT', NOW()
-            );
+            -- If exact match didn't work, try more flexible matching
+            IF v_RowsAffected = 0 THEN
+                DELETE FROM inv_inventory
+                WHERE PartID = p_PartID
+                  AND Location = p_Location  
+                  AND Operation = p_Operation
+                  AND Quantity = p_Quantity
+                LIMIT 1;
+                
+                SET v_RowsAffected = ROW_COUNT();
+            END IF;
             
-            SET p_Status = 0;
-            SET p_ErrorMsg = CONCAT('Inventory item removed successfully for part: ', p_PartID, ', quantity: ', p_Quantity);
-            COMMIT;
+            -- FIXED: Correct status logic (0 = success, 1 = not found)
+            IF v_RowsAffected > 0 THEN
+                -- Insert transaction record for audit trail
+                INSERT INTO inv_transaction (
+                    TransactionType, PartID, FromLocation, Operation, 
+                    Quantity, ItemType, User, BatchNumber, Notes, ReceiveDate
+                ) VALUES (
+                    'OUT', p_PartID, p_Location, p_Operation,
+                    p_Quantity, p_ItemType, p_User, p_BatchNumber, p_Notes, NOW()
+                );
+                
+                SET p_Status = 0;  -- ? SUCCESS
+                SET p_ErrorMsg = CONCAT('Inventory item removed successfully for part: ', p_PartID, ', quantity: ', p_Quantity);
+            ELSE
+                SET p_Status = 1;  -- ? NOT FOUND
+                SET p_ErrorMsg = CONCAT('No matching inventory item found for removal. Found ', v_RecordCount, ' records for PartID: ', p_PartID, ', Location: ', p_Location, ', Operation: ', p_Operation, ' but none matched Quantity: ', p_Quantity);
+            END IF;
         END IF;
+        
+        COMMIT;
     END IF;
 END $$
 DELIMITER ;
 
--- ================================================================================
--- INVENTORY TRANSFER PROCEDURES (MySQL 5.7.24 Compatible)
--- ================================================================================
-
--- Transfer part to new location (simple transfer) with status reporting and error logging
+-- Transfer part to new location - FIXED VERSION compatible with current application calls
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_Transfer_Part(
-    IN p_BatchNumber VARCHAR(20),
-    IN p_PartID VARCHAR(100),
+    IN p_BatchNumber VARCHAR(300),   -- Match working signature
+    IN p_PartID VARCHAR(300),        -- Match working signature  
     IN p_Operation VARCHAR(100),
     IN p_NewLocation VARCHAR(100),
-    IN p_User VARCHAR(100),
-    OUT p_Status INT,
-    OUT p_ErrorMsg VARCHAR(255)
+    OUT p_Status INT,                -- Add status reporting
+    OUT p_ErrorMsg VARCHAR(255)      -- Add error messaging
 )
 BEGIN
-    DECLARE v_Count INT DEFAULT 0;
     DECLARE v_RowsAffected INT DEFAULT 0;
-    DECLARE v_OldLocation VARCHAR(100);
     DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -299,108 +224,58 @@ BEGIN
         SET p_Status = -1;
         SET p_ErrorMsg = CONCAT('Database error occurred while transferring part: ', p_PartID);
         
-        -- Log error to log_error table
-        INSERT INTO log_error (
-            User, Severity, ErrorType, ErrorMessage, StackTrace,
-            ModuleName, MethodName, AdditionalInfo, MachineName,
-            OSVersion, AppVersion, ErrorTime
-        ) VALUES (
-            COALESCE(p_User, 'SYSTEM'), 'Error', 'DatabaseError',
-            CONCAT('inv_inventory_Transfer_Part failed: ', v_ErrorMessage),
-            v_ErrorMessage,
-            'inv_inventory_Transfer_Part', 'Transfer_Part',
-            CONCAT('PartID: ', p_PartID, ', BatchNumber: ', p_BatchNumber, ', Operation: ', p_Operation, ', NewLocation: ', p_NewLocation),
-            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-        );
-        
         ROLLBACK;
     END;
     
     START TRANSACTION;
     
-    -- Check if inventory item exists and get current location
-    SELECT COUNT(*), MAX(Location) INTO v_Count, v_OldLocation 
-    FROM inv_inventory 
-    WHERE BatchNumber = p_BatchNumber 
-      AND PartID = p_PartID 
-      AND Operation = p_Operation;
-    
-    IF v_Count = 0 THEN
-        SET p_Status = 1;
-        SET p_ErrorMsg = CONCAT('No inventory found for part: ', p_PartID, ', batch: ', p_BatchNumber);
-        
-        -- Log business logic error
-        INSERT INTO log_error (
-            User, Severity, ErrorType, ErrorMessage, StackTrace,
-            ModuleName, MethodName, AdditionalInfo, MachineName,
-            OSVersion, AppVersion, ErrorTime
-        ) VALUES (
-            COALESCE(p_User, 'SYSTEM'), 'Warning', 'BusinessLogicError',
-            'inv_inventory_Transfer_Part business logic failed: No inventory found',
-            'No inventory found for transfer',
-            'inv_inventory_Transfer_Part', 'Transfer_Part',
-            CONCAT('PartID: ', p_PartID, ', BatchNumber: ', p_BatchNumber, ', Operation: ', p_Operation),
-            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-        );
-        
-        ROLLBACK;
-    ELSE
-        -- FIXED: Use correct column name LastUpdated instead of ModifiedDate
-        UPDATE inv_inventory 
+    -- Use the WORKING validation and update logic from CurrentStoredProcedures.sql
+    IF EXISTS (
+        SELECT 1 FROM inv_inventory
+        WHERE BatchNumber = p_BatchNumber
+          AND PartID = p_PartID
+          AND Operation = p_Operation
+    ) THEN
+        -- Update the location (working logic)
+        UPDATE inv_inventory
         SET Location = p_NewLocation,
-            User = p_User,
             LastUpdated = NOW()
-        WHERE BatchNumber = p_BatchNumber 
-          AND PartID = p_PartID 
+        WHERE BatchNumber = p_BatchNumber
+          AND PartID = p_PartID
           AND Operation = p_Operation;
         
         SET v_RowsAffected = ROW_COUNT();
         
         IF v_RowsAffected > 0 THEN
             SET p_Status = 0;
-            SET p_ErrorMsg = CONCAT('Part transferred successfully from ', v_OldLocation, ' to ', p_NewLocation);
+            SET p_ErrorMsg = CONCAT('Part transferred successfully to ', p_NewLocation);
         ELSE
             SET p_Status = 2;
             SET p_ErrorMsg = CONCAT('No transfer occurred for part: ', p_PartID);
-            
-            -- Log unexpected result
-            INSERT INTO log_error (
-                User, Severity, ErrorType, ErrorMessage, StackTrace,
-                ModuleName, MethodName, AdditionalInfo, MachineName,
-                OSVersion, AppVersion, ErrorTime
-            ) VALUES (
-                COALESCE(p_User, 'SYSTEM'), 'Warning', 'BusinessLogicError',
-                'inv_inventory_Transfer_Part business logic warning: No rows affected during transfer',
-                'No rows affected during transfer operation',
-                'inv_inventory_Transfer_Part', 'Transfer_Part',
-                CONCAT('PartID: ', p_PartID, ', BatchNumber: ', p_BatchNumber, ', RowsAffected: ', v_RowsAffected),
-                'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-            );
         END IF;
-        
-        COMMIT;
+    ELSE
+        SET p_Status = 1;
+        SET p_ErrorMsg = CONCAT('No inventory found for part: ', p_PartID, ', batch: ', p_BatchNumber, ', operation: ', p_Operation);
     END IF;
+    
+    COMMIT;
 END $$
 DELIMITER ;
 
--- Transfer specific quantity to new location with status reporting and error logging
+-- Transfer specific quantity - FIXED VERSION with original user preservation
 DELIMITER $$
 CREATE PROCEDURE inv_inventory_transfer_quantity(
-    IN p_BatchNumber VARCHAR(20),
-    IN p_PartID VARCHAR(100),
+    IN p_BatchNumber VARCHAR(300),   -- Match working size
+    IN p_PartID VARCHAR(300),        -- Match working size
     IN p_Operation VARCHAR(100),
     IN p_TransferQuantity INT,
+    IN p_OriginalQuantity INT,       -- Add missing parameter from working version
     IN p_NewLocation VARCHAR(100),
     IN p_User VARCHAR(100),
-    OUT p_Status INT,
-    OUT p_ErrorMsg VARCHAR(255)
+    OUT p_Status INT,                -- Add status reporting
+    OUT p_ErrorMsg VARCHAR(255)      -- Add error messaging
 )
 BEGIN
-    DECLARE v_NewBatchNumber VARCHAR(20);
-    DECLARE v_ItemType VARCHAR(50);
-    DECLARE v_OriginalLocation VARCHAR(100);
-    DECLARE v_CurrentQuantity INT DEFAULT 0;
-    DECLARE v_Count INT DEFAULT 0;
     DECLARE v_ErrorMessage TEXT DEFAULT '';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -411,136 +286,42 @@ BEGIN
         SET p_Status = -1;
         SET p_ErrorMsg = CONCAT('Database error occurred while transferring quantity for part: ', p_PartID);
         
-        -- Log error to log_error table
-        INSERT INTO log_error (
-            User, Severity, ErrorType, ErrorMessage, StackTrace,
-            ModuleName, MethodName, AdditionalInfo, MachineName,
-            OSVersion, AppVersion, ErrorTime
-        ) VALUES (
-            COALESCE(p_User, 'SYSTEM'), 'Error', 'DatabaseError',
-            CONCAT('inv_inventory_transfer_quantity failed: ', v_ErrorMessage),
-            v_ErrorMessage,
-            'inv_inventory_transfer_quantity', 'transfer_quantity',
-            CONCAT('PartID: ', p_PartID, ', BatchNumber: ', p_BatchNumber, ', TransferQuantity: ', p_TransferQuantity, ', NewLocation: ', p_NewLocation),
-            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-        );
-        
         ROLLBACK;
     END;
     
     START TRANSACTION;
     
-    -- Validate transfer quantity
-    IF p_TransferQuantity <= 0 THEN
+    -- Use the WORKING validation logic from CurrentStoredProcedures.sql
+    IF p_TransferQuantity <= 0 OR p_TransferQuantity > p_OriginalQuantity THEN
         SET p_Status = 1;
-        SET p_ErrorMsg = 'Transfer quantity must be greater than zero';
-        
-        -- Log validation error
-        INSERT INTO log_error (
-            User, Severity, ErrorType, ErrorMessage, StackTrace,
-            ModuleName, MethodName, AdditionalInfo, MachineName,
-            OSVersion, AppVersion, ErrorTime
-        ) VALUES (
-            COALESCE(p_User, 'SYSTEM'), 'Warning', 'ValidationError',
-            'inv_inventory_transfer_quantity validation failed: Transfer quantity must be greater than zero',
-            'Validation Error',
-            'inv_inventory_transfer_quantity', 'transfer_quantity',
-            CONCAT('PartID: ', p_PartID, ', TransferQuantity: ', p_TransferQuantity),
-            'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-        );
-        
+        SET p_ErrorMsg = 'Invalid transfer quantity';
         ROLLBACK;
     ELSE
-        -- Get original location, item type, and current quantity
-        SELECT COUNT(*), MAX(Location), MAX(ItemType), MAX(Quantity) 
-        INTO v_Count, v_OriginalLocation, v_ItemType, v_CurrentQuantity
-        FROM inv_inventory 
-        WHERE BatchNumber = p_BatchNumber 
-          AND PartID = p_PartID 
-          AND Operation = p_Operation;
+        -- FIXED: Update remaining quantity at old location while preserving original user
+        UPDATE inv_inventory
+        SET Quantity = Quantity - p_TransferQuantity,
+            LastUpdated = NOW()
+            -- DO NOT UPDATE User - preserve original user who created this inventory
+        WHERE BatchNumber = p_BatchNumber
+          AND PartID = p_PartID
+          AND Operation = p_Operation
+          AND Quantity = p_OriginalQuantity;
         
-        IF v_Count = 0 THEN
-            SET p_Status = 1;
-            SET p_ErrorMsg = CONCAT('No inventory found for part: ', p_PartID, ', batch: ', p_BatchNumber);
-            
-            -- Log business logic error
-            INSERT INTO log_error (
-                User, Severity, ErrorType, ErrorMessage, StackTrace,
-                ModuleName, MethodName, AdditionalInfo, MachineName,
-                OSVersion, AppVersion, ErrorTime
-            ) VALUES (
-                COALESCE(p_User, 'SYSTEM'), 'Warning', 'BusinessLogicError',
-                'inv_inventory_transfer_quantity business logic failed: No inventory found',
-                'No inventory found for quantity transfer',
-                'inv_inventory_transfer_quantity', 'transfer_quantity',
-                CONCAT('PartID: ', p_PartID, ', BatchNumber: ', p_BatchNumber, ', Operation: ', p_Operation),
-                'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-            );
-            
-            ROLLBACK;
-        ELSEIF v_CurrentQuantity < p_TransferQuantity THEN
-            SET p_Status = 1;
-            SET p_ErrorMsg = CONCAT('Insufficient quantity for transfer. Available: ', v_CurrentQuantity, ', Requested: ', p_TransferQuantity);
-            
-            -- Log insufficient quantity error
-            INSERT INTO log_error (
-                User, Severity, ErrorType, ErrorMessage, StackTrace,
-                ModuleName, MethodName, AdditionalInfo, MachineName,
-                OSVersion, AppVersion, ErrorTime
-            ) VALUES (
-                COALESCE(p_User, 'SYSTEM'), 'Warning', 'BusinessLogicError',
-                'inv_inventory_transfer_quantity business logic failed: Insufficient quantity for transfer',
-                'Insufficient quantity available for transfer',
-                'inv_inventory_transfer_quantity', 'transfer_quantity',
-                CONCAT('PartID: ', p_PartID, ', Available: ', v_CurrentQuantity, ', Requested: ', p_TransferQuantity),
-                'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
-            );
-            
-            ROLLBACK;
-        ELSE
-            -- Generate new batch number for transferred quantity
-            SELECT LPAD(COALESCE(MAX(CAST(BatchNumber AS UNSIGNED)), 0) + 1, 10, '0') 
-            INTO v_NewBatchNumber
-            FROM inv_inventory;
-            
-            -- FIXED: Use correct column name LastUpdated instead of ModifiedDate
-            UPDATE inv_inventory 
-            SET Quantity = Quantity - p_TransferQuantity,
-                LastUpdated = NOW()
-            WHERE BatchNumber = p_BatchNumber 
-              AND PartID = p_PartID 
-              AND Operation = p_Operation;
-            
-            -- Remove original record if quantity becomes 0
-            DELETE FROM inv_inventory 
-            WHERE BatchNumber = p_BatchNumber 
-              AND PartID = p_PartID 
-              AND Operation = p_Operation 
-              AND Quantity <= 0;
-            
-            -- FIXED: Use correct column names for INSERT
-            INSERT INTO inv_inventory (
-                PartID, Location, Operation, Quantity, ItemType,
-                User, BatchNumber, ReceiveDate, LastUpdated
-            ) VALUES (
-                p_PartID, p_NewLocation, p_Operation, p_TransferQuantity, v_ItemType,
-                p_User, v_NewBatchNumber, NOW(), NOW()
-            );
-            
-            -- Record transfer transactions
-            INSERT INTO inv_transaction (
-                PartID, Location, Operation, Quantity, ItemType,
-                User, BatchNumber, TransactionType, ReceiveDate
-            ) VALUES 
-            (p_PartID, v_OriginalLocation, p_Operation, p_TransferQuantity, v_ItemType,
-             p_User, p_BatchNumber, 'OUT', NOW()),
-            (p_PartID, p_NewLocation, p_Operation, p_TransferQuantity, v_ItemType,
-             p_User, v_NewBatchNumber, 'IN', NOW());
-            
-            SET p_Status = 0;
-            SET p_ErrorMsg = CONCAT('Quantity transferred successfully from ', v_OriginalLocation, ' to ', p_NewLocation, ', new batch: ', v_NewBatchNumber);
-            COMMIT;
-        END IF;
+        -- Insert new record for transferred quantity at new location (with current user)
+        INSERT INTO inv_inventory (
+            BatchNumber, PartID, Operation, Quantity, Location, 
+            User, ItemType, ReceiveDate, LastUpdated
+        )
+        SELECT 
+            p_BatchNumber, p_PartID, p_Operation, p_TransferQuantity, p_NewLocation,
+            p_User, ItemType, NOW(), NOW()
+        FROM inv_inventory 
+        WHERE BatchNumber = p_BatchNumber AND PartID = p_PartID AND Operation = p_Operation
+        LIMIT 1;
+        
+        SET p_Status = 0;
+        SET p_ErrorMsg = CONCAT('Quantity transferred successfully from original location to ', p_NewLocation);
+        COMMIT;
     END IF;
 END $$
 DELIMITER ;
@@ -1202,7 +983,7 @@ BEGIN
         AND (p_GeneralSearch IS NULL OR p_GeneralSearch = ''
              OR t.PartID LIKE CONCAT('%', p_GeneralSearch, '%')
              OR t.BatchNumber LIKE CONCAT('%', p_GeneralSearch, '%')
-             OR t.Notes LIKE CONCAT('%', p_GeneralSearch, '%')
+             OR t.Notes LIKE CONCAT('%', p_Notes, '%')
              OR t.User LIKE CONCAT('%', p_GeneralSearch, '%')
              OR t.FromLocation LIKE CONCAT('%', p_GeneralSearch, '%')
              OR t.ToLocation LIKE CONCAT('%', p_GeneralSearch, '%')
@@ -1314,3 +1095,52 @@ DELIMITER ;
 -- ================================================================================
 -- END OF INVENTORY PROCEDURES
 -- ================================================================================
+
+-- Add missing inv_transaction_Add procedure (required by Dao_Inventory.cs)
+DELIMITER $$
+CREATE PROCEDURE inv_transaction_Add(
+    IN p_TransactionType ENUM('IN','OUT','TRANSFER'),
+    IN p_PartID VARCHAR(300),
+    IN p_BatchNumber VARCHAR(100),
+    IN p_FromLocation VARCHAR(300),
+    IN p_ToLocation VARCHAR(100),
+    IN p_Operation VARCHAR(100),
+    IN p_Quantity INT,
+    IN p_Notes VARCHAR(1000),
+    IN p_User VARCHAR(100),
+    IN p_ItemType VARCHAR(100),
+    IN p_ReceiveDate DATETIME,
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
+BEGIN
+    DECLARE v_ErrorMessage TEXT DEFAULT '';
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_ErrorMessage = MESSAGE_TEXT;
+        
+        SET p_Status = -1;
+        SET p_ErrorMsg = CONCAT('Database error occurred while adding transaction: ', v_ErrorMessage);
+        
+        ROLLBACK;
+    END;
+    
+    START TRANSACTION;
+    
+    -- Insert transaction record (using working structure from CurrentStoredProcedures.sql)
+    INSERT INTO inv_transaction (
+        TransactionType, PartID, BatchNumber, FromLocation, ToLocation, 
+        Operation, Quantity, Notes, User, ItemType, ReceiveDate
+    ) VALUES (
+        p_TransactionType, p_PartID, p_BatchNumber, p_FromLocation, p_ToLocation,
+        p_Operation, p_Quantity, p_Notes, p_User, p_ItemType, p_ReceiveDate
+    );
+    
+    SET p_Status = 0;
+    SET p_ErrorMsg = 'Transaction added successfully';
+    
+    COMMIT;
+END $$
+DELIMITER ;

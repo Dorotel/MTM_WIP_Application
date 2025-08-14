@@ -242,13 +242,20 @@ public static class Dao_Inventory
                 var removeResult = await RemoveInventoryItemAsync(
                     partId, location, operation, quantity, itemType, user, batchNumber, notes, useAsync);
 
+                // FIXED: Check if removal was actually successful (Data.Status > 0 means items were removed)
                 if (removeResult.IsSuccess && removeResult.Data.Status > 0)
                 {
                     removedCount += removeResult.Data.Status;
                 }
-                else if (!string.IsNullOrWhiteSpace(removeResult.Data.ErrorMsg))
+                else if (removeResult.IsSuccess && removeResult.Data.Status == 0)
                 {
+                    // No matching item found, add to error messages
                     errorMessages.Add($"PartID: {partId}, Location: {location}, Operation: {operation}, Error: {removeResult.Data.ErrorMsg}");
+                }
+                else
+                {
+                    // Actual failure occurred
+                    errorMessages.Add($"PartID: {partId}, Location: {location}, Operation: {operation}, Error: {removeResult.ErrorMessage}");
                 }
             }
 
@@ -296,16 +303,25 @@ public static class Dao_Inventory
                 useAsync
             );
 
-            if (result.IsSuccess)
+            // FIXED: Check actual Status from stored procedure, not just IsSuccess
+            // Status 0 = success, Status 1 = not found, Status -1 = error
+            if (result.IsSuccess && result.Status == 0)
             {
-                // MIGRATED: Use Status instead of RowsAffected and return meaningful counts
-                return DaoResult<(int, string)>.Success((result.Status, result.ErrorMessage ?? ""), 
-                    $"Successfully removed inventory item: {partId}", 1); // Return 1 for successful operations
+                // Actual removal occurred
+                return DaoResult<(int, string)>.Success((1, result.ErrorMessage ?? ""), 
+                    $"Successfully removed inventory item: {partId}");
+            }
+            else if (result.IsSuccess && result.Status == 1)
+            {
+                // No matching item found for removal
+                return DaoResult<(int, string)>.Success((0, result.ErrorMessage ?? ""), 
+                    $"No inventory item found for removal: {result.ErrorMessage}");
             }
             else
             {
-                return DaoResult<(int, string)>.Success((result.Status, result.ErrorMessage ?? ""), 
-                    $"No inventory item removed: {result.ErrorMessage}");
+                // Database error or exception
+                return DaoResult<(int, string)>.Failure(
+                    $"Failed to remove inventory item for part {partId}: {result.ErrorMessage}");
             }
         }
         catch (Exception ex)
