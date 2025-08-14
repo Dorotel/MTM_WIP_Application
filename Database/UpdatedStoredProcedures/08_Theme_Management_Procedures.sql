@@ -25,11 +25,11 @@ DROP PROCEDURE IF EXISTS app_themes_Set_UserTheme;
 
 -- Get all themes from app_themes table (direct table query as stored procedure)
 DELIMITER $$
-CREATE PROCEDURE app_themes_Get_All()
+CREATE PROCEDURE app_themes_Get_All(
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
+)
 BEGIN
-    DECLARE p_Status INT DEFAULT 0;
-    DECLARE p_ErrorMsg VARCHAR(255) DEFAULT '';
-    
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET p_Status = -1;
@@ -37,7 +37,7 @@ BEGIN
     END;
     
     -- Simply return all rows from app_themes table (like the old Helper_Database_Core.ExecuteDataTable approach)
-    SELECT * FROM app_themes WHERE IsActive = 1 ORDER BY ThemeName;
+    SELECT * FROM app_themes ORDER BY ThemeName;
     
     SET p_Status = 0;
     SET p_ErrorMsg = 'Themes retrieved successfully';
@@ -47,11 +47,11 @@ DELIMITER ;
 -- Get specific theme by name with status reporting
 DELIMITER $$
 CREATE PROCEDURE app_themes_Get_ByName(
-    IN p_ThemeName VARCHAR(50)
+    IN p_ThemeName VARCHAR(50),
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(255)
 )
 BEGIN
-    DECLARE p_Status INT DEFAULT 0;
-    DECLARE p_ErrorMsg VARCHAR(255) DEFAULT '';
     DECLARE v_Count INT DEFAULT 0;
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -60,11 +60,11 @@ BEGIN
         SET p_ErrorMsg = CONCAT('Database error occurred while retrieving theme: ', p_ThemeName);
     END;
     
-    SELECT COUNT(*) INTO v_Count FROM app_themes WHERE ThemeName = p_ThemeName AND IsActive = 1;
+    SELECT COUNT(*) INTO v_Count FROM app_themes WHERE ThemeName = p_ThemeName;
     
     IF v_Count = 0 THEN
         SET p_Status = 1;
-        SET p_ErrorMsg = CONCAT('Theme not found or inactive: ', p_ThemeName);
+        SET p_ErrorMsg = CONCAT('Theme not found: ', p_ThemeName);
         -- Return empty result set with structure
         SELECT NULL as ThemeName, NULL as SettingsJson LIMIT 0;
     ELSE
