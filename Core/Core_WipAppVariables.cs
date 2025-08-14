@@ -2,6 +2,7 @@
 
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
+using MTM_Inventory_Application.Models;
 
 namespace MTM_Inventory_Application.Core;
 
@@ -11,7 +12,7 @@ internal static class Core_WipAppVariables
 {
     #region User Info
 
-    public static readonly string User = Dao_System.System_GetUserName();
+    public static readonly string User = Model_AppVariables.User;
 
     #endregion
 

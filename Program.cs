@@ -130,6 +130,9 @@ namespace MTM_Inventory_Application
                 try
                 {
                     Model_AppVariables.User = Dao_System.System_GetUserName();
+                    //Model_AppVariables.User = "TestUser"; // TEMPORARY OVERRIDE FOR TESTING - REMOVE IN PRODUCTION
+
+
                     LoggingUtility.Log($"[Startup] User identified: {Model_AppVariables.User}");
                 }
                 catch (Exception ex)

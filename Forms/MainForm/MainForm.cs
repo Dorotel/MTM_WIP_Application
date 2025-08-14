@@ -252,6 +252,9 @@ namespace MTM_Inventory_Application.Forms.MainForm
                         await MainForm_OnStartup_GetUserFullNameAsync();
                         Debug.WriteLine("[DEBUG] [MainForm.ctor] User full name loaded.");
 
+                        // Configure Development Menu visibility based on username
+                        ConfigureDevelopmentMenuVisibility();
+
                         await Task.Delay(500);
                         SetInitialFocusToInventoryTab();
 
@@ -269,6 +272,76 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 LoggingUtility.LogApplicationError(ex);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Configures Development Menu visibility based on current user
+        /// Only users JKOLL or JOHNK can access the Development Menu
+        /// </summary>
+        private void ConfigureDevelopmentMenuVisibility()
+        {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["CurrentUser"] = Model_AppVariables.User ?? "Unknown",
+                ["DevelopmentMenuExists"] = developmentToolStripMenuItem != null
+            }, nameof(ConfigureDevelopmentMenuVisibility), nameof(MainForm));
+
+            try
+            {
+                string currentUser = Model_AppVariables.User?.ToUpperInvariant() ?? "";
+                bool isDeveloper = currentUser == "JKOLL" || currentUser == "JOHNK";
+
+                if (developmentToolStripMenuItem != null)
+                {
+                    developmentToolStripMenuItem.Visible = isDeveloper;
+
+                    Service_DebugTracer.TraceBusinessLogic("DEVELOPMENT_MENU_VISIBILITY", 
+                        inputData: new { 
+                            User = Model_AppVariables.User,
+                            UserUpperCase = currentUser,
+                            IsDeveloper = isDeveloper
+                        },
+                        outputData: new {
+                            MenuVisible = isDeveloper,
+                            AccessGranted = isDeveloper ? "Yes" : "No"
+                        });
+
+                    Service_DebugTracer.TraceUIAction("DEVELOPMENT_MENU_CONFIGURED", nameof(MainForm),
+                        new Dictionary<string, object>
+                        {
+                            ["User"] = Model_AppVariables.User ?? "Unknown",
+                            ["MenuVisible"] = isDeveloper,
+                            ["AccessLevel"] = isDeveloper ? "Developer" : "Standard User"
+                        });
+
+                    LoggingUtility.LogApplicationInfo($"Development Menu configured for user '{Model_AppVariables.User}': {(isDeveloper ? "Visible" : "Hidden")}");
+                }
+                else
+                {
+                    Service_DebugTracer.TraceUIAction("DEVELOPMENT_MENU_NOT_FOUND", nameof(MainForm),
+                        new Dictionary<string, object>
+                        {
+                            ["Warning"] = "developmentToolStripMenuItem is null"
+                        });
+                    LoggingUtility.Log("Development Menu item not found during visibility configuration");
+                }
+            }
+            catch (Exception ex)
+            {
+                Service_DebugTracer.TraceUIAction("DEVELOPMENT_MENU_CONFIG_ERROR", nameof(MainForm),
+                    new Dictionary<string, object> { ["Exception"] = ex.Message });
+        
+                LoggingUtility.LogApplicationError(ex);
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low,
+                    controlName: nameof(MainForm),
+                    contextData: new Dictionary<string, object> 
+                    { 
+                        ["Method"] = nameof(ConfigureDevelopmentMenuVisibility),
+                        ["User"] = Model_AppVariables.User ?? "Unknown"
+                    });
+            }
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(ConfigureDevelopmentMenuVisibility), nameof(MainForm));
         }
 
         private void SetInitialFocusToInventoryTab()

@@ -33,7 +33,7 @@ DROP PROCEDURE IF EXISTS inv_transaction_Add;
 
 -- Add inventory item - ALWAYS CREATE NEW BATCH VERSION (no quantity consolidation)
 DELIMITER $$
-CREATE PROCEDURE inv_inventory_Add_Item(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Add_Item`(
     IN p_PartID VARCHAR(300),        -- Match working size
     IN p_Location VARCHAR(100),
     IN p_Operation VARCHAR(100),
@@ -48,6 +48,7 @@ CREATE PROCEDURE inv_inventory_Add_Item(
 BEGIN
     DECLARE v_NextBatchNumber VARCHAR(20);
     DECLARE v_ErrorMessage TEXT DEFAULT '';
+    DECLARE v_CurrentMax INT DEFAULT 0;
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -72,22 +73,28 @@ BEGIN
         updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     
-    -- ROBUST: Initialize sequence table if empty
-    INSERT IGNORE INTO inv_inventory_batch_seq (last_batch_number)
-    SELECT COALESCE(MAX(CAST(CASE 
-        WHEN BatchNumber IS NOT NULL AND BatchNumber REGEXP '^[0-9]+$' 
-        THEN BatchNumber 
-        ELSE '0' 
-    END AS UNSIGNED)), 0)
-    FROM inv_inventory;
+    -- FIXED: Initialize sequence table only once if completely empty
+    IF (SELECT COUNT(*) FROM inv_inventory_batch_seq) = 0 THEN
+        -- Get the current maximum batch number from existing inventory
+        SELECT COALESCE(MAX(CAST(CASE 
+            WHEN BatchNumber IS NOT NULL AND BatchNumber REGEXP '^[0-9]+$' 
+            THEN BatchNumber 
+            ELSE '0' 
+        END AS UNSIGNED)), 0) INTO v_CurrentMax
+        FROM inv_inventory;
+        
+        -- Insert initial record with current max
+        INSERT INTO inv_inventory_batch_seq (last_batch_number) VALUES (v_CurrentMax);
+    END IF;
     
-    -- Generate next batch number
-    SELECT COALESCE(last_batch_number, 0) INTO @nextBatch FROM inv_inventory_batch_seq LIMIT 1;
-    SET @nextBatch = @nextBatch + 1;
+    -- FIXED: Atomic increment and retrieval
+    UPDATE inv_inventory_batch_seq 
+    SET last_batch_number = last_batch_number + 1
+    WHERE TRUE;
+    
+    -- Get the newly incremented value
+    SELECT last_batch_number INTO @nextBatch FROM inv_inventory_batch_seq LIMIT 1;
     SET v_NextBatchNumber = LPAD(@nextBatch, 10, '0');
-    
-    -- Update the sequence table
-    UPDATE inv_inventory_batch_seq SET last_batch_number = @nextBatch WHERE TRUE;
     
     -- Validate quantity
     IF p_Quantity <= 0 THEN
@@ -118,7 +125,7 @@ BEGIN
         SET p_ErrorMsg = CONCAT('New inventory batch created successfully for part: ', p_PartID, ' with batch: ', v_NextBatchNumber, ', quantity: ', p_Quantity);
         COMMIT;
     END IF;
-END $$
+END$$
 DELIMITER ;
 
 -- Remove inventory item - SIMPLIFIED VERSION with flexible matching
@@ -350,13 +357,14 @@ DELIMITER ;
 
 -- Get next available batch number with status reporting and error logging
 DELIMITER $$
-CREATE PROCEDURE inv_inventory_GetNextBatchNumber(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_GetNextBatchNumber`(
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
 )
 BEGIN
     DECLARE v_ErrorMessage TEXT DEFAULT '';
     DECLARE v_NextBatchNumber VARCHAR(20) DEFAULT '0000000001';
+    DECLARE v_CurrentMax INT DEFAULT 0;
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -388,16 +396,21 @@ BEGIN
         updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     
-    -- ROBUST: Initialize sequence table if empty
-    INSERT IGNORE INTO inv_inventory_batch_seq (last_batch_number)
-    SELECT COALESCE(MAX(CAST(CASE 
-        WHEN BatchNumber IS NOT NULL AND BatchNumber REGEXP '^[0-9]+$' 
-        THEN BatchNumber 
-        ELSE '0' 
-    END AS UNSIGNED)), 0)
-    FROM inv_inventory;
+    -- FIXED: Initialize sequence table only once if completely empty
+    IF (SELECT COUNT(*) FROM inv_inventory_batch_seq) = 0 THEN
+        -- Get the current maximum batch number from existing inventory
+        SELECT COALESCE(MAX(CAST(CASE 
+            WHEN BatchNumber IS NOT NULL AND BatchNumber REGEXP '^[0-9]+$' 
+            THEN BatchNumber 
+            ELSE '0' 
+        END AS UNSIGNED)), 0) INTO v_CurrentMax
+        FROM inv_inventory;
+        
+        -- Insert initial record with current max
+        INSERT INTO inv_inventory_batch_seq (last_batch_number) VALUES (v_CurrentMax);
+    END IF;
     
-    -- ROBUST: Generate next batch number using fallback methods
+    -- FIXED: Just peek at the next number without incrementing
     SELECT LPAD(COALESCE(last_batch_number + 1, 1), 10, '0') INTO v_NextBatchNumber
     FROM inv_inventory_batch_seq
     LIMIT 1;
@@ -417,17 +430,12 @@ BEGIN
         END IF;
     END IF;
     
-    -- Update the sequence table for next time
-    UPDATE inv_inventory_batch_seq 
-    SET last_batch_number = CAST(v_NextBatchNumber AS UNSIGNED)
-    WHERE TRUE;
-    
-    -- Return the generated batch number
+    -- Return the generated batch number (DON'T update the sequence here - let Add_Item do it)
     SELECT v_NextBatchNumber as NextBatchNumber;
     
     SET p_Status = 0;
     SET p_ErrorMsg = 'Next batch number generated successfully';
-END $$
+END$$
 DELIMITER ;
 
 -- Fix batch numbers (consolidate and clean up) with error logging

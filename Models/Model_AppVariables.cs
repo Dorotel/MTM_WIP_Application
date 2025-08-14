@@ -11,7 +11,7 @@ namespace MTM_Inventory_Application.Models
         #region User Info
 
         public static string EnteredUser { get; set; } = "Default User";
-        public static string User { get; set; } = Dao_System.System_GetUserName();
+        public static string User { get; set; } = "DEFAULT";
         public static string? UserPin { get; set; }
         public static string? UserShift { get; set; }
         public static bool UserTypeAdmin { get; set; } = false;
