@@ -283,16 +283,16 @@ CREATE PROCEDURE usr_users_Add_User(
     IN p_User VARCHAR(100),
     IN p_FullName VARCHAR(200),
     IN p_Shift VARCHAR(50),
-    IN p_VitsUser TINYINT(1), -- MySQL 5.7 compatible boolean
-    IN p_Pin VARCHAR(20),
-    IN p_LastShownVersion VARCHAR(20),
-    IN p_HideChangeLog VARCHAR(10),
+    IN p_VitsUser TINYINT, -- Match current procedure exactly
+    IN p_Pin VARCHAR(50), -- Match current procedure size
+    IN p_LastShownVersion VARCHAR(50), -- Match current procedure size
+    IN p_HideChangeLog VARCHAR(50), -- Match current procedure size
     IN p_Theme_Name VARCHAR(50),
     IN p_Theme_FontSize INT,
-    IN p_VisualUserName VARCHAR(100),
-    IN p_VisualPassword VARCHAR(100),
-    IN p_WipServerAddress VARCHAR(100),
-    IN p_WIPDatabase VARCHAR(100),
+    IN p_VisualUserName VARCHAR(50), -- Match current procedure size
+    IN p_VisualPassword VARCHAR(50), -- Match current procedure size
+    IN p_WipServerAddress VARCHAR(15), -- Match current procedure size
+    IN p_WipDatabase VARCHAR(100),
     IN p_WipServerPort VARCHAR(10),
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
@@ -321,12 +321,12 @@ BEGIN
             User, `Full Name`, Shift, VitsUser, Pin,
             LastShownVersion, HideChangeLog, Theme_Name, Theme_FontSize,
             VisualUserName, VisualPassword, WipServerAddress, 
-            WIPDatabase, WipServerPort
+            WipDatabase, WipServerPort
         ) VALUES (
             p_User, p_FullName, p_Shift, p_VitsUser, p_Pin,
             p_LastShownVersion, p_HideChangeLog, p_Theme_Name, p_Theme_FontSize,
             p_VisualUserName, p_VisualPassword, p_WipServerAddress,
-            p_WIPDatabase, p_WipServerPort
+            p_WipDatabase, p_WipServerPort
         );
         
         SET p_Status = 0;
@@ -342,9 +342,9 @@ CREATE PROCEDURE usr_users_Update_User(
     IN p_User VARCHAR(100),
     IN p_FullName VARCHAR(200),
     IN p_Shift VARCHAR(50),
-    IN p_Pin VARCHAR(20),
-    IN p_VisualUserName VARCHAR(100),
-    IN p_VisualPassword VARCHAR(100),
+    IN p_Pin VARCHAR(50), -- Match current procedure size
+    IN p_VisualUserName VARCHAR(50), -- Match current procedure size
+    IN p_VisualPassword VARCHAR(50), -- Match current procedure size
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
 )

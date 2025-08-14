@@ -11,12 +11,12 @@
 
 -- Drop procedures if they exist (for clean deployment)
 DROP PROCEDURE IF EXISTS md_part_ids_Get_All;
-DROP PROCEDURE IF EXISTS md_part_ids_Get_ByPartID;
+DROP PROCEDURE IF EXISTS md_part_ids_Get_ByItemNumber;
 DROP PROCEDURE IF EXISTS md_part_ids_GetItemType_ByPartID;
 DROP PROCEDURE IF EXISTS md_part_ids_Exists_ByPartID;
-DROP PROCEDURE IF EXISTS md_part_ids_Add_PartID;
-DROP PROCEDURE IF EXISTS md_part_ids_Update_PartID;
-DROP PROCEDURE IF EXISTS md_part_ids_Delete_ByPartID;
+DROP PROCEDURE IF EXISTS md_part_ids_Add_Part;
+DROP PROCEDURE IF EXISTS md_part_ids_Update_Part;
+DROP PROCEDURE IF EXISTS md_part_ids_Delete_ByItemNumber;
 DROP PROCEDURE IF EXISTS md_operation_numbers_Get_All;
 DROP PROCEDURE IF EXISTS md_operation_numbers_Exists_ByOperation;
 DROP PROCEDURE IF EXISTS md_operation_numbers_Add_Operation;
@@ -32,7 +32,7 @@ DROP PROCEDURE IF EXISTS md_item_types_GetDistinct;
 DROP PROCEDURE IF EXISTS md_item_types_Exists_ByItemType;
 DROP PROCEDURE IF EXISTS md_item_types_Add_ItemType;
 DROP PROCEDURE IF EXISTS md_item_types_Update_ItemType;
-DROP PROCEDURE IF EXISTS md_item_types_Delete_ByItemType;
+DROP PROCEDURE IF EXISTS md_item_types_Delete_ByType;
 
 -- ================================================================================
 -- PART ID MANAGEMENT PROCEDURES
@@ -63,7 +63,7 @@ DELIMITER ;
 
 -- Get part ID by specific part ID
 DELIMITER $$
-CREATE PROCEDURE md_part_ids_Get_ByPartID(
+CREATE PROCEDURE md_part_ids_Get_ByItemNumber(
     IN p_PartID VARCHAR(300),
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
@@ -147,10 +147,12 @@ DELIMITER ;
 
 -- Add new part ID
 DELIMITER $$
-CREATE PROCEDURE md_part_ids_Add_PartID(
-    IN p_PartID VARCHAR(300),
-    IN p_ItemType VARCHAR(50),
+CREATE PROCEDURE md_part_ids_Add_Part(
+    IN p_PartID VARCHAR(300), -- Match current p_ItemNumber parameter (but keep consistent naming)
+    IN p_Customer VARCHAR(300), -- Add missing parameter from current procedure
+    IN p_Description VARCHAR(300), -- Add missing parameter from current procedure
     IN p_IssuedBy VARCHAR(100),
+    IN p_ItemType VARCHAR(100), -- Match current parameter size
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
 )
@@ -174,8 +176,8 @@ BEGIN
         SET p_ErrorMsg = CONCAT('Part ID already exists: ', p_PartID);
         ROLLBACK;
     ELSE
-        INSERT INTO md_part_ids (PartID, ItemType, IssuedBy)
-        VALUES (p_PartID, p_ItemType, p_IssuedBy);
+        INSERT INTO md_part_ids (PartID, Customer, Description, IssuedBy, ItemType)
+        VALUES (p_PartID, p_Customer, p_Description, p_IssuedBy, p_ItemType);
         
         SET p_Status = 0;
         SET p_ErrorMsg = CONCAT('Part ID added successfully: ', p_PartID);
@@ -186,11 +188,13 @@ DELIMITER ;
 
 -- Update existing part ID
 DELIMITER $$
-CREATE PROCEDURE md_part_ids_Update_PartID(
-    IN p_OldPartID VARCHAR(300),
-    IN p_NewPartID VARCHAR(300),
-    IN p_ItemType VARCHAR(50),
+CREATE PROCEDURE md_part_ids_Update_Part(
+    IN p_ID INT,
+    IN p_ItemNumber VARCHAR(300), -- Match current procedure parameter name
+    IN p_Customer VARCHAR(300), -- Add missing parameter from current procedure
+    IN p_Description VARCHAR(300), -- Add missing parameter from current procedure
     IN p_IssuedBy VARCHAR(100),
+    IN p_ItemType VARCHAR(100), -- Match current parameter size
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
 )
@@ -201,34 +205,36 @@ BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET p_Status = -1;
-        SET p_ErrorMsg = CONCAT('Database error occurred while updating part ID: ', p_OldPartID);
+        SET p_ErrorMsg = CONCAT('Database error occurred while updating part ID: ', p_ItemNumber);
         ROLLBACK;
     END;
     
     START TRANSACTION;
     
-    -- Check if old part ID exists
-    SELECT COUNT(*) INTO v_Count FROM md_part_ids WHERE PartID = p_OldPartID;
+    -- Check if ID exists
+    SELECT COUNT(*) INTO v_Count FROM md_part_ids WHERE ID = p_ID;
     
     IF v_Count = 0 THEN
         SET p_Status = 1;
-        SET p_ErrorMsg = CONCAT('Part ID not found: ', p_OldPartID);
+        SET p_ErrorMsg = CONCAT('Part ID not found for ID: ', p_ID);
         ROLLBACK;
     ELSE
         UPDATE md_part_ids 
-        SET PartID = p_NewPartID,
-            ItemType = p_ItemType,
-            IssuedBy = p_IssuedBy
-        WHERE PartID = p_OldPartID;
+        SET PartID = p_ItemNumber,
+            Customer = p_Customer,
+            Description = p_Description,
+            IssuedBy = p_IssuedBy,
+            ItemType = p_ItemType
+        WHERE ID = p_ID;
         
         SET v_RowsAffected = ROW_COUNT();
         
         IF v_RowsAffected > 0 THEN
             SET p_Status = 0;
-            SET p_ErrorMsg = CONCAT('Part ID updated successfully from ', p_OldPartID, ' to ', p_NewPartID);
+            SET p_ErrorMsg = CONCAT('Part updated successfully for ID: ', p_ID);
         ELSE
             SET p_Status = 2;
-            SET p_ErrorMsg = CONCAT('No changes made to part ID: ', p_OldPartID);
+            SET p_ErrorMsg = CONCAT('No changes made to part for ID: ', p_ID);
         END IF;
         
         COMMIT;
@@ -238,7 +244,7 @@ DELIMITER ;
 
 -- Delete part ID
 DELIMITER $$
-CREATE PROCEDURE md_part_ids_Delete_ByPartID(
+CREATE PROCEDURE md_part_ids_Delete_ByItemNumber(
     IN p_PartID VARCHAR(300),
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
@@ -813,7 +819,7 @@ DELIMITER ;
 
 -- Delete item type
 DELIMITER $$
-CREATE PROCEDURE md_item_types_Delete_ByItemType(
+CREATE PROCEDURE md_item_types_Delete_ByType(
     IN p_ItemType VARCHAR(50),
     OUT p_Status INT,
     OUT p_ErrorMsg VARCHAR(255)
