@@ -34,16 +34,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
         // Progress reporting
         private Helper_StoredProcedureProgress? _progressHelper;
 
-        // Smart search controls (will be added to designer)
-        private TextBox _smartSearchTextBox = new();
-        private CheckBox _checkBoxIN = new();
-        private CheckBox _checkBoxOUT = new(); 
-        private CheckBox _checkBoxTRANSFER = new();
-        private RadioButton _radioToday = new();
-        private RadioButton _radioThisWeek = new();
-        private RadioButton _radioThisMonth = new();
-        private RadioButton _radioCustomRange = new();
-
         #endregion
 
         #region Properties
@@ -141,50 +131,18 @@ namespace MTM_Inventory_Application.Forms.Transactions
         {
             try
             {
-                // Setup smart search textbox
-                _smartSearchTextBox.Name = "Transactions_TextBox_SmartSearch";
-                _smartSearchTextBox.PlaceholderText = "Search anything... Part ID, User, Location, Notes";
-                _smartSearchTextBox.Font = new Font("Segoe UI", 10F);
-                
-                // Setup transaction type checkboxes
-                _checkBoxIN.Name = "Transactions_CheckBox_IN";
-                _checkBoxIN.Text = "📥 IN";
-                _checkBoxIN.Checked = true;
-                
-                _checkBoxOUT.Name = "Transactions_CheckBox_OUT";
-                _checkBoxOUT.Text = "📤 OUT";
-                _checkBoxOUT.Checked = true;
-                
-                _checkBoxTRANSFER.Name = "Transactions_CheckBox_TRANSFER";
-                _checkBoxTRANSFER.Text = "🔄 TRANSFER";
-                _checkBoxTRANSFER.Checked = true;
-
-                // Setup time range radio buttons
-                _radioToday.Name = "Transactions_Radio_Today";
-                _radioToday.Text = "Today";
-                _radioToday.Checked = true;
-                
-                _radioThisWeek.Name = "Transactions_Radio_ThisWeek";
-                _radioThisWeek.Text = "This Week";
-                
-                _radioThisMonth.Name = "Transactions_Radio_ThisMonth";
-                _radioThisMonth.Text = "This Month";
-                
-                _radioCustomRange.Name = "Transactions_Radio_CustomRange";
-                _radioCustomRange.Text = "Custom Range";
-
                 // Wire up events for smart search
-                _smartSearchTextBox.TextChanged += OnSmartSearchTextChanged;
+                Transactions_TextBox_SmartSearch.TextChanged += OnSmartSearchTextChanged;
                 
                 // Filter change events
-                _checkBoxIN.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
-                _checkBoxOUT.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
-                _checkBoxTRANSFER.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
+                Transactions_CheckBox_IN.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
+                Transactions_CheckBox_OUT.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
+                Transactions_CheckBox_TRANSFER.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
                 
-                _radioToday.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
-                _radioThisWeek.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
-                _radioThisMonth.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
-                _radioCustomRange.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
+                Transactions_Radio_Today.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
+                Transactions_Radio_ThisWeek.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
+                Transactions_Radio_ThisMonth.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
+                Transactions_Radio_CustomRange.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
             }
             catch (Exception ex)
             {
@@ -862,11 +820,11 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 CurrentPage = 1;
                 
                 // Reset smart search controls
-                _smartSearchTextBox.Clear();
-                _checkBoxIN.Checked = true;
-                _checkBoxOUT.Checked = true;
-                _checkBoxTRANSFER.Checked = true;
-                _radioToday.Checked = true;
+                Transactions_TextBox_SmartSearch.Clear();
+                Transactions_CheckBox_IN.Checked = true;
+                Transactions_CheckBox_OUT.Checked = true;
+                Transactions_CheckBox_TRANSFER.Checked = true;
+                Transactions_Radio_Today.Checked = true;
             }
             catch (Exception ex)
             {
@@ -898,17 +856,100 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 // Parse search terms and build search criteria
                 var searchCriteria = ParseSearchInput(searchText);
                 
-                // For now, use the existing load method with enhanced criteria
-                // TODO: Replace with DAO call using DaoResult<T> pattern
-                await LoadTransactionsAsync();
+                _progressHelper?.UpdateProgress(30, "Executing smart search...");
+                
+                // Use DAO smart search with parsed criteria
+                var dao = new Dao_Transactions();
+                var searchTerms = BuildSearchTermsDictionary(searchCriteria);
+                var transactionTypes = GetSelectedTransactionTypes();
+                var timeRange = GetSelectedTimeRange();
+                var locations = GetSelectedLocations();
+                
+                var searchResult = await dao.SmartSearchAsync(
+                    searchTerms,
+                    transactionTypes,
+                    timeRange,
+                    locations,
+                    _isAdmin ? string.Empty : _currentUser,
+                    _isAdmin,
+                    CurrentPage,
+                    PageSize
+                );
 
-                _progressHelper?.ShowSuccess("Smart search completed");
+                _progressHelper?.UpdateProgress(80, "Processing results...");
+
+                if (searchResult.IsSuccess && searchResult.Data != null)
+                {
+                    await DisplaySearchResultsAsync(searchResult.Data);
+                    await UpdateAnalyticsDashboardAsync(searchResult.Data);
+                    _progressHelper?.ShowSuccess($"Smart search found {searchResult.Data.Count} transactions");
+                }
+                else
+                {
+                    Service_ErrorHandler.HandleException(
+                        new Exception($"Smart search failed: {searchResult.ErrorMessage}"),
+                        ErrorSeverity.Medium,
+                        controlName: "Smart Search"
+                    );
+                    _progressHelper?.ShowError("Smart search failed");
+                }
             }
             catch (Exception ex)
             {
                 _progressHelper?.ShowError("Smart search failed");
                 Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
+                    retryAction: () => HandleSmartSearchAsync(searchText),
                     controlName: "HandleSmartSearchAsync");
+            }
+        }
+
+        /// <summary>
+        /// Builds search terms dictionary from parsed criteria
+        /// </summary>
+        /// <param name="criteria">Parsed search criteria</param>
+        /// <returns>Dictionary of search terms for DAO</returns>
+        private Dictionary<string, string> BuildSearchTermsDictionary(SmartSearchCriteria criteria)
+        {
+            var searchTerms = new Dictionary<string, string>();
+
+            if (!string.IsNullOrWhiteSpace(criteria.SpecificPartId))
+                searchTerms["partid"] = criteria.SpecificPartId;
+
+            if (!string.IsNullOrWhiteSpace(criteria.SpecificUser))
+                searchTerms["user"] = criteria.SpecificUser;
+
+            if (!string.IsNullOrWhiteSpace(criteria.SpecificLocation))
+                searchTerms["location"] = criteria.SpecificLocation;
+
+            if (!string.IsNullOrWhiteSpace(criteria.SpecificOperation))
+                searchTerms["operation"] = criteria.SpecificOperation;
+
+            if (criteria.SpecificQuantity.HasValue)
+                searchTerms["quantity"] = criteria.SpecificQuantity.Value.ToString();
+
+            // Combine general terms for broad search
+            if (criteria.GeneralTerms.Count > 0)
+                searchTerms["general"] = string.Join(" ", criteria.GeneralTerms);
+
+            return searchTerms;
+        }
+
+        /// <summary>
+        /// Updates the analytics dashboard with transaction data
+        /// </summary>
+        /// <param name="transactions">Transaction data</param>
+        private async Task UpdateAnalyticsDashboardAsync(List<Model_Transactions> transactions)
+        {
+            try
+            {
+                // TODO: Implement analytics dashboard updates
+                await Task.CompletedTask;
+                System.Diagnostics.Debug.WriteLine($"[ANALYTICS] Processing {transactions.Count} transactions for dashboard");
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low,
+                    controlName: "UpdateAnalyticsDashboardAsync");
             }
         }
 
@@ -1007,11 +1048,11 @@ namespace MTM_Inventory_Application.Forms.Transactions
         {
             var types = new List<TransactionType>();
             
-            if (_checkBoxIN.Checked) 
+            if (Transactions_CheckBox_IN.Checked) 
                 types.Add(TransactionType.IN);
-            if (_checkBoxOUT.Checked) 
+            if (Transactions_CheckBox_OUT.Checked) 
                 types.Add(TransactionType.OUT);
-            if (_checkBoxTRANSFER.Checked) 
+            if (Transactions_CheckBox_TRANSFER.Checked) 
                 types.Add(TransactionType.TRANSFER);
             
             // If none selected, return all types
@@ -1028,19 +1069,19 @@ namespace MTM_Inventory_Application.Forms.Transactions
         /// </summary>
         private (DateTime from, DateTime to) GetSelectedTimeRange()
         {
-            if (_radioToday.Checked)
+            if (Transactions_Radio_Today.Checked)
             {
                 return (DateTime.Today, DateTime.Today.AddDays(1).AddTicks(-1));
             }
             
-            if (_radioThisWeek.Checked)
+            if (Transactions_Radio_ThisWeek.Checked)
             {
                 var startOfWeek = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
                 var endOfWeek = startOfWeek.AddDays(7).AddTicks(-1);
                 return (startOfWeek, endOfWeek);
             }
             
-            if (_radioThisMonth.Checked)
+            if (Transactions_Radio_ThisMonth.Checked)
             {
                 var startOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
                 var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
@@ -1048,7 +1089,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
             
             // Custom range
-            if (_radioCustomRange.Checked)
+            if (Transactions_Radio_CustomRange.Checked)
             {
                 return (Control_AdvancedRemove_DateTimePicker_From.Value.Date, 
                         Control_AdvancedRemove_DateTimePicker_To.Value.Date.AddDays(1).AddTicks(-1));
@@ -1084,7 +1125,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
         {
             _searchDebounceTimer.Stop();
             
-            var currentText = _smartSearchTextBox.Text;
+            var currentText = Transactions_TextBox_SmartSearch.Text;
             
             // Skip if text hasn't actually changed
             if (currentText == _lastSearchText)
@@ -1128,9 +1169,9 @@ namespace MTM_Inventory_Application.Forms.Transactions
         /// </summary>
         private async Task HandleFilterChangeAsync()
         {
-            if (!string.IsNullOrWhiteSpace(_smartSearchTextBox.Text))
+            if (!string.IsNullOrWhiteSpace(Transactions_TextBox_SmartSearch.Text))
             {
-                await HandleSmartSearchAsync(_smartSearchTextBox.Text);
+                await HandleSmartSearchAsync(Transactions_TextBox_SmartSearch.Text);
             }
         }
 

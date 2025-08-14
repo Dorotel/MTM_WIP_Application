@@ -36,6 +36,20 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private Panel Transactions_Panel_Bottom_Left;
         private Button Transactions_Button_Reset;
 
+        // Smart search controls
+        private Panel Transactions_Panel_Row_SmartSearch;
+        private Label Transactions_Label_SmartSearch;
+        private TextBox Transactions_TextBox_SmartSearch;
+        private Panel Transactions_Panel_TransactionTypes;
+        private CheckBox Transactions_CheckBox_IN;
+        private CheckBox Transactions_CheckBox_OUT;
+        private CheckBox Transactions_CheckBox_TRANSFER;
+        private Panel Transactions_Panel_TimeRange;
+        private RadioButton Transactions_Radio_Today;
+        private RadioButton Transactions_Radio_ThisWeek;
+        private RadioButton Transactions_Radio_ThisMonth;
+        private RadioButton Transactions_Radio_CustomRange;
+
         #endregion
 
         #region Methods
@@ -73,6 +87,21 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Control_AdvancedRemove_DateTimePicker_To = new DateTimePicker();
             Control_AdvancedRemove_CheckBox_Date = new CheckBox();
             Control_AdvancedRemove_DateTimePicker_From = new DateTimePicker();
+            
+            // Smart search controls
+            Transactions_Panel_Row_SmartSearch = new Panel();
+            Transactions_Label_SmartSearch = new Label();
+            Transactions_TextBox_SmartSearch = new TextBox();
+            Transactions_Panel_TransactionTypes = new Panel();
+            Transactions_CheckBox_IN = new CheckBox();
+            Transactions_CheckBox_OUT = new CheckBox();
+            Transactions_CheckBox_TRANSFER = new CheckBox();
+            Transactions_Panel_TimeRange = new Panel();
+            Transactions_Radio_Today = new RadioButton();
+            Transactions_Radio_ThisWeek = new RadioButton();
+            Transactions_Radio_ThisMonth = new RadioButton();
+            Transactions_Radio_CustomRange = new RadioButton();
+            
             Transactions_TableLayout_SelectionReport = new TableLayoutPanel();
             Transactions_Label_Report_BatchNumber = new Label();
             Transactions_Label_Report_PartID = new Label();
@@ -118,6 +147,9 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_SplitContainer_Main.Panel2.SuspendLayout();
             Transactions_SplitContainer_Main.SuspendLayout();
             Transactions_TableLayout_Inputs.SuspendLayout();
+            Transactions_Panel_Row_SmartSearch.SuspendLayout();
+            Transactions_Panel_TransactionTypes.SuspendLayout();
+            Transactions_Panel_TimeRange.SuspendLayout();
             Transactions_Panel_Row_Building.SuspendLayout();
             Transactions_Panel_Row_SortBy.SuspendLayout();
             Transactions_Panel_Row_SearchPartID.SuspendLayout();
@@ -184,22 +216,28 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // 
             Transactions_TableLayout_Inputs.ColumnCount = 1;
             Transactions_TableLayout_Inputs.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20F));
+            Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_Row_SmartSearch, 0, 0);
+            Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_TransactionTypes, 0, 1);
+            Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_TimeRange, 0, 2);
             Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_Row_Building, 0, 3);
-            Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_Row_SortBy, 0, 0);
-            Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_Row_SearchPartID, 0, 1);
-            Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_Row_User, 0, 2);
-            Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_Row_Shift, 0, 4);
-            Transactions_TableLayout_Inputs.Controls.Add(Transactions_TableLayout_SelectionReport, 0, 5);
+            Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_Row_SortBy, 0, 4);
+            Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_Row_SearchPartID, 0, 5);
+            Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_Row_User, 0, 6);
+            Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_Row_Shift, 0, 7);
+            Transactions_TableLayout_Inputs.Controls.Add(Transactions_TableLayout_SelectionReport, 0, 8);
             Transactions_TableLayout_Inputs.Dock = DockStyle.Fill;
             Transactions_TableLayout_Inputs.Location = new Point(0, 0);
             Transactions_TableLayout_Inputs.Name = "Transactions_TableLayout_Inputs";
-            Transactions_TableLayout_Inputs.RowCount = 6;
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            Transactions_TableLayout_Inputs.RowCount = 9;
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Smart Search
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Transaction Types
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Time Range
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Building
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Sort By
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Part ID
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // User
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Shift/Date Range
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // Selection Report
             Transactions_TableLayout_Inputs.Size = new Size(409, 524);
             Transactions_TableLayout_Inputs.TabIndex = 0;
             // 
@@ -775,6 +813,120 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Button_SidePanel.Text = "Collapse ⬅️";
             Transactions_Button_SidePanel.UseVisualStyleBackColor = true;
             // 
+            // Transactions_Panel_Row_SmartSearch
+            // 
+            Transactions_Panel_Row_SmartSearch.Controls.Add(Transactions_Label_SmartSearch);
+            Transactions_Panel_Row_SmartSearch.Controls.Add(Transactions_TextBox_SmartSearch);
+            Transactions_Panel_Row_SmartSearch.Location = new Point(3, 3);
+            Transactions_Panel_Row_SmartSearch.Name = "Transactions_Panel_Row_SmartSearch";
+            Transactions_Panel_Row_SmartSearch.Size = new Size(403, 34);
+            Transactions_Panel_Row_SmartSearch.TabIndex = 0;
+            // 
+            // Transactions_Label_SmartSearch
+            // 
+            Transactions_Label_SmartSearch.Location = new Point(6, 6);
+            Transactions_Label_SmartSearch.Name = "Transactions_Label_SmartSearch";
+            Transactions_Label_SmartSearch.Size = new Size(83, 23);
+            Transactions_Label_SmartSearch.TabIndex = 0;
+            Transactions_Label_SmartSearch.Text = "Smart Search:";
+            Transactions_Label_SmartSearch.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // Transactions_TextBox_SmartSearch
+            // 
+            Transactions_TextBox_SmartSearch.Location = new Point(95, 6);
+            Transactions_TextBox_SmartSearch.Name = "Transactions_TextBox_SmartSearch";
+            Transactions_TextBox_SmartSearch.Size = new Size(302, 23);
+            Transactions_TextBox_SmartSearch.TabIndex = 1;
+            Transactions_TextBox_SmartSearch.PlaceholderText = "Search anything... Part ID, User, Location, Notes";
+            // 
+            // Transactions_Panel_TransactionTypes
+            // 
+            Transactions_Panel_TransactionTypes.Controls.Add(Transactions_CheckBox_IN);
+            Transactions_Panel_TransactionTypes.Controls.Add(Transactions_CheckBox_OUT);
+            Transactions_Panel_TransactionTypes.Controls.Add(Transactions_CheckBox_TRANSFER);
+            Transactions_Panel_TransactionTypes.Location = new Point(3, 43);
+            Transactions_Panel_TransactionTypes.Name = "Transactions_Panel_TransactionTypes";
+            Transactions_Panel_TransactionTypes.Size = new Size(403, 34);
+            Transactions_Panel_TransactionTypes.TabIndex = 1;
+            // 
+            // Transactions_CheckBox_IN
+            // 
+            Transactions_CheckBox_IN.Location = new Point(95, 6);
+            Transactions_CheckBox_IN.Name = "Transactions_CheckBox_IN";
+            Transactions_CheckBox_IN.Size = new Size(60, 23);
+            Transactions_CheckBox_IN.TabIndex = 0;
+            Transactions_CheckBox_IN.Text = "📥 IN";
+            Transactions_CheckBox_IN.UseVisualStyleBackColor = true;
+            Transactions_CheckBox_IN.Checked = true;
+            // 
+            // Transactions_CheckBox_OUT
+            // 
+            Transactions_CheckBox_OUT.Location = new Point(161, 6);
+            Transactions_CheckBox_OUT.Name = "Transactions_CheckBox_OUT";
+            Transactions_CheckBox_OUT.Size = new Size(70, 23);
+            Transactions_CheckBox_OUT.TabIndex = 1;
+            Transactions_CheckBox_OUT.Text = "📤 OUT";
+            Transactions_CheckBox_OUT.UseVisualStyleBackColor = true;
+            Transactions_CheckBox_OUT.Checked = true;
+            // 
+            // Transactions_CheckBox_TRANSFER
+            // 
+            Transactions_CheckBox_TRANSFER.Location = new Point(237, 6);
+            Transactions_CheckBox_TRANSFER.Name = "Transactions_CheckBox_TRANSFER";
+            Transactions_CheckBox_TRANSFER.Size = new Size(100, 23);
+            Transactions_CheckBox_TRANSFER.TabIndex = 2;
+            Transactions_CheckBox_TRANSFER.Text = "🔄 TRANSFER";
+            Transactions_CheckBox_TRANSFER.UseVisualStyleBackColor = true;
+            Transactions_CheckBox_TRANSFER.Checked = true;
+            // 
+            // Transactions_Panel_TimeRange
+            // 
+            Transactions_Panel_TimeRange.Controls.Add(Transactions_Radio_Today);
+            Transactions_Panel_TimeRange.Controls.Add(Transactions_Radio_ThisWeek);
+            Transactions_Panel_TimeRange.Controls.Add(Transactions_Radio_ThisMonth);
+            Transactions_Panel_TimeRange.Controls.Add(Transactions_Radio_CustomRange);
+            Transactions_Panel_TimeRange.Location = new Point(3, 83);
+            Transactions_Panel_TimeRange.Name = "Transactions_Panel_TimeRange";
+            Transactions_Panel_TimeRange.Size = new Size(403, 34);
+            Transactions_Panel_TimeRange.TabIndex = 2;
+            // 
+            // Transactions_Radio_Today
+            // 
+            Transactions_Radio_Today.Location = new Point(95, 6);
+            Transactions_Radio_Today.Name = "Transactions_Radio_Today";
+            Transactions_Radio_Today.Size = new Size(60, 23);
+            Transactions_Radio_Today.TabIndex = 0;
+            Transactions_Radio_Today.Text = "Today";
+            Transactions_Radio_Today.UseVisualStyleBackColor = true;
+            Transactions_Radio_Today.Checked = true;
+            // 
+            // Transactions_Radio_ThisWeek
+            // 
+            Transactions_Radio_ThisWeek.Location = new Point(161, 6);
+            Transactions_Radio_ThisWeek.Name = "Transactions_Radio_ThisWeek";
+            Transactions_Radio_ThisWeek.Size = new Size(80, 23);
+            Transactions_Radio_ThisWeek.TabIndex = 1;
+            Transactions_Radio_ThisWeek.Text = "This Week";
+            Transactions_Radio_ThisWeek.UseVisualStyleBackColor = true;
+            // 
+            // Transactions_Radio_ThisMonth
+            // 
+            Transactions_Radio_ThisMonth.Location = new Point(247, 6);
+            Transactions_Radio_ThisMonth.Name = "Transactions_Radio_ThisMonth";
+            Transactions_Radio_ThisMonth.Size = new Size(90, 23);
+            Transactions_Radio_ThisMonth.TabIndex = 2;
+            Transactions_Radio_ThisMonth.Text = "This Month";
+            Transactions_Radio_ThisMonth.UseVisualStyleBackColor = true;
+            // 
+            // Transactions_Radio_CustomRange
+            // 
+            Transactions_Radio_CustomRange.Location = new Point(343, 6);
+            Transactions_Radio_CustomRange.Name = "Transactions_Radio_CustomRange";
+            Transactions_Radio_CustomRange.Size = new Size(60, 23);
+            Transactions_Radio_CustomRange.TabIndex = 3;
+            Transactions_Radio_CustomRange.Text = "Custom";
+            Transactions_Radio_CustomRange.UseVisualStyleBackColor = true;
+            // 
             // Transactions
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -789,6 +941,9 @@ namespace MTM_Inventory_Application.Forms.Transactions
             ((System.ComponentModel.ISupportInitialize)Transactions_SplitContainer_Main).EndInit();
             Transactions_SplitContainer_Main.ResumeLayout(false);
             Transactions_TableLayout_Inputs.ResumeLayout(false);
+            Transactions_Panel_Row_SmartSearch.ResumeLayout(false);
+            Transactions_Panel_TransactionTypes.ResumeLayout(false);
+            Transactions_Panel_TimeRange.ResumeLayout(false);
             Transactions_Panel_Row_Building.ResumeLayout(false);
             Transactions_Panel_Row_SortBy.ResumeLayout(false);
             Transactions_Panel_Row_SearchPartID.ResumeLayout(false);
