@@ -40,16 +40,7 @@
                             <li><strong>Database:</strong> <code>mtm_wip_application</code></li>
                             <li><strong>Server:</strong> <code>172.16.1.104</code></li>
                             <li><strong>Port:</strong> <code>3306</code></li>
-                            <li><strong>Auto-Detection:</strong> Release mode builds</li>
-                        </ul>
-                    </div>
-                    <div class="env-item development">
-                        <h3>🔧 Development Environment</h3>
-                        <ul>
-                            <li><strong>Database:</strong> <code>mtm_wip_application_test</code></li>
-                            <li><strong>Server:</strong> <code>localhost</code> or <code>172.16.1.104</code></li>
-                            <li><strong>Port:</strong> <code>3306</code></li>
-                            <li><strong>Auto-Detection:</strong> Debug mode builds</li>
+                            <li><strong>Connection:</strong> Automatic detection and connection</li>
                         </ul>
                     </div>
                 </div>
@@ -76,13 +67,6 @@ CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;</code></pre>
                 </div>
 
-                <div class="code-block">
-                    <h4>🟡 Development Database</h4>
-                    <pre><code>CREATE DATABASE mtm_wip_application_test
-CHARACTER SET utf8mb4 
-COLLATE utf8mb4_unicode_ci;</code></pre>
-                </div>
-
                 <h3>Step 3: User Account Setup</h3>
                 <div class="user-setup">
                     <h4>Create Application User</h4>
@@ -92,7 +76,6 @@ CREATE USER 'mtm_user'@'%' IDENTIFIED BY 'secure_password_here';
 
 -- Grant necessary privileges
 GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON mtm_wip_application.* TO 'mtm_user'@'%';
-GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON mtm_wip_application_test.* TO 'mtm_user'@'%';
 
 -- Flush privileges
 FLUSH PRIVILEGES;</code></pre>
@@ -236,33 +219,7 @@ END IF;</code></pre>
             </div>
         </div>
 
-        <div class="help-section">
-            <h2>🧪 MAMP Development Setup</h2>
-            <div class="mamp-setup">
-                <h3>📦 MAMP Configuration</h3>
-                <p>For local development using MAMP (Mac/Windows Apache MySQL PHP):</p>
-                
-                <ol class="setup-steps">
-                    <li><strong>Install MAMP:</strong> Download from mamp.info</li>
-                    <li><strong>Start Services:</strong> Apache and MySQL</li>
-                    <li><strong>Create Database:</strong> Use phpMyAdmin or command line</li>
-                    <li><strong>Import Structure:</strong> Run database creation scripts</li>
-                    <li><strong>Configure Connection:</strong> Update localhost settings</li>
-                </ol>
-
-                <div class="mamp-settings">
-                    <h4>Default MAMP Settings</h4>
-                    <ul>
-                        <li><strong>MySQL Port:</strong> 3306 (or 8889)</li>
-                        <li><strong>Username:</strong> root</li>
-                        <li><strong>Password:</strong> root (default)</li>
-                        <li><strong>Host:</strong> localhost</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="help-section">
+<div class="help-section">
             <h2>🔍 Testing Database Connection</h2>
             <div class="connection-testing">
                 <h3>🧪 Connection Test Procedure</h3>

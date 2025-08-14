@@ -66,33 +66,8 @@
                     <p>The application automatically detects your environment and configures the database connection:</p>
                     
                     <div class="alert alert-info">
-                        <strong>Environment Detection:</strong> The application uses <span class="inline-code">Model_Users.Database</span> and <span class="inline-code">Model_Users.WipServerAddress</span> properties to automatically determine whether to use Release Mode (<span class="inline-code">mtm_wip_application</span>) or Debug Mode (<span class="inline-code">mtm_wip_application_test</span>) database.
+                        <strong>Database Connection:</strong> The application automatically connects to the production database (<span class="inline-code">mtm_wip_application</span>) at server address <span class="inline-code">172.16.1.104</span> using environment detection properties.
                     </div>
-                    
-                    <table class="help-table">
-                        <thead>
-                            <tr>
-                                <th>Mode</th>
-                                <th>Database</th>
-                                <th>Server Address</th>
-                                <th>When Used</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Release Mode</td>
-                                <td><span class="inline-code">mtm_wip_application</span></td>
-                                <td><span class="inline-code">172.16.1.104</span></td>
-                                <td>Production environment</td>
-                            </tr>
-                            <tr>
-                                <td>Debug Mode</td>
-                                <td><span class="inline-code">mtm_wip_application_test</span></td>
-                                <td><span class="inline-code">172.16.1.104</span> or <span class="inline-code">localhost</span></td>
-                                <td>Development and testing</td>
-                            </tr>
-                        </tbody>
-                    </table>
                     
                     <p><a href="database-configuration.html" class="help-btn help-btn-outline-primary">Complete Database Setup Guide</a></p>
                 </div>
@@ -120,7 +95,7 @@
                     <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
                         <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 0.875rem;">
 ┌─ Menu Bar ──────────────────────────────────────────────────┐
-│ File    View    Development    Help                         │
+│ File    View    Help                                        │
 ├─ Tab Control ──────────────────────────────────────────────┤
 │ │Inventory│ │Remove│ │Transfer│ │Advanced│ │QuickButtons│  │
 ├─ Main Content Area ────────────────────────────────────────┤
