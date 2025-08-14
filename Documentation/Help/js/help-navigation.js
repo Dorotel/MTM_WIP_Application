@@ -275,7 +275,7 @@ class HelpNavigation {
             'system-requirements.html': 'System Requirements',
             'database-configuration.html': 'Database Configuration',
             'error-handling.html': 'Error Handling',
-            'development-tools.html': 'Development Tools'
+
         };
         
         return titleMap[filename] || filename.replace('.html', '').replace('-', ' ');
@@ -412,14 +412,7 @@ class HelpNavigation {
                 content: 'error handling messages debugging logs troubleshooting system',
                 keywords: ['error', 'handling', 'messages', 'debugging', 'logs', 'troubleshooting']
             },
-            {
-                title: 'Development Tools',
-                url: 'development-tools.html',
-                category: 'Development',
-                description: 'Developer tools and utilities',
-                content: 'development tools utilities dependency charts converter viewer',
-                keywords: ['development', 'tools', 'utilities', 'dependency', 'charts', 'converter']
-            }
+
         ];
     }
 }
