@@ -15,7 +15,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
 {
     public partial class Transactions : Form
     {
-        #region Fields
 
         private BindingList<Model_Transactions> _displayedTransactions = null!;
         private int _currentPage = 1;
@@ -24,14 +23,8 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private readonly string _currentUser;
         private readonly bool _isAdmin;
         private ComboBox _transactionsComboBoxSearchPartId = new();
-
-        // Enhanced smart search functionality
         private readonly Dictionary<string, string> _lastSearchCriteria = new();
         private bool _isPaginationNavigation = false;
-
-        #endregion
-
-        #region Constructors
 
         public Transactions(string connectionString, string currentUser)
         {
@@ -89,22 +82,14 @@ namespace MTM_Inventory_Application.Forms.Transactions
             };
 
             // Print button logic
-            Transactions_Button_Print.Click += Transactions_Button_Print_Click;
             Core_Themes.ApplyTheme(this);
         }
 
-        #endregion
-
-        #region Methods
-
         private async Task OnFormLoadAsync()
         {
-            Transactions_Button_Print.Enabled = false; // Disable print button on load
             Transactions_Button_Help.Enabled = false; // Disable selection history button on load
             await LoadUserCombosAsync();
-            LoadBuildingCombo(); // Remove await since method is no longer async
             await LoadPartComboAsync();
-            SetupDateRangeDefaults();
             WireUpEvents();
         }
 
@@ -124,15 +109,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
         }
 
-        private void LoadBuildingCombo()
-        {
-            // Set Building ComboBox to only 3 items: [ Enter Building ], Expo Drive, Vits Drive
-            Transactions_ComboBox_Building.Items.Clear();
-            Transactions_ComboBox_Building.Items.Add("[ Enter Building ]");
-            Transactions_ComboBox_Building.Items.Add("Expo Drive");
-            Transactions_ComboBox_Building.Items.Add("Vits Drive");
-            Transactions_ComboBox_Building.SelectedIndex = 0;
-        }
 
         private async Task LoadPartComboAsync()
         {
@@ -140,14 +116,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             _transactionsComboBoxSearchPartId.SelectedIndex = 0;
         }
 
-        private void SetupDateRangeDefaults()
-        {
-            Control_AdvancedRemove_CheckBox_Date.Checked = false;
-            Control_AdvancedRemove_DateTimePicker_From.Value = DateTime.Today.AddDays(-7);
-            Control_AdvancedRemove_DateTimePicker_To.Value = DateTime.Today;
-            Control_AdvancedRemove_DateTimePicker_From.Enabled = false;
-            Control_AdvancedRemove_DateTimePicker_To.Enabled = false;
-        }
 
         private void WireUpEvents()
         {
@@ -173,18 +141,11 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
             Transactions_DataGridView_Transactions.SelectionChanged +=
                 Transactions_DataGridView_Transactions_SelectionChanged;
-            Control_AdvancedRemove_CheckBox_Date.CheckedChanged += (s, e) =>
-            {
-                Control_AdvancedRemove_DateTimePicker_From.Enabled = Control_AdvancedRemove_CheckBox_Date.Checked;
-                Control_AdvancedRemove_DateTimePicker_To.Enabled = Control_AdvancedRemove_CheckBox_Date.Checked;
-            };
-            Transactions_Button_SidePanel.Click += Transactions_Button_SidePanel_Click;
             Transactions_Button_Help.Click += Transactions_Button_Help_Click;
 
             // Enable/disable search button based on combo selection
             _transactionsComboBoxSearchPartId.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
             Transactions_ComboBox_UserFullName.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
-            Transactions_ComboBox_Building.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
             Transactions_EnableSearchButtonIfValid(this, EventArgs.Empty);
         }
 
@@ -222,7 +183,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
             catch (Exception ex)
             {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, "Transactions_HandleSmartSearchAsync");
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, null, null, nameof(Transactions), "Transactions_HandleSmartSearchAsync");
                 UpdateSmartSearchStatus($"Search error: {ex.Message}");
             }
         }
@@ -230,25 +191,11 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private void Transactions_EnableSearchButtonIfValid(object? sender, EventArgs e)
         {
             bool enable = _transactionsComboBoxSearchPartId.SelectedIndex > 0
-                          || Transactions_ComboBox_UserFullName.SelectedIndex > 0
-                          || Transactions_ComboBox_Building.SelectedIndex > 0;
+                          || Transactions_ComboBox_UserFullName.SelectedIndex > 0;
             Transactions_Button_SmartSearch.Enabled = enable;
         }
 
-        private void Transactions_Button_SidePanel_Click(object? sender, EventArgs e)
-        {
-            // Collapse/Expand the left panel (filters/inputs)
-            if (Transactions_SplitContainer_Main.Panel1Collapsed)
-            {
-                Transactions_SplitContainer_Main.Panel1Collapsed = false;
-                Transactions_Button_SidePanel.Text = @"Collapse ⬅️";
-            }
-            else
-            {
-                Transactions_SplitContainer_Main.Panel1Collapsed = true;
-                Transactions_Button_SidePanel.Text = @"Expand ➡️";
-            }
-        }
+
 
         private void Transactions_DataGridView_Transactions_SelectionChanged(object? sender, EventArgs e)
         {
@@ -270,26 +217,11 @@ namespace MTM_Inventory_Application.Forms.Transactions
                             ["TransactionID"] = tx.ID,
                             ["BatchNumber"] = tx.BatchNumber ?? "",
                             ["PartID"] = tx.PartID ?? "",
-                            ["TransactionType"] = tx.TransactionType ?? "",
+                            ["TransactionType"] = tx.TransactionType.ToString(),
                             ["User"] = tx.User ?? ""
                         });
 
-                    // Enhanced selection report with all transaction details
-                    Transactions_TextBox_Report_TransactionType.Text = tx.TransactionType ?? "";
-                    Transactions_TextBox_Report_BatchNumber.Text = tx.BatchNumber ?? "";
-                    Transactions_TextBox_Report_PartID.Text = tx.PartID ?? "";
-                    Transactions_TextBox_Report_FromLocation.Text = tx.FromLocation ?? "";
-                    Transactions_TextBox_Report_ToLocation.Text = tx.ToLocation ?? "";
-                    Transactions_TextBox_Report_Operation.Text = tx.Operation ?? "";
-                    Transactions_TextBox_Report_Quantity.Text = tx.Quantity.ToString();
-                    Transactions_TextBox_Notes.Text = tx.Notes ?? "";
-                    Transactions_TextBox_Report_User.Text = tx.User ?? "";
-                    Transactions_TextBox_Report_ItemType.Text = tx.ItemType ?? "";
-                    Transactions_TextBox_Report_ReceiveDate.Text = tx.DateTime.ToString("g");
-
-                    // Enable history and print buttons when a transaction is selected
                     Transactions_Button_Help.Enabled = true;
-                    Transactions_Button_Print.Enabled = true;
 
                     Service_DebugTracer.TraceUIAction("TRANSACTION_DETAILS_POPULATED", nameof(Transactions),
                         new Dictionary<string, object>
@@ -300,13 +232,8 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 }
             }
             else
-            {
-                // Clear selection report when no single row is selected
-                ClearSelectionReportControls();
-                
-                // Disable action buttons
+            {                
                 Transactions_Button_Help.Enabled = false;
-                Transactions_Button_Print.Enabled = false;
 
                 Service_DebugTracer.TraceUIAction("SELECTION_REPORT_CLEARED", nameof(Transactions),
                     new Dictionary<string, object>
@@ -314,12 +241,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
                         ["HistoryButtonEnabled"] = false,
                         ["PrintButtonEnabled"] = false
                     });
-            }
-        }
-                Transactions_TextBox_Notes.Text = "";
-                Transactions_TextBox_Report_User.Text = "";
-                Transactions_TextBox_Report_ItemType.Text = "";
-                Transactions_TextBox_Report_ReceiveDate.Text = "";
             }
         }
 
@@ -390,35 +311,16 @@ namespace MTM_Inventory_Application.Forms.Transactions
             {
                 string part = _transactionsComboBoxSearchPartId.Text;
                 string user = Transactions_ComboBox_UserFullName.Text;
-                string building = Transactions_ComboBox_Building.Text;
-                string notes = Transactions_TextBox_Notes.Text;
-                bool filterByDate = Control_AdvancedRemove_CheckBox_Date.Checked;
-                DateTime? dateFrom =
-                    filterByDate ? Control_AdvancedRemove_DateTimePicker_From.Value.Date : (DateTime?)null;
-                DateTime? dateTo = filterByDate
-                    ? Control_AdvancedRemove_DateTimePicker_To.Value.Date.AddDays(1).AddTicks(-1)
-                    : (DateTime?)null;
 
                 bool partSelected = _transactionsComboBoxSearchPartId.SelectedIndex > 0 &&
                                     !string.IsNullOrWhiteSpace(part);
                 bool userSelected = Transactions_ComboBox_UserFullName.SelectedIndex > 0 &&
                                     !string.IsNullOrWhiteSpace(user);
-                bool buildingSelected = Transactions_ComboBox_Building.SelectedIndex > 0 &&
-                                        !string.IsNullOrWhiteSpace(building);
-                bool anyFieldFilled = partSelected || userSelected || buildingSelected ||
-                                      !string.IsNullOrWhiteSpace(notes) ||
-                                      (filterByDate && dateFrom != null && dateTo != null);
+                bool anyFieldFilled = partSelected || userSelected;
 
                 if (!anyFieldFilled)
                 {
                     MessageBox.Show(@"Please fill in at least one field to search.", @"Validation Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (filterByDate && dateFrom > dateTo)
-                {
-                    MessageBox.Show(@"The 'From' date cannot be after the 'To' date.", @"Validation Error",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -439,24 +341,11 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     parameters.Add(new MySqlParameter("@User", user));
                 }
 
-                if (buildingSelected)
-                {
-                    queryBuilder.Append("AND FromLocation = @FromLocation ");
-                    parameters.Add(new MySqlParameter("@FromLocation", building));
-                }
 
-                if (!string.IsNullOrWhiteSpace(notes))
-                {
-                    queryBuilder.Append("AND Notes LIKE @Notes ");
-                    parameters.Add(new MySqlParameter("@Notes", $"%{notes}%"));
-                }
 
-                if (filterByDate && dateFrom.HasValue && dateTo.HasValue)
-                {
-                    queryBuilder.Append("AND ReceiveDate BETWEEN @DateFrom AND @DateTo ");
-                    parameters.Add(new MySqlParameter("@DateFrom", dateFrom));
-                    parameters.Add(new MySqlParameter("@DateTo", dateTo));
-                }
+
+
+
 
                 string sortBy = Transactions_ComboBox_SortBy.Text ?? "Date";
                 string orderBy = sortBy switch
@@ -572,7 +461,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_DataGridView_Transactions.DataSource = _displayedTransactions;
             Transactions_Image_NothingFound.Visible = result.Count == 0;
             Transactions_DataGridView_Transactions.Visible = result.Count > 0;
-            Transactions_Button_Print.Enabled = result.Count > 0;
             Transactions_Button_Help.Enabled = result.Count > 0;
             if (_displayedTransactions.Count > 0)
             {
@@ -596,9 +484,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_ComboBox_SortBy.SelectedIndex = 0;
             _transactionsComboBoxSearchPartId.SelectedIndex = 0;
             Transactions_ComboBox_UserFullName.SelectedIndex = 0;
-            Transactions_ComboBox_Building.SelectedIndex = 0;
-            Control_AdvancedRemove_CheckBox_Date.Checked = false;
-            SetupDateRangeDefaults();
             
             // Reset smart search functionality
             if (Controls.ContainsKey("Transactions_TextBox_SmartSearch"))
@@ -611,8 +496,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             _isPaginationNavigation = false;
             _currentPage = 1;
             
-            // Clear selection report
-            ClearSelectionReportControls();
             
             // Clear data grid
             Transactions_DataGridView_Transactions.DataSource = null;
@@ -795,7 +678,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_DataGridView_Transactions.DataSource = new BindingList<dynamic>(describedResults);
             Transactions_Image_NothingFound.Visible = describedResults.Count == 0;
             Transactions_DataGridView_Transactions.Visible = describedResults.Count > 0;
-            Transactions_Button_Print.Enabled = describedResults.Count > 0;
             Transactions_Button_Help.Enabled = describedResults.Count > 0;
             if (describedResults.Count > 0)
             {
@@ -956,25 +838,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     }
                 };
 
-                // Add panel to the input table layout at the top (row 0, shifting others down)
-                if (Transactions_TableLayout_Inputs != null)
-                {
-                    // Insert at the beginning (row 0)
-                    Transactions_TableLayout_Inputs.RowCount++;
-                    Transactions_TableLayout_Inputs.RowStyles.Insert(0, new RowStyle(SizeType.Absolute, 50F));
-                    
-                    // Shift existing controls down by 1 row
-                    for (int i = Transactions_TableLayout_Inputs.Controls.Count - 1; i >= 0; i--)
-                    {
-                        var control = Transactions_TableLayout_Inputs.Controls[i];
-                        var position = Transactions_TableLayout_Inputs.GetPositionFromControl(control);
-                        Transactions_TableLayout_Inputs.SetRow(control, position.Row + 1);
-                    }
-                    
-                    // Add smart search panel at row 0
-                    Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_SmartSearch, 0, 0);
-                }
-
                 // Apply theme to individual controls in the panel
                 foreach (Control ctrl in Transactions_Panel_SmartSearch.Controls)
                 {
@@ -1006,14 +869,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
         }
 
-        #endregion
-
-        #region Smart Search Methods
-
-        /// <summary>
-        /// Handles smart search input with intelligent parsing
-        /// </summary>
-        /// <param name="searchText">Raw search input from user</param>
         private async Task HandleSmartSearchAsync(string searchText)
         {
             try
@@ -1060,11 +915,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
         }
 
-        /// <summary>
-        /// Parses user search input into structured search criteria
-        /// </summary>
-        /// <param name="searchText">Raw search input</param>
-        /// <returns>Parsed search criteria</returns>
         private (Dictionary<string, string> SearchTerms, List<string> Tags, SearchType Type) ParseSearchInput(string searchText)
         {
             var searchTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -1148,53 +998,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             return (searchTerms, tags, searchType);
         }
 
-        /// <summary>
-        /// Splits search terms while preserving quoted strings
-        /// </summary>
-        /// <param name="searchText">Search text to split</param>
-        /// <returns>Array of search terms</returns>
-        private string[] SplitSearchTerms(string searchText)
-        {
-            var terms = new List<string>();
-            var currentTerm = new StringBuilder();
-            var inQuotes = false;
-            var quoteChar = '\0';
-
-            for (int i = 0; i < searchText.Length; i++)
-            {
-                var c = searchText[i];
-
-                if (!inQuotes && (c == '"' || c == '\''))
-                {
-                    inQuotes = true;
-                    quoteChar = c;
-                    continue;
-                }
-
-                if (inQuotes && c == quoteChar)
-                {
-                    inQuotes = false;
-                    continue;
-                }
-
-                if (!inQuotes && char.IsWhiteSpace(c))
-                {
-                    if (currentTerm.Length > 0)
-                    {
-                        terms.Add(currentTerm.ToString());
-                        currentTerm.Clear();
-                    }
-                    continue;
-                }
-
-                currentTerm.Append(c);
-            }
-
-            if (currentTerm.Length > 0)
-                terms.Add(currentTerm.ToString());
-
-            return terms.ToArray();
-        }
 
         /// <summary>
         /// Gets selected transaction types from UI controls
@@ -1220,13 +1023,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             DateTime? fromDate = null;
             DateTime? toDate = null;
 
-            // Read from date picker controls
-            if (Control_AdvancedRemove_CheckBox_Date.Checked)
-            {
-                fromDate = Control_AdvancedRemove_DateTimePicker_From.Value.Date;
-                toDate = Control_AdvancedRemove_DateTimePicker_To.Value.Date.AddDays(1).AddSeconds(-1);
-            }
-
             return (fromDate, toDate);
         }
 
@@ -1237,13 +1033,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private List<string> GetSelectedLocations()
         {
             var locations = new List<string>();
-
-            // Add logic to read from location filters
-            // This would be customized based on UI location controls
-            if (!string.IsNullOrEmpty(Transactions_ComboBox_Building.Text))
-            {
-                locations.Add(Transactions_ComboBox_Building.Text);
-            }
 
             return locations;
         }
@@ -1282,11 +1071,8 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 Transactions_Button_PreviousPage.Enabled = _currentPage > 1;
                 Transactions_Button_NextPage.Enabled = transactions.Count == PageSize;
 
-                // Update selection-related controls
-                UpdateSelectionControls();
 
                 // Enable/disable buttons based on results
-                Transactions_Button_Print.Enabled = transactions.Count > 0;
                 Transactions_Button_Help.Enabled = transactions.Count > 0;
             }
             catch (Exception ex)
@@ -1349,65 +1135,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             });
         }
 
-        /// <summary>
-        /// Updates selection-related controls based on current data
-        /// </summary>
-        private void UpdateSelectionControls()
-        {
-            try
-            {
-                if (Transactions_DataGridView_Transactions.SelectedRows.Count > 0)
-                {
-                    var selectedTransaction = (Model_Transactions)Transactions_DataGridView_Transactions.SelectedRows[0].DataBoundItem;
-                    
-                    // Update selection report controls
-                    Transactions_TextBox_Report_PartID.Text = selectedTransaction.PartID ?? "";
-                    Transactions_TextBox_Report_BatchNumber.Text = selectedTransaction.BatchNumber ?? "";
-                    Transactions_TextBox_Report_FromLocation.Text = selectedTransaction.FromLocation ?? "";
-                    Transactions_TextBox_Report_ToLocation.Text = selectedTransaction.ToLocation ?? "";
-                    Transactions_TextBox_Report_Operation.Text = selectedTransaction.Operation ?? "";
-                    Transactions_TextBox_Report_Quantity.Text = selectedTransaction.Quantity.ToString();
-                    Transactions_TextBox_Notes.Text = selectedTransaction.Notes ?? "";
-                    Transactions_TextBox_Report_User.Text = selectedTransaction.User ?? "";
-                    Transactions_TextBox_Report_ItemType.Text = selectedTransaction.ItemType ?? "";
-                    Transactions_TextBox_Report_ReceiveDate.Text = selectedTransaction.DateTime.ToString("yyyy-MM-dd HH:mm:ss");
-                    Transactions_TextBox_Report_TransactionType.Text = selectedTransaction.TransactionType.ToString();
-                }
-                else
-                {
-                    // Clear selection report controls
-                    ClearSelectionReportControls();
-                }
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex,
-                    ErrorSeverity.Low,
-                    controlName: "UpdateSelectionControls");
-            }
-        }
-
-        /// <summary>
-        /// Clears all selection report controls
-        /// </summary>
-        private void ClearSelectionReportControls()
-        {
-            Transactions_TextBox_Report_PartID.Text = "";
-            Transactions_TextBox_Report_BatchNumber.Text = "";
-            Transactions_TextBox_Report_FromLocation.Text = "";
-            Transactions_TextBox_Report_ToLocation.Text = "";
-            Transactions_TextBox_Report_Operation.Text = "";
-            Transactions_TextBox_Report_Quantity.Text = "";
-            Transactions_TextBox_Notes.Text = "";
-            Transactions_TextBox_Report_User.Text = "";
-            Transactions_TextBox_Report_ItemType.Text = "";
-            Transactions_TextBox_Report_ReceiveDate.Text = "";
-            Transactions_TextBox_Report_TransactionType.Text = "";
-        }
-
-        #endregion
-
-        #region Smart Search Methods
 
         /// <summary>
         /// Parse smart search text with advanced syntax support
@@ -1573,13 +1300,16 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     Service_ErrorHandler.HandleException(
                         new Exception($"Smart search failed: {searchResult.error}"),
                         ErrorSeverity.Medium,
-                        "Transactions_SmartSearch"
+                        null, // third argument must be Func<bool>? (null if not used)
+                        null, // fourth argument is contextData (null if not used)
+                        nameof(Transactions), // fifth argument is callerName
+                        "Transactions_SmartSearch" // sixth argument is controlName
                     );
                 }
             }
             catch (Exception ex)
             {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, "Transactions_ExecuteSmartSearchAsync");
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, null, null, nameof(Transactions), "Transactions_ExecuteSmartSearchAsync");
             }
             finally
             {
@@ -1646,14 +1376,21 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 using var command = new MySqlCommand(queryBuilder.ToString(), connection);
                 command.Parameters.AddRange(parameters.ToArray());
 
-                Service_DebugTracer.TraceDataAccess("SMART_SEARCH_QUERY_EXECUTION", nameof(Transactions),
+                // Replace this line:
+                // Service_DebugTracer.TraceDataAccess("SMART_SEARCH_QUERY_EXECUTION", nameof(Transactions),
+                // With the closest available tracing method, e.g. TraceDatabaseStart:
+
+                Service_DebugTracer.TraceDatabaseStart(
+                    "SMART_SEARCH_QUERY_EXECUTION",
+                    nameof(Transactions),
                     new Dictionary<string, object>
                     {
                         ["Query"] = queryBuilder.ToString(),
                         ["ParameterCount"] = parameters.Count,
                         ["Page"] = _currentPage,
                         ["PageSize"] = PageSize
-                    });
+                    }
+                );
 
                 using var adapter = new MySql.Data.MySqlClient.MySqlDataAdapter(command);
                 var results = new DataTable();
@@ -1716,7 +1453,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
             catch (Exception ex)
             {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, "Transactions_DisplaySearchResults");
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), "Transactions_DisplaySearchResults");
             }
         }
 
@@ -1743,19 +1480,27 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // Enable Previous button if not on first page
             if (Controls.ContainsKey("Transactions_Button_PreviousPage"))
             {
-                Controls["Transactions_Button_PreviousPage"].Enabled = _currentPage > 1;
+                var prevButton = Controls["Transactions_Button_PreviousPage"] as Button;
+                if (prevButton != null)
+                {
+                    prevButton.Enabled = _currentPage > 1;
+                }
             }
 
             // Enable Next button if we got a full page of results
             if (Controls.ContainsKey("Transactions_Button_NextPage"))
             {
-                Controls["Transactions_Button_NextPage"].Enabled = resultCount == PageSize;
+                var nextButton = Controls["Transactions_Button_NextPage"] as Button;
+                if (nextButton != null)
+                {
+                    nextButton.Enabled = resultCount == PageSize;
+                }
             }
         }
 
-        #endregion
 
-        #region Search Type Enumeration
+
+
 
         /// <summary>
         /// Enumeration for different types of search operations
@@ -1767,6 +1512,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Advanced    // Complex search with multiple criteria and filters
         }
 
-        #endregion
+
     }
 }
