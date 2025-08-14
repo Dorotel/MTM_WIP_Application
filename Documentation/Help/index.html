@@ -5,228 +5,123 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MTM Inventory Application - Help System</title>
     <link rel="stylesheet" href="css/help-styles.css">
-    <style>
-        /* Embedded base styles matching Transactions.html modern UI */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        .header-bar {
-            background: linear-gradient(90deg, #0d6efd, #198754);
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .header-bar h1 {
-            margin: 0;
-            font-size: 2rem;
-            font-weight: 300;
-        }
-        
-        .main-content {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .help-nav {
-            background: #f8f9fa;
-            padding: 2rem;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .help-categories {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 2rem;
-        }
-        
-        .category-card {
-            background: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .category-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-color: #0d6efd;
-        }
-        
-        .category-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #0d6efd;
-            margin-bottom: 0.5rem;
-        }
-        
-        .category-description {
-            color: #6c757d;
-            margin-bottom: 1rem;
-        }
-        
-        .category-links {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .category-links li {
-            margin: 0.5rem 0;
-        }
-        
-        .category-links a {
-            color: #495057;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .category-links a:hover {
-            color: #0d6efd;
-        }
-        
-        .search-box {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #dee2e6;
-            border-radius: 25px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-        
-        .search-box:focus {
-            border-color: #0d6efd;
-        }
-        
-        .footer {
-            background: #343a40;
-            color: white;
-            text-align: center;
-            padding: 2rem;
-        }
-    </style>
 </head>
 <body>
-    <div class="header-bar">
-        <h1>MTM Inventory Application - Help System</h1>
-        <p>Comprehensive user guide and technical documentation</p>
-    </div>
-    
-    <div class="main-content">
+    <div class="help-container">
+        <div class="help-header">
+            <h1>🏠 MTM Inventory Application - Help System</h1>
+            <p>Comprehensive user guide and technical documentation</p>
+        </div>
+        
         <div class="help-nav">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item active">Help Home</li>
+                </ol>
+            </nav>
             <input type="text" class="search-box" placeholder="Search help topics..." id="searchBox">
         </div>
         
-        <div class="help-categories">
-            <!-- Getting Started -->
-            <div class="category-card" onclick="location.href='getting-started.html'">
-                <div class="category-title">🚀 Getting Started</div>
-                <div class="category-description">New user guide and application overview</div>
-                <ul class="category-links">
-                    <li><a href="getting-started.html">Application Overview</a></li>
-                    <li><a href="system-requirements.html">System Requirements</a></li>
-                    <li><a href="database-configuration.html">Database Setup</a></li>
-                </ul>
+        <div class="help-content">
+            <div class="alert alert-info">
+                <strong>Welcome!</strong> Use the categories below to find help topics, or press <kbd>F1</kbd> anywhere in the application for context-sensitive help.
             </div>
             
-            <!-- Core Operations -->
-            <div class="category-card" onclick="location.href='inventory-operations.html'">
-                <div class="category-title">📋 Core Operations</div>
-                <div class="category-description">Essential inventory management tasks</div>
-                <ul class="category-links">
-                    <li><a href="inventory-operations.html">Inventory Management</a></li>
-                    <li><a href="remove-operations.html">Remove Items</a></li>
-                    <li><a href="transfer-operations.html">Transfer Operations</a></li>
-                </ul>
-            </div>
-            
-            <!-- Advanced Features -->
-            <div class="category-card" onclick="location.href='advanced-features.html'">
-                <div class="category-title">⚡ Advanced Features</div>
-                <div class="category-description">Power user tools and advanced functionality</div>
-                <ul class="category-links">
-                    <li><a href="quickbuttons.html">QuickButtons</a></li>
-                    <li><a href="advanced-features.html">Advanced Inventory</a></li>
-                    <li><a href="transaction-history.html">Transaction History</a></li>
-                </ul>
-            </div>
-            
-            <!-- Settings & Configuration -->
-            <div class="category-card" onclick="location.href='settings-management.html'">
-                <div class="category-title">⚙️ Settings & Configuration</div>
-                <div class="category-description">Customize your application experience</div>
-                <ul class="category-links">
-                    <li><a href="settings-management.html">Settings Management</a></li>
-                    <li><a href="database-configuration.html">Database Configuration</a></li>
-                    <li><a href="error-handling.html">Error Handling</a></li>
-                </ul>
-            </div>
-            
-            <!-- Keyboard Shortcuts -->
-            <div class="category-card" onclick="location.href='keyboard-shortcuts.html'">
-                <div class="category-title">⌨️ Keyboard Shortcuts</div>
-                <div class="category-description">Complete keyboard shortcuts reference</div>
-                <ul class="category-links">
-                    <li><a href="keyboard-shortcuts.html">All Shortcuts</a></li>
-                    <li><a href="inventory-operations.html#shortcuts">Inventory Shortcuts</a></li>
-                    <li><a href="remove-operations.html#shortcuts">Remove Shortcuts</a></li>
-                </ul>
-            </div>
-            
-            <!-- Troubleshooting -->
-            <div class="category-card" onclick="location.href='troubleshooting.html'">
-                <div class="category-title">🔧 Troubleshooting</div>
-                <div class="category-description">Common issues and solutions</div>
-                <ul class="category-links">
-                    <li><a href="troubleshooting.html">Common Issues</a></li>
-                    <li><a href="error-handling.html">Error Messages</a></li>
-                    <li><a href="database-configuration.html#troubleshooting">Database Issues</a></li>
-                </ul>
-            </div>
-            
-            <!-- Development Tools -->
-            <div class="category-card" onclick="location.href='development-tools.html'">
-                <div class="category-title">🛠️ Development Tools</div>
-                <div class="category-description">Developer tools and utilities</div>
-                <ul class="category-links">
-                    <li><a href="development-tools.html">Development Overview</a></li>
-                    <li><a href="../Dependency Charts/README.md">Dependency Charts</a></li>
-                    <li><a href="../Guides/README.md">Technical Guides</a></li>
-                </ul>
-            </div>
-            
-            <!-- System Information -->
-            <div class="category-card" onclick="location.href='system-requirements.html'">
-                <div class="category-title">💻 System Information</div>
-                <div class="category-description">Technical specifications and requirements</div>
-                <ul class="category-links">
-                    <li><a href="system-requirements.html">System Requirements</a></li>
-                    <li><a href="database-configuration.html">Database Setup</a></li>
-                    <li><a href="../README.md">Technical Documentation</a></li>
-                </ul>
+            <div class="help-categories" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;"
+                <!-- Getting Started -->
+                <div class="help-card" onclick="location.href='getting-started.html'" style="cursor: pointer; transition: all 0.3s ease;">
+                    <h4>🚀 Getting Started</h4>
+                    <p>New user guide and application overview</p>
+                    <ul class="help-list-unstyled">
+                        <li><a href="getting-started.html">• Application Overview</a></li>
+                        <li><a href="system-requirements.html">• System Requirements</a></li>
+                        <li><a href="database-configuration.html">• Database Setup</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Core Operations -->
+                <div class="help-card" onclick="location.href='inventory-operations.html'" style="cursor: pointer; transition: all 0.3s ease;">
+                    <h4>📋 Core Operations</h4>
+                    <p>Essential inventory management tasks</p>
+                    <ul class="help-list-unstyled">
+                        <li><a href="inventory-operations.html">• Inventory Management</a></li>
+                        <li><a href="remove-operations.html">• Remove Items</a></li>
+                        <li><a href="transfer-operations.html">• Transfer Operations</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Advanced Features -->
+                <div class="help-card" onclick="location.href='advanced-features.html'" style="cursor: pointer; transition: all 0.3s ease;">
+                    <h4>⚡ Advanced Features</h4>
+                    <p>Power user tools and advanced functionality</p>
+                    <ul class="help-list-unstyled">
+                        <li><a href="quickbuttons.html">• QuickButtons</a></li>
+                        <li><a href="advanced-features.html">• Advanced Inventory</a></li>
+                        <li><a href="transaction-history.html">• Transaction History</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Settings & Configuration -->
+                <div class="help-card" onclick="location.href='settings-management.html'" style="cursor: pointer; transition: all 0.3s ease;">
+                    <h4>⚙️ Settings & Configuration</h4>
+                    <p>Customize your application experience</p>
+                    <ul class="help-list-unstyled">
+                        <li><a href="settings-management.html">• Settings Management</a></li>
+                        <li><a href="database-configuration.html">• Database Configuration</a></li>
+                        <li><a href="error-handling.html">• Error Handling</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Keyboard Shortcuts -->
+                <div class="help-card" onclick="location.href='keyboard-shortcuts.html'" style="cursor: pointer; transition: all 0.3s ease;">
+                    <h4>⌨️ Keyboard Shortcuts</h4>
+                    <p>Complete keyboard shortcuts reference</p>
+                    <ul class="help-list-unstyled">
+                        <li><a href="keyboard-shortcuts.html">• All Shortcuts</a></li>
+                        <li><a href="inventory-operations.html#shortcuts">• Inventory Shortcuts</a></li>
+                        <li><a href="remove-operations.html#shortcuts">• Remove Shortcuts</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Troubleshooting -->
+                <div class="help-card" onclick="location.href='troubleshooting.html'" style="cursor: pointer; transition: all 0.3s ease;">
+                    <h4>🔧 Troubleshooting</h4>
+                    <p>Common issues and solutions</p>
+                    <ul class="help-list-unstyled">
+                        <li><a href="troubleshooting.html">• Common Issues</a></li>
+                        <li><a href="error-handling.html">• Error Messages</a></li>
+                        <li><a href="database-configuration.html#troubleshooting">• Database Issues</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Development Tools -->
+                <div class="help-card" onclick="location.href='development-tools.html'" style="cursor: pointer; transition: all 0.3s ease;">
+                    <h4>🛠️ Development Tools</h4>
+                    <p>Developer tools and utilities</p>
+                    <ul class="help-list-unstyled">
+                        <li><a href="development-tools.html">• Development Overview</a></li>
+                        <li><a href="../Dependency Charts/README.md">• Dependency Charts</a></li>
+                        <li><a href="../Guides/README.md">• Technical Guides</a></li>
+                    </ul>
+                </div>
+                
+                <!-- System Information -->
+                <div class="help-card" onclick="location.href='system-requirements.html'" style="cursor: pointer; transition: all 0.3s ease;">
+                    <h4>💻 System Information</h4>
+                    <p>Technical specifications and requirements</p>
+                    <ul class="help-list-unstyled">
+                        <li><a href="system-requirements.html">• System Requirements</a></li>
+                        <li><a href="database-configuration.html">• Database Setup</a></li>
+                        <li><a href="../README.md">• Technical Documentation</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="footer">
-        <p>MTM Inventory Application v5.0.1.2 | © 2025 | Help System</p>
-        <p>Press <kbd>F1</kbd> for context-sensitive help | <kbd>Ctrl+F1</kbd> for Getting Started</p>
+        
+        <div class="help-footer">
+            <p>MTM Inventory Application v5.0.1.2 | Help System</p>
+            <p>Need more help? <a href="troubleshooting.html" style="color: #fff;">View Troubleshooting</a> | <a href="getting-started.html" style="color: #fff;">Getting Started Guide</a></p>
+        </div>
     </div>
     
     <script src="js/help-navigation.js"></script>
@@ -234,7 +129,7 @@
         // Basic search functionality
         document.getElementById('searchBox').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.category-card');
+            const cards = document.querySelectorAll('.help-card');
             
             cards.forEach(card => {
                 const text = card.textContent.toLowerCase();
