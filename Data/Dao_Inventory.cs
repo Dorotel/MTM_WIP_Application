@@ -2,6 +2,7 @@ using System.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Logging;
+using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Data;
 
@@ -14,6 +15,18 @@ public static class Dao_Inventory
 
     public static async Task<DaoResult<DataTable>> GetInventoryByPartIdAsync(string partId, bool useAsync = false)
     {
+        Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+        {
+            ["partId"] = partId,
+            ["useAsync"] = useAsync
+        }, nameof(GetInventoryByPartIdAsync), "Dao_Inventory");
+
+        Service_DebugTracer.TraceBusinessLogic("INVENTORY_SEARCH_BY_PARTID", new Dictionary<string, object>
+        {
+            ["SearchCriteria"] = partId,
+            ["AsyncMode"] = useAsync
+        });
+
         try
         {
             // MIGRATED: Use Helper_Database_StoredProcedure instead of Helper_Database_Core for procedures with output parameters
@@ -27,18 +40,50 @@ public static class Dao_Inventory
                 
             if (result.IsSuccess && result.Data != null)
             {
-                return DaoResult<DataTable>.Success(result.Data, $"Retrieved {result.Data.Rows.Count} inventory items for part {partId}");
+                var successResult = DaoResult<DataTable>.Success(result.Data, $"Retrieved {result.Data.Rows.Count} inventory items for part {partId}");
+                
+                Service_DebugTracer.TraceBusinessLogic("INVENTORY_SEARCH_COMPLETE", 
+                    inputData: new Dictionary<string, object> { ["partId"] = partId },
+                    outputData: new Dictionary<string, object> 
+                    { 
+                        ["recordCount"] = result.Data.Rows.Count,
+                        ["hasData"] = result.Data.Rows.Count > 0 
+                    },
+                    businessRules: new Dictionary<string, object>
+                    {
+                        ["rule"] = "Return all inventory records matching PartID",
+                        ["validation"] = "PartID must not be null or empty"
+                    });
+
+                Service_DebugTracer.TraceMethodExit(successResult, nameof(GetInventoryByPartIdAsync), "Dao_Inventory");
+                return successResult;
             }
             else
             {
-                return DaoResult<DataTable>.Failure($"Failed to retrieve inventory for part {partId}: {result.ErrorMessage}");
+                var failureResult = DaoResult<DataTable>.Failure($"Failed to retrieve inventory for part {partId}: {result.ErrorMessage}");
+                
+                Service_DebugTracer.TraceMethodExit(failureResult, nameof(GetInventoryByPartIdAsync), "Dao_Inventory");
+                return failureResult;
             }
         }
         catch (Exception ex)
         {
             LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, useAsync, "GetInventoryByPartIdAsync");
-            return DaoResult<DataTable>.Failure($"Failed to retrieve inventory for part {partId}", ex);
+            
+            var errorResult = DaoResult<DataTable>.Failure($"Failed to retrieve inventory for part {partId}", ex);
+            
+            Service_DebugTracer.TraceBusinessLogic("INVENTORY_SEARCH_ERROR",
+                inputData: new Dictionary<string, object> { ["partId"] = partId },
+                validationResults: new Dictionary<string, object>
+                {
+                    ["exception"] = ex.GetType().Name,
+                    ["message"] = ex.Message,
+                    ["stackTrace"] = ex.StackTrace?.Substring(0, Math.Min(ex.StackTrace.Length, 200)) + "..."
+                });
+
+            Service_DebugTracer.TraceMethodExit(errorResult, nameof(GetInventoryByPartIdAsync), "Dao_Inventory");
+            return errorResult;
         }
     }
 

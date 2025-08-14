@@ -21,10 +21,35 @@ namespace MTM_Inventory_Application
         {
             try
             {
+                // Initialize debugging system first (before any other operations)
+                #if DEBUG
+                Service_DebugTracer.Initialize(DebugLevel.High);
+                Service_DebugConfiguration.InitializeDefaults();
+                Service_DebugConfiguration.SetDevelopmentMode();
+                #else
+                Service_DebugTracer.Initialize(DebugLevel.Medium);
+                Service_DebugConfiguration.InitializeDefaults();
+                #endif
+
+                Service_DebugTracer.TraceUIAction("APPLICATION_STARTUP", "Program", new Dictionary<string, object>
+                {
+                    ["StartupTime"] = DateTime.Now,
+                    ["IsDebugMode"] = Debugger.IsAttached,
+                    ["OSVersion"] = Environment.OSVersion.ToString(),
+                    ["ProcessorCount"] = Environment.ProcessorCount,
+                    ["WorkingSet"] = Environment.WorkingSet
+                });
+
                 // Global exception handling setup with enhanced database error handling
                 Application.ThreadException += (sender, args) =>
                 {
                     Console.WriteLine($"[Global Exception] ThreadException: {args.Exception}");
+                    Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+                    {
+                        ["ExceptionType"] = args.Exception.GetType().Name,
+                        ["ExceptionMessage"] = args.Exception.Message
+                    }, "ThreadExceptionHandler", "Program");
+                    
                     try
                     {
                         LoggingUtility.LogApplicationError(args.Exception);
@@ -42,6 +67,13 @@ namespace MTM_Inventory_Application
                     if (args.ExceptionObject is Exception ex)
                     {
                         Console.WriteLine($"[Global Exception] UnhandledException: {ex}");
+                        Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+                        {
+                            ["ExceptionType"] = ex.GetType().Name,
+                            ["ExceptionMessage"] = ex.Message,
+                            ["IsTerminating"] = args.IsTerminating
+                        }, "UnhandledExceptionHandler", "Program");
+                        
                         try
                         {
                             LoggingUtility.LogApplicationError(ex);
