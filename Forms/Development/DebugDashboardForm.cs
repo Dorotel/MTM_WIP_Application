@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Services;
+using Timer = System.Windows.Forms.Timer;
 
 namespace MTM_Inventory_Application.Forms.Development
 {
@@ -318,7 +320,7 @@ namespace MTM_Inventory_Application.Forms.Development
 
         private void ChkTraceBusinessLogic_CheckedChanged(object? sender, EventArgs e)
         {
-            Service_DebugTracer.TraceBusinessLogic = chkTraceBusinessLogic.Checked;
+            Service_DebugTracer.EnableBusinessLogicTracing = chkTraceBusinessLogic.Checked;
             Service_DebugTracer.TraceUIAction("TRACE_BUSINESS_LOGIC_CHANGED", nameof(DebugDashboardForm),
                 new Dictionary<string, object> { ["Enabled"] = chkTraceBusinessLogic.Checked });
         }
@@ -418,7 +420,7 @@ namespace MTM_Inventory_Application.Forms.Development
             // Load current debug configuration
             cmbDebugLevel.SelectedItem = Service_DebugTracer.CurrentLevel.ToString();
             chkTraceDatabase.Checked = Service_DebugTracer.TraceDatabase;
-            chkTraceBusinessLogic.Checked = Service_DebugTracer.TraceBusinessLogic;
+            chkTraceBusinessLogic.Checked = Service_DebugTracer.EnableBusinessLogicTracing;
             chkTraceUIActions.Checked = Service_DebugTracer.TraceUIActions;
             chkTracePerformance.Checked = Service_DebugTracer.TracePerformance;
 

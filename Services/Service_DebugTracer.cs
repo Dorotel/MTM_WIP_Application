@@ -56,7 +56,7 @@ internal static class Service_DebugTracer
     /// <summary>
     /// Enable/disable business logic tracing
     /// </summary>
-    public static bool TraceBusinessLogic
+    public static bool EnableBusinessLogicTracing
     {
         get => _traceBusinessLogic;
         set => _traceBusinessLogic = value;
@@ -136,7 +136,7 @@ internal static class Service_DebugTracer
                 _methodTimers[timerKey] = Stopwatch.StartNew();
             }
 
-            var indent = new string("  ", _callDepth[key] - 1);
+            var indent = new string(' ', Math.Max(0, _callDepth[key] - 1) * 2);
             var logData = new Dictionary<string, object>
             {
                 ["Action"] = "METHOD_ENTRY",
@@ -173,7 +173,7 @@ internal static class Service_DebugTracer
         {
             var key = $"{controlName}:{callerName}";
             var depth = _callDepth.GetValueOrDefault(key, 1);
-            var indent = new string("  ", depth - 1);
+            var indent = new string(' ', Math.Max(0, depth - 1) * 2);
 
             // Stop performance timer and get elapsed time
             string elapsedTime = "";
@@ -634,15 +634,153 @@ internal static class Service_DebugTracer
         if (value is DateTime dt) return dt.ToString("yyyy-MM-dd HH:mm:ss");
         if (value is System.Data.DataTable dt2) return $"DataTable[{dt2.Rows.Count} rows, {dt2.Columns.Count} columns]";
         if (value is Exception ex) return $"Exception: {ex.Message}";
+        if (value is Type type) return $"Type: {type.FullName}";
         
-        try
-        {
-            return JsonSerializer.Serialize(value);
-        }
-        catch
+        // Handle common .NET types that might cause serialization issues
+        if (value.GetType().IsValueType || value is string)
         {
             return value.ToString() ?? "NULL";
         }
+        
+        // Handle complex objects that might contain unsupported types
+        try
+        {
+            var valueType = value.GetType();
+            
+            // Check if this is a result type (StoredProcedureResult, etc.)
+            if (valueType.IsGenericType)
+            {
+                var genericTypeDef = valueType.GetGenericTypeDefinition();
+                var typeName = genericTypeDef.Name;
+                
+                if (typeName.Contains("Result") || typeName.Contains("StoredProcedure"))
+                {
+                    // Create a safe representation of the result object
+                    return CreateSafeResultRepresentation(value);
+                }
+            }
+            
+            // For other objects, try safe JSON serialization with protection
+            var options = new JsonSerializerOptions 
+            { 
+                WriteIndented = false,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+                MaxDepth = 2 // Limit depth to prevent issues
+            };
+            
+            return JsonSerializer.Serialize(value, options);
+        }
+        catch (NotSupportedException)
+        {
+            // Handle the specific case where System.Text.Json can't serialize the type
+            return CreateSafeStringRepresentation(value);
+        }
+        catch (Exception)
+        {
+            // For any other serialization errors, fall back to safe representation
+            return CreateSafeStringRepresentation(value);
+        }
+    }
+
+    private static object CreateSafeResultRepresentation(object result)
+    {
+        try
+        {
+            var resultType = result.GetType();
+            var properties = resultType.GetProperties();
+            var safeDict = new Dictionary<string, object>();
+
+            foreach (var prop in properties.Take(10)) // Limit properties to prevent huge output
+            {
+                try
+                {
+                    var propValue = prop.GetValue(result);
+                    string safeName = prop.Name;
+                    
+                    if (propValue == null)
+                    {
+                        safeDict[safeName] = "NULL";
+                    }
+                    else if (prop.PropertyType == typeof(Type))
+                    {
+                        safeDict[safeName] = $"Type: {((Type)propValue).Name}";
+                    }
+                    else if (propValue is Exception ex)
+                    {
+                        safeDict[safeName] = $"Exception: {ex.Message}";
+                    }
+                    else if (propValue is System.Data.DataTable dt)
+                    {
+                        safeDict[safeName] = $"DataTable[{dt.Rows.Count} rows, {dt.Columns.Count} columns]";
+                    }
+                    else if (prop.PropertyType.IsValueType || prop.PropertyType == typeof(string))
+                    {
+                        safeDict[safeName] = propValue;
+                    }
+                    else
+                    {
+                        safeDict[safeName] = $"{prop.PropertyType.Name}: {propValue}";
+                    }
+                }
+                catch
+                {
+                    safeDict[prop.Name] = $"[Property Access Failed]";
+                }
+            }
+
+            return safeDict;
+        }
+        catch
+        {
+            return $"[Complex Object: {result.GetType().Name}]";
+        }
+    }
+
+    private static string CreateSafeStringRepresentation(object value)
+    {
+        var valueType = value.GetType();
+        var stringBuilder = new StringBuilder();
+        stringBuilder.Append($"{valueType.Name} {{ ");
+
+        try
+        {
+            var properties = valueType.GetProperties()
+                .Where(p => p.CanRead && p.GetIndexParameters().Length == 0)
+                .Take(5); // Limit to first 5 properties
+
+            var propStrings = new List<string>();
+            foreach (var prop in properties)
+            {
+                try
+                {
+                    var propValue = prop.GetValue(value);
+                    var propValueStr = propValue switch
+                    {
+                        null => "NULL",
+                        Type t => $"Type: {t.Name}",
+                        Exception ex => $"Exception: {ex.Message}",
+                        System.Data.DataTable dt => $"DataTable[{dt.Rows.Count} rows]",
+                        _ when prop.PropertyType.IsValueType || prop.PropertyType == typeof(string) => propValue.ToString(),
+                        _ => $"{prop.PropertyType.Name}"
+                    };
+                    propStrings.Add($"{prop.Name}: {propValueStr}");
+                }
+                catch
+                {
+                    propStrings.Add($"{prop.Name}: [Access Failed]");
+                }
+            }
+
+            stringBuilder.Append(string.Join(", ", propStrings));
+        }
+        catch
+        {
+            stringBuilder.Append("[Property Enumeration Failed]");
+        }
+
+        stringBuilder.Append(" }");
+        return stringBuilder.ToString();
     }
 
     private static string ExtractServerFromConnectionString(string connectionString)

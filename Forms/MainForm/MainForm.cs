@@ -26,6 +26,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
         private Timer? _connectionStrengthTimer;
         public Helper_Control_MySqlSignal ConnectionStrengthChecker = null!;
         private Helper_StoredProcedureProgress? _progressHelper;
+        private Forms.Development.DebugDashboardForm? _debugDashboard;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Service_ConnectionRecoveryManager ConnectionRecoveryManager { get; private set; } = null!;
@@ -694,6 +695,14 @@ namespace MTM_Inventory_Application.Forms.MainForm
             {
                 _connectionStrengthTimer?.Stop();
                 _connectionStrengthTimer?.Dispose();
+                
+                // Close Debug Dashboard if it's open
+                if (_debugDashboard != null && !_debugDashboard.IsDisposed)
+                {
+                    _debugDashboard.Close();
+                    _debugDashboard.Dispose();
+                    _debugDashboard = null;
+                }
             }
             catch (Exception ex)
             {
@@ -768,6 +777,20 @@ namespace MTM_Inventory_Application.Forms.MainForm
         }
 
         #endregion
+
+        private void MainForm_MenuStrip_Development_DebugDashboard_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using var debugDashboard = new Forms.Development.DebugDashboardForm();
+                debugDashboard.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm_MenuStrip_Development_DebugDashboard_Click));
+            }
+        }
 
         private void MainForm_MenuStrip_Development_Conversion_Click(object sender, EventArgs e)
         {

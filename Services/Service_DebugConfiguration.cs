@@ -122,7 +122,7 @@ internal static class Service_DebugConfiguration
     {
         Service_DebugTracer.CurrentLevel = DebugLevel.Verbose;
         Service_DebugTracer.TraceDatabase = true;
-        Service_DebugTracer.TraceBusinessLogic = true;
+        Service_DebugTracer.EnableBusinessLogicTracing = true;
         Service_DebugTracer.TraceUIActions = true;
         Service_DebugTracer.TracePerformance = true;
 
@@ -154,7 +154,7 @@ internal static class Service_DebugConfiguration
     {
         Service_DebugTracer.CurrentLevel = DebugLevel.Low;
         Service_DebugTracer.TraceDatabase = false;
-        Service_DebugTracer.TraceBusinessLogic = false;
+        Service_DebugTracer.EnableBusinessLogicTracing = false;
         Service_DebugTracer.TraceUIActions = false;
         Service_DebugTracer.TracePerformance = false;
 
@@ -186,7 +186,7 @@ internal static class Service_DebugConfiguration
     {
         Service_DebugTracer.CurrentLevel = DebugLevel.Verbose;
         Service_DebugTracer.TraceDatabase = true;
-        Service_DebugTracer.TraceBusinessLogic = true;
+        Service_DebugTracer.EnableBusinessLogicTracing = true;
         Service_DebugTracer.TraceUIActions = false;
         Service_DebugTracer.TracePerformance = true;
 
@@ -231,7 +231,7 @@ internal static class Service_DebugConfiguration
         {
             ["GlobalLevel"] = Service_DebugTracer.CurrentLevel.ToString(),
             ["DatabaseTracing"] = Service_DebugTracer.TraceDatabase,
-            ["BusinessLogicTracing"] = Service_DebugTracer.TraceBusinessLogic,
+            ["BusinessLogicTracing"] = Service_DebugTracer.EnableBusinessLogicTracing,
             ["UIActionsTracing"] = Service_DebugTracer.TraceUIActions,
             ["PerformanceTracing"] = Service_DebugTracer.TracePerformance,
             ["ComponentTracingEnabled"] = _componentTracing.Where(kvp => kvp.Value).Select(kvp => kvp.Key).ToList(),
