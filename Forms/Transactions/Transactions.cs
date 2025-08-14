@@ -35,79 +35,26 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
         public Transactions(string connectionString, string currentUser)
         {
-            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
-            {
-                ["FormType"] = nameof(Transactions),
-                ["ConnectionString"] = connectionString,
-                ["CurrentUser"] = currentUser,
-                ["InitializationTime"] = DateTime.Now,
-                ["Thread"] = Thread.CurrentThread.ManagedThreadId
-            }, nameof(Transactions), nameof(Transactions));
-
-            Service_DebugTracer.TraceUIAction("TRANSACTIONS_FORM_INITIALIZATION", nameof(Transactions),
-                new Dictionary<string, object>
-                {
-                    ["Phase"] = "START",
-                    ["ComponentType"] = "TransactionsForm"
-                });
-
             InitializeComponent();
 
-            Service_DebugTracer.TraceUIAction("THEME_APPLICATION", nameof(Transactions),
-                new Dictionary<string, object>
-                {
-                    ["DpiScaling"] = "APPLIED",
-                    ["LayoutAdjustments"] = "APPLIED",
-                    ["AutoScaleMode"] = "Dpi"
-                });
             // Apply comprehensive DPI scaling and runtime layout adjustments
             AutoScaleMode = AutoScaleMode.Dpi;
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
 
-            Service_DebugTracer.TraceBusinessLogic("USER_CONTEXT_SETUP",
-                inputData: new { connectionString, currentUser },
-                outputData: new { 
-                    _currentUser = currentUser,
-                    _isAdmin = Model_AppVariables.UserTypeAdmin 
-                });
             _currentUser = currentUser;
             _isAdmin = Model_AppVariables.UserTypeAdmin;
 
-            Service_DebugTracer.TraceUIAction("CONTROLS_SETUP", nameof(Transactions),
-                new Dictionary<string, object>
-                {
-                    ["Components"] = new[] { "SortCombo", "DataGrid", "SmartSearchControls" }
-                });
             SetupSortCombo();
             SetupDataGrid();
             InitializeSmartSearchControls();
 
-            Service_DebugTracer.TraceUIAction("EVENT_HANDLERS_SETUP", nameof(Transactions),
-                new Dictionary<string, object>
-                {
-                    ["Events"] = new[] { "FormLoad", "ResetButton" }
-                });
             Load += async (s, e) => await OnFormLoadAsync();
-
             Transactions_Button_Reset.Click += (s, e) => ResetFilters();
 
-            Service_DebugTracer.TraceUIAction("PAGING_EVENTS_SETUP", nameof(Transactions),
-                new Dictionary<string, object>
-                {
-                    ["PagingButtons"] = new[] { "Next", "Previous" },
-                    ["PageSize"] = PageSize
-                });
             // Enhanced paging logic with smart search support
             Transactions_Button_NextPage.Click += async (s, e) =>
             {
-                Service_DebugTracer.TraceUIAction("NEXT_PAGE_CLICKED", nameof(Transactions),
-                    new Dictionary<string, object>
-                    {
-                        ["CurrentPage"] = _currentPage,
-                        ["NextPage"] = _currentPage + 1,
-                        ["HasSearchCriteria"] = _lastSearchCriteria.Count > 0
-                    });
                 _currentPage++;
                 _isPaginationNavigation = true;
                 
@@ -121,15 +68,9 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     await LoadTransactionsAsync();
                 }
             };
+            
             Transactions_Button_PreviousPage.Click += async (s, e) =>
             {
-                Service_DebugTracer.TraceUIAction("PREVIOUS_PAGE_CLICKED", nameof(Transactions),
-                    new Dictionary<string, object>
-                    {
-                        ["CurrentPage"] = _currentPage,
-                        ["CanGoBack"] = _currentPage > 1,
-                        ["HasSearchCriteria"] = _lastSearchCriteria.Count > 0
-                    });
                 if (_currentPage > 1)
                 {
                     _currentPage--;
@@ -147,24 +88,9 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 }
             };
 
-            Service_DebugTracer.TraceUIAction("PRINT_EVENT_SETUP", nameof(Transactions),
-                new Dictionary<string, object> { ["PrintButtonEnabled"] = false });
             // Print button logic
             Transactions_Button_Print.Click += Transactions_Button_Print_Click;
-
-            Service_DebugTracer.TraceUIAction("THEME_APPLICATION_FINAL", nameof(Transactions));
             Core_Themes.ApplyTheme(this);
-
-            Service_DebugTracer.TraceUIAction("TRANSACTIONS_FORM_INITIALIZATION", nameof(Transactions),
-                new Dictionary<string, object>
-                {
-                    ["Phase"] = "COMPLETE",
-                    ["Success"] = true,
-                    ["CurrentUser"] = _currentUser,
-                    ["IsAdmin"] = _isAdmin
-                });
-
-            Service_DebugTracer.TraceMethodExit(null, nameof(Transactions), nameof(Transactions));
         }
 
         #endregion
@@ -225,15 +151,9 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
         private void WireUpEvents()
         {
-            // Standard search functionality
-            Transactions_Button_SmartSearch.Click += async (s, e) => await LoadTransactionsAsync();
+            // Smart search functionality
+            Transactions_Button_SmartSearch.Click += async (s, e) => await HandleSmartSearchAsync();
             
-            // Enhanced smart search functionality
-            if (Controls.ContainsKey("Transactions_Button_SmartSearch"))
-            {
-                Controls["Transactions_Button_SmartSearch"].Click += async (s, e) => await HandleSmartSearchAsync();
-            }
-
             // Smart search with Enter key support
             if (Controls.ContainsKey("Transactions_TextBox_SmartSearch"))
             {
@@ -273,13 +193,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
         /// </summary>
         private async Task HandleSmartSearchAsync()
         {
-            Service_DebugTracer.TraceUIAction("SMART_SEARCH_CLICKED", nameof(Transactions),
-                new Dictionary<string, object>
-                {
-                    ["HasSmartSearchBox"] = Controls.ContainsKey("Transactions_TextBox_SmartSearch"),
-                    ["CurrentPage"] = _currentPage
-                });
-
             try
             {
                 string searchText = "";
@@ -287,13 +200,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 {
                     searchText = (Controls["Transactions_TextBox_SmartSearch"] as TextBox)?.Text?.Trim() ?? "";
                 }
-
-                Service_DebugTracer.TraceUIAction("SMART_SEARCH_INPUT_PARSED", nameof(Transactions),
-                    new Dictionary<string, object>
-                    {
-                        ["SearchText"] = searchText,
-                        ["SearchLength"] = searchText.Length
-                    });
 
                 if (string.IsNullOrWhiteSpace(searchText))
                 {
@@ -312,13 +218,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 // Parse smart search syntax
                 var searchCriteria = ParseSmartSearchText(searchText);
                 
-                Service_DebugTracer.TraceBusinessLogic("SMART_SEARCH_CRITERIA_PARSED", nameof(Transactions),
-                    new Dictionary<string, object>
-                    {
-                        ["CriteriaCount"] = searchCriteria.Count,
-                        ["HasGeneralSearch"] = searchCriteria.ContainsKey("_general")
-                    });
-
                 await ExecuteSmartSearchAsync(searchCriteria);
             }
             catch (Exception ex)
@@ -1047,16 +946,13 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     Transactions_Label_SmartSearchHelp
                 });
 
-                // Wire up events
-                Transactions_Button_SmartSearch.Click += async (s, e) => 
-                    await HandleSmartSearchAsync(Transactions_TextBox_SmartSearch.Text);
-                
+                // Wire up events - remove duplicate, HandleSmartSearchAsync doesn't take parameters
                 Transactions_TextBox_SmartSearch.KeyPress += async (s, e) =>
                 {
                     if (e.KeyChar == (char)Keys.Enter)
                     {
                         e.Handled = true;
-                        await HandleSmartSearchAsync(Transactions_TextBox_SmartSearch.Text);
+                        await HandleSmartSearchAsync();
                     }
                 };
 
