@@ -48,7 +48,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private RadioButton Transactions_Radio_Today;
         private RadioButton Transactions_Radio_ThisWeek;
         private RadioButton Transactions_Radio_ThisMonth;
-        private RadioButton Transactions_Radio_CustomRange;
 
         // View mode controls
         private Panel Transactions_Panel_ViewMode;
@@ -61,21 +60,23 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
         #region Methods
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
         private void InitializeComponent()
         {
             Transactions_GroupBox_Main = new GroupBox();
             Transactions_TableLayout_Main = new TableLayoutPanel();
             Transactions_SplitContainer_Main = new SplitContainer();
             Transactions_TableLayout_Inputs = new TableLayoutPanel();
+            Transactions_Panel_Row_SmartSearch = new Panel();
+            Transactions_Label_SmartSearch = new Label();
+            Transactions_TextBox_SmartSearch = new TextBox();
+            Transactions_Panel_TransactionTypes = new Panel();
+            Transactions_CheckBox_IN = new CheckBox();
+            Transactions_CheckBox_OUT = new CheckBox();
+            Transactions_CheckBox_TRANSFER = new CheckBox();
+            Transactions_Panel_TimeRange = new Panel();
+            Transactions_Radio_Today = new RadioButton();
+            Transactions_Radio_ThisWeek = new RadioButton();
+            Transactions_Radio_ThisMonth = new RadioButton();
             Transactions_Panel_Row_Building = new Panel();
             Transactions_Label_Building = new Label();
             Transactions_ComboBox_Building = new ComboBox();
@@ -94,28 +95,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Control_AdvancedRemove_DateTimePicker_To = new DateTimePicker();
             Control_AdvancedRemove_CheckBox_Date = new CheckBox();
             Control_AdvancedRemove_DateTimePicker_From = new DateTimePicker();
-            
-            // Smart search controls
-            Transactions_Panel_Row_SmartSearch = new Panel();
-            Transactions_Label_SmartSearch = new Label();
-            Transactions_TextBox_SmartSearch = new TextBox();
-            Transactions_Panel_TransactionTypes = new Panel();
-            Transactions_CheckBox_IN = new CheckBox();
-            Transactions_CheckBox_OUT = new CheckBox();
-            Transactions_CheckBox_TRANSFER = new CheckBox();
-            Transactions_Panel_TimeRange = new Panel();
-            Transactions_Radio_Today = new RadioButton();
-            Transactions_Radio_ThisWeek = new RadioButton();
-            Transactions_Radio_ThisMonth = new RadioButton();
-            Transactions_Radio_CustomRange = new RadioButton();
-            
-            // View mode controls
-            Transactions_Panel_ViewMode = new Panel();
-            Transactions_Label_ViewMode = new Label();
-            Transactions_Radio_GridView = new RadioButton();
-            Transactions_Radio_ChartView = new RadioButton();
-            Transactions_Radio_TimelineView = new RadioButton();
-            
             Transactions_TableLayout_SelectionReport = new TableLayoutPanel();
             Transactions_Label_Report_BatchNumber = new Label();
             Transactions_Label_Report_PartID = new Label();
@@ -140,20 +119,26 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_TextBox_Report_BatchNumber = new TextBox();
             Transactions_Label_Report_TransactionType = new Label();
             Transfer_TableLayout_Right = new TableLayoutPanel();
+            Transactions_Panel_ViewMode = new Panel();
+            Transactions_Label_ViewMode = new Label();
+            Transactions_Radio_GridView = new RadioButton();
+            Transactions_Radio_ChartView = new RadioButton();
+            Transactions_Radio_TimelineView = new RadioButton();
             Transactions_Panel_DataGridView = new Panel();
             Transactions_Image_NothingFound = new PictureBox();
             Transactions_DataGridView_Transactions = new DataGridView();
             Transfer_Panel_PageButtons = new Panel();
-            Transfer_Button_SelectionHistory = new Button();
             Transfer_Button_Next = new Button();
             Transfer_Button_Previous = new Button();
             Transactions_TabelLayoutPanel_Bottom = new TableLayoutPanel();
             Transactions_Panel_Bottom_Right = new Panel();
+            Transfer_Button_SelectionHistory = new Button();
             Transactions_Button_Print = new Button();
             Transactions_Button_Reset = new Button();
             Transactions_Panel_Bottom_Left = new Panel();
             Transactions_Button_Search = new Button();
             Transactions_Button_SidePanel = new Button();
+            Transactions_Radio_Everything = new RadioButton();
             Transactions_GroupBox_Main.SuspendLayout();
             Transactions_TableLayout_Main.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)Transactions_SplitContainer_Main).BeginInit();
@@ -171,8 +156,8 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Panel_Row_Shift.SuspendLayout();
             Transactions_Panel_Row_DateRange.SuspendLayout();
             Transactions_TableLayout_SelectionReport.SuspendLayout();
-            Transactions_Panel_ViewMode.SuspendLayout();
             Transfer_TableLayout_Right.SuspendLayout();
+            Transactions_Panel_ViewMode.SuspendLayout();
             Transactions_Panel_DataGridView.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)Transactions_Image_NothingFound).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Transactions_DataGridView_Transactions).BeginInit();
@@ -244,17 +229,126 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_TableLayout_Inputs.Location = new Point(0, 0);
             Transactions_TableLayout_Inputs.Name = "Transactions_TableLayout_Inputs";
             Transactions_TableLayout_Inputs.RowCount = 9;
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Smart Search
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Transaction Types
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Time Range
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Building
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Sort By
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Part ID
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // User
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // Shift/Date Range
-            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // Selection Report
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            Transactions_TableLayout_Inputs.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             Transactions_TableLayout_Inputs.Size = new Size(409, 524);
             Transactions_TableLayout_Inputs.TabIndex = 0;
+            // 
+            // Transactions_Panel_Row_SmartSearch
+            // 
+            Transactions_Panel_Row_SmartSearch.Controls.Add(Transactions_Label_SmartSearch);
+            Transactions_Panel_Row_SmartSearch.Controls.Add(Transactions_TextBox_SmartSearch);
+            Transactions_Panel_Row_SmartSearch.Location = new Point(3, 3);
+            Transactions_Panel_Row_SmartSearch.Name = "Transactions_Panel_Row_SmartSearch";
+            Transactions_Panel_Row_SmartSearch.Size = new Size(403, 34);
+            Transactions_Panel_Row_SmartSearch.TabIndex = 0;
+            // 
+            // Transactions_Label_SmartSearch
+            // 
+            Transactions_Label_SmartSearch.Location = new Point(6, 6);
+            Transactions_Label_SmartSearch.Name = "Transactions_Label_SmartSearch";
+            Transactions_Label_SmartSearch.Size = new Size(83, 23);
+            Transactions_Label_SmartSearch.TabIndex = 0;
+            Transactions_Label_SmartSearch.Text = "Smart Search:";
+            Transactions_Label_SmartSearch.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // Transactions_TextBox_SmartSearch
+            // 
+            Transactions_TextBox_SmartSearch.Location = new Point(95, 6);
+            Transactions_TextBox_SmartSearch.Name = "Transactions_TextBox_SmartSearch";
+            Transactions_TextBox_SmartSearch.PlaceholderText = "Search anything... Part ID, User, Location, Notes";
+            Transactions_TextBox_SmartSearch.Size = new Size(302, 23);
+            Transactions_TextBox_SmartSearch.TabIndex = 1;
+            // 
+            // Transactions_Panel_TransactionTypes
+            // 
+            Transactions_Panel_TransactionTypes.Controls.Add(Transactions_CheckBox_IN);
+            Transactions_Panel_TransactionTypes.Controls.Add(Transactions_CheckBox_OUT);
+            Transactions_Panel_TransactionTypes.Controls.Add(Transactions_CheckBox_TRANSFER);
+            Transactions_Panel_TransactionTypes.Location = new Point(3, 43);
+            Transactions_Panel_TransactionTypes.Name = "Transactions_Panel_TransactionTypes";
+            Transactions_Panel_TransactionTypes.Size = new Size(403, 34);
+            Transactions_Panel_TransactionTypes.TabIndex = 1;
+            // 
+            // Transactions_CheckBox_IN
+            // 
+            Transactions_CheckBox_IN.Checked = true;
+            Transactions_CheckBox_IN.CheckState = CheckState.Checked;
+            Transactions_CheckBox_IN.Location = new Point(95, 6);
+            Transactions_CheckBox_IN.Name = "Transactions_CheckBox_IN";
+            Transactions_CheckBox_IN.Size = new Size(60, 23);
+            Transactions_CheckBox_IN.TabIndex = 0;
+            Transactions_CheckBox_IN.Text = "📥 IN";
+            Transactions_CheckBox_IN.UseVisualStyleBackColor = true;
+            // 
+            // Transactions_CheckBox_OUT
+            // 
+            Transactions_CheckBox_OUT.Checked = true;
+            Transactions_CheckBox_OUT.CheckState = CheckState.Checked;
+            Transactions_CheckBox_OUT.Location = new Point(161, 6);
+            Transactions_CheckBox_OUT.Name = "Transactions_CheckBox_OUT";
+            Transactions_CheckBox_OUT.Size = new Size(70, 23);
+            Transactions_CheckBox_OUT.TabIndex = 1;
+            Transactions_CheckBox_OUT.Text = "📤 OUT";
+            Transactions_CheckBox_OUT.UseVisualStyleBackColor = true;
+            // 
+            // Transactions_CheckBox_TRANSFER
+            // 
+            Transactions_CheckBox_TRANSFER.Checked = true;
+            Transactions_CheckBox_TRANSFER.CheckState = CheckState.Checked;
+            Transactions_CheckBox_TRANSFER.Location = new Point(237, 6);
+            Transactions_CheckBox_TRANSFER.Name = "Transactions_CheckBox_TRANSFER";
+            Transactions_CheckBox_TRANSFER.Size = new Size(100, 23);
+            Transactions_CheckBox_TRANSFER.TabIndex = 2;
+            Transactions_CheckBox_TRANSFER.Text = "🔄 TRANSFER";
+            Transactions_CheckBox_TRANSFER.UseVisualStyleBackColor = true;
+            // 
+            // Transactions_Panel_TimeRange
+            // 
+            Transactions_Panel_TimeRange.Controls.Add(Transactions_Radio_Everything);
+            Transactions_Panel_TimeRange.Controls.Add(Transactions_Radio_Today);
+            Transactions_Panel_TimeRange.Controls.Add(Transactions_Radio_ThisWeek);
+            Transactions_Panel_TimeRange.Controls.Add(Transactions_Radio_ThisMonth);
+            Transactions_Panel_TimeRange.Location = new Point(3, 83);
+            Transactions_Panel_TimeRange.Name = "Transactions_Panel_TimeRange";
+            Transactions_Panel_TimeRange.Size = new Size(403, 34);
+            Transactions_Panel_TimeRange.TabIndex = 2;
+            // 
+            // Transactions_Radio_Today
+            // 
+            Transactions_Radio_Today.Checked = true;
+            Transactions_Radio_Today.Location = new Point(6, 6);
+            Transactions_Radio_Today.Name = "Transactions_Radio_Today";
+            Transactions_Radio_Today.Size = new Size(60, 23);
+            Transactions_Radio_Today.TabIndex = 0;
+            Transactions_Radio_Today.TabStop = true;
+            Transactions_Radio_Today.Text = "Today";
+            Transactions_Radio_Today.UseVisualStyleBackColor = true;
+            // 
+            // Transactions_Radio_ThisWeek
+            // 
+            Transactions_Radio_ThisWeek.Location = new Point(90, 6);
+            Transactions_Radio_ThisWeek.Name = "Transactions_Radio_ThisWeek";
+            Transactions_Radio_ThisWeek.Size = new Size(80, 23);
+            Transactions_Radio_ThisWeek.TabIndex = 1;
+            Transactions_Radio_ThisWeek.Text = "This Week";
+            Transactions_Radio_ThisWeek.UseVisualStyleBackColor = true;
+            // 
+            // Transactions_Radio_ThisMonth
+            // 
+            Transactions_Radio_ThisMonth.Location = new Point(194, 6);
+            Transactions_Radio_ThisMonth.Name = "Transactions_Radio_ThisMonth";
+            Transactions_Radio_ThisMonth.Size = new Size(90, 23);
+            Transactions_Radio_ThisMonth.TabIndex = 2;
+            Transactions_Radio_ThisMonth.Text = "This Month";
+            Transactions_Radio_ThisMonth.UseVisualStyleBackColor = true;
             // 
             // Transactions_Panel_Row_Building
             // 
@@ -285,7 +379,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // 
             Transactions_Panel_Row_SortBy.Controls.Add(Transactions_Label_SortBy);
             Transactions_Panel_Row_SortBy.Controls.Add(Transactions_ComboBox_SortBy);
-            Transactions_Panel_Row_SortBy.Location = new Point(3, 3);
+            Transactions_Panel_Row_SortBy.Location = new Point(3, 163);
             Transactions_Panel_Row_SortBy.Name = "Transactions_Panel_Row_SortBy";
             Transactions_Panel_Row_SortBy.Size = new Size(403, 34);
             Transactions_Panel_Row_SortBy.TabIndex = 0;
@@ -310,7 +404,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // 
             Transactions_Panel_Row_SearchPartID.Controls.Add(Transactions_Label_SearchPartID);
             Transactions_Panel_Row_SearchPartID.Controls.Add(_transactionsComboBoxSearchPartId);
-            Transactions_Panel_Row_SearchPartID.Location = new Point(3, 43);
+            Transactions_Panel_Row_SearchPartID.Location = new Point(3, 203);
             Transactions_Panel_Row_SearchPartID.Name = "Transactions_Panel_Row_SearchPartID";
             Transactions_Panel_Row_SearchPartID.Size = new Size(403, 34);
             Transactions_Panel_Row_SearchPartID.TabIndex = 1;
@@ -324,7 +418,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Label_SearchPartID.Text = "Part ID:";
             Transactions_Label_SearchPartID.TextAlign = ContentAlignment.MiddleRight;
             // 
-            // Transactions_ComboBox_SearchPartID
+            // _transactionsComboBoxSearchPartId
             // 
             _transactionsComboBoxSearchPartId.Location = new Point(94, 5);
             _transactionsComboBoxSearchPartId.Name = "_transactionsComboBoxSearchPartId";
@@ -335,7 +429,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // 
             Transactions_Panel_Row_User.Controls.Add(Transactions_Label_User);
             Transactions_Panel_Row_User.Controls.Add(Transactions_ComboBox_UserFullName);
-            Transactions_Panel_Row_User.Location = new Point(3, 83);
+            Transactions_Panel_Row_User.Location = new Point(3, 243);
             Transactions_Panel_Row_User.Name = "Transactions_Panel_Row_User";
             Transactions_Panel_Row_User.Size = new Size(403, 34);
             Transactions_Panel_Row_User.TabIndex = 2;
@@ -359,7 +453,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             // Transactions_Panel_Row_Shift
             // 
             Transactions_Panel_Row_Shift.Controls.Add(Transactions_Panel_Row_DateRange);
-            Transactions_Panel_Row_Shift.Location = new Point(3, 163);
+            Transactions_Panel_Row_Shift.Location = new Point(3, 283);
             Transactions_Panel_Row_Shift.Name = "Transactions_Panel_Row_Shift";
             Transactions_Panel_Row_Shift.Size = new Size(403, 34);
             Transactions_Panel_Row_Shift.TabIndex = 4;
@@ -441,7 +535,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_TableLayout_SelectionReport.Controls.Add(Transactions_TextBox_Report_BatchNumber, 1, 1);
             Transactions_TableLayout_SelectionReport.Controls.Add(Transactions_Label_Report_TransactionType, 0, 0);
             Transactions_TableLayout_SelectionReport.Dock = DockStyle.Fill;
-            Transactions_TableLayout_SelectionReport.Location = new Point(3, 203);
+            Transactions_TableLayout_SelectionReport.Location = new Point(3, 323);
             Transactions_TableLayout_SelectionReport.Name = "Transactions_TableLayout_SelectionReport";
             Transactions_TableLayout_SelectionReport.RowCount = 11;
             Transactions_TableLayout_SelectionReport.RowStyles.Add(new RowStyle());
@@ -455,7 +549,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_TableLayout_SelectionReport.RowStyles.Add(new RowStyle());
             Transactions_TableLayout_SelectionReport.RowStyles.Add(new RowStyle());
             Transactions_TableLayout_SelectionReport.RowStyles.Add(new RowStyle());
-            Transactions_TableLayout_SelectionReport.Size = new Size(403, 318);
+            Transactions_TableLayout_SelectionReport.Size = new Size(403, 198);
             Transactions_TableLayout_SelectionReport.TabIndex = 6;
             // 
             // Transactions_Label_Report_BatchNumber
@@ -678,20 +772,69 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transfer_TableLayout_Right.Location = new Point(0, 0);
             Transfer_TableLayout_Right.Name = "Transfer_TableLayout_Right";
             Transfer_TableLayout_Right.RowCount = 3;
-            Transfer_TableLayout_Right.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F)); // View Mode
-            Transfer_TableLayout_Right.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // DataGrid
-            Transfer_TableLayout_Right.RowStyles.Add(new RowStyle()); // Page Buttons
+            Transfer_TableLayout_Right.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            Transfer_TableLayout_Right.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            Transfer_TableLayout_Right.RowStyles.Add(new RowStyle());
             Transfer_TableLayout_Right.Size = new Size(405, 524);
             Transfer_TableLayout_Right.TabIndex = 6;
+            // 
+            // Transactions_Panel_ViewMode
+            // 
+            Transactions_Panel_ViewMode.Controls.Add(Transactions_Label_ViewMode);
+            Transactions_Panel_ViewMode.Controls.Add(Transactions_Radio_GridView);
+            Transactions_Panel_ViewMode.Controls.Add(Transactions_Radio_ChartView);
+            Transactions_Panel_ViewMode.Controls.Add(Transactions_Radio_TimelineView);
+            Transactions_Panel_ViewMode.Location = new Point(3, 3);
+            Transactions_Panel_ViewMode.Name = "Transactions_Panel_ViewMode";
+            Transactions_Panel_ViewMode.Size = new Size(399, 34);
+            Transactions_Panel_ViewMode.TabIndex = 0;
+            // 
+            // Transactions_Label_ViewMode
+            // 
+            Transactions_Label_ViewMode.Location = new Point(6, 6);
+            Transactions_Label_ViewMode.Name = "Transactions_Label_ViewMode";
+            Transactions_Label_ViewMode.Size = new Size(60, 23);
+            Transactions_Label_ViewMode.TabIndex = 0;
+            Transactions_Label_ViewMode.Text = "View:";
+            Transactions_Label_ViewMode.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // Transactions_Radio_GridView
+            // 
+            Transactions_Radio_GridView.Checked = true;
+            Transactions_Radio_GridView.Location = new Point(72, 6);
+            Transactions_Radio_GridView.Name = "Transactions_Radio_GridView";
+            Transactions_Radio_GridView.Size = new Size(60, 23);
+            Transactions_Radio_GridView.TabIndex = 1;
+            Transactions_Radio_GridView.TabStop = true;
+            Transactions_Radio_GridView.Text = "📊 Grid";
+            Transactions_Radio_GridView.UseVisualStyleBackColor = true;
+            // 
+            // Transactions_Radio_ChartView
+            // 
+            Transactions_Radio_ChartView.Location = new Point(138, 6);
+            Transactions_Radio_ChartView.Name = "Transactions_Radio_ChartView";
+            Transactions_Radio_ChartView.Size = new Size(70, 23);
+            Transactions_Radio_ChartView.TabIndex = 2;
+            Transactions_Radio_ChartView.Text = "📈 Chart";
+            Transactions_Radio_ChartView.UseVisualStyleBackColor = true;
+            // 
+            // Transactions_Radio_TimelineView
+            // 
+            Transactions_Radio_TimelineView.Location = new Point(214, 6);
+            Transactions_Radio_TimelineView.Name = "Transactions_Radio_TimelineView";
+            Transactions_Radio_TimelineView.Size = new Size(90, 23);
+            Transactions_Radio_TimelineView.TabIndex = 3;
+            Transactions_Radio_TimelineView.Text = "🕐 Timeline";
+            Transactions_Radio_TimelineView.UseVisualStyleBackColor = true;
             // 
             // Transactions_Panel_DataGridView
             // 
             Transactions_Panel_DataGridView.Controls.Add(Transactions_Image_NothingFound);
             Transactions_Panel_DataGridView.Controls.Add(Transactions_DataGridView_Transactions);
             Transactions_Panel_DataGridView.Dock = DockStyle.Fill;
-            Transactions_Panel_DataGridView.Location = new Point(3, 3);
+            Transactions_Panel_DataGridView.Location = new Point(3, 43);
             Transactions_Panel_DataGridView.Name = "Transactions_Panel_DataGridView";
-            Transactions_Panel_DataGridView.Size = new Size(399, 483);
+            Transactions_Panel_DataGridView.Size = new Size(399, 443);
             Transactions_Panel_DataGridView.TabIndex = 5;
             // 
             // Transactions_Image_NothingFound
@@ -703,7 +846,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Image_NothingFound.InitialImage = null;
             Transactions_Image_NothingFound.Location = new Point(0, 0);
             Transactions_Image_NothingFound.Name = "Transactions_Image_NothingFound";
-            Transactions_Image_NothingFound.Size = new Size(399, 483);
+            Transactions_Image_NothingFound.Size = new Size(399, 443);
             Transactions_Image_NothingFound.SizeMode = PictureBoxSizeMode.Zoom;
             Transactions_Image_NothingFound.TabIndex = 22;
             Transactions_Image_NothingFound.TabStop = false;
@@ -714,7 +857,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_DataGridView_Transactions.Dock = DockStyle.Fill;
             Transactions_DataGridView_Transactions.Location = new Point(0, 0);
             Transactions_DataGridView_Transactions.Name = "Transactions_DataGridView_Transactions";
-            Transactions_DataGridView_Transactions.Size = new Size(399, 483);
+            Transactions_DataGridView_Transactions.Size = new Size(399, 443);
             Transactions_DataGridView_Transactions.TabIndex = 0;
             // 
             // Transfer_Panel_PageButtons
@@ -727,17 +870,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transfer_Panel_PageButtons.Name = "Transfer_Panel_PageButtons";
             Transfer_Panel_PageButtons.Size = new Size(399, 29);
             Transfer_Panel_PageButtons.TabIndex = 6;
-            // 
-            // Transfer_Button_SelectionHistory
-            // 
-            Transfer_Button_SelectionHistory.Enabled = false;
-            Transfer_Button_SelectionHistory.Location = new Point(144, 3);
-            Transfer_Button_SelectionHistory.Name = "Transfer_Button_SelectionHistory";
-            Transfer_Button_SelectionHistory.Size = new Size(114, 23);
-            Transfer_Button_SelectionHistory.TabIndex = 2;
-            Transfer_Button_SelectionHistory.Text = "Selection History";
-            Transfer_Button_SelectionHistory.UseVisualStyleBackColor = true;
-            Transfer_Button_SelectionHistory.Click += Transfer_Button_BranchHistory_Click;
             // 
             // Transfer_Button_Next
             // 
@@ -786,6 +918,17 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Panel_Bottom_Right.Size = new Size(403, 28);
             Transactions_Panel_Bottom_Right.TabIndex = 2;
             // 
+            // Transfer_Button_SelectionHistory
+            // 
+            Transfer_Button_SelectionHistory.Enabled = false;
+            Transfer_Button_SelectionHistory.Location = new Point(144, 3);
+            Transfer_Button_SelectionHistory.Name = "Transfer_Button_SelectionHistory";
+            Transfer_Button_SelectionHistory.Size = new Size(114, 23);
+            Transfer_Button_SelectionHistory.TabIndex = 2;
+            Transfer_Button_SelectionHistory.Text = "Selection History";
+            Transfer_Button_SelectionHistory.UseVisualStyleBackColor = true;
+            Transfer_Button_SelectionHistory.Click += Transfer_Button_BranchHistory_Click;
+            // 
             // Transactions_Button_Print
             // 
             Transactions_Button_Print.Location = new Point(3, 2);
@@ -830,167 +973,14 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Button_SidePanel.Text = "Collapse ⬅️";
             Transactions_Button_SidePanel.UseVisualStyleBackColor = true;
             // 
-            // Transactions_Panel_Row_SmartSearch
+            // Transactions_Radio_Everything
             // 
-            Transactions_Panel_Row_SmartSearch.Controls.Add(Transactions_Label_SmartSearch);
-            Transactions_Panel_Row_SmartSearch.Controls.Add(Transactions_TextBox_SmartSearch);
-            Transactions_Panel_Row_SmartSearch.Location = new Point(3, 3);
-            Transactions_Panel_Row_SmartSearch.Name = "Transactions_Panel_Row_SmartSearch";
-            Transactions_Panel_Row_SmartSearch.Size = new Size(403, 34);
-            Transactions_Panel_Row_SmartSearch.TabIndex = 0;
-            // 
-            // Transactions_Label_SmartSearch
-            // 
-            Transactions_Label_SmartSearch.Location = new Point(6, 6);
-            Transactions_Label_SmartSearch.Name = "Transactions_Label_SmartSearch";
-            Transactions_Label_SmartSearch.Size = new Size(83, 23);
-            Transactions_Label_SmartSearch.TabIndex = 0;
-            Transactions_Label_SmartSearch.Text = "Smart Search:";
-            Transactions_Label_SmartSearch.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // Transactions_TextBox_SmartSearch
-            // 
-            Transactions_TextBox_SmartSearch.Location = new Point(95, 6);
-            Transactions_TextBox_SmartSearch.Name = "Transactions_TextBox_SmartSearch";
-            Transactions_TextBox_SmartSearch.Size = new Size(302, 23);
-            Transactions_TextBox_SmartSearch.TabIndex = 1;
-            Transactions_TextBox_SmartSearch.PlaceholderText = "Search anything... Part ID, User, Location, Notes";
-            // 
-            // Transactions_Panel_TransactionTypes
-            // 
-            Transactions_Panel_TransactionTypes.Controls.Add(Transactions_CheckBox_IN);
-            Transactions_Panel_TransactionTypes.Controls.Add(Transactions_CheckBox_OUT);
-            Transactions_Panel_TransactionTypes.Controls.Add(Transactions_CheckBox_TRANSFER);
-            Transactions_Panel_TransactionTypes.Location = new Point(3, 43);
-            Transactions_Panel_TransactionTypes.Name = "Transactions_Panel_TransactionTypes";
-            Transactions_Panel_TransactionTypes.Size = new Size(403, 34);
-            Transactions_Panel_TransactionTypes.TabIndex = 1;
-            // 
-            // Transactions_CheckBox_IN
-            // 
-            Transactions_CheckBox_IN.Location = new Point(95, 6);
-            Transactions_CheckBox_IN.Name = "Transactions_CheckBox_IN";
-            Transactions_CheckBox_IN.Size = new Size(60, 23);
-            Transactions_CheckBox_IN.TabIndex = 0;
-            Transactions_CheckBox_IN.Text = "📥 IN";
-            Transactions_CheckBox_IN.UseVisualStyleBackColor = true;
-            Transactions_CheckBox_IN.Checked = true;
-            // 
-            // Transactions_CheckBox_OUT
-            // 
-            Transactions_CheckBox_OUT.Location = new Point(161, 6);
-            Transactions_CheckBox_OUT.Name = "Transactions_CheckBox_OUT";
-            Transactions_CheckBox_OUT.Size = new Size(70, 23);
-            Transactions_CheckBox_OUT.TabIndex = 1;
-            Transactions_CheckBox_OUT.Text = "📤 OUT";
-            Transactions_CheckBox_OUT.UseVisualStyleBackColor = true;
-            Transactions_CheckBox_OUT.Checked = true;
-            // 
-            // Transactions_CheckBox_TRANSFER
-            // 
-            Transactions_CheckBox_TRANSFER.Location = new Point(237, 6);
-            Transactions_CheckBox_TRANSFER.Name = "Transactions_CheckBox_TRANSFER";
-            Transactions_CheckBox_TRANSFER.Size = new Size(100, 23);
-            Transactions_CheckBox_TRANSFER.TabIndex = 2;
-            Transactions_CheckBox_TRANSFER.Text = "🔄 TRANSFER";
-            Transactions_CheckBox_TRANSFER.UseVisualStyleBackColor = true;
-            Transactions_CheckBox_TRANSFER.Checked = true;
-            // 
-            // Transactions_Panel_TimeRange
-            // 
-            Transactions_Panel_TimeRange.Controls.Add(Transactions_Radio_Today);
-            Transactions_Panel_TimeRange.Controls.Add(Transactions_Radio_ThisWeek);
-            Transactions_Panel_TimeRange.Controls.Add(Transactions_Radio_ThisMonth);
-            Transactions_Panel_TimeRange.Controls.Add(Transactions_Radio_CustomRange);
-            Transactions_Panel_TimeRange.Location = new Point(3, 83);
-            Transactions_Panel_TimeRange.Name = "Transactions_Panel_TimeRange";
-            Transactions_Panel_TimeRange.Size = new Size(403, 34);
-            Transactions_Panel_TimeRange.TabIndex = 2;
-            // 
-            // Transactions_Radio_Today
-            // 
-            Transactions_Radio_Today.Location = new Point(95, 6);
-            Transactions_Radio_Today.Name = "Transactions_Radio_Today";
-            Transactions_Radio_Today.Size = new Size(60, 23);
-            Transactions_Radio_Today.TabIndex = 0;
-            Transactions_Radio_Today.Text = "Today";
-            Transactions_Radio_Today.UseVisualStyleBackColor = true;
-            Transactions_Radio_Today.Checked = true;
-            // 
-            // Transactions_Radio_ThisWeek
-            // 
-            Transactions_Radio_ThisWeek.Location = new Point(161, 6);
-            Transactions_Radio_ThisWeek.Name = "Transactions_Radio_ThisWeek";
-            Transactions_Radio_ThisWeek.Size = new Size(80, 23);
-            Transactions_Radio_ThisWeek.TabIndex = 1;
-            Transactions_Radio_ThisWeek.Text = "This Week";
-            Transactions_Radio_ThisWeek.UseVisualStyleBackColor = true;
-            // 
-            // Transactions_Radio_ThisMonth
-            // 
-            Transactions_Radio_ThisMonth.Location = new Point(247, 6);
-            Transactions_Radio_ThisMonth.Name = "Transactions_Radio_ThisMonth";
-            Transactions_Radio_ThisMonth.Size = new Size(90, 23);
-            Transactions_Radio_ThisMonth.TabIndex = 2;
-            Transactions_Radio_ThisMonth.Text = "This Month";
-            Transactions_Radio_ThisMonth.UseVisualStyleBackColor = true;
-            // 
-            // Transactions_Radio_CustomRange
-            // 
-            Transactions_Radio_CustomRange.Location = new Point(343, 6);
-            Transactions_Radio_CustomRange.Name = "Transactions_Radio_CustomRange";
-            Transactions_Radio_CustomRange.Size = new Size(60, 23);
-            Transactions_Radio_CustomRange.TabIndex = 3;
-            Transactions_Radio_CustomRange.Text = "Custom";
-            Transactions_Radio_CustomRange.UseVisualStyleBackColor = true;
-            // 
-            // Transactions_Panel_ViewMode
-            // 
-            Transactions_Panel_ViewMode.Controls.Add(Transactions_Label_ViewMode);
-            Transactions_Panel_ViewMode.Controls.Add(Transactions_Radio_GridView);
-            Transactions_Panel_ViewMode.Controls.Add(Transactions_Radio_ChartView);
-            Transactions_Panel_ViewMode.Controls.Add(Transactions_Radio_TimelineView);
-            Transactions_Panel_ViewMode.Location = new Point(3, 3);
-            Transactions_Panel_ViewMode.Name = "Transactions_Panel_ViewMode";
-            Transactions_Panel_ViewMode.Size = new Size(399, 34);
-            Transactions_Panel_ViewMode.TabIndex = 0;
-            // 
-            // Transactions_Label_ViewMode
-            // 
-            Transactions_Label_ViewMode.Location = new Point(6, 6);
-            Transactions_Label_ViewMode.Name = "Transactions_Label_ViewMode";
-            Transactions_Label_ViewMode.Size = new Size(60, 23);
-            Transactions_Label_ViewMode.TabIndex = 0;
-            Transactions_Label_ViewMode.Text = "View:";
-            Transactions_Label_ViewMode.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // Transactions_Radio_GridView
-            // 
-            Transactions_Radio_GridView.Location = new Point(72, 6);
-            Transactions_Radio_GridView.Name = "Transactions_Radio_GridView";
-            Transactions_Radio_GridView.Size = new Size(60, 23);
-            Transactions_Radio_GridView.TabIndex = 1;
-            Transactions_Radio_GridView.Text = "📊 Grid";
-            Transactions_Radio_GridView.UseVisualStyleBackColor = true;
-            Transactions_Radio_GridView.Checked = true;
-            // 
-            // Transactions_Radio_ChartView
-            // 
-            Transactions_Radio_ChartView.Location = new Point(138, 6);
-            Transactions_Radio_ChartView.Name = "Transactions_Radio_ChartView";
-            Transactions_Radio_ChartView.Size = new Size(70, 23);
-            Transactions_Radio_ChartView.TabIndex = 2;
-            Transactions_Radio_ChartView.Text = "📈 Chart";
-            Transactions_Radio_ChartView.UseVisualStyleBackColor = true;
-            // 
-            // Transactions_Radio_TimelineView
-            // 
-            Transactions_Radio_TimelineView.Location = new Point(214, 6);
-            Transactions_Radio_TimelineView.Name = "Transactions_Radio_TimelineView";
-            Transactions_Radio_TimelineView.Size = new Size(90, 23);
-            Transactions_Radio_TimelineView.TabIndex = 3;
-            Transactions_Radio_TimelineView.Text = "🕐 Timeline";
-            Transactions_Radio_TimelineView.UseVisualStyleBackColor = true;
+            Transactions_Radio_Everything.Location = new Point(308, 6);
+            Transactions_Radio_Everything.Name = "Transactions_Radio_Everything";
+            Transactions_Radio_Everything.Size = new Size(90, 23);
+            Transactions_Radio_Everything.TabIndex = 3;
+            Transactions_Radio_Everything.Text = "Everything";
+            Transactions_Radio_Everything.UseVisualStyleBackColor = true;
             // 
             // Transactions
             // 
@@ -1007,6 +997,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_SplitContainer_Main.ResumeLayout(false);
             Transactions_TableLayout_Inputs.ResumeLayout(false);
             Transactions_Panel_Row_SmartSearch.ResumeLayout(false);
+            Transactions_Panel_Row_SmartSearch.PerformLayout();
             Transactions_Panel_TransactionTypes.ResumeLayout(false);
             Transactions_Panel_TimeRange.ResumeLayout(false);
             Transactions_Panel_Row_Building.ResumeLayout(false);
@@ -1017,9 +1008,9 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_Panel_Row_DateRange.ResumeLayout(false);
             Transactions_TableLayout_SelectionReport.ResumeLayout(false);
             Transactions_TableLayout_SelectionReport.PerformLayout();
-            Transactions_Panel_ViewMode.ResumeLayout(false);
             Transfer_TableLayout_Right.ResumeLayout(false);
             Transfer_TableLayout_Right.PerformLayout();
+            Transactions_Panel_ViewMode.ResumeLayout(false);
             Transactions_Panel_DataGridView.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)Transactions_Image_NothingFound).EndInit();
             ((System.ComponentModel.ISupportInitialize)Transactions_DataGridView_Transactions).EndInit();
@@ -1074,5 +1065,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private Button Transfer_Button_Next;
         private Button Transfer_Button_Previous;
         private Button Transfer_Button_SelectionHistory;
+        private RadioButton Transactions_Radio_Everything;
     }
 }

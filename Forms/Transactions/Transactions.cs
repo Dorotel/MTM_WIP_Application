@@ -26,7 +26,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private ComboBox _transactionsComboBoxSearchPartId = new();
 
         // Smart search infrastructure
-        private readonly Timer _searchDebounceTimer = new() { Interval = 500 };
+        private readonly System.Windows.Forms.Timer _searchDebounceTimer = new() { Interval = 500 };
         private string _lastSearchText = string.Empty;
         private CancellationTokenSource _searchCancellation = new();
         private TransactionViewMode _currentViewMode = TransactionViewMode.Grid;
@@ -142,7 +142,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 Transactions_Radio_Today.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
                 Transactions_Radio_ThisWeek.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
                 Transactions_Radio_ThisMonth.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
-                Transactions_Radio_CustomRange.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
+                Transactions_Radio_Everything.CheckedChanged += async (s, e) => await HandleFilterChangeAsync();
                 
                 // View mode change events
                 Transactions_Radio_GridView.CheckedChanged += async (s, e) => await HandleViewModeChangeAsync();
@@ -344,7 +344,8 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
                 System.Diagnostics.Debug.WriteLine($"[DEBUG] Rows returned: {dt.Rows.Count}");
 
-                List<Model_Transactions> result = [];
+                // IDE0305 Fix: Simplify collection initialization in LoadTransactionsAsync and similar places
+                List<Model_Transactions> result = new();
                 foreach (DataRow row in dt.Rows)
                 {
                     Model_Transactions tx = new()
@@ -877,12 +878,14 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
         }
 
+        // Fix for CS0029 and IDE0028 in Transfer_Button_BranchHistory_Click
+
         private async void Transfer_Button_BranchHistory_Click(object? sender, EventArgs e)
         {
             try
             {
                 _progressHelper?.ShowProgress("Loading batch history...");
-                
+
                 if (Transactions_DataGridView_Transactions.SelectedRows.Count != 1)
                 {
                     return;
@@ -897,7 +900,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 }
 
                 _progressHelper?.UpdateProgress(20, "Searching for batch history...");
-                
+
                 string? batchNumber = selected.BatchNumber;
                 var dao = new Dao_Transactions();
                 var searchResult = await dao.SearchTransactionsAsync(
@@ -912,12 +915,28 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
                 _progressHelper?.UpdateProgress(60, "Processing results...");
 
-                List<Model_Transactions> results = searchResult.IsSuccess && searchResult.Data != null
-                    ? searchResult.Data
+                // CS0029 Fix: Convert List<MTM_Inventory_Application.Models.Model_Transactions> to List<Model_Transactions>
+                // IDE0028 Fix: Use collection initializer
+                List<Model_Transactions> results = searchResult.Data != null
+                    ? searchResult.Data.Select(x => new Model_Transactions
+                    {
+                        ID = x.ID,
+                        TransactionType = (TransactionType)x.TransactionType,
+                        BatchNumber = x.BatchNumber,
+                        PartID = x.PartID,
+                        FromLocation = x.FromLocation,
+                        ToLocation = x.ToLocation,
+                        Operation = x.Operation,
+                        Quantity = x.Quantity,
+                        Notes = x.Notes,
+                        User = x.User,
+                        ItemType = x.ItemType,
+                        DateTime = x.DateTime
+                    }).ToList()
                     : new List<Model_Transactions>();
 
                 // Build description for each row
-                List<dynamic> describedResults = [];
+                List<dynamic> describedResults = new();
                 for (int i = 0; i < results.Count; i++)
                 {
                     Model_Transactions curr = results[i];
@@ -970,7 +989,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 Transactions_DataGridView_Transactions.Visible = describedResults.Count > 0;
                 Transactions_Button_Print.Enabled = describedResults.Count > 0;
                 Transfer_Button_SelectionHistory.Enabled = describedResults.Count > 0;
-                
+
                 if (describedResults.Count > 0)
                 {
                     Transactions_DataGridView_Transactions.ClearSelection();
@@ -982,7 +1001,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             {
                 _progressHelper?.ShowError("Failed to load batch history");
                 Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
-                    retryAction: () => Transfer_Button_BranchHistory_Click(sender, e),
+                    retryAction: () => { Transfer_Button_BranchHistory_Click(sender, e); return true; },
                     controlName: "Transfer_Button_BranchHistory_Click");
             }
         }
@@ -1011,7 +1030,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             catch (Exception ex)
             {
                 Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
-                    retryAction: () => Transactions_Button_Print_Click(sender, e),
+                    retryAction: () => { Transactions_Button_Print_Click(sender, e); return true; },
                     controlName: "Transactions_Button_Print_Click");
             }
         }
@@ -1046,12 +1065,8 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
         }
 
-        #endregion
-
-        #region Smart Search Methods
-
         /// <summary>
-        /// Handles universal smart search with debouncing and multi-field search
+        /// Advanced smart search for transactions with intelligent parsing
         /// </summary>
         /// <param name="searchText">Raw search input from user</param>
         private async Task HandleSmartSearchAsync(string searchText)
@@ -1060,8 +1075,14 @@ namespace MTM_Inventory_Application.Forms.Transactions
             {
                 _progressHelper?.ShowProgress("Processing smart search...");
 
+                // DEBUG: Show initial search input
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] === STARTING SMART SEARCH ===");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] Raw input: '{searchText}'");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] User: '{_currentUser}', IsAdmin: {_isAdmin}");
+
                 if (string.IsNullOrWhiteSpace(searchText))
                 {
+                    System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] Empty search - falling back to LoadTransactionsAsync");
                     await LoadTransactionsAsync();
                     return;
                 }
@@ -1069,22 +1090,58 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 // Parse search terms and build search criteria
                 var searchCriteria = ParseSearchInput(searchText);
                 
+                // DEBUG: Show parsed criteria
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] Parsed criteria:");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - SpecificPartId: '{searchCriteria.SpecificPartId}'");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - SpecificUser: '{searchCriteria.SpecificUser}'");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - SpecificLocation: '{searchCriteria.SpecificLocation}'");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - SpecificOperation: '{searchCriteria.SpecificOperation}'");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - SpecificQuantity: '{searchCriteria.SpecificQuantity}'");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - GeneralTerms: [{string.Join(", ", searchCriteria.GeneralTerms)}]");
+
                 _progressHelper?.UpdateProgress(30, "Executing smart search...");
-                
-                // Use DAO smart search with parsed criteria
+
                 var dao = new Dao_Transactions();
                 var searchTerms = BuildSearchTermsDictionary(searchCriteria);
-                var transactionTypes = GetSelectedTransactionTypes();
+
+                // DEBUG: Show built search terms dictionary
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] Built search terms dictionary:");
+                foreach (var kvp in searchTerms)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - {kvp.Key}: '{kvp.Value}'");
+                }
+
+                // Convert transaction types to Models.TransactionType for DAO
+                var transactionTypes = GetSelectedTransactionTypes()
+                    .Select(t => (MTM_Inventory_Application.Models.TransactionType)t)
+                    .ToList();
+
                 var timeRange = GetSelectedTimeRange();
                 var locations = GetSelectedLocations();
+
+                // DEBUG: Show additional filters
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] Additional filters:");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - Transaction Types: [{string.Join(", ", transactionTypes)}]");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - Time Range: {timeRange.from:yyyy-MM-dd} to {timeRange.to:yyyy-MM-dd}");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - Locations: [{string.Join(", ", locations)}]");
+
+                // DEBUG: Show what will be passed to DAO
+                bool hasSpecificSearchTerms = searchTerms.Count > 0;
+                string searchUserName = (_isAdmin || hasSpecificSearchTerms) ? "" : _currentUser;
+                bool searchAsAdmin = _isAdmin || hasSpecificSearchTerms;
                 
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] Calling DAO with parameters:");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - searchUserName: '{searchUserName}'");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - searchAsAdmin: {searchAsAdmin}");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] - hasSpecificSearchTerms: {hasSpecificSearchTerms}");
+
                 var searchResult = await dao.SmartSearchAsync(
                     searchTerms,
                     transactionTypes,
                     timeRange,
                     locations,
-                    _isAdmin ? string.Empty : _currentUser,
-                    _isAdmin,
+                    searchUserName,
+                    searchAsAdmin,
                     CurrentPage,
                     PageSize
                 );
@@ -1093,12 +1150,44 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
                 if (searchResult.IsSuccess && searchResult.Data != null)
                 {
-                    await DisplaySearchResultsAsync(searchResult.Data);
-                    await UpdateAnalyticsDashboardAsync(searchResult.Data);
-                    _progressHelper?.ShowSuccess($"Smart search found {searchResult.Data.Count} transactions");
+                    // DEBUG: Show results received from DAO
+                    System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] DAO returned {searchResult.Data.Count} results");
+
+                    // CS1503 Fix: Convert List<MTM_Inventory_Application.Models.Model_Transactions> to List<Model_Transactions>
+                    var convertedList = searchResult.Data
+                        .Select(x => new Model_Transactions
+                        {
+                            ID = x.ID,
+                            TransactionType = (TransactionType)x.TransactionType,
+                            BatchNumber = x.BatchNumber,
+                            PartID = x.PartID,
+                            FromLocation = x.FromLocation,
+                            ToLocation = x.ToLocation,
+                            Operation = x.Operation,
+                            Quantity = x.Quantity,
+                            Notes = x.Notes,
+                            User = x.User,
+                            ItemType = x.ItemType,
+                            DateTime = x.DateTime
+                        })
+                        .ToList();
+
+                    await DisplaySearchResultsAsync(convertedList);
+                    await UpdateAnalyticsDashboardAsync(convertedList);
+                    
+                    // Provide user feedback about search scope
+                    string scopeMessage = !_isAdmin && searchTerms.Count == 0 
+                        ? $"Smart search found {convertedList.Count} transactions for user {_currentUser}"
+                        : $"Smart search found {convertedList.Count} transactions";
+                    
+                    _progressHelper?.ShowSuccess(scopeMessage);
+                    
+                    System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] {scopeMessage}");
+                    System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] === SMART SEARCH COMPLETED SUCCESSFULLY ===");
                 }
                 else
                 {
+                    System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] DAO failed: {searchResult.ErrorMessage}");
                     Service_ErrorHandler.HandleException(
                         new Exception($"Smart search failed: {searchResult.ErrorMessage}"),
                         ErrorSeverity.Medium,
@@ -1109,9 +1198,11 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] Exception occurred: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[SMART SEARCH DEBUG] Stack trace: {ex.StackTrace}");
                 _progressHelper?.ShowError("Smart search failed");
                 Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
-                    retryAction: () => HandleSmartSearchAsync(searchText),
+                    retryAction: () => { HandleSmartSearchAsync(searchText); return true; },
                     controlName: "HandleSmartSearchAsync");
             }
         }
@@ -1335,6 +1426,14 @@ namespace MTM_Inventory_Application.Forms.Transactions
         /// </summary>
         private (DateTime from, DateTime to) GetSelectedTimeRange()
         {
+            // PRIORITY 1: If date checkbox is checked, use custom date range
+            if (Control_AdvancedRemove_CheckBox_Date.Checked)
+            {
+                return (Control_AdvancedRemove_DateTimePicker_From.Value.Date, 
+                        Control_AdvancedRemove_DateTimePicker_To.Value.Date.AddDays(1).AddTicks(-1));
+            }
+            
+            // PRIORITY 2: Use radio button selection
             if (Transactions_Radio_Today.Checked)
             {
                 return (DateTime.Today, DateTime.Today.AddDays(1).AddTicks(-1));
@@ -1354,14 +1453,15 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 return (startOfMonth, endOfMonth);
             }
             
-            // Custom range
-            if (Transactions_Radio_CustomRange.Checked)
+            // FIXED: Transactions_Radio_Everything should have NO DATE RANGE
+            if (Transactions_Radio_Everything.Checked)
             {
-                return (Control_AdvancedRemove_DateTimePicker_From.Value.Date, 
-                        Control_AdvancedRemove_DateTimePicker_To.Value.Date.AddDays(1).AddTicks(-1));
+                // Return a very wide date range that effectively means "everything"
+                // Start from a very early date and go to far future
+                return (new DateTime(1900, 1, 1), new DateTime(2099, 12, 31));
             }
             
-            // Default to last 30 days
+            // Default fallback (should not normally be reached)
             return (DateTime.Today.AddDays(-30), DateTime.Today.AddDays(1).AddTicks(-1));
         }
 
@@ -1389,22 +1489,78 @@ namespace MTM_Inventory_Application.Forms.Transactions
         /// </summary>
         private void OnSmartSearchTextChanged(object? sender, EventArgs e)
         {
-            _searchDebounceTimer.Stop();
-            
-            var currentText = Transactions_TextBox_SmartSearch.Text;
-            
-            // Skip if text hasn't actually changed
-            if (currentText == _lastSearchText)
-                return;
+            try
+            {
+                _searchDebounceTimer.Stop();
                 
-            _lastSearchText = currentText;
-            
-            // Cancel any ongoing search
-            _searchCancellation.Cancel();
-            _searchCancellation = new CancellationTokenSource();
-            
-            // Start debounce timer
-            _searchDebounceTimer.Start();
+                var currentText = Transactions_TextBox_SmartSearch.Text?.Trim() ?? string.Empty;
+                
+                // Skip if text hasn't actually changed
+                if (currentText == _lastSearchText)
+                    return;
+                    
+                _lastSearchText = currentText;
+                
+                // Cancel any ongoing search
+                _searchCancellation.Cancel();
+                _searchCancellation = new CancellationTokenSource();
+                
+                // If text is empty, clear results immediately without triggering search
+                if (string.IsNullOrWhiteSpace(currentText))
+                {
+                    ClearSearchResults();
+                    return;
+                }
+                
+                // Start debounce timer for non-empty text
+                _searchDebounceTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low,
+                    controlName: "OnSmartSearchTextChanged");
+            }
+        }
+
+        /// <summary>
+        /// Clears search results and shows empty state
+        /// </summary>
+        private void ClearSearchResults()
+        {
+            try
+            {
+                this.Invoke(() =>
+                {
+                    _displayedTransactions = new BindingList<Model_Transactions>();
+                    Transactions_DataGridView_Transactions.DataSource = _displayedTransactions;
+                    Transactions_Image_NothingFound.Visible = true;
+                    Transactions_DataGridView_Transactions.Visible = false;
+                    Transactions_Button_Print.Enabled = false;
+                    Transfer_Button_SelectionHistory.Enabled = false;
+                    
+                    // Clear selection report fields
+                    Transactions_TextBox_Report_BatchNumber.Text = "";
+                    Transactions_TextBox_Report_PartID.Text = "";
+                    Transactions_TextBox_Report_FromLocation.Text = "";
+                    Transactions_TextBox_Report_ToLocation.Text = "";
+                    Transactions_TextBox_Report_Operation.Text = "";
+                    Transactions_TextBox_Report_Quantity.Text = "";
+                    Transactions_TextBox_Notes.Text = "";
+                    Transactions_TextBox_Report_User.Text = "";
+                    Transactions_TextBox_Report_ItemType.Text = "";
+                    Transactions_TextBox_Report_ReceiveDate.Text = "";
+                    
+                    // Update statistics
+                    this.Text = "Transactions - No search results";
+                    
+                    System.Diagnostics.Debug.WriteLine("[DEBUG] Search results cleared");
+                });
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low,
+                    controlName: "ClearSearchResults");
+            }
         }
 
         /// <summary>
@@ -1414,7 +1570,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
         {
             try
             {
-                if (!_searchCancellation.Token.IsCancellationRequested)
+                if (!_searchCancellation.Token.IsCancellationRequested && !string.IsNullOrWhiteSpace(_lastSearchText))
                 {
                     await HandleSmartSearchAsync(_lastSearchText);
                 }
@@ -1422,6 +1578,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             catch (OperationCanceledException)
             {
                 // Search was cancelled, ignore
+                System.Diagnostics.Debug.WriteLine("[DEBUG] Search was cancelled");
             }
             catch (Exception ex)
             {
@@ -1435,9 +1592,24 @@ namespace MTM_Inventory_Application.Forms.Transactions
         /// </summary>
         private async Task HandleFilterChangeAsync()
         {
-            if (!string.IsNullOrWhiteSpace(Transactions_TextBox_SmartSearch.Text))
+            try
             {
-                await HandleSmartSearchAsync(Transactions_TextBox_SmartSearch.Text);
+                var currentSearchText = Transactions_TextBox_SmartSearch.Text?.Trim() ?? string.Empty;
+                
+                if (!string.IsNullOrWhiteSpace(currentSearchText))
+                {
+                    await HandleSmartSearchAsync(currentSearchText);
+                }
+                else
+                {
+                    // If no search text, just clear results
+                    ClearSearchResults();
+                }
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low,
+                    controlName: "HandleFilterChangeAsync");
             }
         }
 
@@ -1901,7 +2073,29 @@ namespace MTM_Inventory_Application.Forms.Transactions
             public DateTime? SpecificDate { get; set; }
             public int? SpecificQuantity { get; set; }
         }
-
+        // CS0053 Fix: Make Model_Transactions public so that IReadOnlyList<Model_Transactions> is accessible
+        public class Model_Transactions
+        {
+            public int ID { get; set; }
+            public TransactionType TransactionType { get; set; }
+            public string? BatchNumber { get; set; }
+            public string? PartID { get; set; }
+            public string? FromLocation { get; set; }
+            public string? ToLocation { get; set; }
+            public string? Operation { get; set; }
+            public int Quantity { get; set; }
+            public string? Notes { get; set; }
+            public string? User { get; set; }
+            public string? ItemType { get; set; }
+            public DateTime DateTime { get; set; }
+        }
+        // Change the accessibility of TransactionType enum to public
+        public enum TransactionType
+        {
+            IN = 0,
+            OUT = 1,
+            TRANSFER = 2
+        }
         /// <summary>
         /// View modes for transaction display
         /// </summary>
@@ -1928,7 +2122,6 @@ namespace MTM_Inventory_Application.Forms.Transactions
                 {
                     _searchDebounceTimer?.Dispose();
                     _searchCancellation?.Dispose();
-                    _progressHelper?.Dispose();
                 }
             }
             finally
