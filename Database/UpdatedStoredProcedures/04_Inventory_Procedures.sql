@@ -64,12 +64,30 @@ BEGIN
     
     -- ALWAYS generate a new batch number for each addition (no consolidation)
     -- This ensures each inventory addition creates a separate trackable batch
-    SELECT last_batch_number INTO @nextBatch FROM inv_inventory_batch_seq FOR UPDATE;
+    
+    -- ROBUST: Ensure the batch sequence table exists
+    CREATE TABLE IF NOT EXISTS inv_inventory_batch_seq (
+        last_batch_number INT(11) NOT NULL DEFAULT 0,
+        created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    
+    -- ROBUST: Initialize sequence table if empty
+    INSERT IGNORE INTO inv_inventory_batch_seq (last_batch_number)
+    SELECT COALESCE(MAX(CAST(CASE 
+        WHEN BatchNumber IS NOT NULL AND BatchNumber REGEXP '^[0-9]+$' 
+        THEN BatchNumber 
+        ELSE '0' 
+    END AS UNSIGNED)), 0)
+    FROM inv_inventory;
+    
+    -- Generate next batch number
+    SELECT COALESCE(last_batch_number, 0) INTO @nextBatch FROM inv_inventory_batch_seq LIMIT 1;
     SET @nextBatch = @nextBatch + 1;
-    SET p_BatchNumber = LPAD(@nextBatch, 10, '0');
+    SET v_NextBatchNumber = LPAD(@nextBatch, 10, '0');
     
     -- Update the sequence table
-    UPDATE inv_inventory_batch_seq SET last_batch_number = @nextBatch;
+    UPDATE inv_inventory_batch_seq SET last_batch_number = @nextBatch WHERE TRUE;
     
     -- Validate quantity
     IF p_Quantity <= 0 THEN
@@ -84,7 +102,7 @@ BEGIN
             User, BatchNumber, Notes, ReceiveDate, LastUpdated
         ) VALUES (
             p_PartID, p_Location, p_Operation, p_Quantity, p_ItemType,
-            p_User, p_BatchNumber, p_Notes, NOW(), NOW()
+            p_User, v_NextBatchNumber, p_Notes, NOW(), NOW()
         );
         
         -- Insert transaction record for audit trail
@@ -92,12 +110,12 @@ BEGIN
             TransactionType, BatchNumber, PartID, FromLocation, ToLocation,
             Operation, Quantity, Notes, User, ItemType, ReceiveDate
         ) VALUES (
-            'IN', p_BatchNumber, p_PartID, p_Location, NULL,
+            'IN', v_NextBatchNumber, p_PartID, p_Location, NULL,
             p_Operation, p_Quantity, p_Notes, p_User, p_ItemType, NOW()
         );
         
         SET p_Status = 0;
-        SET p_ErrorMsg = CONCAT('New inventory batch created successfully for part: ', p_PartID, ' with batch: ', p_BatchNumber, ', quantity: ', p_Quantity);
+        SET p_ErrorMsg = CONCAT('New inventory batch created successfully for part: ', p_PartID, ' with batch: ', v_NextBatchNumber, ', quantity: ', p_Quantity);
         COMMIT;
     END IF;
 END $$
@@ -338,6 +356,7 @@ CREATE PROCEDURE inv_inventory_GetNextBatchNumber(
 )
 BEGIN
     DECLARE v_ErrorMessage TEXT DEFAULT '';
+    DECLARE v_NextBatchNumber VARCHAR(20) DEFAULT '0000000001';
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -347,8 +366,8 @@ BEGIN
         SET p_Status = -1;
         SET p_ErrorMsg = 'Database error occurred while generating next batch number';
         
-        -- Log error to log_error table
-        INSERT INTO log_error (
+        -- Log error to log_error table if it exists
+        INSERT IGNORE INTO log_error (
             User, Severity, ErrorType, ErrorMessage, StackTrace,
             ModuleName, MethodName, AdditionalInfo, MachineName,
             OSVersion, AppVersion, ErrorTime
@@ -362,8 +381,49 @@ BEGIN
         );
     END;
     
-    SELECT LPAD(COALESCE(MAX(CAST(BatchNumber AS UNSIGNED)), 0) + 1, 10, '0') as NextBatchNumber
+    -- ROBUST: Ensure the batch sequence table exists and is initialized
+    CREATE TABLE IF NOT EXISTS inv_inventory_batch_seq (
+        last_batch_number INT(11) NOT NULL DEFAULT 0,
+        created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    
+    -- ROBUST: Initialize sequence table if empty
+    INSERT IGNORE INTO inv_inventory_batch_seq (last_batch_number)
+    SELECT COALESCE(MAX(CAST(CASE 
+        WHEN BatchNumber IS NOT NULL AND BatchNumber REGEXP '^[0-9]+$' 
+        THEN BatchNumber 
+        ELSE '0' 
+    END AS UNSIGNED)), 0)
     FROM inv_inventory;
+    
+    -- ROBUST: Generate next batch number using fallback methods
+    SELECT LPAD(COALESCE(last_batch_number + 1, 1), 10, '0') INTO v_NextBatchNumber
+    FROM inv_inventory_batch_seq
+    LIMIT 1;
+    
+    -- ROBUST: If sequence table is still empty, use inventory table maximum
+    IF v_NextBatchNumber IS NULL OR v_NextBatchNumber = '0000000000' THEN
+        SELECT LPAD(COALESCE(MAX(CAST(CASE 
+            WHEN BatchNumber IS NOT NULL AND BatchNumber REGEXP '^[0-9]+$' 
+            THEN BatchNumber 
+            ELSE '0' 
+        END AS UNSIGNED)), 0) + 1, 10, '0') INTO v_NextBatchNumber
+        FROM inv_inventory;
+        
+        -- ROBUST: Final fallback to default starting batch number
+        IF v_NextBatchNumber IS NULL OR v_NextBatchNumber = '0000000000' THEN
+            SET v_NextBatchNumber = '0000000001';
+        END IF;
+    END IF;
+    
+    -- Update the sequence table for next time
+    UPDATE inv_inventory_batch_seq 
+    SET last_batch_number = CAST(v_NextBatchNumber AS UNSIGNED)
+    WHERE TRUE;
+    
+    -- Return the generated batch number
+    SELECT v_NextBatchNumber as NextBatchNumber;
     
     SET p_Status = 0;
     SET p_ErrorMsg = 'Next batch number generated successfully';
@@ -490,7 +550,7 @@ BEGIN
             CONCAT('inv_inventory_Get_ByPartID failed: ', v_ErrorMessage),
             v_ErrorMessage,
             'inv_inventory_Get_ByPartID', 'Get_ByPartID',
-            CONCAT('PartID: ', p_PartID),
+            'PartID: ', p_PartID,
             'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
         );
     END;
@@ -533,7 +593,7 @@ BEGIN
             CONCAT('inv_inventory_Get_ByPartIDAndOperation failed: ', v_ErrorMessage),
             v_ErrorMessage,
             'inv_inventory_Get_ByPartIDAndOperation', 'Get_ByPartIDAndOperation',
-            CONCAT('PartID: ', p_PartID, ', Operation: ', p_Operation),
+            'PartID: ', p_PartID, ', Operation: ', p_Operation,
             'Database Server', 'MySQL 5.7.24', '5.0.1.2', NOW()
         );
     END;

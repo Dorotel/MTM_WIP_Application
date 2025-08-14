@@ -191,7 +191,10 @@ public static class Dao_Inventory
                 useAsync
             );
 
-            await FixBatchNumbersAsync();
+            // FIXED: Do NOT call FixBatchNumbersAsync() after inventory additions
+            // This was causing unwanted consolidation of separate transactions into single rows
+            // FixBatchNumbers should only be called for maintenance operations, not regular transactions
+            // await FixBatchNumbersAsync();
 
             if (result.IsSuccess)
             {
@@ -353,7 +356,10 @@ public static class Dao_Inventory
                 true
             );
 
-            await FixBatchNumbersAsync();
+            // FIXED: Do NOT call FixBatchNumbersAsync() after transfer operations
+            // This was causing unwanted consolidation of separate transactions into single rows
+            // FixBatchNumbers should only be called for maintenance operations, not regular transactions
+            // await FixBatchNumbersAsync();
             
             if (result.IsSuccess)
             {
@@ -397,7 +403,10 @@ public static class Dao_Inventory
                 true
             );
 
-            await FixBatchNumbersAsync();
+            // FIXED: Do NOT call FixBatchNumbersAsync() after quantity transfer operations
+            // This was causing unwanted consolidation of separate transactions into single rows
+            // FixBatchNumbers should only be called for maintenance operations, not regular transactions
+            // await FixBatchNumbersAsync();
             
             if (result.IsSuccess)
             {
