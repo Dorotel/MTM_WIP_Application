@@ -25,6 +25,10 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private readonly bool _isAdmin;
         private ComboBox _transactionsComboBoxSearchPartId = new();
 
+        // Enhanced smart search functionality
+        private readonly Dictionary<string, string> _lastSearchCriteria = new();
+        private bool _isPaginationNavigation = false;
+
         #endregion
 
         #region Constructors
@@ -94,17 +98,28 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     ["PagingButtons"] = new[] { "Next", "Previous" },
                     ["PageSize"] = PageSize
                 });
-            // Paging logic
+            // Enhanced paging logic with smart search support
             Transfer_Button_Next.Click += async (s, e) =>
             {
                 Service_DebugTracer.TraceUIAction("NEXT_PAGE_CLICKED", nameof(Transactions),
                     new Dictionary<string, object>
                     {
                         ["CurrentPage"] = _currentPage,
-                        ["NextPage"] = _currentPage + 1
+                        ["NextPage"] = _currentPage + 1,
+                        ["HasSearchCriteria"] = _lastSearchCriteria.Count > 0
                     });
                 _currentPage++;
-                await LoadTransactionsAsync();
+                _isPaginationNavigation = true;
+                
+                // Continue with smart search if criteria exist
+                if (_lastSearchCriteria.Count > 0)
+                {
+                    await ExecuteSmartSearchAsync(_lastSearchCriteria);
+                }
+                else
+                {
+                    await LoadTransactionsAsync();
+                }
             };
             Transfer_Button_Previous.Click += async (s, e) =>
             {
@@ -112,12 +127,23 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     new Dictionary<string, object>
                     {
                         ["CurrentPage"] = _currentPage,
-                        ["CanGoBack"] = _currentPage > 1
+                        ["CanGoBack"] = _currentPage > 1,
+                        ["HasSearchCriteria"] = _lastSearchCriteria.Count > 0
                     });
                 if (_currentPage > 1)
                 {
                     _currentPage--;
-                    await LoadTransactionsAsync();
+                    _isPaginationNavigation = true;
+                    
+                    // Continue with smart search if criteria exist
+                    if (_lastSearchCriteria.Count > 0)
+                    {
+                        await ExecuteSmartSearchAsync(_lastSearchCriteria);
+                    }
+                    else
+                    {
+                        await LoadTransactionsAsync();
+                    }
                 }
             };
 
@@ -199,7 +225,32 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
         private void WireUpEvents()
         {
+            // Standard search functionality
             Transactions_Button_Search.Click += async (s, e) => await LoadTransactionsAsync();
+            
+            // Enhanced smart search functionality
+            if (Controls.ContainsKey("Transactions_Button_SmartSearch"))
+            {
+                Controls["Transactions_Button_SmartSearch"].Click += async (s, e) => await HandleSmartSearchAsync();
+            }
+
+            // Smart search with Enter key support
+            if (Controls.ContainsKey("Transactions_TextBox_SmartSearch"))
+            {
+                var smartSearchTextBox = Controls["Transactions_TextBox_SmartSearch"] as TextBox;
+                if (smartSearchTextBox != null)
+                {
+                    smartSearchTextBox.KeyDown += async (s, e) =>
+                    {
+                        if (e.KeyCode == Keys.Enter)
+                        {
+                            await HandleSmartSearchAsync();
+                            e.Handled = true;
+                        }
+                    };
+                }
+            }
+
             Transactions_DataGridView_Transactions.SelectionChanged +=
                 Transactions_DataGridView_Transactions_SelectionChanged;
             Control_AdvancedRemove_CheckBox_Date.CheckedChanged += (s, e) =>
@@ -215,6 +266,66 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_ComboBox_UserFullName.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
             Transactions_ComboBox_Building.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
             Transactions_EnableSearchButtonIfValid(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Handle smart search functionality with advanced syntax
+        /// </summary>
+        private async Task HandleSmartSearchAsync()
+        {
+            Service_DebugTracer.TraceUIAction("SMART_SEARCH_CLICKED", nameof(Transactions),
+                new Dictionary<string, object>
+                {
+                    ["HasSmartSearchBox"] = Controls.ContainsKey("Transactions_TextBox_SmartSearch"),
+                    ["CurrentPage"] = _currentPage
+                });
+
+            try
+            {
+                string searchText = "";
+                if (Controls.ContainsKey("Transactions_TextBox_SmartSearch"))
+                {
+                    searchText = (Controls["Transactions_TextBox_SmartSearch"] as TextBox)?.Text?.Trim() ?? "";
+                }
+
+                Service_DebugTracer.TraceUIAction("SMART_SEARCH_INPUT_PARSED", nameof(Transactions),
+                    new Dictionary<string, object>
+                    {
+                        ["SearchText"] = searchText,
+                        ["SearchLength"] = searchText.Length
+                    });
+
+                if (string.IsNullOrWhiteSpace(searchText))
+                {
+                    // If no smart search text, fall back to regular search
+                    await LoadTransactionsAsync();
+                    return;
+                }
+
+                // Reset to first page for new search
+                if (!_isPaginationNavigation)
+                {
+                    _currentPage = 1;
+                }
+                _isPaginationNavigation = false;
+
+                // Parse smart search syntax
+                var searchCriteria = ParseSmartSearchText(searchText);
+                
+                Service_DebugTracer.TraceBusinessLogic("SMART_SEARCH_CRITERIA_PARSED", nameof(Transactions),
+                    new Dictionary<string, object>
+                    {
+                        ["CriteriaCount"] = searchCriteria.Count,
+                        ["HasGeneralSearch"] = searchCriteria.ContainsKey("_general")
+                    });
+
+                await ExecuteSmartSearchAsync(searchCriteria);
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, "Transactions_HandleSmartSearchAsync");
+                UpdateSmartSearchStatus($"Search error: {ex.Message}");
+            }
         }
 
         private void Transactions_EnableSearchButtonIfValid(object? sender, EventArgs e)
@@ -242,11 +353,30 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
         private void Transactions_DataGridView_Transactions_SelectionChanged(object? sender, EventArgs e)
         {
+            Service_DebugTracer.TraceUIAction("SELECTION_CHANGED", nameof(Transactions),
+                new Dictionary<string, object>
+                {
+                    ["SelectedRowCount"] = Transactions_DataGridView_Transactions.SelectedRows.Count,
+                    ["TotalRowCount"] = Transactions_DataGridView_Transactions.Rows.Count
+                });
+
             if (Transactions_DataGridView_Transactions.SelectedRows.Count == 1)
             {
                 DataGridViewRow row = Transactions_DataGridView_Transactions.SelectedRows[0];
                 if (row.DataBoundItem is Model_Transactions tx)
                 {
+                    Service_DebugTracer.TraceBusinessLogic("TRANSACTION_SELECTION_REPORT_UPDATE", nameof(Transactions),
+                        new Dictionary<string, object>
+                        {
+                            ["TransactionID"] = tx.ID,
+                            ["BatchNumber"] = tx.BatchNumber ?? "",
+                            ["PartID"] = tx.PartID ?? "",
+                            ["TransactionType"] = tx.TransactionType ?? "",
+                            ["User"] = tx.User ?? ""
+                        });
+
+                    // Enhanced selection report with all transaction details
+                    Transactions_TextBox_Report_TransactionType.Text = tx.TransactionType ?? "";
                     Transactions_TextBox_Report_BatchNumber.Text = tx.BatchNumber ?? "";
                     Transactions_TextBox_Report_PartID.Text = tx.PartID ?? "";
                     Transactions_TextBox_Report_FromLocation.Text = tx.FromLocation ?? "";
@@ -257,16 +387,36 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     Transactions_TextBox_Report_User.Text = tx.User ?? "";
                     Transactions_TextBox_Report_ItemType.Text = tx.ItemType ?? "";
                     Transactions_TextBox_Report_ReceiveDate.Text = tx.DateTime.ToString("g");
+
+                    // Enable history and print buttons when a transaction is selected
+                    Transfer_Button_SelectionHistory.Enabled = true;
+                    Transactions_Button_Print.Enabled = true;
+
+                    Service_DebugTracer.TraceUIAction("TRANSACTION_DETAILS_POPULATED", nameof(Transactions),
+                        new Dictionary<string, object>
+                        {
+                            ["HistoryButtonEnabled"] = true,
+                            ["PrintButtonEnabled"] = true
+                        });
                 }
             }
             else
             {
-                Transactions_TextBox_Report_BatchNumber.Text = "";
-                Transactions_TextBox_Report_PartID.Text = "";
-                Transactions_TextBox_Report_FromLocation.Text = "";
-                Transactions_TextBox_Report_ToLocation.Text = "";
-                Transactions_TextBox_Report_Operation.Text = "";
-                Transactions_TextBox_Report_Quantity.Text = "";
+                // Clear selection report when no single row is selected
+                ClearSelectionReportControls();
+                
+                // Disable action buttons
+                Transfer_Button_SelectionHistory.Enabled = false;
+                Transactions_Button_Print.Enabled = false;
+
+                Service_DebugTracer.TraceUIAction("SELECTION_REPORT_CLEARED", nameof(Transactions),
+                    new Dictionary<string, object>
+                    {
+                        ["HistoryButtonEnabled"] = false,
+                        ["PrintButtonEnabled"] = false
+                    });
+            }
+        }
                 Transactions_TextBox_Notes.Text = "";
                 Transactions_TextBox_Report_User.Text = "";
                 Transactions_TextBox_Report_ItemType.Text = "";
@@ -536,13 +686,48 @@ namespace MTM_Inventory_Application.Forms.Transactions
 
         private void ResetFilters()
         {
+            Service_DebugTracer.TraceUIAction("RESET_FILTERS_INITIATED", nameof(Transactions),
+                new Dictionary<string, object>
+                {
+                    ["HasSearchCriteria"] = _lastSearchCriteria.Count > 0,
+                    ["CurrentPage"] = _currentPage
+                });
+
+            // Reset traditional filters
             Transactions_ComboBox_SortBy.SelectedIndex = 0;
             _transactionsComboBoxSearchPartId.SelectedIndex = 0;
             Transactions_ComboBox_UserFullName.SelectedIndex = 0;
             Transactions_ComboBox_Building.SelectedIndex = 0;
             Control_AdvancedRemove_CheckBox_Date.Checked = false;
             SetupDateRangeDefaults();
+            
+            // Reset smart search functionality
+            if (Controls.ContainsKey("Transactions_TextBox_SmartSearch"))
+            {
+                (Controls["Transactions_TextBox_SmartSearch"] as TextBox)!.Text = "";
+            }
+            
+            // Clear smart search criteria
+            _lastSearchCriteria.Clear();
+            _isPaginationNavigation = false;
             _currentPage = 1;
+            
+            // Clear selection report
+            ClearSelectionReportControls();
+            
+            // Clear data grid
+            Transactions_DataGridView_Transactions.DataSource = null;
+            
+            // Reset status
+            UpdateSmartSearchStatus("Filters reset - ready for new search");
+
+            Service_DebugTracer.TraceUIAction("RESET_FILTERS_COMPLETED", nameof(Transactions),
+                new Dictionary<string, object>
+                {
+                    ["SmartSearchCleared"] = true,
+                    ["TraditionalFiltersReset"] = true,
+                    ["PageReset"] = true
+                });
         }
 
         private void UpdatePagingButtons(int resultCount)
@@ -1322,6 +1507,354 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Transactions_TextBox_Report_ItemType.Text = "";
             Transactions_TextBox_Report_ReceiveDate.Text = "";
             Transactions_TextBox_Report_TransactionType.Text = "";
+        }
+
+        #endregion
+
+        #region Smart Search Methods
+
+        /// <summary>
+        /// Parse smart search text with advanced syntax support
+        /// Supports: partid:PART123, qty:>50, location:A1, user:JSMITH, batch:0000123
+        /// </summary>
+        /// <param name="searchText">Raw search input from user</param>
+        /// <returns>Dictionary of search criteria</returns>
+        private Dictionary<string, string> ParseSmartSearchText(string searchText)
+        {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["SearchText"] = searchText ?? "",
+                ["SearchLength"] = searchText?.Length ?? 0
+            }, nameof(Transactions), nameof(ParseSmartSearchText));
+
+            var criteria = new Dictionary<string, string>();
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                Service_DebugTracer.TraceMethodExit(criteria, nameof(Transactions), nameof(ParseSmartSearchText));
+                return criteria;
+            }
+
+            // Split by comma and space, handle quoted strings
+            var terms = SplitSearchTerms(searchText);
+            
+            foreach (string term in terms)
+            {
+                var cleanTerm = term.Trim();
+                if (string.IsNullOrEmpty(cleanTerm)) continue;
+
+                if (cleanTerm.Contains(':'))
+                {
+                    var parts = cleanTerm.Split(':', 2);
+                    if (parts.Length == 2)
+                    {
+                        var field = parts[0].Trim().ToLower();
+                        var value = parts[1].Trim().Trim('"', '\'');
+                        
+                        // Map field aliases to database columns
+                        string dbField = MapSearchFieldToColumn(field);
+                        criteria[dbField] = value;
+
+                        Service_DebugTracer.TraceBusinessLogic("SMART_SEARCH_FIELD_PARSED", nameof(Transactions),
+                            new Dictionary<string, object>
+                            {
+                                ["OriginalField"] = field,
+                                ["MappedField"] = dbField,
+                                ["Value"] = value
+                            });
+                    }
+                }
+                else if (cleanTerm.StartsWith('#'))
+                {
+                    // Handle hashtag searches for batch numbers
+                    criteria["BatchNumber"] = cleanTerm.Substring(1);
+                }
+                else
+                {
+                    // General search term
+                    criteria["_general"] = cleanTerm;
+                }
+            }
+
+            Service_DebugTracer.TraceMethodExit(criteria, nameof(Transactions), nameof(ParseSmartSearchText));
+            return criteria;
+        }
+
+        /// <summary>
+        /// Split search terms handling quoted strings properly
+        /// </summary>
+        private List<string> SplitSearchTerms(string searchText)
+        {
+            var terms = new List<string>();
+            var currentTerm = new StringBuilder();
+            bool inQuotes = false;
+            char quoteChar = '\0';
+
+            foreach (char c in searchText)
+            {
+                if (!inQuotes && (c == '"' || c == '\''))
+                {
+                    inQuotes = true;
+                    quoteChar = c;
+                    currentTerm.Append(c);
+                }
+                else if (inQuotes && c == quoteChar)
+                {
+                    inQuotes = false;
+                    currentTerm.Append(c);
+                }
+                else if (!inQuotes && (c == ',' || c == ' '))
+                {
+                    if (currentTerm.Length > 0)
+                    {
+                        terms.Add(currentTerm.ToString());
+                        currentTerm.Clear();
+                    }
+                }
+                else
+                {
+                    currentTerm.Append(c);
+                }
+            }
+
+            if (currentTerm.Length > 0)
+            {
+                terms.Add(currentTerm.ToString());
+            }
+
+            return terms;
+        }
+
+        /// <summary>
+        /// Map search field names to database column names
+        /// </summary>
+        private string MapSearchFieldToColumn(string field)
+        {
+            return field switch
+            {
+                "partid" or "part" => "PartID",
+                "user" => "User", 
+                "location" or "fromlocation" or "from" => "FromLocation",
+                "tolocation" or "to" => "ToLocation",
+                "operation" or "op" => "Operation",
+                "quantity" or "qty" => "Quantity",
+                "batch" or "batchnumber" => "BatchNumber",
+                "type" or "transactiontype" => "TransactionType",
+                "itemtype" => "ItemType",
+                "notes" => "Notes",
+                "date" or "receivedate" => "ReceiveDate",
+                _ => field // Return as-is if no mapping found
+            };
+        }
+
+        /// <summary>
+        /// Execute smart search with parsed criteria
+        /// </summary>
+        private async Task ExecuteSmartSearchAsync(Dictionary<string, string> criteria)
+        {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["CriteriaCount"] = criteria.Count,
+                ["Criteria"] = criteria
+            }, nameof(Transactions), nameof(ExecuteSmartSearchAsync));
+
+            try
+            {
+                _lastSearchCriteria.Clear();
+                foreach (var kvp in criteria)
+                {
+                    _lastSearchCriteria[kvp.Key] = kvp.Value;
+                }
+
+                var searchResult = await PerformSmartDatabaseSearch(criteria);
+                
+                if (searchResult.success)
+                {
+                    await DisplaySearchResultsAsync(searchResult.results);
+                    UpdateSmartSearchStatus($"Found {searchResult.results.Rows.Count} results");
+                }
+                else
+                {
+                    Service_ErrorHandler.HandleException(
+                        new Exception($"Smart search failed: {searchResult.error}"),
+                        ErrorSeverity.Medium,
+                        "Transactions_SmartSearch"
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, "Transactions_ExecuteSmartSearchAsync");
+            }
+            finally
+            {
+                Service_DebugTracer.TraceMethodExit(null, nameof(Transactions), nameof(ExecuteSmartSearchAsync));
+            }
+        }
+
+        /// <summary>
+        /// Perform database search with smart criteria
+        /// </summary>
+        private async Task<(bool success, DataTable results, string error)> PerformSmartDatabaseSearch(Dictionary<string, string> criteria)
+        {
+            var queryBuilder = new StringBuilder();
+            var parameters = new List<MySqlParameter>();
+
+            queryBuilder.Append("SELECT * FROM inv_transaction WHERE 1=1 ");
+
+            foreach (var kvp in criteria)
+            {
+                if (kvp.Key == "_general")
+                {
+                    // General search across multiple fields
+                    queryBuilder.Append("AND (PartID LIKE @General OR User LIKE @General OR FromLocation LIKE @General OR ToLocation LIKE @General OR Notes LIKE @General) ");
+                    parameters.Add(new MySqlParameter("@General", $"%{kvp.Value}%"));
+                }
+                else if (kvp.Value.StartsWith('>'))
+                {
+                    // Greater than search
+                    queryBuilder.Append($"AND {kvp.Key} > @{kvp.Key} ");
+                    if (decimal.TryParse(kvp.Value.Substring(1), out decimal val))
+                        parameters.Add(new MySqlParameter($"@{kvp.Key}", val));
+                }
+                else if (kvp.Value.StartsWith('<'))
+                {
+                    // Less than search
+                    queryBuilder.Append($"AND {kvp.Key} < @{kvp.Key} ");
+                    if (decimal.TryParse(kvp.Value.Substring(1), out decimal val))
+                        parameters.Add(new MySqlParameter($"@{kvp.Key}", val));
+                }
+                else
+                {
+                    // Exact match or LIKE search
+                    if (kvp.Value.Contains('*') || kvp.Value.Contains('%'))
+                    {
+                        queryBuilder.Append($"AND {kvp.Key} LIKE @{kvp.Key} ");
+                        parameters.Add(new MySqlParameter($"@{kvp.Key}", kvp.Value.Replace('*', '%')));
+                    }
+                    else
+                    {
+                        queryBuilder.Append($"AND {kvp.Key} = @{kvp.Key} ");
+                        parameters.Add(new MySqlParameter($"@{kvp.Key}", kvp.Value));
+                    }
+                }
+            }
+
+            // Add pagination
+            queryBuilder.Append($"ORDER BY ID DESC LIMIT {PageSize} OFFSET {(_currentPage - 1) * PageSize}");
+
+            try
+            {
+                using var connection = new MySqlConnection(Model_Users.Database);
+                await connection.OpenAsync();
+                
+                using var command = new MySqlCommand(queryBuilder.ToString(), connection);
+                command.Parameters.AddRange(parameters.ToArray());
+
+                Service_DebugTracer.TraceDataAccess("SMART_SEARCH_QUERY_EXECUTION", nameof(Transactions),
+                    new Dictionary<string, object>
+                    {
+                        ["Query"] = queryBuilder.ToString(),
+                        ["ParameterCount"] = parameters.Count,
+                        ["Page"] = _currentPage,
+                        ["PageSize"] = PageSize
+                    });
+
+                using var adapter = new MySql.Data.MySqlClient.MySqlDataAdapter(command);
+                var results = new DataTable();
+                adapter.Fill(results);
+
+                return (true, results, "");
+            }
+            catch (Exception ex)
+            {
+                return (false, new DataTable(), ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Display search results with enhanced formatting
+        /// </summary>
+        private async Task DisplaySearchResultsAsync(DataTable results)
+        {
+            await Task.Run(() =>
+            {
+                if (InvokeRequired)
+                {
+                    Invoke(() => DisplaySearchResults(results));
+                }
+                else
+                {
+                    DisplaySearchResults(results);
+                }
+            });
+        }
+
+        /// <summary>
+        /// Display search results in DataGridView
+        /// </summary>
+        private void DisplaySearchResults(DataTable results)
+        {
+            try
+            {
+                Transactions_DataGridView_Transactions.DataSource = results;
+                
+                // Update status
+                if (results.Rows.Count == 0)
+                {
+                    UpdateSmartSearchStatus("No results found");
+                }
+                else
+                {
+                    UpdateSmartSearchStatus($"Showing {results.Rows.Count} results (Page {_currentPage})");
+                }
+
+                // Enable/disable pagination buttons
+                UpdatePaginationControls(results.Rows.Count);
+                
+                Service_DebugTracer.TraceUIAction("SEARCH_RESULTS_DISPLAYED", nameof(Transactions),
+                    new Dictionary<string, object>
+                    {
+                        ["ResultCount"] = results.Rows.Count,
+                        ["CurrentPage"] = _currentPage
+                    });
+            }
+            catch (Exception ex)
+            {
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, "Transactions_DisplaySearchResults");
+            }
+        }
+
+        /// <summary>
+        /// Update smart search status message
+        /// </summary>
+        private void UpdateSmartSearchStatus(string message)
+        {
+            if (Controls.ContainsKey("Transactions_Label_SmartSearchStatus"))
+            {
+                if (Controls["Transactions_Label_SmartSearchStatus"] is Label statusLabel)
+                {
+                    statusLabel.Text = message;
+                    statusLabel.ForeColor = message.Contains("error") ? Color.Red : Color.Green;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Update pagination control states
+        /// </summary>
+        private void UpdatePaginationControls(int resultCount)
+        {
+            // Enable Previous button if not on first page
+            if (Controls.ContainsKey("Transfer_Button_Previous"))
+            {
+                Controls["Transfer_Button_Previous"].Enabled = _currentPage > 1;
+            }
+
+            // Enable Next button if we got a full page of results
+            if (Controls.ContainsKey("Transfer_Button_Next"))
+            {
+                Controls["Transfer_Button_Next"].Enabled = resultCount == PageSize;
+            }
         }
 
         #endregion

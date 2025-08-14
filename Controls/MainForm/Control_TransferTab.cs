@@ -26,10 +26,6 @@ namespace MTM_Inventory_Application.Controls.MainForm
         // Cache ToolTip to avoid repeated instantiation
         private static readonly ToolTip SharedToolTip = new();
         private Helper_StoredProcedureProgress? _progressHelper;
-        
-        // Enhanced functionality fields
-        private int _currentPage = 1;
-        private const int PageSize = 20;
 
         #endregion
 
@@ -63,8 +59,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 new Dictionary<string, object>
                 {
                     ["Phase"] = "START",
-                    ["ComponentType"] = "UserControl",
-                    ["DesignType"] = "REDESIGNED_MODERN_LAYOUT"
+                    ["ComponentType"] = "UserControl"
                 });
 
             InitializeComponent();
@@ -77,21 +72,21 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
             Control_TransferTab_Initialize();
             ApplyPrivileges();
-            InitializeNewControls();
-            SetupEnhancedEventHandlers();
-
             Color errorColor = Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             Control_TransferTab_ComboBox_Part.ForeColor = errorColor;
             Control_TransferTab_ComboBox_Operation.ForeColor = errorColor;
             Control_TransferTab_ComboBox_ToLocation.ForeColor = errorColor;
             Control_TransferTab_Image_NothingFound.Visible = false;
 
-            // Use cached ToolTip for enhanced UI
-            SharedToolTip.SetToolTip(Control_TransferTab_Button_Search, "Search inventory items for transfer");
-            SharedToolTip.SetToolTip(Control_TransferTab_Button_Transfer, "Execute transfer operation");
-            SharedToolTip.SetToolTip(Control_TransferTab_Button_Reset, "Reset all fields and clear results");
-            SharedToolTip.SetToolTip(Control_TransferTab_Button_SidePanel, "Toggle side panel visibility");
-            SharedToolTip.SetToolTip(Control_TransferTab_Button_SmartSearch, "Advanced search with field-specific syntax");
+            // Use cached ToolTip
+            SharedToolTip.SetToolTip(Control_TransferTab_Button_Search,
+                $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Search)}");
+            SharedToolTip.SetToolTip(Control_TransferTab_Button_Transfer,
+                $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Transfer)}");
+            SharedToolTip.SetToolTip(Control_TransferTab_Button_Reset,
+                $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_Reset)}");
+            SharedToolTip.SetToolTip(Control_TransferTab_Button_Toggle_RightPanel,
+                $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Left)}/{Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Transfer_ToggleRightPanel_Right)}");
 
             // Setup Print button event and tooltip directly
             Control_TransferTab_Button_Print.Click -= Control_TransferTab_Button_Print_Click;
@@ -104,343 +99,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         #endregion
 
-        #region Enhanced Event Handlers
-
-        /// <summary>
-        /// Handle smart search functionality with advanced syntax
-        /// </summary>
-        private async void Control_TransferTab_Button_SmartSearch_Click(object? sender, EventArgs? e)
-        {
-            Service_DebugTracer.TraceUIAction("SMART_SEARCH_CLICKED", nameof(Control_TransferTab),
-                new Dictionary<string, object>
-                {
-                    ["SearchText"] = Control_TransferTab_TextBox_SmartSearch.Text ?? "",
-                    ["SearchLength"] = Control_TransferTab_TextBox_SmartSearch.Text?.Length ?? 0
-                });
-
-            try
-            {
-                _progressHelper?.ShowProgress();
-                _progressHelper?.UpdateProgress(10, "Processing smart search...");
-
-                string searchText = Control_TransferTab_TextBox_SmartSearch.Text?.Trim() ?? "";
-                
-                if (string.IsNullOrWhiteSpace(searchText))
-                {
-                    // If no smart search text, fall back to regular search
-                    Control_TransferTab_Button_Search_Click(sender, e);
-                    return;
-                }
-
-                // Parse smart search syntax
-                var searchCriteria = ParseSmartSearchText(searchText);
-                await ExecuteSmartSearchAsync(searchCriteria);
-
-                _progressHelper?.UpdateProgress(100, "Smart search complete");
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
-                    controlName: "Control_TransferTab_SmartSearch");
-            }
-            finally
-            {
-                _progressHelper?.HideProgress();
-            }
-        }
-
-        /// <summary>
-        /// Toggle the side panel visibility
-        /// </summary>
-        private void Control_TransferTab_Button_SidePanel_Click(object? sender, EventArgs? e)
-        {
-            Service_DebugTracer.TraceUIAction("SIDE_PANEL_TOGGLE", nameof(Control_TransferTab),
-                new Dictionary<string, object>
-                {
-                    ["CurrentCollapsed"] = Control_TransferTab_SplitContainer_Main.Panel1Collapsed,
-                    ["Action"] = Control_TransferTab_SplitContainer_Main.Panel1Collapsed ? "EXPAND" : "COLLAPSE"
-                });
-
-            bool isCollapsed = Control_TransferTab_SplitContainer_Main.Panel1Collapsed;
-            Control_TransferTab_SplitContainer_Main.Panel1Collapsed = !isCollapsed;
-            
-            Control_TransferTab_Button_SidePanel.Text = isCollapsed ? "Hide Panel ⬅️" : "Show Panel ➡️";
-        }
-
-        /// <summary>
-        /// Show transfer history dialog
-        /// </summary>
-        private void Control_TransferTab_Button_SelectionHistory_Click(object? sender, EventArgs? e)
-        {
-            Service_DebugTracer.TraceUIAction("SELECTION_HISTORY_CLICKED", nameof(Control_TransferTab), new Dictionary<string, object>());
-            
-            try
-            {
-                // Open transfer history form - this would be implemented based on your history system
-                Service_ErrorHandler.ShowInformation(
-                    "Transfer History", 
-                    "Transfer history functionality will be implemented here.",
-                    controlName: "Control_TransferTab_History"
-                );
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, 
-                    controlName: "Control_TransferTab_History");
-            }
-        }
-
-        /// <summary>
-        /// Navigate to previous page
-        /// </summary>
-        private void Control_TransferTab_Button_Previous_Click(object? sender, EventArgs? e)
-        {
-            Service_DebugTracer.TraceUIAction("PREVIOUS_PAGE_CLICKED", nameof(Control_TransferTab), 
-                new Dictionary<string, object> { ["CurrentPage"] = _currentPage });
-            // Pagination logic would be implemented here
-        }
-
-        /// <summary>
-        /// Navigate to next page
-        /// </summary>
-        private void Control_TransferTab_Button_Next_Click(object? sender, EventArgs? e)
-        {
-            Service_DebugTracer.TraceUIAction("NEXT_PAGE_CLICKED", nameof(Control_TransferTab), 
-                new Dictionary<string, object> { ["CurrentPage"] = _currentPage });
-            // Pagination logic would be implemented here
-        }
-
-        /// <summary>
-        /// Update selection report when DataGridView selection changes
-        /// </summary>
-        private void Control_TransferTab_DataGridView_SelectionReport_Changed(object? sender, EventArgs? e)
-        {
-            try
-            {
-                if (Control_TransferTab_DataGridView_Main.SelectedRows.Count == 1)
-                {
-                    DataGridViewRow row = Control_TransferTab_DataGridView_Main.SelectedRows[0];
-                    if (row.DataBoundItem is DataRowView drv)
-                    {
-                        Service_DebugTracer.TraceUIAction("SELECTION_REPORT_UPDATE", nameof(Control_TransferTab),
-                            new Dictionary<string, object>
-                            {
-                                ["PartID"] = drv["PartID"]?.ToString() ?? "",
-                                ["Location"] = drv["Location"]?.ToString() ?? "",
-                                ["Quantity"] = drv["Quantity"]?.ToString() ?? ""
-                            });
-
-                        // Populate selection report
-                        Control_TransferTab_TextBox_Report_PartID.Text = drv["PartID"]?.ToString() ?? "";
-                        Control_TransferTab_TextBox_Report_Operation.Text = drv["Operation"]?.ToString() ?? "";
-                        Control_TransferTab_TextBox_Report_FromLocation.Text = drv["Location"]?.ToString() ?? "";
-                        Control_TransferTab_TextBox_Report_ToLocation.Text = Control_TransferTab_ComboBox_ToLocation.Text;
-                        Control_TransferTab_TextBox_Report_Quantity.Text = drv["Quantity"]?.ToString() ?? "";
-                        Control_TransferTab_TextBox_Report_BatchNumber.Text = drv["BatchNumber"]?.ToString() ?? "";
-                    }
-                }
-                else
-                {
-                    ClearSelectionReport();
-                }
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, 
-                    controlName: "Control_TransferTab_SelectionReport");
-            }
-        }
-
-        #endregion
-
-        #region Smart Search Processing
-
-        /// <summary>
-        /// Parse smart search text into search criteria
-        /// </summary>
-        private Dictionary<string, string> ParseSmartSearchText(string searchText)
-        {
-            var criteria = new Dictionary<string, string>();
-            
-            // Support syntax like: partid:PART123, qty:>50, location:A1
-            var terms = searchText.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            
-            foreach (string term in terms)
-            {
-                if (term.Contains(':'))
-                {
-                    var parts = term.Split(':', 2);
-                    if (parts.Length == 2)
-                    {
-                        string key = parts[0].Trim().ToLower();
-                        string value = parts[1].Trim();
-                        criteria[key] = value;
-                    }
-                }
-                else
-                {
-                    // Default search in part ID or general search
-                    criteria["general"] = term.Trim();
-                }
-            }
-
-            return criteria;
-        }
-
-        /// <summary>
-        /// Execute smart search with parsed criteria
-        /// </summary>
-        private async Task ExecuteSmartSearchAsync(Dictionary<string, string> criteria)
-        {
-            Service_DebugTracer.TraceBusinessLogic("SMART_SEARCH_EXECUTION",
-                inputData: criteria,
-                outputData: new { CriteriaCount = criteria.Count });
-
-            try
-            {
-                _progressHelper?.UpdateProgress(40, "Executing search query...");
-
-                // Build search parameters based on criteria
-                string partId = "";
-                string operation = "";
-                string location = "";
-                
-                if (criteria.ContainsKey("partid") || criteria.ContainsKey("part"))
-                {
-                    partId = criteria.ContainsKey("partid") ? criteria["partid"] : criteria["part"];
-                }
-                else if (criteria.ContainsKey("general"))
-                {
-                    partId = criteria["general"];
-                }
-                else if (!string.IsNullOrWhiteSpace(Control_TransferTab_ComboBox_Part.Text) && 
-                         Control_TransferTab_ComboBox_Part.SelectedIndex > 0)
-                {
-                    partId = Control_TransferTab_ComboBox_Part.Text;
-                }
-
-                if (criteria.ContainsKey("operation") || criteria.ContainsKey("op"))
-                {
-                    operation = criteria.ContainsKey("operation") ? criteria["operation"] : criteria["op"];
-                }
-                else if (Control_TransferTab_ComboBox_Operation.SelectedIndex > 0)
-                {
-                    operation = Control_TransferTab_ComboBox_Operation.Text;
-                }
-
-                if (criteria.ContainsKey("location") || criteria.ContainsKey("loc"))
-                {
-                    location = criteria.ContainsKey("location") ? criteria["location"] : criteria["loc"];
-                }
-                else if (Control_TransferTab_ComboBox_FromLocation.SelectedIndex > 0)
-                {
-                    location = Control_TransferTab_ComboBox_FromLocation.Text;
-                }
-
-                DataTable results;
-                if (!string.IsNullOrWhiteSpace(partId))
-                {
-                    if (!string.IsNullOrWhiteSpace(operation))
-                    {
-                        results = await Dao_Inventory.GetInventoryByPartIdAndOperationAsync(partId, operation, true);
-                    }
-                    else
-                    {
-                        results = await Dao_Inventory.GetInventoryByPartIdAsync(partId, true);
-                    }
-                }
-                else
-                {
-                    // General search without specific part
-                    results = new DataTable(); // This would be enhanced with more general search capabilities
-                }
-
-                _progressHelper?.UpdateProgress(70, "Applying filters and displaying results...");
-                
-                // Apply additional filters if needed (location, quantity, etc.)
-                if (!string.IsNullOrWhiteSpace(location) && results.Rows.Count > 0)
-                {
-                    var filteredRows = results.AsEnumerable()
-                        .Where(row => row.Field<string>("Location")?.ToLower().Contains(location.ToLower()) == true);
-                    
-                    if (filteredRows.Any())
-                    {
-                        results = filteredRows.CopyToDataTable();
-                    }
-                    else
-                    {
-                        results.Clear();
-                    }
-                }
-
-                await DisplaySearchResultsAsync(results);
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
-                    controlName: "Control_TransferTab_SmartSearchExecution");
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Display search results in the DataGridView
-        /// </summary>
-        private async Task DisplaySearchResultsAsync(DataTable results)
-        {
-            await Task.Run(() =>
-            {
-                this.Invoke((Action)(() =>
-                {
-                    DataGridView dgv = Control_TransferTab_DataGridView_Main;
-                    dgv.SuspendLayout();
-                    dgv.DataSource = results;
-
-                    // Show only relevant columns in proper order
-                    string[] columnsToShowArr = { "Location", "PartID", "Operation", "Quantity", "BatchNumber", "Notes" };
-                    HashSet<string> columnsToShow = new(columnsToShowArr);
-                    
-                    foreach (DataGridViewColumn column in dgv.Columns)
-                    {
-                        column.Visible = columnsToShow.Contains(column.Name);
-                    }
-
-                    // Reorder columns
-                    for (int i = 0; i < columnsToShowArr.Length; i++)
-                    {
-                        string colName = columnsToShowArr[i];
-                        if (dgv.Columns.Contains(colName) && dgv.Columns[colName].DisplayIndex != i)
-                        {
-                            dgv.Columns[colName].DisplayIndex = i;
-                        }
-                    }
-
-                    Control_TransferTab_Image_NothingFound.Visible = results.Rows.Count == 0;
-                    
-                    if (results.Rows.Count > 0)
-                    {
-                        Core_Themes.ApplyThemeToDataGridView(dgv);
-                        Core_Themes.SizeDataGrid(dgv);
-                        
-                        if (dgv.Rows.Count > 0)
-                        {
-                            dgv.ClearSelection();
-                            dgv.Rows[0].Selected = true;
-                        }
-                    }
-
-                    dgv.ResumeLayout();
-                }));
-            });
-        }
-
-        #endregion
-
         #region Methods
 
         public void Control_TransferTab_Initialize()
         {
             Control_TransferTab_Button_Reset.TabStop = false;
+
             Core_Themes.ApplyFocusHighlighting(this);
         }
 
@@ -1313,63 +977,60 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
         }
 
+        private void Control_TransferTab_Button_Toggle_RightPanel_Click(object sender, EventArgs e)
+        {
+            if (MainFormInstance != null)
+            {
+                bool panelCollapsed = MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed;
+                MainFormInstance.MainForm_SplitContainer_Middle.Panel2Collapsed = !panelCollapsed;
+                Control_TransferTab_Button_Toggle_RightPanel.Text = panelCollapsed ? "➡️" : "⬅️";
+                Control_TransferTab_Button_Toggle_RightPanel.ForeColor = panelCollapsed
+                    ? Model_AppVariables.UserUiColors.SuccessColor ?? Color.Green
+                    : Model_AppVariables.UserUiColors.ErrorColor ?? Color.Red;
+            }
+
+            Helper_UI_ComboBoxes.DeselectAllComboBoxText(this);
+        }
+
+        #endregion
+
         #region Privileges
 
-        /// <summary>
-        /// Apply user privileges to the enhanced transfer interface
-        /// </summary>
         private void ApplyPrivileges()
         {
             bool isAdmin = Model_AppVariables.UserTypeAdmin;
             bool isNormal = Model_AppVariables.UserTypeNormal;
             bool isReadOnly = Model_AppVariables.UserTypeReadOnly;
 
-            Service_DebugTracer.TraceBusinessLogic("USER_PRIVILEGE_APPLICATION",
-                inputData: new { isAdmin, isNormal, isReadOnly },
-                outputData: new { ControlsConfigured = "Transfer Tab Enhanced UI" });
-
-            // Input Controls
+            // ComboBoxes
             Control_TransferTab_ComboBox_Part.Enabled = isAdmin || isNormal || isReadOnly;
             Control_TransferTab_ComboBox_Operation.Enabled = isAdmin || isNormal || isReadOnly;
-            Control_TransferTab_ComboBox_FromLocation.Enabled = isAdmin || isNormal || isReadOnly;
             Control_TransferTab_ComboBox_ToLocation.Enabled = isAdmin || isNormal || isReadOnly;
-            Control_TransferTab_ComboBox_SortBy.Enabled = isAdmin || isNormal || isReadOnly;
-            
-            // Smart Search
-            Control_TransferTab_TextBox_SmartSearch.Enabled = isAdmin || isNormal || isReadOnly;
-            Control_TransferTab_Button_SmartSearch.Enabled = isAdmin || isNormal || isReadOnly;
-            
             // NumericUpDown
             Control_TransferTab_NumericUpDown_Quantity.ReadOnly = isReadOnly;
             Control_TransferTab_NumericUpDown_Quantity.Enabled = isAdmin || isNormal || isReadOnly;
-            
             // DataGridView
             Control_TransferTab_DataGridView_Main.ReadOnly = isReadOnly;
             Control_TransferTab_DataGridView_Main.Enabled = isAdmin || isNormal || isReadOnly;
-            
-            // Action Buttons - Main operations
+            // Buttons
             Control_TransferTab_Button_Transfer.Visible = isAdmin || isNormal;
             Control_TransferTab_Button_Transfer.Enabled = isAdmin || isNormal;
-            
-            // Utility Buttons - Always available
             Control_TransferTab_Button_Reset.Visible = true;
             Control_TransferTab_Button_Reset.Enabled = true;
             Control_TransferTab_Button_Search.Visible = true;
             Control_TransferTab_Button_Search.Enabled = true;
-            Control_TransferTab_Button_Print.Enabled = isAdmin || isNormal || isReadOnly;
-            
-            // Interface Controls
-            Control_TransferTab_Button_SidePanel.Enabled = true;
-            Control_TransferTab_Button_SelectionHistory.Enabled = isAdmin || isNormal || isReadOnly;
-            Control_TransferTab_Button_Previous.Enabled = isAdmin || isNormal || isReadOnly;
-            Control_TransferTab_Button_Next.Enabled = isAdmin || isNormal || isReadOnly;
+            Control_TransferTab_Button_Toggle_RightPanel.Visible = true;
+            Control_TransferTab_Button_Toggle_RightPanel.Enabled = true;
+            // Panels, labels, images, etc. are always visible
+            // If you add more, follow the same pattern
 
-            // For Read-Only users, hide transfer capability
+            // For Read-Only, hide Transfer button
             if (isReadOnly)
             {
                 Control_TransferTab_Button_Transfer.Visible = false;
                 Control_TransferTab_Button_Transfer.Enabled = false;
             }
+            // TODO: If there are TreeView branches, set their .Visible property here as well.
         }
 
         #endregion
@@ -1384,66 +1045,26 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         #endregion
 
-        #region Cleanup
-
-        /// <summary>
-        /// Update button states based on current selection and input
-        /// </summary>
-        private void Control_TransferTab_Update_ButtonStates()
+        private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
         {
-            try
-            {
-                Control_TransferTab_Button_Search.Enabled = Control_TransferTab_ComboBox_Part.SelectedIndex > 0 ||
-                                                          !string.IsNullOrWhiteSpace(Control_TransferTab_TextBox_SmartSearch.Text);
-                bool hasData = Control_TransferTab_DataGridView_Main.Rows.Count > 0;
-                bool hasSelection = Control_TransferTab_DataGridView_Main.SelectedRows.Count > 0;
-                bool hasToLocation = Control_TransferTab_ComboBox_ToLocation.SelectedIndex > 0 &&
-                                     !string.IsNullOrWhiteSpace(Control_TransferTab_ComboBox_ToLocation.Text);
-                bool hasPart = Control_TransferTab_ComboBox_Part.SelectedIndex > 0;
-                bool hasQuantity = Control_TransferTab_NumericUpDown_Quantity.Value > 0;
-
-                Control_TransferTab_ComboBox_ToLocation.Enabled = hasData;
-                Control_TransferTab_NumericUpDown_Quantity.Enabled =
-                    hasData && Control_TransferTab_DataGridView_Main.SelectedRows.Count <= 1;
-
-                bool toLocationIsSameAsRow = false;
-                if (hasSelection && hasToLocation)
-                {
-                    foreach (DataGridViewRow row in Control_TransferTab_DataGridView_Main.SelectedRows)
-                    {
-                        if (row.DataBoundItem is DataRowView drv)
-                        {
-                            string rowLocation = drv["Location"]?.ToString() ?? string.Empty;
-                            if (string.Equals(rowLocation, Control_TransferTab_ComboBox_ToLocation.Text,
-                                    StringComparison.OrdinalIgnoreCase))
-                            {
-                                toLocationIsSameAsRow = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                Control_TransferTab_Button_Transfer.Enabled =
-                    hasData && hasSelection && hasToLocation && hasQuantity && !toLocationIsSameAsRow;
-                
-                // Smart search button
-                Control_TransferTab_Button_SmartSearch.Enabled = !string.IsNullOrWhiteSpace(Control_TransferTab_TextBox_SmartSearch.Text) ||
-                                                               Control_TransferTab_ComboBox_Part.SelectedIndex > 0;
-                
-                // Print and history buttons
-                if (Control_TransferTab_Button_Print != null)
-                    Control_TransferTab_Button_Print.Enabled = hasData;
-                Control_TransferTab_Button_SelectionHistory.Enabled = true; // Always enabled
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, 
-                    controlName: "Control_TransferTab_Update_ButtonStates");
-            }
         }
 
-        #endregion
+        private void Control_TransferTab_Button_Toggle_Split_Click(object sender, EventArgs e)
+        {
+            SplitContainer? splitContainer = Control_TransferTab_SplitContainer_Main;
+            Button? button = sender as Button ?? Control_TransferTab_Button_Toggle_Split;
+
+            if (splitContainer.Panel1Collapsed)
+            {
+                splitContainer.Panel1Collapsed = false;
+                button.Text = "Collapse ⬅️";
+            }
+            else
+            {
+                splitContainer.Panel1Collapsed = true;
+                button.Text = "Expand ➡️";
+            }
+        }
     }
 
     #endregion
