@@ -3,7 +3,6 @@ using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using System.Data;
-using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Data;
 
@@ -59,7 +58,7 @@ internal class Dao_Transactions
         {
             var parameters = new Dictionary<string, object>
             {
-                ["UserName"] = userName ?? "",                           // p_ prefix added automatically
+                ["UserName"] = userName ?? "",
                 ["IsAdmin"] = isAdmin,
                 ["PartID"] = partID ?? "",
                 ["BatchNumber"] = batchNumber ?? "",
@@ -78,22 +77,33 @@ internal class Dao_Transactions
                 ["PageSize"] = pageSize
             };
 
-            // MIGRATED: Use Helper_Database_StoredProcedure.ExecuteReader for better integration
-            using var reader = await Helper_Database_StoredProcedure.ExecuteReader(
+            // Use Helper_Database_StoredProcedure.ExecuteDataTableWithStatus for proper status handling
+            var result = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
                 Model_AppVariables.ConnectionString,
-                "inv_transactions_Search", 
-                parameters, 
-                true, 
-                CommandType.StoredProcedure);
+                "inv_transactions_Search",
+                parameters,
+                null, // No progress helper for this method
+                true // Use async
+            );
+
+            if (!result.IsSuccess)
+            {
+                return DaoResult<List<Model_Transactions>>.Failure(
+                    result.ErrorMessage ?? "Failed to search transactions"
+                );
+            }
 
             var transactions = new List<Model_Transactions>();
-            while (reader.Read())
+            if (result.Data != null)
             {
-                transactions.Add(MapTransaction(reader));
+                foreach (DataRow row in result.Data.Rows)
+                {
+                    transactions.Add(MapTransactionFromDataRow(row));
+                }
             }
 
             return DaoResult<List<Model_Transactions>>.Success(
-                transactions, 
+                transactions,
                 $"Retrieved {transactions.Count} transactions for search criteria"
             );
         }
@@ -148,13 +158,12 @@ internal class Dao_Transactions
         int pageSize = 20
     )
     {
-        // Synchronous wrapper for backward compatibility
         try
         {
-            var result = SearchTransactionsAsync(userName, isAdmin, partID, batchNumber, fromLocation, 
-                toLocation, operation, transactionType, quantity, notes, itemType, fromDate, toDate, 
+            var result = SearchTransactionsAsync(userName, isAdmin, partID, batchNumber, fromLocation,
+                toLocation, operation, transactionType, quantity, notes, itemType, fromDate, toDate,
                 sortColumn, sortDescending, page, pageSize).GetAwaiter().GetResult();
-            
+
             return result;
         }
         catch (Exception ex)
@@ -172,7 +181,7 @@ internal class Dao_Transactions
     #region Smart Search Methods
 
     /// <summary>
-    /// Advanced smart search for transactions with intelligent parsing
+    /// Advanced smart search for transactions with intelligent parsing using string builder approach
     /// </summary>
     /// <param name="searchTerms">Parsed search terms from user input</param>
     /// <param name="transactionTypes">Selected transaction types filter</param>
@@ -196,67 +205,166 @@ internal class Dao_Transactions
     {
         try
         {
-            // Build parameters from parsed search terms
+            // DEBUG: Show what the DAO received
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] === DAO SmartSearchAsync Called ===");
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Received parameters:");
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] - userName: '{userName}'");
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] - isAdmin: {isAdmin}");
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] - searchTerms count: {searchTerms.Count}");
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] - page: {page}, pageSize: {pageSize}");
+
+            // Build WHERE clause in application using StringBuilder for full control
+            var whereBuilder = new StringBuilder("1=1");
+            
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Starting WHERE clause build: '{whereBuilder}'");
+            
+            // User filtering logic - only apply if user is not admin AND no specific search terms
+            bool hasSpecificSearchTerms = searchTerms.Count > 0;
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] hasSpecificSearchTerms: {hasSpecificSearchTerms}");
+            
+            if (!isAdmin && !hasSpecificSearchTerms && !string.IsNullOrWhiteSpace(userName))
+            {
+                whereBuilder.Append($" AND User = '{userName.Replace("'", "''")}'");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added user filter - WHERE clause now: '{whereBuilder}'");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] No user filter applied - isAdmin: {isAdmin}, hasSpecificSearchTerms: {hasSpecificSearchTerms}, userName: '{userName}'");
+            }
+            
+            // Add specific search term filters
+            if (searchTerms.ContainsKey("partid") && !string.IsNullOrWhiteSpace(searchTerms["partid"]))
+            {
+                whereBuilder.Append($" AND PartID = '{searchTerms["partid"].Replace("'", "''")}'");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added partid filter - WHERE clause now: '{whereBuilder}'");
+            }
+            
+            if (searchTerms.ContainsKey("batch") && !string.IsNullOrWhiteSpace(searchTerms["batch"]))
+            {
+                whereBuilder.Append($" AND BatchNumber = '{searchTerms["batch"].Replace("'", "''")}'");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added batch filter - WHERE clause now: '{whereBuilder}'");
+            }
+            
+            if (searchTerms.ContainsKey("operation") && !string.IsNullOrWhiteSpace(searchTerms["operation"]))
+            {
+                whereBuilder.Append($" AND Operation = '{searchTerms["operation"].Replace("'", "''")}'");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added operation filter - WHERE clause now: '{whereBuilder}'");
+            }
+            
+            if (searchTerms.ContainsKey("notes") && !string.IsNullOrWhiteSpace(searchTerms["notes"]))
+            {
+                whereBuilder.Append($" AND Notes LIKE '%{searchTerms["notes"].Replace("'", "''")}%'");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added notes filter - WHERE clause now: '{whereBuilder}'");
+            }
+            
+            if (searchTerms.ContainsKey("user") && !string.IsNullOrWhiteSpace(searchTerms["user"]))
+            {
+                whereBuilder.Append($" AND User = '{searchTerms["user"].Replace("'", "''")}'");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added specific user filter - WHERE clause now: '{whereBuilder}'");
+            }
+            
+            if (searchTerms.ContainsKey("itemtype") && !string.IsNullOrWhiteSpace(searchTerms["itemtype"]))
+            {
+                whereBuilder.Append($" AND ItemType = '{searchTerms["itemtype"].Replace("'", "''")}'");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added itemtype filter - WHERE clause now: '{whereBuilder}'");
+            }
+            
+            if (searchTerms.ContainsKey("quantity") && int.TryParse(searchTerms["quantity"], out int qty))
+            {
+                whereBuilder.Append($" AND Quantity = {qty}");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added quantity filter - WHERE clause now: '{whereBuilder}'");
+            }
+            
+            // Handle transaction types filter
+            if (transactionTypes.Count > 0 && transactionTypes.Count < 3) // Only filter if not all types selected
+            {
+                var typeList = string.Join(",", transactionTypes.Select(t => $"'{t}'"));
+                whereBuilder.Append($" AND TransactionType IN ({typeList})");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added transaction type filter - WHERE clause now: '{whereBuilder}'");
+            }
+            
+            // Handle time range filter
+            if (timeRange.from.HasValue)
+            {
+                whereBuilder.Append($" AND ReceiveDate >= '{timeRange.from.Value:yyyy-MM-dd HH:mm:ss}'");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added from date filter - WHERE clause now: '{whereBuilder}'");
+            }
+            
+            if (timeRange.to.HasValue)
+            {
+                whereBuilder.Append($" AND ReceiveDate <= '{timeRange.to.Value:yyyy-MM-dd HH:mm:ss}'");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added to date filter - WHERE clause now: '{whereBuilder}'");
+            }
+            
+            // Handle locations filter
+            if (locations.Count > 0)
+            {
+                var locationList = string.Join(",", locations.Select(l => $"'{l.Replace("'", "''")}'"));
+                whereBuilder.Append($" AND FromLocation IN ({locationList})");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added location filter - WHERE clause now: '{whereBuilder}'");
+            }
+            
+            // Handle general search term (searches across multiple fields)
+            if (searchTerms.ContainsKey("general") && !string.IsNullOrWhiteSpace(searchTerms["general"]))
+            {
+                var generalTerm = searchTerms["general"].Replace("'", "''");
+                whereBuilder.Append($" AND (PartID LIKE '%{generalTerm}%' OR BatchNumber LIKE '%{generalTerm}%' OR Operation LIKE '%{generalTerm}%' OR Notes LIKE '%{generalTerm}%' OR User LIKE '%{generalTerm}%' OR ItemType LIKE '%{generalTerm}%' OR FromLocation LIKE '%{generalTerm}%' OR ToLocation LIKE '%{generalTerm}%')");
+                System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Added general search filter - WHERE clause now: '{whereBuilder}'");
+            }
+            
+            // Build parameters for the simplified stored procedure
             var parameters = new Dictionary<string, object>
             {
-                ["UserName"] = userName ?? "",
-                ["IsAdmin"] = isAdmin,
+                ["WhereClause"] = whereBuilder.ToString(),
                 ["Page"] = page,
                 ["PageSize"] = pageSize
             };
 
-            // Add search term parameters
-            parameters["PartID"] = searchTerms.ContainsKey("partid") ? searchTerms["partid"] : "";
-            parameters["BatchNumber"] = searchTerms.ContainsKey("batch") ? searchTerms["batch"] : "";
-            parameters["Operation"] = searchTerms.ContainsKey("operation") ? searchTerms["operation"] : "";
-            parameters["Notes"] = searchTerms.ContainsKey("notes") ? searchTerms["notes"] : "";
-            parameters["User"] = searchTerms.ContainsKey("user") ? searchTerms["user"] : "";
-            parameters["ItemType"] = searchTerms.ContainsKey("itemtype") ? searchTerms["itemtype"] : "";
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] === FINAL WHERE CLAUSE ===");
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] WhereClause parameter: '{whereBuilder}'");
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Full SQL will be: SELECT ... FROM inv_transaction WHERE {whereBuilder} ORDER BY ReceiveDate DESC LIMIT ...");
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] === CALLING STORED PROCEDURE ===");
 
-            // Handle quantity search
-            if (searchTerms.ContainsKey("quantity") && int.TryParse(searchTerms["quantity"], out int qty))
-                parameters["Quantity"] = qty;
-            else
-                parameters["Quantity"] = null;
-
-            // Handle transaction types
-            parameters["TransactionTypes"] = transactionTypes.Count > 0 
-                ? string.Join(",", transactionTypes.Select(t => t.ToString())) 
-                : "";
-
-            // Handle time range
-            parameters["FromDate"] = timeRange.from;
-            parameters["ToDate"] = timeRange.to;
-
-            // Handle locations
-            parameters["Locations"] = locations.Count > 0 
-                ? string.Join(",", locations) 
-                : "";
-
-            // Handle general search term (searches across multiple fields)
-            parameters["GeneralSearch"] = searchTerms.ContainsKey("general") ? searchTerms["general"] : "";
-
-            // Execute smart search stored procedure
-            using var reader = await Helper_Database_StoredProcedure.ExecuteReader(
+            // Use Helper_Database_StoredProcedure.ExecuteDataTableWithStatus for proper status handling
+            var result = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
                 Model_AppVariables.ConnectionString,
-                "inv_transactions_SmartSearch", 
-                parameters, 
-                true, 
-                CommandType.StoredProcedure);
+                "inv_transactions_SmartSearch",
+                parameters,
+                null, // No progress helper for this method
+                true // Use async
+            );
 
-            var transactions = new List<Model_Transactions>();
-            while (reader.Read())
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Stored procedure result: IsSuccess={result.IsSuccess}, ErrorMessage='{result.ErrorMessage}'");
+
+            if (!result.IsSuccess)
             {
-                transactions.Add(MapTransaction(reader));
+                return DaoResult<List<Model_Transactions>>.Failure(
+                    result.ErrorMessage ?? "Smart search failed"
+                );
             }
 
+            var transactions = new List<Model_Transactions>();
+            if (result.Data != null)
+            {
+                foreach (DataRow row in result.Data.Rows)
+                {
+                    transactions.Add(MapTransactionFromDataRow(row));
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Mapped {transactions.Count} transactions from result");
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] === DAO SmartSearchAsync Complete ===");
+
             return DaoResult<List<Model_Transactions>>.Success(
-                transactions, 
+                transactions,
                 $"Smart search retrieved {transactions.Count} transactions matching criteria"
             );
         }
         catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Exception in SmartSearchAsync: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[DAO DEBUG] Stack trace: {ex.StackTrace}");
+            
             LoggingUtility.LogDatabaseError(ex);
             await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "SmartSearchAsync");
             return DaoResult<List<Model_Transactions>>.Failure(
@@ -288,30 +396,40 @@ internal class Dao_Transactions
                 ["ToDate"] = timeRange.to
             };
 
-            using var reader = await Helper_Database_StoredProcedure.ExecuteReader(
+            // Use Helper_Database_StoredProcedure.ExecuteDataTableWithStatus for proper status handling
+            var result = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
                 Model_AppVariables.ConnectionString,
-                "inv_transactions_GetAnalytics", 
-                parameters, 
-                true, 
-                CommandType.StoredProcedure);
+                "inv_transactions_GetAnalytics",
+                parameters,
+                null, // No progress helper for this method
+                true // Use async
+            );
+
+            if (!result.IsSuccess)
+            {
+                return DaoResult<Dictionary<string, object>>.Failure(
+                    result.ErrorMessage ?? "Failed to retrieve transaction analytics"
+                );
+            }
 
             var analytics = new Dictionary<string, object>();
-            
-            if (reader.Read())
+
+            if (result.Data != null && result.Data.Rows.Count > 0)
             {
-                analytics["TotalTransactions"] = reader.GetInt32("TotalTransactions");
-                analytics["InTransactions"] = reader.GetInt32("InTransactions");
-                analytics["OutTransactions"] = reader.GetInt32("OutTransactions");
-                analytics["TransferTransactions"] = reader.GetInt32("TransferTransactions");
-                analytics["TotalQuantity"] = reader.GetInt64("TotalQuantity");
-                analytics["UniquePartIds"] = reader.GetInt32("UniquePartIds");
-                analytics["ActiveUsers"] = reader.GetInt32("ActiveUsers");
-                analytics["TopPartId"] = reader["TopPartId"]?.ToString() ?? "";
-                analytics["TopUser"] = reader["TopUser"]?.ToString() ?? "";
+                var row = result.Data.Rows[0];
+                analytics["TotalTransactions"] = Convert.ToInt32(row["TotalTransactions"]);
+                analytics["InTransactions"] = Convert.ToInt32(row["InTransactions"]);
+                analytics["OutTransactions"] = Convert.ToInt32(row["OutTransactions"]);
+                analytics["TransferTransactions"] = Convert.ToInt32(row["TransferTransactions"]);
+                analytics["TotalQuantity"] = Convert.ToInt64(row["TotalQuantity"]);
+                analytics["UniquePartIds"] = Convert.ToInt32(row["UniquePartIds"]);
+                analytics["ActiveUsers"] = Convert.ToInt32(row["ActiveUsers"]);
+                analytics["TopPartId"] = row["TopPartId"]?.ToString() ?? "";
+                analytics["TopUser"] = row["TopUser"]?.ToString() ?? "";
             }
 
             return DaoResult<Dictionary<string, object>>.Success(
-                analytics, 
+                analytics,
                 "Transaction analytics retrieved successfully"
             );
         }
@@ -330,30 +448,30 @@ internal class Dao_Transactions
     #region Private Methods
 
     /// <summary>
-    /// Maps MySqlDataReader row to Model_Transactions object
+    /// Maps DataRow to Model_Transactions object
     /// </summary>
-    /// <param name="reader">MySqlDataReader instance</param>
+    /// <param name="row">DataRow from stored procedure result</param>
     /// <returns>Mapped Model_Transactions object</returns>
-    private Model_Transactions MapTransaction(MySqlDataReader reader) =>
+    private Model_Transactions MapTransactionFromDataRow(DataRow row) =>
         new()
         {
-            ID = reader.GetInt32("ID"),
+            ID = Convert.ToInt32(row["ID"]),
             TransactionType =
-                Enum.TryParse<TransactionType>(reader["TransactionType"].ToString(), out TransactionType type)
+                Enum.TryParse<TransactionType>(row["TransactionType"].ToString(), out TransactionType type)
                     ? type
                     : TransactionType.IN,
-            BatchNumber = reader["BatchNumber"] == DBNull.Value ? null : reader["BatchNumber"].ToString(),
-            PartID = reader["PartID"] == DBNull.Value ? null : reader["PartID"].ToString(),
-            FromLocation = reader["FromLocation"] == DBNull.Value ? null : reader["FromLocation"].ToString(),
-            ToLocation = reader["ToLocation"] == DBNull.Value ? null : reader["ToLocation"].ToString(),
-            Operation = reader["Operation"] == DBNull.Value ? null : reader["Operation"].ToString(),
-            Quantity = reader["Quantity"] == DBNull.Value ? 0 : Convert.ToInt32(reader["Quantity"]),
-            Notes = reader["Notes"] == DBNull.Value ? null : reader["Notes"].ToString(),
-            User = reader["User"] == DBNull.Value ? null : reader["User"].ToString(),
-            ItemType = reader["ItemType"] == DBNull.Value ? null : reader["ItemType"].ToString(),
-            DateTime = reader["ReceiveDate"] == DBNull.Value
+            BatchNumber = row["BatchNumber"] == DBNull.Value ? null : row["BatchNumber"].ToString(),
+            PartID = row["PartID"] == DBNull.Value ? null : row["PartID"].ToString(),
+            FromLocation = row["FromLocation"] == DBNull.Value ? null : row["FromLocation"].ToString(),
+            ToLocation = row["ToLocation"] == DBNull.Value ? null : row["ToLocation"].ToString(),
+            Operation = row["Operation"] == DBNull.Value ? null : row["Operation"].ToString(),
+            Quantity = row["Quantity"] == DBNull.Value ? 0 : Convert.ToInt32(row["Quantity"]),
+            Notes = row["Notes"] == DBNull.Value ? null : row["Notes"].ToString(),
+            User = row["User"] == DBNull.Value ? null : row["User"].ToString(),
+            ItemType = row["ItemType"] == DBNull.Value ? null : row["ItemType"].ToString(),
+            DateTime = row["ReceiveDate"] == DBNull.Value
                 ? DateTime.MinValue
-                : Convert.ToDateTime(reader["ReceiveDate"])
+                : Convert.ToDateTime(row["ReceiveDate"])
         };
 
     #endregion
