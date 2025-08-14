@@ -2,7 +2,7 @@
 -- MTM INVENTORY APPLICATION - COMPREHENSIVE DATABASE TESTING SCRIPT
 -- ================================================================================
 -- File: 99_Database_Testing_Suite.sql
--- Purpose: Test all stored procedures against LiveDatabase.sql for complete validation
+-- Purpose: Test all stored procedures against UpdatedDatabase.sql for complete validation
 -- Created: August 13, 2025
 -- Target Database: mtm_wip_application_test
 -- MySQL Version: 5.7.24+ (MAMP Compatible)

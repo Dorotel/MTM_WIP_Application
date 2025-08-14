@@ -2,7 +2,7 @@
 
 ## ?? **COMPLETE STORED PROCEDURE VERIFICATION SYSTEM**
 
-This guide provides comprehensive verification of ALL stored procedures against your LiveDatabase.sql schema to ensure zero errors during deployment and operation.
+This guide provides comprehensive verification of ALL stored procedures against your UpdatedDatabase.sql schema to ensure zero errors during deployment and operation.
 
 ---
 
@@ -40,7 +40,7 @@ FROM INFORMATION_SCHEMA.TABLES
 WHERE TABLE_SCHEMA = 'mtm_wip_application_test'
 ORDER BY TABLE_NAME;
 
--- Expected Core Tables (from LiveDatabase.sql):
+-- Expected Core Tables (from UpdatedDatabase.sql):
 -- ? app_themes
 -- ? debug_matching  
 -- ? inv_inventory
@@ -63,7 +63,7 @@ ORDER BY TABLE_NAME;
 -- Verify inv_inventory table structure (critical for procedures)
 DESCRIBE inv_inventory;
 
--- Expected columns from LiveDatabase.sql:
+-- Expected columns from UpdatedDatabase.sql:
 -- ? ID int(11) NOT NULL AUTO_INCREMENT
 -- ? PartID varchar(300) NOT NULL
 -- ? Location varchar(100) NOT NULL  
@@ -285,7 +285,7 @@ SELECT @status AS 'Status', @error AS 'Message';
 
 ### **Step 3B: Master Data Procedures (03_)**
 ```sql
--- Test 1: Get All Parts (using existing data from LiveDatabase.sql)
+-- Test 1: Get All Parts (using existing data from UpdatedDatabase.sql)
 CALL md_part_ids_Get_All(@status, @error);
 SELECT @status AS 'Status', @error AS 'Message';
 -- ? Expected: Status=0, should return existing parts data
@@ -308,12 +308,12 @@ SELECT @status AS 'Status', @error AS 'Message';
 -- Test 5: Check if Part Exists (using real data)
 CALL md_part_ids_Exists_ByPartId('CARDBOARD (39X39)', @status, @error);
 SELECT @status AS 'Status', @error AS 'Message';
--- ? Expected: Status=0, exists=1 (from LiveDatabase.sql data)
+-- ? Expected: Status=0, exists=1 (from UpdatedDatabase.sql data)
 
 -- Test 6: Check if Location Exists (using real data)
 CALL md_locations_Exists_ByLocation('V-N4-01', @status, @error);
 SELECT @status AS 'Status', @error AS 'Message';
--- ? Expected: Status=0, exists=1 (from LiveDatabase.sql data)
+-- ? Expected: Status=0, exists=1 (from UpdatedDatabase.sql data)
 ```
 
 ### **Step 3C: Inventory Procedures (04_) - Critical Tests**
@@ -368,7 +368,7 @@ DELETE FROM inv_transaction WHERE PartID = 'TEST_PART_001';
 
 ### **Step 3D: Theme Management Procedures (08_)**
 ```sql
--- Test 1: Get All Themes (using LiveDatabase.sql data)
+-- Test 1: Get All Themes (using UpdatedDatabase.sql data)
 CALL app_themes_Get_All(@status, @error);
 SELECT @status AS 'Status', @error AS 'Message';
 -- ? Expected: Status=0, should return all theme data from app_themes table

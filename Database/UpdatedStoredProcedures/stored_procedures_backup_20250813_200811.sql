@@ -4095,7 +4095,7 @@ BEGIN
         SET p_ErrorMsg = 'Database error occurred during schema verification';
     END;
     
-    -- Expected core tables from LiveDatabase.sql analysis
+    -- Expected core tables from UpdatedDatabase.sql analysis
     SET v_Expected = 11;
     
     -- Check for each required table
@@ -4167,7 +4167,7 @@ BEGIN
         SET p_ErrorMsg = CONCAT('Database error occurred while verifying columns for table: ', p_TableName);
     END;
     
-    -- Define expected columns for key tables based on LiveDatabase.sql
+    -- Define expected columns for key tables based on UpdatedDatabase.sql
     CASE p_TableName
         WHEN 'inv_inventory' THEN
             SET v_ExpectedColumns = 'ID,PartID,Location,Operation,Quantity,ItemType,ReceiveDate,LastUpdated,User,BatchNumber,Notes';

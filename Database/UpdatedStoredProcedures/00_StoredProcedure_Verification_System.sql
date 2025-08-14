@@ -2,7 +2,7 @@
 -- MTM INVENTORY APPLICATION - COMPREHENSIVE STORED PROCEDURE VERIFICATION SYSTEM
 -- ================================================================================
 -- File: 00_StoredProcedure_Verification_System.sql
--- Purpose: Complete verification system for all stored procedures against LiveDatabase.sql
+-- Purpose: Complete verification system for all stored procedures against UpdatedDatabase.sql
 -- Created: August 13, 2025
 -- Target Database: mtm_wip_application_test
 -- MySQL Version: 5.7.24+ (MAMP Compatible)
@@ -36,7 +36,7 @@ BEGIN
         SET p_ErrorMsg = 'Database error occurred during schema verification';
     END;
     
-    -- Expected core tables from LiveDatabase.sql analysis
+    -- Expected core tables from UpdatedDatabase.sql analysis
     SET v_Expected = 17;
     
     -- Check for each required table
@@ -90,7 +90,7 @@ DELIMITER ;
 -- PHASE 2: COLUMN STRUCTURE VERIFICATION
 -- ================================================================================
 
--- Procedure to verify critical table column structures match LiveDatabase.sql
+-- Procedure to verify critical table column structures match UpdatedDatabase.sql
 DELIMITER $$
 CREATE PROCEDURE sys_VerifyTableColumns(
     IN p_TableName VARCHAR(64),
@@ -107,7 +107,7 @@ BEGIN
         SET p_ErrorMsg = CONCAT('Database error occurred while verifying columns for table: ', p_TableName);
     END;
     
-    -- Define expected columns for key tables based on LiveDatabase.sql
+    -- Define expected columns for key tables based on UpdatedDatabase.sql
     CASE p_TableName
         WHEN 'inv_inventory' THEN
             SET v_ExpectedColumns = 'ID,PartID,Location,Operation,Quantity,ItemType,ReceiveDate,LastUpdated,User,BatchNumber,Notes';

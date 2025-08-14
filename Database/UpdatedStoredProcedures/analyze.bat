@@ -17,7 +17,7 @@ echo.
 REM Define paths (Windows)
 set "DB_PATH=%~dp0.."
 set "PROCEDURES_PATH=%~dp0"
-set "SCHEMA_FILE=%DB_PATH%\UpdatedDatabase\LiveDatabase.sql"
+set "SCHEMA_FILE=%DB_PATH%\UpdatedDatabase\UpdatedDatabase.sql"
 
 REM Create analysis report
 set "REPORT_FILE=%TEMP%\stored_procedure_analysis_report.txt"
@@ -56,7 +56,7 @@ echo.
 echo Phase 2: Database Schema Analysis
 echo ==================================
 
-echo CORE TABLE STRUCTURES FROM LIVEDATABASE.SQL >> "%REPORT_FILE%"
+echo CORE TABLE STRUCTURES FROM UpdatedDatabase.sql >> "%REPORT_FILE%"
 echo ============================================ >> "%REPORT_FILE%"
 
 REM Check for inv_inventory table
@@ -238,7 +238,7 @@ echo. >> "%REPORT_FILE%"
 echo 1. COLUMN NAME FIXES: >> "%REPORT_FILE%"
 echo    - Update any references to 'FullName' to match actual schema >> "%REPORT_FILE%"
 echo    - Ensure 'TransactionDate' references use 'ReceiveDate' from actual tables >> "%REPORT_FILE%"
-echo    - Verify all column names match LiveDatabase.sql exactly >> "%REPORT_FILE%"
+echo    - Verify all column names match UpdatedDatabase.sql exactly >> "%REPORT_FILE%"
 echo. >> "%REPORT_FILE%"
 
 echo 2. ERROR HANDLING STANDARDIZATION: >> "%REPORT_FILE%"
@@ -264,7 +264,7 @@ echo Next Steps:
 echo 1. Review the analysis report
 echo 2. Apply recommended fixes to stored procedure files
 echo 3. Run the verification system (00_StoredProcedure_Verification_System.sql)
-echo 4. Test all procedures against LiveDatabase.sql
+echo 4. Test all procedures against UpdatedDatabase.sql
 echo.
 
 REM Display report summary
