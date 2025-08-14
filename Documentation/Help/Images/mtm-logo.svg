@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer circle -->
+  <circle cx="60" cy="60" r="58" fill="none" stroke="#333" stroke-width="4"/>
+  
+  <!-- Inner design elements -->
+  <circle cx="60" cy="60" r="48" fill="none" stroke="#333" stroke-width="2"/>
+  
+  <!-- MTM Text -->
+  <text x="60" y="72" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#333">MTM</text>
+  
+  <!-- Manufacturing Tool Design text around the circle -->
+  <path id="circle-path" d="M 60,60 m -40,0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0" fill="none"/>
+  <text font-family="Arial, sans-serif" font-size="10" fill="#333">
+    <textPath href="#circle-path" startOffset="0%">MANUFACTURING TOOL DESIGN</textPath>
+  </text>
+</svg>

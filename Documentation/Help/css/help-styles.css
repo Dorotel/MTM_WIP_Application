@@ -2,13 +2,17 @@
 /* Modern UI styling matching Transactions.html design */
 
 :root {
-    --primary-color: #0d6efd;
-    --success-color: #198754;
-    --warning-color: #ffc107;
-    --danger-color: #dc3545;
-    --info-color: #0dcaf0;
-    --light-color: #f8f9fa;
-    --dark-color: #343a40;
+    /* MTM Manufacturing Color Scheme - Industrial Theme */
+    --primary-color: #ff9500;          /* Orange accent color from website */
+    --secondary-color: #ffa500;        /* Lighter orange for hover states */
+    --success-color: #28a745;          /* Keep green for success messages */
+    --warning-color: #ffc107;          /* Yellow for warnings */
+    --danger-color: #dc3545;           /* Red for errors */
+    --info-color: #17a2b8;             /* Blue-gray for info */
+    --light-color: #f8f9fa;            /* Light backgrounds */
+    --dark-color: #1a1a1a;             /* Very dark for headers - matching website */
+    --content-dark: #2d2d2d;           /* Slightly lighter dark for content areas */
+    --industrial-gray: #4a4a4a;        /* Industrial gray for text */
     --gray-100: #f8f9fa;
     --gray-200: #e9ecef;
     --gray-300: #dee2e6;
@@ -31,7 +35,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: var(--gray-800);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--dark-color) 0%, var(--content-dark) 100%);
 }
 
 /* Typography */
@@ -65,16 +69,27 @@ p {
 }
 
 .help-header {
-    background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+    background: linear-gradient(90deg, var(--dark-color), var(--content-dark));
     color: white;
     padding: 2rem 1rem;
     text-align: center;
     margin-bottom: 2rem;
+    border-bottom: 3px solid var(--primary-color);
 }
 
 .help-header h1 {
     margin-bottom: 0.5rem;
     font-weight: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.help-header .logo {
+    height: 60px;
+    width: auto;
+    filter: brightness(0) invert(1); /* Make logo white */
 }
 
 .help-header p {
@@ -304,8 +319,8 @@ kbd {
 }
 
 .help-btn-primary:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
     color: white;
 }
 
@@ -359,10 +374,17 @@ kbd {
     text-align: center;
     padding: 2rem 1rem;
     margin-top: 3rem;
+    border-top: 3px solid var(--primary-color);
 }
 
 .help-footer p {
-    margin-bottom: 0;
+    margin-bottom: 0.5rem;
+}
+
+.help-footer .company-info {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-top: 1rem;
 }
 
 /* Responsive Design */
@@ -427,7 +449,26 @@ kbd {
     }
 }
 
-/* Accessibility Improvements */
+/* Search Box Styling */
+.search-box {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--gray-300);
+    border-radius: 25px;
+    background: white;
+    font-size: 0.9rem;
+    min-width: 250px;
+    transition: all 0.3s ease;
+}
+
+.search-box:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(255, 149, 0, 0.25);
+}
+
+.search-box::placeholder {
+    color: var(--gray-500);
+}
 .sr-only {
     position: absolute;
     width: 1px;
