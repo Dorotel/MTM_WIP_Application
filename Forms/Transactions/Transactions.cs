@@ -514,8 +514,8 @@ namespace MTM_Inventory_Application.Forms.Transactions
             progress.UpdateProgress(80, "Mapping results...");
             await Task.Delay(100);
 
-            List<Model_Transactions> results = searchResult.IsSuccess && searchResult.Data != null 
-                ? searchResult.Data 
+            List<Model_Transactions> results = searchResult.IsSuccess && searchResult.Data != null
+                ? searchResult.Data
                 : new List<Model_Transactions>();
 
             // Build description for each row

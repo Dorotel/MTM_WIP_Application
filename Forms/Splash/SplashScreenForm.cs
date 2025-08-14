@@ -1,6 +1,7 @@
 using System.Drawing.Imaging;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Models;
+using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Forms.Splash
 {
@@ -12,20 +13,64 @@ namespace MTM_Inventory_Application.Forms.Splash
 
         public SplashScreenForm()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["FormType"] = nameof(SplashScreenForm),
+                ["Version"] = Model_AppVariables.Version ?? "4.6.0.0",
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(SplashScreenForm), nameof(SplashScreenForm));
+
             System.Diagnostics.Debug.WriteLine("[DEBUG] [SplashScreenForm.ctor] Constructing SplashScreenForm...");
+
+            Service_DebugTracer.TraceUIAction("SPLASH_FORM_INITIALIZATION", nameof(SplashScreenForm),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "SplashScreenForm"
+                });
+
             InitializeComponent();
 
+            Service_DebugTracer.TraceUIAction("THEME_APPLICATION", nameof(SplashScreenForm),
+                new Dictionary<string, object>
+                {
+                    ["AutoScaleMode"] = "Dpi",
+                    ["DpiScaling"] = "APPLIED",
+                    ["LayoutAdjustments"] = "APPLIED"
+                });
             // Apply comprehensive DPI scaling and runtime layout adjustments
             AutoScaleMode = AutoScaleMode.Dpi;
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
 
+            Service_DebugTracer.TraceBusinessLogic("UI_COLORS_APPLICATION",
+                inputData: new {
+                    UserBackColor = Model_AppVariables.UserUiColors?.FormBackColor,
+                    UserForeColor = Model_AppVariables.UserUiColors?.LabelForeColor,
+                    Version = Model_AppVariables.Version
+                },
+                outputData: new {
+                    AppliedBackColor = Model_AppVariables.UserUiColors?.FormBackColor ?? BackColor,
+                    AppliedForeColor = Model_AppVariables.UserUiColors?.LabelForeColor,
+                    VersionText = $"Version {Model_AppVariables.Version ?? "4.6.0.0"}"
+                });
             BackColor = Model_AppVariables.UserUiColors?.FormBackColor ?? BackColor;
             _titleLabel!.ForeColor = Model_AppVariables.UserUiColors?.LabelForeColor ?? _titleLabel.ForeColor;
             _versionLabel!.ForeColor = Model_AppVariables.UserUiColors?.LabelForeColor ?? _versionLabel.ForeColor;
             _versionLabel.Text = $"Version {Model_AppVariables.Version ?? "4.6.0.0"}";
 
+            Service_DebugTracer.TraceUIAction("THEME_APPLIED", nameof(SplashScreenForm));
             ApplyTheme();
+
+            Service_DebugTracer.TraceUIAction("SPLASH_FORM_INITIALIZATION", nameof(SplashScreenForm),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "COMPLETE",
+                    ["Success"] = true
+                });
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(SplashScreenForm), nameof(SplashScreenForm));
             System.Diagnostics.Debug.WriteLine("[DEBUG] [SplashScreenForm.ctor] SplashScreenForm constructed.");
         }
 
@@ -39,11 +84,22 @@ namespace MTM_Inventory_Application.Forms.Splash
 
         public void ShowSplash()
         {
+            Service_DebugTracer.TraceMethodEntry(null, nameof(ShowSplash), nameof(SplashScreenForm));
+
+            Service_DebugTracer.TraceUIAction("SPLASH_SCREEN_SHOW", nameof(SplashScreenForm),
+                new Dictionary<string, object>
+                {
+                    ["Action"] = "Show",
+                    ["ProgressControlVisible"] = true
+                });
+
             System.Diagnostics.Debug.WriteLine("[DEBUG] [SplashScreenForm.ShowSplash] Showing splash screen...");
             Show();
             _progressControl!.ShowProgress();
             Application.DoEvents();
             System.Diagnostics.Debug.WriteLine("[DEBUG] [SplashScreenForm.ShowSplash] Splash screen shown.");
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(ShowSplash), nameof(SplashScreenForm));
         }
 
         public void UpdateProgress(int progress, string status)

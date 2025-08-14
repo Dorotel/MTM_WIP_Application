@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Operations - MTM Inventory Application Help</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <div class="help-container">
+        <div class="help-header">
+            <h1>📋 Inventory Operations</h1>
+            <p>Complete guide to inventory management in MTM WIP Application</p>
+        </div>
+        
+        <div class="help-nav">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Help Home</a></li>
+                    <li class="breadcrumb-item active">Inventory Operations</li>
+                </ol>
+            </nav>
+            <input type="text" class="search-box" placeholder="Search inventory help..." id="searchBox">
+        </div>
+        
+        <div class="help-content">
+            <div class="alert alert-info">
+                <strong>Quick Start:</strong> The Inventory Tab is your primary tool for adding new inventory items. Press <kbd>Ctrl</kbd>+<kbd>S</kbd> to save entries quickly.
+            </div>
+            
+            <div class="help-section">
+                <h2>Inventory Tab Overview</h2>
+                
+                <div class="help-card">
+                    <h4>🎯 Main Purpose</h4>
+                    <p>The Inventory Tab allows you to add new inventory items to the Work-In-Progress (WIP) system. Each entry requires:</p>
+                    <ul class="help-list">
+                        <li><strong>Part ID</strong> - The component or item being inventoried</li>
+                        <li><strong>Operation</strong> - The manufacturing or processing operation</li>
+                        <li><strong>Location</strong> - Where the inventory is physically stored</li>
+                        <li><strong>Quantity</strong> - How many units are being added</li>
+                        <li><strong>Description/Notes</strong> - Optional additional information</li>
+                    </ul>
+                </div>
+                
+                <div class="help-card">
+                    <h4>🖥️ Interface Layout</h4>
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                        <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 0.875rem;">
+┌─ Inventory Tab ────────────────────────┬─ QuickButtons Panel ──┐
+│                                        │                       │
+│ Part ID:      [Dropdown ▼] [Search]   │ Recent Operations:    │
+│ Operation:    [Dropdown ▼]            │ [Button 1] [Button 2] │
+│ Location:     [Dropdown ▼]            │ [Button 3] [Button 4] │
+│ Quantity:     [12345    ]             │ [Button 5] [Button 6] │
+│ Notes:        [Optional notes...]      │ [Button 7] [Button 8] │
+│                                        │ [Button 9] [Button 10]│
+│ [Reset] [Save] [Advanced]              │                       │
+│                                        │ [Toggle Panel]        │
+│ Status: Ready | User: Name | ●         │                       │
+└────────────────────────────────────────┴───────────────────────┘</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Step-by-Step Inventory Process</h2>
+                
+                <div class="help-card">
+                    <h4>1. Select Part ID</h4>
+                    <p>The Part ID dropdown contains all available parts in the system:</p>
+                    <ul class="help-list">
+                        <li><strong>Click the dropdown</strong> to see the complete list</li>
+                        <li><strong>Type to search</strong> - Start typing to filter results</li>
+                        <li><strong>Auto-complete</strong> - The system will suggest matches</li>
+                        <li><strong>Validation</strong> - Red text indicates invalid selection, black text indicates valid</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Required Field:</strong> You must select a valid Part ID before proceeding. The placeholder "[ Enter Part Number ]" indicates the field is empty.
+                    </div>
+                </div>
+                
+                <div class="help-card">
+                    <h4>2. Choose Operation</h4>
+                    <p>Operations define what manufacturing step the inventory is at:</p>
+                    <ul class="help-list">
+                        <li><strong>Select from list</strong> - Available operations are predefined</li>
+                        <li><strong>Operation-specific</strong> - Operations may be part-specific</li>
+                        <li><strong>Workflow stage</strong> - Represents position in manufacturing process</li>
+                    </ul>
+                    
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Common Operations</th>
+                                <th>Description</th>
+                                <th>Use Case</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Raw Material</td>
+                                <td>Unprocessed materials</td>
+                                <td>Initial inventory receipt</td>
+                            </tr>
+                            <tr>
+                                <td>In Process</td>
+                                <td>Being manufactured</td>
+                                <td>Work in progress tracking</td>
+                            </tr>
+                            <tr>
+                                <td>Finished Goods</td>
+                                <td>Completed items</td>
+                                <td>Ready for shipment</td>
+                            </tr>
+                            <tr>
+                                <td>Quality Hold</td>
+                                <td>Awaiting inspection</td>
+                                <td>Quality control process</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="help-card">
+                    <h4>3. Select Location</h4>
+                    <p>Locations represent physical storage areas:</p>
+                    <ul class="help-list">
+                        <li><strong>Warehouse areas</strong> - Specific storage zones</li>
+                        <li><strong>Work stations</strong> - Manufacturing locations</li>
+                        <li><strong>Quality areas</strong> - Inspection and testing zones</li>
+                        <li><strong>Shipping/Receiving</strong> - Dock areas</li>
+                    </ul>
+                    
+                    <div class="alert alert-info">
+                        <strong>Location Logic:</strong> The same part and operation can be stored in multiple locations, but each location entry is tracked separately.
+                    </div>
+                </div>
+                
+                <div class="help-card">
+                    <h4>4. Enter Quantity</h4>
+                    <p>Quantity represents the number of units being added:</p>
+                    
+                    <h5>⌨️ Keyboard Shortcuts for Quantity:</h5>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Shortcut</th>
+                                <th>Adjustment</th>
+                                <th>Best For</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><kbd>↑</kbd></td>
+                                <td>+1000</td>
+                                <td>Large quantity increases</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>↓</kbd></td>
+                                <td>-1000</td>
+                                <td>Large quantity decreases</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>Shift</kbd>+<kbd>↑</kbd></td>
+                                <td>+100</td>
+                                <td>Medium adjustments</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>Shift</kbd>+<kbd>↓</kbd></td>
+                                <td>-100</td>
+                                <td>Medium adjustments</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>←</kbd></td>
+                                <td>+10</td>
+                                <td>Small increments</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>→</kbd></td>
+                                <td>-10</td>
+                                <td>Small decrements</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h5>Validation Rules:</h5>
+                    <ul class="help-list">
+                        <li><strong>Positive integers only</strong> - No negative or decimal values</li>
+                        <li><strong>Reasonable limits</strong> - Extremely large values may be questioned</li>
+                        <li><strong>Required field</strong> - Cannot be empty or zero</li>
+                    </ul>
+                </div>
+                
+                <div class="help-card">
+                    <h4>5. Add Notes (Optional)</h4>
+                    <p>The Notes field allows additional information:</p>
+                    <ul class="help-list">
+                        <li><strong>Batch numbers</strong> - Manufacturing batch information</li>
+                        <li><strong>Quality notes</strong> - Inspection results or concerns</li>
+                        <li><strong>Special handling</strong> - Storage or handling requirements</li>
+                        <li><strong>Reference numbers</strong> - Work orders, purchase orders, etc.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Saving and Validation</h2>
+                
+                <div class="help-card">
+                    <h4>💾 Save Process</h4>
+                    <p>Save your inventory entry using:</p>
+                    <ul class="help-list">
+                        <li><strong>Click Save button</strong> - Mouse click</li>
+                        <li><strong>Press Ctrl+S</strong> - Keyboard shortcut (recommended)</li>
+                        <li><strong>Press Enter</strong> - When Save button has focus</li>
+                    </ul>
+                    
+                    <h5>What Happens When You Save:</h5>
+                    <ol class="help-list">
+                        <li><strong>Validation</strong> - All fields checked for validity</li>
+                        <li><strong>Database Update</strong> - Transaction recorded in database</li>
+                        <li><strong>Progress Feedback</strong> - Status bar shows progress</li>
+                        <li><strong>Success Confirmation</strong> - Success message displayed</li>
+                        <li><strong>QuickButton Update</strong> - Operation added to QuickButtons</li>
+                        <li><strong>Form Reset</strong> - Form cleared for next entry (optional)</li>
+                    </ol>
+                </div>
+                
+                <div class="help-card">
+                    <h4>❌ Validation Errors</h4>
+                    <p>The enhanced error system provides detailed feedback for validation issues:</p>
+                    
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Error Type</th>
+                                <th>Visual Indicator</th>
+                                <th>Solution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Invalid Part</td>
+                                <td>Red text in Part ID field</td>
+                                <td>Select a valid part from dropdown</td>
+                            </tr>
+                            <tr>
+                                <td>Missing Operation</td>
+                                <td>Red text, error dialog</td>
+                                <td>Choose an operation from the list</td>
+                            </tr>
+                            <tr>
+                                <td>Invalid Location</td>
+                                <td>Red text in Location field</td>
+                                <td>Select a valid, active location</td>
+                            </tr>
+                            <tr>
+                                <td>Invalid Quantity</td>
+                                <td>Red text, enhanced error dialog</td>
+                                <td>Enter positive whole number only</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="alert alert-success">
+                        <strong>Enhanced Error Handling:</strong> The application now provides detailed error dialogs with Summary, Technical Details, and Call Stack tabs to help diagnose and resolve issues.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Advanced Features</h2>
+                
+                <div class="help-card">
+                    <h4>🔄 Reset Options</h4>
+                    <p>Clear the form using different reset methods:</p>
+                    <ul class="help-list">
+                        <li><strong>Soft Reset (Click Reset):</strong> Clears form fields only</li>
+                        <li><strong>Hard Reset (Shift+Click Reset):</strong> Clears fields AND refreshes data from database</li>
+                        <li><strong>Keyboard Reset (Ctrl+R):</strong> Soft reset via keyboard</li>
+                        <li><strong>Hard Keyboard Reset (Shift+Ctrl+R):</strong> Hard reset via keyboard</li>
+                    </ul>
+                    
+                    <div class="alert alert-info">
+                        <strong>When to Use Hard Reset:</strong> Use hard reset when you suspect data is out of sync or when dropdowns aren't showing current options.
+                    </div>
+                </div>
+                
+                <div class="help-card">
+                    <h4>⚡ QuickButtons Integration</h4>
+                    <p>Every successful inventory operation is automatically added to QuickButtons:</p>
+                    <ul class="help-list">
+                        <li><strong>Last 10 Operations</strong> - Most recent operations become buttons</li>
+                        <li><strong>One-Click Repeat</strong> - Click button to repeat exact operation</li>
+                        <li><strong>Modify and Save</strong> - Change quantities or notes as needed</li>
+                        <li><strong>Position Management</strong> - Buttons automatically reorder by recency</li>
+                    </ul>
+                    
+                    <p><a href="quickbuttons.html" class="help-btn help-btn-outline-primary">Learn More About QuickButtons</a></p>
+                </div>
+                
+                <div class="help-card">
+                    <h4>📊 Advanced Inventory Mode</h4>
+                    <p>Switch to Advanced Inventory for bulk operations:</p>
+                    <ul class="help-list">
+                        <li><strong>Click Advanced button</strong> or press <kbd>Ctrl</kbd>+<kbd>A</kbd></li>
+                        <li><strong>Single Location Mode</strong> - Multiple entries for one location</li>
+                        <li><strong>Multi-Location Mode</strong> - Same part/operation across multiple locations</li>
+                        <li><strong>Excel Integration</strong> - Import inventory from Excel spreadsheets</li>
+                        <li><strong>Batch Processing</strong> - Process multiple entries simultaneously</li>
+                    </ul>
+                    
+                    <p><a href="advanced-features.html" class="help-btn help-btn-outline-primary">Advanced Features Guide</a></p>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Progress and Status Indicators</h2>
+                
+                <div class="help-card">
+                    <h4>📊 Understanding Visual Feedback</h4>
+                    <table class="help-table">
+                        <thead>
+                            <tr>
+                                <th>Indicator</th>
+                                <th>Meaning</th>
+                                <th>Action Required</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Black text in fields</td>
+                                <td>Valid selection/input</td>
+                                <td>Continue with entry</td>
+                            </tr>
+                            <tr>
+                                <td>Red text in fields</td>
+                                <td>Invalid selection/input</td>
+                                <td>Correct the invalid field</td>
+                            </tr>
+                            <tr>
+                                <td>Green progress bar</td>
+                                <td>Operation successful</td>
+                                <td>None - operation completed</td>
+                            </tr>
+                            <tr>
+                                <td>Yellow progress bar</td>
+                                <td>Warning condition</td>
+                                <td>Review warning message</td>
+                            </tr>
+                            <tr>
+                                <td>Red progress bar</td>
+                                <td>Error occurred</td>
+                                <td>Check error details</td>
+                            </tr>
+                            <tr>
+                                <td>● in status bar</td>
+                                <td>Connected to database</td>
+                                <td>Normal operation</td>
+                            </tr>
+                            <tr>
+                                <td>● in status bar</td>
+                                <td>Disconnected from database</td>
+                                <td>Check connection</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Best Practices</h2>
+                
+                <div class="help-card">
+                    <h4>💡 Efficiency Tips</h4>
+                    <ul class="help-list">
+                        <li><strong>Use Tab Navigation:</strong> Press Tab to move between fields quickly</li>
+                        <li><strong>Master Keyboard Shortcuts:</strong> Ctrl+S to save, Ctrl+R to reset, arrow keys for quantities</li>
+                        <li><strong>Leverage QuickButtons:</strong> For repeated operations, use QuickButtons instead of re-entering</li>
+                        <li><strong>Type to Search:</strong> Don't scroll through long dropdown lists - type to filter</li>
+                        <li><strong>Use Notes Wisely:</strong> Add meaningful notes for future reference</li>
+                        <li><strong>Check Connection Status:</strong> Ensure solid database connection before large batches</li>
+                    </ul>
+                </div>
+                
+                <div class="help-card">
+                    <h4>🎯 Accuracy Tips</h4>
+                    <ul class="help-list">
+                        <li><strong>Double-Check Quantities:</strong> Use arrow keys for precise adjustments</li>
+                        <li><strong>Verify Location:</strong> Ensure you're adding to correct physical location</li>
+                        <li><strong>Use Descriptive Notes:</strong> Include batch numbers, quality notes, or special handling</li>
+                        <li><strong>Review Before Save:</strong> Check all fields before pressing Ctrl+S</li>
+                        <li><strong>Monitor Status Bar:</strong> Watch for connection and operation status</li>
+                    </ul>
+                </div>
+                
+                <div class="help-card">
+                    <h4>🔄 Workflow Integration</h4>
+                    <ul class="help-list">
+                        <li><strong>Start with Inventory Tab:</strong> For most operations, begin here</li>
+                        <li><strong>Use Advanced Mode:</strong> When doing bulk operations or Excel imports</li>
+                        <li><strong>Check Transaction History:</strong> Verify operations completed correctly</li>
+                        <li><strong>Coordinate with Team:</strong> Ensure multiple users aren't modifying same items</li>
+                        <li><strong>Regular Data Verification:</strong> Periodically verify system data against physical counts</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2>Common Scenarios</h2>
+                
+                <div class="help-card">
+                    <h4>📦 Receiving New Inventory</h4>
+                    <ol class="help-list">
+                        <li>Select the received Part ID</li>
+                        <li>Choose "Raw Material" or "Received" operation</li>
+                        <li>Select receiving dock or warehouse location</li>
+                        <li>Enter quantity from packing slip</li>
+                        <li>Add purchase order number or supplier info in notes</li>
+                        <li>Save with Ctrl+S</li>
+                    </ol>
+                </div>
+                
+                <div class="help-card">
+                    <h4>🔧 Work-In-Process Updates</h4>
+                    <ol class="help-list">
+                        <li>Select part being processed</li>
+                        <li>Choose appropriate operation stage</li>
+                        <li>Select work station location</li>
+                        <li>Enter completed quantity</li>
+                        <li>Add work order or batch info in notes</li>
+                        <li>Save and continue to next operation if needed</li>
+                    </ol>
+                </div>
+                
+                <div class="help-card">
+                    <h4>✅ Finished Goods Completion</h4>
+                    <ol class="help-list">
+                        <li>Select completed part</li>
+                        <li>Choose "Finished Goods" or "Completed" operation</li>
+                        <li>Select finished goods warehouse location</li>
+                        <li>Enter final quantity</li>
+                        <li>Add quality inspection notes if applicable</li>
+                        <li>Save and update shipping availability</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <div class="help-footer">
+            <p>MTM Inventory Application v5.0.1.2 | Inventory Operations Guide</p>
+            <p>Need help with advanced features? <a href="advanced-features.html" style="color: #fff;">Advanced Features Guide</a> | <a href="index.html" style="color: #fff;">Back to Help Home</a></p>
+        </div>
+    </div>
+    
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>

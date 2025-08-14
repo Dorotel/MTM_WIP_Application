@@ -5,6 +5,7 @@ using System.Drawing.Printing;
 using System.Text;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
+using MTM_Inventory_Application.Forms.ErrorDialog;
 using MTM_Inventory_Application.Forms.MainForm.Classes;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
@@ -51,15 +52,44 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         public Control_RemoveTab()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_RemoveTab),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_RemoveTab), nameof(Control_RemoveTab));
+
+            Service_DebugTracer.TraceUIAction("REMOVE_TAB_INITIALIZATION", nameof(Control_RemoveTab),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "UserControl"
+                });
+
             InitializeComponent();
 
+            Service_DebugTracer.TraceUIAction("THEME_APPLICATION", nameof(Control_RemoveTab),
+                new Dictionary<string, object>
+                {
+                    ["DpiScaling"] = "APPLIED",
+                    ["LayoutAdjustments"] = "APPLIED"
+                });
             // Apply comprehensive DPI scaling and runtime layout adjustments
             // THEME POLICY: Only update theme on startup, in settings menu, or on DPI change.
             // Do NOT call theme update methods from arbitrary event handlers or business logic.
             Core_Themes.ApplyDpiScaling(this); // Allowed: UserControl initialization
             Core_Themes.ApplyRuntimeLayoutAdjustments(this); // Allowed: UserControl initialization
 
+            Service_DebugTracer.TraceUIAction("CONTROL_INITIALIZATION", nameof(Control_RemoveTab),
+                new Dictionary<string, object> { ["Phase"] = "START" });
             Control_RemoveTab_Initialize();
+
+            Service_DebugTracer.TraceUIAction("COMBOBOX_PROPERTIES_APPLIED", nameof(Control_RemoveTab),
+                new Dictionary<string, object>
+                {
+                    ["ComboBoxes"] = new[] { "Part", "Operation" },
+                    ["StandardProperties"] = "Applied"
+                });
             Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Part);
             Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Operation);
             Control_RemoveTab_ComboBox_Part.ForeColor =
@@ -67,13 +97,26 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_ComboBox_Operation.ForeColor =
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             Control_RemoveTab_Image_NothingFound.Visible = false;
+
+            Service_DebugTracer.TraceUIAction("DATA_LOADING_START", nameof(Control_RemoveTab),
+                new Dictionary<string, object> { ["DataType"] = "ComboBoxes" });
             _ = Control_RemoveTab_OnStartup_LoadComboBoxesAsync();
 
+            Service_DebugTracer.TraceUIAction("EVENT_HANDLERS_SETUP", nameof(Control_RemoveTab),
+                new Dictionary<string, object>
+                {
+                    ["ButtonEvents"] = new[] { "Print" },
+                    ["EventRewiring"] = true
+                });
             Control_RemoveTab_Button_Print.Click -= Control_RemoveTab_Button_Print_Click;
             Control_RemoveTab_Button_Print.Click += Control_RemoveTab_Button_Print_Click;
-            // Tooltip for printButton intentionally omitted to avoid variable conflict
 
-
+            Service_DebugTracer.TraceUIAction("TOOLTIPS_SETUP", nameof(Control_RemoveTab),
+                new Dictionary<string, object>
+                {
+                    ["TooltipCount"] = 3,
+                    ["ButtonsConfigured"] = new[] { "Search", "Delete", "Reset" }
+                });
             ToolTip toolTip = new();
             toolTip.SetToolTip(Control_RemoveTab_Button_Search,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Search)}");
@@ -81,7 +124,18 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Delete)}");
             toolTip.SetToolTip(Control_RemoveTab_Button_Reset,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Reset)}");
+
+            Service_DebugTracer.TraceUIAction("PRIVILEGES_APPLIED", nameof(Control_RemoveTab));
             ApplyPrivileges();
+
+            Service_DebugTracer.TraceUIAction("REMOVE_TAB_INITIALIZATION", nameof(Control_RemoveTab),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "COMPLETE",
+                    ["Success"] = true
+                });
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(Control_RemoveTab), nameof(Control_RemoveTab));
         }
 
         #endregion
@@ -326,11 +380,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
                         reason += "\n\n" + string.Join("\n", errorMessages);
                     }
 
-                    MessageBox.Show(reason, @"Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Service_ErrorHandler.ShowConfirmation(reason, @"Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                DialogResult confirmResult = MessageBox.Show(
+                DialogResult confirmResult = Service_ErrorHandler.ShowConfirmation(
                     $@"The following items were deleted and added to history:\n\n{summary}",
                     @"Delete Complete",
                     MessageBoxButtons.OK,
@@ -386,8 +440,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 }
 
                 _progressHelper?.UpdateProgress(80, "Refreshing results...");
-                MessageBox.Show(@"Undo successful. Removed items have been restored.", @"Undo", MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                Service_ErrorHandler.ShowConfirmation(@"Undo successful. Removed items have been restored.", @"Undo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoggingUtility.Log("Undo: Removed items restored.");
 
                 _lastRemovedItems.Clear();
@@ -401,8 +454,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show(@"Undo failed: " + ex.Message, @"Undo Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
+                    controlName: nameof(Control_RemoveTab));
             }
             finally
             {
@@ -641,8 +694,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (string.IsNullOrWhiteSpace(partId) || (Control_RemoveTab_ComboBox_Part?.SelectedIndex ?? -1) <= 0)
                 {
-                    MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError("Please select a valid Part.", "Part Selection");
                     Control_RemoveTab_ComboBox_Part?.Focus();
                     return;
                 }
@@ -724,7 +776,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             {
                 if (Control_RemoveTab_DataGridView_Main?.Rows.Count == 0)
                 {
-                    MessageBox.Show(@"No data to print.", @"Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Service_ErrorHandler.ShowWarning(@"No data to print.", @"Print", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -754,8 +806,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($@"Print failed: {ex.Message}", @"Print Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
+                    controlName: nameof(Control_RemoveTab));
             }
             finally
             {
@@ -987,8 +1039,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     string errorMsg = !string.IsNullOrEmpty(getAllResult.ErrorMessage) 
                         ? getAllResult.ErrorMessage 
                         : "Unknown error occurred while loading inventory";
-                    MessageBox.Show($"Show All failed: {errorMsg}", @"Show All Error", 
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    var dbException = new Exception($"Show All failed: {errorMsg}");
+                    Service_ErrorHandler.HandleDatabaseError(dbException, 
+                        controlName: nameof(Control_RemoveTab));
                     return;
                 }
 
@@ -1022,8 +1075,8 @@ namespace MTM_Inventory_Application.Controls.MainForm
             catch (Exception ex)
             {
                 LoggingUtility.LogApplicationError(ex);
-                MessageBox.Show($@"Show All failed: {ex.Message}", @"Show All Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Service_ErrorHandler.HandleDatabaseError(ex, 
+                    controlName: nameof(Control_RemoveTab));
             }
             finally
             {

@@ -8,7 +8,7 @@ Quick Buttons on the right side of the MTM Inventory Application were displaying
 
 The issue occurred in `Controls\MainForm\Control_QuickButtons.cs` due to:
 
-1. **Missing Stored Procedures**: The Quick Button stored procedures (`sys_last_10_transactions_Get_ByUser_1`, etc.) didn't exist in the database
+1. **Missing Stored Procedures**: The Quick Button stored procedures (`sys_last_10_transactions_Get_ByUser`, etc.) didn't exist in the database
 2. **Wrong Database Access Pattern**: `LoadLast10Transactions` was using direct `MySqlConnection` instead of `Helper_Database_StoredProcedure`
 3. **Parameter Mismatch**: The stored procedure calls expected status parameters that weren't being handled correctly
 4. **Cross-Thread Operation Error**: UI manipulation happening from background thread
@@ -19,11 +19,11 @@ The issue occurred in `Controls\MainForm\Control_QuickButtons.cs` due to:
 **File**: `Database\StoredProcedures\06_Quick_Button_Procedures.sql`
 
 **Procedures Created**:
-- ? `sys_last_10_transactions_Get_ByUser_1` - Retrieves Quick Buttons for display
-- ? `sys_last_10_transactions_Update_ByUserAndPosition_1` - Updates Quick Button data
-- ? `sys_last_10_transactions_RemoveAndShift_ByUser_1` - Removes and shifts buttons
-- ? `sys_last_10_transactions_Add_AtPosition_1` - Adds button at specific position
-- ? `sys_last_10_transactions_Move_1` - Moves buttons between positions
+- ? `sys_last_10_transactions_Get_ByUser` - Retrieves Quick Buttons for display
+- ? `sys_last_10_transactions_Update_ByUserAndPosition` - Updates Quick Button data
+- ? `sys_last_10_transactions_RemoveAndShift_ByUser` - Removes and shifts buttons
+- ? `sys_last_10_transactions_Add_AtPosition` - Adds button at specific position
+- ? `sys_last_10_transactions_Move` - Moves buttons between positions
 - ? `sys_last_10_transactions_DeleteAll_ByUser` - Clears all buttons for user
 - ? `sys_last_10_transactions_AddOrShift_ByUser` - Adds new button to top
 
@@ -40,7 +40,7 @@ The issue occurred in `Controls\MainForm\Control_QuickButtons.cs` due to:
 ```csharp
 // BEFORE (Problematic):
 using MySqlConnection conn = new(connectionString);
-using MySqlCommand cmd = new("sys_last_10_transactions_Get_ByUser_1", conn)
+using MySqlCommand cmd = new("sys_last_10_transactions_Get_ByUser", conn)
 {
     CommandType = System.Data.CommandType.StoredProcedure
 };
@@ -48,7 +48,7 @@ using MySqlCommand cmd = new("sys_last_10_transactions_Get_ByUser_1", conn)
 // AFTER (Fixed):
 var dataResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
     Model_AppVariables.ConnectionString,
-    "sys_last_10_transactions_Get_ByUser_1",
+    "sys_last_10_transactions_Get_ByUser",
     new Dictionary<string, object> { ["User"] = currentUser },
     null, // No progress helper for this method
     true  // Use async
@@ -152,7 +152,7 @@ public async Task LoadLast10Transactions(string currentUser)
 **Database Test Results**:
 ```sql
 -- Test query shows data is available:
-CALL sys_last_10_transactions_Get_ByUser_1('JOHNK', @status, @msg);
+CALL sys_last_10_transactions_Get_ByUser('JOHNK', @status, @msg);
 -- Returns: 2 quick buttons for user JOHNK
 -- Button 1: (10) - [01-33371-000 x 10]
 -- Button 2: (10) - [01-27991-000 x 10]

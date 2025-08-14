@@ -48,7 +48,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
             {
                 LoggingUtility.LogApplicationError(ex);
                 StatusMessageChanged?.Invoke(this, $"Error loading theme settings: {ex.Message}");
-                
+
                 // Fallback to first theme if available
                 if (Control_Shortcuts_ComboBox_Theme.Items.Count > 0)
                 {
@@ -121,5 +121,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
                 StatusMessageChanged?.Invoke(this, $"Error previewing theme: {ex.Message}");
             }
         }
+
+
     }
 }

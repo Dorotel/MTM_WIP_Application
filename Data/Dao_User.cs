@@ -716,30 +716,39 @@ namespace MTM_Inventory_Application.Data
             Debug.WriteLine($"[Dao_User] Entering GetShortcutsJsonAsync(userId={userId})");
             try
             {
-                // FIXED: Use Helper_Database_StoredProcedure вместо Helper_Database_Core для избежания ошибок параметра p_Status
-                var dataResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
+                var inputParameters = new Dictionary<string, object>
+                {
+                    ["UserId"] = userId // No p_ prefix; helper adds it
+                };
+                var outputParameters = new Dictionary<string, MySqlDbType>
+                {
+                    ["SettingJson"] = MySqlDbType.VarChar,
+                    ["Status"] = MySqlDbType.Int32,
+                    ["ErrorMsg"] = MySqlDbType.VarChar
+                };
+
+                var result = await Helper_Database_StoredProcedure.ExecuteWithCustomOutput(
                     Model_AppVariables.ConnectionString,
                     "usr_ui_settings_GetShortcutsJson",
-                    new Dictionary<string, object> { ["UserId"] = userId }, // Remove p_ prefix - добавлено автоматически
-                    null, // No progress helper for this method
+                    inputParameters,
+                    outputParameters,
+                    null,
                     true
                 );
 
-                if (dataResult.IsSuccess && dataResult.Data != null && dataResult.Data.Rows.Count > 0)
+                if (result.IsSuccess && result.Data != null)
                 {
-                    object? result = dataResult.Data.Rows[0][0]; // Get first column of first row
-                    string? json = result?.ToString();
+                    string? json = result.Data["SettingJson"]?.ToString();
                     Debug.WriteLine($"[Dao_User] GetShortcutsJsonAsync result: {json}");
                     return json ?? "";
                 }
-                
+
                 return "";
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[Dao_User] Exception in GetShortcutsJsonAsync: {ex}");
                 LoggingUtility.LogDatabaseError(ex);
-                // Don't call error handlers here to avoid recursion during startup
                 LoggingUtility.Log($"GetShortcutsJsonAsync failed with exception: {ex.Message}");
                 return "";
             }

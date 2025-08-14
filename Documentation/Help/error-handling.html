@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM Inventory - Error Handling System</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <nav class="help-nav">
+        <div class="nav-brand">
+            <h1>🏭 MTM Inventory Application</h1>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">🏠 Home</a>
+            <a href="getting-started.html">🚀 Getting Started</a>
+            <a href="troubleshooting.html">🔧 Troubleshooting</a>
+        </div>
+    </nav>
+
+    <main class="help-content">
+        <header class="page-header">
+            <h1>🛡️ Error Handling System</h1>
+            <p class="lead">Understanding MTM Inventory's advanced error handling and recovery system</p>
+        </header>
+
+        <section class="content-section">
+            <h2>🎯 Enhanced Error Dialog Overview</h2>
+            <div class="error-system-overview">
+                <p>MTM Inventory Application features a sophisticated, UML-compliant error handling system that provides comprehensive error information and recovery options.</p>
+                
+                <div class="dialog-features">
+                    <h3>🔍 Dialog Features</h3>
+                    <ul class="feature-list">
+                        <li>✅ <strong>Tabbed Interface:</strong> Summary, Technical Details, and Call Stack views</li>
+                        <li>✅ <strong>Color-Coded Call Stack:</strong> Visual hierarchy with component-specific icons</li>
+                        <li>✅ <strong>Plain English Explanations:</strong> User-friendly error descriptions</li>
+                        <li>✅ <strong>Severity-Based Messaging:</strong> Low, Medium, High, and Fatal error levels</li>
+                        <li>✅ <strong>Action Buttons:</strong> Retry, Copy Details, Report Issue, View Logs, Close</li>
+                        <li>✅ <strong>Status Bar:</strong> Connection status and error criticality display</li>
+                        <li>✅ <strong>Automatic Logging:</strong> All errors logged with rich context</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>📊 Error Severity Levels</h2>
+            <div class="severity-grid">
+                <div class="severity-item low">
+                    <h3>🟢 Low Severity</h3>
+                    <div class="severity-details">
+                        <p><strong>Characteristics:</strong></p>
+                        <ul>
+                            <li>Minor issues that don't affect core functionality</li>
+                            <li>User can continue working normally</li>
+                            <li>Typically UI or display-related problems</li>
+                        </ul>
+                        <p><strong>Examples:</strong></p>
+                        <ul>
+                            <li>Theme loading delays</li>
+                            <li>Non-critical UI element failures</li>
+                            <li>Optional feature unavailability</li>
+                        </ul>
+                        <p><strong>Recommended Action:</strong> Continue working, error logged for review</p>
+                    </div>
+                </div>
+
+                <div class="severity-item medium">
+                    <h3>🟡 Medium Severity</h3>
+                    <div class="severity-details">
+                        <p><strong>Characteristics:</strong></p>
+                        <ul>
+                            <li>Functional issues that may impact workflow</li>
+                            <li>Some features may be temporarily unavailable</li>
+                            <li>User should be aware but can continue</li>
+                        </ul>
+                        <p><strong>Examples:</strong></p>
+                        <ul>
+                            <li>Validation errors on user input</li>
+                            <li>Non-critical database query failures</li>
+                            <li>File operation problems</li>
+                        </ul>
+                        <p><strong>Recommended Action:</strong> Review input, retry operation, or contact support</p>
+                    </div>
+                </div>
+
+                <div class="severity-item high">
+                    <h3>🟠 High Severity</h3>
+                    <div class="severity-details">
+                        <p><strong>Characteristics:</strong></p>
+                        <ul>
+                            <li>Serious issues affecting core functionality</li>
+                            <li>May prevent completion of important tasks</li>
+                            <li>Could indicate system or network problems</li>
+                        </ul>
+                        <p><strong>Examples:</strong></p>
+                        <ul>
+                            <li>Database connection failures</li>
+                            <li>Critical data processing errors</li>
+                            <li>Security or permission issues</li>
+                        </ul>
+                        <p><strong>Recommended Action:</strong> Stop current operation, check system status, contact administrator</p>
+                    </div>
+                </div>
+
+                <div class="severity-item fatal">
+                    <h3>🔴 Fatal Severity</h3>
+                    <div class="severity-details">
+                        <p><strong>Characteristics:</strong></p>
+                        <ul>
+                            <li>Critical system failures</li>
+                            <li>Application may need to close</li>
+                            <li>Data integrity concerns</li>
+                        </ul>
+                        <p><strong>Examples:</strong></p>
+                        <ul>
+                            <li>Unrecoverable database errors</li>
+                            <li>System resource exhaustion</li>
+                            <li>Critical security violations</li>
+                        </ul>
+                        <p><strong>Recommended Action:</strong> Application restart required, immediate administrator attention needed</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🔍 Error Dialog Tabs</h2>
+            <div class="tab-descriptions">
+                <div class="tab-item">
+                    <h3>📋 Summary Tab</h3>
+                    <div class="tab-content">
+                        <h4>What You'll See:</h4>
+                        <ul>
+                            <li><strong>Plain English Description:</strong> User-friendly explanation of what went wrong</li>
+                            <li><strong>Severity Indicator:</strong> Visual severity level with color coding</li>
+                            <li><strong>Recommended Actions:</strong> Step-by-step guidance for resolution</li>
+                            <li><strong>Impact Assessment:</strong> What parts of the application are affected</li>
+                        </ul>
+                        <h4>When to Use:</h4>
+                        <p>Start here for a quick understanding of the problem and immediate next steps.</p>
+                    </div>
+                </div>
+
+                <div class="tab-item">
+                    <h3>🔧 Technical Details Tab</h3>
+                    <div class="tab-content">
+                        <h4>What You'll See:</h4>
+                        <ul>
+                            <li><strong>Error Type:</strong> Specific exception or error category</li>
+                            <li><strong>Error Message:</strong> Detailed technical error message</li>
+                            <li><strong>Component Information:</strong> Which part of the application failed</li>
+                            <li><strong>System Context:</strong> Database connection, user, timestamp</li>
+                            <li><strong>Recovery Options:</strong> Available automatic recovery actions</li>
+                        </ul>
+                        <h4>When to Use:</h4>
+                        <p>For IT support or when you need detailed information for troubleshooting.</p>
+                    </div>
+                </div>
+
+                <div class="tab-item">
+                    <h3>📞 Call Stack Tab</h3>
+                    <div class="tab-content">
+                        <h4>What You'll See:</h4>
+                        <ul>
+                            <li><strong>Color-Coded Method Chain:</strong> Visual representation of the error path</li>
+                            <li><strong>Component Icons:</strong> 🎯 Controls, 🔍 DAOs, ⚙️ Services, 📊 Core</li>
+                            <li><strong>Method Hierarchy:</strong> Exactly where the error occurred</li>
+                            <li><strong>Parameter Information:</strong> What data was being processed</li>
+                        </ul>
+                        <h4>When to Use:</h4>
+                        <p>For developers or advanced troubleshooting - shows the exact execution path.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🎮 Action Buttons Guide</h2>
+            <div class="action-buttons">
+                <div class="button-grid">
+                    <div class="button-item retry">
+                        <h3>🔄 Retry</h3>
+                        <p><strong>When Available:</strong> For temporary failures or network issues</p>
+                        <p><strong>What It Does:</strong> Attempts to repeat the failed operation</p>
+                        <p><strong>Best For:</strong> Database timeouts, connection issues, temporary resource problems</p>
+                    </div>
+
+                    <div class="button-item copy">
+                        <h3>📋 Copy Details</h3>
+                        <p><strong>Always Available:</strong> For all error types</p>
+                        <p><strong>What It Does:</strong> Copies technical details to clipboard</p>
+                        <p><strong>Best For:</strong> Sharing error information with support team or documentation</p>
+                    </div>
+
+                    <div class="button-item report">
+                        <h3>📧 Report Issue</h3>
+                        <p><strong>When Available:</strong> For unexpected or recurring errors</p>
+                        <p><strong>What It Does:</strong> Creates error report and logs incident</p>
+                        <p><strong>Best For:</strong> Bugs, system issues, or problems requiring investigation</p>
+                    </div>
+
+                    <div class="button-item logs">
+                        <h3>📊 View Logs</h3>
+                        <p><strong>When Available:</strong> When log files are accessible</p>
+                        <p><strong>What It Does:</strong> Opens detailed application logs</p>
+                        <p><strong>Best For:</strong> Pattern analysis, recurring issues, system monitoring</p>
+                    </div>
+
+                    <div class="button-item close">
+                        <h3>❌ Close</h3>
+                        <p><strong>Always Available:</strong> For all error dialogs</p>
+                        <p><strong>What It Does:</strong> Closes error dialog and continues operation</p>
+                        <p><strong>Best For:</strong> After taking appropriate action or noting the error</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🌈 Icon System Reference</h2>
+            <div class="icon-reference">
+                <h3>📍 Component Icons in Call Stack</h3>
+                <div class="icon-grid">
+                    <div class="icon-item">
+                        <span class="icon">🎯</span>
+                        <div class="icon-info">
+                            <h4>Controls</h4>
+                            <p>User interface controls and forms</p>
+                            <ul>
+                                <li>MainForm controls</li>
+                                <li>Settings form controls</li>
+                                <li>Dialog boxes</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="icon-item">
+                        <span class="icon">🔍</span>
+                        <div class="icon-info">
+                            <h4>DAOs (Data Access)</h4>
+                            <p>Database operations and data layer</p>
+                            <ul>
+                                <li>Database queries</li>
+                                <li>Stored procedure calls</li>
+                                <li>Connection management</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="icon-item">
+                        <span class="icon">⚙️</span>
+                        <div class="icon-info">
+                            <h4>Services</h4>
+                            <p>Business logic and application services</p>
+                            <ul>
+                                <li>Error handling</li>
+                                <li>Connection recovery</li>
+                                <li>Timer services</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="icon-item">
+                        <span class="icon">🗄️</span>
+                        <div class="icon-info">
+                            <h4>Helpers</h4>
+                            <p>Utility and helper functions</p>
+                            <ul>
+                                <li>Database helpers</li>
+                                <li>UI helpers</li>
+                                <li>Progress helpers</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="icon-item">
+                        <span class="icon">📋</span>
+                        <div class="icon-info">
+                            <h4>Forms</h4>
+                            <p>Main application forms</p>
+                            <ul>
+                                <li>MainForm</li>
+                                <li>SettingsForm</li>
+                                <li>Transactions form</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="icon-item">
+                        <span class="icon">📊</span>
+                        <div class="icon-info">
+                            <h4>Core Components</h4>
+                            <p>Core application systems</p>
+                            <ul>
+                                <li>Themes</li>
+                                <li>Models</li>
+                                <li>Logging</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🔧 Common Error Scenarios</h2>
+            <div class="error-scenarios">
+                <div class="scenario-item">
+                    <h3>🗄️ Database Connection Errors</h3>
+                    <div class="scenario-details">
+                        <h4>Symptoms:</h4>
+                        <ul>
+                            <li>High severity error dialog</li>
+                            <li>Red connection status indicator</li>
+                            <li>Cannot load data or save changes</li>
+                        </ul>
+                        <h4>Recovery Steps:</h4>
+                        <ol>
+                            <li>Check network connectivity to database server</li>
+                            <li>Click "Retry" button to attempt reconnection</li>
+                            <li>If retry fails, check database server status</li>
+                            <li>Contact database administrator if problem persists</li>
+                        </ol>
+                        <h4>Prevention:</h4>
+                        <ul>
+                            <li>Monitor network stability</li>
+                            <li>Ensure database server is properly maintained</li>
+                            <li>Use connection recovery features when available</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="scenario-item">
+                    <h3>✍️ Input Validation Errors</h3>
+                    <div class="scenario-details">
+                        <h4>Symptoms:</h4>
+                        <ul>
+                            <li>Medium severity error dialog</li>
+                            <li>Specific field highlighted in form</li>
+                            <li>Cannot save or continue until corrected</li>
+                        </ul>
+                        <h4>Recovery Steps:</h4>
+                        <ol>
+                            <li>Read the plain English error description</li>
+                            <li>Locate the highlighted field or control</li>
+                            <li>Correct the input according to requirements</li>
+                            <li>Try the operation again</li>
+                        </ol>
+                        <h4>Prevention:</h4>
+                        <ul>
+                            <li>Follow field format requirements</li>
+                            <li>Use dropdown selections when available</li>
+                            <li>Check data before submitting</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="scenario-item">
+                    <h3>📁 File Operation Errors</h3>
+                    <div class="scenario-details">
+                        <h4>Symptoms:</h4>
+                        <ul>
+                            <li>Medium to high severity depending on file type</li>
+                            <li>Cannot read, write, or access specific files</li>
+                            <li>Import/export operations fail</li>
+                        </ul>
+                        <h4>Recovery Steps:</h4>
+                        <ol>
+                            <li>Check file permissions and access rights</li>
+                            <li>Verify file path and location</li>
+                            <li>Ensure file is not open in another application</li>
+                            <li>Click "Retry" if it's a temporary issue</li>
+                        </ol>
+                        <h4>Prevention:</h4>
+                        <ul>
+                            <li>Close files after use</li>
+                            <li>Ensure adequate disk space</li>
+                            <li>Maintain proper file permissions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>📊 Error Logging and Monitoring</h2>
+            <div class="logging-system">
+                <h3>🔍 Automatic Logging Features</h3>
+                <ul class="logging-features">
+                    <li>✅ <strong>All errors automatically logged</strong> with full context</li>
+                    <li>✅ <strong>Rich caller information</strong> including component and method</li>
+                    <li>✅ <strong>Severity-based categorization</strong> for easy filtering</li>
+                    <li>✅ <strong>Timestamp and user context</strong> for audit trails</li>
+                    <li>✅ <strong>System state information</strong> for troubleshooting</li>
+                </ul>
+
+                <h3>📈 Log Analysis</h3>
+                <div class="log-analysis">
+                    <h4>Accessing Logs:</h4>
+                    <ol>
+                        <li>Click "View Logs" button in error dialog</li>
+                        <li>Or navigate to Settings → Database → Error Logs</li>
+                        <li>Use filtering options to find specific errors</li>
+                    </ol>
+
+                    <h4>Understanding Log Entries:</h4>
+                    <ul>
+                        <li><strong>Timestamp:</strong> When the error occurred</li>
+                        <li><strong>Severity:</strong> Error level for prioritization</li>
+                        <li><strong>Component:</strong> Which part of the application failed</li>
+                        <li><strong>User:</strong> Who was using the application</li>
+                        <li><strong>Details:</strong> Technical information and stack trace</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🎯 Best Practices</h2>
+            <div class="best-practices">
+                <h3>👤 For End Users</h3>
+                <ul class="practice-list">
+                    <li>📋 <strong>Always read the Summary tab first</strong> for user-friendly explanations</li>
+                    <li>🔄 <strong>Try the Retry button</strong> for temporary network or database issues</li>
+                    <li>📋 <strong>Copy error details</strong> when reporting issues to support</li>
+                    <li>📊 <strong>Note the severity level</strong> to understand urgency</li>
+                    <li>💾 <strong>Save your work frequently</strong> to minimize data loss</li>
+                </ul>
+
+                <h3>🔧 For IT Support</h3>
+                <ul class="practice-list">
+                    <li>📊 <strong>Review Technical Details tab</strong> for system information</li>
+                    <li>🔍 <strong>Analyze Call Stack tab</strong> for root cause analysis</li>
+                    <li>📈 <strong>Monitor error logs regularly</strong> for patterns</li>
+                    <li>⚠️ <strong>Address High and Fatal errors immediately</strong></li>
+                    <li>📋 <strong>Document recurring issues</strong> for system improvements</li>
+                </ul>
+
+                <h3>👨‍💻 For Developers</h3>
+                <ul class="practice-list">
+                    <li>🛡️ <strong>Use Service_ErrorHandler</strong> for all error scenarios</li>
+                    <li>📝 <strong>Provide meaningful error messages</strong> in plain English</li>
+                    <li>🎯 <strong>Include relevant context</strong> in error reports</li>
+                    <li>🔄 <strong>Implement retry logic</strong> for recoverable errors</li>
+                    <li>📊 <strong>Monitor error patterns</strong> for system health</li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="troubleshooting-tip">
+            <h3>🆘 Need More Help?</h3>
+            <p>If you're still experiencing issues after using the error handling system:</p>
+            <ul>
+                <li>📋 Check the <a href="troubleshooting.html">Troubleshooting Guide</a></li>
+                <li>🗄️ Review <a href="database-configuration.html">Database Configuration</a></li>
+                <li>⚙️ Verify <a href="system-requirements.html">System Requirements</a></li>
+                <li>📞 Contact your system administrator with error details</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer class="help-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>📚 Error Resources</h4>
+                <ul>
+                    <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                    <li><a href="database-configuration.html">Database Config</a></li>
+                    <li><a href="system-requirements.html">System Requirements</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>🛠️ Support Tools</h4>
+                <ul>
+                    <li><a href="development-tools.html">Development Tools</a></li>
+                    <li><a href="settings-management.html">Settings Management</a></li>
+                    <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                </ul>
+            </div>
+            <div class="footer-info">
+                <p>&copy; 2025 MTM Inventory Application. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>

@@ -3,6 +3,7 @@ using System.Reflection;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
+using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
@@ -20,8 +21,27 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         public Control_Add_PartID()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_Add_PartID),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_Add_PartID), nameof(Control_Add_PartID));
+
+            Service_DebugTracer.TraceUIAction("ADD_PARTID_INITIALIZATION", nameof(Control_Add_PartID),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "UserControl"
+                });
+
             InitializeComponent();
+
+            Service_DebugTracer.TraceUIAction("PART_TYPES_LOADING", nameof(Control_Add_PartID),
+                new Dictionary<string, object> { ["DataSource"] = "ItemTypes" });
             LoadPartTypes();
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(Control_Add_PartID), nameof(Control_Add_PartID));
         }
 
         #endregion

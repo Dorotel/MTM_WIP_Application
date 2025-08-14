@@ -30,7 +30,7 @@
 
 ## Stored Procedures Referenced (If Applicable)
 - 🗄️ `sys_last_` - Purpose TBD - Status: TO_VERIFY
-- 🗄️ `sys_last_10_transactions_Get_ByUser_1` - Purpose TBD - Status: TO_VERIFY
+- 🗄️ `sys_last_10_transactions_Get_ByUser` - Purpose TBD - Status: TO_VERIFY
 
 ## Method Dependencies (Key Methods Only)
 ### Public Methods

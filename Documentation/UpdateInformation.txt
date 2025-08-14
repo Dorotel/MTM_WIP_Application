@@ -741,7 +741,7 @@ DEPLOYMENT ARCHITECTURE:
     
     INVENTORY OPERATIONS:
     - inv_inventory_Add_Item: Item addition with transaction logging
-    - inv_inventory_Remove_Item_1_1: Item removal with validation
+    - inv_inventory_Remove_Item: Item removal with validation
     - inv_inventory_Transfer_Part: Location transfers
     - inv_inventory_transfer_quantity: Quantity-specific transfers
     - inv_inventory_Get_ByPartID: Inventory queries by part
@@ -783,12 +783,12 @@ DEPLOYMENT ARCHITECTURE:
     Primary Functions: User quick access buttons, personalized shortcuts
     
     QUICK BUTTON OPERATIONS:
-    - sys_last_10_transactions_Get_ByUser_1: Button data retrieval
+    - sys_last_10_transactions_Get_ByUser: Button data retrieval
     - sys_last_10_transactions_AddOrShift_ByUser: Smart button creation
-    - sys_last_10_transactions_Update_ByUserAndPosition_1: Button modification
-    - sys_last_10_transactions_RemoveAndShift_ByUser_1: Button removal with shifting
-    - sys_last_10_transactions_Add_AtPosition_1: Position-specific insertion
-    - sys_last_10_transactions_Move_1: Button reordering
+    - sys_last_10_transactions_Update_ByUserAndPosition: Button modification
+    - sys_last_10_transactions_RemoveAndShift_ByUser: Button removal with shifting
+    - sys_last_10_transactions_Add_AtPosition: Position-specific insertion
+    - sys_last_10_transactions_Move: Button reordering
     - sys_last_10_transactions_DeleteAll_ByUser: Complete user cleanup
     
     USER EXPERIENCE FEATURES:
@@ -917,12 +917,12 @@ SYSTEM FEATURES:
 
 19.2.1 DATABASE ARCHITECTURE
     7 Stored Procedures for Complete Functionality:
-    - sys_last_10_transactions_Get_ByUser_1: Retrieve user's Quick Buttons
+    - sys_last_10_transactions_Get_ByUser: Retrieve user's Quick Buttons
     - sys_last_10_transactions_AddOrShift_ByUser: Smart button creation/update
-    - sys_last_10_transactions_Update_ByUserAndPosition_1: Direct button editing
-    - sys_last_10_transactions_RemoveAndShift_ByUser_1: Button removal with shifting
-    - sys_last_10_transactions_Add_AtPosition_1: Position-specific insertion
-    - sys_last_10_transactions_Move_1: Button reordering functionality
+    - sys_last_10_transactions_Update_ByUserAndPosition: Direct button editing
+    - sys_last_10_transactions_RemoveAndShift_ByUser: Button removal with shifting
+    - sys_last_10_transactions_Add_AtPosition: Position-specific insertion
+    - sys_last_10_transactions_Move: Button reordering functionality
     - sys_last_10_transactions_DeleteAll_ByUser: Complete user cleanup
 
 19.2.2 SMART UNIQUENESS LOGIC
@@ -953,7 +953,7 @@ SYSTEM FEATURES:
         {
             var dataResult = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
                 Model_AppVariables.ConnectionString,
-                "sys_last_10_transactions_Get_ByUser_1",
+                "sys_last_10_transactions_Get_ByUser",
                 new Dictionary<string, object> { ["User"] = currentUser },
                 null, true);
 

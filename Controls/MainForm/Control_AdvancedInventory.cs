@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using ClosedXML.Excel;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
+using MTM_Inventory_Application.Forms.ErrorDialog;
 using MTM_Inventory_Application.Forms.MainForm.Classes;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
@@ -47,17 +48,44 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         public Control_AdvancedInventory()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_AdvancedInventory),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_AdvancedInventory), nameof(Control_AdvancedInventory));
+
             try
             {
+                Service_DebugTracer.TraceUIAction("ADVANCED_INVENTORY_INITIALIZATION", nameof(Control_AdvancedInventory),
+                    new Dictionary<string, object>
+                    {
+                        ["Phase"] = "START",
+                        ["ComponentType"] = "UserControl"
+                    });
+
                 LoggingUtility.Log("Control_AdvancedInventory constructor entered.");
                 InitializeComponent();
 
+                Service_DebugTracer.TraceUIAction("THEME_APPLICATION", nameof(Control_AdvancedInventory),
+                    new Dictionary<string, object>
+                    {
+                        ["DpiScaling"] = "APPLIED",
+                        ["LayoutAdjustments"] = "APPLIED"
+                    });
                 // Apply comprehensive DPI scaling and runtime layout adjustments
                 // THEME POLICY: Only update theme on startup, in settings menu, or on DPI change.
                 // Do NOT call theme update methods from arbitrary event handlers or business logic.
                 Core_Themes.ApplyDpiScaling(this); // Allowed: Form initialization
                 Core_Themes.ApplyRuntimeLayoutAdjustments(this); // Allowed: Form initialization
 
+                Service_DebugTracer.TraceUIAction("TOOLTIPS_SETUP", nameof(Control_AdvancedInventory),
+                    new Dictionary<string, object>
+                    {
+                        ["TooltipCount"] = 8,
+                        ["ButtonTypes"] = new[] { "Single", "MultiLocation", "Import" },
+                        ["ButtonsConfigured"] = new[] { "Send", "Save", "Reset", "Normal", "AddLoc", "SaveAll", "OpenExcel" }
+                    });
                 ToolTip toolTip = new();
                 toolTip.SetToolTip(AdvancedInventory_Single_Button_Send,
                     $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Send)}");
@@ -829,8 +857,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (AdvancedInventory_Single_ListView.Items.Count == 0)
                 {
-                    MessageBox.Show(@"No items to inventory. Please add at least one item to the list.", @"No Items",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Service_ErrorHandler.ShowWarning(@"No items to inventory. Please add at least one item to the list.", @"No Items");
                     return;
                 }
 
@@ -941,32 +968,28 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
                 if (string.IsNullOrWhiteSpace(partId) || AdvancedInventory_Single_ComboBox_Part.SelectedIndex <= 0)
                 {
-                    MessageBox.Show(@"Please select a valid Part.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError("Please select a valid Part.", "Part");
                     AdvancedInventory_Single_ComboBox_Part.Focus();
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(op) || AdvancedInventory_Single_ComboBox_Op.SelectedIndex <= 0)
                 {
-                    MessageBox.Show(@"Please select a valid Operation.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError("Please select a valid Operation.", "Operation");
                     AdvancedInventory_Single_ComboBox_Op.Focus();
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(loc) || AdvancedInventory_Single_ComboBox_Loc.SelectedIndex <= 0)
                 {
-                    MessageBox.Show(@"Please select a valid Location.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError("Please select a valid Location.", "Location");
                     AdvancedInventory_Single_ComboBox_Loc.Focus();
                     return;
                 }
 
                 if (!int.TryParse(qtyText, out int qty) || qty <= 0)
                 {
-                    MessageBox.Show(@"Please enter a valid quantity.", @"Validation Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
+                    Service_ErrorHandler.HandleValidationError("Please enter a valid quantity.", "Quantity");
                     AdvancedInventory_Single_TextBox_Qty.Focus();
                     return;
                 }
@@ -1462,11 +1485,11 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         #region Excel Export/Import Helpers
 
-        private static string GetWipAppExcelUserFolder()
+        private static async Task<string> GetWipAppExcelUserFolderAsync()
         {
             string? server = new MySqlConnectionStringBuilder(Model_AppVariables.ConnectionString).Server;
             string userName = Model_AppVariables.User ?? Environment.UserName;
-            string logFilePath = Helper_Database_Variables.GetLogFilePath(server, userName);
+            string logFilePath = await Helper_Database_Variables.GetLogFilePathAsync(server, userName);
             string logDir = Directory.GetParent(logFilePath)?.Parent?.FullName ?? "";
             string excelRoot = Path.Combine(logDir, "WIP App Excel Files");
             string userFolder = Path.Combine(excelRoot, userName);
@@ -1478,22 +1501,28 @@ namespace MTM_Inventory_Application.Controls.MainForm
             return userFolder;
         }
 
-        private static string GetUserExcelFilePath()
+        private static async Task<string> GetUserExcelFilePathAsync()
         {
-            string userFolder = GetWipAppExcelUserFolder();
+            string userFolder = await GetWipAppExcelUserFolderAsync();
             string fileName = $"{Model_AppVariables.User ?? Environment.UserName}_import.xlsx";
             return Path.Combine(userFolder, fileName);
         }
 
-        private void AdvancedInventory_Import_Button_OpenExcel_Click(object? sender, EventArgs e)
+        // Fix for CS8600: Converting null literal or possible null value to non-nullable type.
+        // The problematic line is:
+        // string excelPath = GetUserExcelFilePathAsync().ToString();
+        // GetUserExcelFilePathAsync() returns a Task<string>, so .ToString() does not return the path, but the type name.
+        // The correct way is to await the Task and ensure the result is not null.
+
+        private async void AdvancedInventory_Import_Button_OpenExcel_Click(object? sender, EventArgs e)
         {
             try
             {
-                string excelPath = GetUserExcelFilePath();
+                string excelPath = await GetUserExcelFilePathAsync();
                 if (!File.Exists(excelPath))
                 {
                     string? userFolder = Path.GetDirectoryName(excelPath);
-                    if (!Directory.Exists(userFolder))
+                    if (!string.IsNullOrEmpty(userFolder) && !Directory.Exists(userFolder))
                     {
                         Directory.CreateDirectory(userFolder!);
                     }
@@ -1522,15 +1551,12 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
         }
 
-        #endregion
-
-        #region Excel Import/Export Actions
-
-        private void AdvancedInventory_Import_Button_ImportExcel_Click(object? sender, EventArgs e)
+        // Fix for CS8600 in AdvancedInventory_Import_Button_ImportExcel_Click and other usages
+        private async void AdvancedInventory_Import_Button_ImportExcel_Click(object? sender, EventArgs e)
         {
             try
             {
-                string excelPath = GetUserExcelFilePath();
+                string excelPath = await GetUserExcelFilePathAsync();
                 if (!File.Exists(excelPath))
                 {
                     MessageBox.Show(@"Excel file not found. Please create or open the Excel file first.",
@@ -1602,6 +1628,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
         }
 
+        // Fix for CS8600 in AdvancedInventory_Import_Button_Save_Click and RefreshImportDataGridView
         private async void AdvancedInventory_Import_Button_Save_Click(object? sender, EventArgs e)
         {
             if (AdvancedInventory_Import_DataGridView.DataSource == null)
@@ -1630,7 +1657,7 @@ namespace MTM_Inventory_Application.Controls.MainForm
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
 
-            string excelPath = GetUserExcelFilePath();
+            string excelPath = await GetUserExcelFilePathAsync();
             XLWorkbook? workbook = null;
             IXLWorksheet? worksheet = null;
             if (File.Exists(excelPath))
@@ -1762,9 +1789,9 @@ namespace MTM_Inventory_Application.Controls.MainForm
             }
         }
 
-        private void RefreshImportDataGridView()
+        private async void RefreshImportDataGridView()
         {
-            string excelPath = GetUserExcelFilePath();
+            string excelPath = await GetUserExcelFilePathAsync();
             if (!File.Exists(excelPath))
             {
                 return;

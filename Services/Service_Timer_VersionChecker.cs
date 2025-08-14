@@ -1,5 +1,4 @@
-﻿using System.Data;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Timers;
 using MTM_Inventory_Application.Controls.MainForm;
 using MTM_Inventory_Application.Forms.MainForm;

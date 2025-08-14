@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
+using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
@@ -25,7 +26,26 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         #region Constructors
 
-        public Control_Add_Operation() => InitializeComponent();
+        public Control_Add_Operation() 
+        {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_Add_Operation),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_Add_Operation), nameof(Control_Add_Operation));
+
+            Service_DebugTracer.TraceUIAction("ADD_OPERATION_INITIALIZATION", nameof(Control_Add_Operation),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "UserControl"
+                });
+
+            InitializeComponent();
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(Control_Add_Operation), nameof(Control_Add_Operation));
+        }
 
         #endregion
 

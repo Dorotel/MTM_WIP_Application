@@ -27,10 +27,10 @@ This caused the stored procedures to fail with "Database error occurred while re
 - ? **Maintains all other functionality** (positions, validation, transactions)
 
 ### **Procedures Updated:**
-- ? `sys_last_10_transactions_Get_ByUser_1` - Fixed SELECT statement
-- ? `sys_last_10_transactions_Update_ByUserAndPosition_1` - Fixed INSERT/UPDATE
-- ? `sys_last_10_transactions_Add_AtPosition_1` - Fixed INSERT
-- ? `sys_last_10_transactions_Move_1` - Fixed INSERT
+- ? `sys_last_10_transactions_Get_ByUser` - Fixed SELECT statement
+- ? `sys_last_10_transactions_Update_ByUserAndPosition` - Fixed INSERT/UPDATE
+- ? `sys_last_10_transactions_Add_AtPosition` - Fixed INSERT
+- ? `sys_last_10_transactions_Move` - Fixed INSERT
 
 ---
 
@@ -64,7 +64,7 @@ After deployment, test the fix:
 
 ```sql
 -- Test the fixed procedure
-CALL sys_last_10_transactions_Get_ByUser_1('JOHNK', @status, @msg);
+CALL sys_last_10_transactions_Get_ByUser('JOHNK', @status, @msg);
 SELECT @status as Status, @msg as Message;
 
 -- Expected Results:

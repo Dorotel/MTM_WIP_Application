@@ -34,8 +34,9 @@ namespace MTM_Inventory_Application.Helpers
             _statusLabel = statusLabel ?? throw new ArgumentNullException(nameof(statusLabel));
             _parentForm = parentForm ?? throw new ArgumentNullException(nameof(parentForm));
             
-            // Store the original progress bar color
-            _originalProgressBarColor = _progressBar.ForeColor;
+            // Store the original progress bar color (ToolStripProgressBar doesn't support ForeColor change)
+            // We'll use different approaches for visual feedback
+            _originalProgressBarColor = SystemColors.Highlight;
         }
 
         #endregion
@@ -53,10 +54,10 @@ namespace MTM_Inventory_Application.Helpers
                 _isErrorState = false;
                 _progressBar.Visible = true;
                 _progressBar.Value = 0;
-                _progressBar.ForeColor = _originalProgressBarColor;
+                // Note: ToolStripProgressBar doesn't support ForeColor changes
                 _statusLabel.ForeColor = SystemColors.ControlText;
-                Application.DoEvents();
                 _statusLabel.Text = status;
+                Application.DoEvents();
             });
         }
 
@@ -73,10 +74,10 @@ namespace MTM_Inventory_Application.Helpers
                 {
                     progress = Math.Max(0, Math.Min(100, progress));
                     _progressBar.Value = progress;
-                    _progressBar.ForeColor = _originalProgressBarColor;
+                    // Note: ToolStripProgressBar doesn't support ForeColor changes
                     _statusLabel.ForeColor = SystemColors.ControlText;
-                    Application.DoEvents();
                     _statusLabel.Text = $"{status} ({progress}%)";
+                    Application.DoEvents();
                 }
             });
         }
@@ -91,7 +92,8 @@ namespace MTM_Inventory_Application.Helpers
             ThreadSafeInvoke(() =>
             {
                 _isErrorState = true;
-                _progressBar.ForeColor = _errorColor;
+                // Note: ToolStripProgressBar doesn't support ForeColor changes
+                // We rely on status label color for error indication
                 _statusLabel.ForeColor = _errorColor;
                 
                 if (progress.HasValue)
@@ -100,8 +102,8 @@ namespace MTM_Inventory_Application.Helpers
                     _progressBar.Value = clampedProgress;
                 }
                 
-                Application.DoEvents();
                 _statusLabel.Text = $"ERROR: {errorMessage}";
+                Application.DoEvents();
                 
                 // Keep error visible for a moment
                 System.Threading.Tasks.Task.Delay(100).Wait();
@@ -118,10 +120,10 @@ namespace MTM_Inventory_Application.Helpers
             {
                 _isErrorState = false;
                 _progressBar.Value = 100;
-                _progressBar.ForeColor = _successColor;
+                // Note: ToolStripProgressBar doesn't support ForeColor changes
                 _statusLabel.ForeColor = _successColor;
-                Application.DoEvents();
                 _statusLabel.Text = $"SUCCESS: {successMessage}";
+                Application.DoEvents();
             });
         }
 
@@ -134,10 +136,10 @@ namespace MTM_Inventory_Application.Helpers
             {
                 _isErrorState = false;
                 _progressBar.Visible = false;
-                _progressBar.ForeColor = _originalProgressBarColor;
+                // Note: ToolStripProgressBar doesn't support ForeColor changes
                 _statusLabel.ForeColor = SystemColors.ControlText;
-                Application.DoEvents();
                 _statusLabel.Text = "Ready";
+                Application.DoEvents();
             });
         }
 
@@ -170,7 +172,7 @@ namespace MTM_Inventory_Application.Helpers
             ThreadSafeInvoke(() =>
             {
                 _isErrorState = false;
-                _progressBar.ForeColor = _originalProgressBarColor;
+                // Note: ToolStripProgressBar doesn't support ForeColor changes
                 _statusLabel.ForeColor = SystemColors.ControlText;
             });
         }

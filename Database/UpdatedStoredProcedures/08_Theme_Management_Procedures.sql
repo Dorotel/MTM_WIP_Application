@@ -4,8 +4,8 @@
 -- File: 08_Theme_Management_Procedures.sql
 -- Purpose: Application theme management and user interface customization procedures
 -- Created: August 10, 2025
--- Updated: August 10, 2025 - UNIFORM PARAMETER NAMING (WITH p_ prefixes)
--- Target Database: mtm_wip_application
+-- Updated: August 12, 2025 - ALL COLOR SETTINGS INCLUDED
+-- Target Database: mtm_wip_application_test
 -- MySQL Version: 5.7.24+ (MAMP Compatible)
 -- ================================================================================
 
@@ -18,135 +18,6 @@ DROP PROCEDURE IF EXISTS app_themes_Delete_Theme;
 DROP PROCEDURE IF EXISTS app_themes_Exists;
 DROP PROCEDURE IF EXISTS app_themes_Get_UserTheme;
 DROP PROCEDURE IF EXISTS app_themes_Set_UserTheme;
-
--- Drop tables if they exist (for clean deployment)
-DROP TABLE IF EXISTS app_themes;
-
--- ================================================================================
--- CREATE THEME TABLES
--- ================================================================================
-
--- Application themes table for storing theme definitions
-CREATE TABLE IF NOT EXISTS app_themes (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    ThemeName VARCHAR(50) NOT NULL UNIQUE,
-    DisplayName VARCHAR(100) NOT NULL,
-    SettingsJson TEXT NOT NULL, -- JSON containing theme color definitions
-    IsDefault TINYINT(1) DEFAULT 0, -- Whether this is a default system theme
-    IsActive TINYINT(1) DEFAULT 1, -- Whether this theme is available for use
-    CreatedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CreatedBy VARCHAR(100) DEFAULT 'SYSTEM',
-    ModifiedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    ModifiedBy VARCHAR(100) DEFAULT 'SYSTEM',
-    Description TEXT NULL, -- Optional description of the theme
-    VERSION INT DEFAULT 1, -- Theme version for future updates
-    INDEX idx_theme_name (ThemeName),
-    INDEX idx_active (IsActive),
-    INDEX idx_default (IsDefault)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ================================================================================
--- INSERT DEFAULT THEMES
--- ================================================================================
-
--- Insert Default Light Theme
-INSERT IGNORE INTO app_themes (ThemeName, DisplayName, SettingsJson, IsDefault, IsActive, Description, CreatedBy) VALUES (
-    'Default',
-    'Default Light Theme',
-    '{
-        "FormBackColor": "#FFFFFF",
-        "FormForeColor": "#000000",
-        "ControlBackColor": "#FFFFFF",
-        "ControlForeColor": "#000000",
-        "ButtonBackColor": "#F0F0F0",
-        "ButtonForeColor": "#000000",
-        "ButtonHoverBackColor": "#E0E0E0",
-        "ButtonPressedBackColor": "#D0D0D0",
-        "TextBoxBackColor": "#FFFFFF",
-        "TextBoxForeColor": "#000000",
-        "ComboBoxBackColor": "#FFFFFF",
-        "ComboBoxForeColor": "#000000",
-        "ComboBoxErrorForeColor": "#FF0000",
-        "DataGridBackColor": "#FFFFFF",
-        "DataGridForeColor": "#000000",
-        "DataGridHeaderBackColor": "#F0F0F0",
-        "DataGridHeaderForeColor": "#000000",
-        "DataGridRowBackColor": "#FFFFFF",
-        "DataGridAltRowBackColor": "#F0F8FF",
-        "DataGridSelectionBackColor": "#316AC5",
-        "DataGridSelectionForeColor": "#FFFFFF"
-    }',
-    1,
-    1,
-    'Default light theme with standard Windows colors',
-    'SYSTEM'
-);
-
--- Insert Dark Theme
-INSERT IGNORE INTO app_themes (ThemeName, DisplayName, SettingsJson, IsDefault, IsActive, Description, CreatedBy) VALUES (
-    'Dark',
-    'Dark Theme',
-    '{
-        "FormBackColor": "#2D2D30",
-        "FormForeColor": "#FFFFFF",
-        "ControlBackColor": "#2D2D30",
-        "ControlForeColor": "#FFFFFF",
-        "ButtonBackColor": "#3C3C3C",
-        "ButtonForeColor": "#FFFFFF",
-        "ButtonHoverBackColor": "#505050",
-        "ButtonPressedBackColor": "#282828",
-        "TextBoxBackColor": "#1E1E1E",
-        "TextBoxForeColor": "#FFFFFF",
-        "ComboBoxBackColor": "#1E1E1E",
-        "ComboBoxForeColor": "#FFFFFF",
-        "ComboBoxErrorForeColor": "#FF6464",
-        "DataGridBackColor": "#2D2D30",
-        "DataGridForeColor": "#FFFFFF",
-        "DataGridHeaderBackColor": "#3C3C3C",
-        "DataGridHeaderForeColor": "#FFFFFF",
-        "DataGridRowBackColor": "#2D2D30",
-        "DataGridAltRowBackColor": "#37373A",
-        "DataGridSelectionBackColor": "#3399FF",
-        "DataGridSelectionForeColor": "#FFFFFF"
-    }',
-    1,
-    1,
-    'Professional dark theme for low-light environments',
-    'SYSTEM'
-);
-
--- Insert Blue Theme
-INSERT IGNORE INTO app_themes (ThemeName, DisplayName, SettingsJson, IsDefault, IsActive, Description, CreatedBy) VALUES (
-    'Blue',
-    'Blue Professional Theme',
-    '{
-        "FormBackColor": "#F0F8FF",
-        "FormForeColor": "#191919",
-        "ControlBackColor": "#F0F8FF",
-        "ControlForeColor": "#191919",
-        "ButtonBackColor": "#4682B4",
-        "ButtonForeColor": "#FFFFFF",
-        "ButtonHoverBackColor": "#6495ED",
-        "ButtonPressedBackColor": "#1E5E8C",
-        "TextBoxBackColor": "#FFFFFF",
-        "TextBoxForeColor": "#000000",
-        "ComboBoxBackColor": "#FFFFFF",
-        "ComboBoxForeColor": "#000000",
-        "ComboBoxErrorForeColor": "#FF0000",
-        "DataGridBackColor": "#FFFFFF",
-        "DataGridForeColor": "#000000",
-        "DataGridHeaderBackColor": "#4682B4",
-        "DataGridHeaderForeColor": "#FFFFFF",
-        "DataGridRowBackColor": "#FFFFFF",
-        "DataGridAltRowBackColor": "#E6F0FF",
-        "DataGridSelectionBackColor": "#4682B4",
-        "DataGridSelectionForeColor": "#FFFFFF"
-    }',
-    1,
-    1,
-    'Professional blue theme with steel blue accents',
-    'SYSTEM'
-);
 
 -- ================================================================================
 -- THEME MANAGEMENT PROCEDURES
@@ -166,7 +37,7 @@ BEGIN
     END;
     
     -- Simply return all rows from app_themes table (like the old Helper_Database_Core.ExecuteDataTable approach)
-    SELECT * FROM app_themes WHERE IsActive = 1 ORDER BY ThemeName;
+    SELECT * FROM app_themes ORDER BY ThemeName;
     
     SET p_Status = 0;
     SET p_ErrorMsg = 'Themes retrieved successfully';
@@ -189,11 +60,11 @@ BEGIN
         SET p_ErrorMsg = CONCAT('Database error occurred while retrieving theme: ', p_ThemeName);
     END;
     
-    SELECT COUNT(*) INTO v_Count FROM app_themes WHERE ThemeName = p_ThemeName AND IsActive = 1;
+    SELECT COUNT(*) INTO v_Count FROM app_themes WHERE ThemeName = p_ThemeName;
     
     IF v_Count = 0 THEN
         SET p_Status = 1;
-        SET p_ErrorMsg = CONCAT('Theme not found or inactive: ', p_ThemeName);
+        SET p_ErrorMsg = CONCAT('Theme not found: ', p_ThemeName);
         -- Return empty result set with structure
         SELECT NULL as ThemeName, NULL as SettingsJson LIMIT 0;
     ELSE
@@ -227,11 +98,11 @@ CREATE PROCEDURE app_themes_Add_Theme(
     IN p_DisplayName VARCHAR(100),
     IN p_SettingsJson TEXT,
     IN p_Description TEXT,
-    IN p_CreatedBy VARCHAR(100),
-    OUT p_Status INT,
-    OUT p_ErrorMsg VARCHAR(255)
+    IN p_CreatedBy VARCHAR(100)
 )
 BEGIN
+    DECLARE p_Status INT DEFAULT 0;
+    DECLARE p_ErrorMsg VARCHAR(255) DEFAULT '';
     DECLARE v_Count INT DEFAULT 0;
     DECLARE v_ThemeId INT DEFAULT 0;
     
@@ -295,11 +166,11 @@ CREATE PROCEDURE app_themes_Update_Theme(
     IN p_DisplayName VARCHAR(100),
     IN p_SettingsJson TEXT,
     IN p_Description TEXT,
-    IN p_ModifiedBy VARCHAR(100),
-    OUT p_Status INT,
-    OUT p_ErrorMsg VARCHAR(255)
+    IN p_ModifiedBy VARCHAR(100)
 )
 BEGIN
+    DECLARE p_Status INT DEFAULT 0;
+    DECLARE p_ErrorMsg VARCHAR(255) DEFAULT '';
     DECLARE v_Count INT DEFAULT 0;
     DECLARE v_RowsAffected INT DEFAULT 0;
     
@@ -348,11 +219,11 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE app_themes_Delete_Theme(
     IN p_ThemeName VARCHAR(50),
-    IN p_ModifiedBy VARCHAR(100),
-    OUT p_Status INT,
-    OUT p_ErrorMsg VARCHAR(255)
+    IN p_ModifiedBy VARCHAR(100)
 )
 BEGIN
+    DECLARE p_Status INT DEFAULT 0;
+    DECLARE p_ErrorMsg VARCHAR(255) DEFAULT '';
     DECLARE v_Count INT DEFAULT 0;
     DECLARE v_RowsAffected INT DEFAULT 0;
     
@@ -398,11 +269,11 @@ DELIMITER ;
 -- Check if theme exists
 DELIMITER $$
 CREATE PROCEDURE app_themes_Exists(
-    IN p_ThemeName VARCHAR(50),
-    OUT p_Status INT,
-    OUT p_ErrorMsg VARCHAR(255)
+    IN p_ThemeName VARCHAR(50)
 )
 BEGIN
+    DECLARE p_Status INT DEFAULT 0;
+    DECLARE p_ErrorMsg VARCHAR(255) DEFAULT '';
     DECLARE v_Count INT DEFAULT 0;
     
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -426,11 +297,11 @@ DELIMITER ;
 -- Get user's selected theme
 DELIMITER $$
 CREATE PROCEDURE app_themes_Get_UserTheme(
-    IN p_UserId VARCHAR(100),
-    OUT p_Status INT,
-    OUT p_ErrorMsg VARCHAR(255)
+    IN p_UserId VARCHAR(100)
 )
 BEGIN
+    DECLARE p_Status INT DEFAULT 0;
+    DECLARE p_ErrorMsg VARCHAR(255) DEFAULT '';
     DECLARE v_ThemeName VARCHAR(50) DEFAULT NULL;
     DECLARE v_ThemeExists INT DEFAULT 0;
     
@@ -482,11 +353,11 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE app_themes_Set_UserTheme(
     IN p_UserId VARCHAR(100),
-    IN p_ThemeName VARCHAR(50),
-    OUT p_Status INT,
-    OUT p_ErrorMsg VARCHAR(255)
+    IN p_ThemeName VARCHAR(50)
 )
 BEGIN
+    DECLARE p_Status INT DEFAULT 0;
+    DECLARE p_ErrorMsg VARCHAR(255) DEFAULT '';
     DECLARE v_UserExists INT DEFAULT 0;
     DECLARE v_ThemeExists INT DEFAULT 0;
     DECLARE v_RowsAffected INT DEFAULT 0;

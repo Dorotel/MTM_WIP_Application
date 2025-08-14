@@ -28,18 +28,7 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
         
 
         
-        #region Methods
 
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-        #endregion
         #region Component Designer generated code
 
         private void InitializeComponent()

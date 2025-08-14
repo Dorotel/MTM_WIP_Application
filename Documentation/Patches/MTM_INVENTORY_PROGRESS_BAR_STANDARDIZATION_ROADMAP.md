@@ -230,7 +230,7 @@ public static async Task<StoredProcedureResult<DataTable>> GetAllLocationsAsync(
 **Inventory Operations**:
 ```
 Dao_Inventory.AddInventoryItem() ? inv_inventory_Add_Item
-Dao_Inventory.RemoveInventoryItem() ? inv_inventory_Remove_Item_1_1
+Dao_Inventory.RemoveInventoryItem() ? inv_inventory_Remove_Item
 Dao_Inventory.TransferInventory() ? inv_inventory_Transfer_Part
 Dao_Inventory.GetInventoryByPart() ? inv_inventory_Get_ByPartID
 ```

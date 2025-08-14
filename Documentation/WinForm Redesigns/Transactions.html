@@ -1,0 +1,605 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM Inventory Application - Transactions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+            font-size: 14px;
+        }
+
+        .main-window {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Bar */
+        .header-bar {
+            background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .branding {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .form-title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .status-panel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .connection-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+            padding: 8px 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .toolbar-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .toolbar-btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+        .btn-info {
+            background: #0dcaf0;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: black;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 300px 1fr 320px;
+            gap: 16px;
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .panel-header {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-content {
+            padding: 16px;
+        }
+
+        /* Filters Panel */
+        .filters-panel {
+            overflow-y: auto;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #0d6efd;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+            .filter-section h4 {
+                color: #495057;
+                margin-bottom: 8px;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .filter-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        /* Results Panel */
+        .results-panel {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .results-summary {
+            background: #e3f2fd;
+            border: 1px solid #1976d2;
+            padding: 12px 16px;
+            margin: 16px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+
+        .view-options {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .view-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .data-grid {
+            flex: 1;
+            overflow: hidden;
+            margin: 0 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .row-add {
+            background: #d4edda;
+        }
+
+        .row-transfer {
+            background: #fff3cd;
+        }
+
+        .row-remove {
+            background: #f8d7da;
+        }
+
+        .action-btn {
+            padding: 2px 6px;
+            margin: 0 2px;
+            border: none;
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .pagination-btn {
+            padding: 6px 12px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Details Panel */
+        .details-panel {
+            overflow-y: auto;
+        }
+
+        .detail-card {
+            background: white;
+            border: 2px solid #0d6efd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            font-size: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 4px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .chart-placeholder {
+            background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%), linear-gradient(-45deg, #f8f9fa 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f8f9fa 75%), linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+            height: 120px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            font-size: 12px;
+            margin: 8px 0;
+        }
+
+        /* Footer */
+        .footer-bar {
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-section {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .status-indicator {
+            color: #28a745;
+            font-size: 12px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 280px 1fr 280px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+
+            .details-panel {
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-window">
+        <!-- Header Bar -->
+        <div class="header-bar">
+            <div class="branding">🏭 MTM Inventory</div>
+            <div class="form-title">📊 Transaction History & Analytics</div>
+            <div class="status-panel">
+                <div class="connection-status"></div>
+                <span>👤 john.doe (Admin)</span>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <button class="toolbar-btn btn-info">🔍 Quick Search</button>
+            <button class="toolbar-btn btn-secondary">📅 Today</button>
+            <button class="toolbar-btn btn-secondary">📈 This Week</button>
+            <button class="toolbar-btn btn-success">📋 Export</button>
+            <button class="toolbar-btn btn-warning">🔄 Refresh</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Filters Panel -->
+            <div class="panel filters-panel">
+                <div class="panel-header">🎯 Smart Search</div>
+                <div class="panel-content">
+                    <input type="text" class="search-box" placeholder="Search anything... Part ID, User, Location, Notes">
+
+                    <div class="filter-section">
+                        <h4>📅 Time Range</h4>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="radio" name="time" checked> Today
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="time"> This Week
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="time"> This Month
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="time"> Custom Range
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h4>🏢 Location & Building</h4>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" checked> Expo Drive
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox"> Vits Drive
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h4>⚡ Transaction Types</h4>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" checked> 📥 IN (Receive)
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" checked> 📤 OUT (Remove)
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" checked> 🔄 TRANSFER
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button class="filter-btn btn-info">🔍 Apply</button>
+                        <button class="filter-btn btn-secondary">🧹 Clear</button>
+                        <button class="filter-btn btn-success">💾 Save</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="panel results-panel">
+                <div class="results-summary">
+                    <div><strong>📊 Results Overview</strong></div>
+                    <div>Found: <strong>247 transactions</strong> | Page 1 of 13 | Total Value: <strong>$12,450</strong></div>
+                    <div class="stats-row">
+                        <span>📥 IN: 89</span>
+                        <span>📤 OUT: 76</span>
+                        <span>🔄 TRANSFER: 82</span>
+                    </div>
+                    <div class="view-options">
+                        <button class="view-btn btn-info">📋 Grid View</button>
+                        <button class="view-btn btn-secondary">📊 Chart View</button>
+                        <button class="view-btn btn-secondary">📈 Timeline</button>
+                    </div>
+                </div>
+
+                <div class="data-grid">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>📦 Part ID ▼</th>
+                                <th>⚡ Operation</th>
+                                <th>📊 Quantity ▲</th>
+                                <th>👤 User</th>
+                                <th>📅 Date/Time</th>
+                                <th>🎯 Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="row-add">
+                                <td>ABC123-456</td>
+                                <td>📥 Add Inventory</td>
+                                <td>+25</td>
+                                <td>john.doe</td>
+                                <td>Jan 27, 2:30 PM</td>
+                                <td>
+                                    <button class="action-btn btn-info">🔍</button>
+                                    <button class="action-btn btn-secondary">📋</button>
+                                </td>
+                            </tr>
+                            <tr class="row-transfer">
+                                <td>DEF789-012</td>
+                                <td>🔄 Transfer</td>
+                                <td>15</td>
+                                <td>jane.smith</td>
+                                <td>Jan 27, 1:15 PM</td>
+                                <td>
+                                    <button class="action-btn btn-info">🔍</button>
+                                    <button class="action-btn btn-secondary">📋</button>
+                                </td>
+                            </tr>
+                            <tr class="row-remove">
+                                <td>GHI345-678</td>
+                                <td>📤 Remove Parts</td>
+                                <td>-10</td>
+                                <td>bob.jones</td>
+                                <td>Jan 27, 11:45 AM</td>
+                                <td>
+                                    <button class="action-btn btn-info">🔍</button>
+                                    <button class="action-btn btn-secondary">📋</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <button class="pagination-btn">⏮️ First</button>
+                    <button class="pagination-btn">◀️ Previous</button>
+                    <span>Page 1 of 13</span>
+                    <button class="pagination-btn">Next ▶️</button>
+                    <button class="pagination-btn">Last ⏭️</button>
+                </div>
+            </div>
+
+            <!-- Details Panel -->
+            <div class="panel details-panel">
+                <div class="panel-header">🔍 Transaction Details</div>
+                <div class="panel-content">
+                    <div class="detail-card">
+                        <div style="font-weight: bold; margin-bottom: 12px;">📦 Part: ABC123-456</div>
+                        <div class="detail-row">
+                            <span>🏷️ Batch:</span>
+                            <span>BTH-2025-0127-001</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>📥 Type:</span>
+                            <span>Add Inventory</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>📊 Quantity:</span>
+                            <span>+25 units</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>🎯 Location:</span>
+                            <span>A1-B2-C3</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>👤 User:</span>
+                            <span>john.doe</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>📅 Date:</span>
+                            <span>Jan 27, 2:30 PM</span>
+                        </div>
+                    </div>
+
+                    <div class="panel-header">📈 Analytics Dashboard</div>
+                    <div style="padding: 16px;">
+                        <h4>📊 Daily Activity</h4>
+                        <div class="chart-placeholder">Activity Chart</div>
+
+                        <h4>🎯 Top Operations</h4>
+                        <div style="font-size: 12px; margin: 8px 0;">
+                            <div>📥 Add Inventory: 45% (234 ops)</div>
+                            <div>🔄 Transfers: 35% (182 ops)</div>
+                            <div>📤 Removals: 20% (104 ops)</div>
+                        </div>
+
+                        <div style="background: #d4edda; padding: 12px; border-radius: 6px; margin-top: 16px; font-size: 12px;">
+                            <div><strong>System Performance:</strong></div>
+                            <div>⚡ Avg Response: 1.2s</div>
+                            <div>🎯 Success Rate: 99.8%</div>
+                            <div>📊 Total Volume: 12,450 items</div>
+                            <div style="margin-top: 8px;">🟢 All systems operational</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-bar">
+            <div class="footer-section">
+                <button class="toolbar-btn btn-secondary">☑️ Select All</button>
+                <button class="toolbar-btn btn-info">📋 Bulk Export</button>
+                <button class="toolbar-btn btn-warning">🏷️ Batch Actions</button>
+            </div>
+            <div class="status-indicator">
+                🟢 Database Connected | ✅ Up to date | Last Update: 2:31 PM | Active Users: 12
+            </div>
+            <div class="footer-section">
+                <button class="toolbar-btn btn-secondary">⚙️ Settings</button>
+                <button class="toolbar-btn btn-info">❓ Help</button>
+                <button class="toolbar-btn btn-success">📞 Support</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

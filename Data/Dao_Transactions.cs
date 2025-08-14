@@ -169,6 +169,164 @@ internal class Dao_Transactions
 
     #endregion
 
+    #region Smart Search Methods
+
+    /// <summary>
+    /// Advanced smart search for transactions with intelligent parsing
+    /// </summary>
+    /// <param name="searchTerms">Parsed search terms from user input</param>
+    /// <param name="transactionTypes">Selected transaction types filter</param>
+    /// <param name="timeRange">Selected time range filter</param>
+    /// <param name="locations">Selected locations filter</param>
+    /// <param name="userName">Current user name</param>
+    /// <param name="isAdmin">Whether user has admin privileges</param>
+    /// <param name="page">Page number for pagination</param>
+    /// <param name="pageSize">Items per page</param>
+    /// <returns>DaoResult containing smart search results</returns>
+    public async Task<DaoResult<List<Model_Transactions>>> SmartSearchAsync(
+        Dictionary<string, string> searchTerms,
+        List<TransactionType> transactionTypes,
+        (DateTime? from, DateTime? to) timeRange,
+        List<string> locations,
+        string userName,
+        bool isAdmin,
+        int page = 1,
+        int pageSize = 20
+    )
+    {
+        try
+        {
+            // Build parameters from parsed search terms
+            var parameters = new Dictionary<string, object>
+            {
+                ["UserName"] = userName ?? "",
+                ["IsAdmin"] = isAdmin,
+                ["Page"] = page,
+                ["PageSize"] = pageSize
+            };
+
+            // Add search term parameters
+            parameters["PartID"] = searchTerms.ContainsKey("partid") ? searchTerms["partid"] : "";
+            parameters["BatchNumber"] = searchTerms.ContainsKey("batch") ? searchTerms["batch"] : "";
+            parameters["Operation"] = searchTerms.ContainsKey("operation") ? searchTerms["operation"] : "";
+            parameters["Notes"] = searchTerms.ContainsKey("notes") ? searchTerms["notes"] : "";
+            parameters["User"] = searchTerms.ContainsKey("user") ? searchTerms["user"] : "";
+            parameters["ItemType"] = searchTerms.ContainsKey("itemtype") ? searchTerms["itemtype"] : "";
+
+            // Handle quantity search
+            if (searchTerms.ContainsKey("quantity") && int.TryParse(searchTerms["quantity"], out int qty))
+                parameters["Quantity"] = qty;
+            else
+                parameters["Quantity"] = null;
+
+            // Handle transaction types
+            parameters["TransactionTypes"] = transactionTypes.Count > 0 
+                ? string.Join(",", transactionTypes.Select(t => t.ToString())) 
+                : "";
+
+            // Handle time range
+            parameters["FromDate"] = timeRange.from;
+            parameters["ToDate"] = timeRange.to;
+
+            // Handle locations
+            parameters["Locations"] = locations.Count > 0 
+                ? string.Join(",", locations) 
+                : "";
+
+            // Handle general search term (searches across multiple fields)
+            parameters["GeneralSearch"] = searchTerms.ContainsKey("general") ? searchTerms["general"] : "";
+
+            // Execute smart search stored procedure
+            using var reader = await Helper_Database_StoredProcedure.ExecuteReader(
+                Model_AppVariables.ConnectionString,
+                "inv_transactions_SmartSearch", 
+                parameters, 
+                true, 
+                CommandType.StoredProcedure);
+
+            var transactions = new List<Model_Transactions>();
+            while (reader.Read())
+            {
+                transactions.Add(MapTransaction(reader));
+            }
+
+            return DaoResult<List<Model_Transactions>>.Success(
+                transactions, 
+                $"Smart search retrieved {transactions.Count} transactions matching criteria"
+            );
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "SmartSearchAsync");
+            return DaoResult<List<Model_Transactions>>.Failure(
+                "Smart search failed", ex
+            );
+        }
+    }
+
+    /// <summary>
+    /// Get transaction analytics for dashboard display
+    /// </summary>
+    /// <param name="userName">Current user name</param>
+    /// <param name="isAdmin">Whether user has admin privileges</param>
+    /// <param name="timeRange">Time range for analytics</param>
+    /// <returns>DaoResult containing analytics data</returns>
+    public async Task<DaoResult<Dictionary<string, object>>> GetTransactionAnalyticsAsync(
+        string userName,
+        bool isAdmin,
+        (DateTime? from, DateTime? to) timeRange
+    )
+    {
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["UserName"] = userName ?? "",
+                ["IsAdmin"] = isAdmin,
+                ["FromDate"] = timeRange.from,
+                ["ToDate"] = timeRange.to
+            };
+
+            using var reader = await Helper_Database_StoredProcedure.ExecuteReader(
+                Model_AppVariables.ConnectionString,
+                "inv_transactions_GetAnalytics", 
+                parameters, 
+                true, 
+                CommandType.StoredProcedure);
+
+            var analytics = new Dictionary<string, object>();
+            
+            if (reader.Read())
+            {
+                analytics["TotalTransactions"] = reader.GetInt32("TotalTransactions");
+                analytics["InTransactions"] = reader.GetInt32("InTransactions");
+                analytics["OutTransactions"] = reader.GetInt32("OutTransactions");
+                analytics["TransferTransactions"] = reader.GetInt32("TransferTransactions");
+                analytics["TotalQuantity"] = reader.GetInt64("TotalQuantity");
+                analytics["UniquePartIds"] = reader.GetInt32("UniquePartIds");
+                analytics["ActiveUsers"] = reader.GetInt32("ActiveUsers");
+                analytics["TopPartId"] = reader["TopPartId"]?.ToString() ?? "";
+                analytics["TopUser"] = reader["TopUser"]?.ToString() ?? "";
+            }
+
+            return DaoResult<Dictionary<string, object>>.Success(
+                analytics, 
+                "Transaction analytics retrieved successfully"
+            );
+        }
+        catch (Exception ex)
+        {
+            LoggingUtility.LogDatabaseError(ex);
+            await Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, true, "GetTransactionAnalyticsAsync");
+            return DaoResult<Dictionary<string, object>>.Failure(
+                "Failed to retrieve transaction analytics", ex
+            );
+        }
+    }
+
+    #endregion
+
     #region Private Methods
 
     /// <summary>

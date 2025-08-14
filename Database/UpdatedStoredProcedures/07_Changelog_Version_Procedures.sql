@@ -5,7 +5,7 @@
 -- Purpose: Application version tracking and changelog management
 -- Created: August 10, 2025
 -- Updated: August 10, 2025 - UNIFORM PARAMETER NAMING (WITH p_ prefixes) - MySQL 5.7.24 COMPATIBLE
--- Target Database: mtm_wip_application
+-- Target Database: mtm_wip_application_test
 -- MySQL Version: 5.7.24+ (MAMP Compatible)
 -- ================================================================================
 
@@ -14,19 +14,6 @@ DROP PROCEDURE IF EXISTS log_changelog_Get_Current;
 DROP PROCEDURE IF EXISTS log_changelog_Get_All;
 DROP PROCEDURE IF EXISTS log_changelog_Add_Entry;
 DROP PROCEDURE IF EXISTS log_changelog_Initialize_Default_Data;
-
--- Create table if it doesn't exist (MySQL 5.7.24 Compatible)
-CREATE TABLE IF NOT EXISTS log_changelog (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    Version VARCHAR(50) NOT NULL,
-    Description TEXT,
-    ReleaseDate DATE,
-    CreatedBy VARCHAR(100),
-    CreatedDate DATETIME DEFAULT NOW(),
-    ModifiedDate DATETIME DEFAULT NOW() ON UPDATE NOW(),
-    INDEX idx_version (Version),
-    INDEX idx_release_date (ReleaseDate)
-);
 
 -- ================================================================================
 -- CHANGELOG AND VERSION PROCEDURES

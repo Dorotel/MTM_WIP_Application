@@ -11,7 +11,7 @@ namespace MTM_Inventory_Application.Models
         #region User Info
 
         public static string EnteredUser { get; set; } = "Default User";
-        public static string User { get; set; } = Dao_System.System_GetUserName();
+        public static string User { get; set; } = "DEFAULT";
         public static string? UserPin { get; set; }
         public static string? UserShift { get; set; }
         public static bool UserTypeAdmin { get; set; } = false;
@@ -45,7 +45,18 @@ namespace MTM_Inventory_Application.Models
         public static string? ThemeName { get; set; } = "Default";
         public static float ThemeFontSize { get; set; } = 9f;
         public static string? WipDataGridTheme { get; set; } = "Default";
-        public static string? WipServerAddress { get; set; } = "localhost"; //localhost
+        public static string? WipServerAddress 
+        { 
+            get
+            {
+                return Model_Users.WipServerAddress;
+            }
+            set 
+            {
+                // For compatibility, but the logic is now in Model_Users
+            }
+        }
+
         public static string? WipServerPort { get; set; } = "3306";
         public static string? Version { get; set; } = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
 

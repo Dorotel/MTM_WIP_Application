@@ -1,411 +1,368 @@
 # ================================================================================
-# MTM INVENTORY APPLICATION - STORED PROCEDURES DEPLOYMENT GUIDE
+# MTM INVENTORY APPLICATION - STORED PROCEDURES DEPLOYMENT GUIDE (WINDOWS)
 # ================================================================================
 # File: README.md
-# Purpose: Comprehensive guide for deploying stored procedures
-# Created: August 10, 2025
-# Updated: For MySQL 5.7.24 and MAMP compatibility
-# Target Database: mtm_wip_application
+# Purpose: Windows-focused deployment guide for stored procedures using .bat files
+# Created: August 13, 2025
+# Updated: August 13, 2025 - Windows .bat files only
+# Target Database: mtm_wip_application (production) / mtm_wip_application_test (development)
 # MySQL Version: 5.7.24+ (MAMP Compatible)
+# Platform: Windows only
 # ================================================================================
 
-# MTM Inventory Application - Stored Procedures Deployment
+# MTM Inventory Application - Windows Deployment Guide
 
-This directory contains all the stored procedures required for the MTM Inventory Application, along with deployment scripts and documentation optimized for MySQL 5.7.24 and MAMP environments.
+This directory contains all stored procedures and Windows deployment tools for the MTM Inventory Application. All deployment is handled through Windows .bat files optimized for MAMP and MySQL 5.7.24.
 
-## Overview
+## 📁 File Structure
 
-The MTM Inventory Application has been architected to use stored procedures exclusively for database operations, eliminating hardcoded SQL statements to improve security, maintainability, and performance. This deployment package includes:
-
-- **User Management Procedures** - Authentication, settings, and user CRUD operations
-- **System Role Procedures** - Role-based access control and permissions
-- **Master Data Procedures** - Part numbers, operations, locations, and item types
-- **Inventory Procedures** - Inventory tracking, transactions, and batch management
-
-## Files Structure
-
+### **Stored Procedure Files (10 files)**
 ```
-Database/StoredProcedures/
-??? 01_User_Management_Procedures.sql      # Core user management procedures (MySQL 5.7 Compatible)
-??? 02_System_Role_Procedures.sql          # Role and access control procedures
-??? 03_Master_Data_Procedures.sql          # Master data management procedures
-??? 04_Inventory_Procedures.sql            # Inventory and transaction procedures
-??? 05_Error_Log_Procedures.sql            # Error logging procedures (NEW)
-??? deploy_procedures.sh                   # Linux/Mac/MAMP deployment script
-??? README.md                             # This file
+Database/UpdatedStoredProcedures/
+├── 00_StoredProcedure_Verification_System.sql  # System verification procedures (5 procedures)
+├── 01_User_Management_Procedures.sql           # User authentication & settings (17 procedures)
+├── 02_System_Role_Procedures.sql               # Role-based access control (8 procedures)
+├── 03_Master_Data_Procedures.sql               # Parts, operations, locations (23 procedures)
+├── 04_Inventory_Procedures.sql                 # Inventory tracking & transactions (15 procedures)
+├── 05_Error_Log_Procedures.sql                 # Error logging system (7 procedures)
+├── 06_Quick_Button_Procedures.sql              # Quick button management (7 procedures)
+├── 07_Changelog_Version_Procedures.sql         # Version management (4 procedures)
+├── 08_Theme_Management_Procedures.sql          # UI theme system (8 procedures)
+└── 99_Database_Testing_Suite.sql               # Testing utilities (2 procedures)
+
+Total: ~96 Stored Procedures
 ```
 
-## Prerequisites
+### **Windows Deployment Tools (5 .bat files)**
+```
+├── deploy.bat                    # 🚀 MAIN DEPLOYMENT - Deploy all stored procedures
+├── analyze.bat                   # 🔍 CODE ANALYSIS - Analyze procedures for issues
+├── run_verification.bat          # ✅ VERIFICATION - Test deployed procedures
+├── final_verification.bat        # 🏁 FINAL CHECK - Quick verification status
+└── fix_and_reverify.bat         # 🔧 FIX & TEST - Fix schema issues and re-verify
+```
 
-### System Requirements
-- **MySQL Server 5.7.24 or higher** (compatible with MAMP)
-- MySQL client tools (included with MAMP)
-- Administrative access to the target database
-- **MAMP** (recommended for development) or standard MySQL installation
+## 🚀 Quick Start Guide
 
-### MAMP-Specific Requirements
-- MAMP 4.0+ with MySQL 5.7.24+
-- Apache and MySQL services running in MAMP
-- Default MAMP credentials (usually root/root)
-- Target database created via phpMyAdmin or MySQL client
+### **Step 1: Ensure MAMP is Running**
+- Start MAMP application
+- Verify Apache and MySQL services are running (green lights)
+- Note the MySQL port (usually 3306, sometimes 8889 for older MAMP)
 
-### Database Requirements
-- Target database `mtm_wip_application` must exist
-- User account with sufficient privileges:
-  - `CREATE ROUTINE` privilege
-  - `ALTER ROUTINE` privilege
-  - `EXECUTE` privilege
-  - `SELECT`, `INSERT`, `UPDATE`, `DELETE` on all application tables
-
-### Application Requirements
-- MTM Inventory Application (.NET 8)
-- All application DAO classes must be using the stored procedure architecture
-- Connection string properly configured for stored procedure calls
-
-## MySQL 5.7.24 Compatibility Notes
-
-### Differences from MySQL 8.0
-- **BOOLEAN Parameters**: Replaced with `TINYINT(1)` for broader compatibility
-- **JSON Handling**: Uses `TEXT` data type for JSON parameters to ensure compatibility
-- **Error Handling**: Enhanced error handling patterns compatible with MySQL 5.7
-- **Syntax Validation**: All procedures tested with MySQL 5.7.24
-
-### MAMP Considerations
-- Default port: **3306** (some older MAMP versions use 8889)
-- Default credentials: **root/root**
-- MySQL binaries location: `/Applications/MAMP/Library/bin` (macOS) or `C:\MAMP\bin\mysql\bin` (Windows)
-- Access phpMyAdmin at: `http://localhost/phpMyAdmin` (when MAMP is running)
-
-## Deployment Methods
-
-### Method 1: MAMP Automated Deployment (Recommended)
-
-#### For MAMP on Windows
+### **Step 2: Deploy All Procedures**
 ```cmd
-# Navigate to stored procedures directory
-cd Database\StoredProcedures
+# Navigate to the directory
+cd "C:\Users\[YourUsername]\source\repos\MTM_WIP_Application\Database\UpdatedStoredProcedures"
 
-# Deploy with MAMP defaults (root/root)
-deploy_procedures.bat -h localhost -u root -p root -d mtm_wip_application
+# Deploy all procedures (MAMP defaults)
+deploy.bat
 
-# Deploy with custom MAMP installation path
-deploy_procedures.bat --mamp-path "C:\MAMP" -p root
-
-# Deploy with older MAMP (port 8889)
-deploy_procedures.bat -P 8889 -u root -p root -d mtm_wip_application
+# Or with custom parameters
+deploy.bat -h localhost -u root -p root -d mtm_wip_application
 ```
 
-#### For MAMP on macOS/Linux
-```bash
-# Navigate to stored procedures directory
-cd Database/StoredProcedures
+### **Step 3: Verify Deployment**
+```cmd
+# Run verification
+run_verification.bat
 
-# Make script executable
-chmod +x deploy_procedures.sh
-
-# Deploy with MAMP defaults
-./deploy_procedures.sh -h localhost -u root -p root -d mtm_wip_application
-
-# Deploy with custom MySQL path
-./deploy_procedures.sh --mysql-path /Applications/MAMP/Library/bin -p root
-
-# Deploy with older MAMP (port 8889)
-./deploy_procedures.sh -P 8889 -u root -p root -d mtm_wip_application
+# Or quick final check
+final_verification.bat
 ```
 
-#### MAMP Deployment Script Parameters
+## 🔧 Detailed .bat File Guide
+
+### **1. deploy.bat** - Main Deployment Script
+**Purpose**: Deploy all stored procedures to your MySQL database
+
+#### **Basic Usage**:
+```cmd
+# Deploy with MAMP defaults (recommended)
+deploy.bat
+
+# Deploy to test database
+deploy.bat -d mtm_wip_application_test
+
+# Deploy with custom credentials
+deploy.bat -h localhost -u myuser -p mypass -d mydatabase
+```
+
+#### **Available Parameters**:
 - `-h, --host` - Database host (default: localhost)
-- `-P, --port` - Database port (default: 3306, older MAMP: 8889)
+- `-P, --port` - Database port (default: 3306)
 - `-u, --user` - Database username (default: root)
-- `-p, --password` - Database password (MAMP default: root)
+- `-p, --password` - Database password (default: root)
 - `-d, --database` - Database name (default: mtm_wip_application)
-- `--mamp-path` - MAMP installation path (Windows only)
-- `--mysql-path` - Custom MySQL binary path (macOS/Linux)
+- `--mamp-path` - Custom MAMP installation path
 
-### Method 2: MAMP Manual Deployment via phpMyAdmin
+#### **What It Does**:
+- ✅ Tests database connection
+- ✅ Creates backup of existing procedures
+- ✅ Deploys all 10 SQL files in order
+- ✅ Provides success/failure feedback
+- ✅ Shows total procedure count (~96 procedures)
 
-1. **Start MAMP** and ensure Apache/MySQL services are running
-2. **Open phpMyAdmin** at `http://localhost/phpMyAdmin`
-3. **Select database** `mtm_wip_application` (create if it doesn't exist)
-4. **Import SQL files** in the following order:
-   - `01_User_Management_Procedures.sql`
-   - `02_System_Role_Procedures.sql`
-   - `03_Master_Data_Procedures.sql`
-   - `04_Inventory_Procedures.sql`
-   - `05_Error_Log_Procedures.sql`   # Import new error log procedures
+---
 
-### Method 3: MAMP Command Line Deployment
+### **2. analyze.bat** - Code Analysis Tool
+**Purpose**: Analyze stored procedures for potential issues and compatibility
 
-#### Windows (with MAMP)
+#### **Usage**:
 ```cmd
-# Add MAMP MySQL to PATH or use full path
+# Run analysis on all procedures
+analyze.bat
+```
+
+#### **What It Analyzes**:
+- ✅ **Procedure Count**: Counts procedures in each file
+- ✅ **Schema Validation**: Checks table structures
+- ✅ **Column Names**: Verifies column name consistency
+- ✅ **Error Handling**: Analyzes error handling patterns
+- ✅ **MySQL Compatibility**: Checks MySQL 5.7.24 compatibility
+- ✅ **Fix Recommendations**: Provides improvement suggestions
+
+#### **Output**:
+- Creates detailed analysis report: `%TEMP%\stored_procedure_analysis_report.txt`
+- Opens report automatically in Notepad
+- Console output with summary of findings
+
+---
+
+### **3. run_verification.bat** - System Verification
+**Purpose**: Deploy and test the verification system
+
+#### **Usage**:
+```cmd
+# Deploy verification system and run tests
+run_verification.bat
+```
+
+#### **What It Does**:
+- ✅ Deploys verification stored procedures
+- ✅ Tests database schema (17 required tables)
+- ✅ Verifies procedure inventory (~96+ procedures expected)
+- ✅ Runs comprehensive system verification
+- ✅ Provides detailed status report
+
+#### **Expected Results**:
+```
+SCHEMA VERIFICATION: PASSED
+PROCEDURE INVENTORY: COMPLETED (77+ procedures found)
+PROCEDURE TESTING: 1-3 tests (some "failures" are expected)
+```
+
+---
+
+### **4. final_verification.bat** - Quick Status Check
+**Purpose**: Quick verification of system status
+
+#### **Usage**:
+```cmd
+# Quick system health check
+final_verification.bat
+```
+
+#### **What It Does**:
+- ⚡ Fast execution (assumes verification system is deployed)
+- ✅ Runs complete verification procedure
+- ✅ Shows overall system status
+- ✅ Provides pass/fail summary
+
+#### **Expected Output**:
+```
+OverallStatus: 0 (success) or 1 (issues detected)
+FinalResult: "✅ ALL SYSTEMS VERIFIED" or "⚠ Issues detected"
+```
+
+---
+
+### **5. fix_and_reverify.bat** - Schema Repair Tool
+**Purpose**: Fix missing tables/schema issues and re-verify
+
+#### **Usage**:
+```cmd
+# Fix schema issues and re-run verification
+fix_and_reverify.bat
+```
+
+#### **What It Does**:
+- 🔧 Creates missing tables (sys_quick_buttons, log_error_log view)
+- 🔧 Fixes column name mismatches
+- 🔧 Adds sample data where needed
+- ✅ Re-runs complete verification
+- ✅ Shows before/after comparison
+
+#### **When to Use**:
+- When verification shows "Missing tables detected"
+- When procedures fail due to schema mismatches
+- After major database changes
+
+## 💡 Environment-Specific Usage
+
+### **Development Environment** (Recommended)
+```cmd
+# Deploy to test database for development
+deploy.bat -d mtm_wip_application_test
+
+# Analyze and verify development setup
+analyze.bat
+run_verification.bat
+```
+
+### **Production Environment**
+```cmd
+# Deploy to production database
+deploy.bat -d mtm_wip_application -h 172.16.1.104
+
+# Verify production deployment
+final_verification.bat
+```
+
+### **Local MAMP Development** (Most Common)
+```cmd
+# Standard MAMP deployment (all defaults work)
+deploy.bat
+
+# Verify MAMP deployment
+run_verification.bat
+```
+
+## 🔍 Troubleshooting Guide
+
+### **Common Issues and Solutions**
+
+#### **1. "mysql command not found"**
+**Problem**: MAMP MySQL not in system PATH
+**Solutions**:
+```cmd
+# Option 1: Use MAMP path parameter
+deploy.bat --mamp-path "C:\MAMP"
+
+# Option 2: Add MAMP to PATH manually
 set PATH=C:\MAMP\bin\mysql\bin;%PATH%
+deploy.bat
 
-# Execute each file in order
-mysql -h localhost -P 3306 -u root -p mtm_wip_application < 01_User_Management_Procedures.sql
-mysql -h localhost -P 3306 -u root -p mtm_wip_application < 02_System_Role_Procedures.sql
-mysql -h localhost -P 3306 -u root -p mtm_wip_application < 03_Master_Data_Procedures.sql
-mysql -h localhost -P 3306 -u root -p mtm_wip_application < 04_Inventory_Procedures.sql
-mysql -h localhost -P 3306 -u root -p mtm_wip_application < 05_Error_Log_Procedures.sql
+# Option 3: Use full path to mysql (the .bat files handle this automatically)
 ```
 
-#### macOS (with MAMP)
-```bash
-# Add MAMP MySQL to PATH
-export PATH="/Applications/MAMP/Library/bin:$PATH"
-
-# Execute each file in order
-mysql -h localhost -P 3306 -u root -p mtm_wip_application < 01_User_Management_Procedures.sql
-mysql -h localhost -P 3306 -u root -p mtm_wip_application < 02_System_Role_Procedures.sql
-mysql -h localhost -P 3306 -u root -p mtm_wip_application < 03_Master_Data_Procedures.sql
-mysql -h localhost -P 3306 -u root -p mtm_wip_application < 04_Inventory_Procedures.sql
-mysql -h localhost -P 3306 -u root -p mtm_wip_application < 05_Error_Log_Procedures.sql
+#### **2. "Can't connect to database"**
+**Problem**: MAMP not running or wrong credentials
+**Solutions**:
+- Start MAMP and ensure MySQL service is running
+- Check MAMP control panel for correct port (3306 or 8889)
+- Verify credentials (MAMP default is usually root/root)
+```cmd
+# Check different port
+deploy.bat -P 8889
 ```
 
-## MAMP Troubleshooting
-
-### Common MAMP Issues
-
-1. **"Can't connect to MySQL"**
-   - Ensure MAMP Apache and MySQL services are running (green lights in MAMP control panel)
-   - Check port number (3306 for newer MAMP, 8889 for older versions)
-   - Verify credentials (usually root/root for MAMP)
-
-2. **"Access denied for user"**
-   - Default MAMP credentials are `root/root`
-   - Check MAMP control panel for actual port and credentials
-   - Ensure user has necessary privileges
-
-3. **"Database doesn't exist"**
-   - Create database via phpMyAdmin: `http://localhost/phpMyAdmin`
-   - Or create via command line: `CREATE DATABASE mtm_wip_application;`
-
-4. **"MySQL command not found"**
-   - Use full path to MAMP MySQL: `C:\MAMP\bin\mysql\bin\mysql.exe` (Windows)
-   - Or add MAMP bin to PATH environment variable
-   - Use `--mamp-path` or `--mysql-path` deployment script options
-
-5. **"Procedures already exist"**
-   - Scripts include `DROP PROCEDURE IF EXISTS` statements
-   - If issues persist, drop procedures manually via phpMyAdmin
-
-### MAMP Version Detection
-The deployment scripts automatically detect common MAMP installations:
-- **Windows**: `C:\MAMP\bin\mysql\bin\`
-- **macOS**: `/Applications/MAMP/Library/bin/`
-- **Linux (XAMPP/LAMPP)**: `/opt/lampp/bin/`
-
-## Procedure Categories (MySQL 5.7.24 Compatible)
-
-### 1. User Management Procedures (01_User_Management_Procedures.sql)
-
-| Procedure Name | Purpose | MySQL 5.7 Changes |
-|----------------|---------|-------------------|
-| `usr_ui_settings_Delete_ByUserId` | Clean deletion of user UI settings | ? Compatible |
-| `usr_users_GetFullName_ByUser` | Retrieve user full name by username | ? Compatible |
-| `usr_ui_settings_GetSettingsJson_ByUserId` | Get user interface settings JSON | ? TEXT parameters |
-| `usr_users_GetUserSetting_ByUserAndField` | Get specific user setting (legacy support) | ? Compatible |
-| `usr_users_SetUserSetting_ByUserAndField` | Set specific user setting dynamically | ? Compatible |
-| `usr_user_roles_GetRoleId_ByUserId` | Get user role ID by user identifier | ? Compatible |
-| `usr_users_Add_User` | Create new user with all settings | ? TINYINT(1) for boolean |
-| `usr_users_Update_User` | Update existing user information | ? Compatible |
-| `usr_users_Delete_User` | Delete user account | ? Compatible |
-| `usr_users_Get_All` | Retrieve all users | ? Compatible |
-| `usr_users_Get_ByUser` | Get user by username | ? Compatible |
-| `usr_users_Exists` | Check if user exists | ? Compatible |
-
-### 2. System Role Procedures (02_System_Role_Procedures.sql)
-
-| Procedure Name | Purpose | MySQL 5.7 Status |
-|----------------|---------|------------------|
-| `sys_user_roles_Add` | Add user role assignment | ? Compatible |
-| `sys_user_roles_Update` | Update user role assignment | ? Compatible |
-| `sys_user_roles_Delete` | Remove user role assignment | ? Compatible |
-| `sys_roles_Get_ById` | Get role information by ID | ? Compatible |
-| `sys_SetUserAccessType` | Set user access level (Admin/ReadOnly/Normal) | ? Compatible |
-| `sys_GetUserAccessType` | Get access types for all users | ? Compatible |
-| `sys_GetUserIdByName` | Get user ID by username | ? Compatible |
-| `sys_GetRoleIdByName` | Get role ID by role name | ? Compatible |
-
-### 3. Master Data Procedures (03_Master_Data_Procedures.sql)
-
-| Procedure Name | Purpose |
-|----------------|---------|
-| `md_part_ids_Add_Part` | Add new part number |
-| `md_part_ids_Update_Part` | Update existing part |
-| `md_part_ids_Delete_Part` | Delete part number |
-| `md_part_ids_Get_All` | Get all parts |
-| `md_part_ids_GetItemType_ByPartID` | Get item type for part |
-| `md_operation_numbers_Add_Operation` | Add new operation |
-| `md_operation_numbers_Update_Operation` | Update operation |
-| `md_operation_numbers_Delete_ByOperation` | Delete operation |
-| `md_operation_numbers_Get_All` | Get all operations |
-| `md_operation_numbers_Exists_ByOperation` | Check if operation exists |
-
-### 4. Inventory Procedures (04_Inventory_Procedures.sql)
-
-| Procedure Name | Purpose |
-|----------------|---------|
-| `inv_inventory_Add_Item` | Add inventory item with transaction logging |
-| `inv_inventory_Remove_Item_1_1` | Remove inventory with detailed validation |
-| `inv_inventory_Transfer_Part` | Transfer part to new location |
-| `inv_inventory_transfer_quantity` | Transfer specific quantity |
-| `inv_inventory_GetNextBatchNumber` | Generate next batch number |
-| `inv_inventory_Fix_BatchNumbers` | Consolidate and fix batch numbers |
-| `inv_inventory_Get_ByPartID` | Get inventory by part ID |
-| `inv_inventory_Get_ByPartIDAndOperation` | Get inventory by part and operation |
-| `inv_transaction_GetProblematicBatchCount` | Count problematic batches |
-| `inv_transaction_GetProblematicBatches` | List problematic batch numbers |
-| `inv_transaction_SplitBatchNumbers` | Split batch numbers by date |
-
-### 5. Error Log Procedures (05_Error_Log_Procedures.sql)
-
-| Procedure Name | Purpose |
-|----------------|---------|
-| `log_error_Add_Error` | Add error log entry with comprehensive details |
-| `log_error_Get_All` | Get all error log entries |
-| `log_error_Get_ByUser` | Get error log entries by user |
-| `log_error_Get_ByDateRange` | Get error log entries by date range |
-| `log_error_Get_Unique` | Get unique error combinations (method + message) |
-| `log_error_Delete_ById` | Delete specific error log entry |
-| `log_error_Delete_All` | Delete all error log entries |
-
-## Validation and Testing
-
-### Post-Deployment Verification (MAMP)
-
-1. **Check Procedure Creation via phpMyAdmin**:
-   - Navigate to `http://localhost/phpMyAdmin`
-   - Select `mtm_wip_application` database
-   - Click "Routines" tab to view all stored procedures
-
-2. **Check Procedure Creation via Command Line**:
-```sql
--- Connect to MAMP MySQL
-mysql -h localhost -P 3306 -u root -p
-
--- Select database
-USE mtm_wip_application;
-
--- Verify all procedures were created
-SELECT ROUTINE_NAME, ROUTINE_TYPE, CREATED 
-FROM INFORMATION_SCHEMA.ROUTINES 
-WHERE ROUTINE_SCHEMA = 'mtm_wip_application' 
-ORDER BY ROUTINE_NAME;
+#### **3. "Database doesn't exist"**
+**Problem**: Target database not created
+**Solutions**:
+- Create database in phpMyAdmin: `http://localhost/phpMyAdmin`
+- Or create via command line:
+```cmd
+mysql -h localhost -P 3306 -u root -p -e "CREATE DATABASE mtm_wip_application;"
 ```
 
-3. **Test Key Procedures**:
-```sql
--- Test user management (with status reporting)
-CALL usr_users_Get_All(@status, @error_msg);
-SELECT @status as Status, @error_msg as ErrorMessage;
+#### **4. "Some procedures failed to deploy"**
+**Problem**: Procedure conflicts or syntax errors
+**Solutions**:
+```cmd
+# Run analysis first
+analyze.bat
 
--- Test system roles
-CALL sys_GetUserAccessType();
+# Fix schema issues
+fix_and_reverify.bat
 
--- Test master data
-CALL md_operation_numbers_Get_All(@status, @error_msg);
-SELECT @status as Status, @error_msg as ErrorMessage;
+# Re-deploy
+deploy.bat
 ```
 
-4. **Test Error Log Procedures**:
-```sql
--- Test error logging
-CALL log_error('Test error message');
-
--- Retrieve and check error log
-CALL usp_get_error_log();
+#### **5. "Verification shows missing tables"**
+**Problem**: Database schema incomplete
+**Solution**:
+```cmd
+# Automatic fix
+fix_and_reverify.bat
 ```
 
-### MySQL 5.7.24 Specific Testing
-```sql
--- Test MySQL version compatibility
-SELECT VERSION() as MySQLVersion;
+## 📊 Expected Results
 
--- Test JSON functionality (MySQL 5.7.8+)
-SELECT JSON_VALID('{"test": "value"}') as JSONSupported;
-
--- Test boolean compatibility
-SELECT CAST(1 AS UNSIGNED) as BooleanTest;
+### **Successful Deployment**:
+```
+[SUCCESS] All stored procedures deployed successfully!
+[INFO] Total: ~96 procedures with uniform p_ parameter naming
 ```
 
-## Common Issues and Troubleshooting (MySQL 5.7.24)
+### **Successful Verification**:
+```
+SCHEMA VERIFICATION: PASSED (17/17 required tables found)
+PROCEDURE INVENTORY: COMPLETED (77+ stored procedures)
+OVERALL RESULT: ✅ ALL SYSTEMS VERIFIED AND WORKING!
+```
 
-### MySQL 5.7 Specific Issues
+### **Successful Analysis**:
+```
+Total Procedures Analyzed: 96
+Schema Files Checked: 10
+MySQL 5.7.24 Compatibility: ✅ All files compatible
+```
 
-1. **JSON Type Compatibility**:
-   - **Solution**: Procedures use `TEXT` parameters for broader compatibility
-   - JSON validation done at application level
+## 🎯 Integration with .NET 8 Application
 
-2. **Boolean Parameter Handling**:
-   - **Issue**: MySQL 5.7 boolean handling differs from 8.0
-   - **Solution**: Use `TINYINT(1)` instead of `BOOLEAN`
+### **Connection String Configuration**
+The deployed procedures work with your .NET 8 application using:
 
-3. **Error Handler Syntax**:
-   - **Solution**: Simplified error handling compatible with MySQL 5.7
-
-4. **Transaction Handling**:
-   - **Solution**: Explicit `START TRANSACTION`/`COMMIT`/`ROLLBACK` statements
-
-### MAMP Specific Issues
-
-1. **Port Conflicts**:
-   - Check MAMP control panel for actual MySQL port
-   - Common ports: 3306 (newer MAMP), 8889 (older MAMP)
-
-2. **Permission Denied**:
-   ```sql
-   -- Grant necessary privileges in MAMP
-   GRANT ALL PRIVILEGES ON mtm_wip_application.* TO 'root'@'localhost';
-   GRANT CREATE ROUTINE ON mtm_wip_application.* TO 'root'@'localhost';
-   FLUSH PRIVILEGES;
-   ```
-
-3. **Character Set Issues**:
-   - MAMP default charset is usually utf8
-   - Ensure database uses consistent character set
-
-## Integration with Application (.NET 8)
-
-### MAMP Connection String Example
 ```csharp
-// Connection string for MAMP (adjust port as needed)
-string connectionString = "Server=localhost;Port=3306;Database=mtm_wip_application;Uid=root;Pwd=root;Allow User Variables=True;";
+// Automatic environment detection
+string connectionString = Helper_Database_Variables.GetConnectionString();
+string database = Model_Users.Database;        // mtm_wip_application or mtm_wip_application_test
+string server = Model_Users.WipServerAddress;  // localhost or 172.16.1.104
 ```
 
-### MySQL 5.7 Specific Considerations
+### **Calling Stored Procedures**
 ```csharp
-// Handle boolean parameters for MySQL 5.7
-command.Parameters.AddWithValue("p_VitsUser", Convert.ToInt32(booleanValue));
-
-// Handle JSON parameters
-command.Parameters.AddWithValue("p_JsonData", jsonString); // TEXT parameter
+// All procedures use uniform p_ parameter naming
+var result = await Helper_Database_StoredProcedure.ExecuteDataTableWithStatus(
+    connectionString,
+    "usr_users_Get_All",  // Procedure name
+    null,                 // No parameters
+    progressHelper,       // Optional progress reporting
+    true                  // Show progress
+);
 ```
 
-## MAMP Development Workflow
+## 📋 Maintenance Workflow
 
-### Recommended Development Setup
-1. **Install MAMP** with MySQL 5.7.24+
-2. **Start MAMP services** (Apache + MySQL)
-3. **Create database** via phpMyAdmin
-4. **Deploy procedures** using automated scripts
-5. **Configure application** connection string for MAMP
-6. **Test procedures** via phpMyAdmin or MySQL client
+### **Regular Development Workflow**:
+1. **Deploy**: `deploy.bat` - Deploy latest procedure changes
+2. **Verify**: `run_verification.bat` - Ensure everything works
+3. **Develop**: Use procedures in your .NET 8 application
+4. **Analyze**: `analyze.bat` - Periodic code quality checks
 
-### MAMP Production Considerations
-- MAMP is recommended for **development only**
-- For production, use dedicated MySQL server
-- Ensure proper backup procedures
-- Monitor performance and security
+### **Troubleshooting Workflow**:
+1. **Analyze**: `analyze.bat` - Identify issues
+2. **Fix**: `fix_and_reverify.bat` - Repair schema/tables
+3. **Deploy**: `deploy.bat` - Re-deploy procedures
+4. **Verify**: `final_verification.bat` - Confirm fixes
 
-## Summary
+### **Production Deployment Workflow**:
+1. **Test**: Deploy and verify in development environment first
+2. **Backup**: Ensure production database is backed up
+3. **Deploy**: `deploy.bat -d mtm_wip_application -h 172.16.1.104`
+4. **Verify**: `final_verification.bat` - Confirm production deployment
 
-This deployment package is now fully compatible with:
-- ? **MySQL 5.7.24** (your current version)
-- ? **MAMP** development environment
-- ? **Windows and macOS/Linux** platforms
-- ? **Automated deployment** scripts
-- ? **Enhanced error handling** with visual feedback
-- ? **Comprehensive troubleshooting** guidance
+## 🎉 Summary
 
-The stored procedures provide the same functionality as the MySQL 8.0 version but with compatibility adjustments for MySQL 5.7.24 and optimized deployment for MAMP environments.
+This Windows-focused deployment system provides:
+
+- ✅ **5 Specialized .bat Files** for different deployment tasks
+- ✅ **96+ Stored Procedures** across 10 SQL files
+- ✅ **Complete MAMP Integration** with automatic path detection
+- ✅ **MySQL 5.7.24 Compatibility** tested and verified
+- ✅ **Comprehensive Error Handling** with helpful messages
+- ✅ **Automated Verification** system with detailed reporting
+- ✅ **Production-Ready** deployment with backup creation
+
+**Your MTM Inventory Application database layer is now fully automated and Windows-optimized!** 🚀

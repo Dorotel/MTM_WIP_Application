@@ -77,11 +77,22 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_MenuStrip_View = new ToolStripMenuItem();
             MainForm_MenuStrip_View_PersonalHistory = new ToolStripMenuItem();
             MainForm_MenuStrip_View_Separator2 = new ToolStripSeparator();
+            developmentToolStripMenuItem = new ToolStripMenuItem();
+            debugDashboardToolStripMenuItem = new ToolStripMenuItem();
+            dependencyChartsToolStripMenuItem = new ToolStripMenuItem();
+            conversionToolStripMenuItem = new ToolStripMenuItem();
+            debugDashboardToolStripMenuItem = new ToolStripMenuItem();
+            helpToolStripMenuItem = new ToolStripMenuItem();
+            gettingStartedToolStripMenuItem = new ToolStripMenuItem();
+            userGuideToolStripMenuItem = new ToolStripMenuItem();
+            keyboardShortcutsToolStripMenuItem = new ToolStripMenuItem();
+            helpSeparator1 = new ToolStripSeparator();
+            aboutMTMInventoryToolStripMenuItem = new ToolStripMenuItem();
             MainForm_StatusStrip = new StatusStrip();
+            MainForm_ProgressBar = new ToolStripProgressBar();
+            MainForm_StatusText = new ToolStripStatusLabel();
             MainForm_StatusStrip_SavedStatus = new ToolStripStatusLabel();
             MainForm_StatusStrip_Disconnected = new ToolStripStatusLabel();
-            MainForm_StatusText = new ToolStripStatusLabel();
-            MainForm_ProgressBar = new ToolStripProgressBar();
             MainForm_Inventory_PrintDocument = new System.Drawing.Printing.PrintDocument();
             MainForm_Inventory_PrintDialog = new PrintPreviewDialog();
             MainForm_ToolTip = new ToolTip(components);
@@ -100,6 +111,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_UserControl_TransferTab = new Control_TransferTab();
             MainForm_UserControl_QuickButtons = new Control_QuickButtons();
             tableLayoutPanel1 = new TableLayoutPanel();
+            viewerToolStripMenuItem = new ToolStripMenuItem();
             MainForm_MenuStrip.SuspendLayout();
             MainForm_StatusStrip.SuspendLayout();
             MainForm_TableLayout.SuspendLayout();
@@ -118,7 +130,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             MainForm_MenuStrip.Dock = DockStyle.Fill;
             MainForm_MenuStrip.ImageScalingSize = new Size(24, 24);
-            MainForm_MenuStrip.Items.AddRange(new ToolStripItem[] { MainForm_MenuStrip_File, MainForm_MenuStrip_View });
+            MainForm_MenuStrip.Items.AddRange(new ToolStripItem[] { MainForm_MenuStrip_File, MainForm_MenuStrip_View, developmentToolStripMenuItem, helpToolStripMenuItem });
             MainForm_MenuStrip.Location = new Point(0, 0);
             MainForm_MenuStrip.Name = "MainForm_MenuStrip";
             MainForm_MenuStrip.Padding = new Padding(0);
@@ -168,6 +180,79 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_MenuStrip_View_Separator2.Name = "MainForm_MenuStrip_View_Separator2";
             MainForm_MenuStrip_View_Separator2.Size = new Size(216, 6);
             // 
+            // developmentToolStripMenuItem
+            // 
+            developmentToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { debugDashboardToolStripMenuItem, dependencyChartsToolStripMenuItem });
+            developmentToolStripMenuItem.Name = "developmentToolStripMenuItem";
+            developmentToolStripMenuItem.Size = new Size(90, 24);
+            developmentToolStripMenuItem.Text = "Development";
+            // 
+            // dependencyChartsToolStripMenuItem
+            // 
+            dependencyChartsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { conversionToolStripMenuItem, viewerToolStripMenuItem });
+            dependencyChartsToolStripMenuItem.Name = "dependencyChartsToolStripMenuItem";
+            dependencyChartsToolStripMenuItem.Size = new Size(180, 22);
+            dependencyChartsToolStripMenuItem.Text = "Dependency Charts";
+            // 
+            // conversionToolStripMenuItem
+            // 
+            conversionToolStripMenuItem.Name = "conversionToolStripMenuItem";
+            conversionToolStripMenuItem.Size = new Size(180, 22);
+            conversionToolStripMenuItem.Text = "Conversion";
+            conversionToolStripMenuItem.Click += MainForm_MenuStrip_Development_Conversion_Click;
+            // 
+            // debugDashboardToolStripMenuItem
+            // 
+            debugDashboardToolStripMenuItem.Name = "debugDashboardToolStripMenuItem";
+            debugDashboardToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.D;
+            debugDashboardToolStripMenuItem.Size = new Size(180, 22);
+            debugDashboardToolStripMenuItem.Text = "🔍 Debug Dashboard";
+            debugDashboardToolStripMenuItem.Click += MainForm_MenuStrip_Development_DebugDashboard_Click;
+            // 
+            // helpToolStripMenuItem
+            // 
+            helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { gettingStartedToolStripMenuItem, userGuideToolStripMenuItem, keyboardShortcutsToolStripMenuItem, helpSeparator1, aboutMTMInventoryToolStripMenuItem });
+            helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            helpToolStripMenuItem.Size = new Size(44, 24);
+            helpToolStripMenuItem.Text = "Help";
+            // 
+            // gettingStartedToolStripMenuItem
+            // 
+            gettingStartedToolStripMenuItem.Name = "gettingStartedToolStripMenuItem";
+            gettingStartedToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.F1;
+            gettingStartedToolStripMenuItem.Size = new Size(257, 22);
+            gettingStartedToolStripMenuItem.Text = "Getting Started";
+            gettingStartedToolStripMenuItem.Click += MainForm_MenuStrip_Help_GettingStarted_Click;
+            // 
+            // userGuideToolStripMenuItem
+            // 
+            userGuideToolStripMenuItem.Name = "userGuideToolStripMenuItem";
+            userGuideToolStripMenuItem.ShortcutKeys = Keys.F1;
+            userGuideToolStripMenuItem.Size = new Size(257, 22);
+            userGuideToolStripMenuItem.Text = "User Guide";
+            userGuideToolStripMenuItem.Click += MainForm_MenuStrip_Help_UserGuide_Click;
+            // 
+            // keyboardShortcutsToolStripMenuItem
+            // 
+            keyboardShortcutsToolStripMenuItem.Name = "keyboardShortcutsToolStripMenuItem";
+            keyboardShortcutsToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.K;
+            keyboardShortcutsToolStripMenuItem.Size = new Size(257, 22);
+            keyboardShortcutsToolStripMenuItem.Text = "Keyboard Shortcuts";
+            keyboardShortcutsToolStripMenuItem.Click += MainForm_MenuStrip_Help_KeyboardShortcuts_Click;
+            // 
+            // helpSeparator1
+            // 
+            helpSeparator1.Name = "helpSeparator1";
+            helpSeparator1.Size = new Size(254, 6);
+            // 
+            // aboutMTMInventoryToolStripMenuItem
+            // 
+            aboutMTMInventoryToolStripMenuItem.Name = "aboutMTMInventoryToolStripMenuItem";
+            aboutMTMInventoryToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Alt | Keys.A;
+            aboutMTMInventoryToolStripMenuItem.Size = new Size(257, 22);
+            aboutMTMInventoryToolStripMenuItem.Text = "About MTM Inventory";
+            aboutMTMInventoryToolStripMenuItem.Click += MainForm_MenuStrip_Help_About_Click;
+            // 
             // MainForm_StatusStrip
             // 
             MainForm_StatusStrip.BackColor = SystemColors.Control;
@@ -181,6 +266,18 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_StatusStrip.SizingGrip = false;
             MainForm_StatusStrip.TabIndex = 18;
             // 
+            // MainForm_ProgressBar
+            // 
+            MainForm_ProgressBar.Name = "MainForm_ProgressBar";
+            MainForm_ProgressBar.Size = new Size(100, 25);
+            MainForm_ProgressBar.Visible = false;
+            // 
+            // MainForm_StatusText
+            // 
+            MainForm_StatusText.Name = "MainForm_StatusText";
+            MainForm_StatusText.Size = new Size(39, 26);
+            MainForm_StatusText.Text = "Ready";
+            // 
             // MainForm_StatusStrip_SavedStatus
             // 
             MainForm_StatusStrip_SavedStatus.Name = "MainForm_StatusStrip_SavedStatus";
@@ -193,18 +290,6 @@ namespace MTM_Inventory_Application.Forms.MainForm
             MainForm_StatusStrip_Disconnected.Size = new Size(240, 26);
             MainForm_StatusStrip_Disconnected.Text = "Disconnected from Server, please standby...";
             MainForm_StatusStrip_Disconnected.Visible = false;
-            // 
-            // MainForm_StatusText
-            // 
-            MainForm_StatusText.Name = "MainForm_StatusText";
-            MainForm_StatusText.Size = new Size(39, 26);
-            MainForm_StatusText.Text = "Ready";
-            // 
-            // MainForm_ProgressBar
-            // 
-            MainForm_ProgressBar.Name = "MainForm_ProgressBar";
-            MainForm_ProgressBar.Size = new Size(100, 25);
-            MainForm_ProgressBar.Visible = false;
             // 
             // MainForm_Inventory_PrintDialog
             // 
@@ -404,6 +489,13 @@ namespace MTM_Inventory_Application.Forms.MainForm
             tableLayoutPanel1.Size = new Size(878, 31);
             tableLayoutPanel1.TabIndex = 94;
             // 
+            // viewerToolStripMenuItem
+            // 
+            viewerToolStripMenuItem.Name = "viewerToolStripMenuItem";
+            viewerToolStripMenuItem.Size = new Size(180, 22);
+            viewerToolStripMenuItem.Text = "Viewer";
+            viewerToolStripMenuItem.Click += viewerToolStripMenuItem_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
@@ -444,6 +536,19 @@ namespace MTM_Inventory_Application.Forms.MainForm
         }
         private TableLayoutPanel tableLayoutPanel1;
         internal ToolTip MainForm_ToolTip;
+        private ToolStripMenuItem developmentToolStripMenuItem;
+        private ToolStripMenuItem debugDashboardToolStripMenuItem;
+        private ToolStripMenuItem dependencyChartsToolStripMenuItem;
+        private ToolStripMenuItem conversionToolStripMenuItem;
+        
+        // Help Menu Items
+        private ToolStripMenuItem helpToolStripMenuItem;
+        private ToolStripMenuItem gettingStartedToolStripMenuItem;
+        private ToolStripMenuItem userGuideToolStripMenuItem;
+        private ToolStripMenuItem keyboardShortcutsToolStripMenuItem;
+        private ToolStripSeparator helpSeparator1;
+        private ToolStripMenuItem aboutMTMInventoryToolStripMenuItem;
+        private ToolStripMenuItem viewerToolStripMenuItem;
     }
 
 

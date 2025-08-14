@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM Inventory Application - Remove Operations</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>🗑️ Remove Operations Guide</h1>
+                <p class="subtitle">Complete guide for removing inventory items from the MTM system</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="content-section">
+                <h2>📋 Overview</h2>
+                <p>The Remove Tab allows you to safely remove inventory items from the MTM system with full audit trail and undo capabilities. The system provides both basic removal and advanced filtering options.</p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Single Item Removal</h3>
+                        <p>Select individual items for precise removal with confirmation dialogs</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📦</div>
+                        <h3>Batch Operations</h3>
+                        <p>Remove multiple items at once with comprehensive selection tools</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3>Advanced Search</h3>
+                        <p>Filter items by part, operation, location, or date range</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">↩️</div>
+                        <h3>Undo Functionality</h3>
+                        <p>Reverse recent removals with transaction history recovery</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🚀 Basic Remove Operations</h2>
+
+                <div class="step-guide">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Select Items to Remove</h3>
+                            <p>Click on rows in the data grid to select items for removal:</p>
+                            <ul>
+                                <li><strong>Single Selection:</strong> Click on a row to select one item</li>
+                                <li><strong>Multiple Selection:</strong> Hold Ctrl and click multiple rows</li>
+                                <li><strong>Range Selection:</strong> Click first row, hold Shift, click last row</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Confirm Removal</h3>
+                            <p>Click the Remove button and confirm the operation:</p>
+                            <ul>
+                                <li><strong>Single Item:</strong> Simple confirmation dialog</li>
+                                <li><strong>Multiple Items:</strong> Batch operation summary with item count</li>
+                                <li><strong>Safety Check:</strong> Review items before final confirmation</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Audit Trail Created</h3>
+                            <p>System automatically creates comprehensive audit records:</p>
+                            <ul>
+                                <li><strong>Transaction Log:</strong> Who removed what and when</li>
+                                <li><strong>User Accountability:</strong> Full user tracking for all removals</li>
+                                <li><strong>Recovery Information:</strong> Data needed for undo operations</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🔍 Search and Filter Options</h2>
+
+                <div class="info-box info">
+                    <h4>Smart Filtering System</h4>
+                    <p>The Remove Tab provides multiple ways to find and filter items before removal.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>🔍 Part Search</h4>
+                        <p>Filter inventory by part number or description. Supports partial matching and wildcards.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>⚙️ Operation Filtering</h4>
+                        <p>Show only items from specific operations (e.g., Machining, Assembly, QC).</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📍 Location-Based Filtering</h4>
+                        <p>Display items from specific locations or work centers only.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📊 Show All</h4>
+                        <p>Display complete inventory for comprehensive removal operations (use with caution for performance).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>⚡ Advanced Remove Features</h2>
+
+                <div class="info-box warning">
+                    <h4>Advanced Mode Access</h4>
+                    <p>Advanced features are available through the Control_AdvancedRemove interface for date-range filtering and complex queries.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>📅 Date Range Filtering</h4>
+                        <p>Filter items by creation date, last modified date, or transaction date ranges.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>👤 User-Specific Filtering</h4>
+                        <p>Show only items created by specific users or during specific shifts.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🔄 Batch Processing</h4>
+                        <p>Advanced selection tools including filter-based selection and select all/none options.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>↩️ Undo and Recovery</h2>
+
+                <div class="step-guide">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Undo Recent Removals</h3>
+                            <p>Recovery options for recently removed items:</p>
+                            <ul>
+                                <li><strong>Last Removed Items:</strong> Quick recovery of most recent removals</li>
+                                <li><strong>Session-Based Undo:</strong> Undo operations within current session</li>
+                                <li><strong>Time Limitations:</strong> Undo typically available for last 24 hours</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Transaction Reversal</h3>
+                            <p>Complete transaction reversal process:</p>
+                            <ul>
+                                <li><strong>Data Restoration:</strong> Original quantity and location restored</li>
+                                <li><strong>Audit Update:</strong> Undo operation logged in audit trail</li>
+                                <li><strong>Status Verification:</strong> Confirmation of successful recovery</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>⚠️ Safety Features</h2>
+
+                <div class="info-box error">
+                    <h4>Important Safety Considerations</h4>
+                    <p>Remove operations are permanent unless undone within the allowable time window. Always verify your selection before confirming.</p>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>🛡️ Confirmation Dialogs</h4>
+                        <p>Multiple confirmation levels for single items and batch operations with detailed summaries.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📋 Pre-removal Summary</h4>
+                        <p>Review screen showing exactly what will be removed before final confirmation.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🔐 User Privilege Checks</h4>
+                        <p>System verifies user permissions for removal operations and restricts access as needed.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>⏰ Time-based Restrictions</h4>
+                        <p>Some removal operations may be restricted during shift changes or maintenance windows.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>📊 Reporting and Export</h2>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>🖨️ Print Options</h4>
+                        <p>Generate removal reports with visible column selection and custom formatting.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📄 Export Functions</h4>
+                        <p>Export removal data to Excel or CSV for external analysis and record-keeping.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📈 Removal Analytics</h4>
+                        <p>View removal trends, user activity, and operational metrics through the Transactions form.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>⌨️ Keyboard Shortcuts</h2>
+                
+                <div class="keyboard-shortcuts">
+                    <div class="shortcut-category">
+                        <h4>Remove Operations</h4>
+                        <div class="shortcut-item">
+                            <kbd>Delete</kbd>
+                            <span>Remove selected items</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>A</kbd>
+                            <span>Select all visible items</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>D</kbd>
+                            <span>Deselect all items</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>Z</kbd>
+                            <span>Undo last removal</span>
+                        </div>
+                    </div>
+
+                    <div class="shortcut-category">
+                        <h4>Navigation</h4>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>F</kbd>
+                            <span>Focus search box</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>F5</kbd>
+                            <span>Refresh data grid</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Esc</kbd>
+                            <span>Clear current selection</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>❓ Troubleshooting</h2>
+
+                <div class="faq-item">
+                    <h4>Cannot remove items - "Access Denied" error</h4>
+                    <p>Check with your supervisor about removal privileges. Some users may have read-only access to the Remove Tab.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Remove button is disabled</h4>
+                    <p>Ensure you have selected at least one item in the data grid. The Remove button is only enabled when items are selected.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Undo option not available</h4>
+                    <p>Undo is typically available for 24 hours after removal. Check the Transactions form for longer-term recovery options.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Data grid shows no items</h4>
+                    <p>Try using "Show All" to display the complete inventory, or check your filter settings.</p>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2>🔗 Related Topics</h2>
+                <div class="related-links">
+                    <a href="inventory-operations.html" class="related-link">
+                        <div class="related-icon">📦</div>
+                        <div class="related-content">
+                            <h4>Inventory Operations</h4>
+                            <p>Learn about adding inventory items</p>
+                        </div>
+                    </a>
+                    <a href="advanced-features.html" class="related-link">
+                        <div class="related-icon">⚙️</div>
+                        <div class="related-content">
+                            <h4>Advanced Features</h4>
+                            <p>Advanced remove operations and filtering</p>
+                        </div>
+                    </a>
+                    <a href="troubleshooting.html" class="related-link">
+                        <div class="related-icon">🔧</div>
+                        <div class="related-content">
+                            <h4>Troubleshooting</h4>
+                            <p>Common issues and solutions</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+                <p>&copy; 2025 Manitowoc Tool and Manufacturing - MTM Inventory Application Help System</p>
+                <div class="footer-links">
+                    <a href="index.html">Help Home</a> | 
+                    <a href="getting-started.html">Getting Started</a> | 
+                    <a href="keyboard-shortcuts.html">Keyboard Shortcuts</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>

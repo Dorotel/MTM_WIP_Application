@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTM Inventory - System Requirements</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+</head>
+<body>
+    <nav class="help-nav">
+        <div class="nav-brand">
+            <h1>🏭 MTM Inventory Application</h1>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">🏠 Home</a>
+            <a href="getting-started.html">🚀 Getting Started</a>
+            <a href="troubleshooting.html">🔧 Troubleshooting</a>
+        </div>
+    </nav>
+
+    <main class="help-content">
+        <header class="page-header">
+            <h1>⚙️ System Requirements</h1>
+            <p class="lead">Technical specifications and prerequisites for running MTM Inventory Application</p>
+        </header>
+
+        <section class="content-section">
+            <h2>🖥️ Operating System Requirements</h2>
+            <div class="requirements-grid">
+                <div class="req-item supported">
+                    <h3>✅ Supported</h3>
+                    <ul>
+                        <li><strong>Windows 10</strong> (Version 1903 or later)</li>
+                        <li><strong>Windows 11</strong> (All versions)</li>
+                        <li><strong>Windows Server 2019</strong> or later</li>
+                    </ul>
+                </div>
+                <div class="req-item minimum">
+                    <h3>⚠️ Minimum Requirements</h3>
+                    <ul>
+                        <li><strong>.NET 8.0 Runtime</strong> (Windows Desktop)</li>
+                        <li><strong>4 GB RAM</strong> (8 GB recommended)</li>
+                        <li><strong>200 MB disk space</strong> (plus database storage)</li>
+                        <li><strong>1024x768 screen resolution</strong> (1920x1080 recommended)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🗄️ Database Requirements</h2>
+            <div class="warning-box">
+                <h3>🔵 Primary Database System</h3>
+                <div class="db-requirement">
+                    <h4>MySQL 5.7.24 or Later</h4>
+                    <ul>
+                        <li><strong>Server:</strong> MySQL Community Server or Enterprise</li>
+                        <li><strong>Storage Engine:</strong> InnoDB (required for transactions)</li>
+                        <li><strong>Character Set:</strong> utf8mb4</li>
+                        <li><strong>Minimum Memory:</strong> 512 MB allocated to MySQL</li>
+                        <li><strong>Network:</strong> TCP/IP connections enabled</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>📊 Database Configuration</h3>
+            <div class="config-grid">
+                <div class="config-item">
+                    <h4>Production Environment</h4>
+                    <ul>
+                        <li><strong>Server:</strong> 172.16.1.104</li>
+                        <li><strong>Database:</strong> mtm_wip_application</li>
+                        <li><strong>Port:</strong> 3306</li>
+                        <li><strong>SSL:</strong> Recommended</li>
+                    </ul>
+                </div>
+                <div class="config-item">
+                    <h4>Development Environment</h4>
+                    <ul>
+                        <li><strong>Server:</strong> localhost or 172.16.1.104</li>
+                        <li><strong>Database:</strong> mtm_wip_application_test</li>
+                        <li><strong>Port:</strong> 3306</li>
+                        <li><strong>MAMP Support:</strong> ✅ Available</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🔧 Software Dependencies</h2>
+            <div class="dependencies">
+                <h3>Required Components</h3>
+                <ul class="checklist">
+                    <li>✅ <strong>.NET 8.0 Windows Desktop Runtime</strong> - Core application framework</li>
+                    <li>✅ <strong>Visual C++ Redistributable</strong> - For MySQL connector</li>
+                    <li>✅ <strong>Windows Forms</strong> - UI framework (included with .NET)</li>
+                    <li>✅ <strong>MySQL Connector/NET</strong> - Database connectivity</li>
+                </ul>
+
+                <h3>Optional Components</h3>
+                <ul class="checklist">
+                    <li>🔧 <strong>Microsoft Edge WebView2</strong> - For help system display</li>
+                    <li>🔧 <strong>Adobe PDF Reader</strong> - For report generation</li>
+                    <li>🔧 <strong>Microsoft Excel</strong> - For data export functionality</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🌐 Network Requirements</h2>
+            <div class="network-requirements">
+                <h3>Network Access</h3>
+                <ul>
+                    <li><strong>Database Server Access:</strong> TCP Port 3306 (MySQL)</li>
+                    <li><strong>Bandwidth:</strong> Minimum 1 Mbps for database operations</li>
+                    <li><strong>Latency:</strong> <100ms to database server recommended</li>
+                    <li><strong>Firewall:</strong> Allow outbound connections to database server</li>
+                </ul>
+
+                <h3>🔐 Security Requirements</h3>
+                <ul class="security-list">
+                    <li>🛡️ User account with appropriate database privileges</li>
+                    <li>🔒 Secure password policy compliance</li>
+                    <li>🔑 SSL/TLS encryption for database connections (recommended)</li>
+                    <li>📊 Audit logging enabled on database server</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🎯 Performance Recommendations</h2>
+            <div class="performance-grid">
+                <div class="perf-item good">
+                    <h3>✅ Optimal Performance</h3>
+                    <ul>
+                        <li><strong>CPU:</strong> Quad-core 2.5GHz or better</li>
+                        <li><strong>RAM:</strong> 8 GB or more</li>
+                        <li><strong>Storage:</strong> SSD recommended</li>
+                        <li><strong>Display:</strong> 1920x1080 or higher</li>
+                        <li><strong>Network:</strong> Gigabit LAN connection</li>
+                    </ul>
+                </div>
+                <div class="perf-item warning">
+                    <h3>⚠️ Minimum Performance</h3>
+                    <ul>
+                        <li><strong>CPU:</strong> Dual-core 1.8GHz</li>
+                        <li><strong>RAM:</strong> 4 GB</li>
+                        <li><strong>Storage:</strong> 7200 RPM HDD minimum</li>
+                        <li><strong>Display:</strong> 1024x768</li>
+                        <li><strong>Network:</strong> 100 Mbps connection</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🔍 System Verification</h2>
+            <div class="verification-steps">
+                <h3>Pre-Installation Checklist</h3>
+                <ol class="setup-steps">
+                    <li><strong>Check Operating System:</strong> Verify Windows version compatibility</li>
+                    <li><strong>Install .NET 8.0:</strong> Download from Microsoft official site</li>
+                    <li><strong>Verify Database Access:</strong> Test connection to MySQL server</li>
+                    <li><strong>Check User Permissions:</strong> Ensure database user has required privileges</li>
+                    <li><strong>Test Network Connectivity:</strong> Verify server reachability</li>
+                    <li><strong>Review Firewall Settings:</strong> Allow application and database ports</li>
+                </ol>
+            </div>
+
+            <div class="troubleshooting-tip">
+                <h3>🔧 Installation Issues?</h3>
+                <p>If you encounter problems during installation or initial setup:</p>
+                <ul>
+                    <li>📋 Check the <a href="troubleshooting.html">Troubleshooting Guide</a></li>
+                    <li>🗄️ Review <a href="database-configuration.html">Database Configuration</a></li>
+                    <li>🚀 Follow the <a href="getting-started.html">Getting Started Guide</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>🏢 Enterprise Environment</h2>
+            <div class="enterprise-info">
+                <h3>Additional Considerations for Enterprise Deployment</h3>
+                <ul>
+                    <li><strong>Domain Integration:</strong> Application supports domain authentication</li>
+                    <li><strong>Group Policy:</strong> Compatible with Windows GPO restrictions</li>
+                    <li><strong>Antivirus:</strong> May require exclusions for database files</li>
+                    <li><strong>Backup Systems:</strong> Database backup integration recommended</li>
+                    <li><strong>Monitoring:</strong> Application logs to Windows Event Log</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer class="help-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>📚 Documentation</h4>
+                <ul>
+                    <li><a href="getting-started.html">Getting Started</a></li>
+                    <li><a href="database-configuration.html">Database Setup</a></li>
+                    <li><a href="troubleshooting.html">Troubleshooting</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>🛠️ Technical</h4>
+                <ul>
+                    <li><a href="error-handling.html">Error Handling</a></li>
+                    <li><a href="development-tools.html">Development Tools</a></li>
+                    <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                </ul>
+            </div>
+            <div class="footer-info">
+                <p>&copy; 2025 MTM Inventory Application. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>

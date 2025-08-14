@@ -425,7 +425,7 @@ LIMIT 1$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Remove_Item_1_1`(IN `p_PartID` VARCHAR(50), IN `p_Location` VARCHAR(50), IN `p_Operation` VARCHAR(50), IN `p_Quantity` INT, IN `p_ItemType` VARCHAR(50), IN `p_User` VARCHAR(50), IN `p_BatchNumber` VARCHAR(50), IN `p_Notes` VARCHAR(255), OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `inv_inventory_Remove_Item`(IN `p_PartID` VARCHAR(50), IN `p_Location` VARCHAR(50), IN `p_Operation` VARCHAR(50), IN `p_Quantity` INT, IN `p_ItemType` VARCHAR(50), IN `p_User` VARCHAR(50), IN `p_BatchNumber` VARCHAR(50), IN `p_Notes` VARCHAR(255), OUT `p_Status` INT, OUT `p_ErrorMsg` VARCHAR(255))
 BEGIN
     -- Try to delete the item
     DELETE FROM inv_inventory
@@ -1013,7 +1013,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Get_ByUser_1`(IN p_User VARCHAR(255))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Get_ByUser`(IN p_User VARCHAR(255))
 BEGIN
     SELECT *
     FROM sys_last_10_transactions
@@ -1054,7 +1054,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Move_1`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Move`(
     IN p_User VARCHAR(255),
     IN p_FromPosition INT,
     IN p_ToPosition INT
@@ -1148,7 +1148,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_RemoveAndShift_ByUser_1`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_RemoveAndShift_ByUser`(
     IN p_User VARCHAR(255),
     IN p_Position INT
 )
@@ -1272,7 +1272,7 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Update_ByUserAndPosition_1`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sys_last_10_transactions_Update_ByUserAndPosition`(
     IN p_User VARCHAR(255),
     IN p_Position INT,
     IN p_PartID VARCHAR(255),

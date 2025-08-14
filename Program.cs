@@ -1,15 +1,14 @@
 using System.Diagnostics;
-using MTM_Inventory_Application.Controls.MainForm;
 using MTM_Inventory_Application.Controls.SettingsForm;
-using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
-using MTM_Inventory_Application.Forms.MainForm;
-using MTM_Inventory_Application.Forms.Splash;
-using MTM_Inventory_Application.Helpers;
+using MTM_Inventory_Application.Forms.ErrorDialog;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Services;
 using MySql.Data.MySqlClient;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Security;
 
 namespace MTM_Inventory_Application
 {
@@ -22,18 +21,69 @@ namespace MTM_Inventory_Application
         {
             try
             {
-                // Global exception handling setup
+                // Initialize debugging system first (before any other operations)
+                #if DEBUG
+                Service_DebugTracer.Initialize(DebugLevel.High);
+                Service_DebugConfiguration.InitializeDefaults();
+                Service_DebugConfiguration.SetDevelopmentMode();
+                #else
+                Service_DebugTracer.Initialize(DebugLevel.Medium);
+                Service_DebugConfiguration.InitializeDefaults();
+                #endif
+
+                Service_DebugTracer.TraceUIAction("APPLICATION_STARTUP", "Program", new Dictionary<string, object>
+                {
+                    ["StartupTime"] = DateTime.Now,
+                    ["IsDebugMode"] = Debugger.IsAttached,
+                    ["OSVersion"] = Environment.OSVersion.ToString(),
+                    ["ProcessorCount"] = Environment.ProcessorCount,
+                    ["WorkingSet"] = Environment.WorkingSet
+                });
+
+                // Global exception handling setup with enhanced database error handling
                 Application.ThreadException += (sender, args) =>
                 {
                     Console.WriteLine($"[Global Exception] ThreadException: {args.Exception}");
-                    LoggingUtility.LogApplicationError(args.Exception);
+                    Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+                    {
+                        ["ExceptionType"] = args.Exception.GetType().Name,
+                        ["ExceptionMessage"] = args.Exception.Message
+                    }, "ThreadExceptionHandler", "Program");
+                    
+                    try
+                    {
+                        LoggingUtility.LogApplicationError(args.Exception);
+                    }
+                    catch (Exception loggingEx)
+                    {
+                        // If logging fails, at least show console output
+                        Console.WriteLine($"[Critical] Failed to log thread exception: {loggingEx.Message}");
+                    }
+                    HandleGlobalException(args.Exception);
                 };
+
                 AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
                 {
                     if (args.ExceptionObject is Exception ex)
                     {
                         Console.WriteLine($"[Global Exception] UnhandledException: {ex}");
-                        LoggingUtility.LogApplicationError(ex);
+                        Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+                        {
+                            ["ExceptionType"] = ex.GetType().Name,
+                            ["ExceptionMessage"] = ex.Message,
+                            ["IsTerminating"] = args.IsTerminating
+                        }, "UnhandledExceptionHandler", "Program");
+                        
+                        try
+                        {
+                            LoggingUtility.LogApplicationError(ex);
+                        }
+                        catch (Exception loggingEx)
+                        {
+                            // If logging fails, at least show console output
+                            Console.WriteLine($"[Critical] Failed to log unhandled exception: {loggingEx.Message}");
+                        }
+                        HandleGlobalException(ex);
                     }
                 };
 
@@ -41,56 +91,444 @@ namespace MTM_Inventory_Application
                 AppDomain.CurrentDomain.ProcessExit += (sender, args) => PerformAppCleanup();
                 Application.ApplicationExit += (sender, args) => PerformAppCleanup();
 
-                // Windows Forms initialization
-                Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
-                ApplicationConfiguration.Initialize();
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                
-                LoggingUtility.Log("[Startup] Application initialization started");
-                
-                // User identification
-                Model_AppVariables.User = Dao_System.System_GetUserName();
-                LoggingUtility.Log($"[Startup] User identified: {Model_AppVariables.User}");
-                
+                // Windows Forms initialization with error handling
+                try
+                {
+                    Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+                    ApplicationConfiguration.Initialize();
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Startup Error] Windows Forms initialization failed: {ex.Message}");
+                    ShowFatalError("Windows Forms Initialization Error",
+                        $"Failed to initialize Windows Forms:\n\n{ex.Message}\n\n" +
+                        "This may be caused by:\n" +
+                        "• Missing .NET runtime components\n" +
+                        "• System display configuration issues\n" +
+                        "• Insufficient system permissions\n\n" +
+                        "Please contact your system administrator.");
+                    return;
+                }
+
+                try
+                {
+                    LoggingUtility.Log("[Startup] Application initialization started");
+                }
+                catch (Exception ex)
+                {
+                    // If initial logging fails, continue but show warning
+                    Console.WriteLine($"[Warning] Initial logging failed: {ex.Message}");
+                    ShowNonCriticalError("Logging System Warning",
+                        $"The logging system encountered an issue during startup:\n\n{ex.Message}\n\n" +
+                        "The application will continue, but some log entries may be missing.\n" +
+                        "Please check file system permissions and disk space.");
+                }
+
+                // User identification with error handling
+                try
+                {
+                    Model_AppVariables.User = Dao_System.System_GetUserName();
+                    //Model_AppVariables.User = "TestUser"; // TEMPORARY OVERRIDE FOR TESTING - REMOVE IN PRODUCTION
+
+
+                    LoggingUtility.Log($"[Startup] User identified: {Model_AppVariables.User}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Startup Error] User identification failed: {ex.Message}");
+                    LoggingUtility.LogApplicationError(ex);
+
+                    // Use fallback user identification
+                    try
+                    {
+                        Model_AppVariables.User = Environment.UserName ?? "Unknown";
+                        LoggingUtility.Log($"[Startup] Using fallback user identification: {Model_AppVariables.User}");
+
+                        ShowNonCriticalError("User Identification Warning",
+                            $"Could not identify user through normal methods:\n\n{ex.Message}\n\n" +
+                            $"Using system username '{Model_AppVariables.User}' as fallback.\n" +
+                            "Some user-specific features may not work correctly.");
+                    }
+                    catch (Exception fallbackEx)
+                    {
+                        Model_AppVariables.User = "Unknown";
+                        LoggingUtility.LogApplicationError(fallbackEx);
+                        ShowNonCriticalError("User Identification Error",
+                            "Failed to identify current user. Using 'Unknown' as username.\n" +
+                            "This may affect user-specific settings and permissions.");
+                    }
+                }
+
                 // ENHANCED: Validate database connectivity using helper patterns BEFORE creating any forms
                 var connectivityResult = ValidateDatabaseConnectivityWithHelper();
                 if (!connectivityResult.IsSuccess)
                 {
                     LoggingUtility.Log($"[Startup] Database connectivity validation failed: {connectivityResult.StatusMessage}");
+
+                    // DEBUG: Output exactly what's in the status message
+                    Console.WriteLine($"[DEBUG] connectivityResult.StatusMessage: '{connectivityResult.StatusMessage}'");
+                    Console.WriteLine($"[DEBUG] connectivityResult.ErrorMessage: '{connectivityResult.ErrorMessage}'");
+
+                    // Use ErrorMessage if StatusMessage is generic
+                    string errorMessage = !string.IsNullOrEmpty(connectivityResult.StatusMessage) && 
+                                        connectivityResult.StatusMessage != "Database connectivity validation failed"
+                                        ? connectivityResult.StatusMessage 
+                                        : connectivityResult.ErrorMessage;
+
+                    // FIXED: Use a more specific title based on the error type
+                    string dialogTitle = "Database Connection Failed";
+                    if (errorMessage.Contains("does not exist"))
+                    {
+                        dialogTitle = "Database Does Not Exist";
+                    }
+                    else if (errorMessage.Contains("Cannot connect"))
+                    {
+                        dialogTitle = "Database Server Unavailable";
+                    }
+                    else if (errorMessage.Contains("Access denied"))
+                    {
+                        dialogTitle = "Database Access Denied";
+                    }
+                    else if (errorMessage.Contains("timeout"))
+                    {
+                        dialogTitle = "Database Connection Timeout";
+                    }
+
+                    var dialogResult = MessageBox.Show(
+                        errorMessage + "\n\n" +
+                        "Click 'Retry' to try connecting again, or 'Cancel' to exit the application.",
+                        dialogTitle,
+                        MessageBoxButtons.RetryCancel,
+                        MessageBoxIcon.Error);
+
+                    if (dialogResult == DialogResult.Retry)
+                    {
+                        // Recursive call to try again
+                        Main();
+                        return;
+                    }
+                    else
+                    {
+                        // User chose to exit
+                        LoggingUtility.Log("[Startup] User chose to exit after database connection failure");
+                        return;
+                    }
+                }
+
+                LoggingUtility.Log("[Startup] Database connectivity validated successfully");
+
+                // Load user access permissions with error handling
+                try
+                {
+                    _ = Dao_System.System_UserAccessTypeAsync(true);
+                }
+                catch (MySqlException ex)
+                {
+                    LoggingUtility.LogDatabaseError(ex);
+                    string userMessage = GetDatabaseConnectionErrorMessage(ex);
+
+                    // FIXED: Show error with retry option instead of immediate exit
+                    var dialogResult = MessageBox.Show(
+                        userMessage + "\n\n" +
+                        "Click 'Retry' to try again, or 'Cancel' to exit the application.",
+                        "User Access Loading Failed",
+                        MessageBoxButtons.RetryCancel,
+                        MessageBoxIcon.Error);
+
+                    if (dialogResult == DialogResult.Retry)
+                    {
+                        Main();
+                        return;
+                    }
+                    else
+                    {
+                        LoggingUtility.Log("[Startup] User chose to exit after user access loading failure");
+                        return;
+                    }
+                }
+                catch (TimeoutException ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                    var dialogResult = MessageBox.Show(
+                        "The request to load user access permissions timed out.\n\n" +
+                        "This usually means:\n" +
+                        "• The database server is responding slowly\n" +
+                        "• Network connectivity issues\n" +
+                        "• The server is overloaded\n\n" +
+                        "Click 'Retry' to try again, or 'Cancel' to exit the application.",
+                        "User Access Timeout",
+                        MessageBoxButtons.RetryCancel,
+                        MessageBoxIcon.Exclamation);
+
+                    if (dialogResult == DialogResult.Retry)
+                    {
+                        Main();
+                        return;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                    ShowSecurityError("Access Denied",
+                        $"Access denied while loading user permissions:\n\n{ex.Message}\n\n" +
+                        "This usually means:\n" +
+                        "• Your account doesn't have sufficient database permissions\n" +
+                        "• The user account configuration is incorrect\n\n" +
+                        "Please contact your system administrator.\n\n" +
+                        "The application will now exit.");
                     return;
                 }
-                
-                LoggingUtility.Log("[Startup] Database connectivity validated successfully");
-                
-                // Load user access permissions
-                _ = Dao_System.System_UserAccessTypeAsync(true);
-                
-                // Trace setup
-                Trace.Listeners.Clear();
-                Trace.Listeners.Add(new DefaultTraceListener());
-                Trace.AutoFlush = true;
-                Console.WriteLine("[Trace] [Main] Application starting...");
-                Trace.WriteLine("[Trace] [Main] Application starting...");
+                catch (Exception ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                    ShowFatalError("User Access Error",
+                        $"Unable to load user access permissions:\n\n{ex.Message}\n\n" +
+                        "Error Type: {ex.GetType().Name}\n\n" +
+                        "This is required for application security and cannot be bypassed.\n" +
+                        "Please contact your system administrator if this problem persists.\n\n" +
+                        "The application will now exit.");
+                    return;
+                }
+
+                // Trace setup with error handling
+                try
+                {
+                    Trace.Listeners.Clear();
+                    Trace.Listeners.Add(new DefaultTraceListener());
+                    Trace.AutoFlush = true;
+                    Console.WriteLine("[Trace] [Main] Application starting...");
+                    Trace.WriteLine("[Trace] [Main] Application starting...");
+                }
+                catch (Exception ex)
+                {
+                    // Trace setup failure is not critical, but log it
+                    LoggingUtility.LogApplicationError(ex);
+                    Console.WriteLine($"[Warning] Trace setup failed: {ex.Message}");
+                }
 
                 // Start application with splash screen
-                Application.Run(new StartupSplashApplicationContext());
+                try
+                {
+                    Application.Run(new Service_Onstartup_StartupSplashApplicationContext());
+                }
+                catch (InvalidOperationException ex) when (ex.Message.Contains("Application.Run"))
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                    ShowFatalError("Application Startup Error",
+                        "Failed to start the main application interface.\n\n" +
+                        "This usually means:\n" +
+                        "• Another instance may already be running\n" +
+                        "• System resources are insufficient\n" +
+                        "• Display configuration issues\n\n" +
+                        "Please restart your computer and try again.");
+                }
+                catch (Exception ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                    HandleGlobalException(ex);
+                }
 
                 Console.WriteLine("[Trace] [Main] Application exiting Main().");
                 Trace.WriteLine("[Trace] [Main] Application exiting Main().");
                 LoggingUtility.Log("[Startup] Application shutdown completed");
             }
+            catch (OutOfMemoryException ex)
+            {
+                // Critical system error - minimal logging to avoid further memory issues
+                Console.WriteLine($"[Critical] Out of memory: {ex.Message}");
+                try
+                {
+                    Service_ErrorHandler.HandleException(
+                        new OutOfMemoryException(
+                            "The application has run out of available memory and must close.\n\n" +
+                            "This usually means:\n" +
+                            "• Insufficient system RAM\n" +
+                            "• Memory leak in application or system\n" +
+                            "• Too many applications running\n\n" +
+                            "Please restart your computer and close unnecessary applications."),
+                        ErrorSeverity.Fatal,
+                        controlName: "Program_Main");
+                }
+                catch
+                {
+                    // If we can't even show a message box, exit immediately
+                    Environment.Exit(1);
+                }
+            }
+            catch (StackOverflowException)
+            {
+                // Stack overflow - can't do much, just exit
+                Console.WriteLine("[Critical] Stack overflow occurred");
+                Environment.Exit(1);
+            }
+            catch (AccessViolationException ex)
+            {
+                Console.WriteLine($"[Critical] Access violation: {ex.Message}");
+                try
+                {
+                    MessageBox.Show(
+                        "A critical system error occurred (Access Violation).\n\n" +
+                        "This usually indicates:\n" +
+                        "• Memory corruption\n" +
+                        "• System instability\n" +
+                        "• Hardware issues\n\n" +
+                        "Please restart your computer immediately.",
+                        "Critical System Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Stop);
+                }
+                catch
+                {
+                    Environment.Exit(1);
+                }
+            }
             catch (Exception ex)
             {
                 Console.WriteLine($"[Global Exception] Main catch: {ex}");
-                LoggingUtility.LogApplicationError(ex);
-                ShowFatalError("Application Startup Error", 
-                    $"A fatal error occurred during application startup:\n\n{ex.Message}\n\nThe application will now exit.");
+                try
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                }
+                catch
+                {
+                    Console.WriteLine("[Critical] Failed to log main exception");
+                }
+                HandleGlobalException(ex);
             }
             finally
             {
                 // Ensure cleanup runs even if exceptions occur
                 PerformAppCleanup();
+            }
+        }
+
+        #endregion
+
+        #region Global Exception Handling
+
+        /// <summary>
+        /// Handle global exceptions with user-friendly messaging
+        /// </summary>
+        /// <param name="ex">Exception to handle</param>
+        private static void HandleGlobalException(Exception ex)
+        {
+            try
+            {
+                if (ex is MySqlException mysqlEx)
+                {
+                    string userMessage = GetDatabaseConnectionErrorMessage(mysqlEx);
+
+                    var dialogResult = MessageBox.Show(
+                        userMessage + "\n\n" +
+                        "Click 'Retry' to try connecting again, or 'OK' to exit the application.",
+                        "Database Error",
+                        MessageBoxButtons.RetryCancel,
+                        MessageBoxIcon.Error);
+
+                    if (dialogResult == DialogResult.Retry)
+                    {
+                        Main();
+                    }
+                }
+                else if (ex is InvalidOperationException && ex.Message.Contains("database"))
+                {
+                    ShowDatabaseError("Database Configuration Error",
+                        $"Database configuration error:\n\n{ex.Message}\n\n" +
+                        "Please contact your system administrator for assistance.");
+                }
+                else if (ex is FileNotFoundException fileEx)
+                {
+                    ShowFileSystemError("Missing File Error",
+                        $"A required file could not be found:\n\n{fileEx.FileName ?? "Unknown file"}\n\n" +
+                        $"Error: {fileEx.Message}\n\n" +
+                        "Please reinstall the application or contact your system administrator.");
+                }
+                else if (ex is DirectoryNotFoundException dirEx)
+                {
+                    ShowFileSystemError("Missing Directory Error",
+                        $"A required directory could not be found:\n\n{dirEx.Message}\n\n" +
+                        "Please reinstall the application or contact your system administrator.");
+                }
+                else if (ex is UnauthorizedAccessException accessEx)
+                {
+                    ShowSecurityError("Access Denied",
+                        $"Access was denied:\n\n{accessEx.Message}\n\n" +
+                        "This usually means:\n" +
+                        "• Insufficient file system permissions\n" +
+                        "• Security software is blocking the application\n" +
+                        "• User account restrictions\n\n" +
+                        "Please contact your system administrator.");
+                }
+                else if (ex is SecurityException secEx)
+                {
+                    ShowSecurityError("Security Error",
+                        $"A security error occurred:\n\n{secEx.Message}\n\n" +
+                        "This usually means:\n" +
+                        "• Application lacks required permissions\n" +
+                        "• Security policy restrictions\n" +
+                        "• Certificate or signature issues\n\n" +
+                        "Please contact your system administrator.");
+                }
+                else if (ex is COMException comEx)
+                {
+                    ShowSystemError("System Component Error",
+                        $"A system component error occurred:\n\n{comEx.Message}\n\n" +
+                        $"Error Code: 0x{comEx.HResult:X8}\n\n" +
+                        "This usually means:\n" +
+                        "• Missing system components\n" +
+                        "• Corrupted system files\n" +
+                        "• Compatibility issues\n\n" +
+                        "Please contact your system administrator.");
+                }
+                else if (ex is ExternalException extEx)
+                {
+                    ShowSystemError("External System Error",
+                        $"An external system error occurred:\n\n{extEx.Message}\n\n" +
+                        $"Error Code: 0x{extEx.ErrorCode:X8}\n\n" +
+                        "Please contact your system administrator.");
+                }
+                else if (ex is TimeoutException)
+                {
+                    ShowTimeoutError("Operation Timeout",
+                        $"An operation timed out:\n\n{ex.Message}\n\n" +
+                        "This usually means:\n" +
+                        "• Network connectivity issues\n" +
+                        "• Server is overloaded or unresponsive\n" +
+                        "• System performance issues\n\n" +
+                        "Please try again or contact your system administrator.");
+                }
+                else
+                {
+                    ShowFatalError("Application Error",
+                        $"An unexpected error occurred:\n\n{ex.Message}\n\n" +
+                        $"Error Type: {ex.GetType().Name}\n\n" +
+                        "Please check the log files and contact your system administrator if needed.\n\n" +
+                        "The application will now exit.");
+                }
+            }
+            catch (Exception innerEx)
+            {
+                // Fallback error handling
+                Console.WriteLine($"Error in global exception handler: {innerEx.Message}");
+                try
+                {
+                    MessageBox.Show($"A critical error occurred and could not be handled properly.\n\n" +
+                                   $"Original error: {ex.Message}\n" +
+                                   $"Handler error: {innerEx.Message}\n\n" +
+                                   "The application will now exit.",
+                        "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                }
+                catch
+                {
+                    // Final fallback - just exit
+                    Environment.Exit(1);
+                }
             }
         }
 
@@ -108,35 +546,39 @@ namespace MTM_Inventory_Application
             {
                 Console.WriteLine("[Startup] Validating database connectivity...");
                 LoggingUtility.Log("[Startup] Starting database connectivity validation");
-                
+
                 // First validate connection string format
                 var formatResult = ValidateConnectionStringFormat();
                 if (!formatResult.IsSuccess)
                 {
                     return formatResult;
                 }
-                
+
                 // Use helper for database health check with stored procedure approach
                 var healthCheckResult = ValidateDatabaseHealthWithStoredProcedure();
                 if (!healthCheckResult.IsSuccess)
                 {
                     return healthCheckResult;
                 }
-                
+
                 Console.WriteLine("[Startup] Database connectivity validated successfully.");
                 LoggingUtility.Log("[Startup] Database connectivity validation completed successfully");
                 return DaoResult.Success("Database connectivity validated successfully");
             }
+            catch (MySqlException ex)
+            {
+                string errorMsg = GetDatabaseConnectionErrorMessage(ex);
+                Console.WriteLine($"[Startup] MySQL Error: {errorMsg}");
+                LoggingUtility.LogDatabaseError(ex);
+
+                return DaoResult.Failure(errorMsg, ex);
+            }
             catch (Exception ex)
             {
-                string errorMsg = $"Critical error during database validation: {ex.Message}";
+                string errorMsg = $"Database connectivity validation failed: {ex.Message}";
                 Console.WriteLine($"[Startup] {errorMsg}");
                 LoggingUtility.LogApplicationError(ex);
-                
-                ShowDatabaseError("Database Validation Error", 
-                    $"Unable to validate database connectivity:\n\n{ex.Message}\n\n" +
-                    "Please check your network connection and database server status.");
-                
+
                 return DaoResult.Failure(errorMsg, ex);
             }
         }
@@ -162,7 +604,18 @@ namespace MTM_Inventory_Application
             catch (MySqlException ex)
             {
                 string userMessage = GetDatabaseConnectionErrorMessage(ex);
-                ShowDatabaseConnectionError(ex);
+                LoggingUtility.LogDatabaseError(ex);
+                return DaoResult.Failure(userMessage, ex);
+            }
+            catch (TimeoutException ex)
+            {
+                string userMessage = "Database connection timed out during health check.\n\n" +
+                                   "This usually means:\n" +
+                                   "• The database server is responding slowly\n" +
+                                   "• Network connectivity issues\n" +
+                                   "• Server is overloaded\n\n" +
+                                   "Please try again or contact your system administrator.";
+                LoggingUtility.LogApplicationError(ex);
                 return DaoResult.Failure(userMessage, ex);
             }
             catch (Exception ex)
@@ -182,21 +635,21 @@ namespace MTM_Inventory_Application
             try
             {
                 LoggingUtility.Log("[Startup] Attempting stored procedure health check");
-                
+
                 // Use a basic connectivity test first
                 using var connection = new MySqlConnection(Model_AppVariables.ConnectionString);
                 connection.Open();
-                
+
                 // Test if critical stored procedures exist
                 const string checkProcedureQuery = @"
                     SELECT COUNT(*) 
                     FROM INFORMATION_SCHEMA.ROUTINES 
                     WHERE ROUTINE_SCHEMA = DATABASE() 
                     AND ROUTINE_NAME IN ('sys_GetUserAccessType', 'sys_SetUserAccessType')";
-                
+
                 using var command = new MySqlCommand(checkProcedureQuery, connection);
                 var procedureCount = Convert.ToInt32(command.ExecuteScalar());
-                
+
                 if (procedureCount >= 1)
                 {
                     LoggingUtility.Log($"[Startup] Found {procedureCount} critical stored procedures");
@@ -208,6 +661,11 @@ namespace MTM_Inventory_Application
                     // Don't fail startup - let the application handle this gracefully
                     return DaoResult.Success("Database accessible but stored procedures may need deployment");
                 }
+            }
+            catch (MySqlException ex)
+            {
+                LoggingUtility.LogDatabaseError(ex);
+                return DaoResult.Failure($"MySQL error during health check: {ex.Message}", ex);
             }
             catch (Exception ex)
             {
@@ -226,21 +684,21 @@ namespace MTM_Inventory_Application
             try
             {
                 LoggingUtility.Log("[Startup] Performing basic connectivity validation");
-                
+
                 // Build connection with appropriate timeouts for startup validation
                 var connectionStringBuilder = new MySqlConnectionStringBuilder(Model_AppVariables.ConnectionString)
                 {
                     ConnectionTimeout = 10, // 10 second timeout for startup validation
                     DefaultCommandTimeout = 10
                 };
-                
+
                 using var connection = new MySqlConnection(connectionStringBuilder.ConnectionString);
                 connection.Open();
-                
+
                 // Test basic query to ensure database is functional
                 using var command = new MySqlCommand("SELECT VERSION() as mysql_version", connection);
                 var version = command.ExecuteScalar();
-                
+
                 if (version != null)
                 {
                     LoggingUtility.Log($"[Startup] Database connectivity confirmed. MySQL version: {version}");
@@ -276,29 +734,21 @@ namespace MTM_Inventory_Application
             try
             {
                 var connectionString = Model_AppVariables.ConnectionString;
-                
+
                 if (string.IsNullOrEmpty(connectionString))
                 {
-                    const string errorMsg = "Database connection string is not configured";
+                    const string errorMsg = "Database connection string is not configured.\n\n" +
+                                          "Please contact your system administrator to configure the database connection.";
                     LoggingUtility.Log($"[Startup] {errorMsg}");
-                    
-                    ShowDatabaseError("Configuration Error", 
-                        "Database connection string is not configured.\n\n" +
-                        "Please contact your system administrator to configure the database connection.");
-                    
                     return DaoResult.Failure(errorMsg);
                 }
 
                 // Basic connection string validation
                 if (!connectionString.Contains("SERVER=") || !connectionString.Contains("DATABASE="))
                 {
-                    const string errorMsg = "Database connection string is invalid or incomplete";
+                    const string errorMsg = "Database connection string is invalid.\n\n" +
+                                          "Please contact your system administrator to verify the database configuration.";
                     LoggingUtility.Log($"[Startup] {errorMsg}");
-                    
-                    ShowDatabaseError("Configuration Error", 
-                        "Database connection string is invalid.\n\n" +
-                        "Please contact your system administrator to verify the database configuration.");
-                    
                     return DaoResult.Failure(errorMsg);
                 }
 
@@ -307,11 +757,9 @@ namespace MTM_Inventory_Application
             }
             catch (Exception ex)
             {
+                string errorMsg = $"Error validating database configuration:\n\n{ex.Message}";
                 LoggingUtility.LogApplicationError(ex);
-                ShowDatabaseError("Configuration Error", 
-                    $"Error validating database configuration:\n\n{ex.Message}");
-                
-                return DaoResult.Failure($"Connection string validation error: {ex.Message}", ex);
+                return DaoResult.Failure(errorMsg, ex);
             }
         }
 
@@ -326,40 +774,57 @@ namespace MTM_Inventory_Application
         /// <returns>User-friendly error message with actionable guidance</returns>
         private static string GetDatabaseConnectionErrorMessage(MySqlException ex)
         {
-            if (ex.Message.Contains("Unable to connect to any of the specified MySQL hosts"))
+            if (ex.Message.Contains("Unknown database"))
+            {
+                string dbName = Model_Users.Database;
+                string serverAddress = Model_Users.WipServerAddress;
+
+#if DEBUG
+                return $"The test database '{dbName}' does not exist on server '{serverAddress}'.\n\n" +
+                       "This is a DEBUG build that requires the test database.\n\n" +
+                       "Please:\n" +
+                       "• Create the test database '{dbName}' on MySQL server\n" +
+                       "• Or run the application in RELEASE mode to use the production database\n" +
+                       "• Contact your system administrator for database setup assistance";
+#else
+                return $"The database '{dbName}' does not exist on server '{serverAddress}'.\n\n" +
+                       "Please contact your system administrator to:\n" +
+                       "• Verify the database server is running\n" +
+                       "• Ensure the database '{dbName}' exists and is accessible\n" +
+                       "• Check database permissions for your user account";
+#endif
+            }
+            else if (ex.Message.Contains("Unable to connect to any of the specified MySQL hosts"))
             {
                 return "Cannot connect to the database server.\n\n" +
                        "This usually means:\n" +
-                       "� The database server is not running\n" +
-                       "� The server address or port is incorrect\n" +
-                       "� A firewall is blocking the connection\n\n" +
-                       "Please check with your system administrator or verify the server is running.\n\n" +
-                       "The application cannot start without a database connection.";
+                       "• The database server is not running\n" +
+                       "• The server address or port is incorrect\n" +
+                       "• A firewall is blocking the connection\n\n" +
+                       "Please check with your system administrator or verify the server is running.";
             }
             else if (ex.Message.Contains("Access denied"))
             {
                 return "Access denied when connecting to the database.\n\n" +
                        "This usually means:\n" +
-                       "� Your username or password is incorrect\n" +
-                       "� Your account doesn't have permission to access the database\n\n" +
-                       "Please check your credentials with your system administrator.\n\n" +
-                       "The application cannot start without proper database access.";
+                       "• Your username or password is incorrect\n" +
+                       "• Your account doesn't have permission to access the database\n\n" +
+                       "Please check your credentials with your system administrator.";
             }
             else if (ex.Message.Contains("timeout") || ex.Message.Contains("Connection timeout"))
             {
                 return "Connection to the database timed out.\n\n" +
                        "This usually means:\n" +
-                       "� The database server is responding slowly\n" +
-                       "� Network connectivity issues\n" +
-                       "� The server is overloaded\n\n" +
+                       "• The database server is responding slowly\n" +
+                       "• Network connectivity issues\n" +
+                       "• The server is overloaded\n\n" +
                        "Please try starting the application again in a few moments.\n" +
                        "If the problem persists, contact your system administrator.";
             }
             else
             {
                 return $"Database connection failed with the following error:\n\n{ex.Message}\n\n" +
-                       "Please contact your system administrator for assistance.\n\n" +
-                       "The application cannot start without a database connection.";
+                       "Please contact your system administrator for assistance.";
             }
         }
 
@@ -370,12 +835,19 @@ namespace MTM_Inventory_Application
         /// <summary>
         /// Show user-friendly database connection error message
         /// </summary>
-        /// <param name="ex">MySQL exception</param>
-        private static void ShowDatabaseConnectionError(MySqlException ex)
+        /// <param name="title">Error dialog title</param>
+        /// <param name="message">Error message</param>
+        private static void ShowDatabaseConnectionError(string title, string message)
         {
-            string userMessage = GetDatabaseConnectionErrorMessage(ex);
-            string title = "Database Connection Failed";
-            MessageBox.Show(userMessage, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            try
+            {
+                MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Critical] Failed to show database connection error dialog: {ex.Message}");
+                Console.WriteLine($"[Critical] Original message: {message}");
+            }
         }
 
         /// <summary>
@@ -385,7 +857,15 @@ namespace MTM_Inventory_Application
         /// <param name="message">Error message</param>
         private static void ShowDatabaseError(string title, string message)
         {
-            MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            try
+            {
+                MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Critical] Failed to show database error dialog: {ex.Message}");
+                Console.WriteLine($"[Critical] Original message: {message}");
+            }
         }
 
         /// <summary>
@@ -395,7 +875,105 @@ namespace MTM_Inventory_Application
         /// <param name="message">Error message</param>
         private static void ShowFatalError(string title, string message)
         {
-            MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Stop);
+            try
+            {
+                MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Stop);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Critical] Failed to show fatal error dialog: {ex.Message}");
+                Console.WriteLine($"[Critical] Original message: {message}");
+            }
+        }
+
+        /// <summary>
+        /// Show non-critical error message that allows application to continue
+        /// </summary>
+        /// <param name="title">Error dialog title</param>
+        /// <param name="message">Error message</param>
+        private static void ShowNonCriticalError(string title, string message)
+        {
+            try
+            {
+                MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Critical] Failed to show non-critical error dialog: {ex.Message}");
+                Console.WriteLine($"[Critical] Original message: {message}");
+            }
+        }
+
+        /// <summary>
+        /// Show file system related error message
+        /// </summary>
+        /// <param name="title">Error dialog title</param>
+        /// <param name="message">Error message</param>
+        private static void ShowFileSystemError(string title, string message)
+        {
+            try
+            {
+                MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Critical] Failed to show file system error dialog: {ex.Message}");
+                Console.WriteLine($"[Critical] Original message: {message}");
+            }
+        }
+
+        /// <summary>
+        /// Show security related error message
+        /// </summary>
+        /// <param name="title">Error dialog title</param>
+        /// <param name="message">Error message</param>
+        private static void ShowSecurityError(string title, string message)
+        {
+            try
+            {
+                MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Critical] Failed to show security error dialog: {ex.Message}");
+                Console.WriteLine($"[Critical] Original message: {message}");
+            }
+        }
+
+        /// <summary>
+        /// Show system error message
+        /// </summary>
+        /// <param name="title">Error dialog title</param>
+        /// <param name="message">Error message</param>
+        private static void ShowSystemError(string title, string message)
+        {
+            try
+            {
+                MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Critical] Failed to show system error dialog: {ex.Message}");
+                Console.WriteLine($"[Critical] Original message: {message}");
+            }
+        }
+
+        /// <summary>
+        /// Show timeout error message
+        /// </summary>
+        /// <param name="title">Error dialog title</param>
+        /// <param name="message">Error message</param>
+        private static void ShowTimeoutError(string title, string message)
+        {
+            try
+            {
+                MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Critical] Failed to show timeout error dialog: {ex.Message}");
+                Console.WriteLine($"[Critical] Original message: {message}");
+            }
         }
 
         #endregion
@@ -410,450 +988,60 @@ namespace MTM_Inventory_Application
             try
             {
                 LoggingUtility.Log("[Cleanup] Starting application cleanup");
-                
+
                 // Clean up temporary files created by Control_About
-                Control_About.CleanupAllTempFiles();
-                
+                try
+                {
+                    Control_About.CleanupAllTempFiles();
+                    LoggingUtility.Log("[Cleanup] Control_About temp files cleaned up successfully");
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                    Console.WriteLine($"[Cleanup Warning] Access denied cleaning temp files: {ex.Message}");
+                }
+                catch (IOException ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                    Console.WriteLine($"[Cleanup Warning] IO error cleaning temp files: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                    Console.WriteLine($"[Cleanup Warning] Error cleaning Control_About temp files: {ex.Message}");
+                }
+
+                // Additional cleanup operations can be added here
+                try
+                {
+                    // Cleanup any remaining database connections
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    LoggingUtility.Log("[Cleanup] Memory cleanup completed");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Cleanup Warning] Error during memory cleanup: {ex.Message}");
+                }
+
                 LoggingUtility.Log("[Cleanup] Application cleanup completed successfully");
             }
             catch (Exception ex)
             {
-                // Don't let cleanup errors crash the application
+                // Don't let cleanup errors crash the application during shutdown
                 Console.WriteLine($"[Cleanup Warning] Error during application cleanup: {ex.Message}");
-                LoggingUtility.LogApplicationError(ex);
+                try
+                {
+                    LoggingUtility.LogApplicationError(ex);
+                }
+                catch
+                {
+                    // If even logging fails during cleanup, just output to console
+                    Console.WriteLine("[Cleanup Warning] Failed to log cleanup error");
+                }
             }
         }
 
         #endregion
     }
-
-    #region Startup Application Context
-
-    public class StartupSplashApplicationContext : ApplicationContext
-    {
-        #region Fields
-
-        private SplashScreenForm? _splashScreen;
-        private MainForm? _mainForm;
-
-        #endregion
-
-        #region Constructors
-
-        public StartupSplashApplicationContext()
-        {
-            try
-            {
-                LoggingUtility.Log("[Splash] Initializing splash screen");
-                _splashScreen = new SplashScreenForm();
-                _splashScreen.Shown += async (s, e) => await RunStartupAsync();
-                _splashScreen.FormClosed += SplashScreen_FormClosed;
-                _splashScreen.Show();
-            }
-            catch (Exception ex)
-            {
-                LoggingUtility.LogApplicationError(ex);
-                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false,
-                    nameof(StartupSplashApplicationContext));
-            }
-        }
-
-        #endregion
-
-        #region Event Handlers
-
-        private void SplashScreen_FormClosed(object? sender, EventArgs e)
-        {
-            try
-            {
-                if (_mainForm == null || _mainForm.IsDisposed)
-                {
-                    LoggingUtility.Log("[Splash] Exiting application thread - MainForm not available");
-                    ExitThread();
-                }
-            }
-            catch (Exception ex)
-            {
-                LoggingUtility.LogApplicationError(ex);
-                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(SplashScreen_FormClosed));
-            }
-        }
-
-        #endregion
-
-        #region Startup Sequence
-
-        private async Task RunStartupAsync()        
-        {
-            try
-            {
-                LoggingUtility.Log("[Splash] Starting startup sequence");
-                int progress = 0;
-                _splashScreen?.UpdateProgress(progress, "Starting startup sequence...");
-                await Task.Delay(100);
-
-                // 1. Initialize logging
-                progress = 5;
-                _splashScreen?.UpdateProgress(progress, "Initializing logging...");
-                await LoggingUtility.InitializeLoggingAsync();
-                progress = 10;
-                _splashScreen?.UpdateProgress(progress, "Logging initialized.");
-                LoggingUtility.Log("[Splash] Logging system initialized");
-                await Task.Delay(50);
-
-                // 2. Clean up old logs
-                progress = 15;
-                _splashScreen?.UpdateProgress(progress, "Cleaning up old logs...");
-                await LoggingUtility.CleanUpOldLogsIfNeededAsync();
-                progress = 20;
-                _splashScreen?.UpdateProgress(progress, "Old logs cleaned up.");
-                LoggingUtility.Log("[Splash] Log cleanup completed");
-                await Task.Delay(50);
-
-                // 3. Clean app data folders
-                progress = 25;
-                _splashScreen?.UpdateProgress(progress, "Wiping app data folders...");
-                await Task.Run(() => Service_OnStartup_AppDataCleaner.WipeAppDataFolders());
-                progress = 30;
-                _splashScreen?.UpdateProgress(progress, "App data folders wiped.");
-                LoggingUtility.Log("[Splash] App data cleanup completed");
-                await Task.Delay(50);
-
-                // 4. Verify database connectivity using helper patterns
-                progress = 35;
-                _splashScreen?.UpdateProgress(progress, "Verifying database connectivity...");
-                var connectivityResult = await VerifyDatabaseConnectivityWithHelperAsync();
-                if (!connectivityResult.IsSuccess)
-                {
-                    LoggingUtility.Log($"[Splash] Database connectivity verification failed: {connectivityResult.StatusMessage}");
-                    _splashScreen?.Close();
-                    return;
-                }
-                progress = 40;
-                _splashScreen?.UpdateProgress(progress, "Database connectivity verified.");
-                LoggingUtility.Log("[Splash] Database connectivity verified during startup");
-                await Task.Delay(50);
-
-                // 5. Setup data tables
-                progress = 45;
-                _splashScreen?.UpdateProgress(progress, "Setting up Data Tables...");
-                await Helper_UI_ComboBoxes.SetupDataTables();
-                progress = 50;
-                _splashScreen?.UpdateProgress(progress, "Data Tables set up.");
-                LoggingUtility.Log("[Splash] Data tables setup completed");
-                await Task.Delay(50);
-
-                // 6. Initialize version checker
-                progress = 60;
-                _splashScreen?.UpdateProgress(progress, "Initializing version checker...");
-                Service_Timer_VersionChecker.Initialize();
-                progress = 65;
-                _splashScreen?.UpdateProgress(progress, "Version checker initialized.");
-                LoggingUtility.Log("[Splash] Version checker initialized");
-                await Task.Delay(50);
-
-                // 7. Initialize theme system
-                progress = 70;
-                _splashScreen?.UpdateProgress(progress, "Initializing theme system...");
-                await Core_Themes.Core_AppThemes.InitializeThemeSystemAsync(Model_AppVariables.User);
-                progress = 75;
-                _splashScreen?.UpdateProgress(progress, "Theme system initialized.");
-                LoggingUtility.Log("[Splash] Theme system initialized");
-                await Task.Delay(50);
-
-                // 8. Load user context
-                progress = 80;
-                _splashScreen?.UpdateProgress(progress, $"User Full Name loaded: {Model_AppVariables.User}");
-                LoggingUtility.Log($"[Splash] User context loaded: {Model_AppVariables.User}");
-                await Task.Delay(50);
-
-                // 9. Load theme settings using DaoResult patterns
-                progress = 85;
-                _splashScreen?.UpdateProgress(progress, "Loading theme settings...");
-                await LoadThemeSettingsAsync();
-                progress = 90;
-                _splashScreen?.UpdateProgress(progress, "Theme settings loaded.");
-                LoggingUtility.Log("[Splash] Theme settings loaded");
-                await Task.Delay(50);
-
-                // 10. Complete core startup
-                progress = 93;
-                _splashScreen?.UpdateProgress(progress, "Startup sequence completed.");
-                LoggingUtility.Log("[Splash] Core startup sequence completed");
-                await Task.Delay(100);
-
-                // 11. Create main form
-                progress = 95;
-                _splashScreen?.UpdateProgress(progress, "Creating main form...");
-                await Task.Delay(200);
-                _mainForm = new MainForm();
-                _mainForm.FormClosed += (s, e) => ExitThread();
-                LoggingUtility.Log("[Splash] MainForm created");
-
-                // 12. Configure form instances
-                progress = 97;
-                _splashScreen?.UpdateProgress(progress, "Configuring form instances...");
-                ConfigureFormInstances();
-                LoggingUtility.Log("[Splash] Form instances configured");
-
-                // 13. Apply theme
-                progress = 99;
-                _splashScreen?.UpdateProgress(progress, "Applying theme...");
-                ApplyThemeToMainForm();
-                LoggingUtility.Log("[Splash] Theme applied to MainForm");
-
-                // 14. Show application
-                progress = 100;
-                _splashScreen?.UpdateProgress(progress, "Ready to start!");
-                await Task.Delay(500);
-                
-                ShowMainForm();
-                LoggingUtility.Log("[Splash] MainForm displayed - startup complete");
-
-                if (_splashScreen != null)
-                {
-                    _splashScreen.FormClosed -= SplashScreen_FormClosed;
-                    _splashScreen.Close();
-                    LoggingUtility.Log("[Splash] Splash screen closed");
-                }
-            }
-            catch (Exception ex)
-            {
-                LoggingUtility.LogApplicationError(ex);
-                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(RunStartupAsync));
-                
-                string userMessage = "A critical error occurred during application startup:\n\n" +
-                                   $"{ex.Message}\n\n" +
-                                   "The application will now close. Please check the log files for more details " +
-                                   "and contact your system administrator if the problem persists.";
-                
-                MessageBox.Show(userMessage, @"Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                _splashScreen?.Close();
-            }
-        }
-
-        #endregion
-
-        #region Database Connectivity (Async)
-
-        /// <summary>
-        /// Verify database connectivity using helper patterns with async support
-        /// </summary>
-        /// <returns>DaoResult indicating connectivity status</returns>
-        private async Task<DaoResult> VerifyDatabaseConnectivityWithHelperAsync()
-        {
-            try
-            {
-                LoggingUtility.Log("[Splash] Starting async database connectivity verification");
-                
-                // Use consistent timeout settings
-                var connectionStringBuilder = new MySqlConnectionStringBuilder(Model_AppVariables.ConnectionString)
-                {
-                    ConnectionTimeout = 10,
-                    DefaultCommandTimeout = 10
-                };
-                
-                using var connection = new MySqlConnection(connectionStringBuilder.ConnectionString);
-                await connection.OpenAsync();
-                
-                // Test database functionality with version query
-                using var command = new MySqlCommand("SELECT VERSION() as mysql_version", connection);
-                var version = await command.ExecuteScalarAsync();
-                
-                if (version != null)
-                {
-                    LoggingUtility.Log($"[Splash] Database connectivity verified. MySQL version: {version}");
-                    return DaoResult.Success($"Database connectivity verified. MySQL version: {version}");
-                }
-                else
-                {
-                    const string errorMsg = "Database version query returned null";
-                    LoggingUtility.Log($"[Splash] {errorMsg}");
-                    return DaoResult.Failure(errorMsg);
-                }
-            }
-            catch (MySqlException ex)
-            {
-                LoggingUtility.LogDatabaseError(ex);
-                
-                string userMessage = GetUserFriendlyConnectionError(ex);
-                MessageBox.Show(userMessage, "Database Connection Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                
-                return DaoResult.Failure(userMessage, ex);
-            }
-            catch (Exception ex)
-            {
-                LoggingUtility.LogApplicationError(ex);
-                
-                string userMessage = "Unable to verify database connectivity during startup:\n\n" +
-                                   $"{ex.Message}\n\n" +
-                                   "Please check your network connection and database server status.\n" +
-                                   "The application cannot start without database access.";
-                
-                MessageBox.Show(userMessage, "Database Connection Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                
-                return DaoResult.Failure(userMessage, ex);
-            }
-        }
-
-        /// <summary>
-        /// Get user-friendly error message for MySQL connection errors
-        /// </summary>
-        /// <param name="ex">MySQL exception</param>
-        /// <returns>User-friendly error message</returns>
-        private static string GetUserFriendlyConnectionError(MySqlException ex)
-        {
-            if (ex.Message.Contains("Unable to connect to any of the specified MySQL hosts"))
-            {
-                return "Cannot connect to the database server during application startup.\n\n" +
-                       "This usually means:\n" +
-                       "� The database server is not running\n" +
-                       "� The server address or port is incorrect\n" +
-                       "� A firewall is blocking the connection\n\n" +
-                       "Please verify the MySQL server is running and accessible.\n" +
-                       "The application cannot start without a database connection.";
-            }
-            
-            if (ex.Message.Contains("Access denied"))
-            {
-                return "Access denied when connecting to the database during startup.\n\n" +
-                       "This usually means:\n" +
-                       "� Your username or password is incorrect\n" +
-                       "� Your account doesn't have permission to access the database\n\n" +
-                       "Please check your database credentials with your system administrator.\n" +
-                       "The application cannot start without proper database access.";
-            }
-            
-            if (ex.Message.Contains("timeout"))
-            {
-                return "Database connection timed out during application startup.\n\n" +
-                       "This usually means:\n" +
-                       "� The database server is responding slowly\n" +
-                       "� Network connectivity issues\n" +
-                       "� The server is overloaded\n\n" +
-                       "Please try starting the application again in a few moments.";
-            }
-            
-            return $"Database connection failed during startup:\n\n{ex.Message}\n\n" +
-                   "Please contact your system administrator for assistance.\n" +
-                   "The application cannot start without a database connection.";
-        }
-
-        #endregion
-
-        #region Form Configuration
-
-        /// <summary>
-        /// Load theme settings using established DAO patterns
-        /// </summary>
-        private async Task LoadThemeSettingsAsync()
-        {
-            try
-            {
-                LoggingUtility.Log("[Splash] Loading theme settings");
-                
-                int? fontSize = await Dao_User.GetThemeFontSizeAsync(Model_AppVariables.User);
-                Model_AppVariables.ThemeFontSize = fontSize ?? 9;
-                
-                Model_AppVariables.UserUiColors = await Core_Themes.GetUserThemeColorsAsync(Model_AppVariables.User);
-                
-                LoggingUtility.Log($"[Splash] Theme settings loaded - Font size: {Model_AppVariables.ThemeFontSize}");
-            }
-            catch (Exception ex)
-            {
-                LoggingUtility.LogApplicationError(ex);
-                // Set defaults if theme loading fails
-                Model_AppVariables.ThemeFontSize = 9;
-                LoggingUtility.Log("[Splash] Using default theme settings due to loading error");
-            }
-        }
-
-        /// <summary>
-        /// Configure form instances with proper error handling
-        /// </summary>
-        private void ConfigureFormInstances()
-        {
-            try
-            {
-                if (_mainForm == null) return;
-                
-                Control_RemoveTab.MainFormInstance = _mainForm;
-                Control_InventoryTab.MainFormInstance = _mainForm;
-                Control_TransferTab.MainFormInstance = _mainForm;
-                Control_AdvancedInventory.MainFormInstance = _mainForm;
-                Control_AdvancedRemove.MainFormInstance = _mainForm;
-                Control_QuickButtons.MainFormInstance = _mainForm;
-                Helper_UI_ComboBoxes.MainFormInstance = _mainForm;
-                Service_Timer_VersionChecker.MainFormInstance = _mainForm;
-                
-                LoggingUtility.Log("[Splash] All form instances configured successfully");
-            }
-            catch (Exception ex)
-            {
-                LoggingUtility.LogApplicationError(ex);
-                throw new InvalidOperationException("Failed to configure form instances", ex);
-            }
-        }
-
-        /// <summary>
-        /// Apply theme to MainForm with thread safety
-        /// </summary>
-        private void ApplyThemeToMainForm()
-        {
-            try
-            {
-                if (_mainForm == null) return;
-                
-                if (_mainForm.InvokeRequired)
-                {
-                    _mainForm.Invoke(new Action(() => Core_Themes.ApplyTheme(_mainForm)));
-                }
-                else
-                {
-                    Core_Themes.ApplyTheme(_mainForm);
-                }
-                
-                LoggingUtility.Log("[Splash] Theme applied to MainForm");
-            }
-            catch (Exception ex)
-            {
-                LoggingUtility.LogApplicationError(ex);
-                // Theme application failure is not critical for startup
-                LoggingUtility.Log("[Splash] Theme application failed, continuing with default theme");
-            }
-        }
-
-        /// <summary>
-        /// Show MainForm with thread safety
-        /// </summary>
-        private void ShowMainForm()
-        {
-            try
-            {
-                if (_mainForm == null) return;
-                
-                if (_mainForm.InvokeRequired)
-                {
-                    _mainForm.Invoke(new Action(() => _mainForm.Show()));
-                }
-                else
-                {
-                    _mainForm.Show();
-                }
-                
-                LoggingUtility.Log("[Splash] MainForm displayed successfully");
-            }
-            catch (Exception ex)
-            {
-                LoggingUtility.LogApplicationError(ex);
-                throw new InvalidOperationException("Failed to show MainForm", ex);
-            }
-        }
-
-        #endregion
-    }
-
-    #endregion
 }

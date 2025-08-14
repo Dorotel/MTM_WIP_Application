@@ -16,10 +16,54 @@
         public static string VisualPassword { get; set; } = "Password";
         public static string VisualUserName { get; set; } = "User Name";
         public bool VitsUser { get; set; } = false;
-        public static string Database { get; set; } = "mtm_wip_application";
+        public static string Database
+        {
+            get => _database ?? (
+#if DEBUG
+                "mtm_wip_application_test"
+#else
+        "mtm_wip_application"
+#endif
+            );
+            set => _database = value;
+        }
 
-        public static string WipServerAddress { get; set; } = "localhost"; //localhost
+        private static string? _database;
+
+        public static string WipServerAddress
+        {
+            get => _wipServerAddress ?? (
+#if DEBUG
+                GetLocalIpAddress() == "172.16.1.104" ? "172.16.1.104" : "localhost"
+#else
+        "172.16.1.104"
+#endif
+            );
+            set => _wipServerAddress = value;
+        }
+
+        private static string? _wipServerAddress;
+
         public static string WipServerPort { get; set; } = "3306";
+
+        /// <summary>
+        /// Gets the local IP address to determine server selection in Debug mode
+        /// </summary>
+        private static string GetLocalIpAddress()
+        {
+            try
+            {
+                using var socket = new System.Net.Sockets.Socket(System.Net.Sockets.AddressFamily.InterNetwork, 
+                    System.Net.Sockets.SocketType.Dgram, 0);
+                socket.Connect("8.8.8.8", 65530);
+                var endPoint = socket.LocalEndPoint as System.Net.IPEndPoint;
+                return endPoint?.Address.ToString() ?? "localhost";
+            }
+            catch
+            {
+                return "localhost";
+            }
+        }
 
         #endregion
     }

@@ -18,7 +18,7 @@ Database error occurred while retrieving quick buttons for user: JOHNK it worke 
 The Quick Button stored procedures are **missing from the database**. The error message is coming directly from the stored procedure's exception handler, which means:
 
 1. ? **Application code is correct** - It's successfully calling the stored procedure
-2. ? **Database is missing procedures** - The `sys_last_10_transactions_Get_ByUser_1` procedure doesn't exist
+2. ? **Database is missing procedures** - The `sys_last_10_transactions_Get_ByUser` procedure doesn't exist
 3. ?? **Previous deployment incomplete** - The 06_Quick_Button_Procedures.sql file wasn't deployed
 
 ---
@@ -49,18 +49,18 @@ ORDER BY ROUTINE_NAME;
 
 -- Expected Results (7 procedures):
 -- sys_last_10_transactions_AddOrShift_ByUser
--- sys_last_10_transactions_Add_AtPosition_1
+-- sys_last_10_transactions_Add_AtPosition
 -- sys_last_10_transactions_DeleteAll_ByUser
--- sys_last_10_transactions_Get_ByUser_1
--- sys_last_10_transactions_Move_1
--- sys_last_10_transactions_RemoveAndShift_ByUser_1
--- sys_last_10_transactions_Update_ByUserAndPosition_1
+-- sys_last_10_transactions_Get_ByUser
+-- sys_last_10_transactions_Move
+-- sys_last_10_transactions_RemoveAndShift_ByUser
+-- sys_last_10_transactions_Update_ByUserAndPosition
 ```
 
 ### **Step 3: Test Quick Button Procedure Manually**
 ```sql
 -- Test the specific procedure that's failing
-CALL sys_last_10_transactions_Get_ByUser_1('JOHNK', @status, @msg);
+CALL sys_last_10_transactions_Get_ByUser('JOHNK', @status, @msg);
 SELECT @status as Status, @msg as Message;
 
 -- Expected Results:
@@ -111,7 +111,7 @@ SELECT @status as Status, @msg as Message;
 After running the deployment, verify:
 
 - [ ] **All 7 Quick Button procedures deployed** - Check INFORMATION_SCHEMA.ROUTINES
-- [ ] **Test procedure works manually** - Run CALL sys_last_10_transactions_Get_ByUser_1
+- [ ] **Test procedure works manually** - Run CALL sys_last_10_transactions_Get_ByUser
 - [ ] **Application quick buttons load** - Restart app and check right panel
 - [ ] **No errors in logs** - Check application logs for Quick Button errors
 - [ ] **Functionality works** - Test click, right-click, edit, remove operations

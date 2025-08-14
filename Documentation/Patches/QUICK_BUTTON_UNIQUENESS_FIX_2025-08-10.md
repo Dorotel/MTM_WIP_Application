@@ -58,14 +58,14 @@ IF v_ExistingPosition > 0 THEN
     
     -- Move existing to position 1 (if not already there)
     IF v_ExistingPosition != 1 THEN
-        CALL sys_last_10_transactions_Move_1(p_User, v_ExistingPosition, 1, @move_status, @move_msg);
+        CALL sys_last_10_transactions_Move(p_User, v_ExistingPosition, 1, @move_status, @move_msg);
     END IF;
     
     SET p_Status = 0;
     SET p_ErrorMsg = CONCAT('Updated existing quick button quantity and moved to position 1 for user: ', p_User);
 ELSE
     -- Add new at position 1 (shifts others down)
-    CALL sys_last_10_transactions_Add_AtPosition_1(p_User, 1, p_PartID, p_Operation, p_Quantity, @add_status, @add_msg);
+    CALL sys_last_10_transactions_Add_AtPosition(p_User, 1, p_PartID, p_Operation, p_Quantity, @add_status, @add_msg);
     SET p_Status = 0;
     SET p_ErrorMsg = CONCAT('Added new quick button at position 1 for user: ', p_User);
 END IF;

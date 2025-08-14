@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using MTM_Inventory_Application.Logging;
+using MTM_Inventory_Application.Services;
 using MySql.Data.MySqlClient;
 
 namespace MTM_Inventory_Application.Helpers
@@ -31,6 +33,20 @@ namespace MTM_Inventory_Application.Helpers
             Helper_StoredProcedureProgress? progressHelper = null,
             bool useAsync = false)
         {
+            var stopwatch = Stopwatch.StartNew();
+            var performanceKey = Service_DebugTracer.StartPerformanceTrace($"SP_{procedureName}");
+            
+            // Trace method entry
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["procedureName"] = procedureName,
+                ["parameterCount"] = parameters?.Count ?? 0,
+                ["useAsync"] = useAsync
+            }, nameof(ExecuteDataTableWithStatus), "Helper_Database_StoredProcedure");
+
+            // Trace database operation start
+            Service_DebugTracer.TraceDatabaseStart("PROCEDURE", procedureName, parameters, connectionString);
+
             try
             {
                 progressHelper?.UpdateProgress(10, $"Connecting to database for {procedureName}...");
@@ -49,12 +65,14 @@ namespace MTM_Inventory_Application.Helpers
                 };
 
                 // Add input parameters (WITH automatic p_ prefix addition)
+                var finalParameters = new Dictionary<string, object>();
                 if (parameters != null)
                 {
                     foreach (var param in parameters)
                     {
                         string paramName = param.Key.StartsWith("p_") ? param.Key : $"p_{param.Key}";
                         command.Parameters.AddWithValue(paramName, param.Value ?? DBNull.Value);
+                        finalParameters[paramName] = param.Value ?? DBNull.Value;
                     }
                 }
 
@@ -93,27 +111,79 @@ namespace MTM_Inventory_Application.Helpers
 
                 progressHelper?.UpdateProgress(100, $"Completed {procedureName}");
 
+                stopwatch.Stop();
+                
+                // Trace complete stored procedure execution
+                Service_DebugTracer.TraceStoredProcedure(
+                    procedureName,
+                    finalParameters,
+                    new Dictionary<string, object>
+                    {
+                        ["p_Status"] = status,
+                        ["p_ErrorMsg"] = errorMessage
+                    },
+                    $"DataTable[{dataTable.Rows.Count} rows]",
+                    status,
+                    errorMessage,
+                    stopwatch.ElapsedMilliseconds);
+
+                Service_DebugTracer.TraceDatabaseComplete("PROCEDURE", procedureName, 
+                    $"DataTable with {dataTable.Rows.Count} rows", dataTable.Rows.Count, stopwatch.ElapsedMilliseconds);
+
                 if (status == 0)
                 {
                     progressHelper?.ProcessStoredProcedureResult(status, errorMessage, 
                         $"Successfully retrieved {dataTable.Rows.Count} records");
-                    return StoredProcedureResult<DataTable>.Success(dataTable, errorMessage);
+                    
+                    var result = StoredProcedureResult<DataTable>.Success(dataTable, errorMessage);
+                    
+                    Service_DebugTracer.TraceMethodExit(result, nameof(ExecuteDataTableWithStatus), "Helper_Database_StoredProcedure");
+                    Service_DebugTracer.StopPerformanceTrace(performanceKey, new Dictionary<string, object>
+                    {
+                        ["Status"] = "SUCCESS",
+                        ["RowCount"] = dataTable.Rows.Count
+                    });
+                    
+                    return result;
                 }
                 else
                 {
                     progressHelper?.ProcessStoredProcedureResult(status, errorMessage);
-                    if (status == 1)
-                        return StoredProcedureResult<DataTable>.Warning(errorMessage, dataTable);
-                    else
-                        return StoredProcedureResult<DataTable>.Error(errorMessage, null, dataTable);
+                    
+                    var result = status == 1 
+                        ? StoredProcedureResult<DataTable>.Warning(errorMessage, dataTable)
+                        : StoredProcedureResult<DataTable>.Error(errorMessage, null, dataTable);
+                    
+                    Service_DebugTracer.TraceMethodExit(result, nameof(ExecuteDataTableWithStatus), "Helper_Database_StoredProcedure");
+                    Service_DebugTracer.StopPerformanceTrace(performanceKey, new Dictionary<string, object>
+                    {
+                        ["Status"] = status == 1 ? "WARNING" : "ERROR",
+                        ["ErrorMessage"] = errorMessage
+                    });
+                    
+                    return result;
                 }
             }
             catch (Exception ex)
             {
+                stopwatch.Stop();
                 string userFriendlyMessage = GetUserFriendlyConnectionError(ex, procedureName);
                 LoggingUtility.LogDatabaseError(ex);
                 progressHelper?.ShowError(userFriendlyMessage);
-                return StoredProcedureResult<DataTable>.Error(userFriendlyMessage, ex);
+                
+                Service_DebugTracer.TraceDatabaseComplete("PROCEDURE", procedureName, 
+                    $"EXCEPTION: {ex.Message}", 0, stopwatch.ElapsedMilliseconds);
+                    
+                var result = StoredProcedureResult<DataTable>.Error(userFriendlyMessage, ex);
+                
+                Service_DebugTracer.TraceMethodExit(result, nameof(ExecuteDataTableWithStatus), "Helper_Database_StoredProcedure");
+                Service_DebugTracer.StopPerformanceTrace(performanceKey, new Dictionary<string, object>
+                {
+                    ["Status"] = "EXCEPTION",
+                    ["ExceptionMessage"] = ex.Message
+                });
+                
+                return result;
             }
         }
 
@@ -520,9 +590,9 @@ namespace MTM_Inventory_Application.Helpers
                     {
                         return $"Cannot connect to the database server to execute {procedureName}.\n\n" +
                                "This usually means:\n" +
-                               "• The database server is not running\n" +
-                               "• The server address or port is incorrect\n" +
-                               "• A firewall is blocking the connection\n\n" +
+                               "ï¿½ The database server is not running\n" +
+                               "ï¿½ The server address or port is incorrect\n" +
+                               "ï¿½ A firewall is blocking the connection\n\n" +
                                "Please check with your system administrator or verify the server is running.";
                     }
 
@@ -530,8 +600,8 @@ namespace MTM_Inventory_Application.Helpers
                     {
                         return $"Access denied when connecting to the database for {procedureName}.\n\n" +
                                "This usually means:\n" +
-                               "• Your username or password is incorrect\n" +
-                               "• Your account doesn't have permission to access the database\n\n" +
+                               "ï¿½ Your username or password is incorrect\n" +
+                               "ï¿½ Your account doesn't have permission to access the database\n\n" +
                                "Please check your credentials with your system administrator.";
                     }
 
@@ -539,9 +609,9 @@ namespace MTM_Inventory_Application.Helpers
                     {
                         return $"Connection to the database timed out while executing {procedureName}.\n\n" +
                                "This usually means:\n" +
-                               "• The database server is responding slowly\n" +
-                               "• Network connectivity issues\n" +
-                               "• The server is overloaded\n\n" +
+                               "ï¿½ The database server is responding slowly\n" +
+                               "ï¿½ Network connectivity issues\n" +
+                               "ï¿½ The server is overloaded\n\n" +
                                "Please try again in a few moments.";
                     }
                 }
@@ -552,9 +622,9 @@ namespace MTM_Inventory_Application.Helpers
                     {
                         return $"The database server refused the connection for {procedureName}.\n\n" +
                                "This usually means:\n" +
-                               "• The MySQL service is not running on the server\n" +
-                               "• The server is not accepting connections on the configured port\n" +
-                               "• The server address is incorrect\n\n" +
+                               "ï¿½ The MySQL service is not running on the server\n" +
+                               "ï¿½ The server is not accepting connections on the configured port\n" +
+                               "ï¿½ The server address is incorrect\n\n" +
                                "Please verify the MySQL service is running and check the server configuration.";
                     }
 
@@ -562,9 +632,9 @@ namespace MTM_Inventory_Application.Helpers
                     {
                         return $"Cannot find the database server to execute {procedureName}.\n\n" +
                                "This usually means:\n" +
-                               "• The server name or IP address is incorrect\n" +
-                               "• DNS resolution is not working\n" +
-                               "• The server is not accessible from this network\n\n" +
+                               "ï¿½ The server name or IP address is incorrect\n" +
+                               "ï¿½ DNS resolution is not working\n" +
+                               "ï¿½ The server is not accessible from this network\n\n" +
                                "Please check the server address in your connection settings.";
                     }
                 }

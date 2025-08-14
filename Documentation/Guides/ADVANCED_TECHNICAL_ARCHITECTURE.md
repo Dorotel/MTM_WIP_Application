@@ -166,7 +166,7 @@ public static class Helper_Database_StoredProcedure
 -- Pattern: [schema_prefix]_[entity]_[operation]_[qualifier]
 -- Examples:
 inv_inventory_Add_Item              -- Add inventory item
-inv_inventory_Remove_Item_1_1       -- Remove single inventory item  
+inv_inventory_Remove_Item       -- Remove single inventory item  
 inv_inventory_Transfer_Part         -- Transfer between locations
 inv_inventory_Get_ByPartID          -- Get inventory by part ID
 inv_transactions_Get_ByUser         -- Get user transaction history

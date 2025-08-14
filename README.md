@@ -128,7 +128,11 @@ MTM_Inventory_Application/
 │  └─ Core_DgvPrinter.cs         # DataGridView printing utilities
 ├─ Data/                         # Data access layer (DAOs)
 ├─ Database/                     # Database scripts and stored procedures
-│  └─ StoredProcedures/          # 74+ procedures with uniform p_ parameter naming
+│  ├─ CurrentDatabase/           # ⚠️  REFERENCE ONLY - Live production database snapshot
+│  ├─ CurrentServer/             # ⚠️  REFERENCE ONLY - Live production server config  
+│  ├─ CurrentStoredProcedures/   # ⚠️  REFERENCE ONLY - Live production procedures
+│  ├─ UpdatedDatabase/           # ✅ ACTIVE - Development/test database structure
+│  └─ UpdatedStoredProcedures/   # ✅ ACTIVE - 74+ procedures with uniform p_ parameter naming
 ├─ Documentation/                # Comprehensive patch history and guides
 │  ├─ Copilot Files/             # Modularized repo documentation (this index points here)
 │  ├─ Patches/                   # Historical fix documentation (30+ patches)
@@ -137,14 +141,47 @@ MTM_Inventory_Application/
 ├─ Helpers/                      # Utility classes and helpers
 │  ├─ Helper_FileIO.cs           # File I/O operations
 │  ├─ Helper_Json.cs             # JSON parsing/serialization
+│  ├─ Helper_Database_Variables.cs # Environment-aware database connection logic
 │  └─ Helper_UI_ComboBoxes.cs    # ComboBox management
 ├─ Logging/                      # Centralized logging system
 ├─ Models/                       # Data models and DTOs
+│  ├─ Model_Users.cs             # Environment-aware database/server properties
+│  └─ Model_AppVariables.cs      # Application variables with environment logic
 ├─ Services/                     # Background services and utilities
 │  ├─ Service_Timer_VersionChecker.cs  # Version checking service
 │  └─ Service_ErrorHandler.cs          # Error handling service
 └─ Program.cs                    # Application entry point with comprehensive startup
 ```
+
+## Environment-Specific Database and Server Logic
+
+The application implements environment-aware database and server selection:
+
+### **Database Name Logic**
+- **Debug Mode (Development)**: Uses `mtm_wip_application_test`
+- **Release Mode (Production)**: Uses `mtm_wip_application`
+
+### **Server Address Logic**  
+- **Release Mode**: Always connects to `172.16.1.104` (production server)
+- **Debug Mode**: Intelligent server selection:
+  - If current machine IP is `172.16.1.104` → connects to `172.16.1.104`
+  - Otherwise → connects to `localhost` (development environment)
+
+### **Implementation Details**
+```csharp
+// Environment-aware database selection
+#if DEBUG
+    string database = "mtm_wip_application_test";     // Test database
+    string server = GetLocalIpAddress() == "172.16.1.104" ? "172.16.1.104" : "localhost";
+#else
+    string database = "mtm_wip_application";          // Production database
+    string server = "172.16.1.104";                  // Always production server
+#endif
+```
+
+### **File Structure Compliance**
+- **Current\*** folders: Reference only - **DO NOT ALTER** these files
+- **Updated\*** folders: Active development and deployment files - **USE FOR ALL CHANGES**
 
 Documentation index (modular files)
 - 1–3 Overview and Architecture: (Documentation/Copilot Files/01-overview-architecture.md)
@@ -245,7 +282,94 @@ When refactoring ANY file in this repository, ensure:
 ✅ **Null Safety**: Never dereference potentially null objects  
 ✅ **Theme Compliance**: Core_Themes usage only in approved locations  
 ✅ **Database Standards**: Stored procedures with OUT p_Status, p_ErrorMsg  
+✅ **Environment Compliance**: Use Model_Users properties for database/server selection  
+✅ **File Structure Compliance**: Only modify Updated\* folders, never Current\* folders  
 ✅ **Logging Standards**: Context-rich logging with start/end markers  
 ✅ **Thread Safety**: Proper Invoke usage for cross-thread operations  
 
-**Non-compliance with region organization will require rework.**
+**Non-compliance with region organization or environment logic will require rework.**
+
+## Help System Integration
+
+### **Accessing Help**
+The application includes a comprehensive help system accessible via:
+- **F1** - Context-sensitive help for current operation
+- **Ctrl+F1** - Getting Started guide  
+- **Menu → Help** - Complete help system with search functionality
+- **Ctrl+Shift+K** - Keyboard shortcuts reference
+
+### **Help System Structure**
+- **Main Help**: `/Documentation/Help/index.html` - Modern UI help system
+- **User Guides**: Comprehensive guides for all forms and operations
+- **Technical Documentation**: Developer guides and dependency charts
+- **Search Functionality**: Full-text search across all help content
+- **Responsive Design**: Works in WebView2 control and external browsers
+
+## Service_ErrorHandler Implementation Standards
+
+### **Error Handling Requirements**
+ALL methods MUST use the centralized `Service_ErrorHandler` system:
+
+```csharp
+// Replace ALL MessageBox.Show() calls with:
+Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
+    retryAction: () => RetryOperation(),
+    contextData: new Dictionary<string, object> { ["UserId"] = userId },
+    controlName: nameof(CurrentControl));
+
+// For user confirmations:
+var result = Service_ErrorHandler.ShowConfirmation("Are you sure?", "Confirmation");
+
+// For validation warnings:
+Service_ErrorHandler.HandleValidationError("Invalid input", "FieldName");
+```
+
+### **Error Severity Levels**
+- **Low**: Information/Warning - application continues normally
+- **Medium**: Recoverable Error - operation failed but can be retried  
+- **High**: Critical Error - data integrity or major functionality affected
+- **Fatal**: Application Termination - unrecoverable error
+
+### **Enhanced Error Dialog Features**
+- **Tabbed Interface**: Summary, Technical Details, Call Stack views
+- **Color-Coded Call Stack**: Visual hierarchy with component icons (🎯🔍⚙️📊)
+- **Plain English Explanations**: Severity-based user-friendly messaging
+- **Action Buttons**: Retry, Copy Details, Report Issue, View Logs, Close
+- **Automatic Logging**: Every error automatically logged with rich context
+
+---
+
+## Recent Updates (January 27, 2025)
+
+### Comprehensive Error Handling System Implementation
+- ✅ **Service_ErrorHandler**: Complete centralized error handling system  
+- ✅ **EnhancedErrorDialog**: UML-compliant error dialog with tabbed interface
+- ✅ **MessageBox Replacement**: Systematic replacement of all MessageBox.Show calls
+- ✅ **Automatic Logging**: Every error logged with caller context and rich debugging info
+- ✅ **Connection Recovery**: Automatic database connection recovery for errors
+
+### Help System Integration  
+- ✅ **Modern Help System**: Responsive HTML help system with search functionality
+- ✅ **MainForm Integration**: Help menu with keyboard shortcuts (F1, Ctrl+F1, Ctrl+Shift+K)
+- ✅ **Comprehensive Guides**: User guides for all forms, controls, and operations
+- ✅ **Technical Documentation**: Developer guides, dependency charts, and troubleshooting
+- ✅ **Search Functionality**: Full-text search across all documentation
+
+### Development Forms Compliance
+- ✅ **Region Organization**: All Development forms meet mandatory #region standards
+- ✅ **Error Handling**: Development forms use centralized Service_ErrorHandler system
+- ✅ **Theme Integration**: Core_Themes.ApplyDpiScaling() and theme compliance
+- ✅ **Progress Integration**: Helper_StoredProcedureProgress for database operations
+
+### Environment-Specific Database and Server Logic Implementation
+- ✅ **Database Selection**: Automatic Debug/Release mode database name selection
+- ✅ **Server Selection**: Intelligent server address detection based on environment
+- ✅ **Connection Logic**: Updated `Helper_Database_Variables` and `Model_Users` classes
+- ✅ **Deployment Scripts**: Updated for test database by default with production options
+- ✅ **Documentation**: Comprehensive documentation of file structure and environment logic
+- ✅ **Compliance Templates**: Updated refactor templates and Copilot instructions
+
+### File Structure Documentation
+- ✅ **Clear Separation**: Current\* (reference only) vs Updated\* (active development)  
+- ✅ **Deployment Safety**: Test database defaults to prevent production accidents
+- ✅ **Development Workflow**: Streamlined development with environment-aware configuration

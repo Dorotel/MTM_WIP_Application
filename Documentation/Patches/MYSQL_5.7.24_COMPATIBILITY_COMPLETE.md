@@ -107,7 +107,7 @@ END;
 - ? **Item Types**: md_item_types_Add_ItemType, md_item_types_Update_ItemType, etc.
 
 ### **Inventory Management (12+ Procedures)**
-- ? **Items**: inv_inventory_Add_Item, inv_inventory_Remove_Item_1_1, etc.
+- ? **Items**: inv_inventory_Add_Item, inv_inventory_Remove_Item, etc.
 - ? **Transfers**: inv_inventory_Transfer_Part, inv_inventory_transfer_quantity
 - ? **Queries**: inv_inventory_Get_ByPartID, inv_inventory_Get_All, etc.
 - ? **Batch Management**: inv_inventory_GetNextBatchNumber, inv_inventory_Fix_BatchNumbers

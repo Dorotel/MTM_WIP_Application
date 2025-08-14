@@ -10,11 +10,20 @@ body:
         Enter the file path in the title after "Online Refactor". Example:
         Online Refactor Data/Inventory/Dao_Inventory.cs
 
+        ## Environment and Database Compliance Checklist
+        When refactoring, verify compliance with:
+        
+        ✅ **Database/Server Logic**: Uses Model_Users.Database and Model_Users.WipServerAddress  
+        ✅ **File Structure**: Only modifies Updated\* folders, never Current\* folders  
+        ✅ **Environment Detection**: Properly handles Debug/Release mode database selection  
+        ✅ **Connection Strings**: Uses Helper_Database_Variables.GetConnectionString()  
+        ✅ **Region Organization**: Follows mandatory #region structure and method ordering  
+
         You can add optional notes below; the workflow will still trigger from the title or any comment containing the phrase.
   - type: textarea
     id: notes
     attributes:
       label: Notes/constraints (optional)
-      placeholder: e.g., "Compliance-only; no behavior changes"
+      placeholder: e.g., "Compliance-only; no behavior changes. Verify environment logic is maintained."
     validations:
       required: false

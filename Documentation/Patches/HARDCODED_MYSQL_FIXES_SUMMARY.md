@@ -90,10 +90,10 @@ Some methods lacked proper error handling for database operations.
 - **Complete rewrite** of all methods to use stored procedures exclusively
 - Added `Helper_Database_Core` field for consistent database access
 - Replaced all direct SQL operations with stored procedure calls:
-  - `UpdateQuickButtonAsync()` - Now uses `sys_last_10_transactions_Update_ByUserAndPosition_1`
-  - `RemoveQuickButtonAndShiftAsync()` - Uses `sys_last_10_transactions_RemoveAndShift_ByUser_1`  
-  - `AddQuickButtonAsync()` - Uses `sys_last_10_transactions_Add_AtPosition_1`
-  - `MoveQuickButtonAsync()` - Uses `sys_last_10_transactions_Move_1`
+  - `UpdateQuickButtonAsync()` - Now uses `sys_last_10_transactions_Update_ByUserAndPosition`
+  - `RemoveQuickButtonAndShiftAsync()` - Uses `sys_last_10_transactions_RemoveAndShift_ByUser`  
+  - `AddQuickButtonAsync()` - Uses `sys_last_10_transactions_Add_AtPosition`
+  - `MoveQuickButtonAsync()` - Uses `sys_last_10_transactions_Move`
   - `DeleteAllQuickButtonsForUserAsync()` - Uses `sys_last_10_transactions_DeleteAll_ByUser`
   - `AddOrShiftQuickButtonAsync()` - Uses `sys_last_10_transactions_AddOrShift_ByUser`
   - `AddQuickButtonAtPositionAsync()` - Uses stored procedures instead of direct INSERT
@@ -187,7 +187,7 @@ Based on the fixes, your database should have these stored procedures deployed:
 - `inv_transaction_SplitBatchNumbers`
 - `inv_inventory_Get_ByPartID`
 - `inv_inventory_Get_ByPartIDAndOperation`
-- `inv_inventory_Remove_Item_1_1`
+- `inv_inventory_Remove_Item`
 - `inv_inventory_Transfer_Part`
 - `inv_inventory_transfer_quantity`
 - `inv_inventory_Fix_BatchNumbers`
@@ -197,10 +197,10 @@ Based on the fixes, your database should have these stored procedures deployed:
 - `md_item_types_Exists_ByType`
 
 ### **Quick Buttons System:**
-- `sys_last_10_transactions_Update_ByUserAndPosition_1`
-- `sys_last_10_transactions_RemoveAndShift_ByUser_1`
-- `sys_last_10_transactions_Add_AtPosition_1`
-- `sys_last_10_transactions_Move_1`
+- `sys_last_10_transactions_Update_ByUserAndPosition`
+- `sys_last_10_transactions_RemoveAndShift_ByUser`
+- `sys_last_10_transactions_Add_AtPosition`
+- `sys_last_10_transactions_Move`
 - `sys_last_10_transactions_DeleteAll_ByUser`
 - `sys_last_10_transactions_AddOrShift_ByUser`
 
