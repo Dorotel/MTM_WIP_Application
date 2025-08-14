@@ -34,7 +34,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
             {
                 ["FormType"] = nameof(Transactions),
-                ["ConnectionString"] = Helper_Database_Variables.SanitizeConnectionStringForLogging(connectionString),
+                ["ConnectionString"] = connectionString,
                 ["CurrentUser"] = currentUser,
                 ["InitializationTime"] = DateTime.Now,
                 ["Thread"] = Thread.CurrentThread.ManagedThreadId

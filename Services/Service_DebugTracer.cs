@@ -601,7 +601,8 @@ internal static class Service_DebugTracer
                     var jsonData = JsonSerializer.Serialize(data, new JsonSerializerOptions 
                     { 
                         WriteIndented = true,
-                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+                        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping // Prevent Unicode escaping
                     });
                     LoggingUtility.Log($"[{timestamp}] [DATA  ] {jsonData}");
                 }
@@ -630,7 +631,7 @@ internal static class Service_DebugTracer
     private static object SerializeValue(object? value)
     {
         if (value == null) return "NULL";
-        if (value is string str) return $"\"{str}\"";
+        if (value is string str) return str; // Remove extra quotes - JSON serializer will handle properly
         if (value is DateTime dt) return dt.ToString("yyyy-MM-dd HH:mm:ss");
         if (value is System.Data.DataTable dt2) return $"DataTable[{dt2.Rows.Count} rows, {dt2.Columns.Count} columns]";
         if (value is Exception ex) return $"Exception: {ex.Message}";
@@ -666,7 +667,8 @@ internal static class Service_DebugTracer
                 WriteIndented = false,
                 DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
                 ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
-                MaxDepth = 2 // Limit depth to prevent issues
+                MaxDepth = 2, // Limit depth to prevent issues
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping // Prevent Unicode escaping
             };
             
             return JsonSerializer.Serialize(value, options);
