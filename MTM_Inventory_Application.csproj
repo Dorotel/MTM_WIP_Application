@@ -48,6 +48,14 @@
 		<EmbeddedResource Include="Resources\CHANGELOG.pdf" />
 	</ItemGroup>
 
+	<!-- ✅ HELP SYSTEM FILES - Copy Documentation/Help folder to build output -->
+	<ItemGroup>
+		<Content Include="Documentation\Help\**\*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Link>Documentation\Help\%(RecursiveDir)%(Filename)%(Extension)</Link>
+		</Content>
+	</ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="Microsoft.TestPlatform" Version="17.14.1" />

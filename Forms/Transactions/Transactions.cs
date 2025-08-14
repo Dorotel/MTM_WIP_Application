@@ -822,8 +822,26 @@ namespace MTM_Inventory_Application.Forms.Transactions
                     Transactions_TableLayout_Inputs.Controls.Add(Transactions_Panel_SmartSearch, 0, 0);
                 }
 
-                // Apply theme
-                Core_Themes.ApplyTheme(Transactions_Panel_SmartSearch);
+                // Apply theme to individual controls in the panel
+                foreach (Control ctrl in Transactions_Panel_SmartSearch.Controls)
+                {
+                    // Apply theme colors based on control type
+                    if (ctrl is Label label)
+                    {
+                        label.ForeColor = Model_AppVariables.UserUiColors?.LabelForeColor ?? SystemColors.ControlText;
+                        label.BackColor = Model_AppVariables.UserUiColors?.LabelBackColor ?? SystemColors.Control;
+                    }
+                    else if (ctrl is TextBox textBox)
+                    {
+                        textBox.ForeColor = Model_AppVariables.UserUiColors?.TextBoxForeColor ?? SystemColors.WindowText;
+                        textBox.BackColor = Model_AppVariables.UserUiColors?.TextBoxBackColor ?? SystemColors.Window;
+                    }
+                    else if (ctrl is Button button)
+                    {
+                        button.ForeColor = Model_AppVariables.UserUiColors?.ButtonForeColor ?? SystemColors.ControlText;
+                        button.BackColor = Model_AppVariables.UserUiColors?.ButtonBackColor ?? SystemColors.Control;
+                    }
+                }
 
                 LoggingUtility.LogApplicationInfo("Smart search controls initialized successfully");
             }

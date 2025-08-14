@@ -430,7 +430,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             }
             catch (Exception ex)
             {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
                     controlName: nameof(MainForm));
             }
         }
@@ -793,8 +793,8 @@ namespace MTM_Inventory_Application.Forms.MainForm
             }
             catch (Exception ex)
             {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
-                    controlName: nameof(MainForm), 
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
+                    controlName: nameof(MainForm),
                     contextData: new Dictionary<string, object> { ["HelpFile"] = "getting-started.html" });
             }
         }
@@ -837,7 +837,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
                                   $"Built with .NET 8 and Windows Forms\n" +
                                   $"Database: MySQL with stored procedures\n" +
                                   $"Environment: {(Model_Users.Database == "mtm_wip_application" ? "Release" : "Debug")}";
-                
+
                 Service_ErrorHandler.ShowInformation("About MTM Inventory", aboutMessage);
             }
             catch (Exception ex)
@@ -859,7 +859,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             try
             {
                 var helpPath = Path.Combine(Application.StartupPath, "Documentation", "Help", fileName);
-                
+
                 if (!File.Exists(helpPath))
                 {
                     // If file doesn't exist locally, create a basic error message
@@ -891,6 +891,20 @@ namespace MTM_Inventory_Application.Forms.MainForm
         }
 
         #endregion
+
+        private void viewerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using var viewerForm = new Forms.Development.DependencyChartConverter.DependencyChartViewerForm();
+                viewerForm.ShowDialog(this);
+            }   
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(viewerToolStripMenuItem_Click));
+            }
+        }
     }
 
     #endregion

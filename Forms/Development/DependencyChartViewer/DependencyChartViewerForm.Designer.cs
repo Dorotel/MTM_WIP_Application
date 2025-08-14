@@ -99,6 +99,7 @@
             this.Controls.Add(this.txtHtmlDir);
             this.Name = "DependencyChartViewerForm";
             this.Text = "Dependency Chart HTML Viewer";
+            this.Load += new System.EventHandler(this.DependencyChartViewerForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
         }
