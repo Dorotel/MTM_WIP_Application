@@ -48,17 +48,44 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         public Control_AdvancedInventory()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_AdvancedInventory),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_AdvancedInventory), nameof(Control_AdvancedInventory));
+
             try
             {
+                Service_DebugTracer.TraceUIAction("ADVANCED_INVENTORY_INITIALIZATION", nameof(Control_AdvancedInventory),
+                    new Dictionary<string, object>
+                    {
+                        ["Phase"] = "START",
+                        ["ComponentType"] = "UserControl"
+                    });
+
                 LoggingUtility.Log("Control_AdvancedInventory constructor entered.");
                 InitializeComponent();
 
+                Service_DebugTracer.TraceUIAction("THEME_APPLICATION", nameof(Control_AdvancedInventory),
+                    new Dictionary<string, object>
+                    {
+                        ["DpiScaling"] = "APPLIED",
+                        ["LayoutAdjustments"] = "APPLIED"
+                    });
                 // Apply comprehensive DPI scaling and runtime layout adjustments
                 // THEME POLICY: Only update theme on startup, in settings menu, or on DPI change.
                 // Do NOT call theme update methods from arbitrary event handlers or business logic.
                 Core_Themes.ApplyDpiScaling(this); // Allowed: Form initialization
                 Core_Themes.ApplyRuntimeLayoutAdjustments(this); // Allowed: Form initialization
 
+                Service_DebugTracer.TraceUIAction("TOOLTIPS_SETUP", nameof(Control_AdvancedInventory),
+                    new Dictionary<string, object>
+                    {
+                        ["TooltipCount"] = 8,
+                        ["ButtonTypes"] = new[] { "Single", "MultiLocation", "Import" },
+                        ["ButtonsConfigured"] = new[] { "Send", "Save", "Reset", "Normal", "AddLoc", "SaveAll", "OpenExcel" }
+                    });
                 ToolTip toolTip = new();
                 toolTip.SetToolTip(AdvancedInventory_Single_Button_Send,
                     $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_AdvInv_Send)}");

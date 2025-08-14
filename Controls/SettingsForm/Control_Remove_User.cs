@@ -2,6 +2,7 @@ using System.Data;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
+using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
@@ -24,11 +25,43 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         public Control_Remove_User()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_Remove_User),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_Remove_User), nameof(Control_Remove_User));
+
+            Service_DebugTracer.TraceUIAction("REMOVE_USER_INITIALIZATION", nameof(Control_Remove_User),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "UserControl"
+                });
+
             InitializeComponent();
+
+            Service_DebugTracer.TraceUIAction("EVENT_HANDLERS_SETUP", nameof(Control_Remove_User),
+                new Dictionary<string, object>
+                {
+                    ["Events"] = new[] { "RemoveButton.Click", "ComboBox.SelectedIndexChanged" }
+                });
             RemoveUserControl_Button_Remove.Click += RemoveUserControl_Button_Remove_Click;
             RemoveUserControl_ComboBox_Users.SelectedIndexChanged +=
                 RemoveUserControl_ComboBox_Users_SelectedIndexChanged;
+
+            Service_DebugTracer.TraceUIAction("USERS_DATA_LOADING", nameof(Control_Remove_User),
+                new Dictionary<string, object> { ["DataSource"] = "Users" });
             LoadUsersAsync();
+
+            Service_DebugTracer.TraceUIAction("REMOVE_USER_INITIALIZATION", nameof(Control_Remove_User),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "COMPLETE",
+                    ["Success"] = true
+                });
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(Control_Remove_User), nameof(Control_Remove_User));
         }
 
         #endregion

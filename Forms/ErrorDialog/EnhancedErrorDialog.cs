@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
+using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Forms.ErrorDialog
 {
@@ -40,17 +41,61 @@ namespace MTM_Inventory_Application.Forms.ErrorDialog
             ErrorSeverity severity = ErrorSeverity.Medium, Func<bool>? retryAction = null,
             Dictionary<string, object>? contextData = null)
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["FormType"] = nameof(EnhancedErrorDialog),
+                ["ExceptionType"] = exception.GetType().Name,
+                ["CallerName"] = callerName,
+                ["ControlName"] = controlName,
+                ["Severity"] = severity.ToString(),
+                ["HasRetryAction"] = retryAction != null,
+                ["HasContextData"] = contextData != null,
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(EnhancedErrorDialog), nameof(EnhancedErrorDialog));
+
+            Service_DebugTracer.TraceUIAction("ERROR_DIALOG_INITIALIZATION", nameof(EnhancedErrorDialog),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "EnhancedErrorDialog",
+                    ["ErrorMessage"] = exception.Message
+                });
+
             InitializeComponent();
+
+            Service_DebugTracer.TraceBusinessLogic("ERROR_CONTEXT_SETUP",
+                inputData: new { exception.Message, callerName, controlName, severity },
+                outputData: new { 
+                    _exception = exception.GetType().Name,
+                    _callerName = callerName,
+                    _controlName = controlName,
+                    _severity = severity.ToString()
+                });
             _exception = exception;
             _callerName = callerName;
             _controlName = controlName;
             _severity = severity;
             _retryAction = retryAction;
             _contextData = contextData ?? new Dictionary<string, object>();
-            
+
+            Service_DebugTracer.TraceUIAction("ERROR_DIALOG_SETUP", nameof(EnhancedErrorDialog),
+                new Dictionary<string, object>
+                {
+                    ["Components"] = new[] { "InitializeErrorDialog", "WireUpEvents", "ApplyTheme" }
+                });
             InitializeErrorDialog();
             WireUpEvents();
             ApplyTheme();
+
+            Service_DebugTracer.TraceUIAction("ERROR_DIALOG_INITIALIZATION", nameof(EnhancedErrorDialog),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "COMPLETE",
+                    ["Success"] = true
+                });
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(EnhancedErrorDialog), nameof(EnhancedErrorDialog));
         }
 
         #endregion

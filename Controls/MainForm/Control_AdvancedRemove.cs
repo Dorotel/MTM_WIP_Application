@@ -8,6 +8,7 @@ using MTM_Inventory_Application.Forms.MainForm.Classes;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Models;
+using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Controls.MainForm
 {
@@ -40,19 +41,51 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         public Control_AdvancedRemove()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_AdvancedRemove),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_AdvancedRemove), nameof(Control_AdvancedRemove));
+
+            Service_DebugTracer.TraceUIAction("ADVANCED_REMOVE_INITIALIZATION", nameof(Control_AdvancedRemove),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "UserControl"
+                });
+
             InitializeComponent();
 
+            Service_DebugTracer.TraceUIAction("THEME_APPLICATION", nameof(Control_AdvancedRemove),
+                new Dictionary<string, object>
+                {
+                    ["DpiScaling"] = "APPLIED",
+                    ["LayoutAdjustments"] = "APPLIED"
+                });
             // Apply comprehensive DPI scaling and runtime layout adjustments
             // THEME POLICY: Only update theme on startup, in settings menu, or on DPI change.
             // Do NOT call theme update methods from arbitrary event handlers or business logic.
             Core_Themes.ApplyDpiScaling(this); // Allowed: UserControl initialization
             Core_Themes.ApplyRuntimeLayoutAdjustments(this); // Allowed: UserControl initialization
 
+            Service_DebugTracer.TraceUIAction("CONTROL_INITIALIZATION", nameof(Control_AdvancedRemove),
+                new Dictionary<string, object>
+                {
+                    ["Components"] = new[] { "Initialize", "ComboBoxProperties", "ComboBoxEvents", "FocusHighlighting" }
+                });
             // No longer need to initialize or wire up removed ComboBoxes or Like controls
             Control_AdvancedRemove_Initialize();
             ApplyStandardComboBoxProperties();
             WireUpComboBoxEvents();
             Core_Themes.ApplyFocusHighlighting(this);
+
+            Service_DebugTracer.TraceUIAction("BUTTON_EVENTS_SETUP", nameof(Control_AdvancedRemove),
+                new Dictionary<string, object>
+                {
+                    ["Buttons"] = new[] { "Normal", "Undo", "Search" },
+                    ["EventRewiring"] = true
+                });
             Control[] btn = Controls.Find("Control_AdvancedRemove_Button_Normal", true);
             if (btn.Length > 0 && btn[0] is Button normalBtn)
             {
