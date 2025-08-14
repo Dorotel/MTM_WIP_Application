@@ -8,6 +8,7 @@ using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Logging;
+using MTM_Inventory_Application.Services;
 using MySql.Data.MySqlClient;
 using MTM_Inventory_Application.Controls.Shared;
 
@@ -42,8 +43,28 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         public Control_QuickButtons()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_QuickButtons),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_QuickButtons), nameof(Control_QuickButtons));
+
+            Service_DebugTracer.TraceUIAction("QUICK_BUTTONS_INITIALIZATION", nameof(Control_QuickButtons),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "UserControl"
+                });
+
             InitializeComponent();
 
+            Service_DebugTracer.TraceUIAction("TABLE_LAYOUT_SETUP", nameof(Control_QuickButtons),
+                new Dictionary<string, object>
+                {
+                    ["RowCount"] = 10,
+                    ["LayoutType"] = "TableLayoutPanel"
+                });
             Control_QuickButtons_TableLayoutPanel_Main.RowCount = 10;
             Control_QuickButtons_TableLayoutPanel_Main.RowStyles.Clear();
             for (int i = 0; i < 10; i++)

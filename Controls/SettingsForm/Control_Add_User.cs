@@ -7,6 +7,7 @@ using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Logging;
 using MTM_Inventory_Application.Helpers;
+using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Controls.SettingsForm
 {
@@ -29,27 +30,89 @@ namespace MTM_Inventory_Application.Controls.SettingsForm
 
         public Control_Add_User()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_Add_User),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_Add_User), nameof(Control_Add_User));
+
+            Service_DebugTracer.TraceUIAction("ADD_USER_CONTROL_INITIALIZATION", nameof(Control_Add_User),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "UserControl"
+                });
+
             InitializeComponent();
 
+            Service_DebugTracer.TraceUIAction("THEME_APPLICATION", nameof(Control_Add_User),
+                new Dictionary<string, object>
+                {
+                    ["DpiScaling"] = "APPLIED",
+                    ["LayoutAdjustments"] = "APPLIED"
+                });
             // Apply comprehensive DPI scaling and runtime layout adjustments
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
 
+            Service_DebugTracer.TraceUIAction("DEFAULT_USER_TYPE_SET", nameof(Control_Add_User),
+                new Dictionary<string, object>
+                {
+                    ["UserType"] = "NormalUser",
+                    ["DefaultSelection"] = true
+                });
             Control_Add_User_RadioButton_NormalUser.Checked = true;
+
+            Service_DebugTracer.TraceUIAction("KEYPRESS_EVENTS_SETUP", nameof(Control_Add_User),
+                new Dictionary<string, object>
+                {
+                    ["TextBoxes"] = new[] { "FirstName", "LastName", "UserName", "Pin", "VisualUserName", "VisualPassword" },
+                    ["KeyPressHandler"] = "NoSpaces"
+                });
             Control_Add_User_TextBox_FirstName.KeyPress += Control_Add_User_TextBox_NoSpaces_KeyPress;
             Control_Add_User_TextBox_LastName.KeyPress += Control_Add_User_TextBox_NoSpaces_KeyPress;
             Control_Add_User_TextBox_UserName.KeyPress += Control_Add_User_TextBox_NoSpaces_KeyPress;
             Control_Add_User_TextBox_Pin.KeyPress += Control_Add_User_TextBox_NoSpaces_KeyPress;
             Control_Add_User_TextBox_VisualUserName.KeyPress += Control_Add_User_TextBox_NoSpaces_KeyPress;
             Control_Add_User_TextBox_VisualPassword.KeyPress += Control_Add_User_TextBox_NoSpaces_KeyPress;
+
+            Service_DebugTracer.TraceUIAction("PASSWORD_FIELDS_SETUP", nameof(Control_Add_User),
+                new Dictionary<string, object>
+                {
+                    ["PasswordFields"] = new[] { "Pin", "VisualPassword" },
+                    ["UseSystemPasswordChar"] = true,
+                    ["VisualFieldsEnabled"] = false
+                });
             Control_Add_User_TextBox_Pin.UseSystemPasswordChar = true;
             Control_Add_User_TextBox_VisualPassword.UseSystemPasswordChar = true;
             Control_Add_User_TextBox_VisualUserName.Enabled = false;
             Control_Add_User_TextBox_VisualPassword.Enabled = false;
+
+            Service_DebugTracer.TraceUIAction("VISUAL_ACCESS_EVENT_SETUP", nameof(Control_Add_User),
+                new Dictionary<string, object>
+                {
+                    ["CheckBoxEvent"] = "VisualAccess.CheckedChanged"
+                });
             Control_Add_User_CheckBox_VisualAccess.CheckedChanged +=
                 Control_Add_User_CheckBox_VisualAccess_CheckedChanged;
+
+            Service_DebugTracer.TraceUIAction("VIEW_PASSWORDS_EVENT_SETUP", nameof(Control_Add_User),
+                new Dictionary<string, object>
+                {
+                    ["CheckBoxEvent"] = "ViewHidePasswords.CheckedChanged"
+                });
             Control_Add_User_CheckBox_ViewHidePasswords.CheckedChanged +=
                 Control_Add_User_CheckBox_ViewHidePasswords_CheckedChanged;
+
+            Service_DebugTracer.TraceUIAction("ADD_USER_CONTROL_INITIALIZATION", nameof(Control_Add_User),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "COMPLETE",
+                    ["Success"] = true
+                });
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(Control_Add_User), nameof(Control_Add_User));
         }
 
         #endregion

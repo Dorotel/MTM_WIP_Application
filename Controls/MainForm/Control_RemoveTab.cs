@@ -52,15 +52,44 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         public Control_RemoveTab()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_RemoveTab),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_RemoveTab), nameof(Control_RemoveTab));
+
+            Service_DebugTracer.TraceUIAction("REMOVE_TAB_INITIALIZATION", nameof(Control_RemoveTab),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "UserControl"
+                });
+
             InitializeComponent();
 
+            Service_DebugTracer.TraceUIAction("THEME_APPLICATION", nameof(Control_RemoveTab),
+                new Dictionary<string, object>
+                {
+                    ["DpiScaling"] = "APPLIED",
+                    ["LayoutAdjustments"] = "APPLIED"
+                });
             // Apply comprehensive DPI scaling and runtime layout adjustments
             // THEME POLICY: Only update theme on startup, in settings menu, or on DPI change.
             // Do NOT call theme update methods from arbitrary event handlers or business logic.
             Core_Themes.ApplyDpiScaling(this); // Allowed: UserControl initialization
             Core_Themes.ApplyRuntimeLayoutAdjustments(this); // Allowed: UserControl initialization
 
+            Service_DebugTracer.TraceUIAction("CONTROL_INITIALIZATION", nameof(Control_RemoveTab),
+                new Dictionary<string, object> { ["Phase"] = "START" });
             Control_RemoveTab_Initialize();
+
+            Service_DebugTracer.TraceUIAction("COMBOBOX_PROPERTIES_APPLIED", nameof(Control_RemoveTab),
+                new Dictionary<string, object>
+                {
+                    ["ComboBoxes"] = new[] { "Part", "Operation" },
+                    ["StandardProperties"] = "Applied"
+                });
             Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Part);
             Helper_UI_ComboBoxes.ApplyStandardComboBoxProperties(Control_RemoveTab_ComboBox_Operation);
             Control_RemoveTab_ComboBox_Part.ForeColor =
@@ -68,13 +97,26 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_RemoveTab_ComboBox_Operation.ForeColor =
                 Model_AppVariables.UserUiColors.ComboBoxErrorForeColor ?? Color.Red;
             Control_RemoveTab_Image_NothingFound.Visible = false;
+
+            Service_DebugTracer.TraceUIAction("DATA_LOADING_START", nameof(Control_RemoveTab),
+                new Dictionary<string, object> { ["DataType"] = "ComboBoxes" });
             _ = Control_RemoveTab_OnStartup_LoadComboBoxesAsync();
 
+            Service_DebugTracer.TraceUIAction("EVENT_HANDLERS_SETUP", nameof(Control_RemoveTab),
+                new Dictionary<string, object>
+                {
+                    ["ButtonEvents"] = new[] { "Print" },
+                    ["EventRewiring"] = true
+                });
             Control_RemoveTab_Button_Print.Click -= Control_RemoveTab_Button_Print_Click;
             Control_RemoveTab_Button_Print.Click += Control_RemoveTab_Button_Print_Click;
-            // Tooltip for printButton intentionally omitted to avoid variable conflict
 
-
+            Service_DebugTracer.TraceUIAction("TOOLTIPS_SETUP", nameof(Control_RemoveTab),
+                new Dictionary<string, object>
+                {
+                    ["TooltipCount"] = 3,
+                    ["ButtonsConfigured"] = new[] { "Search", "Delete", "Reset" }
+                });
             ToolTip toolTip = new();
             toolTip.SetToolTip(Control_RemoveTab_Button_Search,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Search)}");
@@ -82,7 +124,18 @@ namespace MTM_Inventory_Application.Controls.MainForm
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Delete)}");
             toolTip.SetToolTip(Control_RemoveTab_Button_Reset,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Remove_Reset)}");
+
+            Service_DebugTracer.TraceUIAction("PRIVILEGES_APPLIED", nameof(Control_RemoveTab));
             ApplyPrivileges();
+
+            Service_DebugTracer.TraceUIAction("REMOVE_TAB_INITIALIZATION", nameof(Control_RemoveTab),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "COMPLETE",
+                    ["Success"] = true
+                });
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(Control_RemoveTab), nameof(Control_RemoveTab));
         }
 
         #endregion

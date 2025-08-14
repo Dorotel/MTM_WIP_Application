@@ -46,14 +46,40 @@ namespace MTM_Inventory_Application.Controls.MainForm
 
         public Control_InventoryTab()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["ControlType"] = nameof(Control_InventoryTab),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(Control_InventoryTab), nameof(Control_InventoryTab));
+
+            Service_DebugTracer.TraceUIAction("INVENTORY_TAB_INITIALIZATION", nameof(Control_InventoryTab),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "UserControl"
+                });
+
             InitializeComponent();
 
+            Service_DebugTracer.TraceUIAction("THEME_APPLICATION", nameof(Control_InventoryTab),
+                new Dictionary<string, object>
+                {
+                    ["DpiScaling"] = "APPLIED",
+                    ["LayoutAdjustments"] = "APPLIED"
+                });
             // Apply comprehensive DPI scaling and runtime layout adjustments
             // THEME POLICY: Only update theme on startup, in settings menu, or on DPI change.
             // Do NOT call theme update methods from arbitrary event handlers or business logic.
             Core_Themes.ApplyDpiScaling(this); // Allowed: UserControl initialization
             Core_Themes.ApplyRuntimeLayoutAdjustments(this); // Allowed: UserControl initialization
 
+            Service_DebugTracer.TraceUIAction("TOOLTIPS_SETUP", nameof(Control_InventoryTab),
+                new Dictionary<string, object>
+                {
+                    ["TooltipCount"] = 4,
+                    ["ButtonsConfigured"] = new[] { "Save", "AdvancedEntry", "Reset", "ToggleRightPanel" }
+                });
             Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Save,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_Save)}");
             Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_AdvancedEntry,
@@ -63,14 +89,34 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_InventoryTab_Tooltip.SetToolTip(Control_InventoryTab_Button_Toggle_RightPanel,
                 $"Shortcut: {Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Left)}/{Helper_UI_Shortcuts.ToShortcutString(Core_WipAppVariables.Shortcut_Inventory_ToggleRightPanel_Right)}");
 
+            Service_DebugTracer.TraceUIAction("VERSION_TIMER_SETUP", nameof(Control_InventoryTab),
+                new Dictionary<string, object> { ["TimerInstance"] = "Service_Timer_VersionChecker" });
             Service_Timer_VersionChecker.ControlInventoryInstance = this;
 
+            Service_DebugTracer.TraceUIAction("DATA_LOADING_START", nameof(Control_InventoryTab),
+                new Dictionary<string, object> { ["DataType"] = "ComboBoxes" });
             _ = Control_InventoryTab_OnStartup_LoadDataComboBoxesAsync();
 
+            Service_DebugTracer.TraceUIAction("EVENTS_WIREUP", nameof(Control_InventoryTab));
             Control_InventoryTab_OnStartup_WireUpEvents();
 
+            Service_DebugTracer.TraceUIAction("VERSION_LABEL_SET", nameof(Control_InventoryTab),
+                new Dictionary<string, object>
+                {
+                    ["UserVersion"] = Model_AppVariables.UserVersion,
+                    ["DatabaseVersion"] = Service_Timer_VersionChecker.LastCheckedDatabaseVersion ?? "unknown"
+                });
             SetVersionLabel(Model_AppVariables.UserVersion,
                 Service_Timer_VersionChecker.LastCheckedDatabaseVersion ?? "unknown");
+
+            Service_DebugTracer.TraceUIAction("UI_STYLING_APPLIED", nameof(Control_InventoryTab),
+                new Dictionary<string, object>
+                {
+                    ["FocusHighlighting"] = true,
+                    ["ComboBoxColors"] = "Applied",
+                    ["InitialFocus"] = "Control_InventoryTab_ComboBox_Part",
+                    ["QuantityTextBoxState"] = "Placeholder"
+                });
             Core_Themes.ApplyFocusHighlighting(this);
             Control_InventoryTab_ComboBox_Part.ForeColor = Control_InventoryTab_ComboBox_Operation.ForeColor =
                 Control_InventoryTab_ComboBox_Location.ForeColor =
@@ -80,7 +126,17 @@ namespace MTM_Inventory_Application.Controls.MainForm
             Control_InventoryTab_TextBox_Quantity.ForeColor =
                 Model_AppVariables.UserUiColors.TextBoxErrorForeColor ?? Color.Red;
 
+            Service_DebugTracer.TraceUIAction("PRIVILEGES_APPLIED", nameof(Control_InventoryTab));
             ApplyPrivileges();
+
+            Service_DebugTracer.TraceUIAction("INVENTORY_TAB_INITIALIZATION", nameof(Control_InventoryTab),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "COMPLETE",
+                    ["Success"] = true
+                });
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(Control_InventoryTab), nameof(Control_InventoryTab));
         }
 
         #endregion

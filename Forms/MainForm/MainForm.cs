@@ -43,11 +43,32 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         public MainForm()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["FormType"] = nameof(MainForm),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(MainForm), nameof(MainForm));
+
             Debug.WriteLine("[DEBUG] [MainForm.ctor] Constructing MainForm...");
             try
             {
+                Service_DebugTracer.TraceUIAction("FORM_INITIALIZATION", nameof(MainForm),
+                    new Dictionary<string, object>
+                    {
+                        ["Phase"] = "START",
+                        ["ComponentType"] = "MainForm"
+                    });
+
                 InitializeComponent();
                 AutoScaleMode = AutoScaleMode.Dpi;
+
+                Service_DebugTracer.TraceUIAction("THEME_APPLICATION", nameof(MainForm),
+                    new Dictionary<string, object>
+                    {
+                        ["DpiScaling"] = "APPLIED",
+                        ["LayoutAdjustments"] = "APPLIED"
+                    });
 
                 // Apply comprehensive DPI scaling and runtime layout adjustments
                 // THEME POLICY: Only update theme on startup, in settings menu, or on DPI change.
@@ -61,9 +82,19 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 InitializeProgressControl();
                 Debug.WriteLine("[DEBUG] [MainForm.ctor] Progress control initialized.");
 
+                Service_DebugTracer.TraceUIAction("CONNECTION_CHECKER_INIT", nameof(MainForm),
+                    new Dictionary<string, object>
+                    {
+                        ["Component"] = "Helper_Control_MySqlSignal"
+                    });
                 ConnectionStrengthChecker = new Helper_Control_MySqlSignal();
                 Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthChecker initialized.");
 
+                Service_DebugTracer.TraceUIAction("CONNECTION_RECOVERY_INIT", nameof(MainForm),
+                    new Dictionary<string, object>
+                    {
+                        ["Component"] = "Service_ConnectionRecoveryManager"
+                    });
                 ConnectionRecoveryManager = new Service_ConnectionRecoveryManager(this);
                 Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionRecoveryManager initialized.");
 
@@ -71,15 +102,31 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 Debug.WriteLine("[DEBUG] [MainForm.ctor] Startup components initialized.");
 
                 WireUpFormShownEvent();
+
+                Service_DebugTracer.TraceUIAction("FORM_INITIALIZATION", nameof(MainForm),
+                    new Dictionary<string, object>
+                    {
+                        ["Phase"] = "COMPLETE",
+                        ["Success"] = true
+                    });
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[DEBUG] [MainForm.ctor] Exception: {ex}");
+                Service_DebugTracer.TraceUIAction("FORM_INITIALIZATION", nameof(MainForm),
+                    new Dictionary<string, object>
+                    {
+                        ["Phase"] = "ERROR",
+                        ["Success"] = false,
+                        ["Exception"] = ex.Message
+                    });
                 LoggingUtility.LogApplicationError(ex);
                 _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm));
             }
 
             Debug.WriteLine("[DEBUG] [MainForm.ctor] MainForm constructed.");
+            
+            Service_DebugTracer.TraceMethodExit(null, nameof(MainForm), nameof(MainForm));
         }
 
         #endregion
@@ -88,48 +135,109 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         private void InitializeFormTitle()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["User"] = Model_AppVariables.User,
+                ["UserType"] = Model_AppVariables.UserTypeAdmin ? "Admin" : Model_AppVariables.UserTypeNormal ? "Normal" : "ReadOnly"
+            }, nameof(InitializeFormTitle), nameof(MainForm));
+
             try
             {
                 string privilege = GetUserPrivilegeDisplayText();
-                Text = $"Manitowoc Tool and Manufacturing WIP Inventory System | {Model_AppVariables.User} | {privilege}";
+                var formTitleData = new Dictionary<string, object>
+                {
+                    ["User"] = Model_AppVariables.User,
+                    ["Privilege"] = privilege,
+                    ["Title"] = $"Manitowoc Tool and Manufacturing WIP Inventory System | {Model_AppVariables.User} | {privilege}"
+                };
+                
+                Service_DebugTracer.TraceBusinessLogic("FORM_TITLE_GENERATION", 
+                    inputData: new { User = Model_AppVariables.User, UserType = privilege },
+                    outputData: formTitleData["Title"]);
+
+                Text = formTitleData["Title"].ToString();
+                
+                Service_DebugTracer.TraceUIAction("FORM_TITLE_SET", nameof(MainForm), formTitleData);
             }
             catch (Exception ex)
             {
+                Service_DebugTracer.TraceUIAction("FORM_TITLE_ERROR", nameof(MainForm),
+                    new Dictionary<string, object> { ["Exception"] = ex.Message });
                 LoggingUtility.LogApplicationError(ex);
             }
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(InitializeFormTitle), nameof(MainForm));
         }
 
         private static string GetUserPrivilegeDisplayText()
         {
-            if (Model_AppVariables.UserTypeAdmin)
-                return "Administrator";
-            if (Model_AppVariables.UserTypeNormal)
-                return "Normal User";
-            if (Model_AppVariables.UserTypeReadOnly)
-                return "Read Only";
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["UserTypeAdmin"] = Model_AppVariables.UserTypeAdmin,
+                ["UserTypeNormal"] = Model_AppVariables.UserTypeNormal,
+                ["UserTypeReadOnly"] = Model_AppVariables.UserTypeReadOnly
+            }, nameof(GetUserPrivilegeDisplayText), nameof(MainForm));
 
-            return "Unknown";
+            string privilege;
+            if (Model_AppVariables.UserTypeAdmin)
+                privilege = "Administrator";
+            else if (Model_AppVariables.UserTypeNormal)
+                privilege = "Normal User";
+            else if (Model_AppVariables.UserTypeReadOnly)
+                privilege = "Read Only";
+            else
+                privilege = "Unknown";
+
+            Service_DebugTracer.TraceBusinessLogic("USER_PRIVILEGE_DETERMINATION",
+                inputData: new { 
+                    Admin = Model_AppVariables.UserTypeAdmin,
+                    Normal = Model_AppVariables.UserTypeNormal,
+                    ReadOnly = Model_AppVariables.UserTypeReadOnly
+                },
+                outputData: privilege);
+
+            Service_DebugTracer.TraceMethodExit(privilege, nameof(GetUserPrivilegeDisplayText), nameof(MainForm));
+            return privilege;
         }
 
         private void InitializeStartupComponents()
         {
+            Service_DebugTracer.TraceMethodEntry(null, nameof(InitializeStartupComponents), nameof(MainForm));
+
             try
             {
+                Service_DebugTracer.TraceUIAction("CONNECTION_STRENGTH_SETUP", nameof(MainForm),
+                    new Dictionary<string, object> { ["Phase"] = "START" });
                 MainForm_OnStartup_SetupConnectionStrengthControl();
                 Debug.WriteLine("[DEBUG] [MainForm.ctor] ConnectionStrengthControl setup complete.");
 
+                Service_DebugTracer.TraceUIAction("EVENTS_WIREUP", nameof(MainForm),
+                    new Dictionary<string, object> { ["Phase"] = "START" });
                 MainForm_OnStartup_WireUpEvents();
                 Debug.WriteLine("[DEBUG] [MainForm.ctor] Events wired up.");
 
+                Service_DebugTracer.TraceUIAction("DPI_EVENTS_WIREUP", nameof(MainForm),
+                    new Dictionary<string, object> { ["Phase"] = "START" });
                 // Wire up DPI change handling for runtime DPI awareness
                 MainForm_OnStartup_WireUpDpiChangeEvents();
                 Debug.WriteLine("[DEBUG] [MainForm.ctor] DPI change events wired up.");
+
+                Service_DebugTracer.TraceUIAction("STARTUP_COMPONENTS", nameof(MainForm),
+                    new Dictionary<string, object> 
+                    { 
+                        ["Phase"] = "COMPLETE",
+                        ["ComponentsInitialized"] = new[] { "ConnectionStrength", "Events", "DpiChangeEvents" }
+                    });
             }
             catch (Exception ex)
             {
+                Service_DebugTracer.TraceUIAction("STARTUP_COMPONENTS_ERROR", nameof(MainForm),
+                    new Dictionary<string, object> { ["Exception"] = ex.Message });
                 LoggingUtility.LogApplicationError(ex);
                 throw;
             }
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(InitializeStartupComponents), nameof(MainForm));
         }
 
         private void WireUpFormShownEvent()
@@ -719,44 +827,116 @@ namespace MTM_Inventory_Application.Forms.MainForm
 
         private void MainForm_MenuStrip_File_Settings_Click(object sender, EventArgs e)
         {
+            Service_DebugTracer.TraceUIAction("SETTINGS_MENU_CLICK", nameof(MainForm),
+                new Dictionary<string, object>
+                {
+                    ["MenuAction"] = "File > Settings",
+                    ["UserInitiated"] = true
+                });
+
+            Service_DebugTracer.TraceMethodEntry(null, nameof(MainForm_MenuStrip_File_Settings_Click), nameof(MainForm));
+
             try
             {
+                Service_DebugTracer.TraceUIAction("SETTINGS_FORM_OPEN", nameof(MainForm),
+                    new Dictionary<string, object>
+                    {
+                        ["FormType"] = "SettingsForm",
+                        ["Modal"] = true
+                    });
+
                 using SettingsForm settingsForm = new();
                 if (settingsForm.ShowDialog(this) != DialogResult.OK)
                 {
+                    Service_DebugTracer.TraceUIAction("SETTINGS_FORM_CANCELED", nameof(MainForm),
+                        new Dictionary<string, object> { ["UserAction"] = "CANCELED" });
                     return;
                 }
 
+                Service_DebugTracer.TraceUIAction("SETTINGS_FORM_ACCEPTED", nameof(MainForm),
+                    new Dictionary<string, object> 
+                    { 
+                        ["UserAction"] = "ACCEPTED",
+                        ["RequiredOperations"] = new[] { "HardReset", "ThemeApply" }
+                    });
+
+                Service_DebugTracer.TraceUIAction("INVENTORY_TAB_RESET", nameof(MainForm));
                 MainForm_UserControl_InventoryTab?.Control_InventoryTab_HardReset();
+
+                Service_DebugTracer.TraceUIAction("THEME_REAPPLY", nameof(MainForm),
+                    new Dictionary<string, object> { ["Reason"] = "SettingsChanged" });
                 Core_Themes.ApplyTheme(this);
             }
             catch (Exception ex)
             {
+                Service_DebugTracer.TraceUIAction("SETTINGS_MENU_ERROR", nameof(MainForm),
+                    new Dictionary<string, object> { ["Exception"] = ex.Message });
                 LoggingUtility.LogApplicationError(ex);
                 _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm_MenuStrip_File_Settings_Click));
             }
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(MainForm_MenuStrip_File_Settings_Click), nameof(MainForm));
         }
 
         private void MainForm_MenuStrip_Exit_Click(object sender, EventArgs e)
         {
+            Service_DebugTracer.TraceUIAction("EXIT_MENU_CLICK", nameof(MainForm),
+                new Dictionary<string, object>
+                {
+                    ["MenuAction"] = "File > Exit",
+                    ["UserInitiated"] = true
+                });
+
+            Service_DebugTracer.TraceMethodEntry(null, nameof(MainForm_MenuStrip_Exit_Click), nameof(MainForm));
+
             try
             {
+                Service_DebugTracer.TraceUIAction("EXIT_CONFIRMATION_SHOW", nameof(MainForm),
+                    new Dictionary<string, object>
+                    {
+                        ["DialogType"] = "Confirmation",
+                        ["Buttons"] = "YesNo",
+                        ["Icon"] = "Question"
+                    });
+
                 DialogResult result = Service_ErrorHandler.ShowConfirmation(
                     @"Are you sure you want to exit?",
                     @"Exit Application",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
 
+                Service_DebugTracer.TraceUIAction("EXIT_CONFIRMATION_RESULT", nameof(MainForm),
+                    new Dictionary<string, object>
+                    {
+                        ["UserChoice"] = result.ToString(),
+                        ["WillExit"] = result == DialogResult.Yes
+                    });
+
                 if (result == DialogResult.Yes)
                 {
+                    Service_DebugTracer.TraceUIAction("APPLICATION_EXIT", nameof(MainForm),
+                        new Dictionary<string, object>
+                        {
+                            ["ExitMethod"] = "User Requested",
+                            ["Confirmed"] = true
+                        });
                     Application.Exit();
+                }
+                else
+                {
+                    Service_DebugTracer.TraceUIAction("EXIT_CANCELED", nameof(MainForm),
+                        new Dictionary<string, object> { ["UserAction"] = "CANCELED" });
                 }
             }
             catch (Exception ex)
             {
+                Service_DebugTracer.TraceUIAction("EXIT_MENU_ERROR", nameof(MainForm),
+                    new Dictionary<string, object> { ["Exception"] = ex.Message });
                 Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium,
                     controlName: nameof(MainForm));
             }
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(MainForm_MenuStrip_Exit_Click), nameof(MainForm));
         }
 
         private void MainForm_MenuStrip_View_PersonalHistory_Click(object sender, EventArgs e)

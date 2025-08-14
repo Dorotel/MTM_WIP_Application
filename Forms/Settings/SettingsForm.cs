@@ -4,6 +4,7 @@ using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Models;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Data;
+using MTM_Inventory_Application.Services;
 
 namespace MTM_Inventory_Application.Forms.Settings
 {
@@ -20,11 +21,38 @@ namespace MTM_Inventory_Application.Forms.Settings
 
         public SettingsForm()
         {
+            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
+            {
+                ["FormType"] = nameof(SettingsForm),
+                ["InitializationTime"] = DateTime.Now,
+                ["Thread"] = Thread.CurrentThread.ManagedThreadId
+            }, nameof(SettingsForm), nameof(SettingsForm));
+
+            Service_DebugTracer.TraceUIAction("SETTINGS_FORM_INITIALIZATION", nameof(SettingsForm),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "START",
+                    ["ComponentType"] = "SettingsForm"
+                });
+
             InitializeComponent();
 
             AutoScaleMode = AutoScaleMode.Dpi;
+            Service_DebugTracer.TraceUIAction("THEME_APPLICATION", nameof(SettingsForm),
+                new Dictionary<string, object>
+                {
+                    ["DpiScaling"] = "APPLIED",
+                    ["LayoutAdjustments"] = "APPLIED"
+                });
             Core_Themes.ApplyDpiScaling(this);
             Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+
+            Service_DebugTracer.TraceUIAction("SETTINGS_PANELS_INITIALIZATION", nameof(SettingsForm),
+                new Dictionary<string, object>
+                {
+                    ["PanelsCount"] = 19,
+                    ["PanelTypes"] = new[] { "Database", "User Management", "Part Management", "Operations", "Locations", "ItemTypes", "Theme", "About" }
+                });
 
             _settingsPanels = new Dictionary<string, Panel>
             {
@@ -49,8 +77,23 @@ namespace MTM_Inventory_Application.Forms.Settings
                 ["About"] = SettingsForm_Panel_About
             };
 
+            Service_DebugTracer.TraceUIAction("INITIALIZE_CONTROLS", nameof(SettingsForm),
+                new Dictionary<string, object> { ["Phase"] = "START" });
             InitializeUserControls();
+            
+            Service_DebugTracer.TraceUIAction("INITIALIZE_FORM", nameof(SettingsForm),
+                new Dictionary<string, object> { ["Phase"] = "START" });
             InitializeForm();
+
+            Service_DebugTracer.TraceUIAction("SETTINGS_FORM_INITIALIZATION", nameof(SettingsForm),
+                new Dictionary<string, object>
+                {
+                    ["Phase"] = "COMPLETE",
+                    ["Success"] = true,
+                    ["HasChanges"] = HasChanges
+                });
+
+            Service_DebugTracer.TraceMethodExit(null, nameof(SettingsForm), nameof(SettingsForm));
         }
 
         #endregion
