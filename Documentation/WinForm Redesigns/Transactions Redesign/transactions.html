@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Transactions</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- IMPORTANT: Completely new CSS namespace (.tx-) to avoid collisions -->
+  <link rel="stylesheet" href="transactions.css" />
+</head>
+<body data-app="transactions" data-version="2.0">
+<!--
+  REWRITE / REDESIGN GUIDELINES:
+  1. This is a brand-new implementation. DO NOT copy legacy WinForms layout, control names, event wiring, or implicit assumptions.
+  2. Only retain the functional contract: available filters, paging model (PageSize=20), sorting fields, selection details, print/export, batch history.
+  3. All behaviors must be re-implemented using modern, testable modules (see transactions.js). Avoid inline JS.
+  4. Avoid replicating old SQL concatenation patterns; backend must expose safe parameterized API endpoints (/api/transactions/search, /api/transactions/history).
+  5. Admin vs non-admin: user selection disabled for non-admin users (data-user-role).
+  6. Side panel collapse is stateful (localStorage key tx.filters.collapsed).
+  7. Keep accessibility (labels, aria-*). Provide keyboard operability and screen-reader friendly status regions.
+  8. Like-search (Part ID / Location / User) exists as an alternative search path—exposed under “Quick Find”.
+  9. Selection History fetches batch history for selected row (BatchNumber).
+ 10. Printing should create a print-friendly clone (CSS @media print) rather than manipulating inline styles.
+ 11. DO NOT reuse legacy column name typos or mismatched casing except where backend contract requires (map internally).
+ 12. Mutate only the new state object; no hidden global variables.
+ 13. Future enhancement hooks: Smart Search, Analytics integration (see Dao_Transactions methods).
+-->
+
+<header class="tx-header">
+  <h1 class="tx-header__title">Transactions</h1>
+  <div class="tx-header__actions">
+    <button type="button" class="tx-btn tx-btn--ghost" data-action="toggleFilters" aria-expanded="true" aria-controls="filtersPanel">
+      Hide Filters
+    </button>
+  </div>
+</header>
+
+<main class="tx-layout">
+  <!-- Filter / Input Panel -->
+  <aside id="filtersPanel" class="tx-filters" data-component="filters" aria-label="Transaction Filters">
+    <form id="filtersForm" class="tx-filters__form" autocomplete="off" novalidate>
+      <fieldset class="tx-fieldset">
+        <legend class="tx-fieldset__legend">Primary Filters</legend>
+
+        <div class="tx-field">
+          <label for="filter_sortBy" class="tx-label">Sort By</label>
+          <select id="filter_sortBy" name="sortBy" class="tx-select" data-field="sortBy">
+            <option value="ReceiveDate">Date</option>
+            <option value="Quantity">Quantity</option>
+            <option value="User">User</option>
+            <option value="ItemType">Item Type</option>
+          </select>
+        </div>
+
+        <div class="tx-field">
+          <label for="filter_partId" class="tx-label">Part ID</label>
+          <select id="filter_partId" name="partId" class="tx-select" data-field="partId" data-enhanced="true">
+            <option value="">(Any)</option>
+            <!-- Dynamic options -->
+          </select>
+        </div>
+
+        <div class="tx-field">
+          <label for="filter_user" class="tx-label">User</label>
+          <select id="filter_user" name="user" class="tx-select" data-field="user" data-user-role>
+            <option value="">(Any)</option>
+            <!-- Dynamic options -->
+          </select>
+        </div>
+
+        <div class="tx-field">
+          <label for="filter_building" class="tx-label">Building</label>
+          <select id="filter_building" name="building" class="tx-select" data-field="building">
+            <option value="">(Any)</option>
+            <option value="[ Enter Building ]">[ Enter Building ]</option>
+            <option value="Expo Drive">Expo Drive</option>
+            <option value="Vits Drive">Vits Drive</option>
+          </select>
+        </div>
+
+        <div class="tx-field tx-field--inlineGroup">
+          <div class="tx-checkbox">
+            <input type="checkbox" id="filter_dateRangeEnabled" data-field="dateRangeEnabled" />
+            <label for="filter_dateRangeEnabled">Date Range</label>
+          </div>
+          <div class="tx-dateRange" aria-disabled="true">
+            <input type="date" id="filter_dateFrom" name="dateFrom" class="tx-input" data-field="dateFrom" disabled />
+            <span class="tx-dateRange__dash" aria-hidden="true">–</span>
+            <input type="date" id="filter_dateTo" name="dateTo" class="tx-input" data-field="dateTo" disabled />
+          </div>
+        </div>
+      </fieldset>
+
+      <details class="tx-accordion" data-component="quickFind">
+        <summary class="tx-accordion__summary">Quick Find (LIKE search)</summary>
+        <div class="tx-accordion__content">
+          <div class="tx-field">
+            <label for="quickFind_column" class="tx-label">Field</label>
+            <select id="quickFind_column" class="tx-select" data-field="quickFind.column">
+              <option value="">(None)</option>
+              <option value="PartID">Part ID</option>
+              <option value="FromLocation">Location</option>
+              <option value="User">User</option>
+            </select>
+          </div>
+          <div class="tx-field">
+            <label for="quickFind_text" class="tx-label">Contains</label>
+            <input id="quickFind_text" type="text" class="tx-input" data-field="quickFind.text" maxlength="100" placeholder="Substring..." />
+          </div>
+          <p class="tx-help">
+            When a Quick Find field and text are provided, primary filters (except Sort) are ignored.
+          </p>
+        </div>
+      </details>
+
+      <div class="tx-formActions">
+        <button type="submit" class="tx-btn tx-btn--primary" data-action="search" disabled>Search</button>
+        <button type="reset" class="tx-btn tx-btn--secondary" data-action="resetFilters">Reset</button>
+      </div>
+
+      <div class="tx-status" aria-live="polite" data-status-region></div>
+    </form>
+
+    <section class="tx-selectionReport" aria-label="Selected Transaction Details">
+      <h2 class="tx-sectionTitle">Selection</h2>
+      <dl class="tx-reportList" data-selection-report>
+        <div><dt>Transaction Type:</dt><dd data-field="TransactionType">—</dd></div>
+        <div><dt>Batch Number:</dt><dd data-field="BatchNumber">—</dd></div>
+        <div><dt>Part ID:</dt><dd data-field="PartID">—</dd></div>
+        <div><dt>From Location:</dt><dd data-field="FromLocation">—</dd></div>
+        <div><dt>To Location:</dt><dd data-field="ToLocation">—</dd></div>
+        <div><dt>Operation:</dt><dd data-field="Operation">—</dd></div>
+        <div><dt>Quantity:</dt><dd data-field="Quantity">—</dd></div>
+        <div><dt>Notes:</dt><dd data-field="Notes">—</dd></div>
+        <div><dt>User:</dt><dd data-field="User">—</dd></div>
+        <div><dt>Item Type:</dt><dd data-field="ItemType">—</dd></div>
+        <div><dt>Receive Date:</dt><dd data-field="ReceiveDate">—</dd></div>
+      </dl>
+      <div class="tx-selectionActions">
+        <button type="button" class="tx-btn tx-btn--small" data-action="viewHistory" disabled>
+          Selection History
+        </button>
+        <button type="button" class="tx-btn tx-btn--small" data-action="print" disabled>
+          Print
+        </button>
+      </div>
+      <div class="tx-historyPanel" hidden data-history-panel>
+        <h3 class="tx-historyPanel__title">Batch History</h3>
+        <table class="tx-table tx-table--history" aria-label="Batch History">
+          <thead>
+            <tr>
+              <th scope="col">Part ID</th>
+              <th scope="col">Qty</th>
+              <th scope="col">Operation</th>
+              <th scope="col">User</th>
+              <th scope="col">From</th>
+              <th scope="col">To</th>
+              <th scope="col">Receive Date</th>
+              <th scope="col">Description</th>
+            </tr>
+          </thead>
+          <tbody data-history-rows>
+          </tbody>
+        </table>
+        <button type="button" class="tx-btn tx-btn--ghost tx-historyPanel__close" data-action="closeHistory">
+          Close History
+        </button>
+      </div>
+    </section>
+  </aside>
+
+  <!-- Results Section -->
+  <section class="tx-results" aria-label="Search Results">
+    <div class="tx-results__head">
+      <h2 class="tx-sectionTitle">Results</h2>
+      <div class="tx-pagination" data-pagination>
+        <button class="tx-btn tx-btn--small" data-action="prevPage" disabled aria-label="Previous Page">Previous</button>
+        <span class="tx-pagination__info" data-page-info>Page 1</span>
+        <button class="tx-btn tx-btn--small" data-action="nextPage" disabled aria-label="Next Page">Next</button>
+      </div>
+    </div>
+
+    <div class="tx-tableWrapper" data-results-container>
+      <div class="tx-emptyState" data-empty-state hidden>
+        <p>No transactions found.</p>
+      </div>
+      <div class="tx-loadingOverlay" data-loading hidden aria-live="assertive">Loading…</div>
+      <table class="tx-table" aria-label="Transactions Table" data-table>
+        <thead>
+          <tr>
+            <th scope="col" data-col="PartID">Part ID</th>
+            <th scope="col" data-col="Operation">Operation</th>
+            <th scope="col" data-col="Quantity">Quantity</th>
+            <th scope="col" data-col="FromLocation">From Location</th>
+            <th scope="col" data-col="ToLocation">To Location</th>
+            <th scope="col" data-col="ReceiveDate">Receive Date</th>
+          </tr>
+        </thead>
+        <tbody data-tbody>
+          <!-- Rows injected dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<template id="transactionRowTemplate">
+  <tr data-row>
+    <td data-cell="PartID"></td>
+    <td data-cell="Operation"></td>
+    <td data-cell="Quantity" class="tx-num"></td>
+    <td data-cell="FromLocation"></td>
+    <td data-cell="ToLocation"></td>
+    <td data-cell="ReceiveDate"></td>
+  </tr>
+</template>
+
+<template id="historyRowTemplate">
+  <tr data-history-row>
+    <td data-cell="PartID"></td>
+    <td data-cell="Quantity" class="tx-num"></td>
+    <td data-cell="Operation"></td>
+    <td data-cell="User"></td>
+    <td data-cell="FromLocation"></td>
+    <td data-cell="ToLocation"></td>
+    <td data-cell="ReceiveDate"></td>
+    <td data-cell="Description"></td>
+  </tr>
+</template>
+
+<script type="module" src="transactions.js"></script>
+</body>
+</html>
