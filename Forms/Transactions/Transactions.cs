@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel;
 using System.Data;
+using System.Text;
+using MySql.Data.MySqlClient;
 using MTM_Inventory_Application.Core;
 using MTM_Inventory_Application.Data;
 using MTM_Inventory_Application.Helpers;
 using MTM_Inventory_Application.Models;
+using System.Drawing.Printing;
 using MTM_Inventory_Application.Controls.Shared;
-using MTM_Inventory_Application.Services;
-using MTM_Inventory_Application.Logging;
 
 namespace MTM_Inventory_Application.Forms.Transactions
 {
@@ -21,17 +22,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
         private readonly string _currentUser;
         private readonly bool _isAdmin;
         private ComboBox _transactionsComboBoxSearchPartId = new();
-        private readonly Dictionary<string, string> _lastSearchCriteria = new();
-        private bool _isPaginationNavigation = false;
 
-        #endregion
-
-        #region Properties
-        // Properties will be added here as needed
-        #endregion
-
-        #region Progress Control Methods
-        // Progress control methods will be added here as needed
         #endregion
 
         #region Constructors
@@ -48,55 +39,46 @@ namespace MTM_Inventory_Application.Forms.Transactions
             _currentUser = currentUser;
             _isAdmin = Model_AppVariables.UserTypeAdmin;
 
-            SetupFormInitialization();
-            WireUpEventHandlers();
+            SetupSortCombo();
+            SetupDataGrid();
+
+            Load += async (s, e) => await OnFormLoadAsync();
+
+            Transactions_Button_Reset.Click += (s, e) => ResetFilters();
+
+            // Paging logic
+            Transfer_Button_Next.Click += async (s, e) =>
+            {
+                _currentPage++;
+                await LoadTransactionsAsync();
+            };
+            Transfer_Button_Previous.Click += async (s, e) =>
+            {
+                if (_currentPage > 1)
+                {
+                    _currentPage--;
+                    await LoadTransactionsAsync();
+                }
+            };
+
+            // Print button logic
+            Transactions_Button_Print.Click += Transactions_Button_Print_Click;
             Core_Themes.ApplyTheme(this);
         }
 
         #endregion
 
-        #region Form Initialization
-
-        private void SetupFormInitialization()
-        {
-            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
-            {
-                ["User"] = _currentUser,
-                ["IsAdmin"] = _isAdmin
-            }, nameof(Transactions), nameof(SetupFormInitialization));
-
-            SetupSortCombo();
-            SetupDataGrid();
-            SetupFilterControls();
-            InitializeSmartSearchControls();
-
-            Load += async (s, e) => await OnFormLoadAsync();
-
-            Service_DebugTracer.TraceMethodExit(null, nameof(Transactions), nameof(SetupFormInitialization));
-        }
+        #region Methods
 
         private async Task OnFormLoadAsync()
         {
-            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
-            {
-                ["FormName"] = "Transactions"
-            }, nameof(Transactions), nameof(OnFormLoadAsync));
-
-            try
-            {
-                Transactions_Button_Help.Enabled = false;
-                await LoadUserCombosAsync();
-                await LoadPartComboAsync();
-                InitializeFiltersToDefaults();
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, null, null, nameof(Transactions), nameof(OnFormLoadAsync));
-            }
-            finally
-            {
-                Service_DebugTracer.TraceMethodExit(null, nameof(Transactions), nameof(OnFormLoadAsync));
-            }
+            Transactions_Button_Print.Enabled = false; // Disable print button on load
+            Transfer_Button_SelectionHistory.Enabled = false; // Disable selection history button on load
+            await LoadUserCombosAsync();
+            LoadBuildingCombo(); // Remove await since method is no longer async
+            await LoadPartComboAsync();
+            SetupDateRangeDefaults();
+            WireUpEvents();
         }
 
         private async Task LoadUserCombosAsync()
@@ -106,6 +88,7 @@ namespace MTM_Inventory_Application.Forms.Transactions
             if (!_isAdmin)
             {
                 Transactions_ComboBox_UserFullName.Text = Model_AppVariables.User;
+
                 Transactions_ComboBox_UserFullName.Enabled = false;
             }
             else
@@ -114,1090 +97,633 @@ namespace MTM_Inventory_Application.Forms.Transactions
             }
         }
 
+        private void LoadBuildingCombo()
+        {
+            // Set Building ComboBox to only 3 items: [ Enter Building ], Expo Drive, Vits Drive
+            Transactions_ComboBox_Building.Items.Clear();
+            Transactions_ComboBox_Building.Items.Add("[ Enter Building ]");
+            Transactions_ComboBox_Building.Items.Add("Expo Drive");
+            Transactions_ComboBox_Building.Items.Add("Vits Drive");
+            Transactions_ComboBox_Building.SelectedIndex = 0;
+        }
+
         private async Task LoadPartComboAsync()
         {
             await Helper_UI_ComboBoxes.FillPartComboBoxesAsync(_transactionsComboBoxSearchPartId);
             _transactionsComboBoxSearchPartId.SelectedIndex = 0;
         }
 
-        private void WireUpEventHandlers()
+        private void SetupDateRangeDefaults()
         {
-            Service_DebugTracer.TraceMethodEntry(null, nameof(Transactions), nameof(WireUpEventHandlers));
+            Control_AdvancedRemove_CheckBox_Date.Checked = false;
+            Control_AdvancedRemove_DateTimePicker_From.Value = DateTime.Today.AddDays(-7);
+            Control_AdvancedRemove_DateTimePicker_To.Value = DateTime.Today;
+            Control_AdvancedRemove_DateTimePicker_From.Enabled = false;
+            Control_AdvancedRemove_DateTimePicker_To.Enabled = false;
+        }
 
-            // Smart search functionality
-            Transactions_Button_SmartSearch.Click += async (s, e) => await HandleSmartSearchAsync();
-            
-            // Smart search Enter key support
-            Transactions_TextBox_SmartSearch.KeyDown += async (s, e) =>
+        private void WireUpEvents()
+        {
+            Transactions_Button_Search.Click += async (s, e) => await LoadTransactionsAsync();
+            Transactions_DataGridView_Transactions.SelectionChanged +=
+                Transactions_DataGridView_Transactions_SelectionChanged;
+            Control_AdvancedRemove_CheckBox_Date.CheckedChanged += (s, e) =>
             {
-                if (e.KeyCode == Keys.Enter)
-                {
-                    await HandleSmartSearchAsync();
-                    e.Handled = true;
-                }
+                Control_AdvancedRemove_DateTimePicker_From.Enabled = Control_AdvancedRemove_CheckBox_Date.Checked;
+                Control_AdvancedRemove_DateTimePicker_To.Enabled = Control_AdvancedRemove_CheckBox_Date.Checked;
             };
+            Transactions_Button_SidePanel.Click += Transactions_Button_SidePanel_Click;
+            Transfer_Button_SelectionHistory.Click += Transfer_Button_BranchHistory_Click;
 
-            // Pagination controls
-            Transactions_Button_NextPage.Click += async (s, e) => await NavigateToNextPageAsync();
-            Transactions_Button_PreviousPage.Click += async (s, e) => await NavigateToPreviousPageAsync();
-            Transactions_Button_FirstPage.Click += async (s, e) => await NavigateToFirstPageAsync();
-            Transactions_Button_LastPage.Click += async (s, e) => await NavigateToLastPageAsync();
-
-            // Filter controls
-            Transactions_Button_ApplyFilters.Click += async (s, e) => await ApplyFiltersAsync();
-            Transactions_Button_ClearFilters.Click += (s, e) => ClearAllFilters();
-            Transactions_Button_Reset.Click += (s, e) => ResetFilters();
-
-            // Data grid events
-            Transactions_DataGridView_Transactions.SelectionChanged += Transactions_DataGridView_Transactions_SelectionChanged;
-            Transactions_Button_Help.Click += Transactions_Button_Help_Click;
-
-            // Toolbar buttons
-            Transactions_Button_QuickSearch.Click += async (s, e) => await HandleQuickSearchAsync();
-            Transactions_Button_Today.Click += async (s, e) => await FilterTodayAsync();
-            Transactions_Button_ThisWeek.Click += async (s, e) => await FilterThisWeekAsync();
-            Transactions_Button_Export.Click += (s, e) => ExportResults();
-            Transactions_Button_Refresh.Click += async (s, e) => await RefreshDataAsync();
-
-            Service_DebugTracer.TraceMethodExit(null, nameof(Transactions), nameof(WireUpEventHandlers));
+            // Enable/disable search button based on combo selection
+            _transactionsComboBoxSearchPartId.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
+            Transactions_ComboBox_UserFullName.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
+            Transactions_ComboBox_Building.SelectedIndexChanged += Transactions_EnableSearchButtonIfValid;
+            Transactions_EnableSearchButtonIfValid(this, EventArgs.Empty);
         }
 
-        #endregion
-
-        #region Smart Search Functionality
-
-        /// <summary>
-        /// Handle smart search functionality with advanced syntax
-        /// </summary>
-        private async Task HandleSmartSearchAsync()
+        private void Transactions_EnableSearchButtonIfValid(object? sender, EventArgs e)
         {
-            Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
-            {
-                ["SearchText"] = Transactions_TextBox_SmartSearch.Text ?? ""
-            }, nameof(Transactions), nameof(HandleSmartSearchAsync));
-
-            try
-            {
-                string searchText = Transactions_TextBox_SmartSearch.Text?.Trim() ?? "";
-
-                if (string.IsNullOrWhiteSpace(searchText))
-                {
-                    // If no smart search text, fall back to regular search
-                    await LoadTransactionsAsync();
-                    return;
-                }
-
-                // Reset to first page for new search
-                if (!_isPaginationNavigation)
-                {
-                    _currentPage = 1;
-                }
-                _isPaginationNavigation = false;
-
-                // Parse smart search syntax
-                var searchCriteria = ParseSmartSearchText(searchText);
-                await ExecuteSmartSearchAsync(searchCriteria);
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, null, null, nameof(Transactions), nameof(HandleSmartSearchAsync));
-                UpdateSearchStatus($"Search error: {ex.Message}");
-            }
-            finally
-            {
-                Service_DebugTracer.TraceMethodExit(null, nameof(Transactions), nameof(HandleSmartSearchAsync));
-            }
+            bool enable = _transactionsComboBoxSearchPartId.SelectedIndex > 0
+                          || Transactions_ComboBox_UserFullName.SelectedIndex > 0
+                          || Transactions_ComboBox_Building.SelectedIndex > 0;
+            Transactions_Button_Search.Enabled = enable;
         }
 
-        /// <summary>
-        /// Parse smart search text with advanced syntax support
-        /// Supports: partid:PART123, qty:>50, location:A1, user:JSMITH, batch:0000123
-        /// </summary>
-        private Dictionary<string, string> ParseSmartSearchText(string searchText)
+        private void Transactions_Button_SidePanel_Click(object? sender, EventArgs e)
         {
-            var criteria = new Dictionary<string, string>();
-            if (string.IsNullOrWhiteSpace(searchText)) return criteria;
-
-            // Split by comma and space, handle quoted strings
-            var terms = SplitSearchTerms(searchText);
-            
-            foreach (string term in terms)
+            // Collapse/Expand the left panel (filters/inputs)
+            if (Transactions_SplitContainer_Main.Panel1Collapsed)
             {
-                var cleanTerm = term.Trim();
-                if (string.IsNullOrEmpty(cleanTerm)) continue;
-
-                if (cleanTerm.Contains(':'))
-                {
-                    var parts = cleanTerm.Split(':', 2);
-                    if (parts.Length == 2)
-                    {
-                        var field = parts[0].Trim().ToLower();
-                        var value = parts[1].Trim().Trim('"', '\'');
-                        
-                        // Map field aliases to database columns
-                        string dbField = MapSearchFieldToColumn(field);
-                        criteria[dbField] = value;
-                    }
-                }
-                else if (cleanTerm.StartsWith('#'))
-                {
-                    // Handle hashtag searches for batch numbers
-                    criteria["BatchNumber"] = cleanTerm.Substring(1);
-                }
-                else
-                {
-                    // General search term
-                    criteria["_general"] = cleanTerm;
-                }
-            }
-
-            return criteria;
-        }
-
-        /// <summary>
-        /// Split search terms handling quoted strings properly
-        /// </summary>
-        private List<string> SplitSearchTerms(string searchText)
-        {
-            var terms = new List<string>();
-            var currentTerm = new System.Text.StringBuilder();
-            bool inQuotes = false;
-            char quoteChar = '\0';
-
-            foreach (char c in searchText)
-            {
-                if (!inQuotes && (c == '"' || c == '\''))
-                {
-                    inQuotes = true;
-                    quoteChar = c;
-                    currentTerm.Append(c);
-                }
-                else if (inQuotes && c == quoteChar)
-                {
-                    inQuotes = false;
-                    currentTerm.Append(c);
-                }
-                else if (!inQuotes && (c == ',' || c == ' '))
-                {
-                    if (currentTerm.Length > 0)
-                    {
-                        terms.Add(currentTerm.ToString());
-                        currentTerm.Clear();
-                    }
-                }
-                else
-                {
-                    currentTerm.Append(c);
-                }
-            }
-
-            if (currentTerm.Length > 0)
-            {
-                terms.Add(currentTerm.ToString());
-            }
-
-            return terms;
-        }
-
-        /// <summary>
-        /// Map search field names to database column names
-        /// </summary>
-        private string MapSearchFieldToColumn(string field)
-        {
-            return field switch
-            {
-                "partid" or "part" => "PartID",
-                "user" => "User", 
-                "location" or "fromlocation" or "from" => "FromLocation",
-                "tolocation" or "to" => "ToLocation",
-                "operation" or "op" => "Operation",
-                "quantity" or "qty" => "Quantity",
-                "batch" or "batchnumber" => "BatchNumber",
-                "type" or "transactiontype" => "TransactionType",
-                "itemtype" => "ItemType",
-                "notes" => "Notes",
-                "date" or "receivedate" => "ReceiveDate",
-                _ => field
-            };
-        }
-
-        /// <summary>
-        /// Execute smart search with parsed criteria using DAO
-        /// </summary>
-        private async Task ExecuteSmartSearchAsync(Dictionary<string, string> criteria)
-        {
-            try
-            {
-                _lastSearchCriteria.Clear();
-                foreach (var kvp in criteria)
-                {
-                    _lastSearchCriteria[kvp.Key] = kvp.Value;
-                }
-
-                var dao = new Dao_Transactions();
-                
-                // Map criteria to DAO parameters
-                string partID = criteria.ContainsKey("PartID") ? criteria["PartID"] : "";
-                string batchNumber = criteria.ContainsKey("BatchNumber") ? criteria["BatchNumber"] : "";
-                string operation = criteria.ContainsKey("Operation") ? criteria["Operation"] : "";
-                string user = criteria.ContainsKey("User") ? criteria["User"] : "";
-                string fromLocation = criteria.ContainsKey("FromLocation") ? criteria["FromLocation"] : "";
-                string toLocation = criteria.ContainsKey("ToLocation") ? criteria["ToLocation"] : "";
-                string notes = criteria.ContainsKey("Notes") ? criteria["Notes"] : "";
-                string itemType = criteria.ContainsKey("ItemType") ? criteria["ItemType"] : "";
-
-                int? quantity = null;
-                if (criteria.ContainsKey("Quantity") && int.TryParse(criteria["Quantity"], out int qty))
-                {
-                    quantity = qty;
-                }
-
-                var result = await dao.SearchTransactionsAsync(
-                    _isAdmin ? string.Empty : _currentUser,
-                    _isAdmin,
-                    partID: partID,
-                    batchNumber: batchNumber,
-                    fromLocation: fromLocation,
-                    toLocation: toLocation,
-                    operation: operation,
-                    quantity: quantity,
-                    notes: notes,
-                    itemType: itemType,
-                    sortColumn: "ReceiveDate",
-                    sortDescending: SortDescending,
-                    page: _currentPage,
-                    pageSize: PageSize
-                );
-
-                if (result.IsSuccess && result.Data != null)
-                {
-                    DisplaySearchResults(result.Data);
-                    UpdateSearchStatus($"Found {result.Data.Count} results");
-                }
-                else
-                {
-                    UpdateSearchStatus($"Search failed: {result.ErrorMessage}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, null, null, nameof(Transactions), nameof(ExecuteSmartSearchAsync));
-                UpdateSearchStatus($"Search error: {ex.Message}");
-            }
-        }
-
-        #endregion
-
-        #region Button Clicks
-
-        private async Task NavigateToNextPageAsync()
-        {
-            _currentPage++;
-            _isPaginationNavigation = true;
-            
-            if (_lastSearchCriteria.Count > 0)
-            {
-                await ExecuteSmartSearchAsync(_lastSearchCriteria);
+                Transactions_SplitContainer_Main.Panel1Collapsed = false;
+                Transactions_Button_SidePanel.Text = @"Collapse ⬅️";
             }
             else
             {
-                await LoadTransactionsAsync();
+                Transactions_SplitContainer_Main.Panel1Collapsed = true;
+                Transactions_Button_SidePanel.Text = @"Expand ➡️";
             }
         }
-
-        private async Task NavigateToPreviousPageAsync()
-        {
-            if (_currentPage > 1)
-            {
-                _currentPage--;
-                _isPaginationNavigation = true;
-                
-                if (_lastSearchCriteria.Count > 0)
-                {
-                    await ExecuteSmartSearchAsync(_lastSearchCriteria);
-                }
-                else
-                {
-                    await LoadTransactionsAsync();
-                }
-            }
-        }
-
-        private async Task NavigateToFirstPageAsync()
-        {
-            _currentPage = 1;
-            _isPaginationNavigation = true;
-            
-            if (_lastSearchCriteria.Count > 0)
-            {
-                await ExecuteSmartSearchAsync(_lastSearchCriteria);
-            }
-            else
-            {
-                await LoadTransactionsAsync();
-            }
-        }
-
-        private async Task NavigateToLastPageAsync()
-        {
-            // For now, just navigate to a high page number
-            // In a full implementation, you'd calculate the actual last page
-            _currentPage = 999;
-            _isPaginationNavigation = true;
-            
-            if (_lastSearchCriteria.Count > 0)
-            {
-                await ExecuteSmartSearchAsync(_lastSearchCriteria);
-            }
-            else
-            {
-                await LoadTransactionsAsync();
-            }
-        }
-
-        private async Task ApplyFiltersAsync()
-        {
-            try
-            {
-                // Reset to first page when applying filters
-                _currentPage = 1;
-                _isPaginationNavigation = false;
-
-                // Build criteria from filter controls
-                var criteria = BuildFilterCriteria();
-                await ExecuteSmartSearchAsync(criteria);
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(ApplyFiltersAsync));
-            }
-        }
-
-        private async Task HandleQuickSearchAsync()
-        {
-            try
-            {
-                // Quick search using traditional controls
-                await LoadTransactionsAsync();
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(HandleQuickSearchAsync));
-            }
-        }
-
-        private async Task FilterTodayAsync()
-        {
-            try
-            {
-                Transactions_RadioButton_Today.Checked = true;
-                await ApplyFiltersAsync();
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(FilterTodayAsync));
-            }
-        }
-
-        private async Task FilterThisWeekAsync()
-        {
-            try
-            {
-                Transactions_RadioButton_Week.Checked = true;
-                await ApplyFiltersAsync();
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(FilterThisWeekAsync));
-            }
-        }
-
-        private void ExportResults()
-        {
-            try
-            {
-                if (_displayedTransactions == null || _displayedTransactions.Count == 0)
-                {
-                    Service_ErrorHandler.HandleException(
-                        new Exception("No data to export"),
-                        ErrorSeverity.Low, null, null, nameof(Transactions), nameof(ExportResults));
-                    return;
-                }
-
-                // Export functionality would be implemented here
-                // For now, just show a message
-                Service_ErrorHandler.HandleException(
-                    new NotImplementedException("Export functionality not yet implemented"),
-                    ErrorSeverity.Low, null, null, nameof(Transactions), nameof(ExportResults));
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(ExportResults));
-            }
-        }
-
-        private async Task RefreshDataAsync()
-        {
-            try
-            {
-                // Reset page and reload current view
-                _currentPage = 1;
-                if (_lastSearchCriteria.Count > 0)
-                {
-                    await ExecuteSmartSearchAsync(_lastSearchCriteria);
-                }
-                else
-                {
-                    await LoadTransactionsAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(RefreshDataAsync));
-            }
-        }
-
-        private async void Transactions_Button_Help_Click(object? sender, EventArgs e)
-        {
-            try
-            {
-                if (Transactions_DataGridView_Transactions.SelectedRows.Count != 1)
-                    return;
-
-                if (Transactions_DataGridView_Transactions.SelectedRows[0].DataBoundItem is not Model_Transactions selected ||
-                    string.IsNullOrWhiteSpace(selected.BatchNumber))
-                {
-                    Service_ErrorHandler.HandleException(
-                        new Exception("No Batch Number found for the selected transaction."),
-                        ErrorSeverity.Low, null, null, nameof(Transactions), nameof(Transactions_Button_Help_Click));
-                    return;
-                }
-
-                // Load batch history
-                await LoadBatchHistoryAsync(selected.BatchNumber);
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(Transactions_Button_Help_Click));
-            }
-        }
-
-        #endregion
-
-        #region ComboBox & UI Events
 
         private void Transactions_DataGridView_Transactions_SelectionChanged(object? sender, EventArgs e)
         {
+            if (Transactions_DataGridView_Transactions.SelectedRows.Count == 1)
+            {
+                DataGridViewRow row = Transactions_DataGridView_Transactions.SelectedRows[0];
+                if (row.DataBoundItem is Model_Transactions tx)
+                {
+                    Transactions_TextBox_Report_BatchNumber.Text = tx.BatchNumber ?? "";
+                    Transactions_TextBox_Report_PartID.Text = tx.PartID ?? "";
+                    Transactions_TextBox_Report_FromLocation.Text = tx.FromLocation ?? "";
+                    Transactions_TextBox_Report_ToLocation.Text = tx.ToLocation ?? "";
+                    Transactions_TextBox_Report_Operation.Text = tx.Operation ?? "";
+                    Transactions_TextBox_Report_Quantity.Text = tx.Quantity.ToString();
+                    Transactions_TextBox_Notes.Text = tx.Notes ?? "";
+                    Transactions_TextBox_Report_User.Text = tx.User ?? "";
+                    Transactions_TextBox_Report_ItemType.Text = tx.ItemType ?? "";
+                    Transactions_TextBox_Report_ReceiveDate.Text = tx.DateTime.ToString("g");
+                }
+            }
+            else
+            {
+                Transactions_TextBox_Report_BatchNumber.Text = "";
+                Transactions_TextBox_Report_PartID.Text = "";
+                Transactions_TextBox_Report_FromLocation.Text = "";
+                Transactions_TextBox_Report_ToLocation.Text = "";
+                Transactions_TextBox_Report_Operation.Text = "";
+                Transactions_TextBox_Report_Quantity.Text = "";
+                Transactions_TextBox_Notes.Text = "";
+                Transactions_TextBox_Report_User.Text = "";
+                Transactions_TextBox_Report_ItemType.Text = "";
+                Transactions_TextBox_Report_ReceiveDate.Text = "";
+            }
+        }
+
+        private void Transactions_Button_Print_Click(object? sender, EventArgs e)
+        {
             try
             {
-                if (Transactions_DataGridView_Transactions.SelectedRows.Count == 1)
+                Core_DgvPrinter printer = new();
+                List<string> visibleColumns = [];
+                foreach (DataGridViewColumn col in Transactions_DataGridView_Transactions.Columns)
                 {
-                    DataGridViewRow row = Transactions_DataGridView_Transactions.SelectedRows[0];
-                    if (row.DataBoundItem is Model_Transactions tx)
+                    if (col.Visible)
                     {
-                        Transactions_Button_Help.Enabled = true;
-                        UpdateTransactionDetails(tx);
-
-                        Service_DebugTracer.TraceUIAction("TRANSACTION_SELECTED", nameof(Transactions),
-                            new Dictionary<string, object>
-                            {
-                                ["TransactionID"] = tx.ID,
-                                ["PartID"] = tx.PartID ?? "",
-                                ["BatchNumber"] = tx.BatchNumber ?? ""
-                            });
+                        visibleColumns.Add(col.Name);
                     }
                 }
-                else
-                {                
-                    Transactions_Button_Help.Enabled = false;
-                    ClearTransactionDetails();
-                }
+
+                printer.SetPrintVisibleColumns(visibleColumns);
+                printer.Print(Transactions_DataGridView_Transactions);
             }
             catch (Exception ex)
             {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(Transactions_DataGridView_Transactions_SelectionChanged));
+                MessageBox.Show($@"Error printing transactions: {ex.Message}", @"Print Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
-
-        private void UpdateTransactionDetails(Model_Transactions transaction)
-        {
-            try
-            {
-                // Update the right panel details if controls exist
-                if (Transactions_TextBox_BatchNumber != null)
-                    Transactions_TextBox_BatchNumber.Text = transaction.BatchNumber ?? "";
-                
-                if (Transactions_TextBox_TransactionType != null)
-                    Transactions_TextBox_TransactionType.Text = transaction.TransactionType.ToString();
-                
-                if (Transactions_TextBox_Quantity != null)
-                    Transactions_TextBox_Quantity.Text = transaction.Quantity.ToString();
-                
-                if (Transactions_TextBox_Location != null)
-                    Transactions_TextBox_Location.Text = $"{transaction.FromLocation} → {transaction.ToLocation}";
-                
-                if (Transactions_TextBox_User != null)
-                    Transactions_TextBox_User.Text = transaction.User ?? "";
-                
-                if (Transactions_TextBox_DateTime != null)
-                    Transactions_TextBox_DateTime.Text = transaction.DateTime.ToString("yyyy-MM-dd HH:mm:ss");
-                
-                if (Transactions_Label_SelectedPartID != null)
-                    Transactions_Label_SelectedPartID.Text = $"Selected: {transaction.PartID}";
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, null, null, nameof(Transactions), nameof(UpdateTransactionDetails));
-            }
-        }
-
-        private void ClearTransactionDetails()
-        {
-            try
-            {
-                // Clear the right panel details if controls exist
-                if (Transactions_TextBox_BatchNumber != null)
-                    Transactions_TextBox_BatchNumber.Text = "";
-                
-                if (Transactions_TextBox_TransactionType != null)
-                    Transactions_TextBox_TransactionType.Text = "";
-                
-                if (Transactions_TextBox_Quantity != null)
-                    Transactions_TextBox_Quantity.Text = "";
-                
-                if (Transactions_TextBox_Location != null)
-                    Transactions_TextBox_Location.Text = "";
-                
-                if (Transactions_TextBox_User != null)
-                    Transactions_TextBox_User.Text = "";
-                
-                if (Transactions_TextBox_DateTime != null)
-                    Transactions_TextBox_DateTime.Text = "";
-                
-                if (Transactions_Label_SelectedPartID != null)
-                    Transactions_Label_SelectedPartID.Text = "No selection";
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, null, null, nameof(Transactions), nameof(ClearTransactionDetails));
-            }
-        }
-
-        #endregion
-
-        #region Helpers
 
         private async Task LoadTransactionsAsync()
         {
-            try
-            {
-                Service_DebugTracer.TraceMethodEntry(new Dictionary<string, object>
-                {
-                    ["Page"] = _currentPage,
-                    ["PageSize"] = PageSize
-                }, nameof(Transactions), nameof(LoadTransactionsAsync));
+            System.Diagnostics.Debug.WriteLine("[DEBUG] LoadTransactionsAsync started");
+            DataTable dt = new();
+            MySqlCommand cmd;
 
-                var dao = new Dao_Transactions();
-                
-                // Get search parameters from traditional controls
+            bool hasLikeSearch = false;
+            string? likeSearchText = null;
+            string? likeSearchColumn = null;
+            if (Controls.ContainsKey("Transactions_ComboBox_Like") && Controls.ContainsKey("Transactions_TextBox_Like"))
+            {
+                if (Controls["Transactions_ComboBox_Like"] is ComboBox likeCombo &&
+                    Controls["Transactions_TextBox_Like"] is TextBox likeText && likeCombo.SelectedIndex > 0 &&
+                    !string.IsNullOrWhiteSpace(likeText.Text))
+                {
+                    hasLikeSearch = true;
+                    likeSearchText = likeText.Text.Trim();
+                    switch (likeCombo.Text)
+                    {
+                        case "Part ID":
+                            likeSearchColumn = "PartID";
+                            break;
+                        case "Location":
+                            likeSearchColumn = "FromLocation";
+                            break;
+                        case "User":
+                            likeSearchColumn = "User";
+                            break;
+                    }
+                }
+            }
+
+            if (hasLikeSearch && !string.IsNullOrEmpty(likeSearchColumn))
+            {
+                string query = $"SELECT * FROM inv_transaction WHERE {likeSearchColumn} LIKE @SearchPattern";
+                cmd = new MySqlCommand(query);
+                cmd.Parameters.AddWithValue("@SearchPattern", $"%{likeSearchText}%");
+                System.Diagnostics.Debug.WriteLine($"[DEBUG] LIKE Search: {query} with pattern '%{likeSearchText}%'");
+            }
+            else
+            {
                 string part = _transactionsComboBoxSearchPartId.Text;
                 string user = Transactions_ComboBox_UserFullName.Text;
+                string building = Transactions_ComboBox_Building.Text;
+                string notes = Transactions_TextBox_Notes.Text;
+                bool filterByDate = Control_AdvancedRemove_CheckBox_Date.Checked;
+                DateTime? dateFrom =
+                    filterByDate ? Control_AdvancedRemove_DateTimePicker_From.Value.Date : (DateTime?)null;
+                DateTime? dateTo = filterByDate
+                    ? Control_AdvancedRemove_DateTimePicker_To.Value.Date.AddDays(1).AddTicks(-1)
+                    : (DateTime?)null;
 
-                bool partSelected = _transactionsComboBoxSearchPartId.SelectedIndex > 0 && !string.IsNullOrWhiteSpace(part);
-                bool userSelected = Transactions_ComboBox_UserFullName.SelectedIndex > 0 && !string.IsNullOrWhiteSpace(user);
+                bool partSelected = _transactionsComboBoxSearchPartId.SelectedIndex > 0 &&
+                                    !string.IsNullOrWhiteSpace(part);
+                bool userSelected = Transactions_ComboBox_UserFullName.SelectedIndex > 0 &&
+                                    !string.IsNullOrWhiteSpace(user);
+                bool buildingSelected = Transactions_ComboBox_Building.SelectedIndex > 0 &&
+                                        !string.IsNullOrWhiteSpace(building);
+                bool anyFieldFilled = partSelected || userSelected || buildingSelected ||
+                                      !string.IsNullOrWhiteSpace(notes) ||
+                                      (filterByDate && dateFrom != null && dateTo != null);
 
-                if (!partSelected && !userSelected)
+                if (!anyFieldFilled)
                 {
-                    Service_ErrorHandler.HandleException(
-                        new Exception("Please fill in at least one field to search."),
-                        ErrorSeverity.Low, null, null, nameof(Transactions), nameof(LoadTransactionsAsync));
+                    MessageBox.Show(@"Please fill in at least one field to search.", @"Validation Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                var result = await dao.SearchTransactionsAsync(
-                    _isAdmin ? string.Empty : _currentUser,
-                    _isAdmin,
-                    partID: partSelected ? part : "",
-                    batchNumber: "",
-                    fromLocation: "",
-                    toLocation: "",
-                    operation: "",
-                    quantity: null,
-                    notes: "",
-                    itemType: "",
-                    fromDate: null,
-                    toDate: null,
-                    sortColumn: Transactions_ComboBox_SortBy.Text ?? "Date",
-                    sortDescending: SortDescending,
-                    page: _currentPage,
-                    pageSize: PageSize
-                );
-
-                if (result.IsSuccess && result.Data != null)
+                if (filterByDate && dateFrom > dateTo)
                 {
-                    DisplaySearchResults(result.Data);
-                    UpdateSearchStatus($"Loaded {result.Data.Count} transactions");
-                }
-                else
-                {
-                    UpdateSearchStatus($"Load failed: {result.ErrorMessage}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High, null, null, nameof(Transactions), nameof(LoadTransactionsAsync));
-            }
-            finally
-            {
-                Service_DebugTracer.TraceMethodExit(null, nameof(Transactions), nameof(LoadTransactionsAsync));
-            }
-        }
-
-        private void DisplaySearchResults(List<Model_Transactions> results)
-        {
-            try
-            {
-                _displayedTransactions = new BindingList<Model_Transactions>(results);
-                Transactions_DataGridView_Transactions.DataSource = _displayedTransactions;
-                
-                // Update visibility of no results image
-                Transactions_Image_NothingFound.Visible = results.Count == 0;
-                Transactions_DataGridView_Transactions.Visible = results.Count > 0;
-                Transactions_Button_Help.Enabled = results.Count > 0;
-                
-                if (results.Count > 0)
-                {
-                    Transactions_DataGridView_Transactions.ClearSelection();
+                    MessageBox.Show(@"The 'From' date cannot be after the 'To' date.", @"Validation Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
                 }
 
-                UpdatePagingButtons(results.Count);
-                UpdateResultsSummary(results.Count);
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(DisplaySearchResults));
-            }
-        }
+                StringBuilder queryBuilder = new();
+                queryBuilder.Append("SELECT * FROM inv_transaction WHERE 1=1 ");
+                List<MySqlParameter> parameters = [];
 
-        private void UpdatePagingButtons(int resultCount)
-        {
-            try
-            {
-                Transactions_Button_PreviousPage.Enabled = _currentPage > 1;
-                Transactions_Button_FirstPage.Enabled = _currentPage > 1;
-                Transactions_Button_NextPage.Enabled = resultCount >= PageSize;
-                Transactions_Button_LastPage.Enabled = resultCount >= PageSize;
-
-                // Update page info label if it exists
-                if (Transactions_Label_PageInfo != null)
+                if (partSelected)
                 {
-                    Transactions_Label_PageInfo.Text = $"Page {_currentPage} ({resultCount} items)";
-                }
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, null, null, nameof(Transactions), nameof(UpdatePagingButtons));
-            }
-        }
-
-        private void UpdateResultsSummary(int resultCount)
-        {
-            try
-            {
-                if (Transactions_Label_ResultsOverview != null)
-                {
-                    Transactions_Label_ResultsOverview.Text = $"Showing {resultCount} transactions";
+                    queryBuilder.Append("AND PartID = @PartID ");
+                    parameters.Add(new MySqlParameter("@PartID", part));
                 }
 
-                if (Transactions_Label_ResultsStats != null)
+                if (userSelected)
                 {
-                    Transactions_Label_ResultsStats.Text = $"Page {_currentPage} • {PageSize} per page";
+                    queryBuilder.Append("AND User = @User ");
+                    parameters.Add(new MySqlParameter("@User", user));
+                }
+
+                if (buildingSelected)
+                {
+                    queryBuilder.Append("AND FromLocation = @FromLocation ");
+                    parameters.Add(new MySqlParameter("@FromLocation", building));
+                }
+
+                if (!string.IsNullOrWhiteSpace(notes))
+                {
+                    queryBuilder.Append("AND Notes LIKE @Notes ");
+                    parameters.Add(new MySqlParameter("@Notes", $"%{notes}%"));
+                }
+
+                if (filterByDate && dateFrom.HasValue && dateTo.HasValue)
+                {
+                    queryBuilder.Append("AND ReceiveDate BETWEEN @DateFrom AND @DateTo ");
+                    parameters.Add(new MySqlParameter("@DateFrom", dateFrom));
+                    parameters.Add(new MySqlParameter("@DateTo", dateTo));
+                }
+
+                string sortBy = Transactions_ComboBox_SortBy.Text ?? "Date";
+                string orderBy = sortBy switch
+                {
+                    "Quantity" => "Quantity",
+                    "User" => "User",
+                    "ItemType" => "TransactionType",
+                    _ => "ReceiveDate"
+                };
+                queryBuilder.Append($"ORDER BY {orderBy} {(SortDescending ? "DESC" : "ASC")} ");
+                queryBuilder.Append("LIMIT @Offset, @PageSize ");
+                parameters.Add(new MySqlParameter("@Offset", (_currentPage - 1) * PageSize));
+                parameters.Add(new MySqlParameter("@PageSize", PageSize));
+
+                cmd = new MySqlCommand(queryBuilder.ToString());
+                foreach (MySqlParameter param in parameters)
+                {
+                    cmd.Parameters.Add(param);
+                }
+
+                System.Diagnostics.Debug.WriteLine($"[DEBUG] SQL Query: {queryBuilder}");
+                foreach (MySqlParameter p in parameters)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Param: {p.ParameterName} = {p.Value}");
                 }
             }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, null, null, nameof(Transactions), nameof(UpdateResultsSummary));
-            }
-        }
 
-        private void UpdateSearchStatus(string message)
-        {
-            try
+            string connectionString = Helper_Database_Variables.GetConnectionString(null, null, null, null);
+            using (MySqlConnection conn = new(connectionString))
             {
-                // Update status in the database status label if it exists
-                if (Transactions_Label_DatabaseStatus != null)
+                cmd.Connection = conn;
+                await conn.OpenAsync();
+                using (MySqlDataAdapter adapter = new(cmd))
                 {
-                    Transactions_Label_DatabaseStatus.Text = message;
-                    Transactions_Label_DatabaseStatus.ForeColor = message.Contains("error") || message.Contains("failed") 
-                        ? Color.Red : Color.Green;
-                }
-
-                Service_DebugTracer.TraceUIAction("SEARCH_STATUS_UPDATED", nameof(Transactions),
-                    new Dictionary<string, object> { ["Message"] = message });
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, null, null, nameof(Transactions), nameof(UpdateSearchStatus));
-            }
-        }
-
-        private async Task LoadBatchHistoryAsync(string batchNumber)
-        {
-            try
-            {
-                var dao = new Dao_Transactions();
-                var searchResult = await dao.SearchTransactionsAsync(
-                    _isAdmin ? string.Empty : _currentUser,
-                    _isAdmin,
-                    batchNumber: batchNumber,
-                    sortColumn: "ReceiveDate",
-                    sortDescending: true,
-                    page: 1,
-                    pageSize: 1000
-                );
-
-                if (searchResult.IsSuccess && searchResult.Data != null)
-                {
-                    DisplayBatchHistory(searchResult.Data);
-                }
-                else
-                {
-                    Service_ErrorHandler.HandleException(
-                        new Exception($"Failed to load batch history: {searchResult.ErrorMessage}"),
-                        ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(LoadBatchHistoryAsync));
+                    adapter.Fill(dt);
                 }
             }
-            catch (Exception ex)
+
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] Rows returned: {dt.Rows.Count}");
+
+            List<Model_Transactions> result = [];
+            foreach (DataRow row in dt.Rows)
             {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(LoadBatchHistoryAsync));
-            }
-        }
-
-        private void DisplayBatchHistory(List<Model_Transactions> results)
-        {
-            try
-            {
-                // Create enhanced batch history with descriptions
-                List<dynamic> describedResults = [];
-                for (int i = 0; i < results.Count; i++)
+                Model_Transactions tx = new()
                 {
-                    Model_Transactions curr = results[i];
-                    string desc = GenerateTransactionDescription(curr, i, results);
-
-                    describedResults.Add(new
-                    {
-                        curr.PartID,
-                        curr.Quantity,
-                        curr.Operation,
-                        curr.User,
-                        curr.BatchNumber,
-                        curr.FromLocation,
-                        curr.ToLocation,
-                        ReceiveDate = curr.DateTime,
-                        Description = desc
-                    });
-                }
-
-                // Update DataGrid with batch history
-                Transactions_DataGridView_Transactions.DataSource = new BindingList<dynamic>(describedResults);
-                Transactions_Image_NothingFound.Visible = describedResults.Count == 0;
-                Transactions_DataGridView_Transactions.Visible = describedResults.Count > 0;
-                Transactions_Button_Help.Enabled = describedResults.Count > 0;
-
-                if (describedResults.Count > 0)
-                {
-                    Transactions_DataGridView_Transactions.ClearSelection();
-                }
-
-                UpdateSearchStatus($"Batch history: {describedResults.Count} transactions");
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(DisplayBatchHistory));
-            }
-        }
-
-        private string GenerateTransactionDescription(Model_Transactions transaction, int index, List<Model_Transactions> allTransactions)
-        {
-            if (index == allTransactions.Count - 1) // last row (oldest)
-            {
-                return "Initial Transaction";
-            }
-            
-            return transaction.TransactionType switch
-            {
-                TransactionType.OUT => "Removed From System",
-                TransactionType.IN => "Received Into System",
-                TransactionType.TRANSFER => $"Transferred from {transaction.FromLocation ?? "Unknown"} to {transaction.ToLocation ?? "Unknown"}",
-                _ => "Transaction"
-            };
-        }
-
-        private Dictionary<string, string> BuildFilterCriteria()
-        {
-            var criteria = new Dictionary<string, string>();
-
-            try
-            {
-                // Build criteria from time range filters
-                if (Transactions_RadioButton_Today?.Checked == true)
-                {
-                    criteria["date"] = DateTime.Today.ToString("yyyy-MM-dd");
-                }
-                else if (Transactions_RadioButton_Week?.Checked == true)
-                {
-                    criteria["date"] = ">=" + DateTime.Today.AddDays(-7).ToString("yyyy-MM-dd");
-                }
-                else if (Transactions_RadioButton_Month?.Checked == true)
-                {
-                    criteria["date"] = ">=" + DateTime.Today.AddMonths(-1).ToString("yyyy-MM-dd");
-                }
-
-                // Add location filters
-                if (Transactions_CheckBox_ExpoLocation?.Checked == true)
-                {
-                    criteria["location"] = "Expo";
-                }
-                if (Transactions_CheckBox_VitsLocation?.Checked == true)
-                {
-                    criteria["location"] = criteria.ContainsKey("location") ? criteria["location"] + ",Vits" : "Vits";
-                }
-
-                // Add transaction type filters
-                var types = new List<string>();
-                if (Transactions_CheckBox_TypeReceive?.Checked == true) types.Add("IN");
-                if (Transactions_CheckBox_TypeRemove?.Checked == true) types.Add("OUT");
-                if (Transactions_CheckBox_TypeTransfer?.Checked == true) types.Add("TRANSFER");
-                
-                if (types.Count > 0)
-                {
-                    criteria["type"] = string.Join(",", types);
-                }
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, null, null, nameof(Transactions), nameof(BuildFilterCriteria));
+                    TransactionType =
+                        Enum.TryParse(row["TransactionType"].ToString(), out TransactionType ttype)
+                            ? ttype
+                            : TransactionType.IN,
+                    BatchNumber = row["BatchNumber"]?.ToString(),
+                    PartID = row["PartID"]?.ToString(),
+                    FromLocation = row["FromLocation"]?.ToString(),
+                    ToLocation = row["ToLocation"]?.ToString(),
+                    Operation = row["Operation"]?.ToString(),
+                    Quantity = int.TryParse(row["Quantity"]?.ToString(), out int qty) ? qty : 0,
+                    Notes = row["Notes"]?.ToString(),
+                    User = row["User"]?.ToString(),
+                    ItemType = row["ItemType"]?.ToString(),
+                    DateTime = DateTime.TryParse(row["ReceiveDate"]?.ToString(), out DateTime dtm)
+                        ? dtm
+                        : DateTime.MinValue
+                };
+                result.Add(tx);
             }
 
-            return criteria;
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] Transactions mapped: {result.Count}");
+
+            _displayedTransactions = new BindingList<Model_Transactions>(result);
+            Transactions_DataGridView_Transactions.AutoGenerateColumns = false;
+            Transactions_DataGridView_Transactions.Columns.Clear();
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "PartID",
+                DataPropertyName = "PartID",
+                Name = "colPartID",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Operation",
+                DataPropertyName = "Operation",
+                Name = "colOperation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Quantity",
+                DataPropertyName = "Quantity",
+                Name = "colQuantity",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "FromLocation",
+                DataPropertyName = "FromLocation",
+                Name = "colFromLocation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "ToLocation",
+                DataPropertyName = "ToLocation",
+                Name = "colToLocation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "ReceiveDate",
+                DataPropertyName = "DateTime",
+                Name = "colReceiveDate",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.DataSource = _displayedTransactions;
+            Transactions_Image_NothingFound.Visible = result.Count == 0;
+            Transactions_DataGridView_Transactions.Visible = result.Count > 0;
+            Transactions_Button_Print.Enabled = result.Count > 0;
+            Transfer_Button_SelectionHistory.Enabled = result.Count > 0;
+            if (_displayedTransactions.Count > 0)
+            {
+                Transactions_DataGridView_Transactions.ClearSelection();
+            }
+
+            UpdatePagingButtons(result.Count);
+            System.Diagnostics.Debug.WriteLine("[DEBUG] LoadTransactionsAsync finished");
         }
 
         private void ResetFilters()
         {
-            try
-            {
-                Service_DebugTracer.TraceUIAction("RESET_FILTERS_INITIATED", nameof(Transactions),
-                    new Dictionary<string, object>
-                    {
-                        ["HasSearchCriteria"] = _lastSearchCriteria.Count > 0,
-                        ["CurrentPage"] = _currentPage
-                    });
-
-                // Reset traditional filters
-                Transactions_ComboBox_SortBy.SelectedIndex = 0;
-                _transactionsComboBoxSearchPartId.SelectedIndex = 0;
-                Transactions_ComboBox_UserFullName.SelectedIndex = 0;
-                
-                // Reset smart search functionality
-                Transactions_TextBox_SmartSearch.Text = "";
-                
-                // Clear smart search criteria
-                _lastSearchCriteria.Clear();
-                _isPaginationNavigation = false;
-                _currentPage = 1;
-                
-                // Clear data grid
-                Transactions_DataGridView_Transactions.DataSource = null;
-                
-                // Reset status
-                UpdateSearchStatus("Filters reset - ready for new search");
-
-                Service_DebugTracer.TraceUIAction("RESET_FILTERS_COMPLETED", nameof(Transactions), null);
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(ResetFilters));
-            }
+            Transactions_ComboBox_SortBy.SelectedIndex = 0;
+            _transactionsComboBoxSearchPartId.SelectedIndex = 0;
+            Transactions_ComboBox_UserFullName.SelectedIndex = 0;
+            Transactions_ComboBox_Building.SelectedIndex = 0;
+            Control_AdvancedRemove_CheckBox_Date.Checked = false;
+            SetupDateRangeDefaults();
+            _currentPage = 1;
         }
 
-        private void ClearAllFilters()
+        private void UpdatePagingButtons(int resultCount)
         {
-            try
+            Transfer_Button_Previous.Enabled = _currentPage > 1;
+            Transfer_Button_Next.Enabled = resultCount >= PageSize;
+        }
+
+        private async void Transfer_Button_BranchHistory_Click(object? sender, EventArgs e)
+        {
+            if (Transactions_DataGridView_Transactions.SelectedRows.Count != 1)
             {
-                // Clear all filter checkboxes and radio buttons
-                if (Transactions_RadioButton_Today != null) Transactions_RadioButton_Today.Checked = false;
-                if (Transactions_RadioButton_Week != null) Transactions_RadioButton_Week.Checked = false;
-                if (Transactions_RadioButton_Month != null) Transactions_RadioButton_Month.Checked = false;
-                if (Transactions_RadioButton_CustomRange != null) Transactions_RadioButton_CustomRange.Checked = false;
-
-                if (Transactions_CheckBox_ExpoLocation != null) Transactions_CheckBox_ExpoLocation.Checked = false;
-                if (Transactions_CheckBox_VitsLocation != null) Transactions_CheckBox_VitsLocation.Checked = false;
-
-                if (Transactions_CheckBox_TypeReceive != null) Transactions_CheckBox_TypeReceive.Checked = false;
-                if (Transactions_CheckBox_TypeRemove != null) Transactions_CheckBox_TypeRemove.Checked = false;
-                if (Transactions_CheckBox_TypeTransfer != null) Transactions_CheckBox_TypeTransfer.Checked = false;
-
-                // Also clear smart search and traditional filters
-                ResetFilters();
+                return;
             }
-            catch (Exception ex)
+
+            if (Transactions_DataGridView_Transactions.SelectedRows[0]
+                    .DataBoundItem is not Model_Transactions selected ||
+                string.IsNullOrWhiteSpace(selected.BatchNumber))
             {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(ClearAllFilters));
+                MessageBox.Show(@"No Batch Number found for the selected transaction.", @"Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
             }
+
+            Control_ProgressBarUserControl progress = new();
+            Controls.Add(progress);
+            progress.BringToFront();
+            progress.ShowProgress();
+            progress.UpdateProgress(10, "Loading batch history...");
+            await Task.Delay(100);
+
+            string? batchNumber = selected.BatchNumber;
+            var dao = new Dao_Transactions();
+            var searchResult = await dao.SearchTransactionsAsync(
+                _isAdmin ? string.Empty : _currentUser,
+                _isAdmin,
+                batchNumber: batchNumber,
+                sortColumn: "ReceiveDate",
+                sortDescending: true,
+                page: 1,
+                pageSize: 1000
+            );
+
+            progress.UpdateProgress(80, "Mapping results...");
+            await Task.Delay(100);
+
+            List<Model_Transactions> results = searchResult.IsSuccess && searchResult.Data != null
+                ? searchResult.Data
+                : new List<Model_Transactions>();
+
+            // Build description for each row
+            List<dynamic> describedResults = [];
+            for (int i = 0; i < results.Count; i++)
+            {
+                Model_Transactions curr = results[i];
+                string desc = "";
+                if (i == results.Count - 1) // last row (oldest)
+                {
+                    desc = "Initial Transaction";
+                }
+                else
+                {
+                    Model_Transactions prev = results[i + 1];
+                    if (curr.TransactionType == TransactionType.OUT)
+                    {
+                        desc = "Removed From System";
+                    }
+                    else if (curr.TransactionType == TransactionType.TRANSFER && prev.ToLocation != curr.FromLocation)
+                    {
+                        desc =
+                            $"Part transferred from {prev.ToLocation ?? "Unknown"} to {curr.ToLocation ?? "Unknown"}";
+                    }
+                    else if (curr.TransactionType == TransactionType.IN)
+                    {
+                        desc = "Received Into System";
+                    }
+                    else
+                    {
+                        desc = "Transaction";
+                    }
+                }
+
+                describedResults.Add(new
+                {
+                    curr.PartID,
+                    curr.Quantity,
+                    curr.Operation,
+                    curr.User,
+                    curr.BatchNumber,
+                    curr.FromLocation,
+                    curr.ToLocation,
+                    ReceiveDate = curr.DateTime,
+                    Description = desc
+                });
+            }
+
+            Transactions_DataGridView_Transactions.AutoGenerateColumns = false;
+            Transactions_DataGridView_Transactions.Columns.Clear();
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "PartID",
+                DataPropertyName = "PartID",
+                Name = "colPartID",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Quantity",
+                DataPropertyName = "Quantity",
+                Name = "colQuantity",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Operation",
+                DataPropertyName = "Operation",
+                Name = "colOperation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "User",
+                DataPropertyName = "User",
+                Name = "colUser",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "BatchNumber",
+                DataPropertyName = "BatchNumber",
+                Name = "colBatchNumber",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "FromLocation",
+                DataPropertyName = "FromLocation",
+                Name = "colFromLocation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "ToLocation",
+                DataPropertyName = "ToLocation",
+                Name = "colToLocation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "ReceiveDate",
+                DataPropertyName = "ReceiveDate",
+                Name = "colReceiveDate",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            DataGridViewTextBoxColumn descCol = new()
+            {
+                HeaderText = "Description",
+                DataPropertyName = "Description",
+                Name = "colDescription",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                DefaultCellStyle = new DataGridViewCellStyle { WrapMode = DataGridViewTriState.True }
+            };
+            Transactions_DataGridView_Transactions.Columns.Add(descCol);
+            Transactions_DataGridView_Transactions.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+
+            Transactions_DataGridView_Transactions.DataSource = new BindingList<dynamic>(describedResults);
+            Transactions_Image_NothingFound.Visible = describedResults.Count == 0;
+            Transactions_DataGridView_Transactions.Visible = describedResults.Count > 0;
+            Transactions_Button_Print.Enabled = describedResults.Count > 0;
+            Transfer_Button_SelectionHistory.Enabled = describedResults.Count > 0;
+            if (describedResults.Count > 0)
+            {
+                Transactions_DataGridView_Transactions.ClearSelection();
+            }
+
+            progress.UpdateProgress(100, "Complete");
+            await Task.Delay(200);
+            progress.HideProgress();
         }
 
         private void SetupSortCombo()
         {
-            try
-            {
-                Transactions_ComboBox_SortBy.Items.Clear();
-                Transactions_ComboBox_SortBy.Items.Add("Date");
-                Transactions_ComboBox_SortBy.Items.Add("Quantity");
-                Transactions_ComboBox_SortBy.Items.Add("User");
-                Transactions_ComboBox_SortBy.Items.Add("ItemType");
-                Transactions_ComboBox_SortBy.SelectedIndex = 0;
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, null, null, nameof(Transactions), nameof(SetupSortCombo));
-            }
+            Transactions_ComboBox_SortBy.Items.Clear();
+            Transactions_ComboBox_SortBy.Items.Add("Date");
+            Transactions_ComboBox_SortBy.Items.Add("Quantity");
+            Transactions_ComboBox_SortBy.Items.Add("User");
+            Transactions_ComboBox_SortBy.Items.Add("ItemType");
+            Transactions_ComboBox_SortBy.SelectedIndex = 0;
         }
 
         private void SetupDataGrid()
         {
-            try
+            Transactions_DataGridView_Transactions.AutoGenerateColumns = false;
+            Transactions_DataGridView_Transactions.Columns.Clear();
+
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
             {
-                Transactions_DataGridView_Transactions.AutoGenerateColumns = false;
-                Transactions_DataGridView_Transactions.Columns.Clear();
-
-                // Add standard columns
-                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
-                {
-                    HeaderText = "PartID",
-                    DataPropertyName = "PartID",
-                    Name = "colPartID",
-                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-                });
-                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
-                {
-                    HeaderText = "Operation",
-                    DataPropertyName = "Operation",
-                    Name = "colOperation",
-                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-                });
-                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
-                {
-                    HeaderText = "Quantity",
-                    DataPropertyName = "Quantity",
-                    Name = "colQuantity",
-                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-                });
-                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
-                {
-                    HeaderText = "FromLocation",
-                    DataPropertyName = "FromLocation",
-                    Name = "colFromLocation",
-                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-                });
-                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
-                {
-                    HeaderText = "ToLocation",
-                    DataPropertyName = "ToLocation",
-                    Name = "colToLocation",
-                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-                });
-                Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
-                {
-                    HeaderText = "ReceiveDate",
-                    DataPropertyName = "DateTime",
-                    Name = "colReceiveDate",
-                    AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-                });
-
-                // Configure grid properties
-                Transactions_DataGridView_Transactions.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-                Transactions_DataGridView_Transactions.ReadOnly = true;
-                Transactions_DataGridView_Transactions.AllowUserToAddRows = false;
-                Transactions_DataGridView_Transactions.AllowUserToDeleteRows = false;
-                Transactions_DataGridView_Transactions.AllowUserToOrderColumns = false;
-                Transactions_DataGridView_Transactions.AllowUserToResizeRows = false;
-
-                Transactions_DataGridView_Transactions.DataSource = new BindingList<Model_Transactions>();
-            }
-            catch (Exception ex)
+                HeaderText = "PartID",
+                DataPropertyName = "PartID",
+                Name = "colPartID",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
             {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(SetupDataGrid));
-            }
-        }
-
-        private void SetupFilterControls()
-        {
-            try
+                HeaderText = "Quantity",
+                DataPropertyName = "Quantity",
+                Name = "colQuantity",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
             {
-                // Initialize filter controls to default states
-                InitializeFiltersToDefaults();
-            }
-            catch (Exception ex)
+                HeaderText = "Operation",
+                DataPropertyName = "Operation",
+                Name = "colOperation",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
             {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, null, null, nameof(Transactions), nameof(SetupFilterControls));
-            }
-        }
-
-        private void InitializeFiltersToDefaults()
-        {
-            try
+                HeaderText = "User",
+                DataPropertyName = "User",
+                Name = "colUser",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
             {
-                // Set default filter states
-                if (Transactions_RadioButton_Today != null) Transactions_RadioButton_Today.Checked = false;
-                if (Transactions_RadioButton_Week != null) Transactions_RadioButton_Week.Checked = false;
-                if (Transactions_RadioButton_Month != null) Transactions_RadioButton_Month.Checked = false;
-                if (Transactions_RadioButton_CustomRange != null) Transactions_RadioButton_CustomRange.Checked = false;
-
-                if (Transactions_CheckBox_ExpoLocation != null) Transactions_CheckBox_ExpoLocation.Checked = true;
-                if (Transactions_CheckBox_VitsLocation != null) Transactions_CheckBox_VitsLocation.Checked = true;
-
-                if (Transactions_CheckBox_TypeReceive != null) Transactions_CheckBox_TypeReceive.Checked = true;
-                if (Transactions_CheckBox_TypeRemove != null) Transactions_CheckBox_TypeRemove.Checked = true;
-                if (Transactions_CheckBox_TypeTransfer != null) Transactions_CheckBox_TypeTransfer.Checked = true;
-            }
-            catch (Exception ex)
+                HeaderText = "BatchNumber",
+                DataPropertyName = "BatchNumber",
+                Name = "colBatchNumber",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            Transactions_DataGridView_Transactions.Columns.Add(new DataGridViewTextBoxColumn
             {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Low, null, null, nameof(Transactions), nameof(InitializeFiltersToDefaults));
-            }
-        }
-
-        private void InitializeSmartSearchControls()
-        {
-            try
+                HeaderText = "ReceiveDate",
+                DataPropertyName = "ReceiveDate",
+                Name = "colReceiveDate",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            DataGridViewTextBoxColumn descCol = new()
             {
-                // Smart search controls are already initialized in the designer
-                // Just ensure proper placeholder text
-                if (Transactions_TextBox_SmartSearch != null)
-                {
-                    Transactions_TextBox_SmartSearch.PlaceholderText = "partid:ABC123 qty:>50 user:john";
-                }
+                HeaderText = "Description",
+                DataPropertyName = "Description",
+                Name = "colDescription",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                DefaultCellStyle = new DataGridViewCellStyle { WrapMode = DataGridViewTriState.True }
+            };
+            Transactions_DataGridView_Transactions.Columns.Add(descCol);
+            Transactions_DataGridView_Transactions.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
 
-                LoggingUtility.LogApplicationInfo("Smart search controls initialized successfully");
-            }
-            catch (Exception ex)
-            {
-                Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, null, null, nameof(Transactions), nameof(InitializeSmartSearchControls));
-            }
-        }
+            Transactions_DataGridView_Transactions.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            Transactions_DataGridView_Transactions.ReadOnly = true;
+            Transactions_DataGridView_Transactions.AllowUserToAddRows = false;
+            Transactions_DataGridView_Transactions.AllowUserToDeleteRows = false;
+            Transactions_DataGridView_Transactions.AllowUserToOrderColumns = false;
+            Transactions_DataGridView_Transactions.AllowUserToResizeRows = false;
 
-        #endregion
-
-        #region Cleanup
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _displayedTransactions?.Clear();
-                _lastSearchCriteria?.Clear();
-                _transactionsComboBoxSearchPartId?.Dispose();
-            }
-            base.Dispose(disposing);
+            Transactions_DataGridView_Transactions.DataSource = new BindingList<Model_Transactions>();
         }
 
         #endregion
