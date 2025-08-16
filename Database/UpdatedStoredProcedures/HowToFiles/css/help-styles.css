@@ -1,0 +1,155 @@
+/* ================================================================================
+   MTM INVENTORY APPLICATION - BASE HELP STYLES
+   Black, White, and Gold Theme with MTM Branding
+   ================================================================================ */
+
+/* CSS Reset and Base Styles */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* MTM Color Scheme Variables */
+:root {
+    --mtm-gold: #FFD700;
+    --mtm-dark-gold: #DAA520;
+    --mtm-light-gold: #FFF8DC;
+    --mtm-black: #000000;
+    --mtm-dark-gray: #1a1a1a;
+    --mtm-medium-gray: #333333;
+    --mtm-light-gray: #666666;
+    --mtm-white: #FFFFFF;
+    --mtm-off-white: #F8F8F8;
+    --mtm-cream: #FFFEF7;
+}
+
+/* This file serves as a base for help documentation */
+/* Main styles are now in deployment-styles.css */
+
+/* MTM Logo Integration */
+.mtm-logo {
+    height: 40px;
+    width: auto;
+    margin-right: 1rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.mtm-logo-large {
+    height: 60px;
+    width: auto;
+    margin: 0 auto 1rem;
+    display: block;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+}
+
+/* Additional help-specific styles */
+.help-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    background: var(--mtm-white);
+    color: var(--mtm-black);
+}
+
+.help-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--mtm-cream);
+    border-left: 4px solid var(--mtm-gold);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Code syntax highlighting - Gold theme */
+.highlight {
+    background: linear-gradient(135deg, var(--mtm-light-gold), var(--mtm-cream));
+    color: var(--mtm-black);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    border: 1px solid var(--mtm-gold);
+    box-shadow: 0 1px 3px rgba(218, 165, 32, 0.3);
+}
+
+/* Navigation improvements - Gold accent */
+.nav-active {
+    background: linear-gradient(135deg, var(--mtm-gold), var(--mtm-dark-gold)) !important;
+    color: var(--mtm-black) !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(218, 165, 32, 0.4);
+    border-radius: 6px;
+    transform: translateY(-2px);
+}
+
+/* MTM Branded Elements */
+.mtm-badge {
+    background: linear-gradient(135deg, var(--mtm-gold), var(--mtm-dark-gold));
+    color: var(--mtm-black);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    box-shadow: 0 2px 6px rgba(218, 165, 32, 0.3);
+}
+
+.mtm-divider {
+    height: 2px;
+    background: linear-gradient(90deg, var(--mtm-gold), var(--mtm-dark-gold), var(--mtm-gold));
+    margin: 2rem 0;
+    border: none;
+    border-radius: 1px;
+}
+
+/* Print optimizations */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .page-break {
+        page-break-before: always;
+    }
+
+    .mtm-logo, .mtm-logo-large {
+        filter: none !important;
+        -webkit-print-color-adjust: exact;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+    }
+}
+
+/* Dark mode override for MTM theme */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --mtm-white: #1a1a1a;
+        --mtm-black: #ffffff;
+        --mtm-off-white: #2d2d2d;
+        --mtm-cream: #2a2a2a;
+    }
+}
+
+/* Accessibility enhancements */
+.mtm-focus-ring:focus {
+    outline: 3px solid var(--mtm-gold);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .nav-active {
+        border: 2px solid var(--mtm-black) !important;
+    }
+
+    .mtm-badge {
+        border: 2px solid var(--mtm-black);
+    }
+}

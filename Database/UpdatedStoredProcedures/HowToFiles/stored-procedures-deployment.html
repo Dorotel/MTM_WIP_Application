@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consolidated Stored Procedures Deployment - MTM Inventory Application</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+    <link rel="stylesheet" href="css/deployment-styles.css">
+    <link rel="icon" href="images/MTM.png" type="image/png">
+</head>
+<body>
+    <div class="header-bar">
+        <h1>
+            <img src="images/MTM.png" alt="MTM Logo" class="mtm-logo">
+            🚀 Consolidated Stored Procedures Deployment Guide
+        </h1>
+        <p>Windows deployment tools for MTM Inventory Application using consolidated SQL routines</p>
+        <div class="breadcrumb">
+            <a href="index.html">Help Home</a> > <a href="development-tools.html">Development Tools</a> >
+            <span class="mtm-badge">MTM Deployment</span>
+        </div>
+    </div>
+
+    <div class="main-content" id="main-content">
+        <!-- Important Update Notice -->
+        <div class="content-section">
+            <div class="consolidated-highlight">
+                <img src="images/MTM.png" alt="MTM Logo" class="mtm-logo-large">
+                <h4>🎯 UPDATED: Now Uses Consolidated mtm_wip_application_test_routines.sql</h4>
+                <p>All deployment tools have been refactored to use the single consolidated SQL file instead of multiple separate files</p>
+            </div>
+        </div>
+
+        <!-- Quick Navigation Hub -->
+        <div class="content-section">
+            <div class="quick-nav">
+                <h3>🧭 Deployment Guide Navigation</h3>
+                <div class="nav-grid">
+                    <div class="nav-card">
+                        <h4><a href="deployment-overview.html">📋 Overview & Benefits</a></h4>
+                        <p>Introduction to consolidated deployment approach and key benefits</p>
+                        <span class="mtm-badge">Essential</span>
+                    </div>
+                    <div class="nav-card">
+                        <h4><a href="deployment-quickstart.html">🚀 Quick Start Guide</a></h4>
+                        <p>Step-by-step guide to deploy procedures in minutes</p>
+                        <span class="mtm-badge">Start Here</span>
+                    </div>
+                    <div class="nav-card">
+                        <h4><a href="deployment-tools.html">🔧 Deployment Tools</a></h4>
+                        <p>Complete guide to all .bat files and deployment utilities</p>
+                        <span class="mtm-badge">Tools</span>
+                    </div>
+                    <div class="nav-card">
+                        <h4><a href="deployment-file-structure.html">📁 File Structure</a></h4>
+                        <p>Understanding the consolidated file and procedure categories</p>
+                        <span class="mtm-badge">Reference</span>
+                    </div>
+                    <div class="nav-card">
+                        <h4><a href="deployment-troubleshooting.html">🔍 Troubleshooting</a></h4>
+                        <p>Common issues and solutions for deployment problems</p>
+                        <span class="mtm-badge">Support</span>
+                    </div>
+                    <div class="nav-card">
+                        <h4><a href="deployment-workflows.html">📋 Workflows</a></h4>
+                        <p>Development and production deployment workflows</p>
+                        <span class="mtm-badge">Process</span>
+                    </div>
+                    <div class="nav-card">
+                        <h4><a href="deployment-integration.html">🎯 .NET 8 Integration</a></h4>
+                        <p>Using deployed procedures in your .NET 8 application</p>
+                        <span class="mtm-badge">.NET 8</span>
+                    </div>
+                    <div class="nav-card">
+                        <h4><a href="deployment-results.html">📊 Expected Results</a></h4>
+                        <p>What to expect from successful deployments</p>
+                        <span class="mtm-badge">Results</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="mtm-divider">
+
+        <!-- Quick Access Tools -->
+        <div class="content-section">
+            <h2>⚡ Quick Access</h2>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-icon">🚀</div>
+                    <h3>Deploy Now</h3>
+                    <p>Ready to deploy? Start here for MAMP default setup</p>
+                    <div class="command-block">deploy.bat</div>
+                    <a href="deployment-quickstart.html#step-2" class="btn-primary">Get Started</a>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">🔍</div>
+                    <h3>Find Missing Procedures</h3>
+                    <p>Check for procedures missing from consolidated file</p>
+                    <div class="command-block">find_missing_procedures.bat</div>
+                    <a href="deployment-tools.html#find-missing" class="btn-secondary">Learn More</a>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">✅</div>
+                    <h3>Verify Deployment</h3>
+                    <p>Test your deployment with verification tools</p>
+                    <div class="command-block">run_verification.bat</div>
+                    <a href="deployment-tools.html#verification" class="btn-secondary">Learn More</a>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">🔧</div>
+                    <h3>Fix & Repair</h3>
+                    <p>Troubleshoot and fix deployment issues</p>
+                    <div class="command-block">fix_and_reverify.bat</div>
+                    <a href="deployment-troubleshooting.html" class="btn-warning">Troubleshoot</a>
+                </div>
+            </div>
+        </div>
+
+        <hr class="mtm-divider">
+
+        <!-- System Status -->
+        <div class="content-section">
+            <h2>📊 System Overview</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <h4>Consolidated Source</h4>
+                    <p><strong>mtm_wip_application_test_routines.sql</strong></p>
+                    <span class="status-badge success">Single File</span>
+                </div>
+                <div class="status-item">
+                    <h4>Procedures Count</h4>
+                    <p><strong>~96 Procedures</strong></p>
+                    <span class="status-badge info">All Categories</span>
+                </div>
+                <div class="status-item">
+                    <h4>Parameter Naming</h4>
+                    <p><strong>Uniform p_ Prefixes</strong></p>
+                    <span class="status-badge success">Standardized</span>
+                </div>
+                <div class="status-item">
+                    <h4>MySQL Compatibility</h4>
+                    <p><strong>MySQL 5.7.24+</strong></p>
+                    <span class="status-badge success">MAMP Ready</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>🚀 Quick Links</h4>
+                <ul>
+                    <li><a href="deployment-quickstart.html">Quick Start</a></li>
+                    <li><a href="deployment-tools.html">All Tools</a></li>
+                    <li><a href="deployment-troubleshooting.html">Troubleshooting</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>🔧 Development</h4>
+                <ul>
+                    <li><a href="deployment-workflows.html">Workflows</a></li>
+                    <li><a href="deployment-integration.html">.NET Integration</a></li>
+                    <li><a href="deployment-file-structure.html">File Structure</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>📚 Documentation</h4>
+                <ul>
+                    <li><a href="deployment-overview.html">Overview</a></li>
+                    <li><a href="deployment-results.html">Expected Results</a></li>
+                    <li><a href="../README.md">Full README</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>🏆 MTM System</h4>
+                <img src="images/MTM.png" alt="MTM Logo" class="mtm-logo">
+                <p>Professional Inventory Management</p>
+                <span class="mtm-badge">Version 1.0</span>
+            </div>
+            <div class="footer-info">
+                <p>&copy; 2025 MTM Inventory Application. All rights reserved.</p>
+                <p>Press <kbd>F1</kbd> for context-sensitive help</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>

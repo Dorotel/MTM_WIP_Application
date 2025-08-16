@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36109.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTM_Inventory_Application", "MTM_Inventory_Application.csproj", "{00D424E4-9ED7-4A0B-9F87-2E1892ED2B27}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTMDeploymentToolsGUI", "..\MTMDeploymentToolsGUI\MTMDeploymentToolsGUI.csproj", "{D6464993-DB2B-4237-BB4F-C86B1CC72A22}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{00D424E4-9ED7-4A0B-9F87-2E1892ED2B27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00D424E4-9ED7-4A0B-9F87-2E1892ED2B27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00D424E4-9ED7-4A0B-9F87-2E1892ED2B27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6464993-DB2B-4237-BB4F-C86B1CC72A22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6464993-DB2B-4237-BB4F-C86B1CC72A22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6464993-DB2B-4237-BB4F-C86B1CC72A22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6464993-DB2B-4237-BB4F-C86B1CC72A22}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

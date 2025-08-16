@@ -1,0 +1,116 @@
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `usr_users`
+--
+
+CREATE TABLE `usr_users` (
+  `ID` int(11) NOT NULL,
+  `User` varchar(100) NOT NULL,
+  `Full Name` varchar(200) DEFAULT NULL,
+  `Shift` varchar(50) NOT NULL DEFAULT '1',
+  `VitsUser` tinyint(1) NOT NULL DEFAULT '0',
+  `Pin` varchar(50) DEFAULT NULL,
+  `LastShownVersion` varchar(50) NOT NULL DEFAULT '0.0.0.0',
+  `HideChangeLog` varchar(50) NOT NULL DEFAULT 'false',
+  `Theme_Name` varchar(50) NOT NULL DEFAULT 'Default (Black and White)',
+  `Theme_FontSize` int(11) NOT NULL DEFAULT '9',
+  `VisualUserName` varchar(50) NOT NULL DEFAULT 'User Name',
+  `VisualPassword` varchar(50) NOT NULL DEFAULT 'Password',
+  `WipServerAddress` varchar(15) NOT NULL DEFAULT '172.16.1.104',
+  `WIPDatabase` varchar(300) NOT NULL DEFAULT 'mtm_wip_application_test',
+  `WipServerPort` varchar(10) NOT NULL DEFAULT '3306'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Truncate table before insert `usr_users`
+--
+
+TRUNCATE TABLE `usr_users`;
+--
+-- Dumping data for table `usr_users`
+--
+
+INSERT INTO `usr_users` (`ID`, `User`, `Full Name`, `Shift`, `VitsUser`, `Pin`, `LastShownVersion`, `HideChangeLog`, `Theme_Name`, `Theme_FontSize`, `VisualUserName`, `VisualPassword`, `WipServerAddress`, `WIPDatabase`, `WipServerPort`) VALUES
+(1, '[ All Users ]', '[ All Users ]', '[ All Users ]', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(2, 'DLAFOND', 'Dan Lafond', 'First', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(3, 'JEGBERT', 'Jacalyn Egbert', 'Second', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(4, 'RECEIVING', 'Receiving Department', 'First', 0, '0000', '4.5.0.3', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(5, 'SHOP2', 'Press Floor', 'First', 0, '0000', '4.5.1.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(6, 'SHIPPING', 'Shipping Department', 'First', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(7, 'DHAMMONS', 'Doyle Hammons', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(8, 'JMAUER', 'Jennifer Mauer', 'Second', 0, '6286', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(9, 'KWILKER', 'Kirt Wilker', 'First', 0, '0000', '4.5.0.2', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(10, 'MHANDLER', 'Material Handler (General)', 'First', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(11, 'MIKESAMZ', 'Mike Samz', 'First', 0, '1859', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(12, 'MLAURIN', 'Michelle Laurin', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, '', '', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(13, 'MLEDVINA', 'Michael Ledvina', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(14, 'NPITSCH', 'Nyla Pitsch', 'First', 0, '1357', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(15, 'PBAHR', 'Phil Bahr', 'Weekend', 0, '0000', '4.6.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(16, 'ROOT', 'SQL Server', 'First', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(17, 'SCARBON', 'Scott Carbon', 'First', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(18, 'TTELETZKE', 'Todd Teletzke', 'Third', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(19, 'TLINDLOFF', 'Tim Lindloff', 'Third', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(20, 'ABEEMAN', 'Angela Beeman', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(21, 'DHAGENOW', 'Denny Hagenow', 'Second', 0, '4422', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(22, 'JORNALES', 'Jamie Ornales', 'First', 0, '0000', '4.5.0.2', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(23, 'TSMAXWELL', 'Tanya Smaxwell', 'Second', 0, '0000', '4.6.0.0', 'true', 'Default', 11, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(24, 'CMUCHOWSKI', 'Cris Muchowski', 'First', 0, '0000', '4.5.1.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(25, 'NWUNSCH', 'Nick Wunsch', 'First', 0, '0000', '4.5.0.2', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(26, 'GWHITSON', 'Greg Whitson', 'First', 0, '0000', '4.6.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(27, 'JCASTRO', 'Joe Castro', 'Weekend', 0, '0000', '4.6.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(28, 'MVOSS', 'Michael Voss', 'First', 0, '0000', '4.6.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(29, 'NLEE', 'Nou Lee', 'First', 0, '0000', '4.5.2.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(30, 'JMILLER', 'Josh Miller', 'Second', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(31, 'SSNYDER', 'Shawn Snyder', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(32, 'CSNYDER', 'Christian Snyder', 'Third', 0, '0000', '4.5.1.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(33, 'BAUSTIN', 'Brandon Austin', 'Third', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(34, 'DEBLAFOND', 'Deb Lafond', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(35, 'ASCHULTZ', 'Amy Schultz', 'First', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(36, 'SJACKSON', 'Shavon Jackson', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(37, 'DRIEBE', 'Dan Riebe', 'First', 0, '0000', '4.5.1.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(38, 'TRADDATZ', 'Tim Raddatz', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(39, 'SDETTLAFF', 'Shane Dettlaff', 'Third', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(40, 'JWETAK', 'Joseph Wetak', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(41, 'KSKATTEBO', 'Kevin Skattebo', 'Second', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(42, 'AGAUTHIER', 'Alicia Gauthier', 'Second', 0, '0000', '4.5.0.2', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(43, 'MBECKER', 'Mike Becker', 'Second', 0, '0000', '4.6.0.0', 'true', 'Default', 10, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(44, 'RLESSER', 'Russell Lesser', 'First', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(45, 'AGROELLE', 'Amanda Groelle', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(46, 'CEHLENBECK', 'Charles Ehlenbeck', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(47, 'BNEUMAN', 'Bradley Neuman', 'Second', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(48, 'MTMDC', 'Mtm Dc', 'First', 0, '0000', '4.5.1.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(49, 'KDREWIESKE', 'Karra Drewieske', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(50, 'MHERNANDEZ', 'Monica Hernandez', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 10, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(51, 'KLEE', 'Ka Lee', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(52, 'ADMININT', 'It Department', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(53, 'CALVAREZ', 'Cesar Alvarez', 'Third', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(54, 'TYANG', 'Tou Yang', 'Second', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(55, 'KSMITH', 'Katie Smith', 'First', 0, '0802', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(56, 'JKOLL', 'John Koll', 'Swing Shift', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'JKOLL', 'KOLL', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(57, 'JBEHRMANN', 'John Behrmann', 'Third', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(58, 'MDRESSEL', 'Matt Dressel', 'Second', 0, '1122', '4.6.0.0', 'true', 'Default', 11, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(59, 'DSMITH', 'Dan Smith', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(60, 'APIESCHEL', 'Austin Pieschel', 'Second', 0, '3668', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(61, 'JPATTERSON', 'John Patterson', 'First', 0, '0000', '4.5.1.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(62, 'VKINGSBURY', 'Valerie Kingsbury', 'First', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(63, 'JHAFNER', 'Jonathon Hafner', 'First', 0, '0000', '4.5.1.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(64, 'JHERMAN', 'Jamie Herman', 'First', 0, '0000', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(65, 'DSANCHEZ', 'Daniel Sanchez', 'Third', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(66, 'TLOHSE', 'Tim Lohse', 'First', 0, '0000', '4.6.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(67, 'JOHNK', 'John Koll', 'Second', 0, '0001', '4.6.0.0', 'true', 'Default', 9, 'JKOLL', 'KOLL', 'localhost', 'mtm_wip_application_test', '3306'),
+(68, 'BSTEEVES', 'Becky Steeves', 'First', 0, '1974', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(69, 'JHALLOCK', 'Jackquelyn Hallock', 'First', 0, '0901', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(70, 'GGERK', 'Greg Gerk', 'Second', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(71, 'TMUELLER', 'Travis Mueller', 'First', 0, '1234', '0.0.0.0', 'false', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(72, 'CLOR', 'Ching Lor', 'First', 0, '1122', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(73, 'AGAY', 'Alan Gay', 'First', 0, '1945', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(74, 'NPIESCHEL', 'Nicholas Pieschel', 'First', 0, '6032', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(75, 'LBARTS', 'Lucas Barts', 'Second', 0, '0516', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(76, 'ESMITH', 'Erik Smith', 'Second', 0, '2578', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(77, 'JRODRIGUEZ', 'Juan Rodriguez', 'Second', 0, '5435', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(78, 'PFLOOR', 'Press Floor', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '172.16.1.104', 'mtm_wip_application_test', '3306'),
+(149, 'DALEXANDER', NULL, '1', 0, NULL, '0.0.0.0', 'false', 'Default (Black and White)', 9, '', '', '', '', ''),
+(179, 'TWILSON', 'Troy Wilson', 'First', 0, '0000', '4.6.0.0', 'true', 'Default', 9, 'User Name', 'Password', '127.0.0.1', 'wip_db', '3306'),
+(310, 'RDREWIESKE', 'Riley Drewieske', 'Third', 0, '0000', '5.0.1.2', 'false', 'Default', 9, '', '', '172.16.1.104', 'mtm_wip_application_test', '3306');

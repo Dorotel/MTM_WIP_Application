@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployment Overview - MTM Inventory Application</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+    <link rel="stylesheet" href="css/deployment-styles.css">
+</head>
+<body>
+    <div class="header-bar">
+        <h1>📋 Deployment Overview</h1>
+        <p>Understanding the consolidated stored procedures deployment approach</p>
+        <div class="breadcrumb">
+            <a href="stored-procedures-deployment.html">Deployment Home</a> > Overview
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="content-section">
+            <h2>📋 Overview</h2>
+            <p>The MTM Inventory Application now uses a consolidated stored procedure deployment approach with <strong>mtm_wip_application_test_routines.sql</strong>. This single file contains 96+ procedures optimized for MySQL 5.7.24 with uniform p_ parameter naming.</p>
+
+            <div class="info-box success">
+                <h4>Key Benefits of Consolidated Deployment</h4>
+                <ul class="feature-list">
+                    <li>Single File Deployment - Easy to manage and deploy</li>
+                    <li>Complete MAMP Integration with automatic path detection</li>
+                    <li>MySQL 5.7.24 Compatibility tested and verified</li>
+                    <li>Uniform p_ Parameter Naming across all procedures</li>
+                    <li>Automated Verification system with detailed reporting</li>
+                    <li>Production-Ready deployment with backup creation</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>🎯 Why Consolidated Deployment?</h2>
+
+            <div class="nav-grid">
+                <div class="nav-card">
+                    <h4>🚀 Simplified Management</h4>
+                    <p>Single file contains all procedures instead of managing 10+ separate SQL files</p>
+                </div>
+                <div class="nav-card">
+                    <h4>🔧 Unified Standards</h4>
+                    <p>All procedures follow uniform p_ parameter naming convention</p>
+                </div>
+                <div class="nav-card">
+                    <h4>✅ Automated Testing</h4>
+                    <p>Built-in verification ensures all procedures deploy correctly</p>
+                </div>
+                <div class="nav-card">
+                    <h4>🏗️ MAMP Optimized</h4>
+                    <p>Specifically tested and optimized for MAMP MySQL 5.7.24</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>📊 System Architecture</h2>
+
+            <div class="info-box info">
+                <h4>Previous Approach (Multiple Files)</h4>
+                <p><strong>Challenges:</strong> 10+ separate SQL files, inconsistent parameter naming, complex deployment scripts, difficult to maintain</p>
+            </div>
+
+            <div class="info-box success">
+                <h4>New Approach (Consolidated)</h4>
+                <p><strong>Solution:</strong> Single mtm_wip_application_test_routines.sql file with ~96 procedures, uniform naming, automated deployment</p>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>🔗 Next Steps</h2>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-icon">🚀</div>
+                    <h3>Get Started</h3>
+                    <p>Ready to deploy? Follow the quick start guide</p>
+                    <a href="deployment-quickstart.html" class="btn-primary">Quick Start Guide</a>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">📁</div>
+                    <h3>Understand Structure</h3>
+                    <p>Learn about the consolidated file structure</p>
+                    <a href="deployment-file-structure.html" class="btn-secondary">File Structure</a>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">🔧</div>
+                    <h3>Explore Tools</h3>
+                    <p>Discover all deployment tools available</p>
+                    <a href="deployment-tools.html" class="btn-secondary">Deployment Tools</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>📋 Overview Topics</h4>
+                <ul>
+                    <li><a href="#overview">Benefits</a></li>
+                    <li><a href="#why">Why Consolidated?</a></li>
+                    <li><a href="#architecture">Architecture</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>🔗 Related Pages</h4>
+                <ul>
+                    <li><a href="deployment-quickstart.html">Quick Start</a></li>
+                    <li><a href="deployment-file-structure.html">File Structure</a></li>
+                    <li><a href="deployment-tools.html">Tools</a></li>
+                </ul>
+            </div>
+            <div class="footer-info">
+                <p><a href="stored-procedures-deployment.html">← Back to Deployment Home</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>

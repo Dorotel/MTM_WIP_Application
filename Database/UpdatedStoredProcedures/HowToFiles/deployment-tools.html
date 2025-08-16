@@ -1,0 +1,207 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployment Tools - MTM Inventory Application</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+    <link rel="stylesheet" href="css/deployment-styles.css">
+</head>
+<body>
+    <div class="header-bar">
+        <h1>🔧 Deployment Tools</h1>
+        <p>Complete guide to Windows deployment tools and utilities</p>
+        <div class="breadcrumb">
+            <a href="stored-procedures-deployment.html">Deployment Home</a> > Tools
+        </div>
+    </div>
+
+    <div class="main-content" id="main-content">
+        <div class="content-section">
+            <h2>🔧 Windows Deployment Tools</h2>
+            <p>The MTM Inventory Application provides 6 specialized batch files for consolidated deployment management:</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-title">🚀 deploy.bat</div>
+                    <div class="feature-description">Consolidated deployment script</div>
+                    <ul class="feature-list">
+                        <li>Tests database connection</li>
+                        <li>Creates backup of existing procedures</li>
+                        <li>Deploys mtm_wip_application_test_routines.sql</li>
+                        <li>Shows total procedure count (~96 procedures)</li>
+                    </ul>
+                    <div class="command-examples">
+                        <span class="comment"># Basic usage</span><br>
+                        deploy.bat<br>
+                        <br>
+                        <span class="comment"># With parameters</span><br>
+                        deploy.bat -h localhost -u root -p root -d mtm_wip_application_test
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">🔍 analyze.bat</div>
+                    <div class="feature-description">Consolidated file analysis tool</div>
+                    <ul class="feature-list">
+                        <li>Analyzes consolidated SQL file</li>
+                        <li>Counts procedures by category</li>
+                        <li>Verifies p_ parameter naming</li>
+                        <li>Checks MySQL 5.7.24 compatibility</li>
+                        <li>Validates DELIMITER $$ syntax</li>
+                    </ul>
+                    <div class="command-examples">
+                        <span class="comment"># Run analysis on consolidated file</span><br>
+                        analyze.bat
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">✅ run_verification.bat</div>
+                    <div class="feature-description">Consolidated system verification</div>
+                    <ul class="feature-list">
+                        <li>Verifies consolidated procedures deployment</li>
+                        <li>Tests key procedure categories</li>
+                        <li>Checks procedure functionality</li>
+                        <li>Provides detailed status report</li>
+                    </ul>
+                    <div class="command-examples">
+                        <span class="comment"># Verify consolidated deployment</span><br>
+                        run_verification.bat
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">🏁 final_verification.bat</div>
+                    <div class="feature-description">Quick consolidated status check</div>
+                    <ul class="feature-list">
+                        <li>Fast execution for consolidated file</li>
+                        <li>Tests procedure categories</li>
+                        <li>Shows overall system status</li>
+                        <li>Provides pass/fail summary</li>
+                    </ul>
+                    <div class="command-examples">
+                        <span class="comment"># Quick consolidated system health check</span><br>
+                        final_verification.bat
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">🔧 fix_and_reverify.bat</div>
+                    <div class="feature-description">Schema repair for consolidated deployment</div>
+                    <ul class="feature-list">
+                        <li>Creates missing tables for consolidated routines</li>
+                        <li>Re-deploys consolidated SQL file</li>
+                        <li>Adds sample data where needed</li>
+                        <li>Re-runs complete verification</li>
+                    </ul>
+                    <div class="command-examples">
+                        <span class="comment"># Fix schema issues and re-deploy consolidated file</span><br>
+                        fix_and_reverify.bat
+                    </div>
+                </div>
+
+                <div class="feature-card" id="find-missing">
+                    <div class="feature-title">🔍 find_missing_procedures.bat</div>
+                    <div class="feature-description">Missing procedures detection & consolidation tool</div>
+                    <ul class="feature-list">
+                        <li>Scans UpdatedStoredProcedures\ directory for missing items</li>
+                        <li>Compares individual SQL files against consolidated file</li>
+                        <li>Automatically adds missing procedures to consolidated file</li>
+                        <li>Generates detailed missing items report</li>
+                    </ul>
+                    <div class="command-examples">
+                        <span class="comment"># Find and add missing procedures</span><br>
+                        find_missing_procedures.bat
+                    </div>
+                    <div class="info-box info">
+                        <h4>🆕 NEW Tool</h4>
+                        <p>This tool searches for procedures, functions, and triggers that exist in individual SQL files but are missing from the consolidated file, and can automatically add them.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>🔄 Tool Usage Workflow</h2>
+            <div class="nav-grid">
+                <div class="nav-card">
+                    <h4>1. Detection Phase</h4>
+                    <p>Use <strong>find_missing_procedures.bat</strong> to identify any procedures missing from the consolidated file</p>
+                </div>
+                <div class="nav-card">
+                    <h4>2. Analysis Phase</h4>
+                    <p>Run <strong>analyze.bat</strong> to check code quality and compatibility of the consolidated file</p>
+                </div>
+                <div class="nav-card">
+                    <h4>3. Deployment Phase</h4>
+                    <p>Deploy with <strong>deploy.bat</strong> to install all procedures to your database</p>
+                </div>
+                <div class="nav-card">
+                    <h4>4. Verification Phase</h4>
+                    <p>Verify deployment with <strong>run_verification.bat</strong> for comprehensive testing</p>
+                </div>
+                <div class="nav-card">
+                    <h4>5. Quick Check</h4>
+                    <p>Use <strong>final_verification.bat</strong> for fast status checks during development</p>
+                </div>
+                <div class="nav-card">
+                    <h4>6. Repair & Fix</h4>
+                    <p>If issues arise, use <strong>fix_and_reverify.bat</strong> to repair and re-test</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>🔗 Next Steps</h2>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-icon">🚀</div>
+                    <h3>Start Deploying</h3>
+                    <p>Ready to use these tools? Follow the quick start guide</p>
+                    <a href="deployment-quickstart.html" class="btn-primary">Quick Start</a>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">📋</div>
+                    <h3>Learn Workflows</h3>
+                    <p>Understand deployment workflows and best practices</p>
+                    <a href="deployment-workflows.html" class="btn-secondary">View Workflows</a>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">🔍</div>
+                    <h3>Get Help</h3>
+                    <p>Having issues? Check troubleshooting guide</p>
+                    <a href="deployment-troubleshooting.html" class="btn-warning">Troubleshooting</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>🔧 Deployment Tools</h4>
+                <ul>
+                    <li><a href="#deploy">deploy.bat</a></li>
+                    <li><a href="#analyze">analyze.bat</a></li>
+                    <li><a href="#verification" id="verification">run_verification.bat</a></li>
+                    <li><a href="#find-missing">find_missing_procedures.bat</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>🔗 Related Pages</h4>
+                <ul>
+                    <li><a href="deployment-quickstart.html">Quick Start</a></li>
+                    <li><a href="deployment-workflows.html">Workflows</a></li>
+                    <li><a href="deployment-troubleshooting.html">Troubleshooting</a></li>
+                </ul>
+            </div>
+            <div class="footer-info">
+                <p><a href="stored-procedures-deployment.html">← Back to Deployment Home</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>

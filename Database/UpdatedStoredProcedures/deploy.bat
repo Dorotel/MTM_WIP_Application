@@ -1,16 +1,16 @@
 @echo off
 REM ================================================================================
-REM MTM INVENTORY APPLICATION - STORED PROCEDURES DEPLOYMENT SCRIPT (WINDOWS/MAMP)
+REM MTM INVENTORY APPLICATION - CONSOLIDATED STORED PROCEDURES DEPLOYMENT SCRIPT
 REM ================================================================================
-REM File: deploy_procedures.bat
-REM Purpose: Deploy all stored procedures to the MTM WIP Application database
+REM File: deploy.bat
+REM Purpose: Deploy consolidated stored procedures from mtm_wip_application_test_routines.sql
 REM Created: August 10, 2025
-REM Updated: January 27, 2025 - Updated for new database/environment logic
+REM Updated: August 15, 2025 - Refactored to use consolidated routines file
 REM Target Database: mtm_wip_application_test (development/test database)
 REM MySQL Version: 5.7.24+ (MAMP Compatible)
 REM 
 REM ENVIRONMENT LOGIC:
-REM - This script deploys to the TEST database (mtm_wip_application_test)
+REM - This script deploys the consolidated mtm_wip_application_test_routines.sql file
 REM - For production deployment, use database name: mtm_wip_application
 REM - Debug Mode (C#): Uses mtm_wip_application_test and localhost or 172.16.1.104
 REM - Release Mode (C#): Uses mtm_wip_application and always 172.16.1.104
@@ -28,6 +28,9 @@ set DB_PASSWORD=root
 REM MAMP MySQL path (adjust if needed)
 set MYSQL_PATH=C:\MAMP\bin\mysql\bin
 set MYSQLDUMP_PATH=C:\MAMP\bin\mysql\bin
+
+REM Path to consolidated routines file
+set "ROUTINES_FILE=%~dp0..\UpdatedDatabase\mtm_wip_application_test_routines.sql"
 
 REM Check if MAMP MySQL path exists, otherwise try standard path
 if not exist "%MYSQL_PATH%\mysql.exe" (
@@ -133,13 +136,24 @@ if "%MYSQL_PATH%"=="" (
 
 REM Print header
 echo ================================
-echo MTM INVENTORY APPLICATION - STORED PROCEDURES DEPLOYMENT
+echo MTM INVENTORY APPLICATION - CONSOLIDATED STORED PROCEDURES DEPLOYMENT
 echo ================================
 echo [INFO] Target: MySQL %DB_HOST%:%DB_PORT%/%DB_NAME%
 echo [INFO] User: %DB_USER%
 echo [INFO] MySQL Client: !MYSQL_CMD!
+echo [INFO] Source: mtm_wip_application_test_routines.sql (Consolidated)
 echo [INFO] UNIFORM PARAMETER NAMING: WITH p_ prefixes
 echo ================================
+
+REM Check if consolidated routines file exists
+if not exist "%ROUTINES_FILE%" (
+    echo [ERROR] Consolidated routines file not found!
+    echo [ERROR] Expected location: %ROUTINES_FILE%
+    echo [INFO] Please ensure mtm_wip_application_test_routines.sql exists in UpdatedDatabase folder
+    exit /b 1
+)
+
+echo [INFO] Found consolidated routines file: %ROUTINES_FILE%
 
 REM Test database connection
 echo [INFO] Testing database connection...
@@ -168,120 +182,28 @@ if errorlevel 1 (
     echo [INFO] Backup created: %backup_file%
 )
 
-REM Deploy procedures - UPDATED FOR UNIFORM PARAMETER NAMING
-set success_count=0
-set total_count=8
-
-REM User Management Procedures
-echo [INFO] Executing User Management Procedures ^(UNIFORM p_ prefixes^)...
-if exist "01_User_Management_Procedures.sql" (
-    !MYSQL_CMD! -h%DB_HOST% -P%DB_PORT% -u%DB_USER% -p%DB_PASSWORD% %DB_NAME% < "01_User_Management_Procedures.sql"
-    if errorlevel 1 (
-        echo [ERROR] User Management Procedures failed
-    ) else (
-        echo [SUCCESS] User Management Procedures completed successfully
-        set /a success_count+=1
-    )
-) else (
-    echo [ERROR] File not found: 01_User_Management_Procedures.sql
+REM Count procedures in consolidated file
+echo [INFO] Analyzing consolidated procedures file...
+set proc_count=0
+for /f %%i in ('findstr /c:"CREATE DEFINER" "%ROUTINES_FILE%" 2^>nul') do (
+    set /a proc_count+=%%i
 )
+echo [INFO] Found %proc_count% procedures in consolidated file
 
-REM System Role Procedures
-echo [INFO] Executing System Role Procedures ^(UNIFORM p_ prefixes^)...
-if exist "02_System_Role_Procedures.sql" (
-    !MYSQL_CMD! -h%DB_HOST% -P%DB_PORT% -u%DB_USER% -p%DB_PASSWORD% %DB_NAME% < "02_System_Role_Procedures.sql"
-    if errorlevel 1 (
-        echo [ERROR] System Role Procedures failed
-    ) else (
-        echo [SUCCESS] System Role Procedures completed successfully
-        set /a success_count+=1
-    )
-) else (
-    echo [ERROR] File not found: 02_System_Role_Procedures.sql
-)
+REM Deploy consolidated procedures
+echo [INFO] Deploying consolidated stored procedures ^(UNIFORM p_ prefixes^)...
+!MYSQL_CMD! -h%DB_HOST% -P%DB_PORT% -u%DB_USER% -p%DB_PASSWORD% %DB_NAME% < "%ROUTINES_FILE%"
 
-REM Master Data Procedures
-echo [INFO] Executing Master Data Procedures ^(UNIFORM p_ prefixes^)...
-if exist "03_Master_Data_Procedures.sql" (
-    !MYSQL_CMD! -h%DB_HOST% -P%DB_PORT% -u%DB_USER% -p%DB_PASSWORD% %DB_NAME% < "03_Master_Data_Procedures.sql"
-    if errorlevel 1 (
-        echo [ERROR] Master Data Procedures failed
-    ) else (
-        echo [SUCCESS] Master Data Procedures completed successfully
-        set /a success_count+=1
-    )
+if errorlevel 1 (
+    echo [ERROR] Consolidated procedures deployment failed
+    echo [ERROR] Check the following:
+    echo [ERROR]   1. Database %DB_NAME% exists and is accessible
+    echo [ERROR]   2. User %DB_USER% has CREATE ROUTINE privileges
+    echo [ERROR]   3. mtm_wip_application_test_routines.sql syntax is valid
+    echo [ERROR]   4. MySQL version is 5.7.24 or higher
+    exit /b 1
 ) else (
-    echo [ERROR] File not found: 03_Master_Data_Procedures.sql
-)
-
-REM Inventory Management Procedures
-echo [INFO] Executing Inventory Management Procedures ^(UNIFORM p_ prefixes^)...
-if exist "04_Inventory_Procedures.sql" (
-    !MYSQL_CMD! -h%DB_HOST% -P%DB_PORT% -u%DB_USER% -p%DB_PASSWORD% %DB_NAME% < "04_Inventory_Procedures.sql"
-    if errorlevel 1 (
-        echo [ERROR] Inventory Management Procedures failed
-    ) else (
-        echo [SUCCESS] Inventory Management Procedures completed successfully
-        set /a success_count+=1
-    )
-) else (
-    echo [ERROR] File not found: 04_Inventory_Procedures.sql
-)
-
-REM Error Log Procedures
-echo [INFO] Executing Error Log Procedures ^(UNIFORM p_ prefixes^)...
-if exist "05_Error_Log_Procedures.sql" (
-    !MYSQL_CMD! -h%DB_HOST% -P%DB_PORT% -u%DB_USER% -p%DB_PASSWORD% %DB_NAME% < "05_Error_Log_Procedures.sql"
-    if errorlevel 1 (
-        echo [ERROR] Error Log Procedures failed
-    ) else (
-        echo [SUCCESS] Error Log Procedures completed successfully
-        set /a success_count+=1
-    )
-) else (
-    echo [ERROR] File not found: 05_Error_Log_Procedures.sql
-)
-
-REM Quick Button Procedures
-echo [INFO] Executing Quick Button Procedures ^(UNIFORM p_ prefixes^)...
-if exist "06_Quick_Button_Procedures.sql" (
-    !MYSQL_CMD! -h%DB_HOST% -P%DB_PORT% -u%DB_USER% -p%DB_PASSWORD% %DB_NAME% < "06_Quick_Button_Procedures.sql"
-    if errorlevel 1 (
-        echo [ERROR] Quick Button Procedures failed
-    ) else (
-        echo [SUCCESS] Quick Button Procedures completed successfully
-        set /a success_count+=1
-    )
-) else (
-    echo [ERROR] File not found: 06_Quick_Button_Procedures.sql
-)
-
-REM Changelog/Version Procedures
-echo [INFO] Executing Changelog/Version Procedures ^(UNIFORM p_ prefixes^)...
-if exist "07_Changelog_Version_Procedures.sql" (
-    !MYSQL_CMD! -h%DB_HOST% -P%DB_PORT% -u%DB_USER% -p%DB_PASSWORD% %DB_NAME% < "07_Changelog_Version_Procedures.sql"
-    if errorlevel 1 (
-        echo [ERROR] Changelog/Version Procedures failed
-    ) else (
-        echo [SUCCESS] Changelog/Version Procedures completed successfully
-        set /a success_count+=1
-    )
-) else (
-    echo [ERROR] File not found: 07_Changelog_Version_Procedures.sql
-)
-
-REM Theme Management Procedures - NEW
-echo [INFO] Executing Theme Management Procedures ^(UNIFORM p_ prefixes^)...
-if exist "08_Theme_Management_Procedures.sql" (
-    !MYSQL_CMD! -h%DB_HOST% -P%DB_PORT% -u%DB_USER% -p%DB_PASSWORD% %DB_NAME% < "08_Theme_Management_Procedures.sql"
-    if errorlevel 1 (
-        echo [ERROR] Theme Management Procedures failed
-    ) else (
-        echo [SUCCESS] Theme Management Procedures completed successfully
-        set /a success_count+=1
-    )
-) else (
-    echo [ERROR] File not found: 08_Theme_Management_Procedures.sql
+    echo [SUCCESS] Consolidated procedures deployed successfully!
 )
 
 REM MySQL 5.7.24 Compatibility Check
@@ -293,44 +215,39 @@ if errorlevel 1 (
     echo [INFO] MySQL version check completed - procedures optimized for MySQL 5.7.24+
 )
 
+REM Verify deployment by counting deployed procedures
+echo [INFO] Verifying deployment...
+!MYSQL_CMD! -h%DB_HOST% -P%DB_PORT% -u%DB_USER% -p%DB_PASSWORD% -e "SELECT COUNT(*) as 'Deployed Procedures' FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA='%DB_NAME%' AND ROUTINE_TYPE='PROCEDURE';" %DB_NAME% 2>nul
+
 REM Summary
 echo ================================
 echo DEPLOYMENT SUMMARY
 echo ================================
-echo [INFO] Successfully deployed: %success_count%/%total_count% procedure files
-echo [INFO] UNIFORM PARAMETER NAMING: All procedures now use p_ prefixes
+echo [INFO] Source: mtm_wip_application_test_routines.sql
+echo [INFO] Procedures in file: %proc_count%
+echo [INFO] UNIFORM PARAMETER NAMING: All procedures use p_ prefixes
 
-if %success_count% == %total_count% (
-    echo [SUCCESS] All stored procedures deployed successfully!
-    echo [SUCCESS] UNIFORM PARAMETER NAMING implementation complete!
-    echo [INFO] Features deployed:
-    echo [INFO]   - User Management ^(17 procedures^) with p_ prefixes
-    echo [INFO]   - System Roles ^(8 procedures^) with p_ prefixes
-    echo [INFO]   - Master Data ^(21 procedures^) with p_ prefixes
-    echo [INFO]   - Inventory Management ^(12 procedures^) with p_ prefixes
-    echo [INFO]   - Error Logging ^(6 procedures^) with p_ prefixes
-    echo [INFO]   - Quick Buttons ^(7 procedures^) with p_ prefixes
-    echo [INFO]   - Changelog/Version ^(3 procedures^) with p_ prefixes
-    echo [INFO]   - Theme Management ^(8 procedures^) with p_ prefixes
-    echo [INFO] Total: ~82 procedures with uniform p_ parameter naming
-    echo [INFO] Deployment completed for MySQL 5.7.24 ^(MAMP Compatible^)
-    exit /b 0
-) else (
-    echo [ERROR] Some procedures failed to deploy. Please check the errors above.
-    echo [INFO] Common MAMP issues:
-    echo [INFO]   1. Ensure MAMP Apache and MySQL services are running
-    echo [INFO]   2. Check that the database '%DB_NAME%' exists
-    echo [INFO]   3. Verify user '%DB_USER%' has CREATE ROUTINE privileges
-    echo [INFO]   4. Confirm MAMP MySQL version is 5.7.24 or higher
-    echo [INFO]   5. Ensure all 8 SQL files are present in current directory
-    exit /b 1
-)
+echo [SUCCESS] Consolidated stored procedures deployment completed!
+echo [SUCCESS] UNIFORM PARAMETER NAMING implementation complete!
+echo [INFO] Features deployed from consolidated file:
+echo [INFO]   - User Management with p_ prefixes
+echo [INFO]   - System Roles with p_ prefixes  
+echo [INFO]   - Master Data with p_ prefixes
+echo [INFO]   - Inventory Management with p_ prefixes
+echo [INFO]   - Error Logging with p_ prefixes
+echo [INFO]   - Quick Buttons with p_ prefixes
+echo [INFO]   - Changelog/Version with p_ prefixes
+echo [INFO]   - Theme Management with p_ prefixes
+echo [INFO] Total: ~%proc_count% procedures with uniform p_ parameter naming
+echo [INFO] Deployment completed for MySQL 5.7.24 ^(MAMP Compatible^)
+exit /b 0
 
 :show_usage
 echo Usage: %0 [options]
 echo.
-echo MTM Inventory Application - Stored Procedures Deployment
+echo MTM Inventory Application - Consolidated Stored Procedures Deployment
 echo UNIFORM PARAMETER NAMING: All procedures use p_ prefixes for consistency
+echo Source: mtm_wip_application_test_routines.sql
 echo.
 echo Options:
 echo   -h, --host HOST        Database host ^(default: localhost^)
@@ -344,15 +261,11 @@ echo.
 echo Environment variables:
 echo   DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 echo.
-echo Files deployed ^(8 total^):
-echo   01_User_Management_Procedures.sql     ^(17 procedures^)
-echo   02_System_Role_Procedures.sql         ^(8 procedures^)
-echo   03_Master_Data_Procedures.sql         ^(21 procedures^)
-echo   04_Inventory_Procedures.sql           ^(12 procedures^)
-echo   05_Error_Log_Procedures.sql           ^(6 procedures^)
-echo   06_Quick_Button_Procedures.sql        ^(7 procedures^)
-echo   07_Changelog_Version_Procedures.sql   ^(3 procedures^)
-echo   08_Theme_Management_Procedures.sql    ^(8 procedures^)
+echo Consolidated deployment:
+echo   Single file: mtm_wip_application_test_routines.sql
+echo   Contains: ~96 procedures with p_ parameter naming
+echo   Categories: User Management, System Roles, Master Data, Inventory,
+echo              Error Logging, Quick Buttons, Changelog, Theme Management
 echo.
 echo MAMP Examples:
 echo   %0 -h localhost -u root -p root -d mtm_wip_application_test
@@ -364,6 +277,6 @@ echo   1. Start MAMP and ensure Apache/MySQL services are running
 echo   2. Check MAMP control panel for correct port ^(usually 3306^)
 echo   3. Default MAMP credentials are usually root/root
 echo   4. Ensure target database exists in phpMyAdmin
-echo   5. Verify all 8 SQL files are present in current directory
+echo   5. Verify mtm_wip_application_test_routines.sql exists in UpdatedDatabase folder
 echo.
 exit /b 0

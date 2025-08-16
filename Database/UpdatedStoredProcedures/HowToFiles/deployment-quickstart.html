@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Start Guide - MTM Inventory Application</title>
+    <link rel="stylesheet" href="css/help-styles.css">
+    <link rel="stylesheet" href="css/deployment-styles.css">
+</head>
+<body>
+    <div class="header-bar">
+        <h1>🚀 Quick Start Guide</h1>
+        <p>Get your stored procedures deployed in minutes</p>
+        <div class="breadcrumb">
+            <a href="stored-procedures-deployment.html">Deployment Home</a> > Quick Start
+        </div>
+    </div>
+
+    <div class="main-content" id="main-content">
+        <div class="content-section">
+            <div class="consolidated-highlight">
+                <h4>⚡ Deploy in 3 Simple Steps</h4>
+                <p>MAMP users can deploy all procedures in under 5 minutes with default settings</p>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>🚀 Quick Start Guide</h2>
+
+            <div class="step-guide">
+                <div class="step" id="step-1">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Ensure MAMP is Running</h3>
+                        <ul class="feature-list">
+                            <li>Start MAMP application</li>
+                            <li>Verify Apache and MySQL services are running (green lights)</li>
+                            <li>Note the MySQL port (usually 3306, sometimes 8889 for older MAMP)</li>
+                        </ul>
+                        <div class="info-box info">
+                            <h4>💡 MAMP Setup Tip</h4>
+                            <p>Default MAMP credentials are usually <strong>root/root</strong> on port <strong>3306</strong></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step" id="step-2">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Deploy Consolidated Procedures</h3>
+                        <div class="command-examples">
+                            # Navigate to the directory<br>
+                            cd "C:\Users\[YourUsername]\source\repos\MTM_WIP_Application\Database\UpdatedStoredProcedures"<br>
+                            <br>
+                            <span class="comment"># Deploy consolidated procedures (MAMP defaults)</span><br>
+                            deploy.bat<br>
+                            <br>
+                            <span class="comment"># Or with custom parameters</span><br>
+                            deploy.bat -h localhost -u root -p root -d mtm_wip_application_test
+                        </div>
+                        <div class="info-box success">
+                            <h4>✅ Expected Output</h4>
+                            <p><strong>[SUCCESS] Consolidated stored procedures deployed successfully!</strong></p>
+                            <p>Procedures in file: ~96</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step" id="step-3">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>Verify Consolidated Deployment</h3>
+                        <div class="command-examples">
+                            <span class="comment"># Run verification</span><br>
+                            run_verification.bat<br>
+                            <br>
+                            <span class="comment"># Or quick final check</span><br>
+                            final_verification.bat
+                        </div>
+                        <div class="info-box success">
+                            <h4>✅ Verification Success</h4>
+                            <p><strong>✅ CONSOLIDATED ROUTINES VERIFIED AND WORKING!</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>💡 Environment-Specific Usage</h2>
+
+            <div class="nav-grid">
+                <div class="nav-card">
+                    <h4>Development Environment (Recommended)</h4>
+                    <div class="command-examples">
+                        <span class="comment"># Deploy to test database</span><br>
+                        deploy.bat -d mtm_wip_application_test<br>
+                        <br>
+                        <span class="comment"># Analyze and verify</span><br>
+                        analyze.bat<br>
+                        run_verification.bat
+                    </div>
+                </div>
+                <div class="nav-card">
+                    <h4>Production Environment</h4>
+                    <div class="command-examples">
+                        <span class="comment"># Deploy to production</span><br>
+                        deploy.bat -d mtm_wip_application -h 172.16.1.104<br>
+                        <br>
+                        <span class="comment"># Verify production</span><br>
+                        final_verification.bat
+                    </div>
+                </div>
+                <div class="nav-card">
+                    <h4>Local MAMP Development (Most Common)</h4>
+                    <div class="command-examples">
+                        <span class="comment"># Standard MAMP deployment</span><br>
+                        deploy.bat<br>
+                        <br>
+                        <span class="comment"># Verify MAMP deployment</span><br>
+                        run_verification.bat
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>🔗 Next Steps</h2>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-icon">🔧</div>
+                    <h3>Explore Tools</h3>
+                    <p>Learn about all available deployment tools</p>
+                    <a href="deployment-tools.html" class="btn-primary">View Tools</a>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">🔍</div>
+                    <h3>Troubleshoot</h3>
+                    <p>Having issues? Check the troubleshooting guide</p>
+                    <a href="deployment-troubleshooting.html" class="btn-warning">Get Help</a>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">🎯</div>
+                    <h3>Integrate</h3>
+                    <p>Use procedures in your .NET 8 application</p>
+                    <a href="deployment-integration.html" class="btn-secondary">Integration Guide</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>🚀 Quick Start Steps</h4>
+                <ul>
+                    <li><a href="#step-1">Step 1: MAMP Setup</a></li>
+                    <li><a href="#step-2">Step 2: Deploy</a></li>
+                    <li><a href="#step-3">Step 3: Verify</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>🔗 Related Pages</h4>
+                <ul>
+                    <li><a href="deployment-tools.html">Deployment Tools</a></li>
+                    <li><a href="deployment-troubleshooting.html">Troubleshooting</a></li>
+                    <li><a href="deployment-workflows.html">Workflows</a></li>
+                </ul>
+            </div>
+            <div class="footer-info">
+                <p><a href="stored-procedures-deployment.html">← Back to Deployment Home</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/help-navigation.js"></script>
+</body>
+</html>

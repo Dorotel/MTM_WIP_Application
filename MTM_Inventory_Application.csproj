@@ -25,8 +25,30 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_database.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_extra.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_routines.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_app_themes.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_debug_matching.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_inv_inventory.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_inv_inventory_batch_seq.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_inv_transaction.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_log_changelog.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_log_error.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_md_item_types.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_md_locations.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_md_operation_numbers.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_md_part_ids.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_migration_debug_log.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_sys_last_10_transactions.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_sys_last_10_transactions_backup.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_sys_roles.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_sys_user_roles.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_usr_ui_settings.sql" />
+        <None Remove="Database\UpdatedDatabase\mtm_wip_application_test_table_usr_users.sql" />
         <None Remove="DATABASE_SCHEMA.sql" />
         <None Remove="Resources\CHANGELOG.pdf" />
+        <None Remove="Resources\MTM.png" />
     </ItemGroup>
 
     <ItemGroup>
@@ -49,6 +71,9 @@
         <Content Include="MTMWIPApp.ico">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
+        <Resource Include="Database\UpdatedStoredProcedures\HowToFiles\images\MTM.png">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
         <EmbeddedResource Include="Resources\CHANGELOG.pdf" />
     </ItemGroup>
 
@@ -113,6 +138,75 @@
     <ItemGroup>
         <Folder Include="Documentation\WinForm Redesigns\" />
         <Folder Include="Documentation\PlantUML Files\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_database.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_extra.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_routines.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_app_themes.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_debug_matching.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_inv_inventory.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_inv_inventory_batch_seq.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_inv_transaction.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_log_changelog.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_log_error.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_md_item_types.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_md_locations.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_md_operation_numbers.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_md_part_ids.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_migration_debug_log.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_sys_last_10_transactions.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_sys_last_10_transactions_backup.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_sys_roles.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_sys_user_roles.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_usr_ui_settings.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Database\UpdatedDatabase\mtm_wip_application_test_table_usr_users.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Resources\MTM.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
     </ItemGroup>
 
 </Project>
