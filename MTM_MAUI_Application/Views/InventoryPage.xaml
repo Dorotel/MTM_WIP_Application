@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MTM_MAUI_Application.ViewModels"
+             x:Class="MTM_MAUI_Application.Views.InventoryPage"
+             Title="Inventory Entry">
+
+    <ContentPage.BindingContext>
+        <vm:InventoryViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Entry Form -->
+        <ScrollView Grid.Row="0" Padding="20">
+            <StackLayout Spacing="15">
+                
+                <!-- Header -->
+                <Label Text="Add Inventory Item" 
+                       FontSize="24" 
+                       FontAttributes="Bold" 
+                       HorizontalOptions="Center" />
+
+                <!-- Part Selection -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <Label Grid.Column="0" 
+                           Text="Part:" 
+                           VerticalOptions="Center" 
+                           FontAttributes="Bold" />
+                    
+                    <Picker Grid.Column="1"
+                            ItemsSource="{Binding Parts}"
+                            SelectedItem="{Binding SelectedPartId}"
+                            Title="Select Part..." />
+                </Grid>
+
+                <!-- Location Selection -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <Label Grid.Column="0" 
+                           Text="Location:" 
+                           VerticalOptions="Center" 
+                           FontAttributes="Bold" />
+                    
+                    <Picker Grid.Column="1"
+                            ItemsSource="{Binding Locations}"
+                            SelectedItem="{Binding SelectedLocation}"
+                            Title="Select Location..." />
+                </Grid>
+
+                <!-- Operation Selection -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <Label Grid.Column="0" 
+                           Text="Operation:" 
+                           VerticalOptions="Center" 
+                           FontAttributes="Bold" />
+                    
+                    <Picker Grid.Column="1"
+                            ItemsSource="{Binding Operations}"
+                            SelectedItem="{Binding SelectedOperation}"
+                            Title="Select Operation..." />
+                </Grid>
+
+                <!-- Quantity Entry -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <Label Grid.Column="0" 
+                           Text="Quantity:" 
+                           VerticalOptions="Center" 
+                           FontAttributes="Bold" />
+                    
+                    <Entry Grid.Column="1"
+                           Text="{Binding Quantity}"
+                           Keyboard="Numeric"
+                           Placeholder="Enter quantity..." />
+                </Grid>
+
+                <!-- Batch Number -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <Label Grid.Column="0" 
+                           Text="Batch #:" 
+                           VerticalOptions="Center" 
+                           FontAttributes="Bold" />
+                    
+                    <Entry Grid.Column="1"
+                           Text="{Binding BatchNumber}"
+                           Placeholder="Optional batch number..." />
+                </Grid>
+
+                <!-- Notes -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <Label Grid.Column="0" 
+                           Text="Notes:" 
+                           VerticalOptions="Start" 
+                           FontAttributes="Bold" />
+                    
+                    <Editor Grid.Column="1"
+                            Text="{Binding Notes}"
+                            Placeholder="Optional notes..."
+                            HeightRequest="80" />
+                </Grid>
+
+                <!-- Action Buttons -->
+                <StackLayout Orientation="Horizontal" 
+                             HorizontalOptions="Center" 
+                             Spacing="20">
+                    
+                    <Button Text="Save" 
+                            Command="{Binding SaveInventoryCommand}"
+                            IsEnabled="{Binding CanSave}"
+                            BackgroundColor="Green"
+                            TextColor="White"
+                            WidthRequest="100" />
+                    
+                    <Button Text="Reset" 
+                            Command="{Binding ResetFormCommand}"
+                            BackgroundColor="Orange"
+                            TextColor="White"
+                            WidthRequest="100" />
+                </StackLayout>
+
+                <!-- Loading Indicator -->
+                <ActivityIndicator IsVisible="{Binding IsLoading}" 
+                                   IsRunning="{Binding IsLoading}" />
+
+            </StackLayout>
+        </ScrollView>
+
+        <!-- Current Inventory Display -->
+        <Grid Grid.Row="1" Padding="20,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" 
+                   Text="Current Inventory" 
+                   FontSize="18" 
+                   FontAttributes="Bold" 
+                   Margin="0,10,0,10" />
+
+            <CollectionView Grid.Row="1" 
+                            ItemsSource="{Binding CurrentInventory}"
+                            BackgroundColor="LightGray">
+                
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="10" Margin="5" BackgroundColor="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackLayout Grid.Column="0">
+                                <Label Text="{Binding Location}" FontAttributes="Bold" />
+                                <Label Text="{Binding Operation}" FontSize="Small" />
+                            </StackLayout>
+
+                            <StackLayout Grid.Column="1">
+                                <Label Text="{Binding Quantity, StringFormat='Qty: {0}'}" />
+                                <Label Text="{Binding BatchNumber, StringFormat='Batch: {0}'}" 
+                                       FontSize="Small" 
+                                       IsVisible="{Binding BatchNumber, Converter={StaticResource StringIsNotNullOrEmptyConverter}}" />
+                            </StackLayout>
+
+                            <StackLayout Grid.Column="2">
+                                <Label Text="{Binding User}" FontSize="Small" />
+                                <Label Text="{Binding CreatedDate, StringFormat='{0:MM/dd/yyyy}'}" 
+                                       FontSize="Small" />
+                            </StackLayout>
+
+                            <Label Grid.Column="3" 
+                                   Text=">" 
+                                   VerticalOptions="Center" 
+                                   FontSize="16" 
+                                   TextColor="Gray" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </Grid>
+</ContentPage>

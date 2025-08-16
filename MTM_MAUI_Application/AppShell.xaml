@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="MTM_MAUI_Application.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:MTM_MAUI_Application.Views"
+    Title="MTM WIP Application">
+
+    <!-- Shell Appearance -->
+    <Shell.FlyoutBehavior>
+        Flyout
+    </Shell.FlyoutBehavior>
+
+    <!-- Main Tabs for Inventory Operations -->
+    <TabBar>
+        <ShellContent
+            Title="Inventory"
+            Icon="inventory_icon.png"
+            ContentTemplate="{DataTemplate local:InventoryPage}"
+            Route="inventory" />
+        
+        <ShellContent
+            Title="Transfer"
+            Icon="transfer_icon.png"
+            ContentTemplate="{DataTemplate local:TransferPage}"
+            Route="transfer" />
+        
+        <ShellContent
+            Title="Remove"
+            Icon="remove_icon.png"
+            ContentTemplate="{DataTemplate local:RemovePage}"
+            Route="remove" />
+        
+        <ShellContent
+            Title="Transactions"
+            Icon="transactions_icon.png"
+            ContentTemplate="{DataTemplate local:TransactionsPage}"
+            Route="transactions" />
+    </TabBar>
+
+    <!-- Flyout Menu Items -->
+    <FlyoutItem Title="Settings" Icon="settings_icon.png">
+        <ShellContent ContentTemplate="{DataTemplate local:SettingsPage}" Route="settings" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Development Tools" Icon="dev_tools_icon.png">
+        <ShellContent Title="Application Analyzer" 
+                      ContentTemplate="{DataTemplate local:ApplicationAnalyzerPage}" 
+                      Route="analyzer" />
+        <ShellContent Title="MAUI Migration Assessment" 
+                      ContentTemplate="{DataTemplate local:MigrationAssessmentPage}" 
+                      Route="migration" />
+        <ShellContent Title="Debug Dashboard" 
+                      ContentTemplate="{DataTemplate local:DebugDashboardPage}" 
+                      Route="debug" />
+    </FlyoutItem>
+
+</Shell>

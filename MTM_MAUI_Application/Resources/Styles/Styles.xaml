@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-stylesheet href="../Base.css" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Font Sizes -->
+    <x:Double x:Key="SmallFontSize">12</x:Double>
+    <x:Double x:Key="DefaultFontSize">14</x:Double>
+    <x:Double x:Key="MediumFontSize">16</x:Double>
+    <x:Double x:Key="LargeFontSize">18</x:Double>
+    <x:Double x:Key="HeaderFontSize">22</x:Double>
+    <x:Double x:Key="TitleFontSize">28</x:Double>
+
+    <!-- Spacing -->
+    <x:Double x:Key="SmallSpacing">5</x:Double>
+    <x:Double x:Key="DefaultSpacing">10</x:Double>
+    <x:Double x:Key="MediumSpacing">15</x:Double>
+    <x:Double x:Key="LargeSpacing">20</x:Double>
+
+    <!-- Base Button Style -->
+    <Style TargetType="Button" x:Key="BaseButtonStyle">
+        <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+        <Setter Property="TextColor" Value="{DynamicResource White}" />
+        <Setter Property="FontSize" Value="{DynamicResource DefaultFontSize}" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="Padding" Value="15,10" />
+        <Setter Property="MinimumHeightRequest" Value="44" />
+    </Style>
+
+    <!-- Primary Button -->
+    <Style TargetType="Button" x:Key="PrimaryButton" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+    </Style>
+
+    <!-- Secondary Button -->
+    <Style TargetType="Button" x:Key="SecondaryButton" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="BackgroundColor" Value="{DynamicResource SecondaryColor}" />
+        <Setter Property="TextColor" Value="{DynamicResource Black}" />
+    </Style>
+
+    <!-- Success Button -->
+    <Style TargetType="Button" x:Key="SuccessButton" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="BackgroundColor" Value="{DynamicResource Success}" />
+    </Style>
+
+    <!-- Warning Button -->
+    <Style TargetType="Button" x:Key="WarningButton" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="BackgroundColor" Value="{DynamicResource Warning}" />
+        <Setter Property="TextColor" Value="{DynamicResource Black}" />
+    </Style>
+
+    <!-- Error Button -->
+    <Style TargetType="Button" x:Key="ErrorButton" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="BackgroundColor" Value="{DynamicResource Error}" />
+    </Style>
+
+    <!-- Entry Style -->
+    <Style TargetType="Entry" x:Key="BaseEntryStyle">
+        <Setter Property="BackgroundColor" Value="{DynamicResource BackgroundColor}" />
+        <Setter Property="TextColor" Value="{DynamicResource TextColor}" />
+        <Setter Property="FontSize" Value="{DynamicResource DefaultFontSize}" />
+        <Setter Property="PlaceholderColor" Value="{DynamicResource SecondaryTextColor}" />
+        <Setter Property="MinimumHeightRequest" Value="44" />
+    </Style>
+
+    <!-- Picker Style -->
+    <Style TargetType="Picker" x:Key="BasePickerStyle">
+        <Setter Property="BackgroundColor" Value="{DynamicResource BackgroundColor}" />
+        <Setter Property="TextColor" Value="{DynamicResource TextColor}" />
+        <Setter Property="FontSize" Value="{DynamicResource DefaultFontSize}" />
+        <Setter Property="TitleColor" Value="{DynamicResource SecondaryTextColor}" />
+    </Style>
+
+    <!-- Label Styles -->
+    <Style TargetType="Label" x:Key="BaseLabelStyle">
+        <Setter Property="TextColor" Value="{DynamicResource TextColor}" />
+        <Setter Property="FontSize" Value="{DynamicResource DefaultFontSize}" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="HeaderLabel" BasedOn="{StaticResource BaseLabelStyle}">
+        <Setter Property="FontSize" Value="{DynamicResource HeaderFontSize}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="TitleLabel" BasedOn="{StaticResource BaseLabelStyle}">
+        <Setter Property="FontSize" Value="{DynamicResource TitleFontSize}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="SubtitleLabel" BasedOn="{StaticResource BaseLabelStyle}">
+        <Setter Property="FontSize" Value="{DynamicResource MediumFontSize}" />
+        <Setter Property="TextColor" Value="{DynamicResource SecondaryTextColor}" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="SmallLabel" BasedOn="{StaticResource BaseLabelStyle}">
+        <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
+        <Setter Property="TextColor" Value="{DynamicResource SecondaryTextColor}" />
+    </Style>
+
+    <!-- Frame Style -->
+    <Style TargetType="Frame" x:Key="BaseFrameStyle">
+        <Setter Property="BackgroundColor" Value="{DynamicResource SurfaceColor}" />
+        <Setter Property="BorderColor" Value="{DynamicResource Gray300}" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="Padding" Value="{DynamicResource DefaultSpacing}" />
+        <Setter Property="HasShadow" Value="True" />
+    </Style>
+
+    <!-- Card Style -->
+    <Style TargetType="Frame" x:Key="CardStyle" BasedOn="{StaticResource BaseFrameStyle}">
+        <Setter Property="Margin" Value="{DynamicResource DefaultSpacing}" />
+        <Setter Property="Padding" Value="{DynamicResource MediumSpacing}" />
+    </Style>
+
+    <!-- Activity Indicator Style -->
+    <Style TargetType="ActivityIndicator" x:Key="BaseActivityIndicatorStyle">
+        <Setter Property="Color" Value="{DynamicResource PrimaryColor}" />
+    </Style>
+
+    <!-- CollectionView Style -->
+    <Style TargetType="CollectionView" x:Key="BaseCollectionViewStyle">
+        <Setter Property="BackgroundColor" Value="{DynamicResource BackgroundColor}" />
+    </Style>
+
+    <!-- Application Specific Styles -->
+    
+    <!-- Inventory Card -->
+    <Style TargetType="Frame" x:Key="InventoryCardStyle" BasedOn="{StaticResource CardStyle}">
+        <Setter Property="BorderColor" Value="{DynamicResource InventoryGreen}" />
+    </Style>
+
+    <!-- Transfer Card -->
+    <Style TargetType="Frame" x:Key="TransferCardStyle" BasedOn="{StaticResource CardStyle}">
+        <Setter Property="BorderColor" Value="{DynamicResource TransferBlue}" />
+    </Style>
+
+    <!-- Remove Card -->
+    <Style TargetType="Frame" x:Key="RemoveCardStyle" BasedOn="{StaticResource CardStyle}">
+        <Setter Property="BorderColor" Value="{DynamicResource RemoveRed}" />
+    </Style>
+
+    <!-- Transaction Card -->
+    <Style TargetType="Frame" x:Key="TransactionCardStyle" BasedOn="{StaticResource CardStyle}">
+        <Setter Property="BorderColor" Value="{DynamicResource TransactionOrange}" />
+    </Style>
+
+    <!-- Form Section Style -->
+    <Style TargetType="StackLayout" x:Key="FormSectionStyle">
+        <Setter Property="Spacing" Value="{DynamicResource MediumSpacing}" />
+        <Setter Property="Padding" Value="{DynamicResource LargeSpacing}" />
+    </Style>
+
+    <!-- Status Label Styles -->
+    <Style TargetType="Label" x:Key="SuccessLabel" BasedOn="{StaticResource BaseLabelStyle}">
+        <Setter Property="TextColor" Value="{DynamicResource Success}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="WarningLabel" BasedOn="{StaticResource BaseLabelStyle}">
+        <Setter Property="TextColor" Value="{DynamicResource Warning}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="ErrorLabel" BasedOn="{StaticResource BaseLabelStyle}">
+        <Setter Property="TextColor" Value="{DynamicResource Error}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <!-- Apply default styles -->
+    <Style TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}" />
+    <Style TargetType="Entry" BasedOn="{StaticResource BaseEntryStyle}" />
+    <Style TargetType="Picker" BasedOn="{StaticResource BasePickerStyle}" />
+    <Style TargetType="Label" BasedOn="{StaticResource BaseLabelStyle}" />
+    <Style TargetType="ActivityIndicator" BasedOn="{StaticResource BaseActivityIndicatorStyle}" />
+
+</ResourceDictionary>
