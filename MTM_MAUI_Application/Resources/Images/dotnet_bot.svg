@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="300" height="185" viewBox="0 0 300 185" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="300" height="185" fill="#F3F4F6"/>
+  
+  <!-- MTM Logo -->
+  <circle cx="150" cy="92" r="60" fill="#2563EB" stroke="#1E40AF" stroke-width="3"/>
+  
+  <!-- MTM Text -->
+  <text x="150" y="105" font-family="Arial, sans-serif" font-size="24" font-weight="bold" 
+        fill="white" text-anchor="middle" dominant-baseline="middle">MTM</text>
+  
+  <!-- Gear icon -->
+  <g transform="translate(150,70)">
+    <circle cx="0" cy="0" r="10" fill="white" opacity="0.9"/>
+    <polygon points="-6,-6 6,-6 6,6 -6,6" fill="#2563EB"/>
+    <circle cx="0" cy="0" r="4" fill="white"/>
+  </g>
+  
+  <!-- Bottom text -->
+  <text x="150" y="160" font-family="Arial, sans-serif" font-size="14" font-weight="normal" 
+        fill="#6B7280" text-anchor="middle" dominant-baseline="middle">WIP Application</text>
+</svg>

@@ -2,6 +2,7 @@ using MTM_MAUI_Application.Services;
 using MTM_MAUI_Application.ViewModels;
 using MTM_MAUI_Application.Views;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace MTM_MAUI_Application;
 
@@ -14,6 +15,7 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .ConfigureFonts(fonts =>
             {
+                // Add default fonts - these will be embedded from system if available
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
