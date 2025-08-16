@@ -81,6 +81,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             debugDashboardToolStripMenuItem = new ToolStripMenuItem();
             dependencyChartsToolStripMenuItem = new ToolStripMenuItem();
             conversionToolStripMenuItem = new ToolStripMenuItem();
+            applicationAnalyzerToolStripMenuItem = new ToolStripMenuItem();
             debugDashboardToolStripMenuItem = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
             gettingStartedToolStripMenuItem = new ToolStripMenuItem();
@@ -182,7 +183,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             // developmentToolStripMenuItem
             // 
-            developmentToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { debugDashboardToolStripMenuItem, dependencyChartsToolStripMenuItem });
+            developmentToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { debugDashboardToolStripMenuItem, dependencyChartsToolStripMenuItem, applicationAnalyzerToolStripMenuItem });
             developmentToolStripMenuItem.Name = "developmentToolStripMenuItem";
             developmentToolStripMenuItem.Size = new Size(90, 24);
             developmentToolStripMenuItem.Text = "Development";
@@ -208,6 +209,14 @@ namespace MTM_Inventory_Application.Forms.MainForm
             debugDashboardToolStripMenuItem.Size = new Size(180, 22);
             debugDashboardToolStripMenuItem.Text = "🔍 Debug Dashboard";
             debugDashboardToolStripMenuItem.Click += MainForm_MenuStrip_Development_DebugDashboard_Click;
+            // 
+            // applicationAnalyzerToolStripMenuItem
+            // 
+            applicationAnalyzerToolStripMenuItem.Name = "applicationAnalyzerToolStripMenuItem";
+            applicationAnalyzerToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.A;
+            applicationAnalyzerToolStripMenuItem.Size = new Size(180, 22);
+            applicationAnalyzerToolStripMenuItem.Text = "📊 Application Analyzer";
+            applicationAnalyzerToolStripMenuItem.Click += MainForm_MenuStrip_Development_ApplicationAnalyzer_Click;
             // 
             // helpToolStripMenuItem
             // 
@@ -540,6 +549,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
         private ToolStripMenuItem debugDashboardToolStripMenuItem;
         private ToolStripMenuItem dependencyChartsToolStripMenuItem;
         private ToolStripMenuItem conversionToolStripMenuItem;
+        private ToolStripMenuItem applicationAnalyzerToolStripMenuItem;
         
         // Help Menu Items
         private ToolStripMenuItem helpToolStripMenuItem;
