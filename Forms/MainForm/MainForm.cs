@@ -28,6 +28,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
         private Helper_StoredProcedureProgress? _progressHelper;
         private Forms.Development.DebugDashboardForm? _debugDashboard;
         private Forms.Development.ApplicationAnalyzerForm? _applicationAnalyzer;
+        private Forms.Development.MAUIMigrationAssessmentForm? _mauiMigrationAssessment;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Service_ConnectionRecoveryManager ConnectionRecoveryManager { get; private set; } = null!;
@@ -1059,6 +1060,23 @@ namespace MTM_Inventory_Application.Forms.MainForm
                 LoggingUtility.LogApplicationError(ex);
                 Service_ErrorHandler.HandleException(ex, ErrorSeverity.High,
                     contextData: new Dictionary<string, object> { ["MenuAction"] = "ApplicationAnalyzer" },
+                    controlName: nameof(MainForm));
+            }
+        }
+
+        private void MainForm_MenuStrip_Development_MAUIMigrationAssessment_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using var mauiAssessment = new Forms.Development.MAUIMigrationAssessmentForm();
+                mauiAssessment.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
+                mauiAssessment.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High,
+                    contextData: new Dictionary<string, object> { ["MenuAction"] = "MAUIMigrationAssessment" },
                     controlName: nameof(MainForm));
             }
         }

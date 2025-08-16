@@ -82,6 +82,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             dependencyChartsToolStripMenuItem = new ToolStripMenuItem();
             conversionToolStripMenuItem = new ToolStripMenuItem();
             applicationAnalyzerToolStripMenuItem = new ToolStripMenuItem();
+            mauiMigrationAssessmentToolStripMenuItem = new ToolStripMenuItem();
             debugDashboardToolStripMenuItem = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
             gettingStartedToolStripMenuItem = new ToolStripMenuItem();
@@ -183,7 +184,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
             // 
             // developmentToolStripMenuItem
             // 
-            developmentToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { debugDashboardToolStripMenuItem, dependencyChartsToolStripMenuItem, applicationAnalyzerToolStripMenuItem });
+            developmentToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { debugDashboardToolStripMenuItem, dependencyChartsToolStripMenuItem, applicationAnalyzerToolStripMenuItem, mauiMigrationAssessmentToolStripMenuItem });
             developmentToolStripMenuItem.Name = "developmentToolStripMenuItem";
             developmentToolStripMenuItem.Size = new Size(90, 24);
             developmentToolStripMenuItem.Text = "Development";
@@ -217,6 +218,14 @@ namespace MTM_Inventory_Application.Forms.MainForm
             applicationAnalyzerToolStripMenuItem.Size = new Size(180, 22);
             applicationAnalyzerToolStripMenuItem.Text = "📊 Application Analyzer";
             applicationAnalyzerToolStripMenuItem.Click += MainForm_MenuStrip_Development_ApplicationAnalyzer_Click;
+            // 
+            // mauiMigrationAssessmentToolStripMenuItem
+            // 
+            mauiMigrationAssessmentToolStripMenuItem.Name = "mauiMigrationAssessmentToolStripMenuItem";
+            mauiMigrationAssessmentToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.M;
+            mauiMigrationAssessmentToolStripMenuItem.Size = new Size(180, 22);
+            mauiMigrationAssessmentToolStripMenuItem.Text = "🚀 MAUI Migration Assessment";
+            mauiMigrationAssessmentToolStripMenuItem.Click += MainForm_MenuStrip_Development_MAUIMigrationAssessment_Click;
             // 
             // helpToolStripMenuItem
             // 
@@ -550,6 +559,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
         private ToolStripMenuItem dependencyChartsToolStripMenuItem;
         private ToolStripMenuItem conversionToolStripMenuItem;
         private ToolStripMenuItem applicationAnalyzerToolStripMenuItem;
+        private ToolStripMenuItem mauiMigrationAssessmentToolStripMenuItem;
         
         // Help Menu Items
         private ToolStripMenuItem helpToolStripMenuItem;
