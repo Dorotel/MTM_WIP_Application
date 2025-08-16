@@ -27,6 +27,7 @@ namespace MTM_Inventory_Application.Forms.MainForm
         public Helper_Control_MySqlSignal ConnectionStrengthChecker = null!;
         private Helper_StoredProcedureProgress? _progressHelper;
         private Forms.Development.DebugDashboardForm? _debugDashboard;
+        private Forms.Development.ApplicationAnalyzerForm? _applicationAnalyzer;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Service_ConnectionRecoveryManager ConnectionRecoveryManager { get; private set; } = null!;
@@ -1042,6 +1043,23 @@ namespace MTM_Inventory_Application.Forms.MainForm
             {
                 LoggingUtility.LogApplicationError(ex);
                 _ = Dao_ErrorLog.HandleException_GeneralError_CloseApp(ex, false, nameof(MainForm_MenuStrip_Development_DebugDashboard_Click));
+            }
+        }
+
+        private void MainForm_MenuStrip_Development_ApplicationAnalyzer_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using var applicationAnalyzer = new Forms.Development.ApplicationAnalyzerForm();
+                applicationAnalyzer.SetProgressControls(MainForm_ProgressBar, MainForm_StatusText);
+                applicationAnalyzer.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                LoggingUtility.LogApplicationError(ex);
+                Service_ErrorHandler.HandleException(ex, ErrorSeverity.High,
+                    contextData: new Dictionary<string, object> { ["MenuAction"] = "ApplicationAnalyzer" },
+                    controlName: nameof(MainForm));
             }
         }
 
