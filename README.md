@@ -183,16 +183,51 @@ The application implements environment-aware database and server selection:
 - **Current\*** folders: Reference only - **DO NOT ALTER** these files
 - **Updated\*** folders: Active development and deployment files - **USE FOR ALL CHANGES**
 
-Documentation index (modular files)
-- 1–3 Overview and Architecture: (Documentation/Copilot Files/01-overview-architecture.md)
-- 4, 6, 10 Patterns and Templates (DAO, UI, Theme, DGV/ComboBox): (Documentation/Copilot Files/04-patterns-and-templates.md)
-- 5 Recent Major Improvements (Aug 2025): (Documentation/Copilot Files/05-improvements-and-changelog.md)
-- 7, 9 Database and Stored Procedures + Versioning: (Documentation/Copilot Files/07-database-and-stored-procedures.md)
-- 11 Error Handling and Logging: (Documentation/Copilot Files/11-error-handling-logging.md)
-- 12 Startup and Lifecycle: (Documentation/Copilot Files/12-startup-lifecycle.md)
-- 13–18 Utilities, Extensions, Business Logic, Testing, Performance, Troubleshooting: (Documentation/Copilot Files/13-18-utilities-and-troubleshooting.md)
-- 19, 20 Quick Commands and File-Specific Guidance: (Documentation/Copilot Files/19-20-guides-and-commands.md)
-- 21 Refactoring Workflow (Recursive Dependency Compliance Analysis, includes Online Refactor Mode prompt template): (Documentation/Copilot Files/21-refactoring-workflow.md)
+## Comprehensive Documentation Index
+
+### **Core Technical Documentation**
+- **1–3 Overview and Architecture**: [Documentation/Copilot Files/01-overview-architecture.md](Documentation/Copilot%20Files/01-overview-architecture.md)
+- **4, 6, 10 Patterns and Templates** (DAO, UI, Theme, DGV/ComboBox): [Documentation/Copilot Files/04-patterns-and-templates.md](Documentation/Copilot%20Files/04-patterns-and-templates.md)
+- **5 Recent Major Improvements** (Aug 2025): [Documentation/Copilot Files/05-improvements-and-changelog.md](Documentation/Copilot%20Files/05-improvements-and-changelog.md)
+- **7, 9 Database and Stored Procedures + Versioning**: [Documentation/Copilot Files/07-database-and-stored-procedures.md](Documentation/Copilot%20Files/07-database-and-stored-procedures.md)
+- **11 Error Handling and Logging**: [Documentation/Copilot Files/11-error-handling-logging.md](Documentation/Copilot%20Files/11-error-handling-logging.md)
+- **12 Startup and Lifecycle**: [Documentation/Copilot Files/12-startup-lifecycle.md](Documentation/Copilot%20Files/12-startup-lifecycle.md)
+- **13–18 Utilities and Troubleshooting**: [Documentation/Copilot Files/13-18-utilities-and-troubleshooting.md](Documentation/Copilot%20Files/13-18-utilities-and-troubleshooting.md)
+- **19, 20 Quick Commands and Guidance**: [Documentation/Copilot Files/19-20-guides-and-commands.md](Documentation/Copilot%20Files/19-20-guides-and-commands.md)
+- **21 Refactoring Workflow**: [Documentation/Copilot Files/21-refactoring-workflow.md](Documentation/Copilot%20Files/21-refactoring-workflow.md)
+
+### **Modern UI and Standards Documentation**
+- **22 Modern UI Design Standards**: [Documentation/Copilot Files/22-modern-ui-standards.md](Documentation/Copilot%20Files/22-modern-ui-standards.md)
+- **23 User Guide Integration**: [Documentation/Copilot Files/23-user-guide-integration.md](Documentation/Copilot%20Files/23-user-guide-integration.md)
+- **24 Help System Architecture**: [Documentation/Copilot Files/24-help-system-architecture.md](Documentation/Copilot%20Files/24-help-system-architecture.md)
+- **25 Service_ErrorHandler Standards**: [Documentation/Copilot Files/25-service-errorhandler-standards.md](Documentation/Copilot%20Files/25-service-errorhandler-standards.md)
+- **26 Database Stored Procedure Compliance**: [Documentation/Copilot Files/26-database-stored-procedure-compliance.md](Documentation/Copilot%20Files/26-database-stored-procedure-compliance.md)
+
+### **User Documentation and Guides**
+- **Complete User Guide**: [Documentation/Guides/USER_GUIDE_COMPLETE.md](Documentation/Guides/USER_GUIDE_COMPLETE.md)
+- **Inventory Operations Guide**: [Documentation/Guides/CONTROL_INVENTORY_TAB_GUIDE.md](Documentation/Guides/CONTROL_INVENTORY_TAB_GUIDE.md)
+- **Remove Operations Guide**: [Documentation/Guides/CONTROL_REMOVE_TAB_GUIDE.md](Documentation/Guides/CONTROL_REMOVE_TAB_GUIDE.md)
+- **Transfer Operations Guide**: [Documentation/Guides/CONTROL_TRANSFER_TAB_GUIDE.md](Documentation/Guides/CONTROL_TRANSFER_TAB_GUIDE.md)
+- **Keyboard Shortcuts Reference**: [Documentation/Guides/KEYBOARD_SHORTCUTS_REFERENCE.md](Documentation/Guides/KEYBOARD_SHORTCUTS_REFERENCE.md)
+
+### **Technical Architecture Guides**
+- **Advanced Technical Architecture**: [Documentation/Guides/ADVANCED_TECHNICAL_ARCHITECTURE.md](Documentation/Guides/ADVANCED_TECHNICAL_ARCHITECTURE.md)
+- **UI Redesign Patterns**: [Documentation/Guides/UI_REDESIGN_PATTERNS.md](Documentation/Guides/UI_REDESIGN_PATTERNS.md)
+- **Environment Configuration**: [Documentation/Guides/ENVIRONMENT_CONFIGURATION.md](Documentation/Guides/ENVIRONMENT_CONFIGURATION.md)
+- **Progress Control Implementation**: [Documentation/Guides/PROGRESS_CONTROL_IMPLEMENTATION.md](Documentation/Guides/PROGRESS_CONTROL_IMPLEMENTATION.md)
+- **Modern Theme System**: [Documentation/Guides/MODERN_THEME_SYSTEM.md](Documentation/Guides/MODERN_THEME_SYSTEM.md)
+- **Database Operations Guide**: [Documentation/Guides/DATABASE_OPERATIONS_GUIDE.md](Documentation/Guides/DATABASE_OPERATIONS_GUIDE.md)
+
+### **Dependency Charts and Analysis**
+- **Professional HTML Charts**: [Documentation/Dependency Charts/HTML/](Documentation/Dependency%20Charts/HTML/)
+- **Markdown Dependency Charts**: [Documentation/Dependency Charts/](Documentation/Dependency%20Charts/)
+- **PlantUML Architectural Diagrams**: [Documentation/PlantUML Files/](Documentation/PlantUML%20Files/)
+
+### **Help System (HTML)**
+- **Main Help Portal**: [Documentation/Help/index.html](Documentation/Help/index.html)
+- **Getting Started Guide**: [Documentation/Help/getting-started.html](Documentation/Help/getting-started.html)
+- **Keyboard Shortcuts**: [Documentation/Help/keyboard-shortcuts.html](Documentation/Help/keyboard-shortcuts.html)
+- **Troubleshooting Guide**: [Documentation/Help/troubleshooting.html](Documentation/Help/troubleshooting.html)
 
 Notes
 - Place this README.md in the repository root.
@@ -289,6 +324,109 @@ When refactoring ANY file in this repository, ensure:
 
 **Non-compliance with region organization or environment logic will require rework.**
 
+## Modern UI Design Patterns
+
+### **Responsive Design Standards**
+The application follows modern UI design patterns inspired by the Transactions.html template:
+
+- **Color Scheme**: Bootstrap-inspired colors with professional gradients
+  - Primary: `#0d6efd` (Blue)
+  - Success: `#198754` (Green) 
+  - Warning: `#ffc107` (Yellow)
+  - Danger: `#dc3545` (Red)
+  - Dark: `#2c3e50` (Header backgrounds)
+
+- **Typography**: Segoe UI font family with consistent sizing hierarchy
+  - Headers: 2.5em (main), 2em (section), 1.5em (subsection)
+  - Body text: 1em with 1.5 line height
+  - Code elements: Consolas/Monaco monospace
+
+- **Layout Patterns**: 
+  - Three-panel layouts: 300px-1fr-320px with responsive breakpoints
+  - Grid-based card layouts with consistent spacing (20px gaps)
+  - Header bars with linear gradients (135deg)
+
+- **Interactive Elements**:
+  - Button hover effects with transform scaling (1.05)
+  - Color-coded status indicators with icons
+  - Progressive disclosure with collapsible sections
+
+### **Component Library Standards**
+- **Header Components**: Gradient backgrounds with title and subtitle areas
+- **Navigation**: Card-based navigation with hover states
+- **Data Tables**: Professional DataGridView with theme compliance
+- **Forms**: Input validation with color-coded feedback
+- **Progress Indicators**: StatusStrip integration with Helper_StoredProcedureProgress
+
+### **Accessibility Compliance**
+- **WCAG 2.1 AA**: Proper contrast ratios and keyboard navigation
+- **Screen Reader Support**: Semantic HTML and ARIA labels
+- **High DPI Support**: Core_Themes.ApplyDpiScaling() integration
+
+## Troubleshooting Quick Start
+
+### **Common Issues and Solutions**
+
+#### **Database Connection Issues**
+```bash
+# Check environment configuration
+Environment: Debug → mtm_wip_application_test, localhost/172.16.1.104
+Environment: Release → mtm_wip_application, 172.16.1.104
+
+# Verify connection string in Helper_Database_Variables.GetConnectionString()
+# Check MySQL service status and credentials
+```
+
+#### **Build and Compilation Issues**
+```bash
+# Clean and rebuild solution
+dotnet clean
+dotnet restore  
+dotnet build --configuration Release
+
+# Check for missing references or packages
+# Verify .NET 8 SDK installation
+```
+
+#### **UI Rendering and Theme Issues**
+```csharp
+// Ensure proper theme application in constructors:
+Core_Themes.ApplyDpiScaling(this);
+Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+
+// Check for null references in UI controls
+// Verify UserControl inheritance and InitializeComponent() calls
+```
+
+#### **Progress Control Integration Issues**
+```csharp
+// Verify progress helper initialization:
+_progressHelper = Helper_StoredProcedureProgress.Create(progressBar, statusLabel, parentForm);
+
+// Check for proper ShowProgress/UpdateProgress/ShowSuccess patterns
+// Ensure try/catch/finally blocks with progress cleanup
+```
+
+#### **Error Handling and Logging Issues**
+```csharp
+// Replace MessageBox.Show with Service_ErrorHandler:
+Service_ErrorHandler.HandleException(ex, ErrorSeverity.Medium, 
+    retryAction: () => RetryOperation(),
+    contextData: new Dictionary<string, object> { ["UserId"] = userId });
+
+// Check LoggingUtility integration and log file permissions
+```
+
+#### **Keyboard Shortcuts Not Working**
+```csharp
+// Verify ProcessCmdKey implementation:
+protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+{
+    // Handle F1, Ctrl+F1, Ctrl+Shift+K shortcuts
+    return base.ProcessCmdKey(ref msg, keyData);
+}
+```
+
 ## Help System Integration
 
 ### **Accessing Help**
@@ -304,6 +442,164 @@ The application includes a comprehensive help system accessible via:
 - **Technical Documentation**: Developer guides and dependency charts
 - **Search Functionality**: Full-text search across all help content
 - **Responsive Design**: Works in WebView2 control and external browsers
+
+### **Integration with MainForm**
+The help system is integrated into the MainForm MenuStrip with the following menu structure:
+```
+Help Menu:
+├── Getting Started (Ctrl+F1)
+├── User Guide (F1)  
+├── Keyboard Shortcuts (Ctrl+Shift+K)
+├── Troubleshooting Guide
+├── System Requirements
+├── About MTM Inventory (Ctrl+Alt+A)
+```
+
+## Development Forms Compliance Requirements
+
+### **Forms/Development Folder Standards**
+All forms in the `Forms/Development/` folder MUST comply with the following standards:
+
+#### **Mandatory Region Organization**
+```csharp
+#region Fields
+#region Properties  
+#region Progress Control Methods
+#region Constructors
+#region [Specific Functionality] // e.g., "Dependency Analysis", "Chart Generation"
+#region Key Processing
+#region Button Clicks
+#region ComboBox & UI Events
+#region Helpers
+#region Cleanup
+```
+
+#### **Error Handling Compliance**
+- **MUST** use `Service_ErrorHandler` instead of `MessageBox.Show`
+- **MUST** implement comprehensive try/catch blocks with context logging
+- **MUST** use `DaoResult<T>` for all database operations
+- **MUST** include retry mechanisms for recoverable errors
+
+#### **Theme and UI Standards**
+```csharp
+// Required in constructor:
+Core_Themes.ApplyDpiScaling(this);
+Core_Themes.ApplyRuntimeLayoutAdjustments(this);
+```
+
+#### **Progress Integration Requirements**
+```csharp
+// Required for database operations:
+_progressHelper = Helper_StoredProcedureProgress.Create(progressBar, statusLabel, this);
+```
+
+#### **Database Operation Standards**
+- **MUST** use environment-aware database selection (`Model_Users.Database`)
+- **MUST** use server address from `Model_Users.WipServerAddress`
+- **MUST** follow stored procedure parameter conventions (no p_ prefix in C#)
+- **MUST** handle OUT p_Status and p_ErrorMsg parameters
+
+### **Development Forms Audit Checklist**
+- [ ] **Region Organization**: Proper #region structure implemented
+- [ ] **Error Handling**: Service_ErrorHandler integration complete
+- [ ] **Theme Compliance**: Core_Themes applied in constructor
+- [ ] **Progress Integration**: Helper_StoredProcedureProgress implemented
+- [ ] **Database Standards**: Environment-aware connection logic
+- [ ] **Method Ordering**: Public → Protected → Private → Static
+- [ ] **Null Safety**: All potential null references handled
+## Database Stored Procedure Verification Requirements
+
+### **Stored Procedure Compliance Standards**
+All stored procedures in the `Database/UpdatedStoredProcedures/` folder MUST meet these requirements:
+
+#### **Parameter Naming Convention**
+- **MySQL Parameters**: Use `p_` prefix (e.g., `p_UserID`, `p_PartNumber`)
+- **C# Parameters**: Remove `p_` prefix (e.g., `UserID`, `PartNumber`)
+- **Consistent Naming**: PascalCase for all parameter names
+- **Required Outputs**: Every procedure MUST have `OUT p_Status INT` and `OUT p_ErrorMsg VARCHAR(500)`
+
+#### **Standard Parameter Examples**
+```sql
+-- MySQL Stored Procedure Declaration:
+PROCEDURE sp_GetUserByID(
+    IN p_UserID INT,
+    IN p_IncludeInactive BOOLEAN,
+    OUT p_Status INT,
+    OUT p_ErrorMsg VARCHAR(500)
+)
+
+-- C# Helper_Database_StoredProcedure Call:
+var parameters = new Dictionary<string, object>
+{
+    ["UserID"] = userId,           // No p_ prefix
+    ["IncludeInactive"] = includeInactive
+};
+```
+
+#### **Status Code Standards**
+```sql
+-- Success codes:
+SET p_Status = 0;   -- Success with data
+SET p_Status = 1;   -- Success with no data found
+
+-- Error codes:
+SET p_Status = -1;  -- Invalid parameters
+SET p_Status = -2;  -- Database constraint violation
+SET p_Status = -3;  -- Record not found
+SET p_Status = -4;  -- Permission denied
+SET p_Status = -5;  -- General database error
+```
+
+#### **Error Message Standards**
+```sql
+-- Clear, user-friendly error messages:
+SET p_ErrorMsg = 'User not found with the specified ID';
+SET p_ErrorMsg = 'Invalid parameter: UserID cannot be null or zero';
+SET p_ErrorMsg = 'Database connection error: Unable to execute query';
+```
+
+### **Verification Checklist for All Stored Procedures**
+- [ ] **Parameter Naming**: Consistent p_ prefix in MySQL, removed in C#
+- [ ] **Output Parameters**: OUT p_Status INT and OUT p_ErrorMsg VARCHAR(500) present
+- [ ] **Error Handling**: All error conditions return appropriate status codes
+- [ ] **Data Validation**: Input parameters validated with meaningful error messages
+- [ ] **Transaction Safety**: Proper ROLLBACK on errors, COMMIT on success
+- [ ] **Performance**: Optimized queries with proper indexing considerations
+- [ ] **Security**: SQL injection prevention and parameter sanitization
+
+### **Database Environment Logic Verification**
+```csharp
+// Verify environment-aware database selection:
+#if DEBUG
+    string database = "mtm_wip_application_test";     // Test database
+    string server = GetLocalIpAddress() == "172.16.1.104" ? "172.16.1.104" : "localhost";
+#else
+    string database = "mtm_wip_application";          // Production database
+    string server = "172.16.1.104";                  // Always production server
+#endif
+```
+
+### **Deployment Verification Steps**
+1. **Test Database First**: Always deploy to `mtm_wip_application_test` for validation
+2. **Parameter Verification**: Confirm all C# calls match MySQL parameter names (without p_)
+3. **Status Code Testing**: Test all error conditions return proper status codes
+4. **Performance Testing**: Verify query execution time meets performance requirements
+5. **Integration Testing**: Test with actual application forms and controls
+6. **Production Deployment**: Only after successful test database validation
+
+### **Compliance Audit Tools**
+- **Automated Verification**: Scripts to validate parameter naming consistency
+- **Performance Monitoring**: Query execution time tracking
+- **Error Code Coverage**: Testing all possible status code paths
+- **Integration Testing**: Form-level testing with actual stored procedure calls
+
+---
+
+### **Performance Optimization Tips**
+- Use async/await for database operations
+- Implement proper disposal patterns in #region Cleanup
+- Cache frequently accessed data in static properties
+- Use DaoResult<T> for efficient error handling without exceptions
 
 ## Service_ErrorHandler Implementation Standards
 
@@ -373,3 +669,18 @@ Service_ErrorHandler.HandleValidationError("Invalid input", "FieldName");
 - ✅ **Clear Separation**: Current\* (reference only) vs Updated\* (active development)  
 - ✅ **Deployment Safety**: Test database defaults to prevent production accidents
 - ✅ **Development Workflow**: Streamlined development with environment-aware configuration
+
+### Modern UI Design Patterns
+- ✅ **Responsive Design**: Transactions.html modern UI template with gradient headers
+- ✅ **Component Library**: Bootstrap-inspired color scheme (#0d6efd, #198754, #ffc107)
+- ✅ **Typography Standards**: Segoe UI font family with consistent sizing hierarchy
+- ✅ **Layout Patterns**: Three-panel layouts (300px-1fr-320px) with responsive breakpoints
+- ✅ **Visual Elements**: Modern toolbar with hover effects, card-based layouts
+- ✅ **Accessibility**: WCAG 2.1 AA compliance with proper contrast ratios
+
+### Database Stored Procedure Verification
+- ✅ **Parameter Standards**: Uniform p_ parameter naming convention across 74+ procedures
+- ✅ **Output Compliance**: All procedures use OUT p_Status and OUT p_ErrorMsg
+- ✅ **Connection Logic**: Environment-aware database selection (test/production)
+- ✅ **Deployment Safety**: Updated procedures in UpdatedStoredProcedures folder only
+- ✅ **Verification Tools**: Stored procedure compliance audit and verification scripts
