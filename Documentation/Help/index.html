@@ -231,20 +231,207 @@
     
     <script src="js/help-navigation.js"></script>
     <script>
-        // Basic search functionality
-        document.getElementById('searchBox').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
+        // Enhanced search functionality for help topics
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchBox = document.getElementById('searchBox');
             const cards = document.querySelectorAll('.category-card');
             
-            cards.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    card.style.display = 'block';
+            // Help topics data for enhanced search
+            const helpTopics = [
+                { title: 'Getting Started', description: 'New user guide and application overview', url: 'getting-started.html', category: 'basics' },
+                { title: 'Inventory Operations', description: 'Essential inventory management tasks', url: 'inventory-operations.html', category: 'operations' },
+                { title: 'Remove Operations', description: 'Remove items from inventory', url: 'remove-operations.html', category: 'operations' },
+                { title: 'Transfer Operations', description: 'Transfer items between locations', url: 'transfer-operations.html', category: 'operations' },
+                { title: 'QuickButtons', description: 'One-click access to recent operations', url: 'quickbuttons.html', category: 'advanced' },
+                { title: 'Keyboard Shortcuts', description: 'Complete keyboard shortcuts reference', url: 'keyboard-shortcuts.html', category: 'reference' },
+                { title: 'Settings Management', description: 'Customize your application experience', url: 'settings-management.html', category: 'configuration' },
+                { title: 'Troubleshooting', description: 'Common issues and solutions', url: 'troubleshooting.html', category: 'support' },
+                { title: 'Error Handling', description: 'Error handling system usage guide', url: 'error-handling.html', category: 'support' },
+                { title: 'Development Tools', description: 'Developer tools and utilities', url: 'development-tools.html', category: 'development' }
+            ];
+            
+            // Enhanced search with live results
+            searchBox.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                if (searchTerm.length === 0) {
+                    // Show all cards when no search term
+                    cards.forEach(card => {
+                        card.style.display = 'block';
+                        card.style.opacity = '1';
+                        card.style.transform = 'scale(1)';
+                    });
+                    return;
+                }
+                
+                // Filter and highlight matching cards
+                cards.forEach(card => {
+                    const cardText = card.textContent.toLowerCase();
+                    const isMatch = cardText.includes(searchTerm);
+                    
+                    if (isMatch) {
+                        card.style.display = 'block';
+                        card.style.opacity = '1';
+                        card.style.transform = 'scale(1)';
+                        card.style.border = '2px solid #0d6efd';
+                    } else {
+                        card.style.opacity = '0.3';
+                        card.style.transform = 'scale(0.95)';
+                        card.style.border = '1px solid #dee2e6';
+                    }
+                });
+                
+                // Add search results summary
+                const visibleCards = Array.from(cards).filter(card => card.style.opacity !== '0.3');
+                if (visibleCards.length === 0) {
+                    showNoResultsMessage();
                 } else {
-                    card.style.display = searchTerm ? 'none' : 'block';
+                    hideNoResultsMessage();
                 }
             });
+            
+            // Enhanced keyboard navigation
+            searchBox.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    this.value = '';
+                    cards.forEach(card => {
+                        card.style.display = 'block';
+                        card.style.opacity = '1';
+                        card.style.transform = 'scale(1)';
+                        card.style.border = '1px solid #dee2e6';
+                    });
+                    hideNoResultsMessage();
+                }
+                
+                if (e.key === 'Enter') {
+                    const firstVisibleCard = Array.from(cards).find(card => card.style.opacity !== '0.3');
+                    if (firstVisibleCard) {
+                        firstVisibleCard.click();
+                    }
+                }
+            });
+            
+            function showNoResultsMessage() {
+                let noResultsDiv = document.getElementById('noResults');
+                if (!noResultsDiv) {
+                    noResultsDiv = document.createElement('div');
+                    noResultsDiv.id = 'noResults';
+                    noResultsDiv.innerHTML = `
+                        <div style="
+                            background: #fff3cd;
+                            border: 1px solid #ffeaa7;
+                            border-radius: 8px;
+                            padding: 30px;
+                            text-align: center;
+                            margin: 20px;
+                            color: #856404;
+                        ">
+                            <h3>🔍 No help topics found</h3>
+                            <p>Try searching for different keywords or browse the categories above.</p>
+                            <button onclick="document.getElementById('searchBox').value=''; document.getElementById('searchBox').dispatchEvent(new Event('input'));" 
+                                    style="
+                                        background: #0d6efd;
+                                        color: white;
+                                        border: none;
+                                        padding: 10px 20px;
+                                        border-radius: 20px;
+                                        cursor: pointer;
+                                        margin-top: 10px;
+                                    ">Clear Search</button>
+                        </div>
+                    `;
+                    document.querySelector('.help-categories').appendChild(noResultsDiv);
+                }
+                noResultsDiv.style.display = 'block';
+            }
+            
+            function hideNoResultsMessage() {
+                const noResultsDiv = document.getElementById('noResults');
+                if (noResultsDiv) {
+                    noResultsDiv.style.display = 'none';
+                }
+            }
+            
+            // Accessibility improvements
+            searchBox.setAttribute('role', 'searchbox');
+            searchBox.setAttribute('aria-label', 'Search help topics');
+            searchBox.setAttribute('aria-describedby', 'search-instructions');
+            
+            // Add search instructions for screen readers
+            const searchInstructions = document.createElement('div');
+            searchInstructions.id = 'search-instructions';
+            searchInstructions.className = 'sr-only';
+            searchInstructions.textContent = 'Type to search help topics. Use Escape to clear search, Enter to select first result.';
+            searchBox.parentNode.insertBefore(searchInstructions, searchBox);
+            
+            // Add screen reader only class
+            const style = document.createElement('style');
+            style.textContent = `
+                .sr-only {
+                    position: absolute;
+                    width: 1px;
+                    height: 1px;
+                    padding: 0;
+                    margin: -1px;
+                    overflow: hidden;
+                    clip: rect(0, 0, 0, 0);
+                    white-space: nowrap;
+                    border: 0;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Add focus indicators for better accessibility
+            cards.forEach(card => {
+                card.setAttribute('tabindex', '0');
+                card.setAttribute('role', 'button');
+                card.setAttribute('aria-label', card.querySelector('.category-title').textContent + ' - ' + card.querySelector('.category-description').textContent);
+                
+                card.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
+            });
         });
+        
+        // Performance and analytics (optional)
+        if ('performance' in window) {
+            window.addEventListener('load', function() {
+                const loadTime = performance.now();
+                console.log(`Help system loaded in ${Math.round(loadTime)}ms`);
+            });
+        }
+        
+        // Add skip navigation for accessibility
+        function addSkipNavigation() {
+            const skipLink = document.createElement('a');
+            skipLink.href = '#main-content';
+            skipLink.textContent = 'Skip to main content';
+            skipLink.style.cssText = `
+                position: absolute;
+                top: -40px;
+                left: 6px;
+                background: #0d6efd;
+                color: white;
+                padding: 8px;
+                text-decoration: none;
+                z-index: 1000;
+                border-radius: 4px;
+                transition: top 0.3s;
+            `;
+            skipLink.addEventListener('focus', function() {
+                this.style.top = '6px';
+            });
+            skipLink.addEventListener('blur', function() {
+                this.style.top = '-40px';
+            });
+            document.body.insertBefore(skipLink, document.body.firstChild);
+        }
+        
+        addSkipNavigation();
+        document.querySelector('.main-content').id = 'main-content';
     </script>
 </body>
 </html>
